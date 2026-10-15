@@ -5,7 +5,8 @@
 #
 # Usage: tools/bevy_bench/bench.sh [label] [options of --bench-map: --bench-distance N
 #        --bench-seconds N --bench-pan-only --bench-descent-only] [--faction F] [--offscreen]
-# Env:   BENCH_TIMEOUT=<seconds> (default 300)
+# Env:   BENCH_TIMEOUT=<seconds> (default 300; raise it when the build is not warm: it covers the build)
+#        BENCH_FEATURES=profile  per-system timings in the report (client feature `profile`)
 # Exit code: 0 report written, 1 panic / AGENT_FATAL / no report / timeout.
 set -u
 here=${0:A:h}
@@ -17,7 +18,8 @@ log="$root/out/bench/map_$label.log"
 mkdir -p "$root/out/bench"
 rm -f "$out"
 export CENT_ANS_PROFILE=release CENT_ANS_MUTE=1 CENT_ANS_NO_BRIEFING=1
-unset CENT_ANS_FEATURES
+# BENCH_FEATURES=profile adds the per-system timings ("systems" section) to the report.
+if [[ -n "${BENCH_FEATURES:-}" ]]; then export CENT_ANS_FEATURES=$BENCH_FEATURES; else unset CENT_ANS_FEATURES; fi
 cd "$root"
 "$root/client/run_bg.sh" --state Campaign --bench-map --bench-out "$out" \
 	--exit-after 20000 "$@" > "$log" 2>&1 &

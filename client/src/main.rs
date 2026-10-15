@@ -35,6 +35,7 @@ fn main() -> ExitCode {
     let mut bevy_app = App::new();
     bevy_app.add_plugins(
         DefaultPlugins
+            .set(agent::profile::log_plugin())
             .set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "Cent Ans".into(),

@@ -434,40 +434,60 @@ fn first_free(
     best
 }
 
-/// Rectangles in square cells of [`CELL`] px.
+/// Rectangles in square cells of [`CELL`] px. A rectangle covering more than [`BIG_CELLS`] cells
+/// (e.g. the top-bar strip `armies::markers` passes as `(-1e4, -1e4)..(1e5, inset)`, ~270 000
+/// cells) is kept in a short linear list instead of being hashed into every cell: indexing it was
+/// the 30 ms/frame cost of `update_plates`.
 #[derive(Default)]
 struct SpatialGrid {
     rects: Vec<Rect>,
     cells: HashMap<(i32, i32), Vec<usize>>,
+    big: Vec<usize>,
 }
 
+/// Rectangles over this many cells are not indexed per cell.
+const BIG_CELLS: i64 = 256;
+
 impl SpatialGrid {
-    fn keys(rect: Rect) -> impl Iterator<Item = (i32, i32)> {
-        let (x0, y0) = (
+    fn bounds(rect: Rect) -> (i32, i32, i32, i32) {
+        (
             (rect.min.x / CELL).floor() as i32,
             (rect.min.y / CELL).floor() as i32,
-        );
-        let (x1, y1) = (
             (rect.max.x / CELL).floor() as i32,
             (rect.max.y / CELL).floor() as i32,
-        );
+        )
+    }
+
+    fn keys(rect: Rect) -> impl Iterator<Item = (i32, i32)> {
+        let (x0, y0, x1, y1) = Self::bounds(rect);
         (y0..=y1).flat_map(move |y| (x0..=x1).map(move |x| (x, y)))
     }
 
     fn insert(&mut self, rect: Rect) {
         let index = self.rects.len();
         self.rects.push(rect);
+        let (x0, y0, x1, y1) = Self::bounds(rect);
+        let cells = i64::from(x1 - x0 + 1) * i64::from(y1 - y0 + 1);
+        if cells > BIG_CELLS {
+            self.big.push(index);
+            return;
+        }
         for key in Self::keys(rect) {
             self.cells.entry(key).or_default().push(index);
         }
     }
 
-    fn candidates(&self, rect: Rect) -> std::collections::BTreeSet<usize> {
-        Self::keys(rect)
+    /// Indices of the rectangles that may touch `rect`, ascending and unique.
+    fn candidates(&self, rect: Rect) -> Vec<usize> {
+        let mut found: Vec<usize> = Self::keys(rect)
             .filter_map(|k| self.cells.get(&k))
             .flatten()
+            .chain(self.big.iter())
             .copied()
-            .collect()
+            .collect();
+        found.sort_unstable();
+        found.dedup();
+        found
     }
 
     fn hits(&self, rect: Rect) -> bool {
@@ -591,5 +611,18 @@ mod tests {
             )
         };
         assert!(place(0, "a").intersect(place(1, "b")).is_empty());
+    }
+
+    #[test]
+    fn huge_obstacle_is_not_indexed_per_cell_but_still_blocks() {
+        let mut grid = SpatialGrid::default();
+        // The top-bar strip armies pass: ~270 000 cells if hashed.
+        grid.insert(Rect::new(-1.0e4, -1.0e4, 1.0e5, 48.0));
+        grid.insert(rect(300.0, 300.0, 100.0, 40.0));
+        assert!(grid.cells.len() < 64, "{} cells hashed", grid.cells.len());
+        assert!(grid.hits(rect(500.0, 10.0, 80.0, 30.0)));
+        assert!(!grid.hits(rect(500.0, 100.0, 80.0, 30.0)));
+        assert!(grid.hits(rect(350.0, 320.0, 10.0, 10.0)));
+        assert!(grid.overlap_area(rect(500.0, 10.0, 10.0, 10.0)) > 99.0);
     }
 }

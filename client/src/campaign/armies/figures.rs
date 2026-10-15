@@ -410,7 +410,7 @@ pub fn tint_liveries(
     mut cache: ResMut<LiveryCache>,
 ) {
     for (entity, name, material) in &new {
-        commands.entity(entity).insert(Tinted);
+        commands.entity(entity).try_insert(Tinted);
         if name.0 != LIVERY_MATERIAL {
             continue;
         }

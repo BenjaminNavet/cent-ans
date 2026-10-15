@@ -181,7 +181,7 @@ pub fn update_view(
     data: Res<LifeData>,
     rig: Option<Res<crate::campaign::camera::rig::CampaignRig>>,
     sim: Res<crate::sim::Sim>,
-    relief: Option<Res<crate::campaign::terrain::relief_state::ReliefState>>,
+    relief: Option<Res<crate::campaign::countryside::ReliefVersion>>,
     zoom: Option<Res<crate::campaign::camera::zoom::ZoomView>>,
     mut view: ResMut<LifeView>,
 ) {

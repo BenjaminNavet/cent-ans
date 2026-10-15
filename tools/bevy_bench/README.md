@@ -16,3 +16,15 @@ d = 30 pendant 20 s, puis trois descentes (Rouen, Grande Chartreuse, Paris : 150
 Bevy n'expose pas le nombre d'appels de dessin, `visible_meshes` (entités `Mesh3d` visibles,
 échantillon toutes les 10 images, lots instanciés comptés une fois) le remplace.
 Comparaison : chiffres Godot dans `docs/wip/fl-fluidite-carte.md`, `docs/wip/rx/perf.md`.
+
+## Chronométrage par système (feature `profile`)
+
+    BENCH_FEATURES=profile BENCH_TIMEOUT=1000 tools/bevy_bench/bench.sh <étiquette>
+
+Le build est compilé avec `bevy_ecs/trace` (+ `debug` pour les noms) et une couche `tracing` maison
+(`client/src/agent/profile.rs`, branchée via `LogPlugin::custom_layer` dans `main.rs`) : pas de
+crate Chrome/Tracy (absentes du registre hors ligne ; `bevy/trace` échoue sur `profiling-procmacros`).
+Le rapport gagne une section `systems` : `by_total` / `by_max` (système, appels, total, moyenne, max
+en ms) et `spike_frames` (pour chaque image > 33 ms, les 5 plus longs systèmes qui s'y sont terminés).
+Le traçage coûte cher (x2 à x3 en temps d'image sur un build chargé) : à lire en relatif, jamais
+pour des chiffres d'image. `BENCH_TIMEOUT` couvre le build : le monter si le cache est froid.

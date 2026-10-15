@@ -7,6 +7,7 @@
 pub mod bench;
 pub mod cli;
 pub mod dump;
+pub mod profile;
 pub mod script;
 
 use std::collections::VecDeque;
