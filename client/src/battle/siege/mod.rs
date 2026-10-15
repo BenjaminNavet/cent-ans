@@ -188,6 +188,7 @@ pub struct SiegeStats {
     /// Static engines posed, swings started (and how many were predicted), servants drawn.
     pub swings: usize,
     pub predicted_swings: usize,
+    pub crew_listed: usize,
     pub crew_shown: usize,
     pub crew_batches: usize,
     pub crew_by_clip: BTreeMap<String, usize>,
@@ -528,7 +529,7 @@ fn dump_siege(world: &World) -> (String, serde_json::Value) {
                 "particles_spawned": stats.particles_spawned, "bars": stats.bars,
                 "kit_pieces": stats.kit_pieces, "kit_models": stats.kit_models, "kit_ruins": stats.kit_ruins,
                 "swings": stats.swings, "predicted_swings": stats.predicted_swings,
-                "crew_shown": stats.crew_shown, "crew_batches": stats.crew_batches, "crew_by_clip": stats.crew_by_clip,
+                "crew_listed": stats.crew_listed, "crew_shown": stats.crew_shown, "crew_batches": stats.crew_batches, "crew_by_clip": stats.crew_by_clip,
                 "engine_poses": stats.engine_poses,
             },
             "events_seen": stats.events_seen,

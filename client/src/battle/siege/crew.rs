@@ -300,6 +300,7 @@ pub fn draw_crew(
             component.version = batch.version;
         }
     }
+    stats.crew_listed = crew.entries.len();
     stats.crew_shown = shown;
     stats.crew_batches = state.batches.len();
     stats.crew_by_clip = by_clip;
