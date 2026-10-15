@@ -554,6 +554,7 @@ fn spawn_hud(mut commands: Commands, theme: Res<UiTheme>) {
                             ("hud:open_tech", "Techniques"),
                             ("hud:open_recruitment", "Recrutement"),
                             ("hud:open_faction", "Ma faction"),
+                            ("hud:open_economy", "Économie"),
                             ("hud:open_council", "Conseil"),
                             ("hud:open_feudal", "Féodalité"),
                             ("hud:open_chronicle", "Chronique"),

@@ -9,6 +9,7 @@ pub mod army;
 pub mod chronicle;
 pub mod court;
 pub mod diplomacy;
+pub mod economy;
 pub mod faction;
 pub mod feudal;
 pub mod province;
@@ -31,6 +32,7 @@ pub enum OpenPanel {
     Faction(String),
     Feudal,
     Chronicle,
+    Economy,
     CloseAll,
 }
 
@@ -48,6 +50,7 @@ impl Plugin for CampaignPanelsPlugin {
             feudal::PanelFeudalPlugin,
             chronicle::PanelChroniclePlugin,
             faction::PanelFactionPlugin,
+            economy::PanelEconomyPlugin,
         ));
     }
 }

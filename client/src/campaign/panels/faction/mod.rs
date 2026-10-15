@@ -26,9 +26,9 @@
 //!
 //! Not ported: the ransoms window and the routes overlay of the map.
 
-mod chart;
-mod sections;
-mod view;
+pub(crate) mod chart;
+pub(crate) mod sections;
+pub(crate) mod view;
 
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
