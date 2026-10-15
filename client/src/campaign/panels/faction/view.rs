@@ -76,7 +76,7 @@ const RUBRICS: [(&str, &str, &str); 6] = [
     ),
 ];
 
-fn income_label(key: &str) -> &str {
+pub(crate) fn income_label(key: &str) -> &str {
     match key {
         "poll_peasants" => "Taille des paysans",
         "poll_burghers" => "Taille des bourgeois",
@@ -202,7 +202,7 @@ pub fn rebuild(
         });
 }
 
-pub(super) fn ink(theme: &UiTheme, content: &str, ui_type: UiType, color: Color) -> impl Bundle {
+pub(crate) fn ink(theme: &UiTheme, content: &str, ui_type: UiType, color: Color) -> impl Bundle {
     (
         Text::new(content),
         theme.text_font(false, false, ui_type.size()),
@@ -211,7 +211,7 @@ pub(super) fn ink(theme: &UiTheme, content: &str, ui_type: UiType, color: Color)
 }
 
 /// `content` as a text that wraps inside the width of its column.
-pub(super) fn wrapped(content: impl Bundle) -> impl Bundle {
+pub(crate) fn wrapped(content: impl Bundle) -> impl Bundle {
     (
         content,
         Node {
@@ -599,7 +599,7 @@ fn budget_row(
     );
 }
 
-fn budget_table(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
+pub(crate) fn budget_table(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
     let economy = &view.economy;
     let has_past = economy.net_change.is_some();
     let head = [style::INK_SOFT; 4];
@@ -747,7 +747,7 @@ fn tone(delta: f64, bad_when_up: bool) -> Color {
 
 /// Forecast of the three gauges and the main drivers of the balance (the overview tab of
 /// `economy_overview_tab.gd`).
-fn forecast_section(
+pub(crate) fn forecast_section(
     pane: &mut Kids,
     theme: &UiTheme,
     assets: &AssetServer,

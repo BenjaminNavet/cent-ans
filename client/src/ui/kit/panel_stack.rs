@@ -469,13 +469,14 @@ fn apply_requests(
 /// when it answers true. Docked panels keep company with each other (their owners decide).
 pub fn displaces(message: &crate::campaign::panels::OpenPanel, own_id: &str) -> bool {
     use crate::campaign::panels::OpenPanel as P;
-    const CENTRAL: [&str; 6] = [
+    const CENTRAL: [&str; 7] = [
         "diplomacy",
         "tech",
         "chronicle",
         "feudal",
         "court",
         "faction",
+        "economy",
     ];
     let own_central = CENTRAL.contains(&own_id);
     let central = |id: &str| !(own_id == id);
@@ -487,6 +488,7 @@ pub fn displaces(message: &crate::campaign::panels::OpenPanel, own_id: &str) -> 
         P::Feudal => central("feudal"),
         P::Council => central("court"),
         P::Faction(_) => central("faction"),
+        P::Economy => central("economy"),
         // The character sheet accompanies a central screen (faction, court).
         P::Character(_) => !own_central,
         P::Province(_) | P::Army(_) | P::Recruitment(_) | P::Siege(_) => own_central,
