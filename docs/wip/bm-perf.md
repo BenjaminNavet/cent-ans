@@ -37,3 +37,8 @@ Outil : `BENCH_FEATURES=profile tools/bevy_bench/bench.sh <nom>` (voir `tools/be
 | avant | 56,5 / 89 / 124 / 580 | 204 / 342 | 158 / 1456 |
 | après | 16,5 / 32,9 / 51,9 / 83,7 | 14 / 1141 | 77 / 205 |
 Mesure relative fiable : `update_plates` 35 ms/image en moyenne (profil) -> absent du top.
+
+## perf2 (lot suivant)
+- `update_plates` : écritures Visibility/Node/BorderColor seulement si changé, HashMap id -> marqueur, `PlateStats::overlaps()` calculé au dump (O(n^2) sorti de la boucle) ; `place_markers` : `Transform::set_if_neq`.
+- `prepare_buffers` (skinned, billboard) : `run_if` sur présence de lots dans le monde de rendu. En campagne les lots skinned existent et leur `version` change à chaque image (animation) : le coût (≈2-4 ms) est un vrai envoi de tampon, pas un gaspillage de conditions ; piste : ne ré-uploader que les lots visibles / `write_buffer` sur un tampon persistant au lieu de `create_buffer_with_data`.
+- Banc profil (machine chargée, mesure relative) : `update_plates`, `place_markers` hors du top 30 avant et après.
