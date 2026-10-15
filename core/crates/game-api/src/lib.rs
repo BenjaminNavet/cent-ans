@@ -8,6 +8,7 @@ pub mod faction;
 pub mod hud;
 pub mod pprovince;
 pub mod province;
+pub mod recruit;
 pub mod tech;
 pub mod turn;
 
