@@ -251,6 +251,11 @@ impl FigureLibrary {
     }
 }
 
+/// Rest-pose mesh child of a figure: removed when the animated batch takes the figure over
+/// (`skin.rs`).
+#[derive(Component)]
+pub struct RestPose;
+
 /// A figure root (counted by the dump); `fallback` when the capsule stand-in is used.
 #[derive(Component, Debug, Clone)]
 pub struct Figure {
@@ -280,29 +285,36 @@ impl Figures<'_> {
         h2: f32,
         ws: f32,
         at: Vec3,
+        activity: &str,
     ) -> Entity {
         let table = &self.data.table;
         let baked = self
             .library
             .mesh_for(table, &mut self.meshes, role, lod, h, h2);
         let livery = table.livery_of(role);
+        let kind = self.library.figure_of(table, role);
         match baked {
             Some(mesh) => {
                 let material = self.library.material(&mut self.materials);
-                commands
-                    .spawn((
-                        Name::new("life:figure"),
-                        Figure {
-                            role: role.to_string(),
-                            fallback: false,
-                        },
-                        // The mesh looks along +Z, the heading axis of the instance is +X.
-                        Transform::from_translation(at)
-                            .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_2))
-                            .with_scale(Vec3::splat(ws)),
-                        Visibility::Inherited,
-                    ))
-                    .with_child((Mesh3d(mesh), MeshMaterial3d(material)))
+                let mut entity = commands.spawn((
+                    Name::new("life:figure"),
+                    Figure {
+                        role: role.to_string(),
+                        fallback: false,
+                    },
+                    // The mesh looks along +Z, the heading axis of the instance is +X.
+                    Transform::from_translation(at)
+                        .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_2))
+                        .with_scale(Vec3::splat(ws)),
+                    Visibility::Inherited,
+                ));
+                if let Some((family, variant)) = kind {
+                    entity.insert(super::skin::SkinFigure::new(
+                        role, &family, variant, activity, h, h2,
+                    ));
+                }
+                entity
+                    .with_child((Mesh3d(mesh), MeshMaterial3d(material), RestPose))
                     .id()
             }
             None => {

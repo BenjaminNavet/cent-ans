@@ -60,6 +60,8 @@ pub struct FolkProps {
     pub zone_margin: f32,
     pub folk_edge_inner: f32,
     pub folk_range_fade: f32,
+    /// Camera distance under which the fine figure level is used (`folk_detail_distance`).
+    pub folk_detail_distance: f32,
 }
 
 impl Default for FolkProps {
@@ -80,6 +82,7 @@ impl Default for FolkProps {
             zone_margin: 1.4,
             folk_edge_inner: 0.75,
             folk_range_fade: 0.85,
+            folk_detail_distance: 35.0,
         }
     }
 }
@@ -104,6 +107,7 @@ impl FolkProps {
             zone_margin: f("folk_zone_margin", d.zone_margin),
             folk_edge_inner: f("folk_edge_inner", d.folk_edge_inner),
             folk_range_fade: f("folk_range_fade", d.folk_range_fade),
+            folk_detail_distance: f("folk_detail_distance", d.folk_detail_distance),
         }
     }
 

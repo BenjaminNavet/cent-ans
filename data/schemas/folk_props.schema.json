@@ -155,6 +155,37 @@
         "minItems": 3,
         "maxItems": 3
       }
+    },
+    "activity_anims": {
+      "type": "object",
+      "description": "Animation d'une activité : état du style `folk` (villageois) ou jeu de clips (autres figurines) ; clips absents du rig écartés, repli sur `fallback`.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state", "clips", "fallback"],
+        "properties": {
+          "state": { "type": "string" },
+          "clips": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "fallback": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+        }
+      }
+    },
+    "folk_styles": {
+      "type": "object",
+      "description": "Styles d'animation des villageois (STYLES.folk de battle_skinned.gd) : état -> jeu de clips.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["set"],
+          "properties": {
+            "set": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "speed": { "type": "number", "exclusiveMinimum": 0 },
+            "fallback": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+          }
+        }
+      }
     }
   }
 }

@@ -449,5 +449,39 @@
    0.42,
    0.4
   ]
- ]
+ ],
+ "activity_anims": {
+  "walk": {"state": "marching", "clips": ["walk"], "fallback": ["idle"]},
+  "guard_walk": {"state": "marching", "clips": ["pike_walk", "walk"], "fallback": ["walk"]},
+  "ride": {"state": "marching", "clips": ["c_walk"], "fallback": ["c_idle"]},
+  "plough": {"state": "plough", "clips": ["plough", "push"], "fallback": ["walk"]},
+  "scythe": {"state": "scythe", "clips": ["scythe", "slash"], "fallback": ["idle"]},
+  "harvest": {"state": "carry", "clips": ["carry", "haul", "push"], "fallback": ["walk"]},
+  "chop": {"state": "scythe", "clips": ["overhead", "slash", "crank"], "fallback": ["idle"]},
+  "herd": {"state": "idle", "clips": ["idle", "idle_look", "idle_lean"], "fallback": ["idle"]},
+  "idle": {"state": "idle", "clips": ["idle", "idle_look", "idle_lean", "guard"], "fallback": ["idle"]},
+  "procession": {"state": "marching", "clips": ["walk"], "fallback": ["idle"]},
+  "drill": {"state": "idle", "clips": ["guard", "idle"], "fallback": ["idle"]}
+ },
+ "folk_styles": {
+  "folk": {
+   "idle": {"set": ["idle", "idle", "idle_look"]},
+   "marching": {"set": ["walk"]},
+   "running": {"set": ["run"]},
+   "charging": {"set": ["run"]},
+   "routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
+   "victory": {"set": ["victory", "victory_b"]},
+   "scythe": {"set": ["scythe"], "fallback": ["idle"]},
+   "carry": {"set": ["carry"], "fallback": ["walk"]},
+   "plough": {"set": ["plough"], "speed": 0.7, "fallback": ["walk"]}
+  },
+  "folk_carry": {
+   "idle": {"set": ["idle", "idle_look"]},
+   "marching": {"set": ["carry"], "fallback": ["walk"]},
+   "running": {"set": ["run"]},
+   "charging": {"set": ["run"]},
+   "routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
+   "carry": {"set": ["carry"], "fallback": ["walk"]}
+  }
+ }
 }
