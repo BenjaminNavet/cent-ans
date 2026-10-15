@@ -147,6 +147,8 @@ pub struct VegetationWorld {
     pub exclusions: Vec<(f64, f64, f64)>,
     /// Lakes, sea and main roads (`clearance.rs`).
     pub clearance: super::clearance::Clearance,
+    /// Reed and pond decor of the wetland sites (`reeds.rs`).
+    pub wetlands: super::reeds::Wetlands,
     pub wet_sites: Vec<WetSite>,
     pub cover: (f32, f32),
     pub beech: BeechParams,
@@ -561,6 +563,7 @@ pub fn load(root: &Path, heights: Arc<HeightGrid>) -> Result<VegetationWorld, St
         wet,
         exclusions,
         clearance,
+        wetlands: super::reeds::Wetlands::load(&map_dir),
         wet_sites,
         cover,
         beech,

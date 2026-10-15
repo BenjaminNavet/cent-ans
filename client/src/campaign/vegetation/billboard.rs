@@ -70,7 +70,7 @@ pub struct Params {
     pub wind: Vec4,
     /// Reeds: clump width and height (world units), sway, far scale.
     pub extra: Vec4,
-    /// Reeds: scale near and far distances.
+    /// Reeds, ponds: scale near and far distances, pond far scale.
     pub range: Vec4,
 }
 

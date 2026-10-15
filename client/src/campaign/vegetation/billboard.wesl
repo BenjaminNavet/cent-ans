@@ -20,7 +20,7 @@ struct Params {
     frame: vec4<f32>,   // ortho, foot, alpha cutoff, mode
     wind: vec4<f32>,    // bend, calm, light, gain
     extra: vec4<f32>,   // reeds: width, height (world units), sway, far scale
-    range: vec4<f32>,   // reeds: scale near distance, scale far distance, 0, 0
+    range: vec4<f32>,   // reeds, ponds: scale near distance, scale far distance, pond far scale, 0
 }
 
 @group(2) @binding(0) var albedo_texture: texture_2d<f32>;
@@ -174,8 +174,13 @@ fn vertex(in: Vertex) -> VertexOutput {
         let scaled = vec3<f32>(p.x * params.extra.x * size, p.y * params.extra.y * size, p.z * params.extra.x * size);
         world = rotate_y(scaled, c, s) + origin;
     } else {
-        // Pond: flat disc of diameter `scale`.
-        let scaled = vec3<f32>(in.position.x * in.scale_seed.x, in.position.y, in.position.z * in.scale_seed.x);
+        // Pond: flat disc of diameter `scale`, slightly magnified with the distance.
+        let d = distance(view.world_position, origin);
+        let near = params.range.x;
+        let far = max(params.range.y, near * 1.01);
+        let t = clamp(log(max(d, 1e-3) / near) / log(far / near), 0.0, 1.0);
+        let size = in.scale_seed.x * mix(1.0, params.range.z, smoothstep(0.0, 1.0, t));
+        let scaled = vec3<f32>(in.position.x * size, in.position.y, in.position.z * size);
         world = rotate_y(scaled, c, s) + origin;
     }
     out.world_position = world;
