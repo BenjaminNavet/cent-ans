@@ -20,6 +20,9 @@
 
 mod format;
 mod view;
+pub mod war;
+
+pub use war::AskWarDeclaration;
 
 use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::prelude::*;
@@ -48,7 +51,8 @@ pub struct PanelDiplomacyPlugin;
 
 impl Plugin for PanelDiplomacyPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<DiplomacyUi>()
+        app.add_plugins(war::WarDialogPlugin)
+            .init_resource::<DiplomacyUi>()
             .register_dump(dump_diplomacy)
             .add_systems(
                 Update,
@@ -96,6 +100,8 @@ pub struct Snapshot {
     pub calls: Vec<FeudalCall>,
     /// Attitude trend arrow of each faction (`""` without a reference).
     pub trends: HashMap<String, &'static str>,
+    /// « Qui peut entrer en guerre » chain if the player declared war on the selected faction.
+    pub escalation: Vec<game_api::diplomacy::EscalationView>,
 }
 
 /// Upper bound of a typed tribute per season (`TRIBUTE_MAX`).
@@ -142,6 +148,8 @@ pub struct DiplomacyUi {
     turn: Option<u32>,
     seen: HashMap<String, i32>,
     previous: HashMap<String, i32>,
+    /// Faction a confirmation of war was asked for (sent as a message by `handle_presses`).
+    ask_war: Option<String>,
 }
 
 impl Default for DiplomacyUi {
@@ -165,6 +173,7 @@ impl Default for DiplomacyUi {
             turn: None,
             seen: HashMap::new(),
             previous: HashMap::new(),
+            ask_war: None,
         }
     }
 }
@@ -388,6 +397,7 @@ fn handle_presses(
     mut tabs: MessageReader<TabSelected>,
     mut ui: ResMut<DiplomacyUi>,
     mut sim: ResMut<Sim>,
+    mut wars: MessageWriter<AskWarDeclaration>,
 ) {
     for tab in tabs.read() {
         if tab.group == "dip_tab" {
@@ -402,6 +412,13 @@ fn handle_presses(
             continue;
         };
         press_button(name, &mut ui, &mut sim);
+        if let Some(target) = ui.ask_war.take() {
+            wars.write(AskWarDeclaration {
+                target,
+                target_label: String::new(),
+                then: None,
+            });
+        }
     }
 }
 
@@ -658,6 +675,11 @@ fn run_action(ui: &mut DiplomacyUi, sim: &mut Sim, key: &str, selected: Option<&
     let Some(action) = detail.actions.iter().find(|a| a.key == key).cloned() else {
         return;
     };
+    if matches!(action.order, sim_campaign::Order::DeclareWar { .. }) {
+        // Confirmed in the war declaration dialog (consequences + escalation chain).
+        ui.ask_war = Some(detail.row.id.clone());
+        return;
+    }
     let result = run_order(sim, action.order);
     ui.result = Some(LastResult {
         ok: result.ok,
@@ -761,6 +783,9 @@ pub(crate) fn refresh_snapshot(ui: &mut DiplomacyUi, sim: &Sim) {
     prune_in_force(&mut ui.draft, &detail);
     ui.snapshot.verdict = evaluate_draft(data, state, &sim.player, &target, &ui.draft);
     ui.snapshot.clause_names = clause_names(&detail);
+    if detail.actions.iter().any(|a| a.key == "declare_war") {
+        ui.snapshot.escalation = game_api::diplomacy::war_escalation(data, state, &sim.player, &target);
+    }
 }
 
 /// Unique, script-friendly widget names of the menu clauses: `dip:clause:<slot>:<key>` for a
@@ -852,6 +877,7 @@ fn dump_diplomacy(world: &World) -> (String, Value) {
             "draft": ui.draft.iter().map(|a| a.key()).collect::<Vec<_>>(),
             "detail": detail,
             "verdict": verdict,
+            "escalation": snap.escalation,
             "last_result": ui.result.as_ref().map(|r| json!({"ok": r.ok, "text": r.text})),
         }),
     )

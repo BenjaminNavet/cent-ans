@@ -1340,6 +1340,46 @@ pub fn court_banner(
     lines
 }
 
+/// One link of the « Qui peut entrer en guerre » chain (port of `escalation_preview.gd`).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct EscalationView {
+    pub faction: String,
+    pub name: String,
+    /// `likely`, `uncertain`, `unlikely`.
+    pub likelihood: String,
+    pub likelihood_label: String,
+    pub reason: String,
+}
+
+/// Suzerains called, link by link, if `attacker` attacks `target`; empty for a sovereign target
+/// or an unknown faction. No rule here: `sim_campaign::feudal::war_escalation_preview`.
+pub fn war_escalation(
+    data: &GameData,
+    state: &CampaignState,
+    attacker: &FactionId,
+    target: &FactionId,
+) -> Vec<EscalationView> {
+    use sim_campaign::feudal::{war_escalation_preview, Likelihood};
+    if !state.factions.contains_key(attacker) || !state.factions.contains_key(target) {
+        return Vec::new();
+    }
+    war_escalation_preview(state, data, attacker, target)
+        .into_iter()
+        .map(|step| EscalationView {
+            name: data.faction_name(&step.faction),
+            faction: step.faction.as_str().to_owned(),
+            likelihood: step.likelihood.key().to_owned(),
+            likelihood_label: match step.likelihood {
+                Likelihood::Likely => "probable",
+                Likelihood::Uncertain => "incertain",
+                Likelihood::Unlikely => "improbable",
+            }
+            .to_owned(),
+            reason: step.reason,
+        })
+        .collect()
+}
+
 /// Counts used by tests and dumps: rows by relation status.
 pub fn status_counts(rows: &[FactionRow]) -> BTreeMap<String, usize> {
     let mut counts = BTreeMap::new();
@@ -1447,6 +1487,23 @@ mod tests {
             assert!(!result.message.is_empty());
             assert!(state.is_at_war(&france, &england));
         }
+    }
+
+    #[test]
+    fn war_escalation_covers_every_faction_without_panic() {
+        let (data, state, france) = setup();
+        let nowhere = FactionId::new("fac_nowhere").unwrap();
+        assert!(war_escalation(data, &state, &france, &nowhere).is_empty());
+        let mut linked = 0;
+        for row in faction_list(data, &state, &france) {
+            let target = FactionId::new(&row.id).unwrap();
+            for step in war_escalation(data, &state, &france, &target) {
+                assert!(["likely", "uncertain", "unlikely"].contains(&step.likelihood.as_str()));
+                assert!(!step.reason.is_empty() && !step.name.is_empty());
+                linked += 1;
+            }
+        }
+        assert!(linked > 0, "at least one vassal target has a chain");
     }
 
     #[test]
