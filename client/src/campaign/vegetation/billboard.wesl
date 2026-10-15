@@ -12,10 +12,11 @@
 import bevy_pbr::render::{
     pbr_functions,
     pbr_types,
-    mesh_view_bindings::{view, globals, fog},
+    mesh_view_bindings::{view, globals, fog, lights},
     mesh_view_types,
     fog as bevy_fog,
     view_transformations::position_world_to_clip,
+    shadows,
 };
 
 struct Params {
@@ -296,15 +297,34 @@ fn camera_fog(color: vec3<f32>, world: vec3<f32>) -> vec3<f32> {
 // Foliage lit like the ground (`terrain.wesl`: ambient + sun x N.L, then its distance fog and the
 // camera haze), with the Godot foliage terms: wrapped Lambert (`diffuse_lambert_wrap`), light
 // seen through the leaves against the sun (`BACKLIGHT`), ambient occlusion on the sky light.
-fn shade_foliage(albedo: vec3<f32>, n: vec3<f32>, occlusion: f32, backlight: f32, world: vec3<f32>) -> vec3<f32> {
+// Visibility of the sun (cascaded shadow map of the `CampaignSun`, as `sun_shadow` of the
+// terrain material): 1 lit, 0 in the shadow of the relief or of a town. The normal handed to the
+// bias is the sun direction, so that a camera-facing card never shadows itself.
+fn foliage_sun_shadow(world: vec3<f32>, l: vec3<f32>, frag_xy: vec2<f32>) -> f32 {
+    if lights.n_directional_lights == 0u {
+        return 1.0;
+    }
+    if (lights.directional_lights[0].flags & mesh_view_types::DIRECTIONAL_LIGHT_FLAGS_SHADOWS_ENABLED_BIT) == 0u {
+        return 1.0;
+    }
+    let wp = vec4<f32>(world, 1.0);
+    let view_z = dot(vec4<f32>(view.view_from_world[0].z, view.view_from_world[1].z,
+        view.view_from_world[2].z, view.view_from_world[3].z), wp);
+    return shadows::fetch_directional_shadow(0u, wp, l, view_z, frag_xy);
+}
+
+fn shade_foliage(albedo: vec3<f32>, n: vec3<f32>, occlusion: f32, backlight: f32, world: vec3<f32>, frag_xy: vec2<f32>) -> vec3<f32> {
     let l = normalize(params.sun_dir.xyz);
+    // Cast shadow of the relief / towns on the sun term only (Godot lights the foliage in
+    // `light()`, where ATTENUATION carries the shadow).
+    let shadow = foliage_sun_shadow(world, l, frag_xy);
     let ndl = dot(n, l);
     let wrap = max((ndl + 0.5) / 1.5, 0.0);
     let v = normalize(view.world_position - world);
     let through = max(-ndl, 0.0) * smoothstep(-0.2, 0.6, dot(-v, l));
     // AO: full on the sky light, 0.4 on the sun (`AO_LIGHT_AFFECT`).
     var color = albedo * (params.ambient.rgb * occlusion
-        + params.sun_color.rgb * (wrap + backlight * through) * mix(1.0, occlusion, 0.4));
+        + params.sun_color.rgb * (wrap + backlight * through) * mix(1.0, occlusion, 0.4) * shadow);
     let d = distance(world, view.world_position);
     let begin = params.fog_range.x;
     let t = clamp((d - begin) / max(params.fog_range.y - begin, 1.0), 0.0, 1.0);
@@ -405,7 +425,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
             if (mode < 0.5 || mode > 2.5) && season_deciduous(params.tint.w) {
                 back = mix(0.35, 0.1, params.season.w);
             }
-            return vec4<f32>(shade_foliage(color.rgb, normal, occlusion, back, in.world_position), 1.0);
+            return vec4<f32>(shade_foliage(color.rgb, normal, occlusion, back, in.world_position, in.position.xy), 1.0);
         }
     }
 

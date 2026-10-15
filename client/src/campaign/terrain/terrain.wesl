@@ -1425,12 +1425,15 @@ struct FieldsOut {
 // crop of the parcel, wild soil of the unfarmed ones, canopy, rock), their season, hedges and
 // rims; far, the patchwork of soles and terroirs. Crops follow the biome / landscape table,
 // relief and water decide where they grow (GR, ADR 0352).
-fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint: f32, land: f32, open_w: f32, forest_w: f32,
+fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_w: f32, forest_w: f32,
         rock_w: f32, farm_share: f32, slope: f32, grad: vec2<f32>, alt: f32, col_in: vec3<f32>) -> FieldsOut {
     var out = FieldsOut(col_in, vec2<f32>(0.0));
     // Derivatives first (uniform control flow).
     let dpx = dpdx(p);
     let dpy = dpdy(p);
+    // Godot's footprint is the screen derivative (`max(length(dFdx(p)), length(dFdy(p)))`), larger
+    // than the distance footprint on grazing ground: the patch colour of the crops comes in there.
+    let footprint = max(footprint_in, max(length(dpx), length(dpy)));
     var col = col_in;
     let mpp = max(ground.micro.w, 1.0);
     let fade = smoothstep(fields.v0.x, fields.v0.y, footprint);
