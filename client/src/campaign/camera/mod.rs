@@ -106,6 +106,13 @@ impl Plugin for CampaignCameraPlugin {
                 .run_if(in_state(AppState::Campaign))
                 .run_if(resource_exists::<CampaignRig>),
         );
+        app.add_systems(
+            Update,
+            frame_player_capital
+                .before(drive_camera)
+                .run_if(in_state(AppState::Campaign))
+                .run_if(resource_exists::<CampaignRig>),
+        );
         focus::add(app);
     }
 }
@@ -151,6 +158,33 @@ pub fn parse_camera_env(
         distance: numbers[2] as f32,
         yaw: numbers.get(3).copied().unwrap_or(0.0).to_radians() as f32,
     })
+}
+
+/// The opening framing was done (removed on exit so a new campaign frames again).
+#[derive(Resource)]
+struct StartFramed;
+
+/// Opening view: the player's capital (Godot starts there), unless `CENT_ANS_CAMERA` /
+/// `out/camera.txt` placed the camera.
+fn frame_player_capital(
+    mut commands: Commands,
+    framed: Option<Res<StartFramed>>,
+    sim: Res<crate::sim::Sim>,
+    mut requests: MessageWriter<FocusCamera>,
+) {
+    if framed.is_some() {
+        return;
+    }
+    let Some(state) = &sim.state else { return };
+    commands.insert_resource(StartFramed);
+    let placed = std::env::var(CAMERA_ENV).is_ok()
+        || paths::find_root().is_ok_and(|root| root.join(CAMERA_FILE).exists());
+    if placed {
+        return;
+    }
+    if let Some(faction) = state.factions.get(state.player_faction()) {
+        requests.write(FocusCamera::Province(faction.capital.to_string()));
+    }
 }
 
 #[derive(Resource)]
@@ -309,6 +343,7 @@ fn teardown(
         *msaa = saved.1;
     }
     commands.remove_resource::<SavedUiClear>();
+    commands.remove_resource::<StartFramed>();
     commands.remove_resource::<CampaignRig>();
 }
 
