@@ -1381,6 +1381,7 @@ fn dump_towns(world: &World) -> (String, Value) {
             "landmark_cities": w.landmarks.cities.len(),
             "landmark_anchored": w.landmark_px.len(),
             "forced": w.force_active,
+            "style": world.get_resource::<super::style::TownStyle>().map(|s| s.name()),
             "active": state.active,
             "weight": state.weight,
             "profile": {"max_rig_distance": w.profile.max_rig_distance, "detail_range": w.profile.detail_range, "stream_max": w.profile.stream_max},

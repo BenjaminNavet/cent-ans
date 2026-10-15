@@ -67,6 +67,7 @@ impl Plugin for CampaignMarkersPlugin {
                         signs::rescale_signs,
                         landmark_fallback,
                         update_stats,
+                        probe_nearby,
                     )
                         .run_if(|built: Res<MarkersBuilt>| built.0),
                 )
@@ -112,6 +113,8 @@ pub struct MarkerStats {
     /// Generated scenes whose materials got the albedo gain.
     pub dn_brightened: usize,
     pub dn_banners_recoloured: u64,
+    /// Places within `NEARBY_RADIUS` of the rig focus: representation, visibility, heights.
+    pub nearby: Value,
     pub rendered_meshes: usize,
     pub live_probe: Value,
     pub catalog_valid: bool,
@@ -243,6 +246,7 @@ fn dump_markers(world: &World) -> (String, Value) {
             "dn": {"places": s.dn_places, "brightened": s.dn_brightened, "banners_recoloured": s.dn_banners_recoloured},
             "rendered_meshes": s.rendered_meshes,
             "live_probe": s.live_probe,
+            "nearby": s.nearby,
             "build_ms": s.build_ms,
         }),
     )
@@ -863,19 +867,18 @@ fn refresh_signs(
     stats.worksites = worksites.len();
 }
 
-/// Hides maquettes beyond their range (distance camera to ground point).
+/// Hides maquettes beyond the range of their kind, on the rig distance like Godot
+/// (`TownMaquetteLayer._update_fades`: `visibility` of `town_maquettes.json`, the same for every
+/// place of a kind; the fade over `fade_margin` is a hard cut here).
 fn update_range(
-    camera: Query<&GlobalTransform, With<Camera3d>>,
-    mut maquettes: Query<(&Maquette, &GlobalTransform, &mut Visibility), Without<Camera3d>>,
+    view: Res<crate::campaign::camera::zoom::ZoomView>,
+    mut maquettes: Query<(&Maquette, &mut Visibility)>,
     mut stats: ResMut<MarkerStats>,
 ) {
-    let Some(cam) = camera.iter().next() else {
-        return;
-    };
-    let eye = cam.translation();
+    let distance = view.distance;
     let mut visible = 0;
-    for (m, g, mut v) in &mut maquettes {
-        let show = !m.sunk && eye.distance(g.translation()) < m.range;
+    for (m, mut v) in &mut maquettes {
+        let show = !m.sunk && distance < m.range;
         let want = if show {
             Visibility::Inherited
         } else {
@@ -1207,6 +1210,113 @@ fn landmark_fallback(
             commands.entity(entity).try_insert(WorldAssetRoot(handle));
         }
     }
+}
+
+/// Radius (map units) of the `nearby` probe around the rig focus.
+const NEARBY_RADIUS: f32 = 45.0;
+
+/// World bounds (min, max) of the meshes under `entity`, `None` before they load.
+fn world_bounds(
+    entity: Entity,
+    children: &Query<&Children>,
+    bounds: &Query<(&GlobalTransform, &bevy::camera::primitives::Aabb)>,
+) -> Option<(Vec3, Vec3)> {
+    let (mut lo, mut hi) = (Vec3::splat(f32::MAX), Vec3::splat(f32::MIN));
+    for d in children.iter_descendants(entity) {
+        if let Ok((g, a)) = bounds.get(d) {
+            for c in 0..8u8 {
+                let s = Vec3::new(
+                    if c & 1 == 0 { -1.0 } else { 1.0 },
+                    if c & 2 == 0 { -1.0 } else { 1.0 },
+                    if c & 4 == 0 { -1.0 } else { 1.0 },
+                );
+                let p = g.transform_point(Vec3::from(a.center) + Vec3::from(a.half_extents) * s);
+                lo = lo.min(p);
+                hi = hi.max(p);
+            }
+        }
+    }
+    (lo.x <= hi.x).then_some((lo, hi))
+}
+
+/// Dump probe: every place near the rig focus with what represents it (`dn` glb, `kit`
+/// maquette, `landmark`), whether it is drawn, its base / top and the ground under it.
+#[allow(clippy::too_many_arguments)]
+fn probe_nearby(
+    rig: Option<Res<crate::campaign::camera::rig::CampaignRig>>,
+    view: Res<crate::campaign::camera::zoom::ZoomView>,
+    towns: Res<TownsState>,
+    places: Res<Places>,
+    anchors: Query<(
+        Entity,
+        &Name,
+        &GroundAnchor,
+        &GlobalTransform,
+        &InheritedVisibility,
+        Option<&Maquette>,
+        Has<DnScene>,
+    )>,
+    bounds: Query<(&GlobalTransform, &bevy::camera::primitives::Aabb)>,
+    children: Query<&Children>,
+    rendered: Query<&ViewVisibility, With<Mesh3d>>,
+    ground: GroundHeight,
+    mut stats: ResMut<MarkerStats>,
+    mut last: Local<f32>,
+) {
+    let Some(rig) = rig else { return };
+    *last += 1.0;
+    if *last < 10.0 {
+        return;
+    }
+    *last = 0.0;
+    let focus = Vec2::new(rig.focus.x, rig.focus.z);
+    let mut rows: Vec<(f32, Value)> = Vec::new();
+    for (e, name, anchor, g, visible, maquette, dn) in &anchors {
+        let d = anchor.px.distance(focus);
+        if d > NEARBY_RADIUS {
+            continue;
+        }
+        let repr = if name.as_str().starts_with("Landmark_") {
+            "landmark"
+        } else if maquette.is_none() {
+            continue;
+        } else if dn {
+            "dn"
+        } else {
+            "kit"
+        };
+        let id = maquette
+            .and_then(|m| places.places.get(m.place))
+            .map_or(name.as_str().trim_start_matches("Landmark_"), |p| {
+                p.id.as_str()
+            });
+        let drawn = children
+            .iter_descendants(e)
+            .filter(|c| rendered.get(*c).is_ok_and(|v| v.get()))
+            .count();
+        let b = world_bounds(e, &children, &bounds);
+        rows.push((
+            d,
+            json!({
+                "id": id,
+                "repr": repr,
+                "distance": (d * 10.0).round() / 10.0,
+                "visible": visible.get(),
+                "drawn_meshes": drawn,
+                "town_1to1": towns.is_shown(id),
+                "y": g.translation().y,
+                "ground": ground.at(anchor.px.x, anchor.px.y),
+                "base_y": b.map(|(lo, _)| lo.y),
+                "top_y": b.map(|(_, hi)| hi.y),
+            }),
+        ));
+    }
+    rows.sort_by(|a, b| a.0.total_cmp(&b.0));
+    stats.nearby = json!({
+        "rig_distance": view.distance,
+        "focus": [rig.focus.x, rig.focus.z],
+        "places": rows.into_iter().map(|r| r.1).collect::<Vec<_>>(),
+    });
 }
 
 /// Load counters of the maquette and landmark scenes.

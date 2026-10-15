@@ -12,14 +12,12 @@ pub fn px_to_world(px: Vec2, height: f32) -> Vec3 {
     Vec3::new(px.x, height, px.y)
 }
 
-/// Stable 32-bit FNV-1a hash (Godot's `String.hash` is not reproducible outside the engine).
+/// Stable 32-bit hash of a place id: Godot 4's `String.hash()` (djb2 over the Unicode code
+/// points, `h = h * 33 + c` from 5381, wrapping), so variants and yaws match Godot.
 pub fn stable_hash(text: &str) -> u32 {
-    let mut h: u32 = 0x811c_9dc5;
-    for b in text.bytes() {
-        h ^= u32::from(b);
-        h = h.wrapping_mul(0x0100_0193);
-    }
-    h
+    text.chars().fold(5381_u32, |h, c| {
+        h.wrapping_shl(5).wrapping_add(h).wrapping_add(c as u32)
+    })
 }
 
 /// Variant letter of a place (deterministic by id).
