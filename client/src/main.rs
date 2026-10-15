@@ -81,6 +81,7 @@ fn main() -> ExitCode {
             campaign::towns::CampaignTownsPlugin,
             campaign::countryside::CampaignCountrysidePlugin,
             campaign::progress::CampaignProgressPlugin,
+            campaign::parchment::CampaignParchmentPlugin,
         ))
         .add_plugins((
             battle::scene::BattleScenePlugin,

@@ -2233,6 +2233,7 @@ dependencies = [
  "serde_json",
  "sim-battle",
  "sim-campaign",
+ "tiny-skia",
  "vegetation",
  "wesl",
 ]
