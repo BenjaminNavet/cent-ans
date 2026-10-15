@@ -369,3 +369,7 @@ Calquée sur `battle_hud.gd` : un bandeau du bas de 140 px (`battle/hud/geometry
 ## Campagne, parité visuelle 2 (lot `bm/campvis2`, `campaign/terrain/`)
 - Ombres portées du soleil : le relief projette (`terrain_shadow.wesl`, prépasse de `TerrainMaterial`), le sol reçoit (`sun_shadow` dans `terrain.wesl`, lumière directionnelle 0), cascades à la distance caméra (`terrain/shadows.rs`, `data/fx/campaign_lighting.json § shadows`), écrites dans `settings::quality::SunBase` (le lot settings applique qualité et case Ombres). Matériaux maison qui veulent recevoir l'ombre : même appel `shadows::fetch_directional_shadow(0u, …)`.
 - Teinte politique des provinces : fondu multiplicatif à luminance constante (`provinces/shaders/fill.wesl`, `AlphaMode::Multiply`) au lieu d'un lavis alpha.
+
+## Végétation de campagne : rendu (lot vegvis)
+- Pipeline `campaign/vegetation/billboard.rs` : modes imposteur (mip borné 2,5 + compensation d'alpha), roseaux, étangs, modèle proche (glb lod1, `tree_model_gains.json`), ombre au sol (ellipses, `shadows.rs`). Éclairage des arbres copié du matériau de terrain (`light.rs`, `TerrainParams` : soleil, ambiance, brume) : si campvis change la formule d'éclairage du sol, reporter dans `shade_foliage` de `billboard.wesl`.
+- `campaign::countryside::landuse::LanduseTexture` : raster d'occupation du sol (R vigne, G sécheresse, B bocage) pour le shader de sol.

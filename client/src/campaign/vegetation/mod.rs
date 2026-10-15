@@ -30,11 +30,13 @@ pub mod detail_profile;
 pub mod edges;
 pub mod ground_job;
 pub mod ground_materials;
+pub mod light;
 pub mod mask;
 pub mod meshes;
 pub mod mips;
 pub mod reeds;
 pub mod render;
+pub mod shadows;
 pub mod textures;
 pub mod tiles;
 
@@ -48,7 +50,6 @@ use serde_json::{Value, json};
 
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
-use crate::battle::units::instancing::InstancedBatch;
 use crate::campaign::terrain::season::SeasonWeights;
 
 use self::billboard::{BillboardPlugin, Mode, VegBatch};
@@ -201,10 +202,15 @@ impl Plugin for CampaignVegetationPlugin {
             .init_resource::<VegErrors>()
             .init_resource::<WetDecor>()
             .init_resource::<mips::AtlasMips>()
+            .init_resource::<shadows::TreeShadows>()
+            .init_resource::<light::VegLight>()
             .register_dump(dump_vegetation)
             .register_dump(dump_ported)
-            .add_systems(OnEnter(AppState::Campaign), reset_campaign)
-            .add_systems(OnExit(AppState::Campaign), reset_campaign)
+            .add_systems(
+                OnEnter(AppState::Campaign),
+                (reset_campaign, shadows::reset),
+            )
+            .add_systems(OnExit(AppState::Campaign), (reset_campaign, shadows::reset))
             .add_systems(
                 Update,
                 (
@@ -218,8 +224,10 @@ impl Plugin for CampaignVegetationPlugin {
                     mips::build_atlas_mips,
                     assemble_records,
                     apply_records,
+                    shadows::sync_shadows,
                     update_wetlands,
                     sync_season,
+                    light::sync_light,
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
@@ -522,7 +530,6 @@ fn apply_records(
     server: Res<AssetServer>,
     mut render: ResMut<VegRender>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut batches: Query<&mut InstancedBatch>,
     mut veg_batches: Query<&mut VegBatch>,
     season: Option<Res<SeasonWeights>>,
 ) {
@@ -566,8 +573,15 @@ fn apply_records(
         *version += 1;
         let version = *version;
         let records = Arc::new(bytes);
+        let class = world
+            .0
+            .species
+            .season
+            .get(row as usize)
+            .copied()
+            .unwrap_or(0);
         if model {
-            let count = (records.len() / render::RECORD_BYTES) as u32;
+            let count = (records.len() / billboard::RECORD_BYTES) as u32;
             let Some((mesh, texture)) =
                 render.assets.models.get(&row).and_then(|m| m.ready.clone())
             else {
@@ -577,7 +591,7 @@ fn apply_records(
             match render
                 .entities
                 .get(&key)
-                .and_then(|e| batches.get_mut(*e).ok())
+                .and_then(|e| veg_batches.get_mut(*e).ok())
             {
                 Some(mut batch) => {
                     batch.records = records;
@@ -585,16 +599,24 @@ fn apply_records(
                     batch.version = version;
                 }
                 None => {
+                    let gains = render
+                        .assets
+                        .gains
+                        .get_or_insert_with(render::ModelGains::load);
+                    let mut params = render::model_params(gains, species_id, class);
+                    params.season = season_weights;
                     let entity = commands
                         .spawn((
                             Name::new(format!("Trees{species_id}Model")),
-                            InstancedBatch {
+                            VegBatch {
                                 mesh_handle: mesh,
                                 records,
                                 count,
-                                texture_handle: Some(texture),
-                                params: render::params(),
+                                albedo: texture,
+                                normal: None,
+                                params,
                                 version,
+                                params_version: 0,
                             },
                             DespawnOnExit(AppState::Campaign),
                         ))
@@ -623,13 +645,6 @@ fn apply_records(
                     .get(row as usize)
                     .copied()
                     .unwrap_or(1.0);
-                let class = world
-                    .0
-                    .species
-                    .season
-                    .get(row as usize)
-                    .copied()
-                    .unwrap_or(0);
                 let mesh = render
                     .assets
                     .quad
@@ -1001,6 +1016,19 @@ fn dump_vegetation(world: &World) -> (String, Value) {
             "active": view.active, "focus": [view.focus.x, view.focus.y],
             "distance": view.distance, "radius": view.radius,
             "density": view.density, "model_radius": view.model_radius,
+        });
+    }
+    if let Some(shadows) = world.get_resource::<shadows::TreeShadows>() {
+        if let Some(light) = world.get_resource::<light::VegLight>() {
+            value["light"] = json!({
+                "from_terrain": light.sun_dir.w > 0.5,
+                "sun_dir": light.sun_dir.truncate().to_array(),
+                "ambient": light.ambient.truncate().to_array(),
+                "fog": light.fog.to_array(),
+            });
+        }
+        value["shadows"] = json!({
+            "batches": shadows.entities.len(), "opacity": shadows.opacity,
         });
     }
     if let Some(render) = world.get_resource::<VegRender>() {
