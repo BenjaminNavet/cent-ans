@@ -26,21 +26,15 @@ use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{caption, panel_page};
 use crate::ui::kit::{ButtonPressed, UiTheme};
 
-pub const BUTTON_W: f32 = 88.0;
-pub const BUTTON_H: f32 = 40.0;
-/// Above the seal (88 px + 6 px margin), under the orders bar.
-pub const BUTTON_BOTTOM: f32 = 100.0;
-const BOTTOM: f32 = BUTTON_BOTTOM;
-/// Bottom offset of the menu: above its button but never over the card band (it is wider than
-/// the button and would otherwise cover the band's first cards).
-pub const MENU_BOTTOM: f32 = {
-    let above_button = BUTTON_BOTTOM + BUTTON_H + 6.0;
-    if above_button > super::geometry::ABOVE_BAND_BOTTOM {
-        above_button
-    } else {
-        super::geometry::ABOVE_BAND_BOTTOM
-    }
-};
+/// The button is the first cell of the command grid (Godot `COMMANDS[0]`, « Formation »).
+pub const BUTTON_W: f32 = super::commands::CELL.x;
+pub const BUTTON_H: f32 = super::commands::CELL.y;
+/// The menu opens above the band, its right edge on the button's right edge (it grows to the
+/// left, clear of the corner panel and of the orders lot's group formations panel).
+pub const MENU_BOTTOM: f32 = super::geometry::ABOVE_BAND_BOTTOM;
+pub const MENU_RIGHT: f32 =
+    super::geometry::BAND_RIGHT_MARGIN + super::geometry::BAND_PAD_X + super::commands::GRID_WIDTH
+        - BUTTON_W;
 /// Width of the menu panel.
 pub const MENU_WIDTH: f32 = 248.0;
 /// Height of the menu panel with its 8 formations (measured, `hud_layout` dump).
@@ -279,9 +273,11 @@ fn reset(mut menu: ResMut<FormationMenu>) {
 fn spawn(
     mut commands: Commands,
     roots: Query<Entity, With<BattleHudRoot>>,
+    slots: Query<(Entity, &super::geometry::HudSlot)>,
     existing: Query<(), With<MenuButton>>,
     mut menu: ResMut<FormationMenu>,
     theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
 ) {
     let Ok(root) = roots.single() else { return };
     if !existing.is_empty() {
@@ -299,27 +295,37 @@ fn spawn(
                 "[b]Formation[/b]\nChoisir une formation dans le menu (noms historiques, effets) ; la touche T passe à la suivante. Doré : formation particulière ou reformation en cours.",
             ),
             Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(8.0),
-                bottom: Val::Px(BOTTOM),
                 width: Val::Px(BUTTON_W),
                 height: Val::Px(BUTTON_H),
                 border: UiRect::all(Val::Px(1.0)),
+                border_radius: BorderRadius::all(Val::Px(3.0)),
+                flex_direction: FlexDirection::Column,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 ..default()
             },
             BackgroundColor(style::PARCHMENT_LIGHT),
             BorderColor::all(style::INK_SOFT),
-            ChildOf(root),
+            ChildOf(super::slot_or_root(
+                &slots,
+                super::geometry::HudSlot::Formation,
+                root,
+            )),
         ))
         .id();
     commands.spawn((
+        crate::ui::kit::icons::icon(&theme, &assets, "battle_formation", 20.0),
+        Pickable::IGNORE,
+        ChildOf(button),
+    ));
+    // Short name of the selection's formation (empty: none or mixed), as Godot's
+    // `_draw_formation_status`.
+    commands.spawn((
         MenuButtonLabel,
-        Text::new("Formation"),
-        theme.text_font(false, false, UiType::Caption.size()),
+        Text::new(""),
+        theme.text_font(false, false, 10.0),
         TextColor(INK),
-        TextLayout::justify(Justify::Center),
+        TextLayout::new(Justify::Center, LineBreak::NoWrap),
         Pickable::IGNORE,
         ChildOf(button),
     ));
@@ -343,8 +349,9 @@ fn spawn(
             MenuPanel,
             Node {
                 position_type: PositionType::Absolute,
-                left: Val::Px(8.0),
+                right: Val::Px(MENU_RIGHT),
                 bottom: Val::Px(MENU_BOTTOM),
+                width: Val::Px(MENU_WIDTH),
                 display: Display::None,
                 ..default()
             },
@@ -460,11 +467,7 @@ fn refresh(
     let label = selection_label(&data, &selection.units);
     let progress = selection_progress(&data, &selection.units);
     for mut text in &mut labels {
-        let shown = if label.is_empty() {
-            "Formation".to_owned()
-        } else {
-            label.clone()
-        };
+        let shown = label.clone();
         if text.0 != shown {
             text.0 = shown;
         }

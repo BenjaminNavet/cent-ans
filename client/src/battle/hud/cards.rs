@@ -25,16 +25,23 @@ use crate::ui::kit::icons::icon;
 use crate::ui::kit::style;
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::tooltip_spec::TooltipTexts;
-use crate::ui::kit::widgets::{caption, panel_page};
+use crate::ui::kit::widgets::caption;
 use crate::ui::kit::{ButtonPressed, UiTheme};
 
 pub const CARD_WIDTH: f32 = 64.0;
-pub const CARD_HEIGHT: f32 = 94.0;
+/// Painted part of a card; with the « bataille » caption above and the ability row under it,
+/// the column fills [`super::geometry::BAND_INNER`] (unit test).
+pub const CARD_HEIGHT: f32 = 90.0;
+/// Height of the « Avant-garde » / « Bataille » caption over a group of cards.
+pub const GROUP_CAPTION_H: f32 = 16.0;
+/// Margin + rule + margin between the seal, the cards and the commands.
+pub const DIVIDER_SPACE: f32 = 2.0 * DIVIDER_MARGIN + 1.0;
+const DIVIDER_MARGIN: f32 = 8.0;
+/// Width the illustrations (16:9) are drawn at, cropped to the card's centre (Godot
+/// `_draw_art`: a portrait cut from the middle of the painting).
+const ART_WIDTH: f32 = CARD_HEIGHT * 16.0 / 9.0;
 const BAR_HEIGHT: f32 = 4.0;
-/// Right margin of the band: room for the speed controls and the minimap (8 + speed column + 6
-/// + minimap + 6).
-pub const BAND_RIGHT_MARGIN: f32 =
-    8.0 + super::speed::SPEED_PANEL_WIDTH + 6.0 + super::minimap::MAP_SIZE.x + 6.0;
+pub use super::geometry::BAND_RIGHT_MARGIN;
 const DOUBLE_CLICK_S: f32 = 0.35;
 const BORDER_IDLE: Color = Color::srgb(0.42, 0.29, 0.16);
 const BORDER_SELECTED: Color = Color::srgb(0.95, 0.75, 0.15);
@@ -148,15 +155,35 @@ fn illustration_exists(unit_type: &str) -> bool {
 }
 
 /// Spawns the bottom band under `root`.
+/// Vertical hairline between the parts of the band.
+pub fn divider() -> impl Bundle {
+    (
+        Node {
+            width: Val::Px(1.0),
+            height: Val::Percent(86.0),
+            margin: UiRect::horizontal(Val::Px(DIVIDER_MARGIN)),
+            flex_shrink: 0.0,
+            ..default()
+        },
+        BackgroundColor(style::INK_SOFT.with_alpha(0.45)),
+        Pickable::IGNORE,
+    )
+}
+
+/// The bottom band (Godot `_build_bottom`): leader seal slot, the cards grouped by « bataille »
+/// (scrolling sideways when they do not fit) and the command grid, in one parchment page of
+/// fixed height.
 pub fn spawn_band(commands: &mut Commands, root: Entity, ctx: &BuildCtx, texts: &TooltipTexts) {
+    use super::geometry::{BAND_BOTTOM, BAND_HEIGHT, BAND_LEFT, BAND_PAD_X, BAND_PAD_Y, HudSlot};
     let wrapper = commands
         .spawn((
             Name::new("BottomBand"),
             Node {
                 position_type: PositionType::Absolute,
-                left: Val::Px(super::orders_bar::BAND_LEFT_MARGIN),
+                left: Val::Px(BAND_LEFT),
                 right: Val::Px(BAND_RIGHT_MARGIN),
-                bottom: Val::Px(super::geometry::BAND_BOTTOM),
+                bottom: Val::Px(BAND_BOTTOM),
+                height: Val::Px(BAND_HEIGHT),
                 ..default()
             },
             Pickable::IGNORE,
@@ -165,25 +192,42 @@ pub fn spawn_band(commands: &mut Commands, root: Entity, ctx: &BuildCtx, texts: 
         .id();
     let panel = commands
         .spawn((
-            panel_page(ctx.theme),
-            ChildOf(wrapper),
             Name::new("BandPanel"),
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                padding: UiRect::axes(Val::Px(BAND_PAD_X), Val::Px(BAND_PAD_Y)),
+                flex_direction: FlexDirection::Row,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            ctx.theme.sliced("panel"),
+            ChildOf(wrapper),
         ))
         .id();
-    commands
-        .entity(panel)
-        .entry::<Node>()
-        .and_modify(|mut node| {
-            // The strip scrolls: the panel never grows past the band's margins (it used to run
-            // under the minimap and the speed buttons).
-            node.min_width = Val::Px(0.0);
-            node.max_width = Val::Percent(100.0);
-        });
+    commands.spawn((
+        Name::new("SealSlot"),
+        HudSlot::Seal,
+        Node {
+            width: Val::Px(super::orders_bar::SEAL_SIZE),
+            height: Val::Px(super::orders_bar::SEAL_SIZE),
+            flex_shrink: 0.0,
+            ..default()
+        },
+        Pickable::IGNORE,
+        ChildOf(panel),
+    ));
+    commands.spawn((divider(), ChildOf(panel)));
     let strip = commands
         .spawn((
             Name::new("CardStrip"),
             Node {
                 flex_direction: FlexDirection::Row,
+                flex_grow: 1.0,
+                flex_shrink: 1.0,
+                min_width: Val::Px(0.0),
+                height: Val::Percent(100.0),
+                align_items: AlignItems::FlexEnd,
                 column_gap: Val::Px(12.0),
                 overflow: Overflow::scroll_x(),
                 ..default()
@@ -191,6 +235,8 @@ pub fn spawn_band(commands: &mut Commands, root: Entity, ctx: &BuildCtx, texts: 
             ChildOf(panel),
         ))
         .id();
+    commands.spawn((divider(), ChildOf(panel)));
+    super::commands::spawn_grid(commands, panel, ctx);
     for row in BattleRow::ORDER {
         let members: Vec<&UnitView> = ctx.data.own.iter().filter(|u| u.row == row).collect();
         if members.is_empty() {
@@ -202,12 +248,18 @@ pub fn spawn_band(commands: &mut Commands, root: Entity, ctx: &BuildCtx, texts: 
                 Node {
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Px(1.0),
+                    flex_shrink: 0.0,
                     ..default()
                 },
                 ChildOf(strip),
             ))
             .id();
-        commands.spawn((caption(ctx.theme, row.label()), ChildOf(column)));
+        commands
+            .spawn((caption(ctx.theme, row.label()), ChildOf(column)))
+            .entry::<Node>()
+            .and_modify(|mut node| {
+                node.height = Val::Px(GROUP_CAPTION_H);
+            });
         let cards = commands
             .spawn((
                 Name::new("Cards"),
@@ -278,15 +330,16 @@ fn spawn_card(
         commands.spawn((
             Node {
                 position_type: PositionType::Absolute,
-                width: Val::Percent(100.0),
+                left: Val::Px((CARD_WIDTH - ART_WIDTH) * 0.5),
+                top: Val::Px(0.0),
+                width: Val::Px(ART_WIDTH),
                 height: Val::Percent(100.0),
                 ..default()
             },
             ImageNode::new(
                 ctx.assets
                     .load(format!("illustrations/{}.jpg", unit.unit_type)),
-            )
-            .with_mode(NodeImageMode::Auto),
+            ),
             Pickable::IGNORE,
             ChildOf(card),
         ));

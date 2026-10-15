@@ -163,10 +163,12 @@ fn spawn(
     if !existing.is_empty() {
         return;
     }
-    let wrapper = |top: f32| Node {
+    // Centred under the title bar, in the same span (clear of the toasts at the top right).
+    let wrapper = |top: f32, right: f32| Node {
         position_type: PositionType::Absolute,
         top: Val::Px(top),
-        width: Val::Percent(100.0),
+        left: Val::Px(0.0),
+        right: Val::Px(right),
         justify_content: JustifyContent::Center,
         display: Display::None,
         ..default()
@@ -176,7 +178,7 @@ fn spawn(
         .spawn((
             Name::new("SiegeStatus"),
             SiegeLine,
-            wrapper(62.0),
+            wrapper(62.0, super::geometry::TOASTS_RESERVE),
             Pickable::IGNORE,
             ChildOf(root),
         ))
@@ -197,7 +199,7 @@ fn spawn(
         .spawn((
             Name::new("BattleHelp"),
             HelpPanel,
-            wrapper(110.0),
+            wrapper(110.0, 0.0),
             Pickable::IGNORE,
             ChildOf(root),
         ))

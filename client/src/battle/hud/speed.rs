@@ -17,17 +17,19 @@ use crate::ui::kit::ButtonPressed;
 use crate::ui::kit::modal::{ModalQueue, ModalResult, ModalSpec, PRIORITY_DECISION};
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::tooltip::Tooltip;
-use crate::ui::kit::widgets::{Toggled, button_small, heading, panel_note, toggle_button};
+use crate::ui::kit::widgets::{Toggled, button_small, toggle_button};
 
-/// Width of the speed column (the minimap sits to its left).
-pub const SPEED_PANEL_WIDTH: f32 = 72.0;
+/// Width of the speed column (the minimap sits to its left, in the same corner panel).
+pub const SPEED_PANEL_WIDTH: f32 = 46.0;
+const SPEED_BUTTON_H: f32 = 23.0;
+const SPEED_GAP: f32 = 3.0;
 /// Height of the speed column as laid out (5 buttons).
-pub const SPEED_COLUMN_HEIGHT: f32 = 174.0;
+pub const SPEED_COLUMN_HEIGHT: f32 = 5.0 * SPEED_BUTTON_H + 4.0 * SPEED_GAP;
 
 /// Selectable speeds (`BattleScene.SPEEDS`).
 pub const SPEEDS: [f64; 4] = [0.5, 1.0, 2.0, 4.0];
 const SPEED_KEYS: [&str; 5] = ["pause", "0.5", "1", "2", "4"];
-const SPEED_CAPTIONS: [&str; 5] = ["Pause", "×0,5", "×1", "×2", "×4"];
+const SPEED_CAPTIONS: [&str; 5] = ["II", "×0,5", "×1", "×2", "×4"];
 const QUIT_KEY: &str = "battle_quit";
 
 /// `mm:ss`.
@@ -74,6 +76,25 @@ enum TopText {
     Clock,
     TimeLeft,
     Balance,
+    Weather,
+}
+
+/// Title of the bar: the session's (« Bataille de Crécy (26 août 1346) », « Assaut de Paris… »),
+/// else « Bataille : <own> contre <enemy> » (Godot « Bataille personnalisée : France contre
+/// Angleterre »).
+pub fn title_text(title: &str, factions: &[String; 2]) -> String {
+    let title = match title.trim() {
+        "" => "Bataille",
+        other => other,
+    };
+    // Generic titles name the two sides; a named battle or assault keeps its own title.
+    if title != "Bataille" && title != "Bataille personnalisée" {
+        return title.to_owned();
+    }
+    match (factions[0].trim(), factions[1].trim()) {
+        ("", _) | (_, "") => title.to_owned(),
+        (own, enemy) => format!("{title} : {own} contre {enemy}"),
+    }
 }
 #[derive(Component)]
 struct BalanceOwnFill;
@@ -100,15 +121,24 @@ impl Plugin for SpeedPlugin {
     }
 }
 
-/// Spawns the top bar.
-pub fn spawn_top_bar(commands: &mut Commands, root: Entity, ctx: &BuildCtx) {
+/// Spawns the top bar (Godot `_build_top_bar`): title, clock, time left, weather over the site
+/// line, balance of forces, « Quitter ».
+pub fn spawn_top_bar(
+    commands: &mut Commands,
+    root: Entity,
+    ctx: &BuildCtx,
+    session: &mut BattleSession,
+) {
+    let title = title_text(&session.title, &ctx.data.faction_names);
+    let site = session.sim_mut().field().site_label_fr();
     let wrapper = commands
         .spawn((
             Name::new("TopBarWrapper"),
             Node {
                 position_type: PositionType::Absolute,
                 top: Val::Px(8.0),
-                width: Val::Percent(100.0),
+                left: Val::Px(0.0),
+                right: Val::Px(super::geometry::TOASTS_RESERVE),
                 justify_content: JustifyContent::Center,
                 ..default()
             },
@@ -117,7 +147,15 @@ pub fn spawn_top_bar(commands: &mut Commands, root: Entity, ctx: &BuildCtx) {
         ))
         .id();
     let frame = commands
-        .spawn((panel_note(ctx.theme), Name::new("TopBar"), ChildOf(wrapper)))
+        .spawn((
+            Name::new("TopBar"),
+            Node {
+                padding: UiRect::axes(Val::Px(16.0), Val::Px(6.0)),
+                ..default()
+            },
+            ctx.theme.sliced("panel"),
+            ChildOf(wrapper),
+        ))
         .id();
     let bar = commands
         .spawn((
@@ -125,13 +163,21 @@ pub fn spawn_top_bar(commands: &mut Commands, root: Entity, ctx: &BuildCtx) {
             Node {
                 flex_direction: FlexDirection::Row,
                 align_items: AlignItems::Center,
-                column_gap: Val::Px(18.0),
+                column_gap: Val::Px(14.0),
                 ..default()
             },
             ChildOf(frame),
         ))
         .id();
-    commands.spawn((heading(ctx.theme, "Bataille"), ChildOf(bar)));
+    commands.spawn((
+        Name::new("BattleTitle"),
+        Text::new(title),
+        ctx.theme
+            .text_font(true, false, UiType::Heading.size() - 2.0),
+        TextColor(style::INK_TITLE),
+        TextLayout::new(Justify::Left, LineBreak::NoWrap),
+        ChildOf(bar),
+    ));
     commands.spawn((
         TopText::Clock,
         Text::new("00:00"),
@@ -147,6 +193,35 @@ pub fn spawn_top_bar(commands: &mut Commands, root: Entity, ctx: &BuildCtx) {
         TextColor(style::INK_SOFT),
         ChildOf(bar),
     ));
+    let sky = commands
+        .spawn((
+            Name::new("Sky"),
+            Node {
+                flex_direction: FlexDirection::Column,
+                ..default()
+            },
+            ChildOf(bar),
+        ))
+        .id();
+    commands.spawn((
+        TopText::Weather,
+        Text::new(ctx.data.weather.clone()),
+        ctx.theme.text_font(false, false, UiType::Body.size()),
+        TextColor(style::INK),
+        TextLayout::new(Justify::Left, LineBreak::NoWrap),
+        ChildOf(sky),
+    ));
+    if !site.is_empty() {
+        commands.spawn((
+            Name::new("SiteLine"),
+            Text::new(site),
+            ctx.theme
+                .text_font(false, false, UiType::Caption.size() - 1.0),
+            TextColor(style::INK_SOFT),
+            TextLayout::new(Justify::Left, LineBreak::NoWrap),
+            ChildOf(sky),
+        ));
+    }
     let balance = commands
         .spawn((
             Name::new("Balance"),
@@ -169,8 +244,8 @@ pub fn spawn_top_bar(commands: &mut Commands, root: Entity, ctx: &BuildCtx) {
     let track = commands
         .spawn((
             Node {
-                width: Val::Px(220.0),
-                height: Val::Px(12.0),
+                width: Val::Px(180.0),
+                height: Val::Px(10.0),
                 border: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
@@ -195,36 +270,77 @@ pub fn spawn_top_bar(commands: &mut Commands, root: Entity, ctx: &BuildCtx) {
     ));
 }
 
-/// Spawns the speed column, bottom right.
-pub fn spawn_speed_panel(commands: &mut Commands, root: Entity, ctx: &BuildCtx) {
-    let wrapper = commands
+/// Spawns the corner panel, bottom right (Godot `MapCorner`): the minimap slot (filled by
+/// `minimap.rs`) and the speed column, in one page as tall as the card band.
+pub fn spawn_corner(commands: &mut Commands, root: Entity, ctx: &BuildCtx) {
+    use super::geometry::{
+        BAND_BOTTOM, BAND_HEIGHT, BAND_PAD_X, BAND_PAD_Y, CORNER_GAP, CORNER_RIGHT, CORNER_WIDTH,
+        HudSlot,
+    };
+    let corner = commands
         .spawn((
-            Name::new("SpeedControls"),
+            Name::new("MapCorner"),
             Node {
                 position_type: PositionType::Absolute,
-                right: Val::Px(8.0),
-                bottom: Val::Px(6.0),
-                width: Val::Px(SPEED_PANEL_WIDTH),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(3.0),
-                align_items: AlignItems::Stretch,
+                right: Val::Px(CORNER_RIGHT),
+                bottom: Val::Px(BAND_BOTTOM),
+                width: Val::Px(CORNER_WIDTH),
+                height: Val::Px(BAND_HEIGHT),
+                padding: UiRect::axes(Val::Px(BAND_PAD_X), Val::Px(BAND_PAD_Y)),
+                flex_direction: FlexDirection::Row,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(CORNER_GAP),
                 ..default()
             },
+            ctx.theme.sliced("panel"),
             ChildOf(root),
         ))
         .id();
+    commands.spawn((
+        Name::new("MapSlot"),
+        HudSlot::Map,
+        Node {
+            width: Val::Px(super::minimap::MAP_SIZE.x),
+            height: Val::Px(super::minimap::MAP_SIZE.y),
+            flex_shrink: 0.0,
+            ..default()
+        },
+        ChildOf(corner),
+    ));
+    let column = commands
+        .spawn((
+            Name::new("SpeedControls"),
+            Node {
+                width: Val::Px(SPEED_PANEL_WIDTH),
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(SPEED_GAP),
+                flex_shrink: 0.0,
+                ..default()
+            },
+            ChildOf(corner),
+        ))
+        .id();
     for (index, key) in SPEED_KEYS.iter().enumerate() {
-        commands.spawn((
-            toggle_button(
-                ctx.theme,
-                &format!("speed:{key}"),
-                SPEED_CAPTIONS[index],
-                index == 2,
-            ),
-            SpeedButton(index),
-            Tooltip::new(speed_tip(key)),
-            ChildOf(wrapper),
-        ));
+        commands
+            .spawn((
+                toggle_button(
+                    ctx.theme,
+                    &format!("speed:{key}"),
+                    SPEED_CAPTIONS[index],
+                    index == 2,
+                ),
+                SpeedButton(index),
+                Tooltip::new(speed_tip(key)),
+                ChildOf(column),
+            ))
+            .entry::<Node>()
+            .and_modify(|mut node| {
+                // The kit button pads 12 x 5 px: too wide for the column.
+                node.width = Val::Px(SPEED_PANEL_WIDTH);
+                node.height = Val::Px(SPEED_BUTTON_H);
+                node.min_width = Val::Px(0.0);
+                node.padding = UiRect::ZERO;
+            });
     }
 }
 
@@ -299,6 +415,7 @@ fn update_top_bar(
         let value = match field {
             TopText::Clock => clock_text(data.elapsed_s),
             TopText::TimeLeft => time_left_text(data.time_left_s),
+            TopText::Weather => data.weather.clone(),
             TopText::Balance => format!(
                 "{} {} · {} {}",
                 data.faction_names[0],
@@ -364,6 +481,25 @@ mod tests {
         assert_eq!(step_speed(1.0, 1), 2.0);
         assert_eq!(step_speed(4.0, 1), 4.0);
         assert_eq!(step_speed(0.5, -1), 0.5);
+    }
+
+    #[test]
+    fn title_falls_back_on_the_factions() {
+        let factions = ["France".to_owned(), "Angleterre".to_owned()];
+        assert_eq!(
+            title_text("", &factions),
+            "Bataille : France contre Angleterre"
+        );
+        assert_eq!(
+            title_text("Bataille", &factions),
+            "Bataille : France contre Angleterre"
+        );
+        assert_eq!(title_text("Assaut de Paris", &factions), "Assaut de Paris");
+        assert_eq!(
+            title_text("Bataille personnalisée", &factions),
+            "Bataille personnalisée : France contre Angleterre"
+        );
+        assert_eq!(title_text("", &[String::new(), String::new()]), "Bataille");
     }
 
     #[test]

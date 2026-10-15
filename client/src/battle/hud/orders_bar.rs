@@ -36,14 +36,21 @@ use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::caption;
 use crate::ui::kit::{ButtonPressed, UiTheme};
 
-pub const SEAL_SIZE: f32 = 88.0;
-/// Left margin of the card band (room for the seal).
-pub const BAND_LEFT_MARGIN: f32 = 8.0 + SEAL_SIZE + 8.0;
-/// Size (logical px) of the orders bar panel as laid out; the geometry test and the `hud_layout`
-/// dump rely on it.
-pub const ORDERS_BAR_SIZE: Vec2 = Vec2::new(460.0, 138.0);
+/// Diameter of the seal, at the left end of the card band (Godot `SEAL_SIZE` 112, here fitted to
+/// the band's inner height).
+pub const SEAL_SIZE: f32 = 108.0;
+/// Size (logical px) of the orders bar panel at its widest (four orders and « Incendier »); the
+/// geometry test and the `hud_layout` dump rely on it.
+pub const ORDERS_BAR_SIZE: Vec2 = Vec2::new(
+    2.0 * BAR_PAD_X + 5.0 * BUTTON_W + 4.0 * BUTTON_GAP,
+    2.0 * BAR_PAD_Y + 16.0 + 3.0 + BUTTON_H,
+);
 const BUTTON_W: f32 = 96.0;
-const BUTTON_H: f32 = 54.0;
+const BUTTON_H: f32 = 48.0;
+const BUTTON_GAP: f32 = 6.0;
+/// Inside the painted frame of the kit page (its border is about 10 px).
+const BAR_PAD_X: f32 = 14.0;
+const BAR_PAD_Y: f32 = 11.0;
 /// Bottom margin of the bar: above the card band and its ability row.
 const BOTTOM_MARGIN: f32 = super::geometry::ABOVE_BAND_BOTTOM;
 const REFRESH_S: f32 = 0.2;
@@ -276,6 +283,17 @@ fn reset(mut orders: ResMut<LeaderOrders>, mut seal: ResMut<LeaderSeal>) {
     *seal = LeaderSeal::default();
 }
 
+fn heraldry_exists(faction: &str) -> bool {
+    !faction.is_empty()
+        && paths::find_root()
+            .map(|root| {
+                paths::asset_root(&root)
+                    .join(format!("heraldry/{faction}.png"))
+                    .exists()
+            })
+            .unwrap_or(false)
+}
+
 fn portrait_exists(id: &str) -> bool {
     !id.is_empty()
         && paths::find_root()
@@ -292,6 +310,7 @@ fn portrait_exists(id: &str) -> bool {
 fn spawn(
     mut commands: Commands,
     roots: Query<Entity, With<BattleHudRoot>>,
+    slots: Query<(Entity, &super::geometry::HudSlot)>,
     existing: Query<(), With<SealNode>>,
     mut session: ResMut<BattleSession>,
     mut seal: ResMut<LeaderSeal>,
@@ -304,6 +323,7 @@ fn spawn(
         return;
     }
     let player = session.player.unwrap_or(SideId::Attacker);
+    let faction = session.sim_mut().setup().side(player).faction.clone();
     if let Some(general) = session.sim_mut().setup().side(player).general.clone() {
         seal.name = general.name;
         seal.character = general.character;
@@ -319,9 +339,6 @@ fn spawn(
             Hovered::default(),
             Tooltip::new("[b]Pas de chef[/b]\nCette armée n’a pas de chef."),
             Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(8.0),
-                bottom: Val::Px(6.0),
                 width: Val::Px(SEAL_SIZE),
                 height: Val::Px(SEAL_SIZE),
                 border: UiRect::all(Val::Px(5.0)),
@@ -332,7 +349,11 @@ fn spawn(
             },
             BackgroundColor(wax),
             BorderColor::all(Color::srgb(0.2, 0.6, 0.2)),
-            ChildOf(root),
+            ChildOf(super::slot_or_root(
+                &slots,
+                super::geometry::HudSlot::Seal,
+                root,
+            )),
         ))
         .id();
     let inner = commands
@@ -362,6 +383,19 @@ fn spawn(
                 ..default()
             },
             ImageNode::new(assets.load(format!("portraits/{}.png", seal.character))),
+            Pickable::IGNORE,
+            ChildOf(inner),
+        ));
+    } else if heraldry_exists(&faction) {
+        // No portrait: the arms of the faction (Godot `house_heraldry_texture`, the house of the
+        // general being a campaign notion the battle does not carry).
+        commands.spawn((
+            Node {
+                width: Val::Percent(78.0),
+                height: Val::Percent(78.0),
+                ..default()
+            },
+            ImageNode::new(assets.load(format!("heraldry/{faction}.png"))),
             Pickable::IGNORE,
             ChildOf(inner),
         ));
@@ -406,9 +440,17 @@ fn spawn(
             ChildOf(root),
         ))
         .id();
+    // Same page as the band, with the band's tight padding (the kit page pads 28 px).
     let panel = commands
         .spawn((
-            crate::ui::kit::widgets::panel_page(&theme),
+            Name::new("OrdersPage"),
+            Node {
+                padding: UiRect::axes(Val::Px(BAR_PAD_X), Val::Px(BAR_PAD_Y)),
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(3.0),
+                ..default()
+            },
+            theme.sliced("panel"),
             ChildOf(wrapper),
         ))
         .id();
@@ -417,7 +459,7 @@ fn spawn(
         Name::new("OrderRow"),
         Node {
             flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(6.0),
+            column_gap: Val::Px(BUTTON_GAP),
             ..default()
         },
         ChildOf(panel),
@@ -544,7 +586,7 @@ fn spawn_button(
     let icon_id = format!("order_{}", order.icon);
     if !order.icon.is_empty() && theme.icons.get(&icon_id).is_some() {
         commands.spawn((
-            icon(theme, assets, &icon_id, 28.0),
+            icon(theme, assets, &icon_id, 24.0),
             Pickable::IGNORE,
             ChildOf(button),
         ));
