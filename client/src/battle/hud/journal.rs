@@ -137,23 +137,21 @@ fn spawn(
     if !existing.is_empty() {
         return;
     }
-    let panel = commands
+    let wrapper = commands
         .spawn((
             Name::new("BattleLog"),
             JournalPanel,
-            panel_note(&theme),
             Node {
                 position_type: PositionType::Absolute,
                 right: Val::Px(12.0),
                 top: Val::Px(70.0),
                 width: Val::Px(348.0),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(1.0),
                 ..default()
             },
             ChildOf(root),
         ))
         .id();
+    let panel = commands.spawn((panel_note(&theme), ChildOf(wrapper))).id();
     let header = commands
         .spawn((
             Node {

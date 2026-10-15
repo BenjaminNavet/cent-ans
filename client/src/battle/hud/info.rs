@@ -17,7 +17,7 @@ use crate::battle::scene::BattleSession;
 use crate::ui::kit::UiTheme;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
 use crate::ui::kit::style::{self, UiType};
-use crate::ui::kit::widgets::{panel_note, panel_page};
+use crate::ui::kit::widgets::{panel_note, panel_sized};
 
 /// The help text (`HELP_TEXT`), BBCode.
 pub const HELP_TEXT: &str = "[b]Bataille — commandes[/b] (F1 : fermer)\n\
@@ -39,6 +39,9 @@ struct HelpPanel;
 
 #[derive(Component)]
 struct SiegeLine;
+
+#[derive(Component)]
+struct SiegeText;
 
 /// What the panels show, for the dump.
 #[derive(Resource, Default, Debug)]
@@ -123,31 +126,24 @@ fn spawn(
         top: Val::Px(top),
         width: Val::Percent(100.0),
         justify_content: JustifyContent::Center,
+        display: Display::None,
         ..default()
     };
     // Siege line, under the top bar.
     let siege = commands
         .spawn((
-            Name::new("SiegeStatusWrapper"),
+            Name::new("SiegeStatus"),
+            SiegeLine,
             wrapper(62.0),
             Pickable::IGNORE,
             ChildOf(root),
         ))
         .id();
     let frame = commands
-        .spawn((
-            Name::new("SiegeStatus"),
-            SiegeLine,
-            panel_note(&theme),
-            Node {
-                display: Display::None,
-                max_width: Val::Px(600.0),
-                ..default()
-            },
-            ChildOf(siege),
-        ))
+        .spawn((Name::new("SiegeFrame"), panel_note(&theme), ChildOf(siege)))
         .id();
     commands.spawn((
+        SiegeText,
         Text::new(""),
         theme.text_font(false, false, UiType::Body.size()),
         TextColor(style::INK),
@@ -157,26 +153,15 @@ fn spawn(
     // Help, hidden until F1.
     let help = commands
         .spawn((
-            Name::new("BattleHelpWrapper"),
+            Name::new("BattleHelp"),
+            HelpPanel,
             wrapper(110.0),
             Pickable::IGNORE,
             ChildOf(root),
         ))
         .id();
     let panel = commands
-        .spawn((
-            Name::new("BattleHelp"),
-            HelpPanel,
-            panel_page(&theme),
-            Node {
-                display: Display::None,
-                width: Val::Px(760.0),
-                max_width: Val::Percent(96.0),
-                padding: UiRect::all(Val::Px(18.0)),
-                ..default()
-            },
-            ChildOf(help),
-        ))
+        .spawn((panel_sized(&theme, 760.0), ChildOf(help)))
         .id();
     let mut body = RichStyle::body(&theme);
     body.size = UiType::Body.size();
@@ -207,9 +192,9 @@ fn toggle_help(
 fn update_siege(
     mut session: ResMut<BattleSession>,
     mut state: ResMut<InfoState>,
-    lines: Query<(Entity, &Children), With<SiegeLine>>,
+    lines: Query<Entity, With<SiegeLine>>,
     mut nodes: Query<&mut Node>,
-    mut texts: Query<&mut Text>,
+    mut texts: Query<&mut Text, With<SiegeText>>,
     mut hold: Local<Option<f64>>,
 ) {
     let hold_to_win = *hold.get_or_insert_with(|| CaptureRules::bundled().square.hold_s);
@@ -221,7 +206,7 @@ fn update_siege(
         return;
     }
     state.siege_text = text.clone();
-    for (entity, children) in &lines {
+    for entity in &lines {
         if let Ok(mut node) = nodes.get_mut(entity) {
             node.display = if text.is_empty() {
                 Display::None
@@ -229,11 +214,9 @@ fn update_siege(
                 Display::Flex
             };
         }
-        for child in children.iter() {
-            if let Ok(mut label) = texts.get_mut(child) {
-                label.0 = text.clone();
-            }
-        }
+    }
+    for mut label in &mut texts {
+        label.0 = text.clone();
     }
 }
 

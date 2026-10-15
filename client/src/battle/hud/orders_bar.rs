@@ -367,21 +367,24 @@ fn spawn(
         ChildOf(seal_node),
     ));
     // The (empty) bar; buttons are added when the first orders are read.
-    let panel = commands
+    let wrapper = commands
         .spawn((
             Name::new("LeaderOrdersBar"),
             OrdersPanel,
-            crate::ui::kit::widgets::panel_page(&theme),
             Node {
                 position_type: PositionType::Absolute,
                 left: Val::Px(8.0),
                 bottom: Val::Px(BOTTOM_MARGIN),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(2.0),
                 display: Display::None,
                 ..default()
             },
             ChildOf(root),
+        ))
+        .id();
+    let panel = commands
+        .spawn((
+            crate::ui::kit::widgets::panel_page(&theme),
+            ChildOf(wrapper),
         ))
         .id();
     commands.spawn((caption(&theme, "Ordres du chef"), ChildOf(panel)));
