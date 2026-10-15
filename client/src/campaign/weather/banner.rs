@@ -122,7 +122,7 @@ fn animate(
                 continue;
             };
             let Some(base) = base else {
-                commands.entity(entity).insert(FadeBase {
+                commands.entity(entity).try_insert(FadeBase {
                     image: image.map(|i| i.color),
                     text: text.map(|t| t.0),
                     background: background.map(|b| b.0),

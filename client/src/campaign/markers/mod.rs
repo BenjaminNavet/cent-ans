@@ -1015,7 +1015,7 @@ fn landmark_fallback(
         if let Some(path) = l.fallback.clone() {
             let handle: Handle<WorldAsset> = assets.load(GltfAssetLabel::Scene(0).from_asset(path));
             l.handle = handle.clone();
-            commands.entity(entity).insert(WorldAssetRoot(handle));
+            commands.entity(entity).try_insert(WorldAssetRoot(handle));
         }
     }
 }
