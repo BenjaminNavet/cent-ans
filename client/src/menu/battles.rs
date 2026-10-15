@@ -204,7 +204,7 @@ fn launch_battle(
     commands.remove_resource::<CampaignBattle>();
     commands.remove_resource::<PendingHold>();
     if let Some(staged) = launch.staged {
-        commands.insert_resource(CampaignBattle { launch: *staged });
+        commands.insert_resource(CampaignBattle::plain(*staged));
     }
     if launch.hold_opponent {
         commands.insert_resource(PendingHold(true));

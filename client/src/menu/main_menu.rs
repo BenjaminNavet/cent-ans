@@ -157,7 +157,7 @@ fn handle_buttons(
     mut settings: MessageWriter<OpenSettings>,
     mut dialogs: MessageWriter<OpenSaveDialog>,
     mut screens: MessageWriter<OpenBattleScreen>,
-    mut replays: MessageWriter<super::battles::OpenReplays>,
+    mut replays: MessageWriter<crate::flow::OpenBattleReplays>,
     mut modals: ResMut<ModalQueue>,
     mut toasts: MessageWriter<ToastRequest>,
     overlays: Query<(Entity, &MenuOverlay), With<MainMenuOverlay>>,
@@ -213,7 +213,7 @@ fn handle_buttons(
                 screens.write(OpenBattleScreen(BattleScreen::Demos));
             }
             "Rejeux" => {
-                replays.write(super::battles::OpenReplays);
+                replays.write(crate::flow::OpenBattleReplays);
             }
             "Réglages" => {
                 settings.write(OpenSettings);

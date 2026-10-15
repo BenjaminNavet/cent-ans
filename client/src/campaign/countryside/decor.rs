@@ -532,7 +532,7 @@ pub fn stream_decor(
         let Some(&scene) = children.first() else {
             continue;
         };
-        commands.entity(scene).insert(WorldAssetRoot(
+        commands.entity(scene).try_insert(WorldAssetRoot(
             server.load(GltfAssetLabel::Scene(0).from_asset(path)),
         ));
         inst.lod = lod;
