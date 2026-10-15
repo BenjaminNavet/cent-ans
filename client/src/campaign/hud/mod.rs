@@ -35,6 +35,7 @@ use bevy::ui::{ComputedNode, UiGlobalTransform};
 
 pub mod briefing;
 pub mod buttons;
+pub mod capture;
 pub mod cluster;
 pub mod decision;
 pub mod flow;
@@ -224,6 +225,7 @@ impl Plugin for CampaignHudPlugin {
             .add_plugins((
                 flow::plugin,
                 decision::plugin,
+                capture::plugin,
                 replay::plugin,
                 minimap::plugin,
                 missions::plugin,
