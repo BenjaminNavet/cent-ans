@@ -377,6 +377,7 @@ pub fn spawn_sites(
     assets: Res<AssetServer>,
     metrics: Res<ModelMetrics>,
     effects: Option<Res<EffectAssets>>,
+    flipbook: Option<Res<crate::fx::flipbook::FlipbookLooks>>,
     data: Res<LifeData>,
     view: Res<LifeView>,
     sites: Res<EffectSites>,
@@ -505,6 +506,22 @@ pub fn spawn_sites(
                                 DespawnOnExit(AppState::Campaign),
                             ))
                             .id();
+                        // The player's FA flame sheet (`life_flame.gdshader`); the cones stay
+                        // as the fallback while the flipbook plugin is absent.
+                        if let Some(looks) = flipbook.as_deref() {
+                            let flame = crate::fx::flipbook::spawn_static_flame(
+                                &mut commands,
+                                looks,
+                                phase,
+                                Transform::from_scale(Vec3::new(
+                                    f.flame_size[0],
+                                    f.flame_size[1],
+                                    1.0,
+                                )),
+                            );
+                            commands.entity(root).add_child(flame);
+                            continue;
+                        }
                         for (n, (mat, k)) in
                             [(&effects.flame_mid, 1.0f32), (&effects.flame_core, 0.55)]
                                 .into_iter()
