@@ -12,7 +12,7 @@ use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::KitWidget;
 use crate::ui::kit::{
     UiTheme, UiTier, UiType, button_small, caption, fr, heading, scroll_list, separator, style,
-    tab_bar, tab_pane, toggle_button, typed,
+    tab_bar, tab_pane, toggle_button,
 };
 
 #[derive(Component)]
@@ -891,5 +891,4 @@ fn trade_tab(pane: &mut Kids, theme: &UiTheme, panel: &FactionPanel, view: &Fact
             }
         });
     }
-    let _ = typed;
 }

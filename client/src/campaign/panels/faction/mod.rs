@@ -49,7 +49,13 @@ impl Plugin for PanelFactionPlugin {
             .register_dump(dump_faction)
             .add_systems(
                 Update,
-                (open_close, handle_input, watch_turn, view::rebuild)
+                (
+                    dev_open,
+                    open_close,
+                    handle_input,
+                    watch_turn,
+                    view::rebuild,
+                )
                     .chain()
                     .before(crate::menu::pause::pause_escape)
                     .run_if(in_state(AppState::Campaign)),
@@ -83,6 +89,20 @@ impl Default for FactionPanel {
             last_turn: 0,
             view: None,
         }
+    }
+}
+
+/// Dev hook: `CENT_ANS_OPEN_FACTION=<faction id>` opens the panel once the campaign is running
+/// (agent scripts have no way to send an `OpenPanel`).
+fn dev_open(sim: Res<Sim>, mut done: Local<bool>, mut open: MessageWriter<OpenPanel>) {
+    if *done || sim.state.is_none() {
+        return;
+    }
+    *done = true;
+    if let Ok(id) = std::env::var("CENT_ANS_OPEN_FACTION")
+        && !id.is_empty()
+    {
+        open.write(OpenPanel::Faction(id));
     }
 }
 
