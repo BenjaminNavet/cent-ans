@@ -9,11 +9,11 @@
 // sunk -sink_depth_m under the ground), G = soot 0-1 (roofs brown-black, walls a little).
 // The layer follows the fade of the 1:1 layer: a town not built in 1:1 sinks as the layer weight
 // falls (the maquette of the markers lot rises at the same time).
-import bevy_pbr::render::{
-    mesh_functions,
-    forward_io::{Vertex, VertexOutput, decompress_vertex},
-    view_transformations::position_world_to_clip,
-};
+// Single-line imports: `water::drape::with_relief` inlines the relief module after the last
+// `import` line.
+import bevy_pbr::render::mesh_functions;
+import bevy_pbr::render::forward_io::{Vertex, VertexOutput, decompress_vertex};
+import bevy_pbr::render::view_transformations::position_world_to_clip;
 import cent_ans_client::campaign::terrain::relief::{ReliefParams, relief_display_height};
 
 struct FarParams {

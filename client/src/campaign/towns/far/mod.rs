@@ -367,6 +367,8 @@ fn to_mesh(m: FarMesh) -> Mesh {
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, m.positions);
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, m.normals);
     mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, m.colors);
+    // StandardMaterial's fragment reads `uv` whenever `uv_b` exists: a zero UV0.
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, vec![[0.0f32, 0.0]; m.uv1.len()]);
     mesh.insert_attribute(Mesh::ATTRIBUTE_UV_1, m.uv1);
     mesh.insert_indices(Indices::U32(m.indices));
     mesh

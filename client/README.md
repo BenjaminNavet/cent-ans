@@ -331,3 +331,10 @@ Chancellerie et don à l'Église en en-tête (`dip:donate`), arbitrage féodal a
 Section de dump `campaign_terrain.material.{regional_ground,parchment}`. Réglages : `data/fx/campaign_terrain_textures.json`,
 `data/art/ground_biome_mix.json`, `data/map/agri_landscapes.json`. Crochets de dev : `CENT_ANS_NO_FOG=1`, `CENT_ANS_NO_GROUND=1`.
 Détail et restes : `docs/wip/bm-look.md`.
+
+## Lointain des villes 1:1, suie, niveaux (lot `bm/townfar`)
+- `campaign/towns/far/` : port de `town_far_builder.gd`, `town_far_layer.gd`, `town_far_mask.gd` (+ `town_far.gdshader` → `far/town_far.wesl`, étage de sommets drapé sur `relief.wesl`, fragment `StandardMaterial`). Tuiles F1 (128 u, sous 300 u de la caméra) / F2 (512 u), générées dans l'`AsyncComputeTaskPool` (≈ 6 s, 1647 villes, 600 k triangles).
+- Actif avec la couche 1:1 (rig < `max_rig_distance`) : toutes les villes de `towns_1340.json` sauf les villes emblématiques sont alors à l'échelle 1:1 ; `TownsState::is_shown` est vrai pour elles, les maquettes de markers s'enfoncent. Masque Rgba8 64 × 64 : R ville 1:1 construite (lointain enfoncé), G suie. `CENT_ANS_TOWN_FAR=0` coupe la couche.
+- `towns/soot.rs` (`town_soot.gd`) ; `CENT_ANS_TOWN_SOOT=set_a:0.8,set_b:0.4` force une suie. `towns/level.rs` : `level_of` de `settlement_growth.gd`.
+- Dump `campaign_town_far` (`bands.f1|f2` : tuiles, construites, visibles, triangles, villes visibles).
+- Shaders WESL passés par `water::drape::with_relief` : imports sur une seule ligne (le module est inséré après la dernière ligne `import`).
