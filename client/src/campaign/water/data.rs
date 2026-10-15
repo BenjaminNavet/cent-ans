@@ -142,7 +142,16 @@ pub struct RiverDisplay {
     pub edge_soft_px: f32,
     pub sky_reflect: f32,
     pub sky_color: [f32; 3],
+    pub generalised: Generalised,
     pub labels: LabelConfig,
+}
+
+/// `river_display.json` -> `generalised` (GC, ADR 0158): wider rivers, `max(w, scale * sqrt(w * ref))`.
+#[derive(Debug, Clone, Copy, Deserialize, Default)]
+#[serde(default)]
+pub struct Generalised {
+    pub width_scale: f32,
+    pub width_ref_m: f32,
 }
 
 impl Default for RiverDisplay {
@@ -163,6 +172,7 @@ impl Default for RiverDisplay {
             edge_soft_px: 0.7,
             sky_reflect: 0.55,
             sky_color: [0.66, 0.72, 0.76],
+            generalised: Generalised::default(),
             labels: LabelConfig::default(),
         }
     }

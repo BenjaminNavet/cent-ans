@@ -30,6 +30,7 @@ use std::path::Path;
 use std::time::Instant;
 
 use bevy::asset::RenderAssetUsages;
+use bevy::camera::visibility::{InheritedVisibility, NoFrustumCulling, ViewVisibility};
 use bevy::image::{CompressedImageFormats, ImageSampler, ImageType};
 use bevy::light::NotShadowCaster;
 use bevy::mesh::{Indices, PrimitiveTopology};
@@ -228,6 +229,9 @@ impl Ctx<'_, '_, '_> {
                 MeshMaterial3d(material),
                 transform,
                 NotShadowCaster,
+                // World-space meshes with metres in `position.y` (draped in the shader): the
+                // authored bounds are meaningless and the origin is far from the camera.
+                NoFrustumCulling,
                 DespawnOnExit(AppState::Campaign),
             ))
             .id()
@@ -618,7 +622,14 @@ fn build_rivers(
         out.river_vertices += buffers.positions.len();
         out.river_triangles += buffers.triangle_count();
         if let Some(mesh) = buffers.into_mesh() {
-            let params = RiverParams::river(display, min_px, data.map_size, extent, is_minor);
+            let params = RiverParams::river(
+                display,
+                min_px,
+                data.map_size,
+                extent,
+                is_minor,
+                data.meters_per_px,
+            );
             let material = ctx.river_materials.add(RiverMaterial {
                 params,
                 coast_dist: None,
@@ -807,6 +818,7 @@ fn dump_water(world: &World) -> (String, Value) {
                        "on_screen": world.get_resource::<label_ui::RiverLabelStats>().map(|s| s.shown.clone()),
                        "suppressed": world.get_resource::<label_ui::RiverLabelStats>().map(|s| s.suppressed)},
             "river_legibility": legibility(world),
+            "river_bands": river_bands(world),
             "freshwater_sites": stats.freshwater,
         }),
     )
@@ -829,4 +841,81 @@ fn legibility(world: &World) -> Value {
         })
         .collect();
     json!({"distance": materials::LEGIBILITY_DISTANCE, "materials": rows})
+}
+
+/// Per camera-distance band (1200, 600, 200, 60): what the river vertex shader makes of a thin and a
+/// wide river (width in map units after `gen_width`, true and displayed pixels, opacity, lift), and
+/// what the river entities are (spawned, inherited/view visibility, culling disabled). The pixel
+/// maths mirror `river.wesl` (`world_per_px = 2 d tan(fov/2) / viewport_h`).
+fn river_bands(world: &World) -> Value {
+    let Some(materials) = world.get_resource::<Assets<RiverMaterial>>() else {
+        return Value::Null;
+    };
+    let viewport_h = world
+        .try_query::<&Window>()
+        .and_then(|mut q| q.iter(world).next().map(|w| w.resolution.physical_height()))
+        .unwrap_or(1080) as f32;
+    let fov = world
+        .try_query::<&Projection>()
+        .and_then(|mut q| {
+            q.iter(world).find_map(|p| match p {
+                Projection::Perspective(p) => Some(p.fov),
+                _ => None,
+            })
+        })
+        .unwrap_or(55f32.to_radians());
+    let mut meshes: Vec<Value> = Vec::new();
+    if let Some(mut query) = world.try_query::<(
+        &WaterPart,
+        &Visibility,
+        &InheritedVisibility,
+        &ViewVisibility,
+        Has<NoFrustumCulling>,
+    )>() {
+        for (part, vis, inherited, view_vis, no_cull) in query.iter(world) {
+            if matches!(part, WaterPart::MajorRivers | WaterPart::MinorRivers) {
+                meshes.push(json!({"part": format!("{part:?}"), "visibility": format!("{vis:?}"),
+                    "inherited": inherited.get(), "in_view": view_vis.get(), "no_frustum_culling": no_cull,
+                    "origin_visibility_range": false}));
+            }
+        }
+    }
+    let rows: Vec<Value> = materials
+        .iter()
+        .filter(|(_, m)| m.params.sheet < 0.5)
+        .map(|(_, m)| {
+            let p = &m.params;
+            let bands: Vec<Value> = [1200.0f32, 600.0, 200.0, 60.0]
+                .iter()
+                .map(|&d| {
+                    let per_px = d * 2.0 * (fov * 0.5).tan() / viewport_h;
+                    let shown = |w: f32| {
+                        let gw = if p.gen_width_scale > 0.0 {
+                            w.max(p.gen_width_scale * (w.max(0.0) * p.gen_width_ref).sqrt())
+                        } else {
+                            w
+                        };
+                        let floor_px = p.min_px; // importance 3 scale = 1.0
+                        let true_px = gw / per_px;
+                        let far = if p.distance_fade.y > 0.0 {
+                            let t = ((d - p.distance_fade.x) / (p.distance_fade.y - p.distance_fade.x))
+                                .clamp(0.0, 1.0);
+                            1.0 + (p.far_alpha - 1.0) * t * t * (3.0 - 2.0 * t)
+                        } else {
+                            1.0
+                        };
+                        json!({"map_width": w, "gen_width": gw, "true_px": true_px,
+                               "drawn_px": true_px.max(floor_px),
+                               "alpha": 0.9 * far * (1.0 + (1.0f32.min((true_px / floor_px).max(0.25)) - 1.0) * p.thin_fade)})
+                    };
+                    json!({"distance": d, "units_per_px": per_px, "lift": p.lift_base + p.lift_per_distance * d,
+                           "thin_0.3": shown(0.3), "wide_1.0": shown(1.0)})
+                })
+                .collect();
+            json!({"minor": p.distance_fade.y > 0.0, "min_px": p.min_px, "gen_width_scale": p.gen_width_scale,
+                   "gen_width_ref": p.gen_width_ref, "distance_fade": [p.distance_fade.x, p.distance_fade.y],
+                   "bands": bands})
+        })
+        .collect();
+    json!({"viewport_h": viewport_h, "fov_deg": fov.to_degrees(), "entities": meshes, "materials": rows})
 }

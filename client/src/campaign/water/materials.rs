@@ -178,6 +178,10 @@ impl Material for LineMaterial {
     fn enable_shadows() -> bool {
         false
     }
+    fn depth_bias(&self) -> f32 {
+        // Godot `render_priority = 1`: drawn over the ground and the lines under it.
+        1.0
+    }
 
     fn specialize(
         _pipeline: &bevy::pbr::MaterialPipeline,
@@ -358,6 +362,7 @@ impl RiverParams {
         map_size: Vec2,
         extent: f32,
         minor: bool,
+        meters_per_px: f32,
     ) -> Self {
         let scale = &display.importance_min_px_scale;
         let at = |i: usize| scale.get(i).copied().unwrap_or(1.0);
@@ -389,8 +394,12 @@ impl RiverParams {
             ripple_strength: 0.08,
             sheet: 0.0,
             sheet_alpha: 0.88,
-            gen_width_scale: 0.0,
-            gen_width_ref: 0.14,
+            gen_width_scale: display.generalised.width_scale.max(0.0),
+            gen_width_ref: if display.generalised.width_ref_m > 0.0 {
+                display.generalised.width_ref_m / meters_per_px.max(1.0)
+            } else {
+                0.14
+            },
             has_coast_dist: 0.0,
             coast_dist_scale: 2.0,
         }
@@ -404,7 +413,9 @@ impl RiverParams {
             map_size,
             1.0,
             false,
+            719.0,
         );
+        p.gen_width_scale = 0.0;
         p.shallow_color = linear([0.26, 0.46, 0.52], 1.0);
         p.deep_color = linear([0.13, 0.31, 0.44], 1.0);
         p.sky_reflect = 0.55;
@@ -590,11 +601,25 @@ mod tests {
     #[test]
     fn river_floor_and_far_fade_at_the_legibility_distance() {
         let display = super::super::data::RiverDisplay::default();
-        let major = RiverParams::river(&display, 1.6, Vec2::new(7080.0, 6104.0), 7080.0, false);
+        let major = RiverParams::river(
+            &display,
+            1.6,
+            Vec2::new(7080.0, 6104.0),
+            7080.0,
+            false,
+            719.0,
+        );
         let (floors, alpha) = major.legibility(LEGIBILITY_DISTANCE);
         assert!(floors.iter().all(|f| *f >= 1.0), "{floors:?}");
         assert_eq!(alpha, 1.0, "major rivers do not fade");
-        let minor = RiverParams::river(&display, 1.0, Vec2::new(7080.0, 6104.0), 7080.0, true);
+        let minor = RiverParams::river(
+            &display,
+            1.0,
+            Vec2::new(7080.0, 6104.0),
+            7080.0,
+            true,
+            719.0,
+        );
         let (_, near) = minor.legibility(0.0);
         let (_, far) = minor.legibility(1.0e9);
         assert!(near >= far);
