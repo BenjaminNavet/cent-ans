@@ -2226,12 +2226,14 @@ dependencies = [
  "data-model",
  "flate2",
  "game-api",
+ "naga",
  "png 0.18.1",
  "relief-lod",
  "serde",
  "serde_json",
  "sim-battle",
  "sim-campaign",
+ "wesl",
 ]
 
 [[package]]

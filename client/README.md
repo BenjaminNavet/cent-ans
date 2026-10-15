@@ -100,3 +100,9 @@ Remplace `settings.gd` (autoload) et `settings_menu.gd`. Ressource `Settings` (t
 **Liste défilante.** `scroll_list` reçoit une barre fine parchemin (piste de 8 px collée à droite, `IgnoreScroll`, pouce glissable : widget `Scrollbar` de Bevy) en plus de la molette ; le remplissage droit lui réserve la place.
 
 Écarts : Bevy UI n'a pas d'opacité par nœud (pas de fondu de 0,12 s, seulement le glissement de 8 px) ; pas de SVG (icônes game-icons sans PNG absentes) ; la lettrine n'a ni initiale réelle (`FaUi`) ni rinceau.
+
+## Campagne : relief partagé (lot look)
+- `campaign/terrain/relief.wesl` : `import cent_ans_client::campaign::terrain::relief::{ReliefParams, relief_display_height, relief_display_gradient}`.
+  Un matériau lie `ReliefGpu::params` (uniform) et `ReliefGpu::floor` (texture Rgba32Float non filtrable) dans son
+  propre groupe ; mode d'emploi complet en tête de `relief.wesl` et de `relief_gpu.rs`.
+- `terrain::cpu_sampler::CpuSampler` alimente `water::height::GroundHeight` et `provinces::SurfaceHeight`.
