@@ -363,7 +363,10 @@ impl Plugin for PanelStackPlugin {
             .add_message::<PanelClosed>()
             .add_message::<PanelStackChanged>()
             .add_observer(unregister_removed)
-            .add_systems(PreUpdate, escape_closes_top)
+            .add_systems(
+                Update,
+                escape_closes_top.before(crate::menu::pause::pause_escape),
+            )
             .add_systems(Update, (register_new, apply_requests).chain());
     }
 }
@@ -381,12 +384,21 @@ fn unregister_removed(
 /// Escape closes the top panel unless a kit modal is up (its own Escape handler runs later in
 /// the frame, and this system runs first, so the modal still counts as busy).
 fn escape_closes_top(
-    keys: Res<ButtonInput<KeyCode>>,
+    mut edges: ResMut<crate::menu::KeyEdges>,
     modals: Option<Res<ModalQueue>>,
+    stack: Res<PanelStack>,
+    focus: Option<Res<super::text_field::TextInputFocus>>,
     mut requests: MessageWriter<PanelStackRequest>,
 ) {
-    if keys.just_pressed(KeyCode::Escape) && !modals.is_some_and(|queue| queue.is_busy()) {
+    let typing = focus.is_some_and(|f| f.is_active());
+    if edges.escape
+        && !typing
+        && stack.top().is_some()
+        && !modals.is_some_and(|queue| queue.is_busy())
+    {
         requests.write(PanelStackRequest::CloseTop);
+        // The panel on top consumed the key: the pause menu must not open as well.
+        edges.escape = false;
     }
 }
 

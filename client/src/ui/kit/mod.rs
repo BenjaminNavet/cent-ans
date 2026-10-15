@@ -14,6 +14,7 @@
 //!   checkboxes, tabs and sliders also send [`ToggleChanged`], [`TabSelected`], [`SliderChanged`].
 //! - [`icons`], [`tooltip_spec`], [`panel_stack`]: icon helper, structured tooltips, panel stack;
 //!   [`layout_probe`] feeds the dump with frame/padding numbers.
+//! - [`text_field`]: single-line input; [`text_field::TextInputFocus`] tells shortcuts to stay quiet.
 //! - [`fr`]: French numbers, money (`₶`), plurals and dates.
 //! - [`UiCamera`]: the 2D camera that draws the UI (default UI camera, offscreen-aware).
 //! - Gallery: `CENT_ANS_KIT_GALLERY=1` + `MainMenu` shows every widget ([`gallery`]).
@@ -27,6 +28,7 @@ pub mod modal;
 pub mod panel_stack;
 pub mod richtext;
 pub mod style;
+pub mod text_field;
 pub mod tooltip;
 pub mod tooltip_spec;
 pub mod widgets;
@@ -299,6 +301,7 @@ impl Plugin for UiKitPlugin {
                 tooltip::TooltipPlugin,
                 modal::ModalPlugin,
                 panel_stack::PanelStackPlugin,
+                text_field::TextFieldPlugin,
                 gallery::GalleryPlugin,
             ))
             .add_systems(Startup, (load_resources, spawn_ui_camera).chain())
@@ -521,6 +524,7 @@ fn dump_ui_kit(world: &World) -> (String, serde_json::Value) {
             "widgets": widgets::count_widgets(world),
             "tooltips": tooltip::dump(world),
             "modal": modal::dump(world),
+            "text_input": text_field::dump(world),
             "panel_stack": world.resource::<panel_stack::PanelStack>().dump(),
             "layout": layout_probe::dump(world),
             "icons": icons::dump(world),
