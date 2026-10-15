@@ -15,6 +15,7 @@ use super::anim::{self, Mode};
 use super::arms::{DroppedArms, RoutDrop};
 use super::corpses::{Corpses, Loss};
 use super::gaits::{self, GaitMemory};
+use super::heraldry::{ArmsAtlasHandle, BattleHeraldry};
 use super::library::{FigureLibrary, FigureSpec, render_kind};
 use super::looks;
 use super::skinned::{RECORD_FLOATS, SkinParams, SkinnedBatch, push_record};
@@ -146,6 +147,8 @@ pub struct RegimentContext<'w, 's> {
     corpses: ResMut<'w, Corpses>,
     arms: ResMut<'w, DroppedArms>,
     settings: Option<Res<'w, crate::settings::Settings>>,
+    heraldry: ResMut<'w, BattleHeraldry>,
+    arms_atlas: ResMut<'w, ArmsAtlasHandle>,
 }
 
 fn side_index(side: SideId) -> usize {
@@ -168,7 +171,9 @@ pub fn trim_for(color: [f32; 3]) -> [f32; 3] {
 }
 
 fn quad_mesh() -> Mesh {
-    use crate::battle::units::figures::{ATTRIBUTE_BONES, ATTRIBUTE_MASK, ATTRIBUTE_WEIGHTS};
+    use crate::battle::units::figures::{
+        ATTRIBUTE_ATLAS, ATTRIBUTE_BONES, ATTRIBUTE_MASK, ATTRIBUTE_WEIGHTS,
+    };
     use bevy::asset::RenderAssetUsages;
     use bevy::mesh::{Indices, PrimitiveTopology, VertexAttributeValues};
     let positions = vec![
@@ -195,6 +200,10 @@ fn quad_mesh() -> Mesh {
         VertexAttributeValues::Float32x4(vec![[0.0; 4]; 4]),
     );
     mesh.insert_attribute(ATTRIBUTE_MASK, VertexAttributeValues::Float32(vec![0.0; 4]));
+    mesh.insert_attribute(
+        ATTRIBUTE_ATLAS,
+        VertexAttributeValues::Float32(vec![0.0; 4]),
+    );
     // Both windings: the quad is seen from either side.
     mesh.insert_indices(Indices::U32(vec![0, 1, 2, 0, 2, 3, 0, 2, 1, 0, 3, 2]));
     mesh
@@ -244,6 +253,7 @@ fn build_params(
     params.set_hit_set(&hit, hit_seconds, if spec.mounted { 0.12 } else { 0.35 });
     params.set_clips(&spec.clip_table);
     params.set_ga3(spec.ga3_lum, spec.head_y, spec.albedo.is_some());
+    params.set_fine(spec.atlas_layer);
     params.set_wear(
         if spec.mounted {
             MUD_HEIGHT_HORSE
@@ -343,6 +353,11 @@ pub fn update_regiments(
         regiments.quad = Some(ctx.meshes.add(quad_mesh()));
     }
     let quad = regiments.quad.clone().expect("quad set above");
+    {
+        let ctx = &mut ctx;
+        ctx.heraldry
+            .ensure_built(sim, &mut ctx.images, &mut ctx.arms_atlas);
+    }
     let styles: HashMap<u32, String> = regiments
         .map
         .iter()
@@ -365,13 +380,17 @@ pub fn update_regiments(
                 continue;
             };
             let color = colors[side_index(unit.side)];
-            let params = build_params(
+            let mut params = build_params(
                 &spec,
                 &ctx.library,
                 &unit.unit_type,
                 color,
                 ctx.library.fx.cycle_blend_s,
             );
+            let arms =
+                ctx.heraldry
+                    .regiment(side_index(unit.side), unit.id, spec.noble, spec.chest);
+            params.set_arms(&arms);
             let make = |name: String, mesh: Handle<Mesh>| {
                 (
                     Name::new(name),

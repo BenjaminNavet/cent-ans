@@ -7,8 +7,7 @@
 //! battle_unit_looks.gd, battle_cavalry_gaits.gd, battle_impostors.gd (billboards beyond
 //! 300 m, procedural silhouettes instead of a baked atlas), battle_banner_layer.gd and
 //! battle_unit_markers.gd. Not ported: corpses and wounded (battle_soldiers.gd gore layers),
-//! blood, severed limbs, dropped arms (battle_gore.gd, battle_dropped_arms.gd), chest
-//! heraldry, fine atlases (FG3), battle_formation_outline.gd, battle_effects.gd.
+//! blood, severed limbs, dropped arms (battle_gore.gd, battle_dropped_arms.gd), battle_formation_outline.gd, battle_effects.gd.
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
 pub mod anim;
@@ -16,7 +15,9 @@ pub mod arms;
 pub mod banners;
 pub mod corpses;
 pub mod figures;
+pub mod fine_maps;
 pub mod gaits;
+pub mod heraldry;
 pub mod instancing;
 pub mod library;
 pub mod looks;
@@ -140,6 +141,8 @@ impl Plugin for BattleUnitsPlugin {
             volleys::VolleysPlugin,
             smoke::SmokePlugin,
             standards::StandardsPlugin,
+            heraldry::HeraldryPlugin,
+            fine_maps::FineMapsPlugin,
         ))
         .init_resource::<SoldierStats>()
         .init_resource::<PoseFrames>()

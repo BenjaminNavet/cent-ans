@@ -8,8 +8,13 @@
 //! volley_time highlight 0 0`. Per-batch parameters (livery, clip sets, looks, clip table) are a
 //! uniform buffer rebuilt only when `params_version` changes.
 //!
-//! Lost compared with the Godot material: weave/mail/hammered procedural patterns, chest
-//! heraldry, blood, severed parts, spear flames, normal-mapped fine atlases (FG3).
+//! Arms (DA1): atlas `heraldry::ArmsAtlasHandle` (texture array, binding 4-5), layers and bust
+//! box in the parameter block.
+//!
+//! Fine maps (FG3, `fine_maps.rs`): atlases of LOD0/LOD1 (bindings 6-9), shared detail tiles and
+//! horse coat (10-15); the mesh carries the packed atlas uv (`ATTRIBUTE_ATLAS`, location 3).
+//!
+//! Lost compared with the Godot material: weave/mail/hammered procedural patterns, blood, severed parts, spear flames.
 
 use std::collections::{HashMap, HashSet};
 use std::sync::{
@@ -50,7 +55,9 @@ use bevy::{
 };
 
 use super::anim::{AnimConfig, Mode};
-use super::figures::{ATTRIBUTE_BONES, ATTRIBUTE_MASK, ATTRIBUTE_WEIGHTS, MAX_CLIPS};
+use super::figures::{
+    ATTRIBUTE_ATLAS, ATTRIBUTE_BONES, ATTRIBUTE_MASK, ATTRIBUTE_WEIGHTS, MAX_CLIPS,
+};
 use super::looks::MAX_COLOURS;
 
 const SHADER_PATH: &str = "embedded://cent_ans_client/battle/units/skinned.wesl";
@@ -80,8 +87,14 @@ const P_EXTRA: usize = 80;
 const P_FX: usize = 84;
 const P_HITN: usize = 88;
 const P_HIT_SET: usize = 92;
-const P_CLIPS: usize = 100;
-/// Floats of the parameter block (121 `vec4`).
+const P_ARMS: usize = 100;
+const P_CHEST_BOX: usize = 104;
+const P_CHEST: usize = 108;
+const P_BADGE_CROSS: usize = 112;
+const P_BADGE_PATCH: usize = 116;
+const P_FINE: usize = 120;
+const P_CLIPS: usize = 124;
+/// Floats of the parameter block (127 `vec4`).
 pub const PARAM_FLOATS: usize = P_CLIPS + MAX_CLIPS * 4;
 const PARAM_BYTES: u64 = (PARAM_FLOATS * 4) as u64;
 
@@ -103,6 +116,18 @@ impl Default for SkinParams {
         data[P_TIMING + 2] = 1.0;
         data[P_JITTER + 2] = 24.0;
         data[P_JITTER + 3] = 1.0;
+        // No fine maps (FG3) until the figure names an atlas layer.
+        data[P_FINE] = -1.0;
+        data[P_FINE + 1] = super::fine_maps::FINE_DISTANCE;
+        // No arms atlas; Godot's default bust box and banneret share.
+        data[P_ARMS..P_ARMS + 4].copy_from_slice(&[-1.0; 4]);
+        data[P_CHEST_BOX..P_CHEST_BOX + 4].copy_from_slice(&[0.0, 1.22, 0.3, 0.38]);
+        data[P_CHEST..P_CHEST + 4].copy_from_slice(&[
+            -0.1,
+            0.3,
+            super::heraldry::VASSAL_SHARE,
+            0.0,
+        ]);
         Self { data }
     }
 }
@@ -111,6 +136,37 @@ impl SkinParams {
     pub fn set_livery(&mut self, rgb: [f32; 3], share: f32) {
         self.data[P_LIVERY..P_LIVERY + 3].copy_from_slice(&rgb);
         self.data[P_LIVERY + 3] = share;
+    }
+
+    /// Arms of the regiment (atlas layers, bust box, chest arms or livery cross).
+    pub fn set_arms(&mut self, arms: &super::heraldry::RegimentArms) {
+        for (slot, layer) in arms.layers.iter().enumerate() {
+            self.data[P_ARMS + slot] = *layer as f32;
+        }
+        if let Some(chest) = arms.chest {
+            self.data[P_CHEST_BOX..P_CHEST_BOX + 2].copy_from_slice(&chest.center);
+            self.data[P_CHEST_BOX + 2..P_CHEST_BOX + 4].copy_from_slice(&chest.size);
+            self.data[P_CHEST..P_CHEST + 2].copy_from_slice(&chest.depth);
+        }
+        self.data[P_CHEST + 3] = if arms.chest_arms { 1.0 } else { 0.0 };
+        let (cross, patch) = match arms.badge {
+            Some(badge) => (Some(badge.cross), badge.patch),
+            None => (None, None),
+        };
+        for (at, colour) in [(P_BADGE_CROSS, cross), (P_BADGE_PATCH, patch)] {
+            match colour {
+                Some(rgb) => {
+                    self.data[at..at + 3].copy_from_slice(&rgb);
+                    self.data[at + 3] = 1.0;
+                }
+                None => self.data[at..at + 4].copy_from_slice(&[0.0; 4]),
+            }
+        }
+    }
+
+    /// Atlas layer of the regiment's lord or faction (`-1`: no arms).
+    pub fn arms_layer(&self) -> i32 {
+        self.data[P_ARMS] as i32
     }
 
     pub fn livery_share(&self) -> f32 {
@@ -182,6 +238,13 @@ impl SkinParams {
         self.data[P_GA3 + 3] = if has_albedo { 1.0 } else { 0.0 };
     }
 
+    /// FG3 fine maps of the figure: atlas layer (`< 0`: none) and the shared distance limit of
+    /// the maps (m, `fine_distance`).
+    pub fn set_fine(&mut self, atlas_layer: i32) {
+        self.data[P_FINE] = atlas_layer as f32;
+        self.data[P_FINE + 1] = super::fine_maps::FINE_DISTANCE;
+    }
+
     pub fn set_wear(&mut self, mud_height: f32, weathering: f32) {
         self.data[P_WEAR + 2] = mud_height;
         self.data[P_WEAR + 3] = weathering;
@@ -236,6 +299,11 @@ impl SkinParams {
         self.data[P_TIMING + 2] = config.release;
         self.data[P_JITTER] = config.jitter;
     }
+}
+
+/// FG3 atlas layer stored in a parameter block (`-1`: none).
+pub fn fine_layer_of(params: &[f32]) -> i32 {
+    params[P_FINE] as i32
 }
 
 const MAX_SETSLOTS: usize = 8;
@@ -326,7 +394,9 @@ fn init_pipeline(
     asset_server: Res<AssetServer>,
     mesh_pipeline: Res<MeshPipeline>,
 ) {
-    use bevy::render::render_resource::binding_types::{sampler, texture_2d, uniform_buffer_sized};
+    use bevy::render::render_resource::binding_types::{
+        sampler, texture_2d, texture_2d_array, uniform_buffer_sized,
+    };
     let material_layout = BindGroupLayoutDescriptor::new(
         "skinned_material_layout",
         &BindGroupLayoutEntries::sequential(
@@ -336,6 +406,17 @@ fn init_pipeline(
                 sampler(SamplerBindingType::Filtering),
                 texture_2d(TextureSampleType::Float { filterable: false }),
                 uniform_buffer_sized(false, BufferSize::new(PARAM_BYTES)),
+                texture_2d_array(TextureSampleType::Float { filterable: true }),
+                sampler(SamplerBindingType::Filtering),
+                // FG3: atlas LOD0, atlas LOD1 (clamped sampler), detail tiles, detail albedo,
+                // horse coat (repeating sampler).
+                texture_2d_array(TextureSampleType::Float { filterable: true }),
+                texture_2d_array(TextureSampleType::Float { filterable: true }),
+                sampler(SamplerBindingType::Filtering),
+                texture_2d_array(TextureSampleType::Float { filterable: true }),
+                texture_2d_array(TextureSampleType::Float { filterable: true }),
+                texture_2d(TextureSampleType::Float { filterable: true }),
+                sampler(SamplerBindingType::Filtering),
             ),
         ),
     );
@@ -360,6 +441,7 @@ impl SpecializedMeshPipeline for SkinnedPipeline {
             Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
             Mesh::ATTRIBUTE_NORMAL.at_shader_location(1),
             Mesh::ATTRIBUTE_UV_0.at_shader_location(2),
+            ATTRIBUTE_ATLAS.at_shader_location(3),
             Mesh::ATTRIBUTE_COLOR.at_shader_location(5),
             ATTRIBUTE_BONES.at_shader_location(10),
             ATTRIBUTE_WEIGHTS.at_shader_location(11),
@@ -466,6 +548,9 @@ struct InstanceBuffer {
 struct MaterialBindGroup {
     group: BindGroup,
     params_version: u64,
+    arms: Option<AssetId<Image>>,
+    /// Fine maps were bound (FG3).
+    fine: bool,
 }
 
 fn prepare_buffers(
@@ -495,6 +580,7 @@ fn prepare_buffers(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn prepare_bind_groups(
     mut commands: Commands,
     batches: Query<(Entity, &SkinnedBatch, Option<&MaterialBindGroup>)>,
@@ -503,11 +589,36 @@ fn prepare_bind_groups(
     pipeline: Res<SkinnedPipeline>,
     pipeline_cache: Res<PipelineCache>,
     render_device: Res<RenderDevice>,
+    atlas: Option<Res<super::heraldry::ArmsAtlasHandle>>,
+    fine_maps: Option<Res<super::fine_maps::FineMaps>>,
 ) {
+    let arms_id = atlas.as_ref().and_then(|a| a.0.as_ref()).map(|h| h.id());
+    let arms_image = match arms_id {
+        Some(id) => images.get(id),
+        None => None,
+    };
+    // Fine maps: all five uploaded, else the batch is bound to fallbacks with `layer = -1`.
+    let fine_images = fine_maps.as_ref().and_then(|m| {
+        Some([
+            images.get(m.atlas0.as_ref()?.id())?,
+            images.get(m.atlas1.as_ref()?.id())?,
+            images.get(m.detail.as_ref()?.id())?,
+            images.get(m.detail_albedo.as_ref()?.id())?,
+            images.get(m.horse.as_ref()?.id())?,
+        ])
+    });
+    let fine_ready = fine_images.is_some();
     for (entity, batch, existing) in &batches {
-        if existing.is_some_and(|g| g.params_version == batch.params_version) {
+        if existing.is_some_and(|g| {
+            g.params_version == batch.params_version && g.arms == arms_id && g.fine == fine_ready
+        }) {
             continue;
         }
+        // Wait for the atlas upload rather than caching a group without arms.
+        if arms_id.is_some() && arms_image.is_none() {
+            continue;
+        }
+        let arms = arms_image.unwrap_or(&fallback.d2_array);
         let albedo = match &batch.albedo {
             Some(handle) => match images.get(handle.id()) {
                 Some(image) => image,
@@ -518,11 +629,24 @@ fn prepare_bind_groups(
         let Some(bones) = images.get(batch.bones.id()) else {
             continue;
         };
-        let bytes: Vec<u8> = batch
-            .params
+        let mut params = batch.params.as_ref().clone();
+        if !fine_ready {
+            params[P_FINE] = -1.0;
+        }
+        let bytes: Vec<u8> = params
             .iter()
             .flat_map(|value| value.to_le_bytes())
             .collect();
+        let [atlas0, atlas1, detail, detail_albedo, horse] = match fine_images {
+            Some(set) => set,
+            None => [
+                &fallback.d2_array,
+                &fallback.d2_array,
+                &fallback.d2_array,
+                &fallback.d2_array,
+                &fallback.d2,
+            ],
+        };
         let uniform = render_device.create_buffer_with_data(&BufferInitDescriptor {
             label: Some("skinned params"),
             contents: &bytes,
@@ -536,11 +660,22 @@ fn prepare_bind_groups(
                 &albedo.sampler,
                 &bones.texture_view,
                 uniform.as_entire_binding(),
+                &arms.texture_view,
+                &arms.sampler,
+                &atlas0.texture_view,
+                &atlas1.texture_view,
+                &atlas0.sampler,
+                &detail.texture_view,
+                &detail_albedo.texture_view,
+                &horse.texture_view,
+                &detail.sampler,
             )),
         );
         commands.entity(entity).insert(MaterialBindGroup {
             group,
             params_version: batch.params_version,
+            arms: arms_id,
+            fine: fine_ready,
         });
     }
 }
@@ -824,8 +959,8 @@ mod tests {
     }
 
     #[test]
-    fn param_block_is_121_vec4() {
-        assert_eq!(PARAM_FLOATS, 121 * 4);
+    fn param_block_is_127_vec4() {
+        assert_eq!(PARAM_FLOATS, 127 * 4);
         assert_eq!(SkinParams::default().data.len(), PARAM_FLOATS);
     }
 

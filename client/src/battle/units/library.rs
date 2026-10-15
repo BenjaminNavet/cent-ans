@@ -36,6 +36,10 @@ pub struct FigureSpec {
     pub ga3_lum: [f32; 2],
     pub head_y: f32,
     pub mounted: bool,
+    /// Bust of the rest pose where the surcoat carries arms or the livery cross (DA1).
+    pub chest: Option<super::heraldry::ChestBox>,
+    /// FG3: layer in the baked fine atlases (`-1`: the figure has none).
+    pub atlas_layer: i32,
 }
 
 /// `battle_animation.json` and `battle_gore.json` settings the units need.
@@ -234,6 +238,12 @@ impl FigureLibrary {
             })
             .collect::<Option<_>>()?;
         let bones = self.bones(&entry.rig, images)?;
+        let chest = entry.lods.first().and_then(|path| {
+            let full = self.asset_root.join(figures::relative_asset_path(path));
+            let bytes = std::fs::read(full).ok()?;
+            let arrays = figures::decode_mesh(&bytes).ok()?;
+            super::heraldry::chest_box(&arrays, &rig.bones)
+        });
         let clips = rig.clips();
         let clip_table = clips
             .names
@@ -262,6 +272,8 @@ impl FigureLibrary {
             ga3_lum: entry.ga3_lum.unwrap_or([0.2, 0.2]),
             head_y: entry.ga3_head_y.unwrap_or(99.0),
             mounted: kind == "cavalry",
+            chest,
+            atlas_layer: entry.atlas_layer.unwrap_or(-1),
         }))
     }
 }

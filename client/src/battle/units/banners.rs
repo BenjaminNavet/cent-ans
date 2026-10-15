@@ -131,7 +131,11 @@ pub fn house_id(data_dir: &std::path::Path, house: &str) -> Option<String> {
 }
 
 /// House of the general of `side`: the `house` of his character file, as an id.
-fn general_house(sim: &BattleSim, data_dir: &std::path::Path, side: SideId) -> Option<String> {
+pub(super) fn general_house(
+    sim: &BattleSim,
+    data_dir: &std::path::Path,
+    side: SideId,
+) -> Option<String> {
     let general = sim.setup().side(side).general.as_ref()?;
     let text =
         std::fs::read_to_string(data_dir.join(format!("characters/{}.json", general.character)))
