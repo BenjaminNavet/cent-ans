@@ -2,6 +2,19 @@
 //! `CampaignState`, shared by every client. No engine dependency (no Bevy, no Godot); each
 //! view is unit-tested here by `cargo test -p game-api`.
 
+pub mod army;
+pub mod common;
 pub mod faction;
+pub mod hud;
+pub mod province;
+pub mod turn;
 
-pub use faction::{faction_summary, FactionSummary};
+pub use army::{army_ids, army_sheet, ArmySheet};
+pub use common::{FactionRef, KeyedAmount, UnitView};
+pub use faction::{faction_sheet, faction_summary, FactionSheet, FactionSummary};
+pub use hud::{
+    current_difficulty, difficulty_levels, economy, forecast, income_top_provinces, top_bar,
+    EconomyView, ForecastView, TopBar,
+};
+pub use province::{province_sheet, ProvinceSheet};
+pub use turn::{turn_readiness, Alert, TurnReadiness};
