@@ -60,6 +60,12 @@ impl MaterialExtension for WindExtension {
     fn vertex_shader() -> ShaderRef {
         "embedded://cent_ans_client/battle/decor/wind.wesl".into()
     }
+    /// No depth prepass: Bevy's default prepass vertex stage does not sway, so with SSAO on
+    /// (which needs the prepass) the still cards' depth hid the ground behind the swaying ones
+    /// and the sky showed through. Shadows keep their own (still) pass.
+    fn enable_prepass() -> bool {
+        false
+    }
 }
 
 pub type WindMaterial = ExtendedMaterial<StandardMaterial, WindExtension>;

@@ -294,6 +294,7 @@ pub fn flush_arms(
                                     double_sided: false,
                                 },
                                 version: 0,
+                                cast_shadows: true,
                             },
                             DespawnOnExit(AppState::Battle),
                         ))

@@ -6,6 +6,8 @@
   "ssao": { "enabled": true, "quality": "medium", "object_thickness": 0.25, "radius": 1.6 },
   "sky_light": {
     "face_px": 128,
+    "skybox": true,
+    "skybox_face_px": 512,
     "ambient_boost": 1.35,
     "sky_contribution": 0.7,
     "ambient_lighten": 0.15,

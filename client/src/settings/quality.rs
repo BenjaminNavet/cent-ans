@@ -35,6 +35,8 @@ pub struct Preset {
     pub map_shadow_range: f32,
     pub model_shadow_distance: f32,
     pub veg_max_distance: f32,
+    /// Ambient occlusion in battle (`ssao`; it excludes MSAA in Bevy, SMAA takes over).
+    pub ssao: bool,
 }
 
 fn msaa_from(name: &str) -> Option<Msaa> {
@@ -58,6 +60,7 @@ impl Preset {
             map_shadow_range: 1.0,
             model_shadow_distance: 250.0,
             veg_max_distance: 900.0,
+            ssao: true,
         }
     }
 
@@ -73,6 +76,7 @@ impl Preset {
             map_shadow_range: number("map_shadow_range")? as f32,
             model_shadow_distance: number("model_shadow_distance")? as f32,
             veg_max_distance: number("veg_max_distance")? as f32,
+            ssao: value.get("ssao").and_then(Value::as_bool).unwrap_or(false),
         })
     }
 }
@@ -151,7 +155,10 @@ pub fn level_for_adapter(adapter: &str) -> &'static str {
 pub struct RenderQuality {
     /// `low` .. `ultra` (« Automatique » resolved).
     pub level: String,
+    /// Off when `ssao_battle` (SSAO needs it off; SMAA replaces it).
     pub msaa_battle: Msaa,
+    /// SSAO + SMAA in battle: the preset asks for SSAO and the player forced no MSAA level.
+    pub ssao_battle: bool,
     pub msaa_campaign: Msaa,
     pub shadows: bool,
     pub shadow_map_size: usize,
@@ -175,9 +182,15 @@ impl RenderQuality {
         };
         let preset = presets.get(level);
         let forced = msaa_from(&settings.msaa);
+        let ssao_battle = preset.ssao && forced.is_none();
         Self {
             level: level.to_owned(),
-            msaa_battle: forced.unwrap_or(preset.msaa),
+            msaa_battle: if ssao_battle {
+                Msaa::Off
+            } else {
+                forced.unwrap_or(preset.msaa)
+            },
+            ssao_battle,
             msaa_campaign: forced.unwrap_or(preset.map_msaa),
             shadows: settings.shadows,
             shadow_map_size: preset.shadow_atlas.next_power_of_two(),
@@ -349,12 +362,19 @@ mod tests {
         let mut settings = Settings::default();
         let auto = RenderQuality::resolve(&settings, &presets, "medium");
         assert_eq!(auto.level, "medium");
+        // Medium asks for SSAO: MSAA off in battle (SMAA instead), the map keeps its MSAA.
+        assert!(auto.ssao_battle);
+        assert_eq!(auto.msaa_battle, Msaa::Off);
+        assert!(!RenderQuality::resolve(&settings, &presets, "low").ssao_battle);
         settings.quality = "ultra".into();
         settings.msaa = "4x".into();
         settings.view_distance = 0.5;
         let ultra = RenderQuality::resolve(&settings, &presets, "medium");
         assert_eq!(ultra.level, "ultra");
         assert_eq!(ultra.msaa_campaign, Msaa::Sample4);
+        // A forced MSAA level wins over SSAO.
+        assert!(!ultra.ssao_battle);
+        assert_eq!(ultra.msaa_battle, Msaa::Sample4);
         assert_eq!(ultra.shadow_map_size, 8192);
         assert_eq!(ultra.view_distance, 0.5);
     }

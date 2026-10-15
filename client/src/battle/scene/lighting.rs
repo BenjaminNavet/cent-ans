@@ -18,14 +18,14 @@
 //! `ColorGrading` takes the product of their contrast and saturation and the summed temperature
 //! and tint; per-channel lift / gain / shadow and highlight toning are not ported.
 //!
-//! SSAO needs `Msaa::Off` in Bevy: it is on only when the player's battle MSAA is off (the
-//! settings lot owns `Msaa`). The instanced soldiers and plants are drawn after the prepass, so
+//! SSAO needs `Msaa::Off` in Bevy: a quality preset with `ssao` (medium and above) turns the
+//! battle MSAA off and SMAA on, unless the player forced an MSAA level. The instanced soldiers and plants are drawn after the prepass, so
 //! they neither occlude nor receive it.
 
 use bevy::anti_alias::smaa::Smaa;
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::{Exposure, Hdr};
-use bevy::light::{AmbientLight, GeneratedEnvironmentMapLight};
+use bevy::light::{AmbientLight, GeneratedEnvironmentMapLight, Skybox};
 use bevy::pbr::{ScreenSpaceAmbientOcclusion, ScreenSpaceAmbientOcclusionQualityLevel};
 use bevy::post_process::bloom::{Bloom, BloomPrefilter};
 use bevy::prelude::*;
@@ -71,6 +71,20 @@ pub struct SkyLightLook {
     pub max_luminance: f32,
     pub ground_darken: f32,
     pub horizon_floor: f32,
+    /// Show the panorama as the background (`Skybox`) in place of the decor sky dome.
+    #[serde(default = "yes")]
+    pub skybox: bool,
+    /// Cube face size of the background cube (the light keeps its own `face_px` cube).
+    #[serde(default = "skybox_face_px")]
+    pub skybox_face_px: u32,
+}
+
+fn yes() -> bool {
+    true
+}
+
+fn skybox_face_px() -> u32 {
+    512
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -165,7 +179,7 @@ impl Plugin for BattleLightingPlugin {
     }
 }
 
-fn init_lighting(mut commands: Commands) {
+pub(super) fn init_lighting(mut commands: Commands) {
     if let Some(look) = LightingLook::load() {
         commands.insert_resource(look);
     }
@@ -264,7 +278,7 @@ fn light_camera(
         ));
         // Bloom needs an HDR view; the HUD camera draws over the battle camera on the same
         // target with `ClearColorConfig::None`, which only composes when both have the same HDR
-        // setting (a lone HDR battle camera comes out black). Off unless the data asks for it.
+        // setting, so `camera.rs` makes the HUD camera HDR for the battle when bloom is on.
         if look.bloom.enabled {
             entity.insert((
                 Hdr,
@@ -281,15 +295,18 @@ fn light_camera(
     }
 }
 
-/// SSAO (and SMAA in place of the MSAA it excludes) only while the battle MSAA is off.
+/// SSAO (and SMAA in place of the MSAA it excludes) when the quality preset asks for it (which
+/// then turns the battle MSAA off) and while the battle MSAA is off.
 fn ssao_follows_msaa(
     mut commands: Commands,
     look: Res<LightingLook>,
+    quality: Option<Res<crate::settings::quality::RenderQuality>>,
     mut state: ResMut<SkyLightState>,
     cameras: Query<(Entity, &Msaa, Has<ScreenSpaceAmbientOcclusion>), With<Lit>>,
 ) {
+    let preset = quality.as_ref().is_none_or(|q| q.ssao_battle);
     for (camera, msaa, has_ssao) in &cameras {
-        let want = look.ssao.enabled && *msaa == Msaa::Off;
+        let want = look.ssao.enabled && preset && *msaa == Msaa::Off;
         if want && !has_ssao {
             let quality_level = match look.ssao.quality.as_str() {
                 "low" => ScreenSpaceAmbientOcclusionQualityLevel::Low,
@@ -438,6 +455,10 @@ fn build_sky_light(
     };
     let size = sl.face_px.max(16);
     let (cube, mean) = cube_image(&pano, &params, size);
+    // The background needs more texels than the light (filtered, 128 px is enough there).
+    let background = sl
+        .skybox
+        .then(|| images.add(cube_image(&pano, &params, sl.skybox_face_px.max(size)).0));
     let handle = images.add(cube);
     let energy = fog.ambient * sl.ambient_boost;
     let env_intensity = look.unit() * energy * sl.sky_contribution;
@@ -461,6 +482,15 @@ fn build_sky_light(
             },
             ambient.clone(),
         ));
+        if let Some(background) = &background {
+            // Godot draws the HDRI as the background (`BG_SKY`, energy 1): radiance 1.0 maps
+            // to the exposure's unit.
+            commands.entity(camera).insert(Skybox {
+                image: Some(background.clone()),
+                brightness: look.unit(),
+                ..default()
+            });
+        }
     }
     if cameras.is_empty() {
         return;
@@ -601,18 +631,36 @@ pub fn f16_bits(value: f32) -> u16 {
 
 /// Six-face Rgba16Float cubemap of the sky and its mean radiance.
 fn cube_image(pano: &Panorama, params: &SkyParams, size: u32) -> (Image, Vec3) {
+    // One thread per face: the background cube is large (1.5 M texels at 512 px).
+    let faces: Vec<(Vec<u8>, Vec3)> = std::thread::scope(|scope| {
+        let workers: Vec<_> = (0..6)
+            .map(|face| {
+                scope.spawn(move || {
+                    let mut bytes = Vec::with_capacity((size * size * 8) as usize);
+                    let mut sum = Vec3::ZERO;
+                    for y in 0..size {
+                        for x in 0..size {
+                            let col = sky_radiance(pano, params, cube_dir(face, x, y, size));
+                            sum += col;
+                            for c in [col.x, col.y, col.z, 1.0] {
+                                bytes.extend_from_slice(&f16_bits(c).to_le_bytes());
+                            }
+                        }
+                    }
+                    (bytes, sum)
+                })
+            })
+            .collect();
+        workers
+            .into_iter()
+            .map(|w| w.join().unwrap_or_default())
+            .collect()
+    });
     let mut bytes = Vec::with_capacity((size * size * 6 * 8) as usize);
     let mut sum = Vec3::ZERO;
-    for face in 0..6 {
-        for y in 0..size {
-            for x in 0..size {
-                let col = sky_radiance(pano, params, cube_dir(face, x, y, size));
-                sum += col;
-                for c in [col.x, col.y, col.z, 1.0] {
-                    bytes.extend_from_slice(&f16_bits(c).to_le_bytes());
-                }
-            }
-        }
+    for (face, face_sum) in faces {
+        bytes.extend_from_slice(&face);
+        sum += face_sum;
     }
     let mut image = Image::new(
         Extent3d {
@@ -672,11 +720,13 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
     let mut cameras = 0;
     let mut env = 0;
     let mut ssao = 0;
+    let mut skybox = 0;
     for entity in world.iter_entities() {
         if entity.contains::<Lit>() {
             cameras += 1;
             env += usize::from(entity.contains::<GeneratedEnvironmentMapLight>());
             ssao += usize::from(entity.contains::<ScreenSpaceAmbientOcclusion>());
+            skybox += usize::from(entity.contains::<Skybox>());
         }
     }
     (
@@ -689,8 +739,10 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
         "shadow_unclipped_depth": crate::battle::units::skinned::UNCLIPPED_DEPTH.load(std::sync::atomic::Ordering::Relaxed),
         "shadow_draws_total": crate::battle::units::skinned::SHADOW_DRAWS.load(std::sync::atomic::Ordering::Relaxed),
         "shadow_casters": crate::battle::units::skinned::SHADOW_CASTERS.load(std::sync::atomic::Ordering::Relaxed),
+        "instanced_shadow_casters": crate::battle::units::instancing::INSTANCED_SHADOW_CASTERS.load(std::sync::atomic::Ordering::Relaxed),
             "cameras_with_sky_light": env,
             "cameras_with_ssao": ssao,
+            "cameras_with_skybox": skybox,
             "sky_id": state.map(|s| s.sky_id.clone()),
             "sky_built": state.is_some_and(|s| s.built_for.is_some()),
             "sky_missing": state.is_some_and(|s| s.missing),
