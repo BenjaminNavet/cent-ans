@@ -23,16 +23,18 @@ use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
 use data_model::{BuildingId, DietId, EdictId, ProvinceId, SettlementId};
 use serde_json::{Value, json};
-use sim_campaign::{Order, Place, TaxRate};
+use sim_campaign::{ArmyId, Order, Place, TaxRate};
 
 use self::labels::UiLabels;
 use self::view::{SETTLEMENT_GROUP, Snapshot, TAB_GROUP, TABS};
 use super::OpenPanel;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
+use crate::campaign::armies::SelectedArmy;
 use crate::campaign::provinces::ProvinceClicked;
 use crate::sim::Sim;
 use crate::ui::kit::modal::ToastRequest;
+use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::panel_stack::{PanelClosed, PanelTier, StackedPanel};
 use crate::ui::kit::style::UiTier;
 use crate::ui::kit::widgets::{ListSelected, TabSelected, ToggleChanged};
@@ -157,7 +159,8 @@ fn open_requests(
     for request in requests.read() {
         match request {
             OpenPanel::Province(id) => panel.open_province(id),
-            OpenPanel::CloseAll | OpenPanel::Army(_) => panel.close(),
+            OpenPanel::Army(_) => panel.close(),
+            other if displaces(other, "province") => panel.close(),
             _ => {}
         }
     }
@@ -333,6 +336,7 @@ fn handle_buttons(
     mut sim: ResMut<Sim>,
     mut toasts: MessageWriter<ToastRequest>,
     mut requests: MessageWriter<OpenPanel>,
+    mut selected_army: ResMut<SelectedArmy>,
 ) {
     for press in presses.read() {
         let Some(action) = press.name.strip_prefix("prov:") else {
@@ -491,8 +495,19 @@ fn handle_buttons(
         };
         panel.orders_issued += 1;
         panel.last_order = Some(format!("{order:?}"));
+        // After « Former une armée » the army panel opens on the new army.
+        let armies_before: Option<Vec<ArmyId>> = (action == "form_army")
+            .then(|| sim.state.as_ref())
+            .flatten()
+            .map(|state| state.armies().keys().cloned().collect());
         match submit(&mut sim, order) {
             Ok(()) => {
+                if let (Some(before), Some(state)) = (armies_before, sim.state.as_ref())
+                    && let Some(new_army) = state.armies().keys().find(|id| !before.contains(id))
+                {
+                    selected_army.0 = Some(new_army.clone());
+                    requests.write(OpenPanel::Army(new_army.to_string()));
+                }
                 panel.orders_accepted += 1;
                 panel.error.clear();
                 panel.open_choice.clear();

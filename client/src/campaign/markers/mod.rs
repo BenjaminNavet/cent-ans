@@ -334,6 +334,8 @@ fn build_markers(
                     ..default()
                 },
                 Visibility::Hidden,
+                // World labels sit under the whole UI (the HUD is `GlobalZIndex(0)`).
+                GlobalZIndex(-1),
                 PlaceLabel { index: i },
                 DespawnOnExit(AppState::Campaign),
             ))
@@ -716,6 +718,7 @@ fn update_labels(
         (&PlaceLabel, &mut Node, &mut Visibility, &ComputedNode),
         Without<LabelShield>,
     >,
+    plates: Query<(&Name, &Node, &Visibility)>,
     mut stats: ResMut<MarkerStats>,
 ) {
     let Some((camera, cam_t)) = camera.iter().next() else {
@@ -728,6 +731,18 @@ fn update_labels(
     let cell = places.catalog.declutter_f32("cell_px", 64.0);
     let margin = places.catalog.declutter_f32("label_margin_px", 3.0);
     let mut grid = declutter::Declutter::new(cell);
+    // Army plates (effectives) are obstacles: a name never sits under one.
+    for (plate_name, plate, plate_vis) in &plates {
+        if plate_name.as_str().starts_with("Plate_")
+            && let (Val::Px(left), Val::Px(top), Val::Px(width), Val::Px(height)) =
+                (plate.left, plate.top, plate.width, plate.height)
+            && *plate_vis != Visibility::Hidden
+        {
+            let rect =
+                Rect::from_corners(Vec2::new(left, top), Vec2::new(left + width, top + height));
+            grid.try_place(rect, -2, true);
+        }
+    }
     let mut shown = 0;
     for (label, node, vis, computed) in &mut entries {
         let p = &places.places[label.index];
@@ -747,9 +762,21 @@ fn update_labels(
                 Vec2::new(screen.x - size.x * 0.5, screen.y - size.y) - Vec2::splat(margin),
                 Vec2::new(screen.x + size.x * 0.5, screen.y) + Vec2::splat(margin),
             );
-            if grid.try_place(rect, label.index as i32, false) {
+            // Above the settlement; if an army plate or a bigger place is there, just below it.
+            let below = Rect::from_corners(
+                rect.min + Vec2::new(0.0, size.y + 4.0),
+                rect.max + Vec2::new(0.0, size.y + 4.0),
+            );
+            let slot = if grid.try_place(rect, label.index as i32, false) {
+                Some(0.0)
+            } else if grid.try_place(below, label.index as i32, false) {
+                Some(size.y + 4.0)
+            } else {
+                None
+            };
+            if let Some(drop) = slot {
                 node.left = Val::Px(screen.x - size.x * 0.5);
-                node.top = Val::Px(screen.y - size.y);
+                node.top = Val::Px(screen.y - size.y + drop);
                 hide = false;
                 shown += 1;
             }

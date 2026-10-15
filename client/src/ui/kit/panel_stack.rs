@@ -450,6 +450,37 @@ fn apply_requests(
     }
 }
 
+/// Exclusivity of the campaign panels, driven by [`OpenPanel`] (one central screen at a time, a
+/// central screen replaces the docked panels and the other way round, `CloseAll` closes all).
+/// Each panel owner calls [`displaces`] with its own panel id (`diplomacy`, `tech`, `chronicle`,
+/// `feudal`, `court`, `faction` central; `province`, `army`, `siege` docked) and closes itself
+/// when it answers true. Docked panels keep company with each other (their owners decide).
+pub fn displaces(message: &crate::campaign::panels::OpenPanel, own_id: &str) -> bool {
+    use crate::campaign::panels::OpenPanel as P;
+    const CENTRAL: [&str; 6] = [
+        "diplomacy",
+        "tech",
+        "chronicle",
+        "feudal",
+        "court",
+        "faction",
+    ];
+    let own_central = CENTRAL.contains(&own_id);
+    let central = |id: &str| !(own_id == id);
+    match message {
+        P::CloseAll => true,
+        P::Diplomacy => central("diplomacy"),
+        P::Tech => central("tech"),
+        P::Chronicle => central("chronicle"),
+        P::Feudal => central("feudal"),
+        P::Council => central("court"),
+        P::Faction(_) => central("faction"),
+        // The character sheet accompanies a central screen (faction, court).
+        P::Character(_) => !own_central,
+        P::Province(_) | P::Army(_) | P::Recruitment(_) | P::Siege(_) => own_central,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -565,5 +596,18 @@ mod tests {
         stack.open("province");
         stack.open("pause");
         assert_eq!(stack.top(), Some("pause"));
+    }
+
+    #[test]
+    fn central_panels_displace_each_other_and_docked() {
+        use crate::campaign::panels::OpenPanel as P;
+        assert!(displaces(&P::Tech, "diplomacy"));
+        assert!(!displaces(&P::Tech, "tech"));
+        assert!(displaces(&P::Feudal, "province"));
+        assert!(displaces(&P::Province("p".into()), "chronicle"));
+        assert!(!displaces(&P::Province("p".into()), "army"));
+        assert!(!displaces(&P::Character("c".into()), "faction"));
+        assert!(displaces(&P::Character("c".into()), "province"));
+        assert!(displaces(&P::CloseAll, "court"));
     }
 }

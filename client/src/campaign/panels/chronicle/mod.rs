@@ -35,6 +35,7 @@ use crate::menu::KeyEdges;
 use crate::settings::Settings;
 use crate::sim::Sim;
 use crate::ui::kit::modal::ToastRequest;
+use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::widgets::{
@@ -144,7 +145,7 @@ fn open_close(
                 panel.open = true;
                 panel.dirty = true;
             }
-            OpenPanel::CloseAll => panel.open = false,
+            other if displaces(other, "chronicle") => panel.open = false,
             _ => {}
         }
     }

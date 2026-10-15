@@ -31,6 +31,7 @@ use crate::app::AppState;
 use crate::menu::KeyEdges;
 use crate::sim::Sim;
 use crate::ui::kit::ButtonPressed;
+use crate::ui::kit::panel_stack::displaces;
 
 pub struct PanelFeudalPlugin;
 
@@ -136,7 +137,7 @@ fn open_close(
                     ui.open_on(None);
                 }
             }
-            OpenPanel::CloseAll if ui.open => {
+            other if ui.open && displaces(other, "feudal") => {
                 ui.open = false;
                 ui.dirty = true;
             }

@@ -29,6 +29,7 @@ use super::OpenPanel;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::sim::Sim;
+use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::{ButtonPressed, TabSelected};
 
 pub struct PanelDiplomacyPlugin;
@@ -142,7 +143,7 @@ fn open_close(
     for request in requests.read() {
         match request {
             OpenPanel::Diplomacy => toggle = true,
-            OpenPanel::Tech | OpenPanel::CloseAll if ui.open => {
+            other if ui.open && displaces(other, "diplomacy") => {
                 ui.open = false;
                 ui.dirty = true;
             }

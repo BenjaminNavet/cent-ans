@@ -29,6 +29,7 @@ use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::menu::KeyEdges;
 use crate::sim::Sim;
+use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::{ButtonPressed, TabSelected};
 
 pub struct PanelCourtPlugin;
@@ -215,20 +216,7 @@ fn open_close(
                     ui.open_council();
                 }
             }
-            OpenPanel::CloseAll
-            | OpenPanel::Diplomacy
-            | OpenPanel::Tech
-            | OpenPanel::Province(_)
-            | OpenPanel::Army(_)
-            | OpenPanel::Recruitment(_)
-            | OpenPanel::Siege(_)
-            | OpenPanel::Faction(_)
-            | OpenPanel::Feudal
-            | OpenPanel::Chronicle
-                if ui.screen != Screen::None =>
-            {
-                ui.close();
-            }
+            other if ui.screen != Screen::None && displaces(other, "court") => ui.close(),
             _ => {}
         }
     }

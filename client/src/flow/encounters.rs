@@ -65,7 +65,8 @@ pub fn spawn_layer(mut commands: Commands) {
         Name::new("flow:site_layer"),
         SiteLayer,
         DespawnOnExit(AppState::Campaign),
-        UiTier::Hud.index(),
+        // World markers go under every piece of UI (HUD = tier 0).
+        GlobalZIndex(-1),
         Node {
             position_type: PositionType::Absolute,
             width: Val::Percent(100.0),
