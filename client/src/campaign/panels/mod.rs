@@ -10,11 +10,24 @@ pub mod diplomacy;
 pub mod province;
 pub mod tech;
 
+/// Shared request to open or close a campaign panel (sent by the HUD, the map pickers or a
+/// script). Each panel subfolder reads it and opens itself; a panel that opens closes the others
+/// of the same tier (docked panels: province, army; central screens: diplomacy, tech).
+#[derive(Message, Debug, Clone, PartialEq)]
+pub enum OpenPanel {
+    Province(String),
+    Army(String),
+    Recruitment(String),
+    Diplomacy,
+    Tech,
+    CloseAll,
+}
+
 pub struct CampaignPanelsPlugin;
 
 impl Plugin for CampaignPanelsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((
+        app.add_message::<OpenPanel>().add_plugins((
             province::PanelProvincePlugin,
             diplomacy::PanelDiplomacyPlugin,
             tech::PanelTechPlugin,
