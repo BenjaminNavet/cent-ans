@@ -13,6 +13,7 @@
 
 #![allow(clippy::type_complexity)]
 
+pub mod banner;
 pub mod catalog;
 pub mod declutter;
 pub mod dn;
@@ -43,6 +44,7 @@ pub struct CampaignMarkersPlugin;
 
 impl Plugin for CampaignMarkersPlugin {
     fn build(&self, app: &mut App) {
+        banner::add(app);
         app.init_resource::<Places>()
             .init_resource::<ShieldCache>()
             .init_resource::<MarkerStats>()
@@ -243,7 +245,7 @@ fn dump_markers(world: &World) -> (String, Value) {
             "ruin_signs": s.ruins,
             "worksite_signs": s.worksites,
             "controller_changes": s.controller_changes,
-            "dn": {"places": s.dn_places, "brightened": s.dn_brightened, "banners_recoloured": s.dn_banners_recoloured},
+            "dn": {"places": s.dn_places, "brightened": s.dn_brightened, "banners_recoloured": s.dn_banners_recoloured, "banner_materials": world.get_resource::<banner::BannerMaterials>().map(|b| b.count()), "banner_wave": world.get_resource::<banner::BannerMaterials>().and_then(|b| b.params).map(|p| p.wave.to_array())},
             "rendered_meshes": s.rendered_meshes,
             "live_probe": s.live_probe,
             "nearby": s.nearby,
@@ -267,7 +269,6 @@ fn reset_markers(
 fn build_markers(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     mut built: ResMut<MarkersBuilt>,
     mut places_res: ResMut<Places>,
     mut stats: ResMut<MarkerStats>,
@@ -275,6 +276,10 @@ fn build_markers(
     assets: Res<AssetServer>,
     ground: GroundHeight,
     theme: Res<UiTheme>,
+    mut banners: (
+        ResMut<banner::BannerMaterials>,
+        ResMut<Assets<banner::BannerMaterial>>,
+    ),
 ) {
     if built.0 || sim.state.is_none() {
         return;
@@ -301,7 +306,8 @@ fn build_markers(
     let dn_models = dn::DnModels::load(&data_dir);
     stats.dn_places = dn::assign(&mut places, data, &dn_models, &assets_dir);
     let heraldic = crate::campaign::provinces::modes::heraldic_colors(data);
-    let banner_mesh = meshes.add(banner_mesh());
+    let banner_mesh = meshes.add(banner::banner_mesh());
+    banners.0.clear();
 
     let root_entity = commands
         .spawn((
@@ -402,7 +408,7 @@ fn build_markers(
                         .get(&p.controller)
                         .copied()
                         .unwrap_or(Srgba::new(0.55, 0.1, 0.08, 1.0));
-                    let material = materials.add(banner_material(colour));
+                    let material = banners.0.get(&mut banners.1, colour);
                     let k = (d.top * dn_models.banner_pole_ratio).max(0.001);
                     entity.with_child((
                         Name::new("DnBanner"),
@@ -570,68 +576,13 @@ fn brighten_dn(
     stats.dn_brightened += 1;
 }
 
-/// Unit banner of the generated glb (`_banner_mesh`): pole of height 1 and a 0.55 x 0.38 cloth.
-fn banner_mesh() -> Mesh {
-    use bevy::asset::RenderAssetUsages;
-    use bevy::mesh::{Indices, PrimitiveTopology};
-    let mut positions: Vec<[f32; 3]> = Vec::new();
-    let mut normals: Vec<[f32; 3]> = Vec::new();
-    let pole = 0.02;
-    let corners = [
-        Vec3::new(-pole, 0.0, -pole),
-        Vec3::new(pole, 0.0, -pole),
-        Vec3::new(pole, 0.0, pole),
-        Vec3::new(-pole, 0.0, pole),
-    ];
-    for c in 0..4 {
-        let a = corners[c];
-        let b = corners[(c + 1) % 4];
-        let up = Vec3::Y;
-        let n = (a + b).normalize();
-        for v in [a, b, b + up, a, b + up, a + up] {
-            positions.push(v.into());
-            normals.push(n.into());
-        }
-    }
-    let (width, height) = (0.55, 0.38);
-    for v in [
-        Vec3::new(0.0, 1.0, 0.0),
-        Vec3::new(width, 1.0, 0.0),
-        Vec3::new(width, 1.0 - height, 0.0),
-        Vec3::new(0.0, 1.0, 0.0),
-        Vec3::new(width, 1.0 - height, 0.0),
-        Vec3::new(0.0, 1.0 - height, 0.0),
-    ] {
-        positions.push(v.into());
-        normals.push([0.0, 0.0, 1.0]);
-    }
-    let count = positions.len() as u32;
-    Mesh::new(
-        PrimitiveTopology::TriangleList,
-        RenderAssetUsages::default(),
-    )
-    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
-    .with_inserted_indices(Indices::U32((0..count).collect()))
-}
-
-/// Banner cloth material: faction colour, two-sided.
-fn banner_material(colour: Srgba) -> StandardMaterial {
-    StandardMaterial {
-        base_color: colour.into(),
-        perceptual_roughness: 0.9,
-        cull_mode: None,
-        double_sided: true,
-        ..default()
-    }
-}
-
 /// Repaints the banners whose place changed hands.
 fn recolour_dn_banners(
     places: Res<Places>,
     sim: Res<Sim>,
-    mut banners: Query<(&mut DnBanner, &MeshMaterial3d<StandardMaterial>)>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut banners: Query<(&mut DnBanner, &mut MeshMaterial3d<banner::BannerMaterial>)>,
+    mut shared: ResMut<banner::BannerMaterials>,
+    mut materials: ResMut<Assets<banner::BannerMaterial>>,
     mut stats: ResMut<MarkerStats>,
     mut colours: Local<Option<std::collections::HashMap<String, Srgba>>>,
 ) {
@@ -643,7 +594,7 @@ fn recolour_dn_banners(
     };
     let colours =
         colours.get_or_insert_with(|| crate::campaign::provinces::modes::heraldic_colors(data));
-    for (mut banner, material) in &mut banners {
+    for (mut banner, mut material) in &mut banners {
         let Some(p) = places.places.get(banner.place) else {
             continue;
         };
@@ -651,9 +602,8 @@ fn recolour_dn_banners(
             continue;
         }
         banner.controller = p.controller.clone();
-        if let (Some(c), Some(mut m)) = (colours.get(&p.controller), materials.get_mut(&material.0))
-        {
-            m.base_color = (*c).into();
+        if let Some(c) = colours.get(&p.controller) {
+            material.0 = shared.get(&mut materials, *c);
             stats.dn_banners_recoloured += 1;
         }
     }
