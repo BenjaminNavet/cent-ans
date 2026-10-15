@@ -16,6 +16,7 @@
 //! `prov:garrison_pick:<index>` (checkbox), `prov:form_army`.
 
 mod choices;
+mod images;
 mod labels;
 mod view;
 
@@ -52,6 +53,7 @@ impl Plugin for PanelProvincePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ProvincePanel>()
             .insert_resource(UiLabels::load())
+            .insert_resource(images::BuildingImages::load())
             .register_dump(dump_panel)
             .add_systems(
                 Update,
@@ -270,7 +272,11 @@ fn snapshot(
             linked.insert(key.to_owned(), crate::codex::text::format_auto(codex, text));
         }
     }
+    let tier = state.settlement_tier(data, &settlement);
+    let tier_progress = state.settlement_tier_progress(data, &settlement);
     Some(Snapshot {
+        tier,
+        tier_progress,
         linked,
         bars,
         lent_text,
@@ -301,6 +307,7 @@ fn refresh(
     assets: Res<AssetServer>,
     theme: Res<UiTheme>,
     labels: Res<UiLabels>,
+    images: Res<images::BuildingImages>,
     mut panel: ResMut<ProvincePanel>,
     existing: Query<Entity, With<ProvincePanelRoot>>,
 ) {
@@ -350,7 +357,7 @@ fn refresh(
             },
             theme.sliced("panel"),
         ))
-        .with_children(|root| view::build(root, &theme, &assets, &labels, &snap, tab));
+        .with_children(|root| view::build(root, &theme, &assets, &labels, &images, &snap, tab));
 }
 
 fn submit(sim: &mut Sim, order: Order) -> Result<(), String> {
@@ -601,7 +608,14 @@ fn dump_panel(world: &World) -> (String, Value) {
                 .map(|n| n.building.as_str())
                 .collect()
         });
+        let images = world.resource::<images::BuildingImages>();
         json!({
+            "images_known": images.image_count(),
+            "tier": s.tier, "tier_progress": s.tier_progress,
+            "tier_caption": s.tree.as_ref().map(|t| images.tier_caption(&t.kind, s.tier)),
+            "bound_images": images::bound_images(images, s).iter()
+                .map(|(widget, path)| json!({"widget": widget, "path": path}))
+                .collect::<Vec<_>>(),
             "buildable_ids": buildable_ids,
             "province": s.sheet.id, "name": s.sheet.name, "owner": s.sheet.owner,
             "controller": s.sheet.controller, "mine": s.mine,

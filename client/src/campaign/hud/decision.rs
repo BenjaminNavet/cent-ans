@@ -89,6 +89,23 @@ fn open_window(
         .with_children(|root| {
             root.spawn((panel_sized(&theme, 560.0), Pickable::default()))
                 .with_children(|card| {
+                    if let Some(path) = crate::campaign::panels::chronicle::art::decision_art(
+                        crate::campaign::panels::chronicle::art::assets_root().as_deref(),
+                        view.event.as_str(),
+                    ) {
+                        card.spawn((
+                            Name::new("hud:decision_art"),
+                            Node {
+                                height: Val::Px(
+                                    crate::campaign::panels::chronicle::art::ART_HEIGHT,
+                                ),
+                                aspect_ratio: Some(16.0 / 9.0),
+                                align_self: AlignSelf::Center,
+                                ..default()
+                            },
+                            ImageNode::new(assets.load(path)),
+                        ));
+                    }
                     card.spawn(typed(&theme, &view.title, UiType::Heading));
                     if !view.province_name.is_empty() {
                         card.spawn(caption(&theme, &view.province_name));

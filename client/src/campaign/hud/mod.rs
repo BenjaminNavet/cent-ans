@@ -992,6 +992,7 @@ fn dump_hud(world: &World) -> (String, Value) {
             "turns_played": flow.turns_played,
             "last_turn_events": flow.last_events.len(),
             "last_report_counts": flow.last_report_counts,
+            "last_report_vignette": {"id": flow.last_report_vignette.0, "image": flow.last_report_vignette.1},
             "confirm_shown": flow.confirm_shown,
             "turn_error": flow.error,
             "orders_dropped": flow.orders_dropped,
