@@ -22,5 +22,7 @@ pub mod regions;
 pub mod rng;
 pub mod shapes;
 pub mod soot;
+pub mod style;
 
 pub use layer::{CampaignTownsPlugin, TownsState};
+pub use style::TownStyle;

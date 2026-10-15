@@ -209,6 +209,7 @@ pub struct CampaignTownsPlugin;
 
 impl Plugin for CampaignTownsPlugin {
     fn build(&self, app: &mut App) {
+        super::style::add(app);
         app.init_resource::<TownsState>()
             .register_dump(dump_towns)
             .add_systems(OnEnter(AppState::Campaign), init_towns)
@@ -557,6 +558,7 @@ pub(super) fn stream_towns(
     world: Res<TownsWorld>,
     shared: Res<TownMeshes>,
     mut state: ResMut<TownsState>,
+    style: Res<super::style::TownStyle>,
     view: Res<ZoomView>,
     rig: Option<Res<CampaignRig>>,
     surface: Option<Res<Surface>>,
@@ -580,7 +582,8 @@ pub(super) fn stream_towns(
             } else {
                 0.0
             });
-    state.active = world.force_active || distance < limit;
+    // Maquette style (default, ADR 0158): no 1:1 town, the maquettes stay at every distance.
+    state.active = world.force_active || (style.real() && distance < limit);
     state.weight = if world.force_active {
         1.0
     } else {
