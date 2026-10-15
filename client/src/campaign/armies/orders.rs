@@ -1009,7 +1009,7 @@ pub fn dump_armies(world: &World) -> (String, Value) {
             "plates_visible": plates.visible,
             "plates_displaced": plates.displaced,
             "plates_hidden": plates.hidden,
-            "plate_overlaps": plates.overlaps,
+            "plate_overlaps": plates.overlaps(),
             "land_mask_loaded": mask.is_loaded(),
             "land_mask_size": [mask.size().0, mask.size().1],
             "fog_active": fog.active,
