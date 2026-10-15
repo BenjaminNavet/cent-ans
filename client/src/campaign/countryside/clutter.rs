@@ -34,7 +34,6 @@ use super::LoadedCountryside;
 use super::placement::Rng;
 use crate::app::AppState;
 use crate::campaign::camera::rig::CampaignRig;
-use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::GroundHeight;
 use crate::campaign::vegetation::VegWorld;
 use crate::campaign::vegetation::data::VegetationWorld;
@@ -415,10 +414,11 @@ pub fn bush_image() -> Image {
             depth_or_array_layers: 1,
         },
         TextureDimension::D2,
-        chain,
+        data,
         TextureFormat::Rgba8UnormSrgb,
         RenderAssetUsages::RENDER_WORLD,
     );
+    image.data = Some(chain);
     image.texture_descriptor.mip_level_count = levels;
     image.sampler = mipmapped_sampler();
     image
@@ -444,7 +444,7 @@ enum Seeding {
 struct ClutterCell {
     seeding: Seeding,
     /// One entity (and mesh) per kind once meshed: grass, bushes.
-    entities: Vec<(Entity, Handle<Mesh>)>,
+    entities: [Option<(Entity, Handle<Mesh>)>; 2],
     /// Relief version the heights of the meshes were taken at.
     seated: Option<u32>,
     tufts: usize,
@@ -480,7 +480,7 @@ pub fn update_view(
     rig: Option<Res<CampaignRig>>,
     quality: Option<Res<RenderQuality>>,
     sim: Res<crate::sim::Sim>,
-    relief: Option<Res<ReliefState>>,
+    relief: Option<Res<super::ReliefVersion>>,
     mut clutter: ResMut<Clutter>,
 ) {
     if relief.is_some_and(|r| r.is_changed()) {
@@ -540,7 +540,7 @@ pub fn stream_clutter(
         clutter.shown = 0;
         clutter.tufts_shown = 0;
         for cell in clutter.cells.values() {
-            for (e, _) in &cell.entities {
+            for (e, _) in cell.entities.iter().flatten() {
                 if let Ok(mut v) = visibilities.get_mut(*e) {
                     v.set_if_neq(Visibility::Hidden);
                 }
@@ -603,7 +603,7 @@ pub fn stream_clutter(
             key,
             ClutterCell {
                 seeding: Seeding::Pending(slot),
-                entities: Vec::new(),
+                entities: [None, None],
                 seated: None,
                 tufts: 0,
                 last_seen: frame,
@@ -657,13 +657,27 @@ pub fn stream_clutter(
                 continue;
             };
             let cell = clutter.cells.get_mut(key).expect("cell");
-            let first = cell.entities.is_empty();
+            let first = cell.seated.is_none();
             let mut built = 0usize;
             for (kind, bush) in [false, true].into_iter().enumerate() {
                 let data = build_mesh_data(kept, &heights, origin, bush);
-                built += data.tufts();
+                let count = data.tufts();
+                built += count;
+                if count == 0 {
+                    // No empty mesh (the renderer warns about it): drop the entity, if any.
+                    if let Some((entity, _)) = cell.entities[kind].take() {
+                        commands.entity(entity).despawn();
+                    }
+                    continue;
+                }
                 let mesh = data.to_mesh();
-                if first {
+                if let Some((entity, handle)) = &cell.entities[kind] {
+                    meshes.insert(handle, mesh).ok();
+                    // The bounds follow the new heights.
+                    commands
+                        .entity(*entity)
+                        .remove::<bevy::camera::primitives::Aabb>();
+                } else {
                     let handle = meshes.add(mesh);
                     let entity = commands
                         .spawn((
@@ -680,14 +694,7 @@ pub fn stream_clutter(
                             DespawnOnExit(AppState::Campaign),
                         ))
                         .id();
-                    cell.entities.push((entity, handle));
-                } else {
-                    let handle = &cell.entities[kind].1;
-                    meshes.insert(handle, mesh).ok();
-                    // The bounds follow the new heights.
-                    commands
-                        .entity(cell.entities[kind].0)
-                        .remove::<bevy::camera::primitives::Aabb>();
+                    cell.entities[kind] = Some((entity, handle));
                 }
             }
             cell.tufts = built;
@@ -715,7 +722,7 @@ pub fn stream_clutter(
             shown += 1;
             tufts_shown += cell.tufts;
         }
-        for (e, _) in &cell.entities {
+        for (e, _) in cell.entities.iter().flatten() {
             if let Ok(mut v) = visibilities.get_mut(*e) {
                 v.set_if_neq(if visible {
                     Visibility::Inherited
@@ -738,7 +745,7 @@ pub fn stream_clutter(
             break;
         };
         if let Some(cell) = clutter.cells.remove(&oldest) {
-            for (e, _) in cell.entities {
+            for (e, _) in cell.entities.into_iter().flatten() {
                 commands.entity(e).despawn();
             }
             clutter.evicted += 1;

@@ -38,6 +38,33 @@ use crate::paths;
 use self::config::Config;
 use self::terrain_data::{Inputs, MapTerrain};
 
+/// Version of the displayed relief: changes when the vertical exaggeration (scale, gain, squash)
+/// or the set of resident height pages changes. `ReliefState` itself cannot be used for change
+/// detection: the terrain streaming takes it mutably every frame, so `is_changed()` is always
+/// true and every prop would be re-seated every frame.
+#[derive(Resource, PartialEq, Eq, Clone, Copy, Default, Debug)]
+pub struct ReliefVersion {
+    stamp: [u32; 4],
+}
+
+pub fn track_relief(
+    relief: Option<Res<crate::campaign::terrain::relief_state::ReliefState>>,
+    surface: Option<Res<crate::campaign::terrain::surface::Surface>>,
+    mut version: ResMut<ReliefVersion>,
+) {
+    let Some(relief) = relief else {
+        return;
+    };
+    version.set_if_neq(ReliefVersion {
+        stamp: [
+            relief.vertical_scale.to_bits(),
+            relief.gain.to_bits(),
+            relief.squash.to_bits(),
+            surface.map_or(0, |s| s.page_count() as u32),
+        ],
+    });
+}
+
 /// Loaded countryside data (kept between campaign visits).
 #[derive(Resource, Clone)]
 pub struct LoadedCountryside {
@@ -63,6 +90,7 @@ impl Plugin for CampaignCountrysidePlugin {
             .init_resource::<layer::Cells>()
             .init_resource::<layer::Measures>()
             .init_resource::<proto::Prototypes>()
+            .init_resource::<ReliefVersion>()
             .init_resource::<LoadErrors>()
             .init_resource::<bridges::Bridges>()
             .init_resource::<decor::DecorView>()
@@ -137,6 +165,7 @@ impl Plugin for CampaignCountrysidePlugin {
                 )
                     .run_if(in_state(AppState::Campaign)),
             )
+            .add_systems(Update, track_relief.run_if(in_state(AppState::Campaign)))
             .add_systems(
                 Update,
                 (

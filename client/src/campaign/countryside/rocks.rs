@@ -32,7 +32,6 @@ use super::placement::{Rng, Terrain};
 use super::proto::{Lookup, Prototypes, spawn_prims};
 use crate::app::AppState;
 use crate::campaign::camera::rig::CampaignRig;
-use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::GroundHeight;
 
 /// Live rock roots cap (320 while every rock was a glb scene).
@@ -819,7 +818,7 @@ pub fn stream_rocks(
 pub fn apply_rocks(
     plan: Res<RockPlan>,
     ground: GroundHeight,
-    relief: Option<Res<ReliefState>>,
+    relief: Option<Res<super::ReliefVersion>>,
     mut view: ResMut<RockView>,
     mut query: Query<(&mut RockInst, &mut Transform, &mut Visibility)>,
 ) {

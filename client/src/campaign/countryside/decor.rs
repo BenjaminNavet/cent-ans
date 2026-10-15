@@ -544,7 +544,7 @@ pub fn apply_decor(
     plan: Res<DecorPlan>,
     rig: Option<Res<CampaignRig>>,
     ground: GroundHeight,
-    relief: Option<Res<crate::campaign::terrain::relief_state::ReliefState>>,
+    relief: Option<Res<super::ReliefVersion>>,
     mut view: ResMut<DecorView>,
     mut query: Query<(&mut DecorInst, &mut Transform, &mut Visibility)>,
 ) {

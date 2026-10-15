@@ -20,8 +20,10 @@ use super::proto::{Lookup, Proto, Prototypes, spawn_prims};
 use crate::app::AppState;
 use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::camera::zoom::{ZoomView, smoothstep};
-use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::GroundHeight;
+
+/// Roots spawned per cell and call.
+const SPAWN_SLICE: usize = 300;
 
 /// Live prop roots cap (the Godot layer has no cap: its instances are free). Was 1800 when every
 /// instance was a glb scene.
@@ -159,7 +161,7 @@ pub fn update_view(
     cfg: Option<Res<LoadedCountryside>>,
     rig: Option<Res<CampaignRig>>,
     sim: Res<crate::sim::Sim>,
-    relief: Option<Res<ReliefState>>,
+    relief: Option<Res<super::ReliefVersion>>,
     measures: Res<Measures>,
     mut view: ResMut<PropView>,
 ) {
@@ -289,7 +291,19 @@ pub fn stream_cells(
     missing.sort_by(|a, b| a.0.total_cmp(&b.0));
     let live: usize = cells.cells.values().map(|e| e.entities.len()).sum();
     if live < MAX_ENTITIES {
-        for (_, key) in missing.into_iter().take(r.cells_per_frame.max(1)) {
+        // Cells still being spawned first, then the nearest missing ones.
+        let mut partial: Vec<IVec2> = cells
+            .staged
+            .keys()
+            .filter(|k| cells.cells.contains_key(*k))
+            .copied()
+            .collect();
+        partial.sort_by_key(|k| (k.x, k.y));
+        let todo = partial
+            .into_iter()
+            .chain(missing.into_iter().map(|m| m.1))
+            .take(r.cells_per_frame.max(1) + 1);
+        for key in todo {
             install_cell(
                 &mut commands,
                 &cfg,
@@ -310,7 +324,10 @@ pub fn stream_cells(
     };
     let frame = cells.frame;
     let wanted: std::collections::HashSet<IVec2> = wanted.into_iter().collect();
-    cells.staged.retain(|k, _| wanted.contains(k));
+    let installed: std::collections::HashSet<IVec2> = cells.cells.keys().copied().collect();
+    cells
+        .staged
+        .retain(|k, _| wanted.contains(k) || installed.contains(k));
     let mut shown = 0;
     for (key, cell) in cells.cells.iter_mut() {
         cell.on = wanted.contains(key);
@@ -341,6 +358,7 @@ pub fn stream_cells(
             }
             cells.evicted += 1;
         }
+        cells.staged.remove(&oldest);
     }
 }
 
@@ -401,15 +419,40 @@ fn install_cell(
         cells.waiting_models += 1;
         return;
     }
-    let instances = cells.staged.remove(&key).unwrap_or_default();
-    let mut counts: HashMap<usize, usize> = HashMap::new();
-    let mut entities = Vec::new();
-    for inst in instances {
+    if !cells.cells.contains_key(&key) {
+        let mut counts: HashMap<usize, usize> = HashMap::new();
+        for inst in &cells.staged[&key] {
+            if matches!(resolved.get(&inst.prop), Some(Some(_))) {
+                *counts.entry(inst.prop).or_default() += 1;
+            }
+        }
+        cells.installed += 1;
+        let frame = cells.frame;
+        cells.cells.insert(
+            key,
+            Cell {
+                entities: Vec::new(),
+                count: 0,
+                counts,
+                last_seen: frame,
+                on: false,
+                grow: 0.0,
+            },
+        );
+    }
+    // A slice of the cell per call: spawning thousands of roots in one frame is a visible hitch.
+    let staged = cells.staged.get_mut(&key).expect("staged cell");
+    let take = staged.len().min(SPAWN_SLICE);
+    let batch = staged.split_off(staged.len() - take);
+    if staged.is_empty() {
+        cells.staged.remove(&key);
+    }
+    let mut spawned = Vec::with_capacity(batch.len());
+    for inst in batch {
         let Some(Some(proto)) = resolved.get(&inst.prop) else {
             continue;
         };
         let measure = measures.0[&inst.prop];
-        *counts.entry(inst.prop).or_default() += 1;
         let prims = spawn_model(commands, proto, inst.prop, lod, measure);
         let root = commands
             .spawn((
@@ -434,24 +477,15 @@ fn install_cell(
             ))
             .add_children(&prims)
             .id();
-        entities.push(root);
+        spawned.push(root);
     }
-    let count = entities.len();
-    cells.installed += 1;
     cells.build_ms_max = cells
         .build_ms_max
         .max(started.elapsed().as_secs_f32() * 1000.0);
-    cells.cells.insert(
-        key,
-        Cell {
-            entities,
-            count,
-            counts,
-            last_seen: cells.frame,
-            on: false,
-            grow: 0.0,
-        },
-    );
+    if let Some(cell) = cells.cells.get_mut(&key) {
+        cell.count += spawned.len();
+        cell.entities.extend(spawned);
+    }
 }
 
 /// Replaces the primitives of the props when the level of detail changed.
