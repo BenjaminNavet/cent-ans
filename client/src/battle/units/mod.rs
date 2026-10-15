@@ -1,40 +1,57 @@
-//! Soldier rendering: every living figure of the simulation drawn by GPU instancing, positions
-//! and facings read from `sim_battle::BattleSim::soldier_poses` and blended between the two
-//! latest fixed steps.
+//! Soldier rendering: every living figure of the simulation, skinned and animated on the GPU,
+//! positions and facings read from `sim_battle::BattleSim::soldier_poses` and blended between
+//! the two latest fixed steps.
 //!
-//! Ports the instancing core of game/scripts/battle/battle_soldiers.gd (poses from
-//! `battle_sim_poses.rs`, blend of `battle_pose_lerp.rs`) and the figure meshes of
-//! battle_meshes.gd as plain meshes tinted by side. Not ported yet: skinned/animated figures
-//! (battle_skinned.gd), unit looks and faces (battle_unit_looks.gd), LOD rings, banners and
-//! standards, formation outlines, blood and effects (battle_cavalry_gaits.gd,
-//! battle_formation_outline.gd, battle_blood.gd, battle_effects.gd).
+//! Ports game/scripts/battle/battle_soldiers.gd (update loop, level of detail),
+//! battle_skinned.gd (manifest, meshes, bone textures, state to clip tables),
+//! battle_unit_looks.gd, battle_cavalry_gaits.gd, battle_impostors.gd (billboards beyond
+//! 300 m, procedural silhouettes instead of a baked atlas), battle_banner_layer.gd and
+//! battle_unit_markers.gd. Not ported: corpses and wounded (battle_soldiers.gd gore layers),
+//! blood, severed limbs, dropped arms (battle_gore.gd, battle_dropped_arms.gd), chest
+//! heraldry, fine atlases (FG3), battle_formation_outline.gd, battle_effects.gd.
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
+pub mod anim;
+pub mod banners;
+pub mod figures;
+pub mod gaits;
 pub mod instancing;
+pub mod library;
+pub mod looks;
+pub mod markers;
+pub mod regiments;
+pub mod skinned;
 
 use std::collections::HashMap;
-use std::sync::Arc;
 
 use bevy::prelude::*;
-use data_model::UnitCategory;
-use sim_battle::{BattleSim, SideId};
+use serde_json::json;
+use sim_battle::BattleSim;
 
+use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
-use instancing::{InstancedBatch, InstancingPlugin, MaterialParams};
+use banners::BattleBannersPlugin;
+use instancing::InstancingPlugin;
+use library::FigureLibrary;
+use markers::BattleMarkersPlugin;
+use regiments::{Lod, Regiments};
+use skinned::SkinnedPlugin;
 
-/// Bytes of one instance record: x, y, z, yaw (degrees), scale, model index.
-const RECORD_FLOATS: usize = 6;
 /// A figure that moved more than this between two steps is teleporting: no blend (m).
 const TELEPORT_M: f32 = 8.0;
 
-/// Counters of the soldier renderer (dump section `battle`).
+/// Counters of the soldier renderer (dump section `battle_units`, and `battle`).
 #[derive(Resource, Default, Debug, Clone)]
 pub struct SoldierStats {
-    /// Instances handed to the GPU this frame.
+    /// Soldiers handed to the GPU this frame (all levels of detail and impostors).
     pub drawn: usize,
     /// `[attacker foot, attacker mounted, defender foot, defender mounted]`.
     pub per_batch: [usize; 4],
+    /// Soldiers per level of detail: full, medium, far, impostor.
+    pub lod: [usize; 4],
+    /// Regiments drawn.
+    pub regiments: usize,
 }
 
 /// One figure: `(x, y, z, facing)` as given by the simulation.
@@ -42,59 +59,197 @@ type Pose = [f32; 4];
 
 /// Poses of the two latest simulation steps, by regiment id.
 #[derive(Resource, Default)]
-struct PoseFrames {
+pub struct PoseFrames {
     ticks: Option<u64>,
     prev: HashMap<u32, Vec<Pose>>,
     cur: HashMap<u32, Vec<Pose>>,
-    /// `(ticks, fraction bits)` of the records last written.
-    written: Option<(u64, u32)>,
 }
 
-#[derive(Resource)]
-struct SoldierBatches {
-    entities: [Entity; 4],
-    versions: [u64; 4],
+impl PoseFrames {
+    /// Reads the poses of the step `ticks`; the previous ones are kept for blending when the
+    /// simulation advanced by a few steps only.
+    fn refresh(&mut self, sim: &BattleSim, ticks: u64) {
+        let advanced = self
+            .ticks
+            .is_some_and(|old| ticks > old && ticks - old <= 3);
+        let old = std::mem::take(&mut self.cur);
+        self.prev = if advanced { old } else { HashMap::new() };
+        self.cur = drawn_units(sim)
+            .map(|unit| {
+                let poses = sim
+                    .soldier_poses(unit, 1.0)
+                    .into_iter()
+                    .map(|p| [p[0] as f32, p[1] as f32, p[2] as f32, p[3] as f32])
+                    .collect();
+                (unit.id, poses)
+            })
+            .collect();
+        self.ticks = Some(ticks);
+    }
+}
+
+/// Loading failure of the figure library (reported in the dump).
+#[derive(Resource, Default)]
+pub struct UnitsReport {
+    pub library_error: Option<String>,
 }
 
 pub struct BattleUnitsPlugin;
 
 impl Plugin for BattleUnitsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(InstancingPlugin)
-            .init_resource::<SoldierStats>()
-            .init_resource::<PoseFrames>()
-            .add_systems(
-                Update,
-                (
-                    spawn_batches.run_if(resource_added::<BattleSession>),
-                    update_soldiers
-                        .run_if(in_state(AppState::Battle))
-                        .run_if(resource_exists::<BattleSession>)
-                        .run_if(resource_exists::<SoldierBatches>),
-                )
-                    .chain()
-                    .after(crate::battle::scene::StepSet),
+        app.add_plugins((
+            InstancingPlugin,
+            SkinnedPlugin,
+            BattleBannersPlugin,
+            BattleMarkersPlugin,
+        ))
+        .init_resource::<SoldierStats>()
+        .init_resource::<PoseFrames>()
+        .init_resource::<Regiments>()
+        .init_resource::<UnitsReport>()
+        .register_dump(dump_units)
+        .add_systems(
+            Update,
+            (
+                load_library.run_if(resource_added::<BattleSession>),
+                dev_view.run_if(resource_exists::<BattleSession>),
+                regiments::update_regiments
+                    .run_if(in_state(AppState::Battle))
+                    .run_if(resource_exists::<BattleSession>)
+                    .run_if(resource_exists::<FigureLibrary>),
             )
-            .add_systems(OnExit(AppState::Battle), clear_units);
+                .chain()
+                .after(crate::battle::scene::StepSet),
+        )
+        .add_systems(OnExit(AppState::Battle), clear_units);
     }
 }
 
-fn clear_units(
+fn load_library(
     mut commands: Commands,
-    mut stats: ResMut<SoldierStats>,
-    mut frames: ResMut<PoseFrames>,
+    mut report: ResMut<UnitsReport>,
+    existing: Option<Res<FigureLibrary>>,
 ) {
-    commands.remove_resource::<SoldierBatches>();
-    *stats = SoldierStats::default();
-    *frames = PoseFrames::default();
+    if existing.is_some() {
+        return;
+    }
+    let loaded = crate::paths::find_root().and_then(|root| {
+        FigureLibrary::load(
+            crate::paths::asset_root(&root),
+            &crate::paths::data_dir(&root),
+        )
+    });
+    match loaded {
+        Ok(library) => commands.insert_resource(library),
+        Err(error) => {
+            error!("battle units: {error}");
+            report.library_error = Some(error);
+        }
+    }
 }
 
-/// Foot soldier: a 1.7 m capsule.
+/// Dev hook: `CENT_ANS_UNITS_VIEW=<regiment id>,<distance m>[,<yaw rad>]` frames a regiment from
+/// the given distance once the battle opens (captures and dumps of a close view).
+fn dev_view(
+    mut done: Local<bool>,
+    mut session: ResMut<BattleSession>,
+    state: Option<ResMut<crate::battle::scene::camera::BattleCameraState>>,
+) {
+    if *done {
+        return;
+    }
+    let Ok(spec) = std::env::var("CENT_ANS_UNITS_VIEW") else {
+        *done = true;
+        return;
+    };
+    let Some(mut state) = state else {
+        return;
+    };
+    let mut parts = spec.split(',');
+    let id: u32 = parts.next().and_then(|v| v.parse().ok()).unwrap_or(0);
+    let distance: f32 = parts.next().and_then(|v| v.parse().ok()).unwrap_or(40.0);
+    let sim = &*session.sim_mut();
+    let Some(unit) = sim.units().iter().find(|u| u.id == id) else {
+        return;
+    };
+    state.target = Vec3::new(unit.x as f32, 0.0, unit.z as f32);
+    state.distance = distance;
+    state.target_distance = distance;
+    if let Some(yaw) = parts.next().and_then(|v| v.parse().ok()) {
+        state.yaw = yaw;
+    }
+    *done = true;
+}
+
+fn clear_units(
+    mut stats: ResMut<SoldierStats>,
+    mut frames: ResMut<PoseFrames>,
+    mut regiments: ResMut<Regiments>,
+) {
+    *stats = SoldierStats::default();
+    *frames = PoseFrames::default();
+    *regiments = Regiments::default();
+}
+
+fn dump_units(world: &World) -> (String, serde_json::Value) {
+    let stats = world
+        .get_resource::<SoldierStats>()
+        .cloned()
+        .unwrap_or_default();
+    let regiments = world.get_resource::<Regiments>();
+    let mut by_figure: std::collections::BTreeMap<String, usize> = Default::default();
+    let mut by_state: std::collections::BTreeMap<String, usize> = Default::default();
+    let mut by_lod = [0usize; 4];
+    let mut samples = Vec::new();
+    if let Some(regiments) = regiments {
+        let mut all: Vec<_> = regiments.summaries().collect();
+        all.sort_by_key(|r| r.0);
+        for (id, figure, state, lod, drawn) in all {
+            *by_figure.entry(figure.to_owned()).or_default() += drawn;
+            *by_state.entry(state.to_owned()).or_default() += drawn;
+            by_lod[lod.index()] += 1;
+            if samples.len() < 8 {
+                samples.push(json!({ "id": id, "figure": figure, "state": state, "lod": format!("{lod:?}"), "soldiers": drawn }));
+            }
+        }
+    }
+    let lod_names = [Lod::Full, Lod::Medium, Lod::Far, Lod::Impostor];
+    let named = |counts: [usize; 4]| {
+        lod_names
+            .iter()
+            .zip(counts)
+            .map(|(l, n)| (format!("{l:?}").to_lowercase(), json!(n)))
+            .collect::<serde_json::Map<_, _>>()
+    };
+    let library = world.get_resource::<FigureLibrary>();
+    (
+        "battle_units".into(),
+        json!({
+            "library": library.map(|l| json!({
+                "figures_in_manifest": l.manifest.figures.len(),
+                "unit_looks": l.looks.len(),
+                "load_failures": l.failures,
+            })),
+            "library_error": world.get_resource::<UnitsReport>().and_then(|r| r.library_error.clone()),
+            "regiments": stats.regiments,
+            "soldiers_drawn": stats.drawn,
+            "soldiers_by_lod": named(stats.lod),
+            "regiments_by_lod": named(by_lod),
+            "soldiers_by_figure": by_figure,
+            "soldiers_by_state": by_state,
+            "per_batch": stats.per_batch,
+            "samples": samples,
+        }),
+    )
+}
+
+/// Foot soldier: a 1.7 m capsule (rigid fallback, kept for other lots' tests).
 pub fn foot_mesh() -> Mesh {
     Mesh::from(Capsule3d::new(0.22, 1.26)).translated_by(Vec3::Y * 0.85)
 }
 
-/// Horseman: body, legs and a rider.
+/// Horseman: body, legs and a rider (rigid fallback).
 pub fn mounted_mesh() -> Mesh {
     let mut mesh = Mesh::from(Cuboid::new(0.55, 0.9, 1.9)).translated_by(Vec3::Y * 0.85);
     let legs = Mesh::from(Cuboid::new(0.4, 0.45, 1.4)).translated_by(Vec3::Y * 0.22);
@@ -104,72 +259,11 @@ pub fn mounted_mesh() -> Mesh {
     mesh
 }
 
-fn side_index(side: SideId) -> usize {
-    usize::from(side == SideId::Defender)
-}
-
-fn batch_index(side: SideId, mounted: bool) -> usize {
-    side_index(side) * 2 + usize::from(mounted)
-}
-
-fn spawn_batches(
-    mut commands: Commands,
-    session: Res<BattleSession>,
-    mut meshes: ResMut<Assets<Mesh>>,
-) {
-    let foot = meshes.add(foot_mesh());
-    let mounted = meshes.add(mounted_mesh());
-    let mut entities = [Entity::PLACEHOLDER; 4];
-    for side in SideId::BOTH {
-        let [r, g, b] = session.colors[side_index(side)];
-        let color = Color::srgb(r, g, b).to_linear();
-        for is_mounted in [false, true] {
-            let index = batch_index(side, is_mounted);
-            entities[index] = commands
-                .spawn((
-                    Name::new(format!(
-                        "Soldiers{}{}",
-                        if side == SideId::Attacker {
-                            "Attacker"
-                        } else {
-                            "Defender"
-                        },
-                        if is_mounted { "Mounted" } else { "Foot" }
-                    )),
-                    InstancedBatch {
-                        mesh_handle: if is_mounted {
-                            mounted.clone()
-                        } else {
-                            foot.clone()
-                        },
-                        records: Arc::new(Vec::new()),
-                        count: 0,
-                        texture_handle: None,
-                        params: MaterialParams {
-                            base_color: [color.red, color.green, color.blue, 1.0],
-                            alpha_cutoff: 0.0,
-                            roughness: 0.8,
-                            metallic: 0.0,
-                            double_sided: false,
-                        },
-                        version: 0,
-                    },
-                    DespawnOnExit(AppState::Battle),
-                ))
-                .id();
-        }
-    }
-    commands.insert_resource(SoldierBatches {
-        entities,
-        versions: [0; 4],
-    });
-}
-
 /// Regiments drawn as figures: field regiments with soldiers (not engines, not off-field reserve).
-fn drawn_units(sim: &BattleSim) -> impl Iterator<Item = &sim_battle::Unit> {
+pub fn drawn_units(sim: &BattleSim) -> impl Iterator<Item = &sim_battle::Unit> {
     sim.units()
         .iter()
-        .filter(|u| !u.synthetic && !u.reserve && u.category != UnitCategory::Siege)
+        .filter(|u| !u.synthetic && !u.reserve && u.category != data_model::UnitCategory::Siege)
 }
 
 /// Blends `prev` towards `cur` by `t`; a figure that jumped, or a regiment whose head count
@@ -198,76 +292,6 @@ pub fn blend_poses(prev: Option<&[Pose]>, cur: &[Pose], t: f32) -> Vec<Pose> {
         .collect()
 }
 
-fn push_record(records: &mut Vec<u8>, pose: &Pose) {
-    let record: [f32; RECORD_FLOATS] = [pose[0], pose[1], pose[2], pose[3].to_degrees(), 1.0, 0.0];
-    for value in record {
-        records.extend_from_slice(&value.to_le_bytes());
-    }
-}
-
-fn update_soldiers(
-    mut session: ResMut<BattleSession>,
-    mut frames: ResMut<PoseFrames>,
-    mut batches: ResMut<SoldierBatches>,
-    mut stats: ResMut<SoldierStats>,
-    mut query: Query<&mut InstancedBatch>,
-) {
-    let fraction = if session.paused {
-        1.0
-    } else {
-        session.step_fraction()
-    };
-    let sim = &*session.sim_mut();
-    let ticks = sim.ticks();
-    if frames.ticks != Some(ticks) {
-        let advanced = frames
-            .ticks
-            .is_some_and(|old| ticks > old && ticks - old <= 3);
-        let old = std::mem::take(&mut frames.cur);
-        frames.prev = if advanced { old } else { HashMap::new() };
-        frames.cur = drawn_units(sim)
-            .map(|unit| {
-                let poses = sim
-                    .soldier_poses(unit, 1.0)
-                    .into_iter()
-                    .map(|p| [p[0] as f32, p[1] as f32, p[2] as f32, p[3] as f32])
-                    .collect();
-                (unit.id, poses)
-            })
-            .collect();
-        frames.ticks = Some(ticks);
-        frames.written = None;
-    }
-    let key = (ticks, fraction.to_bits());
-    if frames.written == Some(key) {
-        return;
-    }
-    frames.written = Some(key);
-    let mut records: [Vec<u8>; 4] = Default::default();
-    let mut counts = [0usize; 4];
-    for unit in drawn_units(sim) {
-        let Some(cur) = frames.cur.get(&unit.id) else {
-            continue;
-        };
-        let poses = blend_poses(frames.prev.get(&unit.id).map(Vec::as_slice), cur, fraction);
-        let index = batch_index(unit.side, unit.mounted);
-        counts[index] += poses.len();
-        for pose in &poses {
-            push_record(&mut records[index], pose);
-        }
-    }
-    for (index, bytes) in records.into_iter().enumerate() {
-        if let Ok(mut batch) = query.get_mut(batches.entities[index]) {
-            batches.versions[index] += 1;
-            batch.count = counts[index] as u32;
-            batch.records = Arc::new(bytes);
-            batch.version = batches.versions[index];
-        }
-    }
-    stats.drawn = counts.iter().sum();
-    stats.per_batch = counts;
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -289,13 +313,5 @@ mod tests {
         let cur = [[0.0, 0.0, 0.0, -3.0]];
         let out = blend_poses(Some(&prev), &cur, 0.5);
         assert!(out[0][3].abs() > 3.0, "{}", out[0][3]);
-    }
-
-    #[test]
-    fn record_is_24_bytes() {
-        let mut bytes = Vec::new();
-        push_record(&mut bytes, &[1.0, 2.0, 3.0, std::f32::consts::PI]);
-        assert_eq!(bytes.len(), 24);
-        assert_eq!(f32::from_le_bytes(bytes[12..16].try_into().unwrap()), 180.0);
     }
 }
