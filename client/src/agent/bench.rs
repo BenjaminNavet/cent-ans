@@ -49,6 +49,8 @@ const DESCENT_FAR: f32 = 150.0;
 /// Frames waited for the campaign to be ready before giving up.
 const READY_TIMEOUT_FRAMES: u32 = 6000;
 const SPIKE_MS: f32 = 50.0;
+/// Frames slower than this are attributed to systems in the `systems` section (feature `profile`).
+const PROFILE_SPIKE_MS: f32 = 33.0;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum Phase {
@@ -74,6 +76,8 @@ struct BenchRun {
     descent: Vec<f32>,
     descent_visible: Vec<u32>,
     entities_max: usize,
+    /// `(end_ms, frame_ms)` of the frames over `PROFILE_SPIKE_MS` (profiler clock).
+    spikes: Vec<(f64, f32)>,
 }
 
 /// Percentiles of a series (sorted in place); `q` in 0..=1, index `min(n-1, floor(n*q))`.
@@ -178,6 +182,7 @@ pub fn add(app: &mut App, cli: &Cli) {
         descent: Vec::new(),
         descent_visible: Vec::new(),
         entities_max: 0,
+        spikes: Vec::new(),
     })
     .add_systems(
         Update,
@@ -227,6 +232,9 @@ fn bench_step(
     // Measured frame: every frame after the warm-up.
     let measuring = !matches!(run.phase, Phase::WaitCampaign | Phase::Warmup | Phase::Done);
     if measuring && dt > 0.0 {
+        if frame_ms > PROFILE_SPIKE_MS {
+            run.spikes.push((super::profile::now_ms(), frame_ms));
+        }
         let sample_visible = run.frames.is_multiple_of(10);
         let visible = if sample_visible {
             meshes.iter().filter(|v| v.get()).count() as u32
@@ -274,6 +282,7 @@ fn bench_step(
         }
         Phase::Warmup => {
             if run.frames >= WARMUP_FRAMES {
+                super::profile::reset();
                 run.phase = if run.config.descent_only {
                     Phase::Descent(0, 0)
                 } else {
@@ -346,6 +355,7 @@ fn finish(run: &mut BenchRun, exit: &mut MessageWriter<AppExit>) {
         "entities_max": run.entities_max,
         "pan": run.pan.as_ref().map(Stats::json),
         "descent": descent.as_ref().map(Stats::json),
+        "systems": super::profile::report(&run.spikes),
         "note": "frame_ms = real time between frames, vsync off; visible_meshes replaces draw calls",
     });
     let text = serde_json::to_string_pretty(&report).unwrap_or_default();

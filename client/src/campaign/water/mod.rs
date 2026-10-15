@@ -705,7 +705,7 @@ fn build_roads(
             handle,
             Transform::IDENTITY,
         );
-        ctx.commands.entity(entity).insert(Visibility::Hidden);
+        ctx.commands.entity(entity).try_insert(Visibility::Hidden);
     }
 }
 

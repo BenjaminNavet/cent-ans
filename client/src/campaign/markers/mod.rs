@@ -28,7 +28,6 @@ use serde_json::{Value, json};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::provinces::picker::SelectedProvince;
-use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::GroundHeight;
 use crate::campaign::towns::TownsState;
 use crate::paths;
@@ -704,7 +703,7 @@ fn update_range(
 /// new anchors, and whenever the relief exaggeration (camera zoom) changes.
 fn settle_ground(
     ground: GroundHeight,
-    relief: Option<Res<ReliefState>>,
+    relief: Option<Res<crate::campaign::countryside::ReliefVersion>>,
     fresh: Query<(), Added<GroundAnchor>>,
     mut anchored: Query<(&GroundAnchor, &mut Transform)>,
     mut stats: ResMut<MarkerStats>,
@@ -1015,7 +1014,7 @@ fn landmark_fallback(
         if let Some(path) = l.fallback.clone() {
             let handle: Handle<WorldAsset> = assets.load(GltfAssetLabel::Scene(0).from_asset(path));
             l.handle = handle.clone();
-            commands.entity(entity).insert(WorldAssetRoot(handle));
+            commands.entity(entity).try_insert(WorldAssetRoot(handle));
         }
     }
 }
