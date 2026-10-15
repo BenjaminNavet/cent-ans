@@ -797,7 +797,12 @@ fn build_site(
             ..AtlasStyle::default()
         };
     }
+    // Generated palisade segments (`props.rs`) replace the palisade volumes.
+    let ga3_palisades = super::props::replaces_palisades(winter);
     for obstacle in &field.obstacles {
+        if ga3_palisades && matches!(obstacle.kind, ObstacleKind::Palisade) {
+            continue;
+        }
         add_obstacle(
             &mut structures,
             obstacle.kind,

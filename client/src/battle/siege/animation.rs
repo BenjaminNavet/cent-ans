@@ -165,9 +165,108 @@ impl CrewSettings {
     }
 }
 
+/// Settings of a rolling engine (`ram`, `siege_tower`); a GA3 variant overrides some keys.
+#[derive(Debug, Clone, Deserialize)]
+pub struct Mover {
+    #[serde(default = "Mover::default_wheel")]
+    pub wheel_radius: f32,
+    #[serde(default = "Mover::default_beam_drop")]
+    pub beam_drop: f32,
+    #[serde(default = "Mover::default_max_swing")]
+    pub max_swing_deg: f32,
+    #[serde(default = "Mover::default_sway")]
+    pub sway_deg: f32,
+    #[serde(default = "Mover::default_sway_per_m")]
+    pub sway_per_m: f32,
+}
+
+impl Default for Mover {
+    fn default() -> Self {
+        Self {
+            wheel_radius: 0.6,
+            beam_drop: 1.95,
+            max_swing_deg: 48.0,
+            sway_deg: 1.0,
+            sway_per_m: 0.5,
+        }
+    }
+}
+
+impl Mover {
+    fn default_wheel() -> f32 {
+        0.6
+    }
+    fn default_beam_drop() -> f32 {
+        1.95
+    }
+    fn default_max_swing() -> f32 {
+        48.0
+    }
+    fn default_sway() -> f32 {
+        1.0
+    }
+    fn default_sway_per_m() -> f32 {
+        0.5
+    }
+
+    /// `kind_settings`: the settings of the variant `over` (a json object) replace the common ones.
+    pub fn with_override(&self, over: &serde_json::Value) -> Self {
+        let get = |key: &str, base: f32| over[key].as_f64().map_or(base, |v| v as f32);
+        Self {
+            wheel_radius: get("wheel_radius", self.wheel_radius),
+            beam_drop: get("beam_drop", self.beam_drop),
+            max_swing_deg: get("max_swing_deg", self.max_swing_deg),
+            sway_deg: get("sway_deg", self.sway_deg),
+            sway_per_m: get("sway_per_m", self.sway_per_m),
+        }
+    }
+
+    /// Angle (rad) of the ram's beam pendulum for a head pulled back by `offset` m (<= 0).
+    pub fn pivot_angle(&self, offset: f32) -> f32 {
+        let limit = self.max_swing_deg.to_radians();
+        (-offset / self.beam_drop.max(0.01))
+            .clamp(-0.95, 0.95)
+            .asin()
+            .clamp(-limit, limit)
+    }
+}
+
+/// Offset of the ram head along the beam (m, <= 0) at `phase` (0..1) of the blow period.
+pub fn ram_offset(phase: f32) -> f32 {
+    let swing = if phase < 0.75 {
+        let t = (phase / 0.75).clamp(0.0, 1.0);
+        t * t * (3.0 - 2.0 * t)
+    } else {
+        let k = (phase - 0.75) / 0.25;
+        1.0 - k * k
+    };
+    -1.5 * swing
+}
+
+/// Name of the generated variant of `model` (`ga3` of the settings) when `exists(variant)`;
+/// `_lod` is followed. `None`: the base model.
+pub fn ga3_variant(
+    model: &str,
+    ga3: &serde_json::Value,
+    exists: impl Fn(&str) -> bool,
+) -> Option<String> {
+    let base = model.trim_end_matches("_lod");
+    let name = ga3[base]["model"].as_str().filter(|s| !s.is_empty())?;
+    let variant = if model.ends_with("_lod") {
+        format!("{name}_lod")
+    } else {
+        name.to_owned()
+    };
+    exists(&variant).then_some(variant)
+}
+
 /// Every setting the engines need.
 #[derive(Debug, Clone)]
 pub struct EngineSettings {
+    /// `ga3` entries (generated variants and their overrides), raw.
+    pub ga3: serde_json::Value,
+    pub ram: Mover,
+    pub siege_tower: Mover,
     pub trebuchet: Trebuchet,
     pub mangonel: Mangonel,
     pub bombard: Bombard,
@@ -192,6 +291,9 @@ impl EngineSettings {
             })
             .unwrap_or_default();
         Some(Self {
+            ga3: doc["ga3"].clone(),
+            ram: serde_json::from_value(doc["ram"].clone()).unwrap_or_default(),
+            siege_tower: serde_json::from_value(doc["siege_tower"].clone()).unwrap_or_default(),
             trebuchet,
             mangonel: serde_json::from_value(doc["mangonel"].clone()).ok()?,
             bombard: serde_json::from_value(doc["bombard"].clone()).ok()?,
@@ -410,6 +512,32 @@ pub fn servant_act(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn ga3_variant_follows_lod_and_existence() {
+        let ga3 = serde_json::json!({"ram": {"model": "ga3_ram"}, "trebuchet": {"model": "ga3_trebuchet"}});
+        let all = |_: &str| true;
+        assert_eq!(
+            super::ga3_variant("ram", &ga3, all).as_deref(),
+            Some("ga3_ram")
+        );
+        assert_eq!(
+            super::ga3_variant("ram_lod", &ga3, all).as_deref(),
+            Some("ga3_ram_lod")
+        );
+        assert_eq!(super::ga3_variant("mangonel", &ga3, all), None);
+        assert_eq!(super::ga3_variant("ram", &ga3, |_| false), None);
+    }
+
+    #[test]
+    fn ram_pendulum_is_bounded() {
+        let ram = super::Mover::default().with_override(&serde_json::json!({"beam_drop": 2.2}));
+        assert_eq!(ram.beam_drop, 2.2);
+        assert_eq!(super::ram_offset(0.0), 0.0);
+        assert!((super::ram_offset(0.75) + 1.5).abs() < 1e-5);
+        let angle = ram.pivot_angle(-1.5);
+        assert!(angle > 0.0 && angle <= 48f32.to_radians());
+    }
+
     use super::*;
 
     fn settings() -> EngineSettings {

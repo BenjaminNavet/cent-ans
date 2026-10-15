@@ -31,6 +31,7 @@ pub mod fx;
 pub mod historical;
 pub mod kit_town;
 pub mod overlay;
+pub mod stone;
 pub mod streets;
 pub mod works;
 
@@ -184,6 +185,12 @@ pub struct SiegeStats {
     pub scars: usize,
     pub engine_models: usize,
     pub engine_models_loaded: usize,
+    /// Engines laid in their generated GA3 variant.
+    pub engine_ga3: usize,
+    /// Walls and towers drawn in the player's castle wall texture (not the atlas masonry).
+    pub stone_walls: bool,
+    /// Engine models actually loaded: `{unit: file}`.
+    pub engine_files: std::collections::BTreeMap<u32, String>,
     pub particles_spawned: usize,
     /// Flipbook fire emitters started (flames and smoke count one each).
     pub fires_started: usize,
@@ -213,6 +220,8 @@ impl Plugin for BattleSiegePlugin {
             .init_resource::<SiegeStats>()
             .register_dump(dump_siege)
             .add_plugins((
+                stone::StonePlugin,
+                crate::battle::decor::props::PropsPlugin,
                 works::WorksPlugin,
                 engines::EnginesPlugin,
                 crew::CrewPlugin,
@@ -535,7 +544,7 @@ fn dump_siege(world: &World) -> (String, serde_json::Value) {
                 "structure_pieces": stats.pieces, "towers": stats.towers, "houses": stats.houses,
                 "street_quads": stats.street_quads, "atlas_pieces": stats.atlas_pieces, "atlas_towers": stats.atlas_towers, "atlas_house_vertices": stats.atlas_house_vertices,
                 "breaches_played": stats.collapses_played, "scars": stats.scars,
-                "engine_models": stats.engine_models, "engine_models_loaded": stats.engine_models_loaded,
+                "engine_models": stats.engine_models, "engine_models_loaded": stats.engine_models_loaded, "engine_ga3": stats.engine_ga3, "stone_walls": stats.stone_walls, "engine_files": stats.engine_files,
                 "particles_spawned": stats.particles_spawned, "fire_emitters_started": stats.fires_started, "bars": stats.bars,
                 "kit_pieces": stats.kit_pieces, "kit_models": stats.kit_models, "kit_ruins": stats.kit_ruins,
                 "swings": stats.swings, "predicted_swings": stats.predicted_swings,
