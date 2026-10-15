@@ -28,5 +28,10 @@ contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; ar
   (qui contient `main` du 15/10, `ef2bbfaae`).
 - 15/10 ~2 h : squelette V0 commité (menu → campagne vérifié par vidage). Vague 1 lancée
   (9 agents : uikit, terrain et battle en Opus, les 6 autres en Sonnet).
-- Prochaine étape : relire chaque lot, fusionner `bm/*` dans `bevy-migration` (worktree gp-bevy),
-  capture de contrôle par Opus pour les lots visuels, supprimer les worktrees fusionnés.
+- 15/10 ~2 h 15 : 7 lots V1 fusionnés (armies, gameapi, audio, provinces, markers, water, uikit),
+  worktrees supprimés ; vidage Campaign combiné OK (13 armées, 400 villes, 213 provinces, eau,
+  audio). Galerie du kit vue : bon rendu, marges intérieures manquantes (lot kitfix).
+  Restes de chaque lot : `docs/wip/bm-<lot>.md`.
+- Vague 2 lancée (8 lots Sonnet) : kitfix, menu (accueil, faction, sauvegardes, pause), settings,
+  hud (barre, alertes, fin de tour), panels/{province,diplomacy,tech,army}. Terrain et battle (V1)
+  encore en cours. Attention disque : `bm_wt.sh` clone désormais assets et data en APFS.
