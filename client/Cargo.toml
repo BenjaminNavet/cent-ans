@@ -46,6 +46,8 @@ serde_json = "1"
 [dev-dependencies]
 wesl = "0.6"
 naga = { version = "30", features = ["wgsl-in"] }
+# Snapshot tests of the agent dumps (tests/snapshots.rs); `cargo insta review` to accept.
+insta = { version = "1", features = ["json", "yaml", "redactions", "filters"] }
 
 [profile.dev]
 opt-level = 1
