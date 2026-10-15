@@ -4,6 +4,7 @@
 //! (height field mesh) and battle_camera.gd (TW-style camera). Owned by one lot of agent.
 
 pub mod camera;
+pub mod lighting;
 pub mod replay;
 pub mod replay_bar;
 pub mod setup;
@@ -146,6 +147,7 @@ impl Plugin for BattleScenePlugin {
             .add_plugins((
                 terrain::BattleTerrainPlugin,
                 camera::BattleCameraPlugin,
+                lighting::BattleLightingPlugin,
                 replay_bar::ReplayBarPlugin,
             ))
             .add_systems(OnEnter(AppState::Battle), start_battle)
