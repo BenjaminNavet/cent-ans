@@ -532,6 +532,8 @@ fn interact(
             .height(f64::from(world.x), f64::from(world.y)) as f32;
         moves.write(MoveSelectionTo {
             point: Vec3::new(world.x, height, world.y),
+            // Shift = queued order (mouse-click modifier, like the ground's Shift + right click;
+            // not a remappable action).
             queued: keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]),
             run: false,
         });
