@@ -11,3 +11,7 @@ Reste : les lots propriétaires remplacent les `KeyCode::` ci-dessous (hors test
 - campaign/panels/{tech (F4), chronicle (F5 → `map_toggle_chronicle`), diplomacy (Entrée)}, progress/objectives.rs (O → `map_toggle_objectives`), codex/mod.rs (K → `codex_open`), campaign/hud/help.rs (F1 → `help_open`), hud/replay.rs et flow/loading.rs (Espace/Échap/Entrée : passer), hud/flow.rs (Entrée, a déjà KeyMap), armies/orders.rs (repli `army_test_*` désormais inutile)
 - ui/kit (modal, panel_stack, tooltip : Échap, Alt), menu/mod.rs (Échap, Entrée), agent/mod.rs (table des scripts, légitime)
 Autres champs stockés non lus : colorblind, high_contrast, stance_fill, show_zoc, ai_moves_speed, autosave_interval, tutorial_enabled, blood, unit_size, max_figures, cinematic*, auto_pause_on_alert, season_report, confirm_end_turn, news_filter, next_hint, audio_battle_music/sfx, voice_*, text_size.
+
+## settings4 (vague 5)
+Fait : toutes les actions de `project.godot` et de `battle_hotkeys.gd` réaffectables étaient déjà dans `ACTIONS`. Ajouts (section « Bataille ») : `battle_group_1..9` (chiffres ; Ctrl = enregistrer, Alt+Maj = formation de groupe, le modificateur Ctrl est toléré) et `battle_deselect` (Échap). Écart : en Godot ces touches sont fixes ; ici réaffectables.
+Reste (lots propriétaires) : brancher `battle_group_*` / `battle_deselect` dans battle/orders/hotkeys.rs et input.rs ; le reste de la liste settings3 est inchangé.
