@@ -63,11 +63,13 @@ pub fn pending_label(pending: u8) -> String {
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<TraditionsPanel>()
+        .init_resource::<DevHook>()
         .register_dump(dump)
         .add_systems(OnEnter(AppState::Campaign), reset_on_enter)
         .add_systems(
             Update,
             (
+                dev_hook,
                 open_close.before(crate::menu::pause::pause_escape),
                 handle_buttons.run_if(orders_open),
                 notify_ranks,
@@ -79,14 +81,23 @@ pub fn plugin(app: &mut App) {
         .add_systems(OnExit(AppState::Campaign), close_on_exit);
 }
 
-fn reset_on_enter(mut panel: ResMut<TraditionsPanel>, mut sim: ResMut<Sim>) {
+fn reset_on_enter(mut panel: ResMut<TraditionsPanel>, mut hook: ResMut<DevHook>) {
     *panel = TraditionsPanel::default();
-    if std::env::var("CENT_ANS_OPEN_TRADITIONS").is_err() {
+    hook.0 = std::env::var("CENT_ANS_OPEN_TRADITIONS").is_ok();
+}
+
+/// Dev hook pending (`Sim::state` may not exist yet when the campaign state is entered).
+#[derive(Resource, Default)]
+struct DevHook(bool);
+
+fn dev_hook(mut hook: ResMut<DevHook>, mut panel: ResMut<TraditionsPanel>, mut sim: ResMut<Sim>) {
+    if !hook.0 {
         return;
     }
     let Some(state) = sim.state.as_mut() else {
         return;
     };
+    hook.0 = false;
     let Some(first) = player_armies(state).into_iter().next() else {
         return;
     };
