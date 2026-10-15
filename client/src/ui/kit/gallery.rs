@@ -8,10 +8,14 @@
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
 
+use super::icons::icon;
 use super::modal::{ModalSpec, PRIORITY_DECISION, PRIORITY_REPORT, ToastRequest};
 use super::richtext::RichStyle;
 use super::style::{UiTier, UiType};
 use super::tooltip::{TooltipRegistry, TooltipState};
+use super::tooltip_spec::{
+    TooltipSpec, TooltipStyle, TooltipTexts, register_rule_texts, tooltip_view,
+};
 use super::widgets::*;
 use super::{UiTheme, fr, heading, rich_text, typed};
 use crate::app::AppState;
@@ -37,6 +41,20 @@ impl Plugin for GalleryPlugin {
 
 const SAMPLE: &str = "Le [b]moral[/b] des [i]archers[/i] tombe de [color=#8b1a1a]−12[/color] ; voir [url=ib:rule:morale]moral[/url] et [url=ib:rule:fear]peur[/url]. [img=18x18]ui/medallions/agents.png[/img] Solde [color=#2a6a2a]+3 063 ₶[/color].";
 
+const SPEC_JSON: &str = r#"{
+  "id": "unit_knights", "kind": "unit", "title": "Chevaliers", "subtitle": "Cavalerie lourde",
+  "icon": "unit_knights",
+  "headline": [{"key": "strength", "label": "Effectif", "value": "120"},
+               {"key": "melee", "stat": "melee", "label": "Mêlée", "value": "9", "sign": 1}],
+  "stats": [{"key": "armor", "label": "Armure", "value": "7"}, {"key": "morale", "label": "Moral", "value": "8"}],
+  "effects": [{"key": "army_morale", "label": "Moral des armées", "before": 60, "after": 65, "value": "+5", "sign": 1},
+              {"text": "Entretien accru en hiver", "sign": -1}],
+  "traits": {"strengths": ["charge"], "weaknesses": ["pluie"]},
+  "requires": [{"text": "Écurie", "met": true}],
+  "flavour": "Fleur de la chevalerie.",
+  "footer": {"cost": "300 ₶", "time": "2 saisons"}
+}"#;
+
 fn spawn_gallery(
     mut commands: Commands,
     theme: Res<UiTheme>,
@@ -51,6 +69,9 @@ fn spawn_gallery(
         "ib:rule:fear",
         "[b]Peur[/b]\nUne troupe effrayée rompt la ligne.",
     );
+    if let Ok(texts) = TooltipTexts::load() {
+        register_rule_texts(&mut registry, &texts, |_| None);
+    }
     let theme = theme.clone();
     let body = RichStyle::body(&theme);
     commands
@@ -70,7 +91,7 @@ fn spawn_gallery(
         ))
         .with_children(|root| {
             // Column 1: typography, rich text, money, gauges, separator.
-            root.spawn(panel_sized(&theme, 400.0)).with_children(|col| {
+            root.spawn(panel_sized(&theme, 340.0)).with_children(|col| {
                 col.spawn(heading(&theme, "Typographie"));
                 for variation in [
                     UiType::Title,
@@ -88,7 +109,7 @@ fn spawn_gallery(
                 col.spawn(heading(&theme, "Texte riche"));
                 col.spawn((
                     Node {
-                        max_width: Val::Px(360.0),
+                        max_width: Val::Px(280.0),
                         ..default()
                     },
                     children![rich_text(&theme, &assets, SAMPLE, &body)],
@@ -119,7 +140,7 @@ fn spawn_gallery(
                 col.spawn(separator(&theme));
                 col.spawn(heading(&theme, "Jauges"));
                 for ratio in [0.9, 0.5, 0.15] {
-                    col.spawn(gauge(&theme, "g:gauge", ratio, 220.0));
+                    col.spawn(gauge(&theme, "g:gauge", ratio, 200.0));
                 }
                 col.spawn((icon_chip(
                     &theme,
@@ -130,7 +151,7 @@ fn spawn_gallery(
                 ),));
             });
             // Column 2: controls.
-            root.spawn(panel_sized(&theme, 420.0)).with_children(|col| {
+            root.spawn(panel_sized(&theme, 360.0)).with_children(|col| {
                 col.spawn(heading(&theme, "Boutons"));
                 col.spawn(button_captioned(&theme, "g:normal", "Normal"));
                 col.spawn((
@@ -170,7 +191,7 @@ fn spawn_gallery(
                 });
             });
             // Column 3: list, panels, lettrine.
-            root.spawn(panel_sized(&theme, 400.0)).with_children(|col| {
+            root.spawn(panel_sized(&theme, 340.0)).with_children(|col| {
                 col.spawn(lettrine(&theme, "Écus et livres", 22.0));
                 col.spawn(heading(&theme, "Liste défilante"));
                 col.spawn(scroll_list(&theme, "g:list", 150.0))
@@ -201,6 +222,43 @@ fn spawn_gallery(
                 col.spawn((
                     panel_illuminated(&theme),
                     children![typed(&theme, "Page enluminée", UiType::Heading)],
+                ));
+            });
+            // Column 4: icons and the structured tooltip.
+            root.spawn(panel_sized(&theme, 360.0)).with_children(|col| {
+                col.spawn(heading(&theme, "Icônes"));
+                col.spawn(Node {
+                    column_gap: Val::Px(6.0),
+                    flex_wrap: FlexWrap::Wrap,
+                    row_gap: Val::Px(6.0),
+                    ..default()
+                })
+                .with_children(|row| {
+                    for name in [
+                        "hud_treasury",
+                        "unit_knights",
+                        "agents",
+                        "end_turn",
+                        "diplomacy",
+                        "no_such_icon",
+                    ] {
+                        row.spawn(icon(&theme, &assets, name, 32.0));
+                    }
+                });
+                col.spawn(heading(&theme, "Infobulle structurée"));
+                let spec = TooltipSpec::from_json(SPEC_JSON).unwrap_or_default();
+                let texts = TooltipTexts::load().unwrap_or_default();
+                let tooltip_style = TooltipStyle::load().unwrap_or_default();
+                col.spawn(tooltip_view(
+                    &theme,
+                    &assets,
+                    &spec,
+                    &texts,
+                    &TooltipStyle {
+                        width_px: 300.0,
+                        ..tooltip_style
+                    },
+                    true,
                 ));
             });
         });

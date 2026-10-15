@@ -12,9 +12,10 @@
 use bevy::ecs::relationship::RelatedSpawner;
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
-use bevy::ui::{InteractionDisabled, Pressed};
+use bevy::ui::{IgnoreScroll, InteractionDisabled, Pressed};
 use bevy::ui_widgets::{
-    Button, ScrollArea, Slider, SliderRange, SliderStep, SliderThumb, SliderValue, ValueChange,
+    Button, ControlOrientation, ScrollArea, Scrollbar, ScrollbarThumb, Slider, SliderRange,
+    SliderStep, SliderThumb, SliderValue, ValueChange,
 };
 use serde_json::{Value, json};
 
@@ -151,7 +152,8 @@ impl Plugin for WidgetsPlugin {
                     sync_gauges,
                 )
                     .chain(),
-            );
+            )
+            .add_systems(Update, attach_scrollbars);
     }
 }
 
@@ -192,6 +194,15 @@ pub fn visual_state(hovered: bool, pressed: bool, disabled: bool, on: bool) -> B
         ButtonVisual::Normal
     }
 }
+
+/// Air between a panel's painted frame and its content.
+const PANEL_GAP: f32 = 8.0;
+/// Floor for framed boxes: a frame shorter than this is mostly border.
+pub const MIN_FRAME_HEIGHT: f32 = 40.0;
+/// Inner padding of the flat card (`card_box` has 4 px; more air reads better in Bevy text).
+const CARD_PADDING: f32 = 6.0;
+/// Width of the scrollbar track of a scroll list.
+const SCROLLBAR_WIDTH: f32 = 8.0;
 
 // ---- bundles -----------------------------------------------------------------------------
 
@@ -243,7 +254,8 @@ pub fn panel_page(theme: &UiTheme) -> impl Bundle {
     (
         KitWidget("panel"),
         Node {
-            padding: theme.padding("panel"),
+            padding: theme.inner_padding("panel", PANEL_GAP),
+            min_height: Val::Px(MIN_FRAME_HEIGHT),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(8.0),
             ..default()
@@ -258,7 +270,8 @@ pub fn panel_sized(theme: &UiTheme, width: f32) -> impl Bundle {
         KitWidget("panel"),
         Node {
             width: Val::Px(width),
-            padding: theme.padding("panel"),
+            padding: theme.inner_padding("panel", PANEL_GAP),
+            min_height: Val::Px(MIN_FRAME_HEIGHT),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(8.0),
             ..default()
@@ -272,7 +285,8 @@ pub fn panel_illuminated(theme: &UiTheme) -> impl Bundle {
     (
         KitWidget("panel_illuminated"),
         Node {
-            padding: theme.padding("panel_illuminated"),
+            padding: theme.inner_padding("panel_illuminated", 6.0),
+            min_height: Val::Px(MIN_FRAME_HEIGHT * 2.0),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(10.0),
             ..default()
@@ -286,7 +300,8 @@ pub fn panel_note(theme: &UiTheme) -> impl Bundle {
     (
         KitWidget("panel_note"),
         Node {
-            padding: theme.padding("tooltip"),
+            padding: theme.inner_padding("tooltip", 4.0),
+            min_height: Val::Px(MIN_FRAME_HEIGHT),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(4.0),
             ..default()
@@ -300,7 +315,7 @@ pub fn panel_inset(theme: &UiTheme) -> impl Bundle {
     (
         KitWidget("panel_inset"),
         Node {
-            padding: theme.padding("inset"),
+            padding: theme.inner_padding("inset", 4.0),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(4.0),
             ..default()
@@ -315,7 +330,8 @@ pub fn card(theme: &UiTheme) -> impl Bundle {
     (
         KitWidget("card"),
         Node {
-            padding: UiRect::all(Val::Px(4.0)),
+            padding: UiRect::axes(Val::Px(CARD_PADDING + 4.0), Val::Px(CARD_PADDING)),
+            min_height: Val::Px(MIN_FRAME_HEIGHT),
             border: UiRect::all(Val::Px(1.0)),
             flex_direction: FlexDirection::Column,
             ..default()
@@ -683,12 +699,48 @@ pub fn scroll_list(theme: &UiTheme, name: &str, height: f32) -> impl Bundle {
             height: Val::Px(height),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(2.0),
-            padding: theme.padding("inset"),
+            padding: {
+                let mut padding = theme.inner_padding("inset", 4.0);
+                padding.right = Val::Px(SCROLLBAR_WIDTH + 8.0);
+                padding
+            },
             overflow: Overflow::scroll_y(),
             ..default()
         },
         theme.sliced("inset"),
     )
+}
+
+/// Thin parchment scrollbar for every new [`KitScrollList`]: a track pinned to the right edge of
+/// the list (it ignores the list's own scroll) with a draggable thumb. Bevy's `Scrollbar` moves
+/// the thumb with the scroll position and scrolls the list when the thumb is dragged; the wheel
+/// is handled by `ScrollArea`.
+fn attach_scrollbars(mut commands: Commands, lists: Query<Entity, Added<KitScrollList>>) {
+    for list in &lists {
+        commands.entity(list).with_child((
+            Name::new("ScrollbarTrack"),
+            KitWidget("scrollbar"),
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(2.0),
+                bottom: Val::Px(2.0),
+                right: Val::Px(2.0),
+                width: Val::Px(SCROLLBAR_WIDTH),
+                border_radius: BorderRadius::all(Val::Px(SCROLLBAR_WIDTH * 0.5)),
+                ..default()
+            },
+            IgnoreScroll(BVec2::new(true, true)),
+            BackgroundColor(style::PARCHMENT_DARK.with_alpha(0.45)),
+            Scrollbar::new(list, ControlOrientation::Vertical, 24.0),
+            children![(
+                ScrollbarThumb {
+                    border_radius: BorderRadius::all(Val::Px(SCROLLBAR_WIDTH * 0.5)),
+                    ..default()
+                },
+                BackgroundColor(style::INK_SOFT.with_alpha(0.85)),
+            )],
+        ));
+    }
 }
 
 /// Selectable row of a list (`group` = one selection per group). Emits [`ListSelected`].
@@ -769,14 +821,16 @@ pub fn lettrine(theme: &UiTheme, content: &str, size: f32) -> impl Bundle {
         KitWidget("lettrine"),
         Node {
             align_items: AlignItems::Center,
-            column_gap: Val::Px(1.0),
+            column_gap: Val::Px(LETTRINE_GAP),
             ..default()
         },
         children![
             (
                 Node {
                     width: Val::Px(field),
+                    min_width: Val::Px(field),
                     height: Val::Px(field),
+                    flex_shrink: 0.0,
                     border: UiRect::all(Val::Px(2.0)),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
@@ -791,6 +845,10 @@ pub fn lettrine(theme: &UiTheme, content: &str, size: f32) -> impl Bundle {
                 )],
             ),
             (
+                Node {
+                    flex_shrink: 1.0,
+                    ..default()
+                },
                 Text::new(rest),
                 theme.title_font(size),
                 TextColor(style::INK_TITLE),
@@ -798,6 +856,10 @@ pub fn lettrine(theme: &UiTheme, content: &str, size: f32) -> impl Bundle {
         ],
     )
 }
+
+/// Space between the lettrine's field and the rest of the title (Godot `Lettrine.GAP` is 1 px
+/// with its glyph drawn inside the field; here the rest of the title is its own text node).
+const LETTRINE_GAP: f32 = 6.0;
 
 /// Lettrines carry no accents (the accent would overflow the field).
 pub fn unaccent(letter: char) -> char {
