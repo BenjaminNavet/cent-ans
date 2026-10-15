@@ -4,4 +4,5 @@ pub mod decor;
 pub mod hud;
 pub mod orders;
 pub mod scene;
+pub mod siege;
 pub mod units;

@@ -78,6 +78,9 @@ fn main() -> ExitCode {
             campaign::vegetation::CampaignVegetationPlugin,
             campaign::life::CampaignLifePlugin,
             campaign::weather::CampaignWeatherPlugin,
+            campaign::towns::CampaignTownsPlugin,
+            campaign::countryside::CampaignCountrysidePlugin,
+            campaign::progress::CampaignProgressPlugin,
         ))
         .add_plugins((
             battle::scene::BattleScenePlugin,
@@ -85,6 +88,7 @@ fn main() -> ExitCode {
             battle::orders::BattleOrdersPlugin,
             battle::hud::BattleHudPlugin,
             battle::decor::BattleDecorPlugin,
+            battle::siege::BattleSiegePlugin,
             flow::FlowPlugin,
         ))
         .insert_resource(cli);
