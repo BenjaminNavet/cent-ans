@@ -8,6 +8,7 @@ pub mod faction;
 pub mod hud;
 pub mod pprovince;
 pub mod province;
+pub mod tech;
 pub mod turn;
 
 pub use army::{army_ids, army_sheet, ArmySheet};
@@ -18,4 +19,5 @@ pub use hud::{
     EconomyView, ForecastView, TopBar,
 };
 pub use province::{province_sheet, ProvinceSheet};
+pub use tech::{tech_tree, TechTree};
 pub use turn::{turn_readiness, Alert, TurnReadiness};
