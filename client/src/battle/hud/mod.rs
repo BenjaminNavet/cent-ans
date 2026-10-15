@@ -41,6 +41,7 @@ pub mod abilities;
 pub mod aftermath;
 pub mod alerts;
 pub mod cards;
+pub mod commands;
 pub mod compare;
 pub mod cursor_tips;
 pub mod formation_menu;
@@ -99,6 +100,8 @@ pub struct HudData {
     pub finished: bool,
     /// Abilities of the player's regiments, in their Alt+n order.
     pub abilities: HashMap<u32, Vec<abilities::AbilityState>>,
+    /// « Temps clair », « Pluie »… (the simulated weather, it may change during the battle).
+    pub weather: String,
 }
 
 impl HudData {
@@ -154,6 +157,7 @@ impl Plugin for BattleHudPlugin {
                 alerts::AlertsPlugin,
                 abilities::AbilitiesPlugin,
                 cards::CardsPlugin,
+                commands::CommandsPlugin,
                 minimap::MinimapPlugin,
                 orders_bar::OrdersBarPlugin,
                 formation_menu::FormationMenuPlugin,
@@ -287,6 +291,7 @@ fn refresh_data(
         colors: [color_of(player), color_of(enemy_side)],
         finished,
         abilities: ability_states,
+        weather: sim.weather().label_fr().to_owned(),
     };
     for alert in sim.take_new_alerts() {
         raised.write(BattleAlertRaised(alert));
@@ -321,6 +326,7 @@ fn reset_data(mut data: ResMut<HudData>, mut texts: ResMut<HudTexts>) {
 }
 
 /// Spawns the HUD once the first data is in.
+#[allow(clippy::too_many_arguments)]
 fn build_hud(
     mut commands: Commands,
     roots: Query<(), With<BattleHudRoot>>,
@@ -329,6 +335,7 @@ fn build_hud(
     data: Res<HudData>,
     mut texts: ResMut<HudTexts>,
     mut registry: ResMut<TooltipRegistry>,
+    mut session: ResMut<BattleSession>,
 ) {
     if !roots.is_empty() || data.tick.is_none() {
         return;
@@ -361,11 +368,70 @@ fn build_hud(
         assets: &assets,
         data: &data,
     };
-    speed::spawn_top_bar(&mut commands, root, &ctx);
-    speed::spawn_speed_panel(&mut commands, root, &ctx);
+    speed::spawn_top_bar(&mut commands, root, &ctx, &mut session);
+    speed::spawn_corner(&mut commands, root, &ctx);
     cards::spawn_band(&mut commands, root, &ctx, &texts.texts);
-    alerts::spawn_column(&mut commands, root, &ctx);
+    let alerts_slot = spawn_left_stack(&mut commands, root);
+    alerts::spawn_column(&mut commands, alerts_slot, &ctx);
     compare::spawn_panel(&mut commands, root, &ctx);
+}
+
+/// Column at the top left (Godot zone `TOASTS`): the journal, then the alerts under it, so the
+/// two never cover each other nor the title bar.
+/// Returns the alerts slot.
+fn spawn_left_stack(commands: &mut Commands, root: Entity) -> Entity {
+    use geometry::{HudSlot, LEFT_STACK_TOP, LEFT_STACK_WIDTH};
+    let stack = commands
+        .spawn((
+            Name::new("LeftStack"),
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(8.0),
+                top: Val::Px(LEFT_STACK_TOP),
+                width: Val::Px(LEFT_STACK_WIDTH),
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(6.0),
+                ..default()
+            },
+            Pickable::IGNORE,
+            ChildOf(root),
+        ))
+        .id();
+    let mut alerts = stack;
+    for (name, slot) in [
+        ("JournalSlot", HudSlot::Journal),
+        ("AlertsSlot", HudSlot::Alerts),
+    ] {
+        let entity = commands
+            .spawn((
+                Name::new(name),
+                slot,
+                Node {
+                    width: Val::Percent(100.0),
+                    flex_direction: FlexDirection::Column,
+                    ..default()
+                },
+                Pickable::IGNORE,
+                ChildOf(stack),
+            ))
+            .id();
+        if slot == HudSlot::Alerts {
+            alerts = entity;
+        }
+    }
+    alerts
+}
+
+/// Parent for a piece built by another plugin: its [`geometry::HudSlot`] node, else the root.
+pub fn slot_or_root(
+    slots: &Query<(Entity, &geometry::HudSlot)>,
+    slot: geometry::HudSlot,
+    root: Entity,
+) -> Entity {
+    slots
+        .iter()
+        .find(|(_, s)| **s == slot)
+        .map_or(root, |(entity, _)| entity)
 }
 
 fn dump_hud(world: &World) -> (String, serde_json::Value) {
@@ -382,6 +448,7 @@ fn dump_hud(world: &World) -> (String, serde_json::Value) {
             "strength": data.strength,
             "factions": data.faction_names,
             "cards": cards::dump(world),
+            "commands": commands::dump(world),
             "alerts": alerts::dump(world),
             "speed": speed::dump(world),
             "compare": compare::dump(world),

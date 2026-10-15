@@ -26,9 +26,7 @@ use crate::battle::scene::camera::{BattleCamera, BattleCameraState};
 use crate::ui::kit::tooltip::Tooltip;
 
 /// Size of the node (`BattleMinimap.SIZE`).
-pub const MAP_SIZE: Vec2 = Vec2::new(168.0, 104.0);
-/// `right` offset of the minimap: left of the speed column.
-pub const MAP_RIGHT: f32 = super::speed::SPEED_PANEL_WIDTH + 14.0;
+pub const MAP_SIZE: Vec2 = Vec2::new(200.0, 124.0);
 /// Pixels of the picture per logical pixel.
 const SCALE: u32 = 2;
 /// Duration of the ping ring (s).
@@ -436,6 +434,7 @@ fn reset(mut state: ResMut<MinimapState>) {
 fn spawn(
     mut commands: Commands,
     roots: Query<Entity, With<BattleHudRoot>>,
+    slots: Query<(Entity, &super::geometry::HudSlot)>,
     existing: Query<(), With<MinimapNode>>,
     mut session: ResMut<BattleSession>,
     mut state: ResMut<MinimapState>,
@@ -480,15 +479,19 @@ fn spawn(
             "[b]Minicarte[/b]\nClic ou glisser : déplacer la caméra. Clic droit : envoyer la sélection à cet endroit (Maj : ordre en file).",
         ),
         Node {
-            position_type: PositionType::Absolute,
-            right: Val::Px(MAP_RIGHT),
-            bottom: Val::Px(6.0),
             width: Val::Px(MAP_SIZE.x),
             height: Val::Px(MAP_SIZE.y),
+            flex_shrink: 0.0,
+            border: UiRect::all(Val::Px(1.0)),
             ..default()
         },
+        BorderColor::all(crate::ui::kit::style::INK_SOFT),
         ImageNode::new(handle),
-        ChildOf(root),
+        ChildOf(super::slot_or_root(
+            &slots,
+            super::geometry::HudSlot::Map,
+            root,
+        )),
     ));
 }
 
@@ -707,9 +710,13 @@ mod tests {
         assert_eq!(raster.data.len(), 20 * 10 * 4);
     }
 
+    /// Size of the minimap picture (`MAP_SIZE` x `SCALE`).
+    const W: u32 = MAP_SIZE.x as u32 * SCALE;
+    const H: u32 = MAP_SIZE.y as u32 * SCALE;
+
     #[test]
     fn dynamic_layer_draws_dots_and_keeps_the_base() {
-        let base = Raster::new(336, 208, [200, 190, 140, 255]);
+        let base = Raster::new(W, H, [200, 190, 140, 255]);
         let colors = [Color::srgb(0.0, 0.0, 1.0), Color::srgb(1.0, 0.0, 0.0)];
         let raster = render_dynamic(
             &base,
@@ -722,15 +729,15 @@ mod tests {
             None,
             None,
         );
-        assert_eq!(raster.pixel(168, 104), [0, 0, 255, 255]);
-        assert_eq!(raster.pixel(84, 52), [255, 0, 0, 255]);
-        assert_eq!(base.pixel(168, 104), [200, 190, 140, 255]);
+        assert_eq!(raster.pixel(W / 2, H / 2), [0, 0, 255, 255]);
+        assert_eq!(raster.pixel(W / 4, H / 4), [255, 0, 0, 255]);
+        assert_eq!(base.pixel(W / 2, H / 2), [200, 190, 140, 255]);
         assert_eq!(raster.pixel(100, 100), [200, 190, 140, 255]);
     }
 
     #[test]
     fn colorblind_mode_swaps_colours_and_draws_enemy_diamonds() {
-        let base = Raster::new(336, 208, [200, 190, 140, 255]);
+        let base = Raster::new(W, H, [200, 190, 140, 255]);
         let colors = [Color::srgb(0.0, 0.0, 1.0), Color::srgb(1.0, 0.0, 0.0)];
         let draw = |colorblind| {
             render_dynamic(
@@ -748,8 +755,8 @@ mod tests {
         let (normal, blind) = (draw(false), draw(true));
         // Two pixels right of the centre: inside the diamond (r 3.5), outside the 4 px square.
         let background = [200, 190, 140, 255];
-        assert_eq!(normal.pixel(84 + 2, 52), background);
-        assert_ne!(blind.pixel(84 + 2, 52), background);
-        assert_ne!(blind.pixel(168, 104), normal.pixel(168, 104));
+        assert_eq!(normal.pixel(W / 4 + 2, H / 4), background);
+        assert_ne!(blind.pixel(W / 4 + 2, H / 4), background);
+        assert_ne!(blind.pixel(W / 2, H / 2), normal.pixel(W / 2, H / 2));
     }
 }

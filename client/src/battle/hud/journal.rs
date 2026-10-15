@@ -12,7 +12,7 @@ use crate::app::AppState;
 use crate::battle::scene::BattleSession;
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::tooltip::Tooltip;
-use crate::ui::kit::widgets::{heading, panel_note};
+use crate::ui::kit::widgets::panel_note;
 use crate::ui::kit::{ButtonPressed, UiTheme};
 
 pub const MAX_LOG: usize = 8;
@@ -136,6 +136,7 @@ fn reset(mut book: ResMut<LogBook>) {
 fn spawn(
     mut commands: Commands,
     roots: Query<Entity, With<BattleHudRoot>>,
+    slots: Query<(Entity, &super::geometry::HudSlot)>,
     existing: Query<(), With<JournalPanel>>,
     theme: Res<UiTheme>,
 ) {
@@ -143,18 +144,17 @@ fn spawn(
     if !existing.is_empty() {
         return;
     }
+    // Top of the left column (Godot zone `TOASTS`), the alerts under it.
+    let parent = super::slot_or_root(&slots, super::geometry::HudSlot::Journal, root);
     let wrapper = commands
         .spawn((
             Name::new("BattleLog"),
             JournalPanel,
             Node {
-                position_type: PositionType::Absolute,
-                right: Val::Px(12.0),
-                top: Val::Px(70.0),
-                width: Val::Px(348.0),
+                width: Val::Percent(100.0),
                 ..default()
             },
-            ChildOf(root),
+            ChildOf(parent),
         ))
         .id();
     let panel = commands.spawn((panel_note(&theme), ChildOf(wrapper))).id();
@@ -169,7 +169,12 @@ fn spawn(
             ChildOf(panel),
         ))
         .id();
-    commands.spawn((heading(&theme, "Journal de bataille"), ChildOf(header)));
+    commands.spawn((
+        Text::new("Journal de bataille"),
+        theme.text_font(true, false, UiType::Body.size() + 1.0),
+        TextColor(style::INK_TITLE),
+        ChildOf(header),
+    ));
     let toggle = commands
         .spawn((
             Name::new(TOGGLE_NAME),

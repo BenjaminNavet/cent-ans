@@ -257,21 +257,19 @@ fn collect_alerts(
     }
 }
 
-/// Spawns the (initially hidden) column.
-pub fn spawn_column(commands: &mut Commands, root: Entity, ctx: &BuildCtx) {
+/// Spawns the (initially hidden) column in `parent` (the alerts slot of the left column, under
+/// the journal).
+pub fn spawn_column(commands: &mut Commands, parent: Entity, ctx: &BuildCtx) {
     let wrapper = commands
         .spawn((
             Name::new("BattleAlertsColumn"),
             AlertFrame,
             Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(8.0),
-                top: Val::Px(8.0),
-                width: Val::Px(260.0),
+                width: Val::Percent(100.0),
                 display: Display::None,
                 ..default()
             },
-            ChildOf(root),
+            ChildOf(parent),
         ))
         .id();
     let outer = commands
