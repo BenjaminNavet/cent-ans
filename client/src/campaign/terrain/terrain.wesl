@@ -73,6 +73,14 @@ struct LookParams {
     cumulus_b: vec4<f32>,
     cumulus_c: vec4<f32>,
     cumulus_d: vec4<f32>,
+    // Morning mist: fog weight under the focus, morning share, wet dim, valley mist opacity.
+    mist: vec4<f32>,
+    // TB6 valley mist: depth (m, from, full), plain altitude (m, full, none) / crest height (m),
+    // plain share, bank scale / drift, grazing gain, lifted share, near share / colour.
+    valley_a: vec4<f32>,
+    valley_b: vec4<f32>,
+    valley_c: vec4<f32>,
+    valley_color: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(4) var<uniform> look: LookParams;
@@ -342,14 +350,67 @@ fn fbm(p_in: vec2<f32>) -> f32 {
     return v;
 }
 
-// Wet ground (darker, glossier) and fresh snow of the current weather.
+// Wind of the weather (`weather_wind` of campaign_weather.gdshaderinc), map px per second.
+const WX_WIND = vec2<f32>(3.0, 0.6);
+// Morning mist sheet: max opacity, share kept near the camera, footprint below which it thins
+// (`weather_mist_max`, `weather_mist_near`, `weather_mist_near_footprint`).
+const WX_MIST_MAX: f32 = 0.07;
+const WX_MIST_NEAR: f32 = 0.2;
+const WX_MIST_NEAR_FOOTPRINT: f32 = 0.06;
+
+// Regional mean altitude (m): 3 x 3 taps of the 16 px block raster over ~190 map px, in place of
+// the Godot heightmap mip 7 (`weather_valley_lods.y`, about 90 km).
+fn wx_height_wide(p: vec2<f32>) -> f32 {
+    var sum = 0.0;
+    for (var j = -1; j <= 1; j = j + 1) {
+        for (var i = -1; i <= 1; i = i + 1) {
+            sum = sum + pm_height(p + vec2<f32>(f32(i), f32(j)) * 64.0);
+        }
+    }
+    return sum / 9.0;
+}
+
+// Morning mist of the "fog" weather (port of the B channel of `weather_ground`): a thin sheet
+// capped at 7 % in the lowlands, then TB6 wide banks in the large valleys and low plains, both
+// thinned near the camera and lifted over the turn.
+fn weather_mist(col: vec3<f32>, p: vec2<f32>, hc: f32, footprint: f32, grazing: f32) -> vec3<f32> {
+    let wb = look.mist.x;
+    if (wb <= 0.001) {
+        return col;
+    }
+    let morning = look.mist.y;
+    let t = globals.time;
+    let near_k = smoothstep(WX_MIST_NEAR_FOOTPRINT * 0.5, WX_MIST_NEAR_FOOTPRINT * 2.0, footprint);
+    let low = 1.0 - smoothstep(150.0, 700.0, hc);
+    let patches = smoothstep(0.3, 0.75, fbm(p * 0.02 - t * WX_WIND * 0.004));
+    var mist = wb * mix(0.3, 0.75, low) * mix(0.35, 1.0, morning) * (0.35 + 0.65 * patches);
+    mist = mist * mix(WX_MIST_NEAR, 1.0, near_k);
+    let veil = mix(vec3<f32>(0.62, 0.64, 0.66), col * 1.6, 0.35);
+    var out = mix(col, veil, clamp(mist, 0.0, WX_MIST_MAX));
+    let opacity = look.mist.w;
+    if (opacity > 0.0 && hc >= 1.0) {
+        let h_mid = pm_height(p);
+        let h_wide = wx_height_wide(p);
+        let basin = smoothstep(look.valley_a.x, look.valley_a.y, h_wide - h_mid);
+        let plain = (1.0 - smoothstep(look.valley_a.z, look.valley_a.w, h_mid)) * look.valley_b.z;
+        let crest = 1.0 - smoothstep(look.valley_b.x, look.valley_b.y, hc - h_mid);
+        let bq = (p - t * WX_WIND * look.valley_c.x) * look.valley_b.w;
+        let banks = smoothstep(0.2, 0.8, fbm(bq) * 0.75 + vnoise(bq * 0.37 + 4.1) * 0.25);
+        let optical = max(basin, plain) * crest * banks * (1.0 + look.valley_c.y * grazing);
+        let lifted = mix(look.valley_c.z, 1.0, morning);
+        let near = mix(look.valley_c.w, 1.0, near_k);
+        let valley = clamp(wb * optical * lifted, 0.0, 1.0) * opacity * near;
+        out = mix(out, look.valley_color.rgb, valley);
+    }
+    return out;
+}
+
+// Wet ground (slightly darker, TB6 `weather_wet_dim`) and fresh snow of the current weather.
 fn weather_ground(col: vec3<f32>, n: vec3<f32>, altitude: f32, p: vec2<f32>) -> vec3<f32> {
     var out = col;
     let land = smoothstep(0.0, 4.0, altitude);
     let wet = look.weather.x;
-    out = out * (1.0 - 0.28 * wet * land);
-    let luma = dot(out, vec3<f32>(0.299, 0.587, 0.114));
-    out = mix(out, vec3<f32>(luma) * 1.05, 0.12 * wet * land);
+    out = out * (1.0 - look.mist.z * wet * land);
     // Fresh snow: patchy at its start, flat ground first, slides off steep slopes.
     let fresh = look.weather.y;
     let patches = smoothstep(0.30, 0.62, fbm(p * 0.05) + fresh * 0.45);
@@ -1847,6 +1908,8 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     }
     albedo = season_ground(albedo, n, in.altitude, in.world.xz);
     albedo = weather_ground(albedo, n, in.altitude, in.world.xz);
+    let to_eye = normalize(view.world_position - in.world);
+    albedo = weather_mist(albedo, in.world.xz, in.altitude, ground_footprint, 1.0 - abs(to_eye.y));
     albedo = fog_of_war_veil(albedo, in.world.xz);
     // RV-C: fair-weather cumulus shadows (gone on the parchment).
     let area_px = sqrt(length(dpdx(in.world.xz)) * length(dpdy(in.world.xz)));

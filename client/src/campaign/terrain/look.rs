@@ -41,6 +41,19 @@ pub struct LookParams {
     pub cumulus_c: Vec4,
     /// CPU side: base strength, medium-range scale, medium band (camera distances).
     pub cumulus_d: Vec4,
+    /// Morning mist of the "fog" weather (`campaign_weather.gdshaderinc`): fog weight under the
+    /// focus (eased), morning share (1 at the start of the turn), wet dim (`clouds.wet_dim`),
+    /// valley mist opacity (`morning_mist.opacity`, 0 = off).
+    pub mist: Vec4,
+    /// TB6 valley mist (`morning_mist` block): valley depth (m, from, full), plain altitude (m,
+    /// full, none).
+    pub valley_a: Vec4,
+    /// Crest height (m, from, gone), plain share, bank scale (1 / map px).
+    pub valley_b: Vec4,
+    /// Drift (share of the wind), grazing gain, lifted share, near share.
+    pub valley_c: Vec4,
+    /// Valley mist colour (linear), 0.
+    pub valley_color: Vec4,
 }
 
 impl Default for LookParams {
@@ -59,6 +72,12 @@ impl Default for LookParams {
             cumulus_b: Vec4::new(0.22, 0.5, 34.0, 12.0),
             cumulus_c: Vec4::new(0.94, 0.97, 1.06, 4.0),
             cumulus_d: Vec4::new(0.4, 0.3, 200.0, 500.0),
+            // Shader defaults of `campaign_weather.gdshaderinc` (valley mist off without data).
+            mist: Vec4::new(0.0, 1.0, 0.04, 0.0),
+            valley_a: Vec4::new(10.0, 140.0, 40.0, 220.0),
+            valley_b: Vec4::new(30.0, 150.0, 0.6, 0.006),
+            valley_c: Vec4::new(0.5, 0.6, 0.35, 0.5),
+            valley_color: Vec4::new(0.69, 0.67, 0.6, 0.0),
         }
     }
 }
@@ -125,6 +144,37 @@ impl LookParams {
             band[0],
             band[1],
         );
+        out.mist.z = num("wet_dim", out.mist.z);
+        // TB6 valley mist (`CampaignWeatherView._apply_ground_tuning`).
+        let mist = &data["morning_mist"];
+        let mnum = |key: &str, fallback: f32| mist[key].as_f64().map_or(fallback, |v| v as f32);
+        let mpair = |key: &str, fallback: (f32, f32)| match mist[key].as_array() {
+            Some(a) if a.len() >= 2 => (
+                a[0].as_f64().map_or(fallback.0, |v| v as f32),
+                a[1].as_f64().map_or(fallback.1, |v| v as f32),
+            ),
+            _ => fallback,
+        };
+        let depth = mpair("valley_depth_m", (out.valley_a.x, out.valley_a.y));
+        let plain = mpair("plain_altitude_m", (out.valley_a.z, out.valley_a.w));
+        let crest = mpair("crest_height_m", (out.valley_b.x, out.valley_b.y));
+        out.mist.w = mnum("opacity", out.mist.w).clamp(0.0, 1.0);
+        out.valley_a = Vec4::new(depth.0, depth.1, plain.0, plain.1);
+        out.valley_b = Vec4::new(
+            crest.0,
+            crest.1,
+            mnum("plain_share", out.valley_b.z),
+            mnum("bank_scale", out.valley_b.w),
+        );
+        out.valley_c = Vec4::new(
+            mnum("drift", out.valley_c.x),
+            mnum("grazing_gain", out.valley_c.y),
+            mnum("lifted_share", out.valley_c.z),
+            mnum("near_share", out.valley_c.w),
+        );
+        if let Some(c) = mist["color"].as_str().and_then(hex_color) {
+            out.valley_color = c.extend(0.0);
+        }
         out
     }
 
@@ -169,17 +219,28 @@ pub fn sync_cumulus(
 pub struct GroundWeather {
     pub wet: f32,
     pub fresh_snow: f32,
+    /// Fog weight under the focus (the B channel of the Godot weather mask), eased.
+    pub fog: f32,
 }
 
 /// Wet and snow targets of a weather kind at an intensity.
 pub fn weather_targets(kind: Kind, intensity: f32) -> (f32, f32) {
     let k = 0.45 + 0.55 * intensity.clamp(0.0, 1.0);
     match kind {
+        // Godot wets the ground under rain and storm only (`max(w.r, w.a)`).
         Kind::Rain => (0.9 * k, 0.0),
         Kind::Storm => (1.0, 0.0),
-        Kind::Snow => (0.25 * k, 0.8 * k),
-        Kind::Fog => (0.3 * k, 0.0),
-        Kind::Clear => (0.0, 0.0),
+        Kind::Snow => (0.0, 0.8 * k),
+        Kind::Fog | Kind::Clear => (0.0, 0.0),
+    }
+}
+
+/// Fog weight of a weather kind at an intensity (B channel of the Godot weather mask).
+pub fn fog_target(kind: Kind, intensity: f32) -> f32 {
+    if kind == Kind::Fog {
+        intensity.clamp(0.0, 1.0)
+    } else {
+        0.0
     }
 }
 
@@ -278,13 +339,22 @@ pub fn sync_weather(
     };
     ground.wet = rate(ground.wet, wet);
     ground.fresh_snow = rate(ground.fresh_snow, snow);
+    ground.fog = rate(
+        ground.fog,
+        fog_target(view.focus_entry.kind, view.focus_entry.intensity),
+    );
+    let morning = view.morning_mist.clamp(0.0, 1.0);
     let changed = materials.get(&handle.0).is_some_and(|m| {
         (m.look.weather.x - ground.wet).abs() > 1e-4
             || (m.look.weather.y - ground.fresh_snow).abs() > 1e-4
+            || (m.look.mist.x - ground.fog).abs() > 1e-4
+            || (m.look.mist.y - morning).abs() > 1e-3
     });
     if changed && let Some(mut material) = materials.get_mut(&handle.0) {
         material.look.weather.x = ground.wet;
         material.look.weather.y = ground.fresh_snow;
+        material.look.mist.x = ground.fog;
+        material.look.mist.y = morning;
     }
 }
 
@@ -324,6 +394,25 @@ mod tests {
         assert!(wet > 0.5 && snow == 0.0);
         let (wet, snow) = weather_targets(Kind::Snow, 1.0);
         assert!(snow > 0.7 && wet < snow);
+        // Fog does not wet the ground (Godot `max(w.r, w.a)`), it lays the morning mist.
+        assert_eq!(weather_targets(Kind::Fog, 1.0), (0.0, 0.0));
+        assert_eq!(fog_target(Kind::Fog, 0.8), 0.8);
+        assert_eq!(fog_target(Kind::Rain, 0.8), 0.0);
+    }
+
+    #[test]
+    fn morning_mist_reads_the_data() {
+        let text = std::fs::read_to_string(
+            crate::paths::find_root()
+                .unwrap()
+                .join("data/ui/campaign_map.json"),
+        )
+        .unwrap();
+        let look = LookParams::from_map_json(&text);
+        assert!((look.mist.z - 0.04).abs() < 1e-6, "wet_dim {}", look.mist.z);
+        assert!((look.mist.w - 0.32).abs() < 1e-6, "opacity {}", look.mist.w);
+        assert_eq!(look.valley_a, Vec4::new(10.0, 140.0, 40.0, 220.0));
+        assert!((look.valley_c.w - 0.5).abs() < 1e-6);
     }
 
     #[test]

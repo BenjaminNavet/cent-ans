@@ -26,8 +26,10 @@ use crate::campaign::terrain::surface::GroundHeight;
 const DRIFT_UNITS: f32 = 28.0;
 /// Seconds of a full drift cycle.
 const DRIFT_PERIOD: f32 = 140.0;
-/// Shadow opacity near the camera (fades out in the medium view as the clouds thicken).
-const SHADOW_ALPHA: f32 = 0.16;
+/// Wide shadow of the weather clouds on the ground (`clouds.mask_shadow` of the Godot data); the
+/// sprite shadow carries it on top of `weather_shadow`, so the ground darkens by ~11 % at the core
+/// of a shadow as in Godot (TB6: under 15 % with the wet ground), not 16 % as before.
+const MASK_SHADOW: f32 = 0.06;
 /// Lift of a shadow above the highest ground under it.
 const SHADOW_LIFT: f32 = 0.12;
 
@@ -282,7 +284,8 @@ fn sync_clouds(
 /// Opacity of a cloud of `kind` and of the shared shadow at camera distance `distance`.
 pub fn alphas(tuning: &CloudTuning, distance: f32) -> (f32, f32) {
     let cloud = tuning.alpha_at(distance);
-    let shadow = SHADOW_ALPHA * (1.0 - smoothstep(tuning.medium[0], tuning.medium[1], distance));
+    let shadow = (tuning.weather_shadow + MASK_SHADOW)
+        * (1.0 - smoothstep(tuning.medium[0], tuning.medium[1], distance));
     (cloud, shadow)
 }
 
