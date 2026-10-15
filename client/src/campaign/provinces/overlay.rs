@@ -15,7 +15,7 @@ use std::collections::HashMap;
 
 use super::borders::{self, BorderCounts, BorderStyle, Edge, smoothstep};
 use super::data::ProvinceMap;
-use super::drape::{OverlayParams, ProvinceBorderMaterial, ProvinceFillMaterial};
+use super::drape::{BorderShape, OverlayParams, ProvinceBorderMaterial, ProvinceFillMaterial};
 use super::labels::camera_ground_distance;
 use super::modes::{self, MapMode, MapModeState, ProvinceView, SetMapMode, Tuning, num};
 use super::picker::{HoveredProvince, ProvinceClicked, SelectedProvince};
@@ -40,8 +40,6 @@ const REFRESH_PERIOD_S: f32 = 0.25;
 pub struct ProvinceOverlayConfig {
     pub fill_height: f32,
     pub border_height: f32,
-    /// World size of one screen pixel of the 1080p border tuning.
-    pub border_world_per_px: f32,
 }
 
 impl Default for ProvinceOverlayConfig {
@@ -49,7 +47,6 @@ impl Default for ProvinceOverlayConfig {
         Self {
             fill_height: 0.05,
             border_height: 3.0,
-            border_world_per_px: 3.0,
         }
     }
 }
@@ -75,6 +72,10 @@ pub struct OverlayState {
     border_material: Handle<ProvinceBorderMaterial>,
     halo_mesh: Handle<Mesh>,
     halo_material: Handle<ProvinceBorderMaterial>,
+    /// Width factors last sent to the border materials (dump).
+    pub view_scale: borders::ViewScale,
+    /// Camera distance (map units) of the last frame, `None` before the first camera.
+    pub camera_distance: Option<f32>,
     /// Current breathing factor of the player's halo.
     pub halo_pulse: f32,
     border_key: Option<BorderKey>,
@@ -88,6 +89,7 @@ pub struct OverlayState {
 struct BorderKey {
     mode: MapMode,
     focus: [String; 2],
+    parchment_focus: bool,
     view_generation: u32,
 }
 
@@ -167,10 +169,12 @@ fn load_province_map(
         relief_floor: Handle::default(),
         fill: fill_image.clone(),
     });
+    let shape = BorderShape::from_tuning(&tuning.borders);
     let border_material = border_materials.add(ProvinceBorderMaterial {
         params: OverlayParams::new(config.border_height, LIFT_PER_DISTANCE),
         relief: ReliefParams::default(),
         relief_floor: Handle::default(),
+        shape,
     });
     let border_mesh = meshes.add(Mesh::new(
         PrimitiveTopology::TriangleList,
@@ -196,6 +200,7 @@ fn load_province_map(
         params: OverlayParams::new(config.border_height, LIFT_PER_DISTANCE),
         relief: ReliefParams::default(),
         relief_floor: Handle::default(),
+        shape,
     });
     let halo_mesh = meshes.add(Mesh::new(
         PrimitiveTopology::TriangleList,
@@ -237,6 +242,11 @@ fn load_province_map(
         halo_mesh,
         halo_material,
         halo_pulse: 1.0,
+        view_scale: borders::ViewScale {
+            width: 1.0,
+            glow: 1.0,
+        },
+        camera_distance: None,
         border_key: None,
         view_key: None,
         since_refresh: f32::INFINITY,
@@ -369,11 +379,11 @@ fn refresh_overlays(
     sim: Res<Sim>,
     map: Res<ProvinceMap>,
     tuning: Res<Tuning>,
-    config: Res<ProvinceOverlayConfig>,
     mode: Res<MapModeState>,
     hovered: Res<HoveredProvince>,
     selected: Res<SelectedProvince>,
     ground: Option<Res<GroundHeight>>,
+    zoom: Option<Res<ZoomView>>,
     mut overlay: ResMut<OverlayState>,
     mut images: ResMut<Assets<Image>>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -384,6 +394,7 @@ fn refresh_overlays(
     let (Some(data), Some(state)) = (sim.data.as_ref(), sim.state.as_ref()) else {
         return;
     };
+    let parchment_focus = parchment_focus(&tuning, zoom.as_deref());
     let viewer_name = mode
         .focus_faction
         .clone()
@@ -399,7 +410,7 @@ fn refresh_overlays(
         if overlay
             .border_key
             .as_ref()
-            .is_some_and(|k| k.focus == focus)
+            .is_some_and(|k| k.focus == focus && k.parchment_focus == parchment_focus)
         {
             return;
         }
@@ -447,13 +458,15 @@ fn refresh_overlays(
     let key = BorderKey {
         mode: mode.mode,
         focus: focus_owners(&overlay.view, &hovered, &selected),
+        parchment_focus,
         view_generation: *generation,
     };
     if overlay.border_key.as_ref() != Some(&key) {
         let style = BorderStyle {
             mode: mode.mode,
             focus_owners: key.focus.clone(),
-            world_per_px: config.border_world_per_px,
+            parchment_focus,
+            glow: true,
             hatch: true,
         };
         // Altitude in metres: the vertex shader drapes it and adds `border_height`.
@@ -481,6 +494,13 @@ fn refresh_overlays(
         overlay.border_key = Some(key);
         overlay.border_rebuilds += 1;
     }
+}
+
+/// Strategic (parchment) view in force: the rest style gives way to full intensity there
+/// (`rest.parchment_focus`, `pw * parchment_focus` >= 0.5).
+fn parchment_focus(tuning: &Tuning, zoom: Option<&ZoomView>) -> bool {
+    let strategic = zoom.map_or(0.0, |z| z.strategic);
+    strategic * num(&tuning.borders, &["rest", "parchment_focus"], 1.0) >= 0.5
 }
 
 /// Owners of the hovered and selected provinces (empty string for none).
@@ -513,9 +533,23 @@ fn fade_with_zoom(
         .and_then(|(c, t)| camera_ground_distance(c, t));
     let (mode_alpha, _) = modes::mode_border_style(mode.mode, &tuning);
     let mpp = map.projection.meters_per_px() as f32;
+    let strategic = zoom.as_ref().map_or(0.0, |z| z.strategic);
     let border = mode_alpha
         * distance.map_or(1.0, |d| borders::zoom_alpha(d, mpp, &tuning.borders))
-        * zoom.map_or(1.0, |z| z.border_alpha);
+        * zoom.as_ref().map_or(1.0, |z| z.border_alpha)
+        * borders::ViewScale::alpha(&tuning.borders, strategic);
+    // Band widths follow the camera in screen pixels (`fr1_width_scale`, parchment widths).
+    let scale = borders::ViewScale::at(&tuning.borders, distance.unwrap_or(0.0), strategic);
+    for handle in [&overlay.border_material, &overlay.halo_material] {
+        if let Some(mut m) = border_materials.get_mut(handle)
+            && (m.shape.width_scale != scale.width || m.shape.glow_scale != scale.glow)
+        {
+            m.shape.width_scale = scale.width;
+            m.shape.glow_scale = scale.glow;
+        }
+    }
+    overlay.view_scale = scale;
+    overlay.camera_distance = distance;
     let near = num(&tuning.fill, &["zoom", "near_distance"], 60.0);
     let far = num(&tuning.fill, &["zoom", "far_distance"], 260.0).max(near + 1.0);
     let near_scale = num(&tuning.fill, &["zoom", "near_scale"], 1.0);

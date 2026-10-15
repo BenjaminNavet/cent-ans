@@ -80,7 +80,50 @@ pub struct ProvinceFillMaterial {
     pub fill: Handle<Image>,
 }
 
-/// Border ribbons coloured per vertex.
+/// Screen-space shape of the border bands (`border.wesl`, `Shape`).
+#[derive(ShaderType, Debug, Clone, Copy, PartialEq)]
+pub struct BorderShape {
+    /// Zoom / parchment factor applied to every band offset (px).
+    pub width_scale: f32,
+    /// Extra factor of the glow extent (parchment).
+    pub glow_scale: f32,
+    pub glow_exponent: f32,
+    pub hatch_period_px: f32,
+    pub hatch_duty: f32,
+    pub pad0: f32,
+    pub pad1: f32,
+    pub pad2: f32,
+}
+
+impl Default for BorderShape {
+    fn default() -> Self {
+        Self {
+            width_scale: 1.0,
+            glow_scale: 1.0,
+            glow_exponent: 1.35,
+            hatch_period_px: 7.0,
+            hatch_duty: 0.5,
+            pad0: 0.0,
+            pad1: 0.0,
+            pad2: 0.0,
+        }
+    }
+}
+
+impl BorderShape {
+    /// Glow exponent and hatching pattern of `faction_borders.json`.
+    pub fn from_tuning(borders: &serde_json::Value) -> Self {
+        use super::modes::num;
+        Self {
+            glow_exponent: num(borders, &["realm", "glow_exponent"], 1.6),
+            hatch_period_px: num(borders, &["occupied", "hatch_period_px"], 7.0),
+            hatch_duty: num(borders, &["occupied", "hatch_duty"], 0.5),
+            ..Self::default()
+        }
+    }
+}
+
+/// Border ribbons coloured per vertex, expanded in screen pixels by the vertex shader.
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct ProvinceBorderMaterial {
     #[uniform(0)]
@@ -89,6 +132,8 @@ pub struct ProvinceBorderMaterial {
     pub relief: ReliefParams,
     #[texture(2, sample_type = "float", filterable = false)]
     pub relief_floor: Handle<Image>,
+    #[uniform(3)]
+    pub shape: BorderShape,
 }
 
 macro_rules! drape_impl {
