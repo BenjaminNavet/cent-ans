@@ -158,7 +158,7 @@ impl Plugin for CampaignWaterPlugin {
                 MaterialPlugin::<LineMaterial>::default(),
                 MaterialPlugin::<RoadRibbonMaterial>::default(),
             ))
-            .add_systems(OnEnter(AppState::Campaign), build_water)
+            .add_systems(OnEnter(AppState::Campaign), (build_water, debug_camera))
             .add_systems(
                 Update,
                 (rebuild_water, apply_view)
@@ -167,6 +167,24 @@ impl Plugin for CampaignWaterPlugin {
             );
         }
     }
+}
+
+/// Dev aid (`CENT_ANS_WATER_DEBUG_CAMERA=x,y,height`, map pixels): a camera above the map so the
+/// shaders compile and render when the camera lot is not merged yet. Off by default.
+fn debug_camera(mut commands: Commands) {
+    let Ok(value) = std::env::var("CENT_ANS_WATER_DEBUG_CAMERA") else {
+        return;
+    };
+    let parts: Vec<f32> = value
+        .split(',')
+        .filter_map(|v| v.trim().parse().ok())
+        .collect();
+    let [x, z, height] = parts[..] else { return };
+    commands.spawn((
+        Camera3d::default(),
+        Transform::from_xyz(x, height, z + height * 0.6).looking_at(Vec3::new(x, 0.0, z), Vec3::Y),
+        DespawnOnExit(AppState::Campaign),
+    ));
 }
 
 /// Mutable asset stores and the command queue handed to the builders.
