@@ -1,0 +1,26 @@
+# Accueil -> Batailles -> Bataille personnalisée : changements, achats, refus du cœur, lancement.
+wait 30
+click Batailles
+wait 10
+click Bataille personnalisée
+wait 30
+click cb:year:10
+click cb:terrain:1
+click cb:season:1
+click cb:siege
+click cb:player:1
+click cb:budget:attacker:-1
+wait 5
+dump out/menu2_custom_invalid.json
+click cb:budget:attacker:1
+click cb:budget:attacker:1
+click cb:clear:defender
+wait 5
+click buy:defender:unit_urban_militia
+click buy:defender:unit_urban_militia
+wait 10
+dump out/menu2_custom_edit.json
+click cb:launch
+wait 60
+dump out/menu2_custom_battle.json
+exit

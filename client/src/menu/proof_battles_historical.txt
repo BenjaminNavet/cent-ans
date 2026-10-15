@@ -1,0 +1,11 @@
+# Accueil -> Batailles -> Batailles historiques -> Mener les Anglais (Crécy) -> Battle.
+wait 30
+click Batailles
+wait 10
+click Batailles historiques
+wait 20
+dump out/menu2_historical_open.json
+click Battle_crecy_defender
+wait 90
+dump out/menu2_historical_battle.json
+exit

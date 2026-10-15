@@ -710,13 +710,14 @@ fn open_screen(
     value_text(&mut commands, &theme, siege, "fort", 120.0);
     commands.spawn((button_small(&theme, "cb:fort:1", "+"), ChildOf(siege)));
     // Errors and actions.
-    commands.spawn((
-        Name::new("Errors"),
-        ValueText("errors".into()),
-        typed(&theme, "", UiType::Caption),
-        TextColor(crate::ui::kit::style::ERROR),
-        ChildOf(panel),
-    ));
+    commands
+        .spawn((
+            Name::new("Errors"),
+            ValueText("errors".into()),
+            typed(&theme, "", UiType::Caption),
+            ChildOf(panel),
+        ))
+        .insert(TextColor(crate::ui::kit::style::ERROR));
     let actions = commands
         .spawn((
             Node {

@@ -243,7 +243,9 @@ fn after_load(mut loaded: MessageReader<GameLoaded>, mut next: ResMut<NextState<
 /// screens (`battles`); « Rejeux » (AI turn replays, needs a campaign) stays disabled.
 fn spawn_battles(commands: &mut Commands, theme: &UiTheme) {
     let (overlay, panel) = spawn_overlay(commands, theme, "BattlesMenu", "Batailles", 480.0, 0);
-    commands.entity(overlay).insert(MainMenuOverlay);
+    commands
+        .entity(overlay)
+        .insert((MainMenuOverlay, DespawnOnExit(AppState::MainMenu)));
     for (name, enabled) in [
         ("Bataille personnalisée", true),
         ("Batailles historiques", true),
@@ -270,7 +272,9 @@ fn spawn_credits(commands: &mut Commands, theme: &UiTheme) {
             "Cent Ans — Benjamin Navet\nDéveloppé avec l'aide d'agents Claude.".into()
         });
     let (overlay, panel) = spawn_overlay(commands, theme, "Credits", "Crédits", 760.0, 0);
-    commands.entity(overlay).insert(MainMenuOverlay);
+    commands
+        .entity(overlay)
+        .insert((MainMenuOverlay, DespawnOnExit(AppState::MainMenu)));
     let list = commands
         .spawn((scroll_list(theme, "credits:list", 420.0), ChildOf(panel)))
         .id();
