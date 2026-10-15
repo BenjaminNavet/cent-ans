@@ -255,13 +255,13 @@ fn spawn_minimap(
             HudWidget,
             Hovered::default(),
             panel_inset(&theme),
-            Node {
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(4.0),
-                padding: UiRect::all(Val::Px(6.0)),
-                ..default()
-            },
         ))
+        .insert(Node {
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(4.0),
+            padding: UiRect::all(Val::Px(6.0)),
+            ..default()
+        })
         .with_children(|frame| {
             frame
                 .spawn((

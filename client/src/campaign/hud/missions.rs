@@ -156,14 +156,14 @@ fn rebuild_tracker(
             HudWidget,
             Hovered::default(),
             panel_note(&theme),
-            Node {
-                width: Val::Px(TRACKER_WIDTH),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(3.0),
-                padding: UiRect::all(Val::Px(6.0)),
-                ..default()
-            },
         ))
+        .insert(Node {
+            width: Val::Px(TRACKER_WIDTH),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(3.0),
+            padding: UiRect::all(Val::Px(6.0)),
+            ..default()
+        })
         .with_children(|box_| {
             box_.spawn(button_small(
                 &theme,
@@ -236,20 +236,20 @@ fn rebuild_offer(
             DespawnOnExit(AppState::Campaign),
             UiTier::Banner.index(),
             panel_page(&theme),
-            Node {
-                position_type: PositionType::Absolute,
-                top: Val::Percent(20.0),
-                left: Val::Percent(50.0),
-                margin: UiRect::left(Val::Px(-260.0)),
-                width: Val::Px(520.0),
-                padding: UiRect::all(Val::Px(14.0)),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(8.0),
-                ..default()
-            },
             HudWidget,
             Hovered::default(),
         ))
+        .insert(Node {
+            position_type: PositionType::Absolute,
+            top: Val::Percent(20.0),
+            left: Val::Percent(50.0),
+            margin: UiRect::left(Val::Px(-260.0)),
+            width: Val::Px(520.0),
+            padding: UiRect::all(Val::Px(14.0)),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(8.0),
+            ..default()
+        })
         .with_children(|win| {
             win.spawn(heading(&theme, "Le conseil propose des missions"));
             win.spawn(caption(

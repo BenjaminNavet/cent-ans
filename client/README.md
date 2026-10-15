@@ -100,3 +100,15 @@ Remplace `settings.gd` (autoload) et `settings_menu.gd`. Ressource `Settings` (t
 **Liste défilante.** `scroll_list` reçoit une barre fine parchemin (piste de 8 px collée à droite, `IgnoreScroll`, pouce glissable : widget `Scrollbar` de Bevy) en plus de la molette ; le remplissage droit lui réserve la place.
 
 Écarts : Bevy UI n'a pas d'opacité par nœud (pas de fondu de 0,12 s, seulement le glissement de 8 px) ; pas de SVG (icônes game-icons sans PNG absentes) ; la lettrine n'a ni initiale réelle (`FaUi`) ni rinceau.
+
+## Campagne : HUD, suite (lot `hud2`, `campaign/hud/`)
+- **Verrou des ordres** (`flow.rs`) : pendant le thread de fin de tour, un voile plein écran (`hud:order_lock`, au-dessus des panneaux) prend les clics ; `flow::orders_open` est une condition d'exécution pour les systèmes qui émettent des ordres ; les écritures de `Sim` vues pendant le tour sont comptées (`hud.orders_dropped`) et signalées par un avis. Les ordres clavier d'un autre lot doivent utiliser `.run_if(flow::orders_open)`.
+- **Rejeu du tour IA** (`replay.rs`, `ai_replay.gd`) : le cœur enregistre les mouvements (`set_ai_replay_recording`), la caméra (`FocusCamera::Point`) visite les 6 plus notables le long de leur trajet puis revient ; Espace / Échap / Entrée / clic passent ; le rapport de saison attend la fin. Les marqueurs d'armées ne sont pas animés (lot armées). Réglages : `data/ui/ai_turn_replay.json`, vitesse `ai_moves_speed`. Dump `ai_replay`.
+- **Minicarte** (`minimap.rs`) : image de 1,5 × la taille d'affichage cuite depuis `province_ids`, couleurs = `OverlayState::colors`, points d'armées (`ArmyViews`), repère du foyer caméra, pings (`MinimapPing`), clic / glisser = `FocusCamera::Point`, modes Politique / Relief (terres et mers seulement). Pas de brouillard. Dump `minimap`.
+- **Colonne de droite** (`RightColumn`) : minicarte, missions (`missions.rs` : suivi repliable, offre du conseil, avis en toasts), conseil « que faire » (`hint.rs`, `data/ui/next_hints.json`).
+- **Pastilles** (`cluster.rs`) : alertes groupées par type avec compteur, au-dessus de la cloche ; un clic visite l'alerte suivante du groupe.
+- **Rançons** (`ransom.rs`) : bouton « Rançons » (si captifs ou dettes), fenêtre payer / échéances / parole / exécuter (confirmation) ; ordres du cœur via `game_api::diplomacy::submit_order`.
+- **Aide** (`help.rs`) : F1 = fiche des raccourcis (touches par défaut de Godot, AZERTY / QWERTY, `Settings::bindings` prioritaires) ; bouton « Légende » = `data/ui/map_legend.json` filtré par mode de carte.
+- **Texte de survol** (`hover.rs`) : au repos sur une province (`decor_hover_delay`), nom, seigneur et chiffre du mode de carte.
+- **Briefing** (`briefing.rs`) : tour 0 d'une nouvelle partie ; « Ne plus afficher » coupe `campaign_briefing` ; `CENT_ANS_NO_BRIEFING=1` pour les scripts.
+- Dumps ajoutés : `ai_replay`, `minimap`, `missions`, `ransoms`, `next_hint`, `help`, `hover_text`, `briefing` ; `hud` gagne `orders_dropped`.

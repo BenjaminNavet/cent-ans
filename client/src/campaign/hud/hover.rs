@@ -83,21 +83,22 @@ pub fn plugin(app: &mut App) {
 }
 
 fn spawn_note(mut commands: Commands, theme: Res<UiTheme>) {
-    commands.spawn((
-        Name::new("hud:hover_note"),
-        HoverNote,
-        DespawnOnExit(AppState::Campaign),
-        UiTier::Tooltip.index(),
-        panel_note(&theme),
-        Pickable::IGNORE,
-        Node {
+    commands
+        .spawn((
+            Name::new("hud:hover_note"),
+            HoverNote,
+            DespawnOnExit(AppState::Campaign),
+            UiTier::Tooltip.index(),
+            panel_note(&theme),
+            Pickable::IGNORE,
+        ))
+        .insert(Node {
             position_type: PositionType::Absolute,
             max_width: Val::Px(320.0),
             display: Display::None,
             padding: UiRect::axes(Val::Px(10.0), Val::Px(6.0)),
             ..default()
-        },
-    ));
+        });
 }
 
 #[allow(clippy::too_many_arguments)]

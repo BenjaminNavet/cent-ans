@@ -198,6 +198,10 @@ impl Plugin for CampaignHudPlugin {
                 minimap::plugin,
                 missions::plugin,
                 ransom::plugin,
+                hint::plugin,
+                hover::plugin,
+                help::plugin,
+                briefing::plugin,
             ))
             .register_dump(dump_hud)
             .add_systems(OnEnter(AppState::Campaign), spawn_hud)
@@ -844,6 +848,8 @@ fn dump_hud(world: &World) -> (String, Value) {
             "last_report_counts": flow.last_report_counts,
             "confirm_shown": flow.confirm_shown,
             "turn_error": flow.error,
+            "orders_dropped": flow.orders_dropped,
+            "last_dropped": flow.last_dropped,
             "modal_active": queue.map(|q| q.active_key().to_owned()),
         }),
     )

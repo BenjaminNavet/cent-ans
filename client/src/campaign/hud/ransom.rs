@@ -295,18 +295,18 @@ fn rebuild_window(
             panel_page(&theme),
             HudWidget,
             Hovered::default(),
-            Node {
-                position_type: PositionType::Absolute,
-                top: Val::Percent(12.0),
-                left: Val::Percent(50.0),
-                margin: UiRect::left(Val::Px(-290.0)),
-                width: Val::Px(580.0),
-                padding: UiRect::all(Val::Px(14.0)),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(6.0),
-                ..default()
-            },
         ))
+        .insert(Node {
+            position_type: PositionType::Absolute,
+            top: Val::Percent(12.0),
+            left: Val::Percent(50.0),
+            margin: UiRect::left(Val::Px(-290.0)),
+            width: Val::Px(580.0),
+            padding: UiRect::all(Val::Px(14.0)),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(6.0),
+            ..default()
+        })
         .with_children(|win| {
             win.spawn(Node {
                 justify_content: JustifyContent::SpaceBetween,

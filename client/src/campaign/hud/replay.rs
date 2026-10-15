@@ -326,18 +326,18 @@ fn spawn_caption(mut commands: Commands, theme: Res<UiTheme>) {
             ReplayCaption,
             UiTier::Banner.index(),
             panel_note(&theme),
-            Node {
-                position_type: PositionType::Absolute,
-                top: Val::Px(90.0),
-                left: Val::Percent(50.0),
-                margin: UiRect::left(Val::Px(-190.0)),
-                width: Val::Px(380.0),
-                justify_content: JustifyContent::Center,
-                padding: UiRect::axes(Val::Px(14.0), Val::Px(6.0)),
-                display: Display::None,
-                ..default()
-            },
         ))
+        .insert(Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(90.0),
+            left: Val::Percent(50.0),
+            margin: UiRect::left(Val::Px(-190.0)),
+            width: Val::Px(380.0),
+            justify_content: JustifyContent::Center,
+            padding: UiRect::axes(Val::Px(14.0), Val::Px(6.0)),
+            display: Display::None,
+            ..default()
+        })
         .with_children(|bar| {
             bar.spawn((
                 Text::new(""),

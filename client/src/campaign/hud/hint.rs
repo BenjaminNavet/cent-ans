@@ -304,14 +304,14 @@ fn rebuild_card(
             HudWidget,
             Hovered::default(),
             panel_note(&theme),
-            Node {
-                width: Val::Px(280.0),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(3.0),
-                padding: UiRect::axes(Val::Px(12.0), Val::Px(6.0)),
-                ..default()
-            },
         ))
+        .insert(Node {
+            width: Val::Px(280.0),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(3.0),
+            padding: UiRect::axes(Val::Px(12.0), Val::Px(6.0)),
+            ..default()
+        })
         .with_children(|card| {
             card.spawn((
                 Text::new(format!("Conseil : {}", current.title)),
