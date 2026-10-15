@@ -134,6 +134,9 @@ struct Shown {
     trees: Option<Handle<Mesh>>,
 }
 
+/// Result slot of a worker thread: the value and the milliseconds it took.
+pub(super) type Job<T> = Arc<std::sync::Mutex<Option<(T, f32)>>>;
+
 #[derive(Resource, Default)]
 pub struct TownsState {
     pub active: bool,
@@ -143,6 +146,9 @@ pub struct TownsState {
     plans: HashMap<String, Arc<Plan>>,
     landmark_plans: HashMap<String, Arc<LandmarkPlan>>,
     order: VecDeque<String>,
+    /// Plans being generated on worker threads (a plan takes 3-40 ms), by settlement id.
+    plan_jobs: HashMap<String, Job<Plan>>,
+    landmark_jobs: HashMap<String, Job<LandmarkPlan>>,
     scenes: HashMap<String, Handle<WorldAsset>>,
     relief_sig: [f32; 3],
     last_settle: f32,
@@ -590,29 +596,61 @@ fn stream_towns(
     wanted.sort_by(|a, b| a.1.total_cmp(&b.1).then_with(|| a.0.id.cmp(&b.0.id)));
     let room = profile.plan_cache.saturating_sub(state.shown.len());
     let budget = profile.max_plan_jobs.clamp(1, 2).min(room);
-    for (town, _) in wanted.into_iter().take(budget) {
-        let started = std::time::Instant::now();
-        let scale = 1.0 / world.db.meters_per_unit;
-        let plan = match state.plans.get(&town.id) {
-            Some(p) => p.clone(),
-            None => {
-                let mpu = world.db.meters_per_unit;
-                let h = |p: Vec2| surface.height_m_at(town.px.x + p.x / mpu, town.px.y + p.y / mpu);
-                let p = Arc::new(plan::generate(town, &world.db, &h));
-                state.plans.insert(town.id.clone(), p.clone());
-                state.order.push_back(town.id.clone());
-                while state.order.len() > profile.plan_cache * 2 {
-                    if let Some(old) = state.order.pop_front() {
-                        state.plans.remove(&old);
-                    }
-                }
-                state.plans_built += 1;
-                state.plan_ms_max = state
-                    .plan_ms_max
-                    .max(started.elapsed().as_secs_f32() * 1000.0);
-                p
-            }
+    // Finished plans enter the cache; the town is built on a later frame.
+    let finished: Vec<String> = state
+        .plan_jobs
+        .iter()
+        .filter(|(_, slot)| slot.lock().is_ok_and(|g| g.is_some()))
+        .map(|(id, _)| id.clone())
+        .collect();
+    for id in finished {
+        let Some(slot) = state.plan_jobs.remove(&id) else {
+            continue;
         };
+        let Some((plan, ms)) = slot.lock().ok().and_then(|mut g| g.take()) else {
+            continue;
+        };
+        state.plans.insert(id.clone(), Arc::new(plan));
+        state.order.push_back(id);
+        while state.order.len() > profile.plan_cache * 2 {
+            if let Some(old) = state.order.pop_front() {
+                state.plans.remove(&old);
+            }
+        }
+        state.plans_built += 1;
+        state.plan_ms_max = state.plan_ms_max.max(ms);
+    }
+    let mut built = 0usize;
+    for (town, _) in wanted {
+        if built >= budget {
+            break;
+        }
+        let scale = 1.0 / world.db.meters_per_unit;
+        let Some(plan) = state.plans.get(&town.id).cloned() else {
+            // Not planned yet: generate on a worker thread (heights from a snapshot of the
+            // resident pages), at most `budget` jobs at a time.
+            if state.plan_jobs.len() < budget && !state.plan_jobs.contains_key(&town.id) {
+                let slot: Job<Plan> = Arc::default();
+                state.plan_jobs.insert(town.id.clone(), slot.clone());
+                let (town, db, surface) = (town.clone(), world.db.clone(), (*surface).clone());
+                std::thread::Builder::new()
+                    .name("town-plan".into())
+                    .spawn(move || {
+                        let started = std::time::Instant::now();
+                        let mpu = db.meters_per_unit;
+                        let h = |p: Vec2| {
+                            surface.height_m_at(town.px.x + p.x / mpu, town.px.y + p.y / mpu)
+                        };
+                        let plan = plan::generate(&town, &db, &h);
+                        if let Ok(mut guard) = slot.lock() {
+                            *guard = Some((plan, started.elapsed().as_secs_f32() * 1000.0));
+                        }
+                    })
+                    .ok();
+            }
+            continue;
+        };
+        built += 1;
         let spawn_started = std::time::Instant::now();
         let growth = growth_of(&sim, &world, town);
         let y_of = |l: Vec2| local_height(&ground, town.px, scale, l);

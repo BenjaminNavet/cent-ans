@@ -184,21 +184,38 @@ pub(super) fn stream_landmarks(
     let Some(city) = world.landmarks.get(id) else {
         return;
     };
-    let started = std::time::Instant::now();
     let mpu = world.db.meters_per_unit;
     let scale = 1.0 / mpu;
-    let lp = match state.landmark_plans.get(id) {
-        Some(p) => p.clone(),
-        None => {
-            let h = |p: Vec2| surface.height_m_at(anchor.x + p.x / mpu, anchor.y + p.y / mpu);
-            let p = Arc::new(landmark_plan::generate(city, &h));
-            state.landmark_plans.insert(id.clone(), p.clone());
-            state.plans_built += 1;
-            state.plan_ms_max = state
-                .plan_ms_max
-                .max(started.elapsed().as_secs_f32() * 1000.0);
-            p
+    // A finished plan (worker thread) enters the cache.
+    if let Some(slot) = state.landmark_jobs.get(id).cloned()
+        && let Some((plan, ms)) = slot.lock().ok().and_then(|mut g| g.take())
+    {
+        state.landmark_jobs.remove(id);
+        state.landmark_plans.insert(id.clone(), Arc::new(plan));
+        state.plans_built += 1;
+        state.plan_ms_max = state.plan_ms_max.max(ms);
+    }
+    let Some(lp) = state.landmark_plans.get(id).cloned() else {
+        if !state.landmark_jobs.contains_key(id) {
+            // Plan on a worker thread (31-41 ms for Paris), heights from a snapshot of the
+            // resident pages.
+            let slot: super::Job<LandmarkPlan> = Arc::default();
+            state.landmark_jobs.insert(id.clone(), slot.clone());
+            let (city, surface) = (city.clone(), surface.clone());
+            std::thread::Builder::new()
+                .name("landmark-plan".into())
+                .spawn(move || {
+                    let started = std::time::Instant::now();
+                    let h =
+                        |p: Vec2| surface.height_m_at(anchor.x + p.x / mpu, anchor.y + p.y / mpu);
+                    let plan = landmark_plan::generate(&city, &h);
+                    if let Ok(mut guard) = slot.lock() {
+                        *guard = Some((plan, started.elapsed().as_secs_f32() * 1000.0));
+                    }
+                })
+                .ok();
         }
+        return;
     };
     let spawn_started = std::time::Instant::now();
     let y_of = |l: Vec2| local_height(ground, anchor, scale, l);
