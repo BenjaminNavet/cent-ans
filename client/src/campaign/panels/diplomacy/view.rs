@@ -68,6 +68,7 @@ pub fn rebuild(
         ))
         .with_children(|root| {
             header(root, &theme, ui);
+            court_banner(root, &theme, ui);
             offers(root, &theme, ui);
             root.spawn(separator(&theme));
             root.spawn(Node {
@@ -126,6 +127,27 @@ fn title_small(theme: &UiTheme, content: &str) -> impl Bundle {
         theme.title_font(UiType::Title.size()),
         TextColor(style::INK_TITLE),
     )
+}
+
+/// « Affaires de la Cour »: offers waiting, treaties about to expire, active league. Hidden if empty.
+fn court_banner(root: &mut Kids, theme: &UiTheme, ui: &DiplomacyUi) {
+    if ui.snapshot.court.is_empty() {
+        return;
+    }
+    root.spawn((
+        Name::new("dip:court"),
+        Node {
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(2.0),
+            ..default()
+        },
+    ))
+    .with_children(|section| {
+        section.spawn(heading(theme, "Affaires de la Cour"));
+        for line in &ui.snapshot.court {
+            section.spawn(ink(theme, line, UiType::Body, style::INK));
+        }
+    });
 }
 
 /// « Propositions reçues »: one row per offer with accept / refuse.
@@ -244,6 +266,37 @@ fn faction_column(
             &format!("Tri : {}", SORTS[ui.sort]),
         ));
         column
+            .spawn(Node {
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(4.0),
+                ..default()
+            })
+            .with_children(|search| {
+                search.spawn((
+                    Name::new("dip:search"),
+                    Node {
+                        flex_grow: 1.0,
+                        flex_basis: Val::Px(0.0),
+                        padding: UiRect::axes(Val::Px(6.0), Val::Px(3.0)),
+                        ..default()
+                    },
+                    BackgroundColor(style::INK.with_alpha(0.08)),
+                    children![if ui.query.is_empty() {
+                        ink(
+                            theme,
+                            "Chercher une maison… (taper)",
+                            UiType::Caption,
+                            style::INK_FADED,
+                        )
+                    } else {
+                        ink(theme, &format!("{}|", ui.query), UiType::Body, style::INK)
+                    }],
+                ));
+                if !ui.query.is_empty() {
+                    search.spawn(button_small(theme, "dip:clear_search", "×"));
+                }
+            });
+        column
             .spawn((
                 Name::new("dip:list"),
                 KitWidget("scroll_list"),
@@ -260,7 +313,7 @@ fn faction_column(
                 theme.sliced("inset"),
             ))
             .with_children(|list| {
-                for row in format::visible_rows(&ui.snapshot.rows, ui.filter, ui.sort) {
+                for row in format::visible_rows(&ui.snapshot.rows, ui.filter, ui.sort, &ui.query) {
                     faction_row(
                         list,
                         theme,

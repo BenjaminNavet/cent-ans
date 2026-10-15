@@ -1199,6 +1199,54 @@ pub fn faction_stance(
     })
 }
 
+/// Truces and non-aggression pacts ending within this many turns are listed on the court banner.
+pub const COURT_EXPIRY_HORIZON: u32 = 2;
+
+/// Lines of the « Affaires de la Cour » banner (offers waiting, treaties about to expire, active
+/// league of princes). Empty when there is nothing to show. Port of `diplomacy_court_banner.gd`.
+pub fn court_banner(
+    data: &GameData,
+    state: &CampaignState,
+    rows: &[FactionRow],
+    offers: &[OfferView],
+) -> Vec<String> {
+    let plural = |n: u32, one: &str, many: &str| format!("{n} {}", if n > 1 { many } else { one });
+    let mut lines = Vec::new();
+    if !offers.is_empty() {
+        lines.push(format!(
+            "\u{2709} {} \u{e0} trancher",
+            plural(offers.len() as u32, "proposition", "propositions")
+        ));
+    }
+    for row in rows {
+        for (turns, label) in [
+            (row.truce_turns_left, "Tr\u{ea}ve"),
+            (row.non_aggression_turns_left, "Pacte de non-agression"),
+        ] {
+            if turns > 0 && turns <= COURT_EXPIRY_HORIZON {
+                lines.push(format!(
+                    "\u{231b} {label} avec {} : encore {}",
+                    row.name,
+                    plural(turns, "tour", "tours")
+                ));
+            }
+        }
+    }
+    if let Some(league) = state.league.as_ref() {
+        let bound = state.is_allied(state.player_faction(), &league.target);
+        lines.push(format!(
+            "\u{2694} Ligue des princes contre {}{}",
+            data.faction_name(&league.target),
+            if bound {
+                " (nous sommes li\u{e9}s \u{e0} lui)"
+            } else {
+                ""
+            }
+        ));
+    }
+    lines
+}
+
 /// Counts used by tests and dumps: rows by relation status.
 pub fn status_counts(rows: &[FactionRow]) -> BTreeMap<String, usize> {
     let mut counts = BTreeMap::new();
@@ -1216,6 +1264,30 @@ mod tests {
         let data = data_model::test_support::game_data();
         let state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
         (data, state, FactionId::new("fac_france").unwrap())
+    }
+
+    #[test]
+    fn court_banner_lists_offers_and_expiring_truces() {
+        let (data, state, france) = setup();
+        let mut rows = faction_list(data, &state, &france);
+        assert!(court_banner(data, &state, &rows, &[])
+            .iter()
+            .all(|l| !l.contains("proposition")));
+        rows[0].truce_turns_left = 1;
+        rows[1].non_aggression_turns_left = 5;
+        let offer = OfferView {
+            id: 1,
+            from: "x".into(),
+            from_name: "X".into(),
+            kind: "peace".into(),
+            ultimatum: false,
+            text: String::new(),
+            expires_in: 2,
+        };
+        let lines = court_banner(data, &state, &rows, &[offer]);
+        assert!(lines[0].contains("1 proposition"));
+        assert!(lines.iter().any(|l| l.contains("encore 1 tour")));
+        assert!(!lines.iter().any(|l| l.contains("non-agression")));
     }
 
     #[test]
