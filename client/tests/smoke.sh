@@ -54,14 +54,14 @@ for name in $names; do
 	) > "$log" 2>&1 &
 	pid=$!
 	# Watchdog: `open -W` hides the app's status and can hang with it; kill after the limit.
-	( sleep $limit; pkill -f "CentAnsBevy.app/Contents/MacOS/cent-ans" 2>/dev/null; kill $pid 2>/dev/null ) &
+	( sleep $limit; pkill -f "CentAnsBevy.app/Contents/MacOS/cent-ans"; kill $pid ) >/dev/null 2>&1 &
 	dog=$!
 	wait $pid
-	status=$?
-	kill $dog 2>/dev/null; wait $dog 2>/dev/null
+	code=$?
+	pkill -P $dog 2>/dev/null; kill $dog 2>/dev/null; wait $dog 2>/dev/null
 	elapsed=$((SECONDS - start))
 	reasons=()
-	(( status != 0 )) && reasons+=("run_bg exit $status")
+	(( code != 0 )) && reasons+=("run_bg exit $code")
 	grep -q "panicked at" "$log" && reasons+=("panic")
 	grep -q "AGENT_FATAL" "$log" && reasons+=("AGENT_FATAL")
 	grep -q "AGENT_EXIT script" "$log" || reasons+=("script did not reach exit")

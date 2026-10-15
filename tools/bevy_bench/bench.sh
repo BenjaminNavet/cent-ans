@@ -22,13 +22,13 @@ cd "$root"
 "$root/client/run_bg.sh" --state Campaign --bench-map --bench-out "$out" \
 	--exit-after 20000 "$@" > "$log" 2>&1 &
 pid=$!
-( sleep ${BENCH_TIMEOUT:-300}; pkill -f "CentAnsBevy.app/Contents/MacOS/cent-ans" 2>/dev/null; kill $pid 2>/dev/null ) &
+( sleep ${BENCH_TIMEOUT:-300}; pkill -f "CentAnsBevy.app/Contents/MacOS/cent-ans"; kill $pid ) >/dev/null 2>&1 &
 dog=$!
 wait $pid
-status=$?
-kill $dog 2>/dev/null; wait $dog 2>/dev/null
-if (( status != 0 )) || ! grep -q "AGENT_EXIT bench" "$log" || [[ ! -s $out ]]; then
-	echo "BENCH FAILED (exit $status), log: $log" >&2
+code=$?
+pkill -P $dog 2>/dev/null; kill $dog 2>/dev/null; wait $dog 2>/dev/null
+if (( code != 0 )) || ! grep -q "AGENT_EXIT bench" "$log" || [[ ! -s $out ]]; then
+	echo "BENCH FAILED (exit $code), log: $log" >&2
 	grep -m5 -E "panicked at|AGENT_FATAL|ERROR|AGENT_EXIT" "$log" | cut -c1-300 >&2
 	exit 1
 fi

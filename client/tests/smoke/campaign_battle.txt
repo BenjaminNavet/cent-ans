@@ -1,6 +1,12 @@
-# Campaign -> staged battle (CENT_ANS_STAGE_BATTLE) played to its end at once -> back to the
-# campaign (CENT_ANS_FLOW_SIM_TO_END); the integration path where a command hit a despawned entity.
+# Campaign -> staged battle (CENT_ANS_STAGE_BATTLE): « Combattre » in the pre-battle dialog, the
+# battle played to its end at once and left (CENT_ANS_FLOW_SIM_TO_END), back to the campaign, then
+# a season: the integration path where a command hit a despawned entity.
 state Campaign
-wait 900
-dump out/smoke/campaign_battle.json
+wait 200
+click flow:fight
+wait 300
+dump out/smoke/campaign_battle_after.json
+key Enter
+wait 200
+dump out/smoke/campaign_battle_turn.json
 exit

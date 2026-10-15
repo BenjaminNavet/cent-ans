@@ -227,10 +227,12 @@ fn bench_step(
     // Measured frame: every frame after the warm-up.
     let measuring = !matches!(run.phase, Phase::WaitCampaign | Phase::Warmup | Phase::Done);
     if measuring && dt > 0.0 {
-        let sample_visible = run.frames % 10 == 0;
-        let visible = sample_visible
-            .then(|| meshes.iter().filter(|v| v.get()).count() as u32)
-            .unwrap_or(0);
+        let sample_visible = run.frames.is_multiple_of(10);
+        let visible = if sample_visible {
+            meshes.iter().filter(|v| v.get()).count() as u32
+        } else {
+            0
+        };
         match run.phase {
             Phase::Pan => {
                 run.frame_ms.push(frame_ms);
@@ -247,7 +249,7 @@ fn bench_step(
         }
     }
     run.phase_time += dt;
-    if run.frames % 30 == 0 {
+    if run.frames.is_multiple_of(30) {
         let count = all.iter().count();
         run.entities_max = run.entities_max.max(count);
     }
