@@ -198,33 +198,29 @@ pub fn open_card(
                 TextColor(style::FE_GOLD),
             ));
             if !screen.title.is_empty() {
-                root.spawn((
-                    typed(theme, &screen.title, UiType::Title),
-                    TextColor(Color::srgb(0.97, 0.92, 0.80)),
-                ));
+                root.spawn(typed(theme, &screen.title, UiType::Title))
+                    .insert(TextColor(Color::srgb(0.97, 0.92, 0.80)));
             }
-            root.spawn((
-                panel_inset(theme),
-                Node {
+            root.spawn(panel_inset(theme))
+                .insert(Node {
                     width: Val::Px(art_width),
                     height: Val::Px(art_height),
                     padding: UiRect::all(Val::Px(8.0)),
                     ..default()
-                },
-            ))
-            .with_children(|frame| {
-                if !screen.image.is_empty() {
-                    frame.spawn((
-                        Name::new("flow:loading_art"),
-                        Node {
-                            width: Val::Percent(100.0),
-                            height: Val::Percent(100.0),
-                            ..default()
-                        },
-                        ImageNode::new(assets.load(screen.image.clone())),
-                    ));
-                }
-            });
+                })
+                .with_children(|frame| {
+                    if !screen.image.is_empty() {
+                        frame.spawn((
+                            Name::new("flow:loading_art"),
+                            Node {
+                                width: Val::Percent(100.0),
+                                height: Val::Percent(100.0),
+                                ..default()
+                            },
+                            ImageNode::new(assets.load(screen.image.clone())),
+                        ));
+                    }
+                });
             if let Some(quote) = &screen.quote {
                 root.spawn((
                     Text::new(format!("« {} »", quote.text)),
@@ -246,10 +242,11 @@ pub fn open_card(
                     TextLayout::justify(Justify::Center),
                 ));
             }
-            root.spawn((
-                caption(theme, "Les armées prennent position… (clic pour passer)"),
-                TextColor(Color::srgb(0.80, 0.74, 0.62)),
-            ));
+            root.spawn(caption(
+                theme,
+                "Les armées prennent position… (clic pour passer)",
+            ))
+            .insert(TextColor(Color::srgb(0.80, 0.74, 0.62)));
         })
         .id()
 }

@@ -90,11 +90,12 @@ pub fn spawn(commands: &mut Commands, theme: &UiTheme, game: &GameData, brief: &
                     panel.spawn(caption(theme, &brief.subtitle));
                     panel.spawn(separator(theme));
                     // Verdict and balance bar.
-                    panel.spawn((
-                        Name::new("flow:verdict"),
-                        typed(theme, &brief.verdict, UiType::Heading),
-                        TextColor(tone_color(&brief.verdict_tone)),
-                    ));
+                    panel
+                        .spawn((
+                            Name::new("flow:verdict"),
+                            typed(theme, &brief.verdict, UiType::Heading),
+                        ))
+                        .insert(TextColor(tone_color(&brief.verdict_tone)));
                     panel
                         .spawn((
                             Name::new("flow:balance"),
@@ -177,8 +178,8 @@ pub fn spawn(commands: &mut Commands, theme: &UiTheme, game: &GameData, brief: &
                                 row.spawn((
                                     Name::new("flow:auto_risk"),
                                     caption(theme, &brief.auto_risk),
-                                    TextColor(style::RUBRIC),
-                                ));
+                                ))
+                                .insert(TextColor(style::RUBRIC));
                             }
                             row.spawn(button_small(theme, AUTO, "Résolution automatique"));
                             row.spawn(button_primary(theme, FIGHT, &brief.fight_label));
@@ -212,10 +213,13 @@ fn side_column(
         ))
         .with_children(|column| {
             let you = if slot == 0 { "  (vous)" } else { "" };
-            column.spawn((
-                typed(theme, &format!("{}{you}", side.name), UiType::Heading),
-                TextColor(color.darker(0.1)),
-            ));
+            column
+                .spawn(typed(
+                    theme,
+                    &format!("{}{you}", side.name),
+                    UiType::Heading,
+                ))
+                .insert(TextColor(color.darker(0.1)));
             let role = {
                 let mut chars = side.role.chars();
                 chars

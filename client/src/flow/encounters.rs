@@ -102,27 +102,25 @@ pub fn sync_markers(
         }
     }
     for site in sites.iter().filter(|s| !have.contains(&s.id)) {
-        let marker = commands
-            .spawn((
-                button_icon(
-                    &theme,
-                    &assets,
-                    &format!("{MARKER_PREFIX}{}", site.id),
-                    MARKER_ICON,
-                    "",
-                ),
-                SiteMarker {
-                    id: site.id,
-                    point: Vec2::new(site.point[0], site.point[1]),
-                    title: site.title.clone(),
-                },
-                Node {
-                    position_type: PositionType::Absolute,
-                    ..default()
-                },
-                Visibility::Hidden,
-            ))
-            .id();
+        let mut marker_commands = commands.spawn((
+            button_icon(
+                &theme,
+                &assets,
+                &format!("{MARKER_PREFIX}{}", site.id),
+                MARKER_ICON,
+                "",
+            ),
+            SiteMarker {
+                id: site.id,
+                point: Vec2::new(site.point[0], site.point[1]),
+                title: site.title.clone(),
+            },
+            Visibility::Hidden,
+        ));
+        marker_commands
+            .entry::<Node>()
+            .and_modify(|mut node| node.position_type = PositionType::Absolute);
+        let marker = marker_commands.id();
         commands.entity(layer).add_child(marker);
     }
 }

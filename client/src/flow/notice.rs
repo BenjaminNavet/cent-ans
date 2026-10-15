@@ -205,10 +205,8 @@ pub fn watch_outcome(
         .with_children(|root| {
             root.spawn((panel_note(&theme), Pickable::IGNORE))
                 .with_children(|note| {
-                    note.spawn((
-                        typed(&theme, &text, UiType::Heading),
-                        TextColor(class_color(&class)),
-                    ));
+                    note.spawn(typed(&theme, &text, UiType::Heading))
+                        .insert(TextColor(class_color(&class)));
                 });
         });
 }
