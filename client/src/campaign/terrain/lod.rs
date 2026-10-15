@@ -324,6 +324,9 @@ pub fn update_lod(
                     Vec3::new(added.origin.0 + extent, 500.0, added.origin.1 + extent),
                 ),
                 MeshMaterial3d(material.clone()),
+                // Bevy's CPU frustum test culled whole interior nodes (holes onto the abyss plane at
+                // close range, offscreen and windowed): the selector already does the culling.
+                bevy::camera::visibility::NoFrustumCulling,
                 DespawnOnExit(AppState::Campaign),
             ))
             .id();
