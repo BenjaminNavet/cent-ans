@@ -15,6 +15,10 @@ Dossier : `client/src/campaign/life/`. Branche `bm/life`.
   maritimes. `birds.rs` : orbite, transit en V, échassiers, cigognes. `effects.rs` : panaches, moulins (ailes qui
   tournent), incendies (cônes + lumières) selon dévastation et sièges, vent de `map_atmosphere.json`.
 
+## Preuve
+`--dump-state` (section `campaign_life`, 3 vues) : Paris d=40 : 6 villageois, 3 charrettes, 1 moulin + ailes, 1 panache, 1 bateau ;
+Normandie d=60 : 413 bêtes, 19 villageois, 76 oiseaux (5 vols) ; Paris d=160 : 3 moulins, 2 bateaux de fleuve.
+
 ## Reste à faire
 Voir le rapport final (écarts : figurines skinnées, chemins de commerce du pont, cheminées 1:1, scènes de province FK4,
 incidents FK5, bannières de maquette, biomes/landcover pour oiseaux et faune, moulins à eau).

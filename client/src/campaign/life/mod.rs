@@ -37,6 +37,7 @@ pub struct LifeStats {
     pub live: BTreeMap<&'static str, usize>,
     pub visible: BTreeMap<&'static str, usize>,
     pub beasts: usize,
+    pub bird_individuals: usize,
     pub load_ms: u128,
 }
 
@@ -144,6 +145,7 @@ fn update_stats(
     mut stats: ResMut<LifeStats>,
     items: Query<(&stream::LifeItem, &models::Fade)>,
     beasts: Query<(), With<folk::Beast>>,
+    individuals: Query<(), With<birds::Bird>>,
 ) {
     *timer -= time.delta_secs();
     if *timer > 0.0 {
@@ -163,6 +165,7 @@ fn update_stats(
         }
     }
     stats.beasts = beasts.iter().count();
+    stats.bird_individuals = individuals.iter().count();
 }
 
 fn dump_life(world: &World) -> (String, Value) {
@@ -207,6 +210,7 @@ fn dump_life(world: &World) -> (String, Value) {
             "live": stats.live,
             "visible": stats.visible,
             "draught_beasts": stats.beasts,
+            "bird_individuals": stats.bird_individuals,
             "view": {
                 "ready": view.ready,
                 "focus": [view.focus.x, view.focus.y],
