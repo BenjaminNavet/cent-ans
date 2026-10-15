@@ -232,6 +232,12 @@ impl CampaignState {
         }
     }
 
+    /// Year at which the campaign of `faction` ends, for the chosen length (same rule as the
+    /// objectives set: own `victory` block, else the generic one).
+    pub fn victory_end_year(&self, data: &GameData, faction: &FactionId) -> i32 {
+        self.victory_set(data, faction).end_year
+    }
+
     /// Seasons all objectives of `faction` must hold in a row (chosen length).
     pub fn victory_hold_turns(&self, data: &GameData, faction: &FactionId) -> u32 {
         self.victory_set(data, faction).hold_turns

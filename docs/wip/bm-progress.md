@@ -1,12 +1,12 @@
 # bm-progress
 
-Branche `bm/progress` : `client/src/campaign/progress/` (objectives, ending, traditions, tutorial) + `core/crates/game-api/src/progress.rs`. Détails : `client/README.md` § « Progression de campagne ».
+Branche `bm/progress2` (suite de `bm/progress`). Détails : `client/README.md` § « Progression de campagne ».
 
-Fait et prouvé (clippy, tests, `--script` + `--dump-state`) : panneau Objectifs + choix court/long, écran de fin, traditions (choix = ordre du cœur), didacticiel 14 étapes avec détection réelle (fin de tour constatée).
+Fait et prouvé (clippy, tests, `--script` + `--dump-state`, scripts `client/src/campaign/progress/proof_script_{a,b}.txt`) : panneau Objectifs, écran de fin, traditions (bannière de maison, infobulles riches), didacticiel 14 étapes avec flèche/halo, sommaire, focus caméra, persistance dans `Settings`, infobulle du score, `end_year` unique côté `sim-campaign`.
 
 Restes :
-- didacticiel : flèche / halo sur la cible (`tutorial_controller.gd::resolve_target`), sommaire (`jump_to`), focus caméra par étape, persistance (clés `tutorial/step|done|postponed` à ajouter à `Settings`), encyclopédie ;
-- câblage `integ` : bouton Objectifs / entrée de menu → `OpenObjectives`, bouton « Traditions » du bandeau d'ost → `OpenTraditions`, Menu → Tutoriel / F1 → `StartTutorial` ;
-- infobulle du score (`campaign_score`), blason de maison des traditions ;
-- `game_api::progress::end_year` duplique `victory_set` (privé dans `sim-campaign`) : exposer un accesseur public dans `sim-campaign::victory` puis le remplacer ;
-- test du clic « Menu principal » de l'écran de fin non exercé en script.
+- câblage `integ` : bouton Objectifs / entrée de menu -> `OpenObjectives`, bouton « Traditions » du bandeau d'ost -> `OpenTraditions`, Menu -> Tutoriel / F1 -> `StartTutorial` ;
+- encyclopédie (lot Codex) ;
+- le parchemin du guide ne s'écarte pas de la cible (`place_panel` / `set_avoid` de `tutorial.gd`) ;
+- test du clic « Menu principal » de l'écran de fin non exercé en script ;
+- coup d'œil réel du cadre / de la flèche non fait (pas de capture).

@@ -1,0 +1,10 @@
+# Proof of the tutorial arrow, focus and steps table: CENT_ANS_TUTORIAL=1 (select_army),
+# CENT_ANS_NO_BRIEFING=1, CENT_ANS_OPEN_TRADITIONS=1, CENT_ANS_OPEN_OBJECTIVES=1.
+wait 240
+dump out/progress2_a1.json
+click tutorial:toc
+wait 10
+click tutorial:step:5
+wait 120
+dump out/progress2_a2.json
+exit

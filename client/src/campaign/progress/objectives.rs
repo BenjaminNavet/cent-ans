@@ -10,7 +10,7 @@ use bevy::prelude::*;
 use game_api::progress::{ObjectivesView, objectives_view, set_victory_length};
 use serde_json::{Value, json};
 
-use super::OpenObjectives;
+use super::{OpenObjectives, ProgressTexts};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::hud::flow::TurnAdvanced;
@@ -19,6 +19,7 @@ use crate::campaign::panels::OpenPanel;
 use crate::menu::KeyEdges;
 use crate::sim::Sim;
 use crate::ui::kit::style::{self, UiTier, UiType};
+use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{
     button_small, caption, gauge, panel_sized, scroll_list, separator, toggle_button,
 };
@@ -145,6 +146,7 @@ fn rebuild(
     sim: Res<Sim>,
     theme: Res<UiTheme>,
     missions: Res<Missions>,
+    texts: Res<ProgressTexts>,
 ) {
     if !panel.open {
         if let Some(root) = panel.root.take() {
@@ -166,7 +168,13 @@ fn rebuild(
     panel.built_turn = state.turn();
     panel.missions_len = missions.active.len();
     panel.rebuilds += 1;
-    panel.root = Some(spawn(&mut commands, &theme, &view, &missions));
+    panel.root = Some(spawn(
+        &mut commands,
+        &theme,
+        &view,
+        &missions,
+        &texts.plain("campaign_score"),
+    ));
 }
 
 fn spawn(
@@ -174,6 +182,7 @@ fn spawn(
     theme: &UiTheme,
     view: &ObjectivesView,
     missions: &Missions,
+    score_tip: &str,
 ) -> Entity {
     let theme = theme.clone();
     commands
@@ -204,7 +213,13 @@ fn spawn(
                         bar.spawn(typed(&theme, "Objectifs de campagne", UiType::Title));
                         bar.spawn(button_small(&theme, "objectives:close", "Fermer"));
                     });
-                    page.spawn(caption(&theme, &view.header_line()));
+                    // The deadline and score line explains the score on hover (`campaign_score`).
+                    page.spawn((
+                        Name::new("objectives:score"),
+                        Node::default(),
+                        Tooltip::new(score_tip),
+                        children![caption(&theme, &view.header_line())],
+                    ));
                     page.spawn(Node {
                         column_gap: Val::Px(6.0),
                         align_items: AlignItems::Center,
@@ -326,6 +341,7 @@ fn dump(world: &World) -> (String, Value) {
             "built_turn": panel.built_turn,
             "rebuilds": panel.rebuilds,
             "length_changes": panel.length_changes,
+            "score_tip": world.resource::<ProgressTexts>().plain("campaign_score"),
             "view": live.as_ref().map(|v| json!({
                 "state": v.state,
                 "length": v.length,

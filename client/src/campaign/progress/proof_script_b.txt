@@ -1,0 +1,7 @@
+# Proof of persistence: settings file with tutorial_step 4, no hook; « Plus tard » is written back.
+wait 240
+dump out/progress2_b1.json
+click tutorial:later
+wait 30
+dump out/progress2_b2.json
+exit

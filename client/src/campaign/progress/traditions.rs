@@ -10,8 +10,10 @@
 //! Dev hook: `CENT_ANS_OPEN_TRADITIONS=1` opens the first army of the player and grants it
 //! experience through the core (`ArmyTraditions::xp`) so a choice is waiting.
 //!
-//! Not ported: the house banner (`HouseArms`) in the header; the rich tooltip (the description is
-//! printed under each tradition instead).
+//! The header shows the house banner of the army's leader (`banner_house` -> `data/heraldry/
+//! houses.json`, shield `assets/heraldry/houses/<id>.png`, blazon in its tooltip) and each
+//! tradition carries a structured tooltip (`TooltipSpec`: tier, effects, reason it is blocked,
+//! description) as `tradition_choice` of the Godot panel.
 
 use std::collections::BTreeMap;
 
@@ -21,7 +23,7 @@ use game_api::progress::{TraditionsView, pending_traditions, player_armies, trad
 use serde_json::{Value, json};
 use sim_campaign::{ArmyId, Order};
 
-use super::OpenTraditions;
+use super::{OpenTraditions, ProgressTexts};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::hud::flow::orders_open;
@@ -30,6 +32,8 @@ use crate::menu::KeyEdges;
 use crate::sim::Sim;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::style::{self, UiTier, UiType};
+use crate::ui::kit::tooltip::Tooltip;
+use crate::ui::kit::tooltip_spec::{Effect, TooltipSpec, TooltipTexts};
 use crate::ui::kit::widgets::{button_small, caption, gauge, panel_sized, separator};
 use crate::ui::kit::{ButtonPressed, UiTheme, typed};
 
@@ -52,6 +56,91 @@ pub struct TraditionsPanel {
 #[derive(Component)]
 struct TraditionsRoot;
 
+/// One house of `data/heraldry/houses.json`.
+#[derive(Debug, Clone, serde::Deserialize)]
+struct House {
+    id: String,
+    name: String,
+    #[serde(default)]
+    blazon: String,
+    #[serde(default)]
+    certainty: String,
+}
+
+/// House arms (`house_arms.gd`): house name or id -> shield and blazon.
+#[derive(Resource, Default)]
+pub struct HouseArms {
+    houses: Vec<House>,
+}
+
+impl HouseArms {
+    pub fn from_json(text: &str) -> Self {
+        #[derive(serde::Deserialize)]
+        struct File {
+            #[serde(default)]
+            houses: Vec<House>,
+        }
+        Self {
+            houses: serde_json::from_str::<File>(text).map_or_else(|_| Vec::new(), |f| f.houses),
+        }
+    }
+
+    fn load() -> Self {
+        crate::paths::find_root()
+            .ok()
+            .and_then(|root| {
+                std::fs::read_to_string(crate::paths::data_dir(&root).join("heraldry/houses.json"))
+                    .ok()
+            })
+            .map_or_else(Self::default, |text| Self::from_json(&text))
+    }
+
+    fn entry(&self, key: &str) -> Option<&House> {
+        self.houses.iter().find(|h| h.name == key || h.id == key)
+    }
+
+    /// Shield path under `game/assets`, `None` for an unknown house.
+    pub fn asset_path(&self, house: &str) -> Option<String> {
+        self.entry(house)
+            .map(|h| format!("heraldry/houses/{}.png", h.id))
+    }
+
+    /// « Armes de la maison Valois : D'azur… (armes de substitution) ».
+    pub fn tooltip(&self, house: &str) -> String {
+        let Some(h) = self.entry(house) else {
+            return String::new();
+        };
+        let mut text = format!("Armes de la maison {} : {}", h.name, h.blazon);
+        if h.certainty == "substitution" {
+            text.push_str(" (armes de substitution)");
+        }
+        text
+    }
+}
+
+/// Structured tooltip of a tradition.
+pub fn tradition_spec(option: &game_api::progress::TraditionRow) -> TooltipSpec {
+    let mut spec = TooltipSpec {
+        id: option.id.clone(),
+        kind: "tradition".to_owned(),
+        title: option.name.clone(),
+        subtitle: format!("{}, palier {}", option.branch_name, option.tier),
+        flavour: option.description.clone(),
+        ..TooltipSpec::default()
+    };
+    if !option.effects_text.is_empty() {
+        spec.effects.push(Effect {
+            text: option.effects_text.clone(),
+            ..Effect::default()
+        });
+    }
+    if !option.allowed && !option.reason.is_empty() {
+        spec.warnings
+            .push(format!("Impossible : {}.", option.reason));
+    }
+    spec
+}
+
 /// Caption of the army strip button: « Traditions » or « Traditions (n) » when ranks are unspent.
 pub fn pending_label(pending: u8) -> String {
     if pending > 0 {
@@ -62,6 +151,7 @@ pub fn pending_label(pending: u8) -> String {
 }
 
 pub fn plugin(app: &mut App) {
+    app.insert_resource(HouseArms::load());
     app.init_resource::<TraditionsPanel>()
         .init_resource::<DevHook>()
         .register_dump(dump)
@@ -235,6 +325,9 @@ fn rebuild(
     mut panel: ResMut<TraditionsPanel>,
     sim: Res<Sim>,
     theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
+    arms: Res<HouseArms>,
+    texts: Res<ProgressTexts>,
 ) {
     let Some(army) = panel.army.clone() else {
         if let Some(root) = panel.root.take() {
@@ -258,11 +351,25 @@ fn rebuild(
         panel.view = None;
         return;
     };
-    panel.root = Some(spawn(&mut commands, &theme, &view));
+    panel.root = Some(spawn(
+        &mut commands,
+        &theme,
+        &assets,
+        &arms,
+        &texts.0,
+        &view,
+    ));
     panel.view = Some(view);
 }
 
-fn spawn(commands: &mut Commands, theme: &UiTheme, view: &TraditionsView) -> Entity {
+fn spawn(
+    commands: &mut Commands,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    arms: &HouseArms,
+    texts: &TooltipTexts,
+    view: &TraditionsView,
+) -> Entity {
     let theme = theme.clone();
     commands
         .spawn((
@@ -286,8 +393,23 @@ fn spawn(commands: &mut Commands, theme: &UiTheme, view: &TraditionsView) -> Ent
                         ..default()
                     })
                     .with_children(|bar| {
+                        if let Some(path) = arms.asset_path(&view.banner_house) {
+                            bar.spawn((
+                                Name::new("Banner"),
+                                ImageNode::new(assets.load(path)),
+                                Node {
+                                    width: Val::Px(36.0),
+                                    height: Val::Px(42.0),
+                                    margin: UiRect::right(Val::Px(8.0)),
+                                    flex_shrink: 0.0,
+                                    ..default()
+                                },
+                                Tooltip::new(&arms.tooltip(&view.banner_house)),
+                            ));
+                        }
                         bar.spawn(Node {
                             flex_direction: FlexDirection::Column,
+                            flex_grow: 1.0,
                             max_width: Val::Px(PANEL_WIDTH - 130.0),
                             ..default()
                         })
@@ -363,16 +485,18 @@ fn spawn(commands: &mut Commands, theme: &UiTheme, view: &TraditionsView) -> Ent
                                 TextColor(style::INK),
                             ));
                             row.spawn(caption(&theme, &option.effects_text));
-                            let mut tip = option.description.clone();
                             if !option.allowed && !option.reason.is_empty() {
-                                tip.push_str(&format!("\nImpossible : {}.", option.reason));
+                                row.spawn(caption(
+                                    &theme,
+                                    &format!("Impossible : {}.", option.reason),
+                                ));
                             }
-                            row.spawn(caption(&theme, &tip));
-                            let mut button = row.spawn(button_small(
+                            let bubble = tradition_spec(option).to_bbcode(texts, false);
+                            let mut button = row.spawn((Tooltip::new(&bubble), button_small(
                                 &theme,
                                 &format!("traditions:choose:{}", option.id),
                                 "Choisir",
-                            ));
+                            )));
                             if !option.allowed {
                                 button.insert(InteractionDisabled);
                             }
@@ -386,6 +510,8 @@ fn spawn(commands: &mut Commands, theme: &UiTheme, view: &TraditionsView) -> Ent
 fn dump(world: &World) -> (String, Value) {
     let panel = world.resource::<TraditionsPanel>();
     let sim = world.resource::<Sim>();
+    let arms = world.resource::<HouseArms>();
+    let texts = &world.resource::<ProgressTexts>().0;
     let armies = match (&sim.data, &sim.state) {
         (Some(data), Some(state)) => pending_traditions(data, state)
             .into_iter()
@@ -401,10 +527,15 @@ fn dump(world: &World) -> (String, Value) {
             "chosen": panel.chosen,
             "toasts": panel.toasts,
             "last_order": panel.last_order,
+            "houses": arms.houses.len(),
             "pending_armies": armies,
             "view": panel.view.as_ref().map(|v| json!({
                 "army": v.army, "name": v.name, "rank": v.rank, "xp": v.xp,
                 "pending": v.pending, "chosen": v.chosen,
+                "banner_house": v.banner_house,
+                "banner": arms.asset_path(&v.banner_house),
+                "banner_tip": arms.tooltip(&v.banner_house),
+                "option_tip": v.next_by_branch().first().map(|o| tradition_spec(o).to_bbcode(texts, false)),
                 "next": v.next_by_branch().iter().map(|o| json!({
                     "id": o.id, "tier": o.tier, "allowed": o.allowed,
                 })).collect::<Vec<_>>(),

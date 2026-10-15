@@ -83,6 +83,12 @@ pub struct Settings {
     pub autosave_interval: u32,
     pub interactive_battles: bool,
     pub tutorial_enabled: bool,
+    /// `tutorial/step`: step the guide is at (resumes there).
+    pub tutorial_step: u32,
+    /// `tutorial/done`: the guide was finished or skipped.
+    pub tutorial_done: bool,
+    /// `tutorial/postponed`: put aside by « Plus tard ».
+    pub tutorial_postponed: bool,
     /// `battle/blood`: 0 off, 1 moderate, 2 full.
     pub blood: u32,
     /// `battle/unit_size`: figures per simulated man.
@@ -144,6 +150,9 @@ impl Default for Settings {
             autosave_interval: 1,
             interactive_battles: true,
             tutorial_enabled: true,
+            tutorial_step: 0,
+            tutorial_done: false,
+            tutorial_postponed: false,
             blood: 1,
             unit_size: 1.0,
             max_figures: 15000,
