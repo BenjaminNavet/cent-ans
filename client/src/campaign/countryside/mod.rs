@@ -337,6 +337,7 @@ fn finish_load(mut commands: Commands, pending: Res<PendingLoad>, mut errors: Re
 fn reset(mut cells: ResMut<layer::Cells>, mut view: ResMut<layer::PropView>) {
     cells.cells.clear();
     cells.staged.clear();
+    cells.seeding.clear();
     view.active = false;
     view.lod = None;
 }

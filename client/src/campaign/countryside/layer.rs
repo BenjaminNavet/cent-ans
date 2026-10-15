@@ -22,6 +22,10 @@ use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::camera::zoom::{ZoomView, smoothstep};
 use crate::campaign::terrain::surface::GroundHeight;
 
+/// Cells sown on worker threads at a time.
+const SEED_JOBS: usize = 4;
+type SeedSlot = std::sync::Arc<std::sync::Mutex<Option<Vec<Instance>>>>;
+
 /// Roots spawned per cell and call.
 const SPAWN_SLICE: usize = 300;
 
@@ -108,6 +112,7 @@ pub struct Cells {
     pub last_instances_per_rule: HashMap<usize, usize>,
     /// Sown cells waiting for their models (`proto`), kept so the sowing is not redone.
     pub staged: HashMap<IVec2, Vec<Instance>>,
+    pub(super) seeding: HashMap<IVec2, SeedSlot>,
     pub waiting_models: usize,
     pub swapped: usize,
 }
@@ -375,20 +380,43 @@ fn install_cell(
     let started = std::time::Instant::now();
     let c = &cfg.config;
     let lod = view.lod.unwrap_or(0);
-    if let std::collections::hash_map::Entry::Vacant(slot) = cells.staged.entry(key) {
-        let mut instances: Vec<Instance> = cell_instances(&*cfg.terrain, c, key);
-        // Budget per prop in this cell: lowest ranks first (the rest could never show).
-        instances.sort_by(|a, b| a.rank.total_cmp(&b.rank));
-        let mut counts: HashMap<usize, usize> = HashMap::new();
-        instances.retain(|inst| {
-            let n = counts.entry(inst.prop).or_default();
-            if *n >= c.props[inst.prop].max_instances.max(40) {
-                return false;
+    if !cells.staged.contains_key(&key) {
+        // Sowing on a worker thread (placement over the whole cell is the heavy part).
+        let finished = cells
+            .seeding
+            .get(&key)
+            .and_then(|slot| slot.lock().expect("prop seeding slot").take());
+        match finished {
+            Some(instances) => {
+                cells.seeding.remove(&key);
+                cells.staged.insert(key, instances);
             }
-            *n += 1;
-            true
-        });
-        slot.insert(instances);
+            None => {
+                if !cells.seeding.contains_key(&key) && cells.seeding.len() < SEED_JOBS {
+                    let slot: SeedSlot = Default::default();
+                    let out = slot.clone();
+                    let (terrain, config) = (cfg.terrain.clone(), cfg.config.clone());
+                    std::thread::spawn(move || {
+                        let mut instances: Vec<Instance> = cell_instances(&*terrain, &config, key);
+                        // Budget per prop in this cell: lowest ranks first (the rest could never
+                        // show).
+                        instances.sort_by(|a, b| a.rank.total_cmp(&b.rank));
+                        let mut counts: HashMap<usize, usize> = HashMap::new();
+                        instances.retain(|inst| {
+                            let n = counts.entry(inst.prop).or_default();
+                            if *n >= config.props[inst.prop].max_instances.max(40) {
+                                return false;
+                            }
+                            *n += 1;
+                            true
+                        });
+                        *out.lock().expect("prop seeding slot") = Some(instances);
+                    });
+                    cells.seeding.insert(key, slot);
+                }
+                return;
+            }
+        }
     }
     // Every model of the cell must be ready: the instances are spawned from its primitives.
     let mut resolved: HashMap<usize, Option<std::sync::Arc<Proto>>> = HashMap::new();

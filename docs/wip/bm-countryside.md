@@ -27,3 +27,16 @@ Etat : lot vague 4 termine pour le sous-ensemble ci-dessous (clippy -D warnings 
 ## Ecarts connus
 - Generateur aleatoire splitmix (pas PCG de Godot) : memes regles et densites, positions differentes.
 - Les ponts sous maquette de colonie ne sont pas filtres (Godot les masque par `covers`).
+
+## Lot countryside3 (vague 5)
+- Instanciation : `proto.rs` (primitives de glb partagées, groupement automatique de Bevy) ; couche rurale 1800 → 14000 racines (10 853 instances, 5 991 visibles au dump d'Orléans/Beauce, distance 40), rochers 320 → 4000. Pas d'ombre portée des props (NotShadowCaster).
+- `clutter.rs` : touffes et broussailles fusionnées par cellule ; 79 065 touffes affichées, 14 cellules, maillage 5 ms max. Densité par niveau de qualité (low 0, medium 0.5, high 1, ultra 1.5).
+- `ReliefVersion` : `ReliefState::is_changed()` est vrai à chaque image (terrain/lod.rs prend `ResMut<ReliefState>`), toutes les couches recalaient donc chaque image ; remplacé par une empreinte (échelle, gain, écrasement, pages).
+- Ponts : suivaient déjà le relief affiché (`ground_bridges`) ; corrigé par `ReliefVersion` (relief_version 899 → 26 sur 900 images).
+## Reste (countryside3)
+- clutter : cartes de plantes du biome (TX T3, `tx_ground_cards_array.webp`), vent, fondu par rang à la distance et au bord du disque, rochers TRELLIS entre les touffes, part prairie/lande du splat (non chargé par le monde de végétation).
+- Le plancher de caméra (20 px) rend le clutter inaccessible sans `CENT_ANS_CLUTTER_DEMO` ; décision de conception (abaisser le plancher ou non) hors de ce lot.
+- Précision f32 : touffe réelle = 8e-4 unité à des coordonnées ~3500 (ulp 2.4e-4) : scintillement possible, non vu (pas de capture).
+- war_scars : engins de siège (marqueurs d'armée `status == siege`, `get_assault_odds.engines`) et croix de portes (plans de ville du lot towns) non faits.
+- water_props (plafond 450) et decor non passés aux primitives partagées.
+- Ponts-portes, mode fin, glb de ponts : inchangés.
