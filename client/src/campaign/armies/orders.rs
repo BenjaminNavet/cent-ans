@@ -5,21 +5,35 @@
 
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use data_model::SettlementId;
 use serde_json::{Value, json};
 use sim_campaign::{ArmyId, MoveOrderTarget, Order, OrderOutcome};
 
+use super::bubble::{BubbleHandles, BubbleMesh, build_mesh};
+use super::feedback::{CursorMode, HoverHint};
 use super::markers::{ArmyMarker, ArmyPlate, camera_distance, screen_rect};
-use super::path::{PathView, preview_from_plan};
+use super::path::{PathView, preview_from_plan, view_from_waypoints};
 use super::pick::{Pickable, pick_scored};
-use super::projection::{HeightSampler, px_to_world, ray_ground};
+use super::projection::{px_to_world, ray_ground};
+use super::sea::{
+    Glide, Glides, SeaClick, SeaLanes, auto_resolve_pending, is_water, route_points, sea_click,
+    voyage_hint, voyage_stops,
+};
 use super::views::ArmyViews;
 use super::{HoveredArmy, SelectedArmy};
+use crate::campaign::terrain::relief_state::ReliefState;
+use crate::campaign::terrain::surface::{GroundHeight, Surface};
 use crate::sim::Sim;
 
 const PATH_COLOR: Color = Color::srgba(0.88, 0.57, 0.26, 0.9);
-const RIPPLE_SECONDS: f32 = 0.8;
-/// Cap on the cells drawn for the reachable area.
-const MAX_BUBBLE_CELLS: usize = 600;
+/// Order ripple (`order_ripple.gd`): first ring, delayed paler echo, radii in screen pixels.
+const RIPPLE_DURATION: f32 = 0.5;
+const RIPPLE_ECHO_DELAY: f32 = 0.12;
+const RIPPLE_ECHO_ALPHA: f32 = 0.5;
+const RIPPLE_START_RADIUS: f32 = 4.0;
+const RIPPLE_END_RADIUS: f32 = 34.0;
+/// The displayed relief follows the camera zoom: re-place overlays at most this often.
+const RELIEF_TICK_SECONDS: f32 = 0.2;
 
 /// Intent of the player (mouse, keys, script, tests).
 #[derive(Message, Debug, Clone, PartialEq)]
@@ -35,6 +49,29 @@ pub enum ArmyCommand {
         army: ArmyId,
         target: ArmyId,
     },
+    /// Sail from the port the army stands in to `to_port` (ADR 0167).
+    Embark {
+        army: ArmyId,
+        to_port: SettlementId,
+    },
+}
+
+/// What the hovered ground says about a voyage.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SeaHover {
+    #[default]
+    None,
+    /// Water with a reachable port: a right click sails.
+    Port,
+    /// Water, but no voyage (army in the field, no route).
+    Refused,
+}
+
+/// Bumped when the displayed relief moved enough to re-place the ground overlays.
+#[derive(Resource, Default)]
+pub struct ReliefTick {
+    pub version: u32,
+    elapsed: f32,
 }
 
 /// Result of the last order, as `run_order_json` reports it.
@@ -63,30 +100,59 @@ pub struct OrderResult {
 pub struct PathPreviewState {
     pub view: Option<PathView>,
     target: Option<[i32; 2]>,
+    tick: u32,
+    pub sea: SeaHover,
+    /// Hover text of the previewed order.
+    pub hint: Option<String>,
 }
 
 #[derive(Resource, Default)]
 pub struct Reachable {
     pub army: Option<ArmyId>,
-    pub cells: Vec<Vec3>,
+    /// Centres (map pixels) of the cells reached this turn / only next turn.
+    pub this_turn: Vec<Vec2>,
+    pub next_turn: Vec<Vec2>,
+    pub cell_px: f32,
     pub count: usize,
     pub next_count: usize,
     pub budget: u32,
+    dirty: bool,
+    tick: u32,
 }
 
+/// Ripples: map pixel and age in seconds.
 #[derive(Resource, Default)]
-pub struct Ripples(Vec<(Vec3, f32)>);
+pub struct Ripples(Vec<(Vec2, f32)>);
+
+/// Throttled change counter of the displayed relief.
+pub fn track_relief(
+    time: Res<Time>,
+    relief: Option<Res<ReliefState>>,
+    mut tick: ResMut<ReliefTick>,
+) {
+    tick.elapsed += time.delta_secs();
+    if relief.is_some_and(|r| r.is_changed()) && tick.elapsed >= RELIEF_TICK_SECONDS {
+        tick.elapsed = 0.0;
+        tick.version += 1;
+    }
+}
 
 pub fn reset(
     mut selected: ResMut<SelectedArmy>,
     mut hovered: ResMut<HoveredArmy>,
     mut preview: ResMut<PathPreviewState>,
     mut reachable: ResMut<Reachable>,
+    mut glides: ResMut<Glides>,
+    mut hint: ResMut<HoverHint>,
+    mut ripples: ResMut<Ripples>,
 ) {
     selected.0 = None;
     hovered.0 = None;
     *preview = PathPreviewState::default();
     *reachable = Reachable::default();
+    *glides = Glides::default();
+    *hint = HoverHint::default();
+    ripples.0.clear();
 }
 
 fn cursor_position(window: &Query<&Window, With<PrimaryWindow>>) -> Option<Vec2> {
@@ -101,7 +167,7 @@ pub fn hover_and_input(
     markers: Query<(&ArmyMarker, &Transform)>,
     plates: Query<(&ArmyPlate, &ComputedNode, &UiGlobalTransform)>,
     views: Res<ArmyViews>,
-    ground: Res<HeightSampler>,
+    ground: GroundHeight,
     mouse: Res<ButtonInput<MouseButton>>,
     selected: Res<SelectedArmy>,
     mut hovered: ResMut<HoveredArmy>,
@@ -161,8 +227,13 @@ pub fn hover_and_input(
 
 /// Script/test hook (no rule): `Tab` selects the next player army, `KeyM` orders the selected
 /// army to march by the offset in `CENT_ANS_ARMY_MOVE` (`dx,dy` map pixels; default tries a few).
-/// `CENT_ANS_ARMY_AUTOTEST=1` does both once, a few frames after the armies appear.
+/// `CENT_ANS_ARMY_AUTOTEST=1` does both once, a few frames after the armies appear;
+/// `CENT_ANS_ARMY_AUTOTEST=sea` instead selects a player army standing in a port and "clicks"
+/// the middle of a sea lane leaving it (the water-click path of ADR 0167).
+#[allow(clippy::too_many_arguments)]
 pub fn test_hook(
+    sim: Res<Sim>,
+    lanes: Res<SeaLanes>,
     keys: Res<ButtonInput<KeyCode>>,
     views: Res<ArmyViews>,
     selected: Res<SelectedArmy>,
@@ -172,6 +243,21 @@ pub fn test_hook(
 ) {
     let mut cycle = keys.just_pressed(KeyCode::Tab);
     let mut march = keys.just_pressed(KeyCode::KeyM);
+    let sea_mode = std::env::var("CENT_ANS_ARMY_AUTOTEST").is_ok_and(|v| v == "sea");
+    if sea_mode && !*auto_done && !views.0.is_empty() {
+        *frames += 1;
+        if *frames == 10 {
+            *auto_done = true;
+            if let Some(click) = sea_autotest_click(&sim, &lanes, &views) {
+                commands.write(ArmyCommand::Select(Some(click.0.clone())));
+                commands.write(ArmyCommand::Move {
+                    army: click.0,
+                    target: click.1,
+                });
+            }
+        }
+        return;
+    }
     if !*auto_done && std::env::var_os("CENT_ANS_ARMY_AUTOTEST").is_some() && !views.0.is_empty() {
         *frames += 1;
         if *frames == 5 {
@@ -205,6 +291,36 @@ pub fn test_hook(
     }
 }
 
+/// A player army in a port with a voyage, and the middle of a lane towards the destination.
+fn sea_autotest_click(
+    sim: &Sim,
+    lanes: &SeaLanes,
+    views: &ArmyViews,
+) -> Option<(ArmyId, [f32; 2])> {
+    let (data, state) = (sim.data.as_ref()?, sim.state.as_ref()?);
+    let mut best: Option<(ArmyId, [f32; 2])> = None;
+    for view in views.0.iter().filter(|v| v.player && v.in_settlement) {
+        let army = state.army(&view.id)?;
+        let from = army.settlement()?;
+        let mut ports: Vec<_> = sim_campaign::voyage::sea_voyages(state, data, &army.faction, from)
+            .into_keys()
+            .collect();
+        ports.sort();
+        for port in ports {
+            let Some(points) = lanes.lane_points(from.as_str(), port.as_str()) else {
+                continue;
+            };
+            let mid = points[points.len() / 2];
+            best = Some((view.id.clone(), [mid.x, mid.y]));
+            break;
+        }
+        if best.is_some() {
+            break;
+        }
+    }
+    best
+}
+
 fn test_offsets() -> Vec<[f32; 2]> {
     if let Ok(text) = std::env::var("CENT_ANS_ARMY_MOVE")
         && let Some((dx, dy)) = text.split_once(',')
@@ -215,6 +331,7 @@ fn test_offsets() -> Vec<[f32; 2]> {
     vec![[0.0, -12.0]]
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn execute_commands(
     mut messages: MessageReader<ArmyCommand>,
     mut sim: ResMut<Sim>,
@@ -222,7 +339,9 @@ pub fn execute_commands(
     mut log: ResMut<OrderLog>,
     mut ripples: ResMut<Ripples>,
     mut preview: ResMut<PathPreviewState>,
-    ground: Res<HeightSampler>,
+    mut glides: ResMut<Glides>,
+    lanes: Res<SeaLanes>,
+    surface: Option<Res<Surface>>,
 ) {
     for command in messages.read() {
         match command {
@@ -234,18 +353,37 @@ pub fn execute_commands(
                 }
             }
             ArmyCommand::Move { army, target } => {
-                let order = Order::MoveArmy {
-                    army: army.clone(),
-                    target: MoveOrderTarget::Point {
-                        x: target[0],
-                        y: target[1],
-                    },
+                let water = surface
+                    .as_ref()
+                    .is_some_and(|s| is_water(s, target[0], target[1]));
+                let ok = if water {
+                    let click = match (&sim.data, &sim.state) {
+                        (Some(data), Some(state)) => Some(sea_click(state, data, army, *target)),
+                        _ => None,
+                    };
+                    match click {
+                        Some(SeaClick::Embark(port)) => {
+                            embark(&mut sim, &mut log, &mut glides, &lanes, army, &port)
+                        }
+                        Some(SeaClick::Refused(text)) => {
+                            refuse(&mut log, "embark", army, text);
+                            false
+                        }
+                        None => false,
+                    }
+                } else {
+                    let order = Order::MoveArmy {
+                        army: army.clone(),
+                        target: MoveOrderTarget::Point {
+                            x: target[0],
+                            y: target[1],
+                        },
+                    };
+                    run_order(&mut sim, &mut log, "move", army, order);
+                    log.last.as_ref().is_some_and(|r| r.ok)
                 };
-                run_order(&mut sim, &mut log, "move", army, order);
-                if log.last.as_ref().is_some_and(|r| r.ok) {
-                    ripples
-                        .0
-                        .push((px_to_world(Vec2::new(target[0], target[1]), &ground), 0.0));
+                if ok {
+                    ripples.0.push((Vec2::new(target[0], target[1]), 0.0));
                     preview.view = None;
                     preview.target = None;
                 }
@@ -257,7 +395,118 @@ pub fn execute_commands(
                 };
                 run_order(&mut sim, &mut log, "attack", army, order);
             }
+            ArmyCommand::Embark { army, to_port } => {
+                if embark(&mut sim, &mut log, &mut glides, &lanes, army, to_port) {
+                    preview.view = None;
+                    preview.target = None;
+                }
+            }
         }
+    }
+}
+
+/// A refused order (nothing reaches the core), reported like a core refusal.
+fn refuse(log: &mut OrderLog, kind: &'static str, army: &ArmyId, error: &str) {
+    log.issued += 1;
+    log.last = Some(OrderResult {
+        kind,
+        army: army.as_str().to_owned(),
+        ok: false,
+        error: error.to_owned(),
+        stop: String::new(),
+        cost: 0,
+        walked: 0,
+        planned_cells: 0,
+        position: [0.0; 2],
+        movement_left: 0,
+    });
+}
+
+/// `Embark` (ADR 0167): submits the order, glides the army along the route, and auto-resolves a
+/// naval battle the crossing may have raised (never played in 3D).
+fn embark(
+    sim: &mut Sim,
+    log: &mut OrderLog,
+    glides: &mut Glides,
+    lanes: &SeaLanes,
+    army: &ArmyId,
+    port: &SettlementId,
+) -> bool {
+    let plan = match (&sim.data, &sim.state) {
+        (Some(data), Some(state)) => state.army(army).and_then(|entry| {
+            let from = entry.settlement()?.clone();
+            Some((from, voyage_stops(state, data, army, port)))
+        }),
+        _ => None,
+    };
+    run_order(
+        sim,
+        log,
+        "embark",
+        army,
+        Order::Embark {
+            army: army.clone(),
+            to_port: port.clone(),
+        },
+    );
+    let ok = log.last.as_ref().is_some_and(|r| r.ok);
+    if ok && let (Some((from, stops)), Some(data), Some(state)) = (plan, &sim.data, &sim.state) {
+        // Stops after the one the army reached (an interception keeps it at a port of call).
+        let reached = state.army(army).and_then(|a| a.settlement()).cloned();
+        let cut = reached
+            .and_then(|r| stops.iter().position(|s| *s == r))
+            .map_or(stops.len(), |i| i + 1);
+        let names: Vec<String> = stops[..cut].iter().map(|s| s.as_str().to_owned()).collect();
+        let point_of = |id: &str| {
+            SettlementId::new(id)
+                .ok()
+                .and_then(|id| data.settlement_point(&id))
+                .map(|p| Vec2::new(p[0], p[1]))
+        };
+        let route = route_points(lanes, &point_of, from.as_str(), &names);
+        if let Some(glide) = Glide::new(route) {
+            glides.active.insert(army.clone(), glide);
+            glides.started += 1;
+        }
+    }
+    if ok {
+        auto_resolve_pending(sim);
+    }
+    ok
+}
+
+/// Slides the voyaging armies along their route, then rebuilds their figures on land.
+pub fn advance_glides(time: Res<Time>, mut glides: ResMut<Glides>, mut views: ResMut<ArmyViews>) {
+    if glides.active.is_empty() {
+        return;
+    }
+    let dt = time.delta_secs();
+    let mut done = Vec::new();
+    for (id, glide) in glides.active.iter_mut() {
+        glide.elapsed += dt;
+        if glide.done() {
+            done.push(id.clone());
+        }
+    }
+    if !done.is_empty() {
+        for id in &done {
+            glides.active.remove(id);
+        }
+        glides.finished += done.len() as u32;
+        // The army lands: rebuild its figures from the current list.
+        views.set_changed();
+    }
+}
+
+/// Naval battles of the player are never played: resolve whatever is pending, whenever it appears
+/// (an AI interception during the turn change).
+pub fn auto_resolve_naval(mut sim: ResMut<Sim>) {
+    let pending = sim
+        .state
+        .as_ref()
+        .is_some_and(|s| !s.naval.pending.is_empty());
+    if pending {
+        auto_resolve_pending(&mut sim);
     }
 }
 
@@ -314,7 +563,6 @@ fn run_order(sim: &mut Sim, log: &mut OrderLog, kind: &'static str, army: &ArmyI
 pub fn refresh_overlays(
     sim: Res<Sim>,
     selected: Res<SelectedArmy>,
-    ground: Res<HeightSampler>,
     mut reachable: ResMut<Reachable>,
 ) {
     if !(selected.is_changed() || sim.is_changed()) {
@@ -322,65 +570,220 @@ pub fn refresh_overlays(
     }
     let (Some(data), Some(state), Some(army)) = (&sim.data, &sim.state, &selected.0) else {
         if reachable.army.is_some() {
-            *reachable = Reachable::default();
+            *reachable = Reachable {
+                dirty: true,
+                ..Reachable::default()
+            };
         }
         return;
     };
     if state.army(army).is_none() {
-        *reachable = Reachable::default();
+        *reachable = Reachable {
+            dirty: true,
+            ..Reachable::default()
+        };
         return;
     }
     let area = state.reachable_cells(data, army);
     let grid = data.navgrid();
-    reachable.army = Some(army.clone());
-    reachable.count = area.this_turn.len();
-    reachable.next_count = area.next_turn.len();
-    reachable.budget = area.budget;
-    let stride = (area.this_turn.len() / MAX_BUBBLE_CELLS).max(1);
-    reachable.cells = area
+    let centre = |cell: &sim_campaign::Cell| {
+        let c = cell.center(grid);
+        Vec2::new(c[0], c[1])
+    };
+    let this_turn: Vec<Vec2> = area
         .this_turn
         .iter()
-        .step_by(stride)
-        .map(|(cell, _)| {
-            let c = cell.center(grid);
-            px_to_world(Vec2::new(c[0], c[1]), &ground)
-        })
+        .map(|(cell, _)| centre(cell))
         .collect();
+    let next_turn: Vec<Vec2> = area.next_turn.iter().map(centre).collect();
+    reachable.army = Some(army.clone());
+    reachable.count = this_turn.len();
+    reachable.next_count = next_turn.len();
+    reachable.budget = area.budget;
+    reachable.cell_px = grid.scale as f32;
+    reachable.this_turn = this_turn;
+    reachable.next_turn = next_turn;
+    reachable.dirty = true;
 }
 
-/// Path preview of the selected army towards the cursor ground point (throttled by cell).
+/// Builds / refreshes the bubble mesh (one entity, mesh replaced in place).
+#[allow(clippy::too_many_arguments)]
+pub fn update_bubble(
+    mut commands: Commands,
+    ground: GroundHeight,
+    tick: Res<ReliefTick>,
+    mut reachable: ResMut<Reachable>,
+    mut handles: ResMut<BubbleHandles>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut bubble: Query<&mut Visibility, With<BubbleMesh>>,
+) {
+    if !(reachable.dirty || reachable.tick != tick.version) {
+        return;
+    }
+    reachable.dirty = false;
+    reachable.tick = tick.version;
+    let visible = reachable.army.is_some() && reachable.count + reachable.next_count > 1;
+    if !visible {
+        for mut visibility in &mut bubble {
+            *visibility = Visibility::Hidden;
+        }
+        handles.quads = 0;
+        return;
+    }
+    let (mesh, quads) = build_mesh(
+        &reachable.this_turn,
+        &reachable.next_turn,
+        reachable.cell_px.max(1.0),
+        &ground,
+    );
+    handles.quads = quads;
+    handles.builds += 1;
+    if let Some(handle) = &handles.mesh {
+        let _ = meshes.insert(handle.id(), mesh);
+        for mut visibility in &mut bubble {
+            *visibility = Visibility::Inherited;
+        }
+        return;
+    }
+    let handle = meshes.add(mesh);
+    handles.mesh = Some(handle.clone());
+    commands.spawn((
+        Name::new("ArmyMovementBubble"),
+        BubbleMesh,
+        Mesh3d(handle),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::WHITE,
+            unlit: true,
+            alpha_mode: AlphaMode::Blend,
+            cull_mode: None,
+            double_sided: true,
+            ..default()
+        })),
+        Transform::default(),
+        Visibility::Inherited,
+        bevy::light::NotShadowCaster,
+        bevy::state::state_scoped::DespawnOnExit(crate::app::AppState::Campaign),
+    ));
+}
+
+/// Back to a fresh state when the screen closes: the bubble entity is despawned with it.
+pub fn forget_bubble(mut handles: ResMut<BubbleHandles>) {
+    *handles = BubbleHandles::default();
+}
+
+/// Path preview of the selected army towards the cursor ground point (throttled by cell), sea
+/// voyage preview over water, and the hover text.
+#[allow(clippy::too_many_arguments)]
 pub fn preview_under_cursor(
     sim: Res<Sim>,
     selected: Res<SelectedArmy>,
+    hovered: Res<HoveredArmy>,
+    views: Res<ArmyViews>,
     window: Query<&Window, With<PrimaryWindow>>,
     camera: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
-    ground: Res<HeightSampler>,
+    ground: GroundHeight,
+    surface: Option<Res<Surface>>,
+    lanes: Res<SeaLanes>,
+    tick: Res<ReliefTick>,
     mut preview: ResMut<PathPreviewState>,
+    mut hint: ResMut<HoverHint>,
 ) {
     let (Some(data), Some(state), Some(army)) = (&sim.data, &sim.state, &selected.0) else {
+        if preview.view.is_some() || preview.sea != SeaHover::None {
+            preview.view = None;
+            preview.sea = SeaHover::None;
+            preview.hint = None;
+        }
+        set_hint(&mut hint, None);
         return;
     };
-    let Some(cursor) = cursor_position(&window) else {
-        return;
-    };
-    let Some((camera, camera_transform)) = camera.iter().next() else {
-        return;
-    };
-    let Ok(ray) = camera.viewport_to_world(camera_transform, cursor) else {
-        return;
-    };
-    let Some(px) = ray_ground(ray, &ground) else {
+    let hostile_hover = hovered
+        .0
+        .as_ref()
+        .is_some_and(|h| h != army && views.get(h).is_some_and(|v| v.hostile));
+    let attack_text = hostile_hover.then(|| "Armée ennemie — clic droit pour attaquer".to_owned());
+    let fresh = (|| {
+        let cursor = cursor_position(&window)?;
+        let (camera, camera_transform) = camera.iter().next()?;
+        let ray = camera.viewport_to_world(camera_transform, cursor).ok()?;
+        let px = ray_ground(ray, &ground)?;
+        Some((
+            px,
+            camera_distance(camera_transform, Vec3::new(px.x, 0.0, px.y)),
+        ))
+    })();
+    let Some((px, distance)) = fresh else {
+        preview.sea = SeaHover::None;
+        set_hint(&mut hint, attack_text);
         return;
     };
     let cell = [(px.x / 4.0) as i32, (px.y / 4.0) as i32];
-    if preview.target == Some(cell) {
-        return;
+    if preview.target != Some(cell) || preview.tick != tick.version {
+        preview.target = Some(cell);
+        preview.tick = tick.version;
+        let water = surface.as_ref().is_some_and(|s| is_water(s, px.x, px.y));
+        if water {
+            match sea_click(state, data, army, [px.x, px.y]) {
+                SeaClick::Embark(port) => {
+                    let stops = voyage_stops(state, data, army, &port);
+                    let from = state
+                        .army(army)
+                        .and_then(|a| a.settlement())
+                        .map(|s| s.as_str().to_owned())
+                        .unwrap_or_default();
+                    let names: Vec<String> = stops.iter().map(|s| s.as_str().to_owned()).collect();
+                    let point_of = |id: &str| {
+                        SettlementId::new(id)
+                            .ok()
+                            .and_then(|id| data.settlement_point(&id))
+                            .map(|p| Vec2::new(p[0], p[1]))
+                    };
+                    let route = route_points(&lanes, &point_of, &from, &names);
+                    preview.view = (route.len() >= 2)
+                        .then(|| view_from_waypoints(&route, Vec::new(), &ground, distance));
+                    preview.sea = SeaHover::Port;
+                    preview.hint = Some(voyage_hint(data, &port, &stops));
+                }
+                SeaClick::Refused(text) => {
+                    preview.view = None;
+                    preview.sea = SeaHover::Refused;
+                    preview.hint = Some(text.to_owned());
+                }
+            }
+        } else {
+            preview.sea = SeaHover::None;
+            let plan = state.plan_path(data, army, [px.x, px.y]);
+            preview.hint = match &plan {
+                Some(plan) => {
+                    let when = if plan.reachable_this_turn() {
+                        "ce tour".to_owned()
+                    } else {
+                        format!("{} tours", plan.turns())
+                    };
+                    Some(format!(
+                        "→ {when}, coût {} — clic droit pour marcher",
+                        plan.cost
+                    ))
+                }
+                None => Some("Aucun chemin".to_owned()),
+            };
+            preview.view = plan.and_then(|plan| preview_from_plan(&plan, &ground, distance));
+        }
     }
-    preview.target = Some(cell);
-    let distance = camera_distance(camera_transform, Vec3::new(px.x, 0.0, px.y));
-    preview.view = state
-        .plan_path(data, army, [px.x, px.y])
-        .and_then(|plan| preview_from_plan(&plan, &ground, distance));
+    let shown = attack_text.or_else(|| preview.hint.clone());
+    set_hint(&mut hint, shown);
+}
+
+fn set_hint(hint: &mut HoverHint, text: Option<String>) {
+    if hint.0 != text {
+        hint.0 = text;
+    }
+}
+
+/// Screen-space radius in pixels to a world radius at `distance` for a perspective camera.
+fn pixels_to_world(pixels: f32, distance: f32, fov: f32, viewport_height: f32) -> f32 {
+    pixels * 2.0 * (fov * 0.5).tan() * distance / viewport_height.max(1.0)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -388,25 +791,22 @@ pub fn draw_overlays(
     mut gizmos: Gizmos,
     time: Res<Time>,
     preview: Res<PathPreviewState>,
-    reachable: Res<Reachable>,
     mut ripples: ResMut<Ripples>,
     views: Res<ArmyViews>,
     selected: Res<SelectedArmy>,
-    ground: Res<HeightSampler>,
+    ground: GroundHeight,
+    camera: Query<(&Camera, &GlobalTransform, &Projection), With<Camera3d>>,
 ) {
+    let color = if preview.sea == SeaHover::Port {
+        Color::srgba(0.25, 0.5, 0.85, 0.9)
+    } else {
+        PATH_COLOR
+    };
     if let Some(view) = &preview.view {
-        gizmos.linestrip(view.points.iter().copied(), PATH_COLOR);
+        gizmos.linestrip(view.points.iter().copied(), color);
         for &end in view.turn_ends.iter().filter_map(|i| view.corners.get(*i)) {
-            gizmos.sphere(Isometry3d::from_translation(end), 0.8, PATH_COLOR);
+            gizmos.sphere(Isometry3d::from_translation(end), 0.8, color);
         }
-    }
-    let bubble = Color::srgba(0.35, 0.6, 0.9, 0.5);
-    for cell in &reachable.cells {
-        gizmos.sphere(
-            Isometry3d::from_translation(*cell + Vec3::Y * 0.1),
-            0.35,
-            bubble,
-        );
     }
     if let Some(view) = selected.0.as_ref().and_then(|id| views.get(id)) {
         let at = px_to_world(Vec2::new(view.point[0], view.point[1]), &ground) + Vec3::Y * 0.2;
@@ -417,20 +817,38 @@ pub fn draw_overlays(
         );
     }
     let dt = time.delta_secs();
-    ripples.0.retain_mut(|(at, age)| {
+    let Some((cam, cam_transform, projection)) = camera.iter().next() else {
+        return;
+    };
+    let fov = match projection {
+        Projection::Perspective(p) => p.fov,
+        _ => 0.8,
+    };
+    let height = cam.logical_viewport_size().map_or(720.0, |s| s.y);
+    ripples.0.retain_mut(|(at_px, age)| {
         *age += dt;
-        let t = *age / RIPPLE_SECONDS;
-        if t >= 1.0 {
+        if *age >= RIPPLE_DURATION + RIPPLE_ECHO_DELAY {
             return false;
         }
-        gizmos.circle(
-            Isometry3d::new(
-                *at + Vec3::Y * 0.2,
-                Quat::from_rotation_arc(Vec3::Z, Vec3::Y),
+        let at = px_to_world(*at_px, &ground) + Vec3::Y * 0.2;
+        let distance = cam_transform.translation().distance(at);
+        for (t, alpha_scale) in [
+            (*age / RIPPLE_DURATION, 1.0),
+            (
+                (*age - RIPPLE_ECHO_DELAY) / RIPPLE_DURATION,
+                RIPPLE_ECHO_ALPHA,
             ),
-            1.0 + 5.0 * t,
-            Color::srgba(1.0, 0.85, 0.4, 1.0 - t),
-        );
+        ] {
+            if !(0.0..1.0).contains(&t) {
+                continue;
+            }
+            let radius_px = RIPPLE_START_RADIUS + (RIPPLE_END_RADIUS - RIPPLE_START_RADIUS) * t;
+            gizmos.circle(
+                Isometry3d::new(at, cam_transform.rotation()),
+                pixels_to_world(radius_px, distance, fov, height),
+                Color::srgba(0.25, 0.14, 0.06, (1.0 - t) * alpha_scale),
+            );
+        }
         true
     });
 }
@@ -442,6 +860,23 @@ pub fn dump_armies(world: &World) -> (String, Value) {
     let log = world.resource::<OrderLog>();
     let preview = world.resource::<PathPreviewState>();
     let reachable = world.resource::<Reachable>();
+    let glides = world.resource::<Glides>();
+    let bubble = world.resource::<BubbleHandles>();
+    let cursor = world.resource::<CursorMode>();
+    let hint = world.resource::<HoverHint>();
+    let lanes = world.resource::<SeaLanes>();
+    let figures = world
+        .try_query::<&super::figures::ArmyFigure>()
+        .map_or(0, |mut q| q.iter(world).count());
+    let scenes_ready = world
+        .try_query::<&super::figures::Tinted>()
+        .map_or(0, |mut q| q.iter(world).count());
+    let tinted = world.resource::<super::figures::LiveryCache>().tinted;
+    let ships = world
+        .try_query::<&super::figures::ArmyFigure>()
+        .map_or(0, |mut q| {
+            q.iter(world).filter(|f| f.path.contains("fleet")).count()
+        });
     let markers = world
         .try_query::<&ArmyMarker>()
         .map_or(0, |mut q| q.iter(world).count());
@@ -467,6 +902,21 @@ pub fn dump_armies(world: &World) -> (String, Value) {
             "path_turns": preview.view.as_ref().map_or(0, |v| v.turns),
             "reachable_cells": reachable.count,
             "reachable_next_cells": reachable.next_count,
+            "movement_budget": reachable.budget,
+            "bubble_quads": bubble.quads,
+            "bubble_builds": bubble.builds,
+            "figure_scenes": figures,
+            "ship_scenes": ships,
+            "mesh_primitives_seen": scenes_ready,
+            "livery_materials_tinted": tinted,
+            "sea_lanes": lanes.len(),
+            "voyages_started": glides.started,
+            "voyages_finished": glides.finished,
+            "voyages_gliding": glides.active.len(),
+            "pending_naval_battles": world.resource::<Sim>().state.as_ref().map_or(0, |s| s.naval.pending.len()),
+            "cursor": cursor.name(),
+            "hover_hint": hint.0,
+            "ripples_alive": world.resource::<Ripples>().0.len(),
         }),
     )
 }

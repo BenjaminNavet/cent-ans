@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 use sim_campaign::PathPlan;
 
-use super::projection::{HeightSampler, px_to_world};
+use super::projection::{Ground, px_to_world};
 
 pub const SUBDIVISION_PX: f32 = 12.0;
 pub const STEP_PER_DISTANCE: f32 = 0.04;
@@ -52,35 +52,49 @@ pub fn subdivide(waypoints: &[Vec2], camera_distance: f32) -> Vec<Vec2> {
     out
 }
 
+/// A drawable polyline of map-pixel waypoints (a sea route has no turn ends).
+pub fn view_from_waypoints(
+    waypoints: &[Vec2],
+    turn_ends: Vec<usize>,
+    ground: &impl Ground,
+    camera_distance: f32,
+) -> PathView {
+    let lift = lift_at(camera_distance);
+    let lifted = |p: Vec2| px_to_world(p, ground) + Vec3::Y * lift;
+    PathView {
+        points: subdivide(waypoints, camera_distance)
+            .into_iter()
+            .map(lifted)
+            .collect(),
+        corners: waypoints.iter().copied().map(lifted).collect(),
+        turn_ends,
+        ..PathView::default()
+    }
+}
+
 /// Converts a plan to a drawable view. `None` when the plan has nothing to walk.
 pub fn preview_from_plan(
     plan: &PathPlan,
-    ground: &HeightSampler,
+    ground: &impl Ground,
     camera_distance: f32,
 ) -> Option<PathView> {
     if plan.points.len() < 2 {
         return None;
     }
     let waypoints: Vec<Vec2> = plan.points.iter().map(|p| Vec2::new(p[0], p[1])).collect();
-    let lift = lift_at(camera_distance);
-    let lifted = |p: Vec2| px_to_world(p, ground) + Vec3::Y * lift;
     Some(PathView {
-        points: subdivide(&waypoints, camera_distance)
-            .into_iter()
-            .map(lifted)
-            .collect(),
-        corners: waypoints.iter().copied().map(lifted).collect(),
-        turn_ends: plan.turn_ends.clone(),
         turns: plan.turns(),
         cost: plan.cost,
         cost_this_turn: plan.cost_this_turn,
         reachable_this_turn: plan.reachable_this_turn(),
+        ..view_from_waypoints(&waypoints, plan.turn_ends.clone(), ground, camera_distance)
     })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::campaign::armies::projection::HeightSampler;
     use sim_campaign::terrain_mods::CostBreakdown;
 
     fn plan(points: Vec<[f32; 2]>, turn_ends: Vec<usize>) -> PathPlan {

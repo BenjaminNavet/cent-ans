@@ -8,12 +8,16 @@
 //! (`campaign_sim_movement.rs`). World convention: `(x, ground, z) = (map px.x, h, map px.y)`.
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
+mod bubble;
+mod feedback;
+pub mod figures;
 mod markers;
 mod orders;
 pub mod path;
 pub mod pick;
 pub mod projection;
 pub mod scale;
+pub mod sea;
 mod views;
 
 use bevy::prelude::*;
@@ -22,8 +26,10 @@ use sim_campaign::ArmyId;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 
+pub use feedback::{CursorMode, HoverHint};
 pub use orders::{ArmyCommand, OrderLog};
-pub use projection::HeightSampler;
+pub use projection::Ground;
+pub use sea::SeaLanes;
 pub use views::{ArmyView, ArmyViews};
 
 /// The army the player has selected.
@@ -40,31 +46,52 @@ impl Plugin for CampaignArmiesPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<SelectedArmy>()
             .init_resource::<HoveredArmy>()
-            .init_resource::<HeightSampler>()
             .init_resource::<ArmyViews>()
             .init_resource::<OrderLog>()
             .init_resource::<orders::PathPreviewState>()
             .init_resource::<orders::Reachable>()
             .init_resource::<orders::Ripples>()
+            .init_resource::<orders::ReliefTick>()
+            .init_resource::<bubble::BubbleHandles>()
+            .init_resource::<figures::LiveryCache>()
+            .init_resource::<sea::Glides>()
+            .init_resource::<sea::SeaLanes>()
+            .init_resource::<feedback::CursorMode>()
+            .init_resource::<feedback::HoverHint>()
             .add_message::<ArmyCommand>()
             .register_dump(orders::dump_armies)
+            .add_systems(
+                OnEnter(AppState::Campaign),
+                (sea::load_sea_lanes, feedback::spawn_hint),
+            )
             .add_systems(
                 Update,
                 (
                     views::refresh_views,
+                    orders::auto_resolve_naval,
+                    orders::advance_glides,
                     markers::sync_markers,
+                    figures::tint_liveries,
+                    markers::refresh_plate_text,
                     markers::place_markers,
                     markers::update_plates,
+                    orders::track_relief,
                     orders::hover_and_input,
                     orders::test_hook,
                     orders::execute_commands,
                     orders::refresh_overlays,
+                    orders::update_bubble,
                     orders::preview_under_cursor,
                     orders::draw_overlays,
+                    feedback::update_cursor,
+                    feedback::update_hint,
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
             )
-            .add_systems(OnExit(AppState::Campaign), orders::reset);
+            .add_systems(
+                OnExit(AppState::Campaign),
+                (orders::reset, orders::forget_bubble, feedback::reset_cursor),
+            );
     }
 }

@@ -5,9 +5,22 @@ use std::sync::Arc;
 
 use bevy::prelude::*;
 
-/// Ground height hook (`MapData.surface_world_at` in Godot). Flat (y = 0) until the terrain
-/// lot provides one: replace the resource's content with `HeightSampler::new(...)`.
-#[derive(Resource, Clone)]
+use crate::campaign::terrain::surface::GroundHeight;
+
+/// Displayed ground height at a map point (`MapData.surface_world_at` in Godot). The game uses
+/// [`GroundHeight`] (terrain lot, includes the dynamic relief); tests use [`HeightSampler`].
+pub trait Ground {
+    fn height(&self, x: f32, z: f32) -> f32;
+}
+
+impl Ground for GroundHeight<'_> {
+    fn height(&self, x: f32, z: f32) -> f32 {
+        self.at(x, z).unwrap_or(0.0)
+    }
+}
+
+/// Closure-backed ground (tests, flat fallback).
+#[derive(Clone)]
 pub struct HeightSampler(Arc<dyn Fn(f32, f32) -> f32 + Send + Sync>);
 
 impl HeightSampler {
@@ -25,6 +38,12 @@ impl HeightSampler {
     }
 }
 
+impl Ground for HeightSampler {
+    fn height(&self, x: f32, z: f32) -> f32 {
+        self.at(x, z)
+    }
+}
+
 impl Default for HeightSampler {
     fn default() -> Self {
         Self::flat()
@@ -32,8 +51,8 @@ impl Default for HeightSampler {
 }
 
 /// World position on the ground of map pixel `p`.
-pub fn px_to_world(p: Vec2, ground: &HeightSampler) -> Vec3 {
-    Vec3::new(p.x, ground.at(p.x, p.y), p.y)
+pub fn px_to_world(p: Vec2, ground: &impl Ground) -> Vec3 {
+    Vec3::new(p.x, ground.height(p.x, p.y), p.y)
 }
 
 /// Map pixel of a world position.
@@ -42,7 +61,7 @@ pub fn world_to_px(w: Vec3) -> Vec2 {
 }
 
 /// Intersection of a ray with the ground (fixed-point on the height sampler).
-pub fn ray_ground(ray: Ray3d, ground: &HeightSampler) -> Option<Vec2> {
+pub fn ray_ground(ray: Ray3d, ground: &impl Ground) -> Option<Vec2> {
     let mut height = 0.0;
     let mut hit = None;
     for _ in 0..4 {
@@ -50,7 +69,7 @@ pub fn ray_ground(ray: Ray3d, ground: &HeightSampler) -> Option<Vec2> {
         let distance = ray.intersect_plane(Vec3::new(0.0, height, 0.0), plane)?;
         let point = ray.get_point(distance);
         hit = Some(world_to_px(point));
-        height = ground.at(point.x, point.z);
+        height = ground.height(point.x, point.z);
     }
     hit
 }

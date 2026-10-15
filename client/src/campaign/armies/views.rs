@@ -1,7 +1,7 @@
 //! Army list shown to the player, read from the `Sim` resource.
 
 use bevy::prelude::*;
-use data_model::FactionId;
+use data_model::{FactionId, UnitCategory};
 use sim_campaign::{ArmyId, ArmyPosition, Stance};
 
 use crate::sim::Sim;
@@ -23,6 +23,8 @@ pub struct ArmyView {
     /// `"moving"`, `"siege"` or `"idle"` (plate status, `ArmyPlate.STATUS_TEXT`).
     pub status: &'static str,
     pub in_settlement: bool,
+    /// One category per regiment (figures follow the composition).
+    pub categories: Vec<UnitCategory>,
     pub movement_left: u32,
 }
 
@@ -83,6 +85,15 @@ pub fn refresh_views(sim: Res<Sim>, mut views: ResMut<ArmyViews>) {
                 "idle"
             },
             in_settlement: matches!(army.position, ArmyPosition::Settlement(_)),
+            categories: army
+                .units
+                .iter()
+                .map(|u| {
+                    data.unit_types
+                        .get(&u.unit_type)
+                        .map_or(UnitCategory::Infantry, |t| t.category)
+                })
+                .collect(),
             movement_left: army.movement_left,
         })
         .collect();
