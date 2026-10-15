@@ -164,6 +164,7 @@ pub struct FlowPlugin;
 
 impl Plugin for FlowPlugin {
     fn build(&self, app: &mut App) {
+        naval::enable_dialog();
         app.add_message::<LeaveBattle>()
             .add_message::<FlowCommand>()
             .add_message::<BattleResolved>()
@@ -248,6 +249,13 @@ fn dump_extra(world: &World, flow: &FlowState) -> Value {
         }))),
     );
     map.insert("last_site".into(), json!(flow.last_site));
+    let sim = world.resource::<Sim>();
+    if let (Some(data), Some(state)) = (&sim.data, &sim.state) {
+        map.insert(
+            "naval_pending".into(),
+            json!(state.pending_naval_views(data).len()),
+        );
+    }
     map.insert(
         "last_autosave".into(),
         json!(flow.last_autosave.as_ref().map(|r| match r {

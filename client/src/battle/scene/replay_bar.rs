@@ -113,80 +113,81 @@ fn spawn_bar(
             ReplayBar,
             DespawnOnExit(AppState::Battle),
             UiTier::Banner.index(),
-            panel_sized(&theme, BAR_WIDTH),
             Node {
                 position_type: PositionType::Absolute,
-                top: Val::Px(8.0),
+                top: Val::Px(60.0),
                 left: Val::Percent(50.0),
                 margin: UiRect::left(Val::Px(-BAR_WIDTH / 2.0)),
                 width: Val::Px(BAR_WIDTH),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(4.0),
                 ..default()
             },
         ))
-        .with_children(|bar| {
-            bar.spawn(Node {
-                column_gap: Val::Px(6.0),
-                align_items: AlignItems::Center,
-                ..default()
-            })
-            .with_children(|top| {
-                top.spawn((
-                    typed(&theme, &heading, UiType::Body),
-                    Node {
-                        flex_grow: 1.0,
+        .with_children(|outer| {
+            outer
+                .spawn(panel_sized(&theme, BAR_WIDTH))
+                .with_children(|bar| {
+                    bar.spawn(Node {
+                        column_gap: Val::Px(6.0),
+                        align_items: AlignItems::Center,
                         ..default()
-                    },
-                ));
-                top.spawn(button_small(&theme, PLAY, "Pause"));
-                for speed in SPEEDS {
-                    top.spawn((
-                        SpeedButton(speed),
-                        toggle_button(
+                    })
+                    .with_children(|top| {
+                        top.spawn((
+                            typed(&theme, &heading, UiType::Body),
+                            Node {
+                                flex_grow: 1.0,
+                                ..default()
+                            },
+                        ));
+                        top.spawn(button_small(&theme, PLAY, "Pause"));
+                        for speed in SPEEDS {
+                            top.spawn((
+                                SpeedButton(speed),
+                                toggle_button(
+                                    &theme,
+                                    &format!("replay:speed:{}", speed as u32),
+                                    &format!("×{}", speed as u32),
+                                    speed == 1.0,
+                                ),
+                            ));
+                        }
+                        top.spawn(button_small(&theme, QUIT, "Quitter le rejeu"));
+                    });
+                    bar.spawn(Node {
+                        column_gap: Val::Px(8.0),
+                        align_items: AlignItems::Center,
+                        ..default()
+                    })
+                    .with_children(|bottom| {
+                        bottom.spawn(slider(
                             &theme,
-                            &format!("replay:speed:{}", speed as u32),
-                            &format!("×{}", speed as u32),
-                            speed == 1.0,
-                        ),
-                    ));
-                }
-                top.spawn(button_small(&theme, QUIT, "Quitter le rejeu"));
-            });
-            bar.spawn(Node {
-                column_gap: Val::Px(8.0),
-                align_items: AlignItems::Center,
-                ..default()
-            })
-            .with_children(|bottom| {
-                bottom.spawn(slider(
-                    &theme,
-                    TIMELINE,
-                    0.0,
-                    duration.max(0.1) as f32,
-                    0.0,
-                    0.1,
-                    BAR_WIDTH - 220.0,
-                ));
-                bottom.spawn((
-                    TimeLabel,
-                    caption(&theme, &format!("0:00 / {}", clock(duration))),
-                    Node {
-                        min_width: Val::Px(110.0),
-                        ..default()
-                    },
-                ));
-            });
-            bar.spawn((
-                DivergenceLabel,
-                caption(&theme, ""),
-                TextColor(style::RUBRIC),
-                Node {
-                    display: Display::None,
-                    max_width: Val::Px(BAR_WIDTH - 24.0),
-                    ..default()
-                },
-            ));
+                            TIMELINE,
+                            0.0,
+                            duration.max(0.1) as f32,
+                            0.0,
+                            0.1,
+                            BAR_WIDTH - 220.0,
+                        ));
+                        bottom.spawn((
+                            TimeLabel,
+                            caption(&theme, &format!("0:00 / {}", clock(duration))),
+                            Node {
+                                min_width: Val::Px(110.0),
+                                ..default()
+                            },
+                        ));
+                    });
+                    bar.spawn((
+                        DivergenceLabel,
+                        caption(&theme, ""),
+                        Node {
+                            display: Display::None,
+                            max_width: Val::Px(BAR_WIDTH - 24.0),
+                            ..default()
+                        },
+                    ))
+                    .insert(TextColor(style::RUBRIC));
+                });
         });
     stats.shown = true;
 }

@@ -30,6 +30,22 @@ use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::widgets::{button_primary, button_small, caption, panel_sized, separator};
 use crate::ui::kit::{ButtonPressed, UiTheme, fr, typed};
 
+/// Whether the pre-battle dialog takes the pending naval battles (set when the flow plugin is
+/// built; `CENT_ANS_NAVAL_AUTO=1` keeps the old « resolve at once » for scripts). The armies'
+/// auto-resolution (`campaign::armies::sea::auto_resolve_pending`) stands back while it is on.
+static OFFER_DIALOG: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Called by the flow plugin: from now on the player decides.
+pub fn enable_dialog() {
+    let auto = std::env::var("CENT_ANS_NAVAL_AUTO").is_ok_and(|v| v != "0");
+    OFFER_DIALOG.store(!auto, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// True when pending naval battles wait for the dialog instead of being resolved at once.
+pub fn offers_dialog() -> bool {
+    OFFER_DIALOG.load(std::sync::atomic::Ordering::Relaxed)
+}
+
 pub const AUTO: &str = "flow:naval:auto";
 pub const WITHDRAW: &str = "flow:naval:withdraw";
 const RESULT_KEY: &str = "flow:naval_result";
@@ -373,19 +389,13 @@ fn fleet_column(
             ));
             column.spawn(caption(
                 theme,
-                &format!(
-                    "{} hommes embarqués",
-                    fr::digits(i64::from(side.men()))
-                ),
+                &format!("{} hommes embarqués", fr::digits(i64::from(side.men()))),
             ));
             for ship in side.ships.iter().take(8) {
                 let men: u32 = ship.crew.iter().map(|c| c.men).sum();
                 column.spawn(caption(
                     theme,
-                    &format!(
-                        "{} — {}, {men} hommes",
-                        ship.name, ship.class.name.display
-                    ),
+                    &format!("{} — {}, {men} hommes", ship.name, ship.class.name.display),
                 ));
             }
             if side.ships.len() > 8 {

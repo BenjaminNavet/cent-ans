@@ -149,7 +149,9 @@ fn stage_naval(
                 .is_some()
             {
                 let index = state.debug_stage_naval(data, &army, &target, enemy);
-                info!("flow dev: staged naval interception {index:?} ({army} to {target} by {enemy})");
+                info!(
+                    "flow dev: staged naval interception {index:?} ({army} to {target} by {enemy})"
+                );
                 return;
             }
         }

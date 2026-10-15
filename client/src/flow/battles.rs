@@ -29,8 +29,8 @@ use super::{
 };
 use crate::app::AppState;
 use crate::battle::decor::horizon::HorizonProvince;
-use crate::battle::scene::BattleSession;
 use crate::battle::hud::aftermath::ResultExtras;
+use crate::battle::scene::BattleSession;
 use crate::campaign::hud::HudData;
 use crate::campaign::hud::flow::TurnFlow;
 use crate::menu::saves::{SaveDir, save_now};
@@ -56,6 +56,7 @@ pub fn apply_settings(settings: Res<Settings>, mut sim: ResMut<Sim>) {
 
 /// Opens the dialog on the first pending battle (not during the end of turn, another modal, a
 /// launch).
+#[allow(clippy::too_many_arguments)]
 pub fn offer_pending(
     mut commands: Commands,
     sim: Res<Sim>,

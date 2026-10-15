@@ -120,6 +120,39 @@ mod tests {
     use super::*;
 
     #[test]
+    fn a_field_battle_in_a_site_province_and_year_is_fought_on_the_site() {
+        let root = paths::find_root().expect("repo root");
+        let dir = paths::data_dir(&root);
+        let (game, _) = data_model::GameData::load(&dir).expect("game data");
+        crate::battle::scene::setup::install_battle_rules(&dir);
+        let custom = crate::battle::scene::setup::default_custom_battle(&game);
+        let (plain, _, _) =
+            crate::battle::scene::setup::build_start(&game, &dir, &custom, 1).unwrap();
+        let mut setup = plain.setup().clone();
+        let maps = maps_in(&dir);
+        let found = maps.iter().find_map(|map| {
+            setup.province = map.province.clone();
+            (1330..1460)
+                .find(|year| map.matches_campaign(&setup.province, *year))
+                .map(|year| (map.id.clone(), year, setup.clone()))
+        });
+        let (id, year, setup) = found.expect("a map is open to campaign battles");
+        let site = campaign_site(&dir, &setup, year).expect("site found");
+        assert_eq!(site.province, setup.province, "{id}");
+        // Never a siege, never outside its years.
+        assert!(campaign_site(&dir, &setup, 1000).is_none());
+        let launch = BattleLaunch {
+            setup,
+            seed: 5,
+            hour: 9.0,
+            index: 0,
+        };
+        let on_site = start_of(&launch, Some(&site)).build().expect("site battle");
+        let plain = start_of(&launch, None).build().expect("plain battle");
+        assert_ne!(on_site.field().width, plain.field().width);
+    }
+
+    #[test]
     fn historical_maps_are_found_and_matched() {
         let root = paths::find_root().expect("repo root");
         let dir = paths::data_dir(&root);

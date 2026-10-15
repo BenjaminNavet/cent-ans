@@ -16,8 +16,8 @@ use sim_battle::custom::CustomBattle;
 use sim_battle::{BattleSim, DT, ReplayStart, SideId};
 
 use crate::agent::dump::DumpAppExt;
-use crate::battle::hud::aftermath::{HistoryInfo, ResultExtras};
 use crate::app::AppState;
+use crate::battle::hud::aftermath::{HistoryInfo, ResultExtras};
 use crate::paths;
 use crate::sim::Sim;
 
@@ -152,7 +152,12 @@ impl Plugin for BattleScenePlugin {
             .add_systems(OnExit(AppState::Battle), end_battle)
             .add_systems(
                 Update,
-                (replay::apply_controls, step_session, save_replay, replay::demo)
+                (
+                    replay::apply_controls,
+                    step_session,
+                    save_replay,
+                    replay::demo,
+                )
                     .chain()
                     .in_set(StepSet)
                     .run_if(in_state(AppState::Battle))
@@ -192,6 +197,7 @@ fn start_battle(
         return;
     };
     replay::discard_recording();
+    replay::set_replaying(replay_request.is_some());
     *extras = ResultExtras::default();
     if let Some(request) = replay_request {
         commands.remove_resource::<replay::PendingReplay>();
@@ -201,9 +207,7 @@ fn start_battle(
                 let duration = session.playback().map_or(0.0, |p| p.duration);
                 info!(
                     "battle: replay \"{}\" {duration} s, {} vs {}",
-                    session.title,
-                    session.snapshot.strength[0],
-                    session.snapshot.strength[1]
+                    session.title, session.snapshot.strength[0], session.snapshot.strength[1]
                 );
                 commands.insert_resource(session);
             }
@@ -219,7 +223,7 @@ fn start_battle(
     // custom composition, so regiment strengths, generals and sieges are those of the armies.
     let opened = if let Some(campaign) = campaign {
         commands.remove_resource::<PendingBattle>();
-        crate::flow::launch::build(&campaign).and_then(|(battle, start, hour)| {
+        crate::flow::launch::build(&campaign).map(|(battle, start, hour)| {
             let config = setup::default_custom_battle(game);
             let seed = campaign.launch.seed;
             let setup = battle.setup();
@@ -228,7 +232,7 @@ fn start_battle(
                 (None, true) => format!("Siège de {}", setup.province_name),
                 (None, false) => format!("Bataille de {}", setup.province_name),
             };
-            Ok(Opened {
+            Opened {
                 sim: battle,
                 start,
                 hour: Some(hour),
@@ -236,7 +240,7 @@ fn start_battle(
                 seed,
                 title,
                 history: None,
-            })
+            }
         })
     } else if let Some(historical) = historical {
         // A scripted historical battle (bsiege lot): orders of battle, site relief, waves.
@@ -281,6 +285,8 @@ fn open_session(game: &GameData, config: CustomBattle, seed: u64) -> Result<Open
     let province = sim.setup().province_name.clone();
     let title = if province.is_empty() {
         "Bataille personnalisée".to_owned()
+    } else if province.starts_with("Bataille") {
+        province
     } else {
         format!("Bataille de {province}")
     };
@@ -454,6 +460,7 @@ fn end_battle(mut commands: Commands, session: Option<ResMut<BattleSession>>) {
         save_now(&mut session);
     }
     replay::discard_recording();
+    replay::set_replaying(false);
     commands.remove_resource::<BattleSession>();
 }
 

@@ -62,7 +62,8 @@ pub fn de(name: &str) -> String {
         .next()
         .map(|c| c.to_lowercase().next().unwrap_or(c));
     match first {
-        Some('a' | 'e' | 'i' | 'o' | 'u' | 'y' | 'h' | 'é' | 'è' | 'ê' | 'â' | 'î' | 'ô' | 'û') => {
+        Some('a' | 'e' | 'i' | 'o' | 'u' | 'y' | 'h' | 'é' | 'è' | 'ê' | 'â' | 'î' | 'ô' | 'û') =>
+        {
             format!("d’{name}")
         }
         _ => format!("de {name}"),

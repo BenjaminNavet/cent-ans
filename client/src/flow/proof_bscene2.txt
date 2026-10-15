@@ -1,0 +1,16 @@
+# Campagne -> dialogue (autosave) -> bataille (site, horizon) -> fin (settle) -> Revoir -> Quitter.
+# CENT_ANS_STAGE_BATTLE=1 CENT_ANS_LOADING_SECONDS=0 CENT_ANS_NO_DEPLOY=1 CENT_ANS_FLOW_FINISH=1
+# CENT_ANS_MUTE=1 CENT_ANS_SAVES=<dossier> CENT_ANS_REPLAYS=<dossier>
+# client/run_bg.sh --state Campaign --faction fac_france --script client/src/flow/proof_bscene2.txt
+wait 150
+dump out/bscene2_flow_dialog.json
+click flow:fight
+wait 240
+dump out/bscene2_flow_battle.json
+click replay:watch
+wait 200
+dump out/bscene2_flow_replay.json
+click replay:quit
+wait 150
+dump out/bscene2_flow_back.json
+exit

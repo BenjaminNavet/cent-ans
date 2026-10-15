@@ -68,8 +68,30 @@ pub fn drive(sim: &mut BattleSim, action: ReplayAction) {
     action.apply(sim);
 }
 
+static REPLAYING: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// A replay is on screen: every input to the simulation is refused (the bridge's
+/// `REPLAY_REFUSAL`), whatever the interface still sends.
+pub fn set_replaying(on: bool) {
+    REPLAYING.store(on, std::sync::atomic::Ordering::Relaxed);
+}
+
+fn replaying() -> bool {
+    REPLAYING.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+fn refusal() -> sim_battle::CommandError {
+    sim_battle::CommandError::OrderUnavailable {
+        order: "rejeu".to_owned(),
+        reason: "rejeu : on regarde la bataille, on ne la commande pas".to_owned(),
+    }
+}
+
 /// `issue_command`, recorded.
 pub fn issue(sim: &mut BattleSim, command: Command) -> Result<(), sim_battle::CommandError> {
+    if replaying() {
+        return Err(refusal());
+    }
     record(
         sim,
         ReplayAction::Command {
@@ -88,6 +110,9 @@ pub fn deploy_unit(
     facing: Option<f64>,
     width: Option<f64>,
 ) -> Result<(), sim_battle::CommandError> {
+    if replaying() {
+        return Err(refusal());
+    }
     record(
         sim,
         ReplayAction::DeployUnit {
@@ -103,12 +128,18 @@ pub fn deploy_unit(
 
 /// `begin_deployment`, recorded.
 pub fn begin_deployment(sim: &mut BattleSim) -> bool {
+    if replaying() {
+        return false;
+    }
     record(sim, ReplayAction::BeginDeployment);
     sim.begin_deployment()
 }
 
 /// `start_battle`, recorded.
 pub fn start_battle(sim: &mut BattleSim) -> Result<(), sim_battle::CommandError> {
+    if replaying() {
+        return Err(refusal());
+    }
     record(sim, ReplayAction::StartBattle);
     sim.start_battle()
 }
@@ -592,7 +623,8 @@ mod tests {
     use super::*;
 
     fn temp_dir(tag: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("cent-ans-replays-{tag}-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("cent-ans-replays-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         dir
     }
@@ -664,7 +696,8 @@ mod tests {
         let (game, _) = data_model::GameData::load(&dir).expect("game data");
         let custom = super::super::setup::default_custom_battle(&game);
         super::super::setup::install_battle_rules(&dir);
-        let (mut sim, start, _) = super::super::setup::build_start(&game, &dir, &custom, 11).unwrap();
+        let (mut sim, start, _) =
+            super::super::setup::build_start(&game, &dir, &custom, 11).unwrap();
         let mut recorder = ReplayRecorder::new(start, &sim);
         recorder.record(&sim, ReplayAction::StartHour { hour: 9.0 });
         sim.set_start_hour(9.0);
