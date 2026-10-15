@@ -93,7 +93,10 @@ fn num(v: &Value, key: &str, default: f32) -> f32 {
 }
 
 fn pair(v: &Value, default: [f32; 2]) -> [f32; 2] {
-    match (v.get(0).and_then(Value::as_f64), v.get(1).and_then(Value::as_f64)) {
+    match (
+        v.get(0).and_then(Value::as_f64),
+        v.get(1).and_then(Value::as_f64),
+    ) {
         (Some(a), Some(b)) => [a as f32, b as f32],
         _ => default,
     }
@@ -108,7 +111,12 @@ pub fn parse_text(text: &str) -> Option<Value> {
     serde_json::from_str(&body.join("\n")).ok()
 }
 
-pub fn parse(doc: &Value, meters_per_px: f32, town_clearance_px: f32, road_cell_px: f32) -> RockConfig {
+pub fn parse(
+    doc: &Value,
+    meters_per_px: f32,
+    town_clearance_px: f32,
+    road_cell_px: f32,
+) -> RockConfig {
     let r = &doc["render"];
     let render = RockRender {
         tile_units: num(r, "tile_units", 128.0),
@@ -181,7 +189,8 @@ fn smooth(a: f32, b: f32, x: f32) -> f32 {
 }
 
 fn lattice(ix: i32, iy: i32) -> f32 {
-    let mut h = (ix as u32).wrapping_mul(0x85eb_ca6b) ^ (iy as u32).wrapping_mul(0xc2b2_ae35) ^ 0x4B5;
+    let mut h =
+        (ix as u32).wrapping_mul(0x85eb_ca6b) ^ (iy as u32).wrapping_mul(0xc2b2_ae35) ^ 0x4B5;
     h ^= h >> 15;
     h = h.wrapping_mul(0x2c1b_3c6d);
     h ^= h >> 12;
@@ -244,7 +253,14 @@ fn treeline_m(size_y: f32, y: f32) -> f32 {
 }
 
 /// Suitability [0, 1] of an outcrop at a probed point.
-pub fn suitability(t: &dyn Terrain, o: &Outcrop, probe: Probe, biome: i32, heath: f32, y: f32) -> f32 {
+pub fn suitability(
+    t: &dyn Terrain,
+    o: &Outcrop,
+    probe: Probe,
+    biome: i32,
+    heath: f32,
+    y: f32,
+) -> f32 {
     if !t.biome_allows(o.biomes, biome) {
         return 0.0;
     }
@@ -411,7 +427,8 @@ pub fn seed_tile(t: &dyn Terrain, cfg: &RockConfig, tile: IVec2) -> Vec<Rock> {
     }
     let side = cfg.render.tile_units;
     let rect = Rect::from_corners(tile.as_vec2() * side, (tile.as_vec2() + Vec2::ONE) * side);
-    let mut rng = Rng::new(0x4B5 ^ ((tile.x as i64 as u64) << 32) ^ (tile.y as u32 as u64) ^ 0x9E37);
+    let mut rng =
+        Rng::new(0x4B5 ^ ((tile.x as i64 as u64) << 32) ^ (tile.y as u32 as u64) ^ 0x9E37);
     let step = cfg.render.grid_step.max(0.5);
     let p_max = cfg.render.max_probability;
     let [t0, t1] = cfg.render.cluster_threshold;
@@ -419,7 +436,8 @@ pub fn seed_tile(t: &dyn Terrain, cfg: &RockConfig, tile: IVec2) -> Vec<Rock> {
     let mut scores = vec![0.0f32; cfg.outcrops.len()];
     for j in 0..cells {
         for i in 0..cells {
-            let p = rect.min + (Vec2::new(i as f32, j as f32) + Vec2::new(rng.f32(), rng.f32())) * step;
+            let p =
+                rect.min + (Vec2::new(i as f32, j as f32) + Vec2::new(rng.f32(), rng.f32())) * step;
             let roll = rng.f32();
             let pick = rng.f32();
             let seed_value = rng.next_u64();
@@ -460,7 +478,16 @@ pub fn seed_tile(t: &dyn Terrain, cfg: &RockConfig, tile: IVec2) -> Vec<Rock> {
             if !place(t, cfg, &mut out, chosen, p, probe, &mut local) {
                 continue;
             }
-            place_group(t, cfg, &mut out, rect, chosen, p, scores[chosen], &mut local);
+            place_group(
+                t,
+                cfg,
+                &mut out,
+                rect,
+                chosen,
+                p,
+                scores[chosen],
+                &mut local,
+            );
         }
     }
     // Shuffled (the budget under the live cap then drops a uniform share, not a corner).
@@ -534,7 +561,11 @@ pub struct RockView {
     pub by_outcrop: HashMap<String, usize>,
 }
 
-pub fn build_plan(loaded: Option<Res<LoadedCountryside>>, existing: Option<Res<RockPlan>>, mut commands: Commands) {
+pub fn build_plan(
+    loaded: Option<Res<LoadedCountryside>>,
+    existing: Option<Res<RockPlan>>,
+    mut commands: Commands,
+) {
     if existing.is_some() {
         return;
     }
@@ -647,7 +678,8 @@ pub fn stream_rocks(
             {
                 continue;
             }
-            let rect = Rect::from_corners(tile.as_vec2() * side, (tile.as_vec2() + Vec2::ONE) * side);
+            let rect =
+                Rect::from_corners(tile.as_vec2() * side, (tile.as_vec2() + Vec2::ONE) * side);
             let nearest = focus.clamp(rect.min, rect.max);
             let dist = nearest.distance(focus);
             if dist <= radius {
@@ -904,8 +936,9 @@ mod tests {
 
     fn config() -> RockConfig {
         let root = crate::paths::find_root().expect("root");
-        let doc = parse_text(&std::fs::read_to_string(root.join("data/art/rock_outcrops.yaml")).unwrap())
-            .expect("catalogue");
+        let doc =
+            parse_text(&std::fs::read_to_string(root.join("data/art/rock_outcrops.yaml")).unwrap())
+                .expect("catalogue");
         parse(&doc, 719.0, 0.8, 96.0)
     }
 
@@ -914,7 +947,11 @@ mod tests {
         let c = config();
         assert!(c.outcrops.len() >= 20, "{}", c.outcrops.len());
         assert!(c.outcrops.iter().all(|o| !o.id.starts_with("coast_")));
-        assert!(c.outcrops.iter().any(|o| o.id == "cliff_limestone" && o.along_contour));
+        assert!(
+            c.outcrops
+                .iter()
+                .any(|o| o.id == "cliff_limestone" && o.along_contour)
+        );
         assert_eq!(c.render.tile_units, 256.0);
     }
 
@@ -925,31 +962,67 @@ mod tests {
         let b = seed_tile(&Hills, &c, IVec2::new(0, 3));
         assert_eq!(a, b);
         assert!(!a.is_empty(), "the ridge carries rocks");
-        let inside = a.iter().filter(|r| r.pos.x > 80.0 && r.pos.x < 160.0).count();
+        let inside = a
+            .iter()
+            .filter(|r| r.pos.x > 80.0 && r.pos.x < 160.0)
+            .count();
         assert!(inside * 10 >= a.len() * 8, "{inside}/{}", a.len());
         // A plain tile far from the ridge but flat and high carries (almost) nothing.
         let flat = seed_tile(&Hills, &c, IVec2::new(5, 3));
-        assert!(flat.len() * 20 < a.len().max(20), "{} vs {}", flat.len(), a.len());
+        assert!(
+            flat.len() * 20 < a.len().max(20),
+            "{} vs {}",
+            flat.len(),
+            a.len()
+        );
     }
 
     #[test]
     fn towns_keep_rocks_away() {
         struct Town(Hills);
         impl Terrain for Town {
-            fn size(&self) -> Vec2 { self.0.size() }
-            fn is_land(&self, p: Vec2) -> bool { self.0.is_land(p) }
-            fn river_sd(&self, p: Vec2) -> f32 { self.0.river_sd(p) }
-            fn in_lake(&self, p: Vec2) -> bool { self.0.in_lake(p) }
-            fn height_m(&self, p: Vec2) -> f32 { self.0.height_m(p) }
-            fn splat(&self, p: Vec2) -> [f32; 4] { self.0.splat(p) }
-            fn wet(&self, p: Vec2) -> [f32; 2] { self.0.wet(p) }
-            fn biome(&self, p: Vec2) -> i32 { self.0.biome(p) }
-            fn biome_allows(&self, m: u32, b: i32) -> bool { self.0.biome_allows(m, b) }
-            fn landscape_row(&self, p: Vec2) -> i32 { self.0.landscape_row(p) }
-            fn landscape_id_row(&self, i: &str) -> i32 { self.0.landscape_id_row(i) }
-            fn near_town(&self, _: Vec2, _: f32) -> bool { true }
-            fn villages_in(&self, c: IVec2) -> &[Village] { self.0.villages_in(c) }
-            fn roads_in(&self, c: IVec2) -> &[RoadSeg] { self.0.roads_in(c) }
+            fn size(&self) -> Vec2 {
+                self.0.size()
+            }
+            fn is_land(&self, p: Vec2) -> bool {
+                self.0.is_land(p)
+            }
+            fn river_sd(&self, p: Vec2) -> f32 {
+                self.0.river_sd(p)
+            }
+            fn in_lake(&self, p: Vec2) -> bool {
+                self.0.in_lake(p)
+            }
+            fn height_m(&self, p: Vec2) -> f32 {
+                self.0.height_m(p)
+            }
+            fn splat(&self, p: Vec2) -> [f32; 4] {
+                self.0.splat(p)
+            }
+            fn wet(&self, p: Vec2) -> [f32; 2] {
+                self.0.wet(p)
+            }
+            fn biome(&self, p: Vec2) -> i32 {
+                self.0.biome(p)
+            }
+            fn biome_allows(&self, m: u32, b: i32) -> bool {
+                self.0.biome_allows(m, b)
+            }
+            fn landscape_row(&self, p: Vec2) -> i32 {
+                self.0.landscape_row(p)
+            }
+            fn landscape_id_row(&self, i: &str) -> i32 {
+                self.0.landscape_id_row(i)
+            }
+            fn near_town(&self, _: Vec2, _: f32) -> bool {
+                true
+            }
+            fn villages_in(&self, c: IVec2) -> &[Village] {
+                self.0.villages_in(c)
+            }
+            fn roads_in(&self, c: IVec2) -> &[RoadSeg] {
+                self.0.roads_in(c)
+            }
         }
         assert!(seed_tile(&Town(Hills), &config(), IVec2::new(0, 3)).is_empty());
     }

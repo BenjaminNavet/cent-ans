@@ -14,9 +14,9 @@ pub mod decor;
 pub mod decor_plan;
 pub mod layer;
 pub mod placement;
+pub mod rocks;
 pub mod scar_meshes;
 pub mod scars;
-pub mod rocks;
 pub mod terrain_data;
 pub mod water_props;
 
@@ -74,7 +74,13 @@ impl Plugin for CampaignCountrysidePlugin {
             .init_resource::<water_props::WaterView>()
             .add_systems(
                 OnExit(AppState::Campaign),
-                (reset, scars::reset, decor::reset, water_props::reset, rocks::reset),
+                (
+                    reset,
+                    scars::reset,
+                    decor::reset,
+                    water_props::reset,
+                    rocks::reset,
+                ),
             )
             .add_systems(
                 Update,
@@ -119,7 +125,8 @@ impl Plugin for CampaignCountrysidePlugin {
                         .run_if(not(resource_exists::<water_props::PendingWaterPlan>))
                         .run_if(resource_exists::<crate::campaign::markers::places::Places>)
                         .run_if(resource_exists::<LifeData>),
-                    water_props::finish_plan.run_if(resource_exists::<water_props::PendingWaterPlan>),
+                    water_props::finish_plan
+                        .run_if(resource_exists::<water_props::PendingWaterPlan>),
                 )
                     .run_if(in_state(AppState::Campaign)),
             )

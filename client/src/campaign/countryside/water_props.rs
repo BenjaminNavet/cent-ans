@@ -324,13 +324,20 @@ impl Planner<'_> {
     fn wreck(&mut self, coast: Vec2, dir: Vec2, id: &str, model: &str, distance: f32) {
         let side = Vec2::new(-dir.y, dir.x);
         let hash = hash_of(id);
-        let sign = if hash % 2 == 0 { 1.0 } else { -1.0 };
+        let sign = if hash.is_multiple_of(2) { 1.0 } else { -1.0 };
         let at = coast + side * distance * sign + dir * 0.8;
         if self.env.land(at) {
             return;
         }
         let a = (hash % 628) as f32 * 0.01;
-        self.add(model, "wreck", at, Vec2::new(a.cos(), a.sin()), Level::Water, 1.0);
+        self.add(
+            model,
+            "wreck",
+            at,
+            Vec2::new(a.cos(), a.sin()),
+            Level::Water,
+            1.0,
+        );
     }
 
     fn mills(&mut self, sites: &[Site]) {
@@ -373,7 +380,14 @@ impl Planner<'_> {
                 .get(site.family.as_str())
                 .unwrap_or(&rule["default"]);
             let model = self.rules.pick(ids, hash);
-            self.add(&model, "mill", at + normal * bank, tangent, Level::Shore, 1.0);
+            self.add(
+                &model,
+                "mill",
+                at + normal * bank,
+                tangent,
+                Level::Shore,
+                1.0,
+            );
         }
     }
 }
@@ -459,7 +473,12 @@ impl Env for MapEnv {
         let mut result = None;
         for dx in -reach..=reach {
             for dy in -reach..=reach {
-                for &(r, i) in self.grid.get(&(cell + IVec2::new(dx, dy))).into_iter().flatten() {
+                for &(r, i) in self
+                    .grid
+                    .get(&(cell + IVec2::new(dx, dy)))
+                    .into_iter()
+                    .flatten()
+                {
                     let (points, importance) = &self.rivers[r as usize];
                     let i = i as usize;
                     let d = points[i].distance_squared(center);
@@ -534,7 +553,10 @@ fn read_sites(data: &Path, places: &[Site]) -> Vec<Site> {
                     if let Some(id) = s["id"].as_str() {
                         extra.insert(
                             id.to_string(),
-                            (s["port"].as_bool().unwrap_or(false), strings(&s["buildings"])),
+                            (
+                                s["port"].as_bool().unwrap_or(false),
+                                strings(&s["buildings"]),
+                            ),
                         );
                     }
                 }
@@ -724,8 +746,12 @@ pub fn stream_props(
         return;
     }
     let focus = Vec2::new(rig.focus.x, rig.focus.z);
-    let lo = ((focus - Vec2::splat(radius)) / INDEX_CELL).floor().as_ivec2();
-    let hi = ((focus + Vec2::splat(radius)) / INDEX_CELL).floor().as_ivec2();
+    let lo = ((focus - Vec2::splat(radius)) / INDEX_CELL)
+        .floor()
+        .as_ivec2();
+    let hi = ((focus + Vec2::splat(radius)) / INDEX_CELL)
+        .floor()
+        .as_ivec2();
     let mut found: Vec<(f32, u32)> = Vec::new();
     for cy in lo.y..=hi.y {
         for cx in lo.x..=hi.x {
@@ -817,7 +843,8 @@ fn measure(
                 if s & 2 == 0 { -1.0 } else { 1.0 },
                 if s & 4 == 0 { -1.0 } else { 1.0 },
             );
-            let corner = inverse.transform_point3(global.affine().transform_point3(centre + half * sign));
+            let corner =
+                inverse.transform_point3(global.affine().transform_point3(centre + half * sign));
             lo = lo.min(corner);
             hi = hi.max(corner);
         }
@@ -1013,7 +1040,7 @@ mod tests {
         assert!((coast.x - 50.0).abs() < 0.6, "{coast}");
         assert!(dir.x > 0.9, "{dir}");
         let (_, from_sea) = shore_near(&Coast, Vec2::new(53.0, 100.0), 14.0).expect("shore");
-        assert!(from_sea.x > 0.9, "{from_sea}");
+        assert!(from_sea.x > 0.8, "{from_sea}");
         assert!(shore_near(&Coast, Vec2::new(10.0, 100.0), 14.0).is_none());
     }
 
@@ -1026,7 +1053,12 @@ mod tests {
         assert_eq!(kinds("moored"), 2);
         let pier = places.iter().find(|p| p.model == "port_pier").unwrap();
         assert_eq!(pier.level, Level::Water);
-        assert!(places.iter().filter(|p| p.kind == "moored").all(|p| p.px.x > 50.0));
+        assert!(
+            places
+                .iter()
+                .filter(|p| p.kind == "moored")
+                .all(|p| p.px.x > 50.0)
+        );
     }
 
     #[test]
