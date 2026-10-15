@@ -188,6 +188,22 @@ impl Plugin for CampaignTownsPlugin {
     }
 }
 
+/// `towns_1340.json` anchors predate the composed map; the settlements (and their maquettes) are
+/// at `settlements_px.json`, the live positions. Town anchors follow their settlement.
+fn realign_to_settlements(db: &mut TownDb, data_dir: &std::path::Path) {
+    let Some(px) = std::fs::read_to_string(data_dir.join("map/settlements_px.json"))
+        .ok()
+        .and_then(|t| serde_json::from_str::<HashMap<String, [f32; 2]>>(&t).ok())
+    else {
+        return;
+    };
+    for (id, town) in &mut db.towns {
+        if let Some(p) = px.get(id) {
+            town.px = Vec2::new(p[0], p[1]);
+        }
+    }
+}
+
 fn parse_growth_env(text: &str) -> Option<Growth> {
     let mut parts = text.split(',');
     let quarters = parts.next()?.trim().parse().ok()?;
@@ -212,7 +228,8 @@ fn init_towns(
     let Ok(root) = paths::find_root() else { return };
     let data_dir = paths::data_dir(&root);
     let assets_dir = paths::asset_root(&root);
-    let db = TownDb::load(&data_dir);
+    let mut db = TownDb::load(&data_dir);
+    realign_to_settlements(&mut db, &data_dir);
     let kit = Kit::load(&assets_dir);
     let look = TownLook::load(&data_dir);
     let profile = TownRenderProfile::load(&root);

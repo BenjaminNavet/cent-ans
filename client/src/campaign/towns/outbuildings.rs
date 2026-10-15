@@ -333,7 +333,6 @@ pub struct OutState {
     fogged: usize,
     by_family: BTreeMap<String, usize>,
     timer: f32,
-    ground_checked: usize,
 }
 
 pub fn add(app: &mut App) {
@@ -484,7 +483,11 @@ fn refresh_outbuildings(
                         .with_rotation(Quat::from_rotation_y(yaw))
                         .with_scale(Vec3::new(k, k * cfg.render.screen.vertical, k)),
                     Visibility::Hidden,
-                    GroundAnchor { px, lift: 0.0 },
+                    GroundAnchor {
+                        px,
+                        lift: 0.0,
+                        footprint: 0.0,
+                    },
                     DespawnOnExit(AppState::Campaign),
                 ))
                 .id();
@@ -544,7 +547,6 @@ fn dump_outbuildings(world: &World) -> (String, Value) {
             "shown": s.shown,
             "fogged": s.fogged,
             "by_family": s.by_family,
-            "ground_checked": s.ground_checked,
         }),
     )
 }

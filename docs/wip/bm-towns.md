@@ -10,5 +10,15 @@ Lot `client/src/campaign/towns/` (branche bm/towns).
 - `layer.rs` : flux, plan, blocs / kit, rubans, murs, monuments, mobilier de place, croissance sim, fondu, `GroundHeight`, dump `campaign_towns`. Preuve : run_bg Abbeville (6 villes, 1743 maisons, 3167 blocs ; mode detail : 1792 modèles du kit, 0 erreur ; croissance forcée 3 quartiers + pierre : 252 maisons, 347 pièces).
 - Pas de capture (règle commune) : aspect des blocs, teintes et soulèvement des rubans non vérifiés à l'oeil.
 
+## Passe 2 (lot towns2)
+- Correctif : les ancrages de `towns_1340.json` datent de l'avant carte composée ; `realign_to_settlements` les remet sur `settlements_px.json` (sans cela aucune ville 1:1 ne se construisait). Preuve : Amiens, caméra xz 1630,2383 : 3089 maisons, 3117 modèles du kit, 1 maquette enfoncée.
+- `regions.rs` : styles régionaux des maisons (`building_regions.json`, part de colombage + variantes du Midi, exceptions par province), `Kit::pick_styled`, test sur les données réelles (Languedoc : variantes du Midi ; France nord : colombage > 70 %).
+- `outbuildings.rs` : bâtiments hors les murs en style `maquette` (port partiel de `outbuilding_layer.gd`) : niveaux par bâtiments construits et ressources (`models_for`), famille `mill` seulement si construite en cours de partie, taille monde constante (fraction d'écran à `size_distance`), secteur par famille, mer évitée, portée 330, brouillard de guerre. Dump `campaign_outbuildings` (1003 modèles, 349 lieux).
+- Markers : maquette enfoncée sous sa ville 1:1 (échelle y = 1 - poids, masquée à 0), épinglage capitale/sélection, écu de l'occupant (RJ-c), pose au plus bas entre le centre et la moyenne de l'emprise (`_pose_m`).
+
 ## Restes
-- Villes emblématiques 1:1 (`landmark_plan.gd`, `landmark_monuments.gd`), `outbuilding_layer.gd` (hameaux, moulins hors les murs), styles régionaux du kit (`building_regions.json`, `BuildingMaterials`), arbres des jardins, pont, toits en prisme, ombres, plan sur fil de travail, fondu de la maquette côté markers (lire `TownsState`).
+- Villes emblématiques 1:1 (`landmark_plan.gd` 809 l., `landmark_monuments.gd` 566 l., `landmarks_v2/*.json`) : non portées ; les 8 lieux gardent leur maquette Meshy.
+- `town_far_*` : remplacé par les maquettes (ADR 0158), rien à porter.
+- Hors les murs : `_layout` (paliers sans recouvrement), sites rive/route/pente, signes de loin, faubourgs de loin, fondu d'opacité, chantier `worksite_1` (dessiné par markers), style `real` (taille tenue à l'écran).
+- Styles régionaux : seul le choix des modèles est porté ; les matières régionales (`tx_building_pack.json`, shader `building_regional`) demandent un matériau WGSL.
+- Arbres des jardins, pont, toits en prisme, ombres, plan sur fil de travail.

@@ -119,6 +119,10 @@ struct MarkersRoot;
 pub struct GroundAnchor {
     pub px: Vec2,
     pub lift: f32,
+    /// Footprint radius (map units): the object stands at the lowest of the ground at its centre
+    /// and the mean of four ground points at this radius (kit buildings extend below their
+    /// floor: better to sink an edge than let the other float). 0 = the centre only.
+    pub footprint: f32,
 }
 
 /// A maquette: index into `Places`, its range (rig distance beyond which it is hidden).
@@ -169,6 +173,24 @@ struct OccupantShield;
 /// Heraldry images by faction (`None` = no armoury file).
 #[derive(Resource, Default)]
 struct ShieldCache(std::collections::HashMap<String, Option<Handle<Image>>>);
+
+/// Height of an anchored object: the ground at its centre, lowered to the mean of four points
+/// of its footprint when that is lower (port of `_pose_m`), plus its lift.
+fn anchored_y(ground: &GroundHeight, anchor: &GroundAnchor) -> f32 {
+    let centre = ground_y(ground, anchor.px);
+    let y = if anchor.footprint > 0.0 {
+        let r = anchor.footprint;
+        let mean = [Vec2::X, -Vec2::X, Vec2::Y, -Vec2::Y]
+            .iter()
+            .map(|d| ground_y(ground, anchor.px + *d * r))
+            .sum::<f32>()
+            * 0.25;
+        centre.min(mean)
+    } else {
+        centre
+    };
+    y + anchor.lift
+}
 
 /// Ground height under a map point, 0 until the terrain exists.
 fn ground_y(ground: &GroundHeight, px: Vec2) -> f32 {
@@ -301,6 +323,7 @@ fn build_markers(
                     GroundAnchor {
                         px: p.px,
                         lift: 0.0,
+                        footprint: 0.0,
                     },
                     ChildOf(root_entity),
                 ))
@@ -341,6 +364,7 @@ fn build_markers(
                 GroundAnchor {
                     px: p.px,
                     lift: 0.0,
+                    footprint: p.radius * 0.6,
                 },
                 ChildOf(root_entity),
             ));
@@ -623,6 +647,7 @@ fn refresh_signs(
             GroundAnchor {
                 px: p.px,
                 lift: signs::RUIN_LIFT,
+                footprint: 0.0,
             },
             ChildOf(root),
         ));
@@ -640,6 +665,7 @@ fn refresh_signs(
             GroundAnchor {
                 px: p.px,
                 lift: 0.0,
+                footprint: 0.0,
             },
             ChildOf(root),
         ));
@@ -694,7 +720,7 @@ fn settle_ground(
     }
     let (mut count, mut lo, mut hi) = (0usize, f32::MAX, f32::MIN);
     for (anchor, mut t) in &mut anchored {
-        let y = ground_y(&ground, anchor.px) + anchor.lift;
+        let y = anchored_y(&ground, anchor);
         if (t.translation.y - y).abs() > 1e-4 {
             t.translation.y = y;
         }
@@ -1004,11 +1030,23 @@ fn update_stats(
     children: Query<&Children>,
     mut stats: ResMut<MarkerStats>,
 ) {
-    if stats.grounded > 0 && stats.probes.len() < 6 {
+    if stats.grounded > 0 && stats.probes.len() < 12 {
         for (entity, name, anchor) in &probed {
             let n = name.as_str();
-            if !(n.starts_with("Maquette_") || n.starts_with("Landmark_"))
-                || stats.probes.len() >= 6
+            let prefix = if n.starts_with("Maquette_") {
+                "Maquette_"
+            } else if n.starts_with("Landmark_") {
+                "Landmark_"
+            } else {
+                continue;
+            };
+            // At most 6 of each kind.
+            if stats
+                .probes
+                .iter()
+                .filter(|p| p.0.starts_with(prefix))
+                .count()
+                >= 6
                 || stats.probes.iter().any(|p| p.0 == n)
             {
                 continue;
