@@ -47,9 +47,9 @@ pub const ROOM_LAYER: usize = 7;
 /// Size of the offscreen image (`SubViewport.size` of the Godot chamber).
 pub const STAGE_PIXELS: UVec2 = UVec2::new(760, 480);
 /// Light powers (lumens); Godot's `light_energy` has no physical unit, tuned on pixel statistics.
-pub const CANDLE_LUMENS: f32 = 90_000.0;
-pub const EMBER_LUMENS: f32 = 60_000.0;
-pub const WINDOW_LUMENS: f32 = 600_000.0;
+pub const CANDLE_LUMENS: f32 = 360_000.0;
+pub const EMBER_LUMENS: f32 = 240_000.0;
+pub const WINDOW_LUMENS: f32 = 2_400_000.0;
 pub const SWAY_AMPLITUDE: f32 = 0.05;
 
 pub struct CouncilRoomPlugin;
@@ -60,6 +60,7 @@ impl Plugin for CouncilRoomPlugin {
             app.add_plugins(HierarchyPropagatePlugin::<RenderLayers>::new(PostUpdate));
         }
         app.init_resource::<CouncilState>()
+            .init_resource::<ProbeResult>()
             .init_resource::<CouncilProps>()
             .register_dump(dump_council)
             .add_systems(Startup, make_stage_image)
@@ -73,6 +74,7 @@ impl Plugin for CouncilRoomPlugin {
                     figures::apply_hover,
                     animate,
                     stage::update_overlays,
+                    dev_probe,
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
@@ -210,6 +212,83 @@ fn make_stage_image(mut state: ResMut<CouncilState>, mut images: ResMut<Assets<I
     ));
 }
 
+/// Result of the dev pixel probe (`CENT_ANS_COUNCIL_PROBE=1`), shown in the dump.
+#[derive(Resource, Default, Clone)]
+pub struct ProbeResult(pub std::sync::Arc<std::sync::Mutex<Option<Value>>>);
+
+/// Dev probe: once the council has been open for 120 frames, reads the room image back and stores
+/// pixel statistics (mean / percentiles of the luminance, black and blown shares, mean per seat
+/// around the head) in the dump; with `CENT_ANS_COUNCIL_PROBE=<path>` also writes the PNG.
+fn dev_probe(
+    mut commands: Commands,
+    ui: Res<CourtUi>,
+    state: Res<CouncilState>,
+    result: Res<ProbeResult>,
+    mut frames: Local<u32>,
+    mut done: Local<bool>,
+) {
+    let Ok(request) = std::env::var("CENT_ANS_COUNCIL_PROBE") else {
+        return;
+    };
+    if *done || !council_open(&ui) {
+        return;
+    }
+    *frames += 1;
+    if *frames < 120 {
+        return;
+    }
+    *done = true;
+    let slot = result.0.clone();
+    commands.spawn(bevy::render::view::screenshot::Screenshot::image(state.image.clone())).observe(
+        move |captured: On<bevy::render::view::screenshot::ScreenshotCaptured>| {
+            let Ok(image) = captured.image.clone().try_into_dynamic() else {
+                return;
+            };
+            if request != "1" {
+                let _ = image.to_rgb8().save(&request);
+            }
+            let luma = image.to_luma8();
+            let (w, h) = (luma.width() as usize, luma.height() as usize);
+            let mut values: Vec<u8> = luma.as_raw().clone();
+            values.sort_unstable();
+            let pick = |q: f32| values[((values.len() - 1) as f32 * q) as usize];
+            let mean = values.iter().map(|v| f64::from(*v)).sum::<f64>() / values.len() as f64;
+            let black = values.iter().filter(|v| **v < 8).count() as f64 / values.len() as f64;
+            let blown = values.iter().filter(|v| **v > 247).count() as f64 / values.len() as f64;
+            let rotation = Transform::from_translation(pick::CAMERA_POSITION)
+                .looking_at(pick::CAMERA_TARGET, Vec3::Y)
+                .rotation;
+            let aspect = w as f32 / h as f32;
+            let seats: Vec<Value> = pick::seat_keys()
+                .map(|key| {
+                    let head = pick::seat_position(key) + Vec3::Y * 1.0;
+                    let at = pick::project(head, pick::CAMERA_POSITION, rotation, pick::CAMERA_FOV_DEG, aspect);
+                    let mean_here = at.map(|uv| {
+                        let (cx, cy) = ((uv.x * w as f32) as i32, (uv.y * h as f32) as i32);
+                        let mut sum = 0.0;
+                        let mut n = 0.0;
+                        for y in (cy - 20).max(0)..(cy + 20).min(h as i32) {
+                            for x in (cx - 20).max(0)..(cx + 20).min(w as i32) {
+                                sum += f64::from(luma.get_pixel(x as u32, y as u32).0[0]);
+                                n += 1.0;
+                            }
+                        }
+                        if n > 0.0 { sum / n } else { 0.0 }
+                    });
+                    json!({"seat": key, "pixel_mean_near_head": mean_here})
+                })
+                .collect();
+            if let Ok(mut slot) = slot.lock() {
+                *slot = Some(json!({
+                    "size": [w, h], "mean": mean,
+                    "p5": pick(0.05), "p50": pick(0.5), "p95": pick(0.95), "p99": pick(0.99),
+                    "black_share": black, "blown_share": blown, "seats": seats,
+                }));
+            }
+        },
+    );
+}
+
 fn council_open(ui: &CourtUi) -> bool {
     ui.screen == Screen::Council
 }
@@ -322,7 +401,7 @@ fn ensure_room(
 }
 
 /// Ambient light of the room (cd/m²), tuned on pixel statistics.
-pub const AMBIENT_CD: f32 = 700.0;
+pub const AMBIENT_CD: f32 = 2800.0;
 
 /// Gentle camera sway and candle flicker (`_process`), still when motion is reduced.
 fn animate(
@@ -434,6 +513,7 @@ fn dump_council(world: &World) -> (String, Value) {
             "stage_vacant_labels": vacant_labels,
             "hovered": hovered, "hovers": hovers, "clicks": clicks, "last_click": last_click,
             "populated": populated,
+            "pixel_probe": world.resource::<ProbeResult>().0.lock().ok().and_then(|g| g.clone()),
         }),
     )
 }
