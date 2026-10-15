@@ -304,6 +304,7 @@ impl Plugin for UiKitPlugin {
                 text_field::TextFieldPlugin,
                 gallery::GalleryPlugin,
             ))
+            .add_plugins((super::fader::plugin, super::art_plates::plugin))
             .add_systems(Startup, (load_resources, spawn_ui_camera).chain())
             .add_systems(Update, apply_text_scale)
             .add_observer(on_activate)
