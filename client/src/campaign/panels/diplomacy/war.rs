@@ -20,9 +20,7 @@ use super::format;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::sim::Sim;
-use crate::ui::kit::modal::{
-    ModalQueue, ModalResult, ModalSpec, PRIORITY_DECISION, ToastRequest,
-};
+use crate::ui::kit::modal::{ModalQueue, ModalResult, ModalSpec, PRIORITY_DECISION, ToastRequest};
 
 /// Key of the confirmation in the [`ModalQueue`].
 pub const WAR_KEY: &str = "war_declaration";
@@ -208,7 +206,8 @@ fn answer_dialog(
         let (Some(data), Some(state)) = (sim.data.clone(), sim.state.as_mut()) else {
             continue;
         };
-        let declared = game_api::diplomacy::submit_order(&data, state, Order::DeclareWar { target });
+        let declared =
+            game_api::diplomacy::submit_order(&data, state, Order::DeclareWar { target });
         if !declared.ok {
             toasts.write(ToastRequest::new(&declared.message));
             continue;

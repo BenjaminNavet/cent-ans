@@ -1,0 +1,19 @@
+wait 120
+key F3
+wait 30
+click dip:faction:fac_penthievre
+wait 10
+click dip:tab:treaties
+wait 10
+dump out/diplo4_a.json
+click dip:tab:war
+wait 10
+click dip:tab:negotiation
+wait 10
+click dip:action:declare_war
+wait 20
+dump out/diplo4_b.json
+click Déclarer la guerre
+wait 20
+dump out/diplo4_c.json
+exit

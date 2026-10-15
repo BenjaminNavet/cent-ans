@@ -19,6 +19,7 @@
 //! keyboard (no kit text input).
 
 mod format;
+pub mod stance_badge;
 mod view;
 pub mod war;
 
@@ -51,7 +52,7 @@ pub struct PanelDiplomacyPlugin;
 
 impl Plugin for PanelDiplomacyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(war::WarDialogPlugin)
+        app.add_plugins((war::WarDialogPlugin, stance_badge::StanceBadgePlugin))
             .init_resource::<DiplomacyUi>()
             .register_dump(dump_diplomacy)
             .add_systems(
@@ -784,7 +785,8 @@ pub(crate) fn refresh_snapshot(ui: &mut DiplomacyUi, sim: &Sim) {
     ui.snapshot.verdict = evaluate_draft(data, state, &sim.player, &target, &ui.draft);
     ui.snapshot.clause_names = clause_names(&detail);
     if detail.actions.iter().any(|a| a.key == "declare_war") {
-        ui.snapshot.escalation = game_api::diplomacy::war_escalation(data, state, &sim.player, &target);
+        ui.snapshot.escalation =
+            game_api::diplomacy::war_escalation(data, state, &sim.player, &target);
     }
 }
 
