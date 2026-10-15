@@ -13,6 +13,7 @@
 //!   tint, scars of the engine shots, collapse of a breached piece, ruins of burnt houses.
 //! - `engines` : glTF models of the rams, siege towers and trebuchets / mangonels / bombards.
 //! - `fx` : dust, debris, oil, fire and smoke particles, ladders of the climbing regiments.
+//! - `streets` : paved great streets of an emblematic town (`landmark_siege_town.gd`).
 //! - `overlay` : health bars of the engines and of the battered pieces, capture points.
 //! - `historical` : scripted historical battles (`setup_historical`).
 //!
@@ -30,6 +31,7 @@ pub mod fx;
 pub mod historical;
 pub mod kit_town;
 pub mod overlay;
+pub mod streets;
 pub mod works;
 
 use std::collections::BTreeMap;
@@ -172,6 +174,11 @@ pub struct SiegeStats {
     pub pieces: usize,
     pub towers: usize,
     pub houses: usize,
+    /// Street ribbons of an emblematic town, and the pieces / towers / house vertices on the atlas.
+    pub street_quads: usize,
+    pub atlas_pieces: usize,
+    pub atlas_towers: usize,
+    pub atlas_house_vertices: usize,
     pub breaches: usize,
     pub collapses_played: usize,
     pub scars: usize,
@@ -524,6 +531,7 @@ fn dump_siege(world: &World) -> (String, serde_json::Value) {
             })).collect::<Vec<_>>(),
             "render": {
                 "structure_pieces": stats.pieces, "towers": stats.towers, "houses": stats.houses,
+                "street_quads": stats.street_quads, "atlas_pieces": stats.atlas_pieces, "atlas_towers": stats.atlas_towers, "atlas_house_vertices": stats.atlas_house_vertices,
                 "breaches_played": stats.collapses_played, "scars": stats.scars,
                 "engine_models": stats.engine_models, "engine_models_loaded": stats.engine_models_loaded,
                 "particles_spawned": stats.particles_spawned, "bars": stats.bars,

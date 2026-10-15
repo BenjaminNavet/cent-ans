@@ -32,3 +32,10 @@ Branche `bm/mats`. Constat joueur : bâtiments, tentes, convois et ville assiég
 
 ## Écarts
 - Normales du kit aussi en campagne (Godot « far » sans normales) : repère cotangent par dérivées, fondu 40-120 m.
+
+## bm-siegemat (suite)
+- `battle/siege/works.rs` : murailles, tours (Masonry forcé), créneaux/gravats/maisons de repli (matière codée dans l'alpha, ombre relative à une couleur de référence), teinte de dégâts par 6 paliers (variantes d'atlas en cache, `damage_level`/`damage_tint`), maisons en feu/ruine = variantes `color`/`soot`.
+- `battle/siege/streets.rs` : rues pavées du plan emblématique (`landmark_siege_town.gd`), rubans de 8 m / 4 m, matière Rubble.
+- `battle/decor/site.rs` : `Volumes` à deux tampons (atlas / couleurs de sommet : haies, flammes, vignes restent unies), maisons/accessoires/clôtures/palissades en couches ; ponts du kit `bridge_*` (`kit_site::plan_bridges`), volumes seulement en repli.
+- Dump : `battle_siege.render.{street_quads,atlas_pieces,atlas_towers,atlas_house_vertices}`, `battle_decor.site.{bridge_bays,bridge_ends,site_layered_vertices,site_plain_vertices}`.
+- Restes : rues en atlas Rubble (pas la texture cobblestone de Godot) ; pas de pont dans les batailles de démo de siège (preuve des ponts par tests) ; haies sans matière de feuillage.

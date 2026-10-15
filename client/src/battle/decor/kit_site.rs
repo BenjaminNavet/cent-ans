@@ -334,6 +334,83 @@ fn churchyards(
     }
 }
 
+/// Length of a stone / wood bay of the bridge kit (m), and the width of their deck
+/// (`battle_bridges.gd`: dimensions of `building_kit.py`).
+const STONE_BAY_M: f32 = 9.0;
+const STONE_WIDTH_M: f32 = 6.0;
+const WOOD_BAY_M: f32 = 4.0;
+const WOOD_WIDTH_M: f32 = 5.0;
+
+/// Bridges of the field as kit bays over the water and ramp-shaped abutments on both banks
+/// (`BattleBridges.build`). `fallback` lists the bridges whose models the kit does not have (the
+/// volumes of `site::add_bridge` draw them).
+#[derive(Debug, Default, PartialEq)]
+pub struct BridgePlan {
+    pub pieces: Vec<KitPiece>,
+    pub bays: usize,
+    pub ends: usize,
+    pub fallback: Vec<usize>,
+}
+
+pub fn plan_bridges(bridges: &[sim_battle::Bridge], kit: &Kit) -> BridgePlan {
+    let mut plan = BridgePlan::default();
+    for (index, bridge) in bridges.iter().enumerate() {
+        let kind = if bridge.stone { "stone" } else { "wood" };
+        let bay = kit
+            .models_of(&format!("bridge_{kind}_bay"))
+            .first()
+            .map(|e| e.name.clone());
+        let end = kit
+            .models_of(&format!("bridge_{kind}_end"))
+            .first()
+            .map(|e| e.name.clone());
+        let (Some(bay_model), Some(end_model)) = (bay, end) else {
+            plan.fallback.push(index);
+            continue;
+        };
+        let (bay_len, deck_width) = if bridge.stone {
+            (STONE_BAY_M, STONE_WIDTH_M)
+        } else {
+            (WOOD_BAY_M, WOOD_WIDTH_M)
+        };
+        let yaw = bridge.dir.1.atan2(bridge.dir.0) as f32;
+        let dir = Vec2::new(yaw.cos(), yaw.sin());
+        let centre = Vec2::new(bridge.x as f32, bridge.z as f32);
+        let span = (bridge.span as f32).max(2.0);
+        let count = ((span / bay_len).round() as i32).max(1);
+        let stretch = span / (count as f32 * bay_len);
+        let squeeze = bridge.width as f32 / deck_width;
+        let deck = bridge.deck as f32;
+        for k in 0..count {
+            let along = -span * 0.5 + (k as f32 + 0.5) * span / count as f32;
+            let p = centre + dir * along;
+            plan.pieces.push(KitPiece {
+                model: bay_model.clone(),
+                transform: Transform::from_translation(Vec3::new(p.x, deck, p.y))
+                    .with_rotation(Quat::from_rotation_y(-yaw))
+                    .with_scale(Vec3::new(stretch, 1.0, squeeze)),
+            });
+            plan.bays += 1;
+        }
+        for sign in [-1.0f32, 1.0] {
+            let p = centre + dir * (sign * span * 0.5);
+            let turn = if sign < 0.0 {
+                std::f32::consts::PI
+            } else {
+                0.0
+            };
+            plan.pieces.push(KitPiece {
+                model: end_model.clone(),
+                transform: Transform::from_translation(Vec3::new(p.x, deck, p.y))
+                    .with_rotation(Quat::from_rotation_y(-yaw + turn))
+                    .with_scale(Vec3::new(1.0, 1.0, squeeze)),
+            });
+            plan.ends += 1;
+        }
+    }
+    plan
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -427,5 +504,53 @@ mod tests {
                 .iter()
                 .all(|p| p.transform.translation.is_finite())
         );
+    }
+
+    fn bridge(stone: bool, span: f64) -> sim_battle::Bridge {
+        sim_battle::Bridge {
+            x: 100.0,
+            z: 50.0,
+            dir: (1.0, 0.0),
+            length: span + 10.0,
+            width: 6.0,
+            span,
+            deck: 4.0,
+            stone,
+            arches: 2,
+            stream: None,
+        }
+    }
+
+    fn bridge_kit() -> Kit {
+        Kit::from_json(&json!({
+            "bridge_stone_bay_0": {"kind": "bridge_stone_bay", "length": 9.0, "depth": 8.8, "height": 8.1},
+            "bridge_stone_end_0": {"kind": "bridge_stone_end", "length": 5.0, "depth": 6.0, "height": 8.5},
+        }))
+    }
+
+    #[test]
+    fn a_stone_bridge_is_bays_over_the_water_and_two_ends() {
+        let plan = plan_bridges(&[bridge(true, 20.0)], &bridge_kit());
+        assert_eq!((plan.bays, plan.ends), (2, 2));
+        assert!(plan.fallback.is_empty());
+        // Two bays of 10 m: stretched 10/9, centred 5 m either side of the bridge centre.
+        let first = &plan.pieces[0].transform;
+        assert!((first.scale.x - 10.0 / 9.0).abs() < 1e-5);
+        assert!((first.translation.x - 95.0).abs() < 1e-4);
+        assert_eq!(first.translation.y, 4.0);
+        assert!((first.scale.z - 1.0).abs() < 1e-5);
+        // The end at the start of the bridge is turned round.
+        let west = &plan.pieces[2].transform;
+        assert!((west.translation.x - 90.0).abs() < 1e-4);
+        let facing = west.rotation * Vec3::X;
+        assert!(facing.x < -0.99);
+    }
+
+    #[test]
+    fn a_bridge_without_kit_models_falls_back_to_volumes() {
+        // The wooden models are missing from this kit.
+        let plan = plan_bridges(&[bridge(false, 8.0), bridge(true, 9.0)], &bridge_kit());
+        assert_eq!(plan.fallback, vec![0]);
+        assert_eq!(plan.bays, 1);
     }
 }
