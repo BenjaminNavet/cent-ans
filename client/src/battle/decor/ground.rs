@@ -135,6 +135,9 @@ pub struct GroundParams {
     pub season: Vec4,
     /// Water colour (rgb), distance where textures fade to their mean (a).
     pub water: Vec4,
+    /// x: normal-map strength, y: distance where it fades out, z: 1 with a normal map,
+    /// w: brightness variation of the macro noise.
+    pub detail: Vec4,
 }
 
 impl Default for GroundParams {
@@ -142,7 +145,8 @@ impl Default for GroundParams {
         GroundParams {
             layers: [Vec4::new(0.3, 0.3, 0.3, 5.0); LAYER_COUNT],
             season: Vec4::new(1.0, 1.0, 1.0, 0.0),
-            water: Vec4::new(0.12, 0.28, 0.42, 160.0),
+            water: Vec4::new(0.12, 0.28, 0.42, 520.0),
+            detail: Vec4::new(0.7, 140.0, 0.0, 0.28),
         }
     }
 }
@@ -151,9 +155,12 @@ impl Default for GroundParams {
 pub struct GroundExtension {
     #[uniform(100)]
     pub params: GroundParams,
-    #[texture(101)]
+    #[texture(101, dimension = "2d_array")]
     #[sampler(102)]
     pub albedo: Option<Handle<Image>>,
+    #[texture(103, dimension = "2d_array")]
+    #[sampler(104)]
+    pub normal: Option<Handle<Image>>,
 }
 
 impl MaterialExtension for GroundExtension {
@@ -182,6 +189,7 @@ fn read_json(path: &Path) -> Option<serde_json::Value> {
 #[derive(Debug, Clone)]
 pub struct GroundPack {
     pub albedo_path: String,
+    pub normal_path: Option<String>,
     pub layers: Vec<Vec4>,
     pub biome: u32,
 }
@@ -195,6 +203,9 @@ pub fn load_pack(data_dir: &Path, biome: u32) -> Option<GroundPack> {
         let albedo = manifest["albedo"]
             .as_str()?
             .trim_start_matches("res://assets/");
+        let normal = manifest["normal"]
+            .as_str()
+            .map(|n| n.trim_start_matches("res://assets/").to_owned());
         let rows = manifest["layers"].as_array()?;
         if rows.len() != LAYER_COUNT {
             continue;
@@ -213,6 +224,7 @@ pub fn load_pack(data_dir: &Path, biome: u32) -> Option<GroundPack> {
             .collect();
         return Some(GroundPack {
             albedo_path: albedo.to_owned(),
+            normal_path: normal,
             layers,
             biome: candidate,
         });
@@ -250,6 +262,9 @@ pub struct GroundStats {
     pub vertices: usize,
     /// Mean splat weight: grass, forest, dirt, mud, stone, plough.
     pub splat_share: [f32; 6],
+    /// Texture strips turned into mip-mapped arrays (albedo, normal).
+    pub arrays_converted: usize,
+    pub mip_levels: u32,
 }
 
 impl GroundStats {
@@ -266,7 +281,118 @@ impl GroundStats {
             pack_loaded,
             vertices: colors.len(),
             splat_share: share.map(|v| (v / n * 1000.0).round() / 1000.0),
+            arrays_converted: 0,
+            mip_levels: 0,
         }
+    }
+}
+
+/// A stacked texture strip (layers one under the other) to turn into a mip-mapped 2D array.
+#[derive(Debug, Clone)]
+pub struct PendingStrip {
+    pub handle: Handle<Image>,
+    pub layers: u32,
+    pub anisotropy: u16,
+}
+
+/// Strips waiting for their image to be loaded.
+#[derive(Resource, Default, Debug)]
+pub struct PendingStrips(pub Vec<PendingStrip>);
+
+/// Box-filtered mip chain of one RGBA8 layer (`size` square), all levels concatenated.
+pub fn mip_chain(layer: &[u8], size: usize) -> Vec<u8> {
+    let mut out = layer.to_vec();
+    let mut previous = layer.to_vec();
+    let mut dim = size;
+    while dim > 1 {
+        let next_dim = dim / 2;
+        let mut next = vec![0u8; next_dim * next_dim * 4];
+        for y in 0..next_dim {
+            for x in 0..next_dim {
+                for c in 0..4 {
+                    let at = |dx: usize, dy: usize| {
+                        u32::from(previous[((y * 2 + dy) * dim + x * 2 + dx) * 4 + c])
+                    };
+                    next[(y * next_dim + x) * 4 + c] =
+                        ((at(0, 0) + at(1, 0) + at(0, 1) + at(1, 1) + 2) / 4) as u8;
+                }
+            }
+        }
+        out.extend_from_slice(&next);
+        previous = next;
+        dim = next_dim;
+    }
+    out
+}
+
+/// Number of mip levels of a square texture of side `size`.
+pub fn mip_count(size: u32) -> u32 {
+    32 - size.max(1).leading_zeros()
+}
+
+/// Turns a loaded strip into a repeating, mip-mapped, anisotropic 2D array (layers stay apart, no
+/// seam from the atlas). Returns false when the image does not have the expected shape.
+pub fn strip_to_array(image: &mut Image, layers: u32, anisotropy: u16) -> bool {
+    use bevy::image::{ImageAddressMode, ImageFilterMode, ImageSampler, ImageSamplerDescriptor};
+    let Some(data) = image.data.take() else {
+        return false;
+    };
+    let size = image.width();
+    let layer_bytes = (size * size * 4) as usize;
+    if size == 0
+        || !size.is_power_of_two()
+        || image.height() != size * layers
+        || data.len() != layer_bytes * layers as usize
+    {
+        image.data = Some(data);
+        return false;
+    }
+    let mut out = Vec::with_capacity(data.len() * 4 / 3 + 64);
+    for layer in data.chunks_exact(layer_bytes) {
+        out.extend_from_slice(&mip_chain(layer, size as usize));
+    }
+    image.data = Some(out);
+    if image.reinterpret_stacked_2d_as_array(layers).is_err() {
+        return false;
+    }
+    image.texture_descriptor.mip_level_count = mip_count(size);
+    image.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
+        address_mode_u: ImageAddressMode::Repeat,
+        address_mode_v: ImageAddressMode::Repeat,
+        address_mode_w: ImageAddressMode::Repeat,
+        mag_filter: ImageFilterMode::Linear,
+        min_filter: ImageFilterMode::Linear,
+        mipmap_filter: ImageFilterMode::Linear,
+        anisotropy_clamp: anisotropy.max(1),
+        ..default()
+    });
+    true
+}
+
+fn convert_strips(
+    mut commands: Commands,
+    mut pending: ResMut<PendingStrips>,
+    mut images: ResMut<Assets<Image>>,
+    mut stats: Option<ResMut<GroundStats>>,
+) {
+    pending.0.retain(|strip| {
+        let Some(mut image) = images.get_mut(&strip.handle) else {
+            return true;
+        };
+        let ok = strip_to_array(&mut image, strip.layers, strip.anisotropy);
+        if let Some(stats) = stats.as_mut() {
+            stats.arrays_converted += usize::from(ok);
+            stats.mip_levels = stats
+                .mip_levels
+                .max(image.texture_descriptor.mip_level_count);
+        }
+        if !ok {
+            warn!("battle ground: texture strip has an unexpected shape, not converted");
+        }
+        false
+    });
+    if pending.0.is_empty() {
+        commands.remove_resource::<PendingStrips>();
     }
 }
 
@@ -275,13 +401,27 @@ pub struct GroundPlugin;
 impl Plugin for GroundPlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "ground.wesl");
-        app.add_plugins(MaterialPlugin::<GroundMaterial>::default());
+        app.add_plugins(MaterialPlugin::<GroundMaterial>::default())
+            .add_systems(
+                Update,
+                convert_strips.run_if(resource_exists::<PendingStrips>),
+            );
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn mip_chain_halves_down_to_one_pixel() {
+        let layer = vec![200u8; 8 * 8 * 4];
+        let chain = mip_chain(&layer, 8);
+        assert_eq!(chain.len(), (64 + 16 + 4 + 1) * 4);
+        assert!(chain.iter().all(|v| *v == 200));
+        assert_eq!(mip_count(1024), 11);
+        assert_eq!(mip_count(8), 4);
+    }
 
     #[test]
     fn polyline_distance_is_zero_on_the_line() {

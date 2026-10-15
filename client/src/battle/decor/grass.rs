@@ -4,7 +4,7 @@
 //! Here the tufts (two crossed alpha-masked cards with the `grass_blades.png` fan) are scattered
 //! once over the whole field on a jittered grid, merged per 48 m chunk, and each chunk fades out
 //! at distance with a visibility range. Tufts keep off water, mud, roads, ploughland, woods and
-//! hamlets (the splat of the ground decides). Not ported: wind, flatten / blood map, snow tint
+//! hamlets (the splat of the ground decides). Wind: `wind.wesl` (amplitude, speed and gusts in `battle_decor_look.json`). Not ported: flatten / blood map, snow tint
 //! shader parameters, FA7 atlas of photographed tufts, per-biome cards, near / far layers.
 
 use bevy::asset::RenderAssetUsages;
@@ -16,17 +16,11 @@ use sim_battle::{BattleSeason, Weather};
 
 use super::ground::splat_at;
 use super::hash01;
+use super::look::DecorLook;
+use super::wind::{WindExtension, WindMaterial, WindParams};
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::terrain::season_ground;
-
-/// Spacing (m) of the jittered tuft grid.
-const SPACING: f32 = 3.0;
-/// Side (m) of a merged chunk.
-const CHUNK: f32 = 48.0;
-/// Tufts disappear between these distances (m).
-const FADE_NEAR: f32 = 130.0;
-const FADE_FAR: f32 = 230.0;
 
 #[derive(Resource, Debug, Clone, Default)]
 pub struct GrassStats {
@@ -97,9 +91,9 @@ impl ChunkBuffers {
 }
 
 /// Tuft colour factor of a season and weather (the card is grey, its tint is the ground colour).
-fn grass_tint(season: BattleSeason, weather: Weather) -> [f32; 3] {
+fn grass_tint(season: BattleSeason, weather: Weather, gain: f32) -> [f32; 3] {
     let ground = season_ground(season);
-    let mut tint = [ground[0] * 1.9, ground[1] * 1.9, ground[2] * 1.9];
+    let mut tint = [ground[0] * gain, ground[1] * gain, ground[2] * gain];
     if matches!(season, BattleSeason::Autumn | BattleSeason::Winter) {
         tint = [tint[0] * 1.05, tint[1] * 0.95, tint[2] * 0.85];
     }
@@ -113,37 +107,45 @@ fn scatter(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<WindMaterial>>,
     assets: Res<AssetServer>,
+    look: Res<DecorLook>,
 ) {
+    let (spacing, chunk_size) = (look.grass.spacing_m, look.grass.chunk_m);
+    let (fade_near, fade_far) = (look.grass.fade_near_m, look.grass.fade_far_m);
     let sim = session.sim_mut();
     let field = sim.field();
     let weather = sim.weather();
     let snowy =
         matches!(weather, Weather::Snow) || matches!(field.ground, sim_battle::Ground::Snowy);
-    let tint = grass_tint(field.season, weather);
-    let material = materials.add(StandardMaterial {
-        base_color: Color::srgb(tint[0], tint[1], tint[2]),
-        base_color_texture: Some(assets.load("textures/battle/grass_blades.png")),
-        alpha_mode: AlphaMode::Mask(0.4),
-        double_sided: true,
-        cull_mode: None,
-        perceptual_roughness: 0.95,
-        reflectance: 0.02,
-        ..default()
+    let tint = grass_tint(field.season, weather, look.grass.tint_gain);
+    let material = materials.add(WindMaterial {
+        base: StandardMaterial {
+            base_color: Color::srgb(tint[0], tint[1], tint[2]),
+            base_color_texture: Some(assets.load("textures/battle/grass_blades.png")),
+            alpha_mode: AlphaMode::Mask(0.4),
+            double_sided: true,
+            cull_mode: None,
+            perceptual_roughness: 0.95,
+            reflectance: 0.02,
+            ..default()
+        },
+        extension: WindExtension {
+            params: WindParams::new(&look.grass.wind, 0.0, 1.0),
+        },
     });
-    let columns = (field.width / f64::from(CHUNK)).ceil() as usize;
-    let rows = (field.depth / f64::from(CHUNK)).ceil() as usize;
+    let columns = (field.width / f64::from(chunk_size)).ceil() as usize;
+    let rows = (field.depth / f64::from(chunk_size)).ceil() as usize;
     let mut chunks: Vec<ChunkBuffers> = (0..columns * rows)
         .map(|_| ChunkBuffers::default())
         .collect();
     let mut tufts = 0usize;
-    let nx = (field.width as f32 / SPACING) as usize;
-    let nz = (field.depth as f32 / SPACING) as usize;
+    let nx = (field.width as f32 / spacing) as usize;
+    let nz = (field.depth as f32 / spacing) as usize;
     for iz in 0..nz {
         for ix in 0..nx {
-            let x = (ix as f32 + hash01(ix as f32, iz as f32, 1.0)) * SPACING;
-            let z = (iz as f32 + hash01(ix as f32, iz as f32, 2.0)) * SPACING;
+            let x = (ix as f32 + hash01(ix as f32, iz as f32, 1.0)) * spacing;
+            let z = (iz as f32 + hash01(ix as f32, iz as f32, 2.0)) * spacing;
             let splat = splat_at(field, f64::from(x), f64::from(z));
             if splat.grass < 0.55 || hash01(x, z, 3.0) > splat.grass {
                 continue;
@@ -156,8 +158,8 @@ fn scatter(
             } else {
                 [variation, variation, variation * 0.95]
             };
-            let chunk = ((z / CHUNK) as usize).min(rows - 1) * columns
-                + ((x / CHUNK) as usize).min(columns - 1);
+            let chunk = ((z / chunk_size) as usize).min(rows - 1) * columns
+                + ((x / chunk_size) as usize).min(columns - 1);
             chunks[chunk].tuft(
                 Vec3::new(x, height - 0.03, z),
                 hash01(x, z, 6.0) * std::f32::consts::TAU,
@@ -182,8 +184,8 @@ fn scatter(
             Transform::default(),
             NotShadowCaster,
             VisibilityRange {
-                start_margin: (FADE_NEAR - 30.0)..FADE_NEAR,
-                end_margin: FADE_FAR..(FADE_FAR + 30.0),
+                start_margin: (fade_near - 30.0)..fade_near,
+                end_margin: fade_far..(fade_far + 30.0),
                 use_aabb: true,
             },
             scope.clone(),

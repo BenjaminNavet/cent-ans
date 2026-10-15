@@ -5,7 +5,8 @@
 //! `data/fx/atmosphere.json` `time_of_day` whose `phases` contains the phase gives elevation,
 //! azimuth, colour and energy; the weather block (`battle.<weather>`) scales energy and elevation
 //! and tints the light. Fog density and colour per weather are the `PRESETS` of the GDScript.
-//! Not ported: procedural / HDRI sky, LUT colour grading, SSAO, volumetric fog, rain and snow
+//! Fog, ambient and sky values come from `data/fx/battle_decor_look.json` (`look`); the sky dome
+//! itself is in `horizon`. Not ported: HDRI sky, LUT colour grading, SSAO, volumetric fog, rain and snow
 //! particles.
 
 use bevy::light::{DirectionalLightShadowMap, GlobalAmbientLight};
@@ -16,43 +17,12 @@ use sim_battle::Weather;
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::BattleCamera;
-use crate::battle::scene::terrain::sky_color;
 use crate::paths;
+
+use super::look::DecorLook;
 
 /// Lux per unit of Godot light energy (clear midday: 1.75 -> 14 000 lux, the previous value).
 const LUX_PER_ENERGY: f32 = 8000.0;
-
-/// Fog of a weather: density, colour, ambient multiplier (`PRESETS` of battle_atmosphere.gd).
-struct FogPreset {
-    density: f32,
-    color: [f32; 3],
-    ambient: f32,
-}
-
-fn fog_preset(weather: Weather) -> FogPreset {
-    match weather {
-        Weather::Clear => FogPreset {
-            density: 0.00032,
-            color: [0.7, 0.76, 0.84],
-            ambient: 1.0,
-        },
-        Weather::Fog => FogPreset {
-            density: 0.0017,
-            color: [0.74, 0.76, 0.77],
-            ambient: 1.1,
-        },
-        Weather::Rain => FogPreset {
-            density: 0.0014,
-            color: [0.52, 0.55, 0.59],
-            ambient: 1.15,
-        },
-        Weather::Snow => FogPreset {
-            density: 0.0009,
-            color: [0.78, 0.81, 0.86],
-            ambient: 1.0,
-        },
-    }
-}
 
 fn weather_key(weather: Weather) -> &'static str {
     match weather {
@@ -186,23 +156,29 @@ fn apply_sun(
     state.sun_direction = dir.to_array();
 }
 
-fn ambient_for(weather: Weather, elevation_deg: f32) -> GlobalAmbientLight {
-    let low_sun = (0.55 + elevation_deg / 40.0).clamp(0.55, 1.0);
+fn ambient_for(look: &DecorLook, weather: Weather, elevation_deg: f32) -> GlobalAmbientLight {
+    let a = &look.ambient;
+    let low_sun =
+        (a.low_sun_floor + elevation_deg / a.low_sun_span_deg).clamp(a.low_sun_floor, 1.0);
     GlobalAmbientLight {
-        color: Color::srgb(0.75, 0.82, 0.95),
-        brightness: 350.0 * fog_preset(weather).ambient * low_sun,
+        color: Color::srgb(a.color[0], a.color[1], a.color[2]),
+        brightness: a.lux * look.fog_of(weather).ambient * low_sun,
         ..default()
     }
 }
 
-fn spawn_atmosphere(mut commands: Commands, mut session: ResMut<BattleSession>) {
+fn spawn_atmosphere(
+    mut commands: Commands,
+    mut session: ResMut<BattleSession>,
+    look: Res<DecorLook>,
+) {
     let sim = session.sim_mut();
     let weather = sim.weather();
     let phase = sim.day_phase().key.clone();
     let rules = read_rules();
     let time_key = time_key_for(&rules, &phase);
     let sun = sun_light(&rules, &time_key, weather);
-    let fog = fog_preset(weather);
+    let fog = look.fog_of(weather);
     let mut state = AtmosphereState {
         time_key,
         phase,
@@ -224,8 +200,9 @@ fn spawn_atmosphere(mut commands: Commands, mut session: ResMut<BattleSession>) 
         transform,
         DespawnOnExit(AppState::Battle),
     ));
-    commands.insert_resource(ambient_for(weather, sun.elevation_deg));
-    commands.insert_resource(ClearColor(sky_color(weather)));
+    commands.insert_resource(ambient_for(&look, weather, sun.elevation_deg));
+    let horizon = look.sky_of(weather).horizon;
+    commands.insert_resource(ClearColor(Color::srgb(horizon[0], horizon[1], horizon[2])));
     commands.insert_resource(state);
 }
 
@@ -233,6 +210,8 @@ fn spawn_atmosphere(mut commands: Commands, mut session: ResMut<BattleSession>) 
 fn fog_on_camera(
     mut commands: Commands,
     mut state: ResMut<AtmosphereState>,
+    look: Res<DecorLook>,
+    horizon: Option<Res<super::horizon::HorizonStats>>,
     cameras: Query<Entity, (With<BattleCamera>, Without<DistanceFog>)>,
 ) {
     let weather = match state.weather.as_str() {
@@ -241,13 +220,17 @@ fn fog_on_camera(
         "snow" => Weather::Snow,
         _ => Weather::Clear,
     };
-    let fog = fog_preset(weather);
+    let fog = look.fog_of(weather);
+    let density = if horizon.is_some_and(|h| h.active) {
+        fog.horizon_density
+    } else {
+        fog.density
+    };
+    state.fog_density = density;
     for camera in &cameras {
         commands.entity(camera).insert(DistanceFog {
             color: Color::srgb(fog.color[0], fog.color[1], fog.color[2]),
-            falloff: FogFalloff::Exponential {
-                density: fog.density,
-            },
+            falloff: FogFalloff::Exponential { density },
             ..default()
         });
         state.fog_on_camera = true;
@@ -261,6 +244,7 @@ fn follow_day(
     mut session: ResMut<BattleSession>,
     mut state: ResMut<AtmosphereState>,
     mut suns: Query<(&mut DirectionalLight, &mut Transform), With<BattleSun>>,
+    look: Res<DecorLook>,
     mut commands: Commands,
 ) {
     *timer += time.delta_secs();
@@ -284,7 +268,7 @@ fn follow_day(
     for (mut light, mut transform) in &mut suns {
         apply_sun(&mut state, sun, &mut light, &mut transform);
     }
-    commands.insert_resource(ambient_for(weather, sun.elevation_deg));
+    commands.insert_resource(ambient_for(&look, weather, sun.elevation_deg));
 }
 
 #[cfg(test)]

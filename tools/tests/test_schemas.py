@@ -102,6 +102,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "formation_width_rules.schema.json": ("rules/formation_width.json",),
     "front_end.schema.json": ("ui/front_end.json",),
     "fx_atmosphere.schema.json": ("fx/atmosphere.json",),
+    "fx_battle_decor_look.schema.json": ("fx/battle_decor_look.json",),
     "fx_trebuchet_swing_curve.schema.json": ("fx/trebuchet_swing_curve.json",),
     "fx_battle_animation.schema.json": ("fx/battle_animation.json",),
     "fx_battle_ground.schema.json": ("fx/battle_ground.json",),

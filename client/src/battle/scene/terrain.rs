@@ -15,7 +15,8 @@ use super::BattleSession;
 use crate::agent::OffscreenTarget;
 use crate::app::AppState;
 use crate::battle::decor::ground::{
-    GroundExtension, GroundMaterial, GroundParams, GroundStats, load_pack, season_tint, splat_at,
+    GroundExtension, GroundMaterial, GroundParams, GroundStats, PendingStrip, PendingStrips,
+    load_pack, season_tint, splat_at,
 };
 use crate::paths;
 
@@ -158,6 +159,7 @@ impl Plugin for BattleTerrainPlugin {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 /// Spawns terrain, apron and the camera once the session exists (the sun, sky and fog belong to
 /// [`crate::battle::decor::atmosphere`]).
 fn spawn_scene(
@@ -166,6 +168,7 @@ fn spawn_scene(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<GroundMaterial>>,
     mut standard: ResMut<Assets<StandardMaterial>>,
+    look: Res<crate::battle::decor::look::DecorLook>,
     assets: Res<AssetServer>,
     target: Option<Res<OffscreenTarget>>,
 ) {
@@ -186,13 +189,44 @@ fn spawn_scene(
         season: season_tint(field, weather),
         ..default()
     };
+    params.water.w = look.ground.texture_fade_m;
+    params.detail = Vec4::new(
+        look.ground.normal_strength,
+        look.ground.normal_fade_m,
+        0.0,
+        look.ground.macro_contrast,
+    );
     let mut albedo = None;
+    let mut normal = None;
     let pack_loaded = load_pack(&data_dir, biome).is_some();
     if let Some(pack) = load_pack(&data_dir, biome) {
         for (slot, layer) in params.layers.iter_mut().zip(&pack.layers) {
             *slot = *layer;
         }
-        albedo = Some(assets.load(pack.albedo_path));
+        let albedo_handle: Handle<Image> = assets.load(pack.albedo_path);
+        let mut strips = vec![PendingStrip {
+            handle: albedo_handle.clone(),
+            layers: pack.layers.len() as u32,
+            anisotropy: look.ground.anisotropy,
+        }];
+        albedo = Some(albedo_handle);
+        if let Some(path) = pack.normal_path {
+            // Normals are data, not colours: no sRGB decoding.
+            let handle: Handle<Image> = assets
+                .load_builder()
+                .with_settings(|settings: &mut bevy::image::ImageLoaderSettings| {
+                    settings.is_srgb = false
+                })
+                .load(path);
+            strips.push(PendingStrip {
+                handle: handle.clone(),
+                layers: pack.layers.len() as u32,
+                anisotropy: look.ground.anisotropy,
+            });
+            params.detail.z = 1.0;
+            normal = Some(handle);
+        }
+        commands.insert_resource(PendingStrips(strips));
     } else {
         warn!("battle ground: no texture pack for biome {biome}, flat colours");
     }
@@ -204,7 +238,11 @@ fn spawn_scene(
             reflectance: 0.05,
             ..default()
         },
-        extension: GroundExtension { params, albedo },
+        extension: GroundExtension {
+            params,
+            albedo,
+            normal,
+        },
     });
     commands.spawn((
         Name::new("BattleTerrain"),
@@ -214,32 +252,35 @@ fn spawn_scene(
         Transform::default(),
         scope.clone(),
     ));
-    // Apron: a big flat plane a little under the field so its edge does not float.
-    let lowest = field.heights.iter().copied().fold(f64::MAX, f64::min) as f32;
-    let [r, g, b] = season_ground(field.season);
-    let apron = standard.add(StandardMaterial {
-        base_color: Color::srgb(r * 0.9, g * 0.9, b * 0.9),
-        perceptual_roughness: 1.0,
-        reflectance: 0.05,
-        ..default()
-    });
-    commands.spawn((
-        Name::new("BattleApron"),
-        Mesh3d(
-            meshes.add(
-                Plane3d::default()
-                    .mesh()
-                    .size(APRON_HALF_SIZE * 2.0, APRON_HALF_SIZE * 2.0),
+    // Apron: a big flat plane a little under the field so its edge does not float (replaced by the
+    // horizon ring of `decor::horizon` when the look enables it).
+    if !look.horizon.enabled {
+        let lowest = field.heights.iter().copied().fold(f64::MAX, f64::min) as f32;
+        let [r, g, b] = season_ground(field.season);
+        let apron = standard.add(StandardMaterial {
+            base_color: Color::srgb(r * 0.9, g * 0.9, b * 0.9),
+            perceptual_roughness: 1.0,
+            reflectance: 0.05,
+            ..default()
+        });
+        commands.spawn((
+            Name::new("BattleApron"),
+            Mesh3d(
+                meshes.add(
+                    Plane3d::default()
+                        .mesh()
+                        .size(APRON_HALF_SIZE * 2.0, APRON_HALF_SIZE * 2.0),
+                ),
             ),
-        ),
-        MeshMaterial3d(apron),
-        Transform::from_xyz(
-            field.width as f32 * 0.5,
-            lowest - 0.4,
-            field.depth as f32 * 0.5,
-        ),
-        scope.clone(),
-    ));
+            MeshMaterial3d(apron),
+            Transform::from_xyz(
+                field.width as f32 * 0.5,
+                lowest - 0.4,
+                field.depth as f32 * 0.5,
+            ),
+            scope.clone(),
+        ));
+    }
     let (centre, yaw) = opening_frame(player, sim);
     camera::spawn_battle_camera(
         &mut commands,

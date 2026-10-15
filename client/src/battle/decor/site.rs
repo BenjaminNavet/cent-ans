@@ -12,6 +12,8 @@
 use std::f32::consts::TAU;
 
 use bevy::asset::RenderAssetUsages;
+use bevy::camera::visibility::VisibilityRange;
+use bevy::light::NotShadowCaster;
 use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 use sim_battle::{
@@ -28,6 +30,8 @@ pub struct SiteStats {
     pub bridges: usize,
     pub hedges: usize,
     pub camps: usize,
+    pub vine_rows: usize,
+    pub vineyards: usize,
 }
 
 pub struct SitePlugin;
@@ -514,11 +518,57 @@ pub fn add_bridge(volumes: &mut Volumes, bridge: &sim_battle::Bridge) {
     }
 }
 
+/// Rows of a vineyard (port of `_build_vineyards` of battle_decor.gd, far version): a low hedge
+/// of `segment_m` every `row_step_m` across the plot, green leaves or brown winter stocks.
+/// Returns the number of segments added.
+pub fn add_vineyard(
+    volumes: &mut Volumes,
+    area: &sim_battle::Area,
+    look: &super::look::DecorLook,
+    leafy: bool,
+    ground: impl Fn(f64, f64) -> f32,
+) -> usize {
+    let cfg = &look.vineyard;
+    let (length, width) = (area.length as f32, area.width as f32);
+    let rows = (((width - 3.0) / cfg.row_step_m) as usize).max(1);
+    let segments = (((length - 4.0) / cfg.segment_m).ceil() as usize).max(1);
+    let segment = (length - 4.0) / segments as f32;
+    let (height, thick, color) = if leafy {
+        (cfg.height_m, cfg.thickness_m, cfg.leaf_color)
+    } else {
+        (cfg.bare_height_m, 0.12, cfg.bare_color)
+    };
+    let yaw = area.yaw as f32;
+    let (axis, across) = (
+        Vec2::new(yaw.cos(), yaw.sin()),
+        Vec2::new(-yaw.sin(), yaw.cos()),
+    );
+    let centre = Vec2::new(area.x as f32, area.z as f32);
+    let mut count = 0;
+    for r in 0..rows {
+        let v = -width * 0.5 + 1.5 + cfg.row_step_m * (r as f32 + 0.5);
+        for sgm in 0..segments {
+            let u = -length * 0.5 + 2.0 + segment * (sgm as f32 + 0.5);
+            let q = centre + axis * u + across * v;
+            let y = ground(f64::from(q.x), f64::from(q.y));
+            volumes.cuboid(
+                Vec3::new(q.x, y + height * 0.5 + 0.2, q.y),
+                Vec3::new(segment * 0.5, height * 0.5, thick * 0.5),
+                yaw,
+                color,
+            );
+            count += 1;
+        }
+    }
+    count
+}
+
 fn build_site(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    look: Res<super::look::DecorLook>,
 ) {
     let colors = session.colors;
     let sim = session.sim_mut();
@@ -571,6 +621,36 @@ fn build_site(
     for bridge in &field.bridges {
         add_bridge(&mut structures, bridge);
         stats.bridges += 1;
+    }
+    let leafy = field.decor.vines_leafy;
+    let range = look.vineyard.range_m;
+    for area in field
+        .decor
+        .areas
+        .iter()
+        .filter(|a| a.kind == sim_battle::AreaKind::Vineyard)
+    {
+        let mut rows = Volumes::default();
+        stats.vine_rows += add_vineyard(&mut rows, area, &look, leafy, ground);
+        stats.vineyards += 1;
+        commands.spawn((
+            Name::new("Vineyard"),
+            Mesh3d(meshes.add(rows.into_mesh())),
+            MeshMaterial3d(materials.add(StandardMaterial {
+                base_color: Color::WHITE,
+                perceptual_roughness: 0.95,
+                reflectance: 0.04,
+                ..default()
+            })),
+            Transform::default(),
+            VisibilityRange {
+                start_margin: 0.0..0.0,
+                end_margin: range..(range + 120.0),
+                use_aabb: true,
+            },
+            NotShadowCaster,
+            DespawnOnExit(AppState::Battle),
+        ));
     }
     if !structures.is_empty() {
         let material = materials.add(StandardMaterial {

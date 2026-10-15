@@ -207,3 +207,7 @@ Remplace `town_plan.gd`, `town_layer.gd`, `town_builder.gd` (blocs, kit, murs, m
 - Rendu : flux autour du foyer du rig (rayon `stream_*`), une ville par image, plans en cache ; blocs au-delà de `detail_range` (1,6), modèles du kit en dessous (instanciation automatique de Bevy) ; hauteur `GroundHeight`, reposée quand `ReliefState` change (rubans reconstruits).
 - Dump `campaign_towns` (villes affichées, décomptes par ville, temps de plan / pose, croissance). Hooks dev : `CENT_ANS_TOWNS_FORCE=1` (actif à toute distance), `CENT_ANS_TOWN_LOD=detail|blocks`, `CENT_ANS_TOWN_GROWTH=<quartiers>[,palisade|stone]`.
 - Non porté : villes emblématiques 1:1 (`landmark_plan.gd`, `landmark_monuments.gd`), `outbuilding_layer.gd` (hameaux, moulins, signes de chantier), styles régionaux du kit (`building_regions.json`, `BuildingMaterials`), arbres de jardin, pont, toits en prisme (blocs = parallélépipèdes).
+## Décor de bataille, vague 4 (bdecor2)
+- `battle/decor/look.rs` lit `data/fx/battle_decor_look.json` (brouillard, ambiance, ciel, horizon, anneau de bois, vignes, vergers, herbe, vent, sol), ressource `DecorLook`.
+- `horizon.rs` : tuile `HZR1` de la province (`HorizonProvince` pour forcer, sinon terrain + graine), anneau d'horizon, silhouette, dôme de ciel. Dump `battle_decor.horizon`.
+- `wind.rs` : `WindMaterial` (herbe, houppiers). `ground.rs` : bandes de textures converties en tableaux 2D à mipmaps (`PendingStrips`).

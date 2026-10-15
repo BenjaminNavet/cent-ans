@@ -11,8 +11,11 @@
 pub mod atmosphere;
 pub mod grass;
 pub mod ground;
+pub mod horizon;
+pub mod look;
 pub mod site;
 pub mod trees;
+pub mod wind;
 
 use bevy::prelude::*;
 
@@ -22,14 +25,17 @@ pub struct BattleDecorPlugin;
 
 impl Plugin for BattleDecorPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((
-            ground::GroundPlugin,
-            atmosphere::AtmospherePlugin,
-            trees::TreesPlugin,
-            grass::GrassPlugin,
-            site::SitePlugin,
-        ))
-        .register_dump(dump_decor);
+        app.insert_resource(look::DecorLook::load())
+            .add_plugins((
+                wind::WindPlugin,
+                horizon::HorizonPlugin,
+                ground::GroundPlugin,
+                atmosphere::AtmospherePlugin,
+                trees::TreesPlugin,
+                grass::GrassPlugin,
+                site::SitePlugin,
+            ))
+            .register_dump(dump_decor);
     }
 }
 
@@ -52,15 +58,23 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
             "ground": world.get_resource::<ground::GroundStats>().map(|g| serde_json::json!({
                 "biome": g.biome, "pack_loaded": g.pack_loaded,
                 "vertices": g.vertices, "splat_share": g.splat_share,
+                "arrays_converted": g.arrays_converted, "mip_levels": g.mip_levels,
             })),
             "trees": world.get_resource::<trees::TreeStats>().map(|s| serde_json::json!({
-                "trees": s.trees, "bushes": s.bushes, "species": s.species, "zones": s.zones,
+                "trees": s.trees, "bushes": s.bushes, "species": s.species, "zones": s.zones, "ring_trees": s.ring_trees,
             })),
             "grass": world.get_resource::<grass::GrassStats>().map(|s| serde_json::json!({
                 "tufts": s.tufts, "chunks": s.chunks,
             })),
+            "horizon": world.get_resource::<horizon::HorizonStats>().map(|h| serde_json::json!({
+                "active": h.active, "province": h.province, "real_relief": h.real_relief,
+                "offset_y": h.offset_y, "rotation_deg": h.rotation_deg,
+                "ring_vertices": h.ring_vertices, "ring_triangles": h.ring_triangles,
+                "ring_max_height": h.ring_max_height, "skyline_segments": h.skyline_segments,
+                "sky_vertices": h.sky_vertices,
+            })),
             "site": world.get_resource::<site::SiteStats>().map(|s| serde_json::json!({
-                "houses": s.houses, "props": s.props, "bridges": s.bridges, "hedges": s.hedges,
+                "vine_rows": s.vine_rows, "vineyards": s.vineyards, "houses": s.houses, "props": s.props, "bridges": s.bridges, "hedges": s.hedges,
                 "camps": s.camps,
             })),
         }),
