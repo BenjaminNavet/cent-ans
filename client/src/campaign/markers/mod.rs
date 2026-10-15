@@ -304,7 +304,12 @@ fn build_markers(
     );
 
     let dn_models = dn::DnModels::load(&data_dir);
-    stats.dn_places = dn::assign(&mut places, data, &dn_models, &assets_dir);
+    // `CENT_ANS_DN_MODELS=0`: kit maquettes only (check of the fallback path).
+    stats.dn_places = if std::env::var("CENT_ANS_DN_MODELS").is_ok_and(|v| v == "0") {
+        0
+    } else {
+        dn::assign(&mut places, data, &dn_models, &assets_dir)
+    };
     let heraldic = crate::campaign::provinces::modes::heraldic_colors(data);
     let banner_mesh = meshes.add(banner::banner_mesh());
     banners.0.clear();
