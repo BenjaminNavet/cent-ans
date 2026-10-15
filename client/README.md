@@ -382,3 +382,6 @@ Gabarit partagé `ui::kit::layout` : `TOP_BAR_HEIGHT`, `EDGE`, `GAP`, `PANEL_TOP
   `ZoomView.strategic`. Données : `parchment_ornaments.json`, `coast_dist.png`,
   `settlement_markers.json`, `stance_cues.json`. Dump : `campaign_parchment`.
 - Frontières épaisses et hachures : shader de terrain (non porté ici). Note : `docs/wip/bm-parch.md`.
+
+## Modèles GA3 en bataille (`siege/{engines,stone}.rs`, `decor/props.rs`, lot bm-ga3)
+Engins : variantes `ga3_trebuchet` / `ga3_ram` du réglage `ga3` de `siege_engines.json` (repli sur le glb de base ; `CENT_ANS_NO_GA3=1` les coupe), roues, caisse et pendule de la poutre du bélier. Props GA3 (`props_ga`) : remplacent une part des `Kit_*` (maison, église, moulin, tente, puits, charrette) et font les palissades. Murs et tours : `castle_wall_varriation` pleine résolution en triplanaire (`stone.wesl`). Dumps : `battle_siege.render.{engine_ga3,engine_files,stone_walls}`, `battle_props_ga`. Note : `docs/wip/bm-ga3.md`.

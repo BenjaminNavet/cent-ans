@@ -599,7 +599,7 @@ fn animate_mover(
         for part in children.iter_descendants(entity) {
             let Ok(name) = names.get(part) else { continue };
             match name.as_str() {
-                n if n.starts_with("Wheel") => state.wheels.push(part),
+                n if is_wheel(n) => state.wheels.push(part),
                 "BeamPivot" => state.pivot = Some(part),
                 "Shed" if is_ram => state.body = Some(part),
                 "Body" if !is_ram => state.body = Some(part),
@@ -644,5 +644,21 @@ fn animate_mover(
             "wheels": state.wheels.len(), "roll": state.roll, "wheel_radius": c.wheel_radius,
             "beam_drop": c.beam_drop,
         }));
+    }
+}
+
+/// `Wheel_<n>` nodes of the models (not their mesh primitives, which would roll twice).
+fn is_wheel(name: &str) -> bool {
+    name.strip_prefix("Wheel_")
+        .is_some_and(|rest| !rest.is_empty() && rest.chars().all(|c| c.is_ascii_digit()))
+}
+
+#[cfg(test)]
+mod wheel_tests {
+    #[test]
+    fn only_the_wheel_nodes_roll() {
+        assert!(super::is_wheel("Wheel_0"));
+        assert!(!super::is_wheel("Wheel_0.001"));
+        assert!(!super::is_wheel("Wheel"));
     }
 }
