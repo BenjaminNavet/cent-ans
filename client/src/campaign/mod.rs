@@ -7,6 +7,7 @@ pub mod hud;
 pub mod life;
 pub mod markers;
 pub mod panels;
+pub mod parchment;
 pub mod progress;
 pub mod provinces;
 pub mod terrain;
