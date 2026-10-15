@@ -63,7 +63,13 @@ impl StyleEntry {
 
 const FLEE: StyleEntry = entry(&["flee", "flee_m"]).speed(1.1).fallback(&["run"]);
 const CAVALRY_CHARGE: StyleEntry = entry(&[
-    "c_charge", "c_charge", "c_charge", "c_charge", "c_charge", "c_charge", "c_charge",
+    "c_charge",
+    "c_charge",
+    "c_charge",
+    "c_charge",
+    "c_charge",
+    "c_charge",
+    "c_charge",
     "c_stumble",
 ])
 .cycle(3.75);
@@ -71,11 +77,21 @@ const CAVALRY_CHARGE: StyleEntry = entry(&[
 /// Clip set of `state` for `style` (`None` when the style does not know the state).
 pub fn style_entry(style: &str, state: &str) -> Option<StyleEntry> {
     let e = match (style, state) {
-        ("sword", "idle") => entry(&["guard", "idle", "guard", "idle_look", "idle_lean", "idle_helm"]),
+        ("sword", "idle") => entry(&[
+            "guard",
+            "idle",
+            "guard",
+            "idle_look",
+            "idle_lean",
+            "idle_helm",
+        ]),
         ("sword", "marching") => entry(&["walk"]),
         ("sword", "running") => entry(&["run"]),
         ("sword", "charging") => entry(&["run"]).speed(1.05),
-        ("sword", "melee") => entry(&["slash", "thrust", "overhead", "parry", "slash", "thrust", "guard"]).cycle(1.3),
+        ("sword", "melee") => entry(&[
+            "slash", "thrust", "overhead", "parry", "slash", "thrust", "guard",
+        ])
+        .cycle(1.3),
         ("sword", "victory") => entry(&["victory", "victory_b"]),
         ("sword", "routing") => FLEE,
         ("sword", "climbing") => entry(&["climb", "guard", "idle"]),
@@ -105,7 +121,9 @@ pub fn style_entry(style: &str, state: &str) -> Option<StyleEntry> {
         ("bow", "running") => entry(&["run"]),
         ("bow", "charging") => entry(&["run"]),
         ("bow", "shooting") => entry(&["bow_shoot"]).volley(1.55),
-        ("bow", "melee") => entry(&["push", "push_shoulder", "parry", "push", "guard"]).cycle(1.5).fallback(&["slash", "thrust", "parry", "guard"]),
+        ("bow", "melee") => entry(&["push", "push_shoulder", "parry", "push", "guard"])
+            .cycle(1.5)
+            .fallback(&["slash", "thrust", "parry", "guard"]),
         ("bow", "routing") => entry(&["flee", "flee_m"]).speed(1.15).fallback(&["run"]),
         ("bow", "victory") => entry(&["victory", "victory_b"]),
 
@@ -114,7 +132,9 @@ pub fn style_entry(style: &str, state: &str) -> Option<StyleEntry> {
         ("crossbow", "running") => entry(&["run"]),
         ("crossbow", "charging") => entry(&["run"]),
         ("crossbow", "shooting") => entry(&["xbow_shoot"]).volley(0.3),
-        ("crossbow", "melee") => entry(&["push", "push_shoulder", "parry", "push", "guard"]).cycle(1.5).fallback(&["slash", "thrust", "parry", "guard"]),
+        ("crossbow", "melee") => entry(&["push", "push_shoulder", "parry", "push", "guard"])
+            .cycle(1.5)
+            .fallback(&["slash", "thrust", "parry", "guard"]),
         ("crossbow", "routing") => entry(&["flee", "flee_m"]).speed(1.15).fallback(&["run"]),
         ("crossbow", "victory") => entry(&["victory"]),
 
@@ -122,7 +142,10 @@ pub fn style_entry(style: &str, state: &str) -> Option<StyleEntry> {
         ("lance", "marching") => entry(&["c_walk"]),
         ("lance", "running") => entry(&["c_gallop"]),
         ("lance", "charging") => CAVALRY_CHARGE,
-        ("lance", "melee") => entry(&["c_thrust", "c_thrust", "c_rear", "c_turn_l", "c_thrust", "c_turn_r", "c_idle"]).cycle(1.4),
+        ("lance", "melee") => entry(&[
+            "c_thrust", "c_thrust", "c_rear", "c_turn_l", "c_thrust", "c_turn_r", "c_idle",
+        ])
+        .cycle(1.4),
         ("lance", "melee_pikes") => entry(&["c_rear", "c_thrust", "c_rear", "c_idle"]).cycle(1.4),
         ("lance", "trotting") => entry(&["c_trot"]),
         ("lance", "turn_l") => entry(&["c_turn_l"]),
@@ -137,7 +160,15 @@ pub fn style_entry(style: &str, state: &str) -> Option<StyleEntry> {
         ("horse_bow", "running") => entry(&["c_gallop"]),
         ("horse_bow", "charging") => entry(&["c_gallop"]),
         ("horse_bow", "shooting") => entry(&["c_bow_shoot"]).volley(1.55),
-        ("horse_bow", "melee") => entry(&["c_thrust", "c_bow_turn_l", "c_thrust", "c_bow_turn_r", "c_rear", "c_bow_idle"]).cycle(1.4),
+        ("horse_bow", "melee") => entry(&[
+            "c_thrust",
+            "c_bow_turn_l",
+            "c_thrust",
+            "c_bow_turn_r",
+            "c_rear",
+            "c_bow_idle",
+        ])
+        .cycle(1.4),
         ("horse_bow", "melee_pikes") => entry(&["c_rear", "c_bow_idle"]).cycle(1.4),
         ("horse_bow", "trotting") => entry(&["c_bow_trot"]),
         ("horse_bow", "turn_l") => entry(&["c_bow_turn_l"]),
@@ -152,7 +183,15 @@ pub fn style_entry(style: &str, state: &str) -> Option<StyleEntry> {
         ("horse_javelin", "running") => entry(&["c_gallop"]),
         ("horse_javelin", "charging") => entry(&["c_gallop"]),
         ("horse_javelin", "shooting") => entry(&["c_javelin_throw"]).volley(0.69),
-        ("horse_javelin", "melee") => entry(&["c_thrust", "c_javelin_turn_l", "c_thrust", "c_javelin_turn_r", "c_rear", "c_javelin_idle"]).cycle(1.4),
+        ("horse_javelin", "melee") => entry(&[
+            "c_thrust",
+            "c_javelin_turn_l",
+            "c_thrust",
+            "c_javelin_turn_r",
+            "c_rear",
+            "c_javelin_idle",
+        ])
+        .cycle(1.4),
         ("horse_javelin", "melee_pikes") => entry(&["c_rear", "c_javelin_idle"]).cycle(1.4),
         ("horse_javelin", "trotting") => entry(&["c_javelin_trot"]),
         ("horse_javelin", "turn_l") => entry(&["c_javelin_turn_l"]),
@@ -323,9 +362,7 @@ pub fn state_config(
     } else {
         state
     };
-    let usable = |k: &str| {
-        style_entry(style, k).is_some_and(|e| !rig.present(e.set).is_empty())
-    };
+    let usable = |k: &str| style_entry(style, k).is_some_and(|e| !rig.present(e.set).is_empty());
     while let Some(next) = gait_fallback(key) {
         if usable(key) {
             break;
@@ -393,7 +430,11 @@ mod tests {
 
     #[test]
     fn missing_gait_falls_back_and_missing_state_to_idle() {
-        let r = rig(&[("c_idle", 40, true), ("c_walk", 30, true), ("c_gallop", 20, true)]);
+        let r = rig(&[
+            ("c_idle", 40, true),
+            ("c_walk", 30, true),
+            ("c_gallop", 20, true),
+        ]);
         let j = JitterSettings::default();
         let cfg = state_config("lance", &r, "trot_turn_l", false, j);
         assert_eq!(cfg.key, "lance/marching");
@@ -425,7 +466,10 @@ mod tests {
     #[test]
     fn locomotion_loops_use_the_smaller_jitter() {
         let r = rig(&[("walk", 24, true), ("guard", 24, true)]);
-        let j = JitterSettings { loco: 0.03, idle: 0.07 };
+        let j = JitterSettings {
+            loco: 0.03,
+            idle: 0.07,
+        };
         assert_eq!(state_config("sword", &r, "marching", false, j).jitter, 0.03);
         assert_eq!(state_config("sword", &r, "idle", false, j).jitter, 0.07);
     }

@@ -70,7 +70,7 @@ struct ClipEntry {
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct RigEntry {
     #[serde(default)]
-    pub bones: u32,
+    pub bones: Vec<String>,
     #[serde(default = "default_fps")]
     pub fps: f32,
     #[serde(default)]
@@ -127,7 +127,8 @@ pub const SKINNED_DIR: &str = "models/battle_skinned";
 impl Manifest {
     pub fn load(asset_root: &Path) -> Result<Self, String> {
         let path = asset_root.join(SKINNED_DIR).join("manifest_merged.json");
-        let text = std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+        let text =
+            std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
         serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))
     }
 
@@ -265,7 +266,10 @@ pub fn mesh_from_arrays(arrays: FigureArrays) -> Mesh {
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, arrays.normals);
     mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, arrays.uvs);
     mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, arrays.colors);
-    mesh.insert_attribute(ATTRIBUTE_BONES, VertexAttributeValues::Float32x4(arrays.bones));
+    mesh.insert_attribute(
+        ATTRIBUTE_BONES,
+        VertexAttributeValues::Float32x4(arrays.bones),
+    );
     mesh.insert_attribute(
         ATTRIBUTE_WEIGHTS,
         VertexAttributeValues::Float32x4(arrays.weights),
@@ -337,7 +341,9 @@ mod tests {
     fn manifest_lists_figures_and_rigs() {
         let manifest = Manifest::load(&root()).expect("manifest");
         assert!(manifest.figures.len() >= 30);
-        let (variant, infantry) = manifest.figure_or_default("infantry", 0).expect("infantry_0");
+        let (variant, infantry) = manifest
+            .figure_or_default("infantry", 0)
+            .expect("infantry_0");
         assert_eq!(variant, 0);
         assert_eq!(infantry.lods.len(), 3);
         let rig = manifest.rig(&infantry.rig).expect("rig");
@@ -374,7 +380,7 @@ mod tests {
         let fig = manifest.figure("infantry", 0).unwrap();
         let rig = manifest.rig(&fig.rig).unwrap();
         let image = load_bone_texture(&root(), rig).expect("texture");
-        assert_eq!(image.width(), rig.bones * 3);
+        assert_eq!(image.width() as usize, rig.bones.len() * 3);
         let clips = rig.clips();
         let last = clips
             .names

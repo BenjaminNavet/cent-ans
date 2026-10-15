@@ -95,7 +95,13 @@ pub fn pick(
             }
     {
         next = Band::Gallop;
-    } else if speed >= if band >= Band::Trot { down_trot } else { up_trot } {
+    } else if speed
+        >= if band >= Band::Trot {
+            down_trot
+        } else {
+            up_trot
+        }
+    {
         next = Band::Trot;
     }
     if !running && next == Band::Gallop {

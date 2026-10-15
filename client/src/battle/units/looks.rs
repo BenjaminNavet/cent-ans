@@ -129,7 +129,10 @@ mod tests {
         assert_eq!(mamluk.cloth_colours().len(), 4);
         assert_eq!(mamluk.coat_colours().len(), 3);
         for look in looks.looks.values() {
-            assert_eq!(look.cloth_colours().len(), look.cloth.len().min(MAX_COLOURS));
+            assert_eq!(
+                look.cloth_colours().len(),
+                look.cloth.len().min(MAX_COLOURS)
+            );
             assert_eq!(look.coat_colours().len(), look.coats.len().min(MAX_COLOURS));
         }
     }
