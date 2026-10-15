@@ -49,23 +49,36 @@ pub struct CampaignCamera;
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CameraSet;
 
+/// Request to move the campaign camera (alerts, minimap, army strip, hotkeys). Shared interface
+/// fixed before wave 3; the camera lot applies it.
+#[derive(Message, Debug, Clone, PartialEq)]
+pub enum FocusCamera {
+    Province(String),
+    Army(String),
+    /// Map point (world x, z), keeping the current distance.
+    Point(Vec2),
+    /// Keep the given army in view while it moves (`None` stops following).
+    Follow(Option<String>),
+}
+
 pub struct CampaignCameraPlugin;
 
 impl Plugin for CampaignCameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            OnEnter(AppState::Campaign),
-            (setup_rig, spawn_camera).chain(),
-        )
-        .add_systems(OnExit(AppState::Campaign), teardown)
-        .add_systems(
-            Update,
-            drive_camera
-                .in_set(CameraSet)
-                .run_if(in_state(AppState::Campaign))
-                .run_if(resource_exists::<CampaignRig>),
-        )
-        .register_dump(dump_camera);
+        app.add_message::<FocusCamera>()
+            .add_systems(
+                OnEnter(AppState::Campaign),
+                (setup_rig, spawn_camera).chain(),
+            )
+            .add_systems(OnExit(AppState::Campaign), teardown)
+            .add_systems(
+                Update,
+                drive_camera
+                    .in_set(CameraSet)
+                    .run_if(in_state(AppState::Campaign))
+                    .run_if(resource_exists::<CampaignRig>),
+            )
+            .register_dump(dump_camera);
     }
 }
 
