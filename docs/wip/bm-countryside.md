@@ -9,6 +9,11 @@ Etat : lot vague 4 termine pour le sous-ensemble ci-dessous (clippy -D warnings 
 - decor_planner.gd + decor_layer.gd -> decor_plan.rs, decor.rs (sites, road, gate, crossing, coast, province, route ; glb du manifeste DN).
 - map_prop_scale.gd : seuls les multiplicateurs maquette (countryside_size/range, folk_scale) sont utilises ; le reste concerne arbres/incendies (autres lots).
 
+## Lot countryside2 (vague 5)
+- water_props_layer.gd -> water_props.rs : moulins (berge, marée, bateau-moulin), jetées, grues, plages, arsenaux, chantiers, navires amarrés par bassin, épaves ; plan calculé sur un thread (`plan`, testé), scènes glb nourries autour du point visé (plafond 450), fondu `1 - strategic`, calage sur le relief affiché. Ajustement de modèle = `DnWaterModels._measure` (axe long sur X, `yaw_deg`, longueur, pied à 0). Niveau « water » = hauteur affichée du sol (pas de surface d'eau séparée).
+- rock_outcrops.gd -> rocks.rs : catalogue `rock_outcrops.yaml`, semis par tuile sur thread (biome, altitude, pente, crête, lande, limite des arbres, groupes le long des courbes de niveau), scènes glb (plafond 320), taille réelle grossie jusqu'à `far_scale`, fondu `fade_start/end`. Non porté : roches de côte (`coast`), gain d'albédo/fondu pixel du shader, cisaillement vertical, plafond de triangles ; bruit de valeur au lieu du simplex.
+- ground_clutter.gd, ponts-portes, engins de siège/croix de portes, fumées/volumes de repli du décor, shader countryside (teinte, fondu tramé) : non portés (instanciation GPU nécessaire pour le clutter ; plafond 1800 inchangé).
+
 ## Reste (non porte)
 - ground_clutter.gd : touffes d'herbe/broussailles instanciees (MultiMesh, shader `ground_clutter`, cartes de plantes par biome TX T3).
 - rock_outcrops.gd : affleurements TRELLIS (`data/art/rock_outcrops.yaml`, `models/rocks/hb/`), semis par tuile sur pente/crete/biome.

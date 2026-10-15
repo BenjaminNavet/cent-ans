@@ -16,7 +16,9 @@ pub mod layer;
 pub mod placement;
 pub mod scar_meshes;
 pub mod scars;
+pub mod rocks;
 pub mod terrain_data;
+pub mod water_props;
 
 use std::sync::{Arc, Mutex};
 
@@ -66,9 +68,13 @@ impl Plugin for CampaignCountrysidePlugin {
             .register_dump(dump_countryside)
             .register_dump(scars::dump)
             .register_dump(decor::dump)
+            .register_dump(water_props::dump)
+            .register_dump(rocks::dump)
+            .init_resource::<rocks::RockView>()
+            .init_resource::<water_props::WaterView>()
             .add_systems(
                 OnExit(AppState::Campaign),
-                (reset, scars::reset, decor::reset),
+                (reset, scars::reset, decor::reset, water_props::reset, rocks::reset),
             )
             .add_systems(
                 Update,
@@ -104,6 +110,40 @@ impl Plugin for CampaignCountrysidePlugin {
                 )
                     .run_if(in_state(AppState::Campaign))
                     .run_if(resource_exists::<LoadedCountryside>),
+            )
+            .add_systems(
+                Update,
+                (
+                    water_props::start_plan
+                        .run_if(not(resource_exists::<water_props::WaterPlan>))
+                        .run_if(not(resource_exists::<water_props::PendingWaterPlan>))
+                        .run_if(resource_exists::<crate::campaign::markers::places::Places>)
+                        .run_if(resource_exists::<LifeData>),
+                    water_props::finish_plan.run_if(resource_exists::<water_props::PendingWaterPlan>),
+                )
+                    .run_if(in_state(AppState::Campaign)),
+            )
+            .add_systems(
+                Update,
+                (
+                    rocks::build_plan.run_if(not(resource_exists::<rocks::RockPlan>)),
+                    (rocks::stream_rocks, rocks::apply_rocks)
+                        .chain()
+                        .run_if(resource_exists::<rocks::RockPlan>),
+                )
+                    .run_if(in_state(AppState::Campaign))
+                    .run_if(resource_exists::<LoadedCountryside>),
+            )
+            .add_systems(
+                Update,
+                (
+                    water_props::stream_props,
+                    water_props::fit_models,
+                    water_props::apply_props,
+                )
+                    .chain()
+                    .run_if(in_state(AppState::Campaign))
+                    .run_if(resource_exists::<water_props::WaterPlan>),
             )
             .add_systems(
                 Update,
