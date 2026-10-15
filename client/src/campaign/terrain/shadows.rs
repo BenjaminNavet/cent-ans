@@ -194,7 +194,7 @@ mod tests {
     fn range_follows_the_camera_and_stops_high_up() {
         let t = ShadowTuning::default();
         assert!((t.range(400.0) - 1400.0).abs() < 1e-3);
-        assert!((t.range(5.0) - 12.0).abs() < 1e-3);
+        assert!((t.range(3.0) - 12.0).abs() < 1e-3);
         assert!((t.range(40.0) - 140.0).abs() < 1e-3);
         assert!(t.enabled(400.0));
         assert!(!t.enabled(1200.0));

@@ -356,3 +356,7 @@ Fenêtre `OpenPanel::Economy` (bouton HUD « Économie », M = `map_toggle_econo
 - **Trésor** : clic sur `hud:treasury` (ou `click hud:treasury`) → `OpenPanel::Economy`.
 - **Historique des batailles jouées** : `flow::history::PlayedBattles` (24 au plus) reçoit à chaque `LeaveBattle` le titre, l'issue, les suites (`ResultExtras::aftermath`) et la bataille historique (`ResultExtras::history`, Histoire répétée ou non). Dump `flow.played_battles`. Non sauvegardé (l'historique persistant est celui du cœur).
 - **Dialogues d'avant-bataille** (terre et mer) : bandeau illustré `flow::dialog::banner` (planche `battle` / `siege` / `naval` d'`ArtPlates`, recadrée, voile dégradé, filet doré, titre ombré ; 84 px sous 760 px de fenêtre) et blasons `heraldry/<faction>.png` en tête de chaque camp (`side_header`). Preuve : `client/src/flow/proof_integ2.txt`.
+
+## Campagne, parité visuelle 2 (lot `bm/campvis2`, `campaign/terrain/`)
+- Ombres portées du soleil : le relief projette (`terrain_shadow.wesl`, prépasse de `TerrainMaterial`), le sol reçoit (`sun_shadow` dans `terrain.wesl`, lumière directionnelle 0), cascades à la distance caméra (`terrain/shadows.rs`, `data/fx/campaign_lighting.json § shadows`), écrites dans `settings::quality::SunBase` (le lot settings applique qualité et case Ombres). Matériaux maison qui veulent recevoir l'ombre : même appel `shadows::fetch_directional_shadow(0u, …)`.
+- Teinte politique des provinces : fondu multiplicatif à luminance constante (`provinces/shaders/fill.wesl`, `AlphaMode::Multiply`) au lieu d'un lavis alpha.
