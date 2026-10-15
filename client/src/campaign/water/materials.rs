@@ -46,6 +46,7 @@ pub fn register_shaders(app: &mut App) {
         ),
     ];
     for (handle, source, path) in sources {
+        let source = super::drape::with_relief(source);
         if let Err(error) = shaders.insert(handle.id(), Shader::from_wesl(source, path)) {
             error!("water: shader {path}: {error:?}");
         }
@@ -177,6 +178,17 @@ impl Material for LineMaterial {
     fn enable_shadows() -> bool {
         false
     }
+
+    fn specialize(
+        _pipeline: &bevy::pbr::MaterialPipeline,
+        descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
+        _layout: &bevy::mesh::MeshVertexBufferLayoutRef,
+        _key: bevy::pbr::MaterialPipelineKey<Self>,
+    ) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
+        // Ribbons have no fixed winding after draping: two-sided.
+        descriptor.primitive.cull_mode = None;
+        Ok(())
+    }
 }
 
 // --- Dirt road ribbons -------------------------------------------------------------------
@@ -241,6 +253,17 @@ impl Material for RoadRibbonMaterial {
     }
     fn enable_shadows() -> bool {
         false
+    }
+
+    fn specialize(
+        _pipeline: &bevy::pbr::MaterialPipeline,
+        descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
+        _layout: &bevy::mesh::MeshVertexBufferLayoutRef,
+        _key: bevy::pbr::MaterialPipelineKey<Self>,
+    ) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
+        // Ribbons have no fixed winding after draping: two-sided.
+        descriptor.primitive.cull_mode = None;
+        Ok(())
     }
 }
 
@@ -380,6 +403,17 @@ impl Material for RiverMaterial {
     }
     fn enable_shadows() -> bool {
         false
+    }
+
+    fn specialize(
+        _pipeline: &bevy::pbr::MaterialPipeline,
+        descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
+        _layout: &bevy::mesh::MeshVertexBufferLayoutRef,
+        _key: bevy::pbr::MaterialPipelineKey<Self>,
+    ) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
+        // Ribbons have no fixed winding after draping: two-sided.
+        descriptor.primitive.cull_mode = None;
+        Ok(())
     }
 }
 

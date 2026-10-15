@@ -31,6 +31,7 @@ pub fn register_shaders(app: &mut App) {
             "provinces/border.wesl",
         ),
     ] {
+        let source = crate::campaign::water::drape::with_relief(source);
         if let Err(error) = shaders.insert(handle.id(), Shader::from_wesl(source, path)) {
             error!("provinces: shader {path}: {error:?}");
         }
@@ -123,6 +124,17 @@ macro_rules! overlay_material {
             }
             fn enable_shadows() -> bool {
                 false
+            }
+
+            fn specialize(
+                _pipeline: &bevy::pbr::MaterialPipeline,
+                descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
+                _layout: &bevy::mesh::MeshVertexBufferLayoutRef,
+                _key: bevy::pbr::MaterialPipelineKey<Self>,
+            ) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
+                // Ribbons have no fixed winding after draping: two-sided.
+                descriptor.primitive.cull_mode = None;
+                Ok(())
             }
         }
     };

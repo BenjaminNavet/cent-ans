@@ -47,3 +47,30 @@ pub fn sync_drape<M: Drape>(
 pub fn add_drape<M: Drape>(app: &mut App) {
     app.add_systems(PostUpdate, sync_drape::<M>);
 }
+
+/// Source of the shared relief module (`terrain/relief.wesl`).
+const RELIEF_SOURCE: &str = include_str!("../terrain/relief.wesl");
+
+/// A draped shader with the relief module inlined: the `import` line is dropped and the module's
+/// functions are prepended, so the shader does not depend on cross-module resolution at runtime
+/// (an unresolved import silently keeps the pipeline pending).
+pub fn with_relief(source: &str) -> String {
+    const IMPORT: &str = "import cent_ans_client::campaign::terrain::relief";
+    if !source.contains(IMPORT) {
+        return source.to_owned();
+    }
+    let lines: Vec<&str> = source
+        .lines()
+        .filter(|l| !l.trim_start().starts_with(IMPORT))
+        .collect();
+    // WESL wants every `import` before the first declaration: the module goes after the last one.
+    let after_imports = lines
+        .iter()
+        .rposition(|l| l.trim_start().starts_with("import "))
+        .map_or(0, |i| i + 1);
+    format!(
+        "{}\n{RELIEF_SOURCE}\n{}",
+        lines[..after_imports].join("\n"),
+        lines[after_imports..].join("\n")
+    )
+}

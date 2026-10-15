@@ -48,7 +48,7 @@ impl Default for ProvinceOverlayConfig {
     fn default() -> Self {
         Self {
             fill_height: 0.05,
-            border_height: 0.08,
+            border_height: 3.0,
             border_world_per_px: 3.0,
         }
     }
@@ -66,6 +66,7 @@ pub struct OverlayState {
     pub fill_rebuilds: u32,
     pub border_rebuilds: u32,
     pub border_alpha: f32,
+    pub border_vertices: usize,
     pub fill_alpha: f32,
     fill_image: Handle<Image>,
     fill_material: Handle<ProvinceFillMaterial>,
@@ -178,6 +179,8 @@ fn load_province_map(
     commands.spawn((
         Name::new("ProvinceFill"),
         DespawnOnExit(AppState::Campaign),
+        // The mesh is replaced after spawn (stale bounds) and draped on the GPU: never cull.
+        bevy::camera::visibility::NoFrustumCulling,
         Mesh3d(fill_mesh.clone()),
         MeshMaterial3d(fill_material.clone()),
         Transform::default(),
@@ -185,6 +188,7 @@ fn load_province_map(
     commands.spawn((
         Name::new("ProvinceBorders"),
         DespawnOnExit(AppState::Campaign),
+        bevy::camera::visibility::NoFrustumCulling,
         Mesh3d(border_mesh.clone()),
         MeshMaterial3d(border_material.clone()),
         Transform::default(),
@@ -199,6 +203,7 @@ fn load_province_map(
         fill_rebuilds: 0,
         border_rebuilds: 0,
         border_alpha: 0.0,
+        border_vertices: 0,
         fill_alpha: 0.0,
         fill_image,
         fill_material,
@@ -426,6 +431,7 @@ fn refresh_overlays(
             &style,
             &lift,
         );
+        overlay.border_vertices = mesh.count_vertices();
         if let Some(mut slot) = meshes.get_mut(&overlay.border_mesh) {
             *slot = mesh;
         }
