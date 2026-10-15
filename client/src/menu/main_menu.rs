@@ -157,6 +157,7 @@ fn handle_buttons(
     mut settings: MessageWriter<OpenSettings>,
     mut dialogs: MessageWriter<OpenSaveDialog>,
     mut screens: MessageWriter<OpenBattleScreen>,
+    mut replays: MessageWriter<super::battles::OpenReplays>,
     mut modals: ResMut<ModalQueue>,
     mut toasts: MessageWriter<ToastRequest>,
     overlays: Query<(Entity, &MenuOverlay), With<MainMenuOverlay>>,
@@ -211,6 +212,9 @@ fn handle_buttons(
             "Batailles de démonstration" => {
                 screens.write(OpenBattleScreen(BattleScreen::Demos));
             }
+            "Rejeux" => {
+                replays.write(super::battles::OpenReplays);
+            }
             "Réglages" => {
                 settings.write(OpenSettings);
             }
@@ -240,7 +244,7 @@ fn after_load(mut loaded: MessageReader<GameLoaded>, mut next: ResMut<NextState<
 }
 
 /// « Batailles » submenu (`battles_menu.gd`): custom, historical and demo battles open their
-/// screens (`battles`); « Rejeux » (AI turn replays, needs a campaign) stays disabled.
+/// screens (`battles`); « Rejeux » sends [`super::battles::OpenReplays`] (screen of the bscene2 lot).
 fn spawn_battles(commands: &mut Commands, theme: &UiTheme) {
     let (overlay, panel) = spawn_overlay(commands, theme, "BattlesMenu", "Batailles", 480.0, 0);
     commands
@@ -250,7 +254,7 @@ fn spawn_battles(commands: &mut Commands, theme: &UiTheme) {
         ("Bataille personnalisée", true),
         ("Batailles historiques", true),
         ("Batailles de démonstration", true),
-        ("Rejeux", false),
+        ("Rejeux", true),
     ] {
         let id = commands.spawn((button(theme, name), ChildOf(panel))).id();
         if !enabled {

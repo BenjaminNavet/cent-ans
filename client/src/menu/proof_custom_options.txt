@@ -1,0 +1,15 @@
+# Bataille personnalisée : technologies, tenir sa position, nom de composition.
+wait 30
+click Batailles
+wait 10
+click Bataille personnalisée
+wait 30
+click cb:techs:attacker
+click cb:hold
+click cb:name:attacker
+wait 5
+dump out/menu3_custom_opts.json
+click cb:launch
+wait 90
+dump out/menu3_custom_hold.json
+exit

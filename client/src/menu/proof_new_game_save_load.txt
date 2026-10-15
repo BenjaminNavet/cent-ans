@@ -7,6 +7,9 @@ click difficulty:hard
 wait 5
 dump out/menu_faction.json
 click Commencer
+wait 10
+dump out/menu_invite.json
+click Oui
 wait 60
 dump out/menu_campaign.json
 key Escape

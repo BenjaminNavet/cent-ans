@@ -28,6 +28,7 @@ pub mod main_menu;
 pub mod pause;
 pub mod presets;
 pub mod saves;
+pub mod unit_tips;
 
 use bevy::prelude::*;
 use serde_json::{Value, json};
@@ -307,8 +308,17 @@ pub struct KeyEdges {
     was_enter: bool,
 }
 
-fn track_keys(keys: Res<ButtonInput<KeyCode>>, mut edges: ResMut<KeyEdges>) {
-    let escape = keys.pressed(KeyCode::Escape);
+/// The cancel edge follows the key map (`campaign_pause`, Escape by default); Enter stays the
+/// fixed confirm key of the dialogs (Godot's `ui_accept`, not an action of the map).
+fn track_keys(
+    keys: Res<ButtonInput<KeyCode>>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    mut edges: ResMut<KeyEdges>,
+) {
+    let escape = keymap.as_ref().map_or_else(
+        || keys.pressed(KeyCode::Escape),
+        |map| map.pressed("campaign_pause", &keys),
+    );
     let enter = keys.pressed(KeyCode::Enter);
     edges.escape = escape && !edges.was_escape;
     edges.enter = enter && !edges.was_enter;

@@ -11,9 +11,14 @@
 //! `cb:ladders`, `cb:ram`, `cb:towers`, `buy:<side>:<unit>`, `rm:<side>:<index>`,
 //! `cb:clear:<side>`, `preset:prev|next|load|save|delete:<side>`, `cb:launch`, `cb:close`.
 //!
-//! Not ported: granting technologies (`custom_technologies`), the opponent-holds option
-//! (`set_hold` happens inside the battle), the siege place type, unit miniatures and tooltips,
-//! typing a preset name (an army is kept as « <faction> n »).
+//! Also: `cb:techs:<side>` (opens the list of grantable technologies, `tech:<side>:<id>` grants
+//! or withdraws one: they unlock the units that require them), `cb:hold` (the opposing army holds
+//! its ground, applied by `battles::apply_hold`), `cb:name:<side>` (focus the name field, then
+//! type; Enter keeps the army under that name, an empty name gives « <faction> n »). Roster and
+//! army rows carry the unit's painted miniature and its tooltip (`unit_tips`).
+//!
+//! Not ported: the siege place type (Godot kept a `place` key that the core dropped in SC BB14:
+//! no rule behind it).
 
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -25,7 +30,7 @@ use data_model::{FactionId, GameData, UnitType};
 use serde_json::{Value, json};
 use sim_battle::custom::{
     CustomBattle, CustomBattleRules, CustomData, CustomEngines, CustomReport, CustomSide,
-    known_technologies, roster,
+    grantable_technologies, known_technologies, roster,
 };
 
 use super::battles::{
@@ -33,16 +38,22 @@ use super::battles::{
 };
 use super::presets::{self, PresetArmy};
 use super::saves::SaveDir;
+use super::unit_tips::unit_type_bbcode;
 use super::{MenuOverlay, spawn_overlay};
 use crate::app::AppState;
 use crate::battle::scene::setup;
 use crate::sim::Sim;
+use crate::ui::kit::icons::icon;
 use crate::ui::kit::style::UiType;
+use crate::ui::kit::tooltip::Tooltip;
+use crate::ui::kit::tooltip_spec::TooltipTexts;
 use crate::ui::kit::{
     ButtonPressed, ListSelected, UiTheme, button_captioned, button_primary, button_small, heading,
     list_item, scroll_list, typed,
 };
 
+/// Side of the miniature in front of a roster row.
+const ROW_ICON: f32 = 24.0;
 const SIDES: [&str; 2] = ["attacker", "defender"];
 const TERRAINS: [(&str, &str); 9] = [
     ("plains", "Plaines"),
@@ -91,6 +102,10 @@ struct ArmyBody(&'static str);
 #[derive(Component)]
 struct LaunchButton;
 
+/// List of grantable technologies of a side (hidden while closed).
+#[derive(Component)]
+struct TechBody(&'static str);
+
 /// The composition being edited and everything derived from it.
 #[derive(Resource)]
 pub struct CustomDraft {
@@ -105,6 +120,15 @@ pub struct CustomDraft {
     factions: Vec<(String, String)>,
     hours: Vec<(String, String)>,
     dirty: bool,
+    /// The opposing army holds its ground (`hold_opponent`).
+    pub hold_opponent: bool,
+    /// Preset name typed in each side's field, and the field taking the keys.
+    names: [String; 2],
+    name_focus: Option<usize>,
+    /// Technology list open for each side.
+    techs_open: [bool; 2],
+    /// Rule texts of the unit tooltips (`None` when the file cannot be read).
+    texts: Option<TooltipTexts>,
 }
 
 fn side_index(side: &str) -> usize {
@@ -166,6 +190,70 @@ pub fn side_roster<'a>(game: &'a GameData, battle: &CustomBattle, side: &str) ->
             roster(&game.unit_types, faction, year, &techs)
         })
         .unwrap_or_default()
+}
+
+/// Technologies `side` may be granted: `(id, name, names of the units it unlocks)` by name.
+pub fn grantable(
+    game: &GameData,
+    battle: &CustomBattle,
+    side: &str,
+) -> Vec<(String, String, Vec<String>)> {
+    let rules = CustomBattleRules::bundled();
+    let year = battle
+        .year
+        .unwrap_or(rules.default_year)
+        .clamp(rules.min_year, rules.max_year);
+    let Some(faction) = FactionId::new(side_of(battle, side).faction.as_str())
+        .ok()
+        .and_then(|id| game.factions.get(&id))
+    else {
+        return Vec::new();
+    };
+    let mut list: Vec<(String, String, Vec<String>)> =
+        grantable_technologies(&game.unit_types, faction, year)
+            .into_iter()
+            .map(|(tech, units)| {
+                let name = game
+                    .technologies
+                    .get(&tech)
+                    .map_or_else(|| tech.to_string(), |t| t.name.display.clone());
+                let units = units.iter().map(|u| u.name.display.clone()).collect();
+                (tech.to_string(), name, units)
+            })
+            .collect();
+    list.sort_by(|a, b| a.1.cmp(&b.1));
+    list
+}
+
+/// Grants `tech` to `side`, or withdraws it (the units that needed it leave the army).
+pub fn toggle_technology(game: &GameData, battle: &mut CustomBattle, side: &str, tech: &str) {
+    let composed = side_mut(battle, side);
+    if let Some(at) = composed.technologies.iter().position(|t| t == tech) {
+        composed.technologies.remove(at);
+        prune_army(game, battle, side);
+    } else if grantable(game, battle, side).iter().any(|g| g.0 == tech) {
+        side_mut(battle, side).technologies.push(tech.to_owned());
+    }
+}
+
+/// Applies the key `key` to a name being typed; true when the text changed.
+pub fn edit_name(name: &mut String, key: &bevy::input::keyboard::Key) -> bool {
+    use bevy::input::keyboard::Key;
+    match key {
+        Key::Character(chars)
+            if chars.chars().all(|c| !c.is_control())
+                && name.chars().count() < presets::MAX_NAME =>
+        {
+            name.push_str(chars);
+            true
+        }
+        Key::Space if name.chars().count() < presets::MAX_NAME => {
+            name.push(' ');
+            true
+        }
+        Key::Backspace => name.pop().is_some(),
+        _ => false,
+    }
 }
 
 /// Removes the units of `side` that its roster no longer offers (faction, year, technologies).
@@ -249,10 +337,16 @@ fn budget_step() -> u32 {
 
 /// The composition shown on opening: the kept one when readable (and valid factions), else
 /// France against England with armies bought automatically.
-fn initial_battle(game: &GameData, last_path: &std::path::Path) -> CustomBattle {
-    let kept = std::fs::read_to_string(last_path)
-        .ok()
-        .and_then(|text| serde_json::from_str::<CustomBattle>(&text).ok());
+fn initial_battle(game: &GameData, last_path: &std::path::Path) -> (CustomBattle, bool) {
+    let text = std::fs::read_to_string(last_path).ok();
+    let hold = text
+        .as_deref()
+        .and_then(|t| serde_json::from_str::<Value>(t).ok())
+        .and_then(|v| v["hold_opponent"].as_bool())
+        .unwrap_or(false);
+    let kept = text
+        .as_deref()
+        .and_then(|text| serde_json::from_str::<CustomBattle>(text).ok());
     let playable = |faction: &str| {
         FactionId::new(faction)
             .ok()
@@ -263,9 +357,9 @@ fn initial_battle(game: &GameData, last_path: &std::path::Path) -> CustomBattle 
         Some(battle)
             if playable(&battle.attacker.faction) && playable(&battle.defender.faction) =>
         {
-            battle
+            (battle, hold)
         }
-        _ => setup::default_custom_battle(game),
+        _ => (setup::default_custom_battle(game), false),
     }
 }
 
@@ -273,7 +367,7 @@ impl CustomDraft {
     pub fn new(game: &GameData, data_dir: &std::path::Path, prefs: &std::path::Path) -> Self {
         let last_path = prefs.join("custom_battle_last.json");
         let presets_path = presets::presets_path(prefs);
-        let battle = initial_battle(game, &last_path);
+        let (battle, hold_opponent) = initial_battle(game, &last_path);
         let report = validate(game, &battle);
         let hours = std::iter::once((String::new(), "Au hasard (comme en campagne)".to_owned()))
             .chain(
@@ -293,6 +387,11 @@ impl CustomDraft {
             factions: playable_factions(game),
             hours,
             dirty: true,
+            hold_opponent,
+            names: [String::new(), String::new()],
+            name_focus: None,
+            techs_open: [false, false],
+            texts: TooltipTexts::load().ok(),
         }
     }
 
@@ -346,6 +445,8 @@ impl CustomDraft {
         true
     }
 
+    /// Keeps the army of `side` under the typed name (a name already used is replaced), or under
+    /// « <faction> n » when the field is empty.
     fn save_preset(&mut self, side: &str) -> Option<String> {
         let composed = side_of(&self.battle, side);
         let faction = self
@@ -353,9 +454,14 @@ impl CustomDraft {
             .iter()
             .find(|f| f.0 == composed.faction)
             .map_or(composed.faction.clone(), |f| f.1.clone());
-        let name = (1..)
-            .map(|n| presets::clean_name(&format!("{faction} {n}")))
-            .find(|name| !self.presets.contains_key(name))?;
+        let typed = presets::clean_name(&self.names[side_index(side)]);
+        let name = if typed.is_empty() {
+            (1..)
+                .map(|n| presets::clean_name(&format!("{faction} {n}")))
+                .find(|name| !self.presets.contains_key(name))?
+        } else {
+            typed
+        };
         let army = PresetArmy {
             faction: composed.faction.clone(),
             budget: composed.budget,
@@ -364,6 +470,7 @@ impl CustomDraft {
         };
         presets::save(&self.presets_path, &name, &army).then(|| {
             self.presets = presets::load_all(&self.presets_path);
+            self.names[side_index(side)].clear();
             name
         })
     }
@@ -376,7 +483,10 @@ impl CustomDraft {
         if let Some(parent) = self.last_path.parent() {
             let _ = std::fs::create_dir_all(parent);
         }
-        if let Ok(text) = serde_json::to_string_pretty(&self.battle) {
+        // The Godot file is the whole screen dictionary: `hold_opponent` rides along.
+        let mut value = serde_json::to_value(&self.battle).unwrap_or(Value::Null);
+        value["hold_opponent"] = Value::Bool(self.hold_opponent);
+        if let Ok(text) = serde_json::to_string_pretty(&value) {
             let _ = std::fs::write(&self.last_path, text);
         }
     }
@@ -388,7 +498,13 @@ impl Plugin for CustomBattlePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (open_screen, handle_buttons, handle_list, refresh)
+            (
+                open_screen,
+                handle_buttons,
+                type_preset_name,
+                handle_list,
+                refresh,
+            )
                 .chain()
                 .run_if(in_state(AppState::MainMenu)),
         );
@@ -447,6 +563,16 @@ fn cycle_row(
     ));
 }
 
+/// `[b]title[/b]` and body of the `plain` tooltip `key` (`data/ui/tooltips.json`), empty when
+/// the file or the key is missing.
+fn plain_tip(texts: Option<&TooltipTexts>, key: &str) -> Tooltip {
+    let text = texts
+        .and_then(|t| t.entry("plain", key))
+        .map(|e| format!("[b]{}[/b]\n{}", e.title, e.body))
+        .unwrap_or_default();
+    Tooltip::new(&text)
+}
+
 fn open_screen(
     mut commands: Commands,
     mut requests: MessageReader<OpenBattleScreen>,
@@ -461,7 +587,10 @@ fn open_screen(
     let (Some(game), Some(data)) = (sim.data.as_deref(), data_dir()) else {
         return;
     };
-    commands.insert_resource(CustomDraft::new(game, &data, &prefs_dir(&dir.0)));
+    let draft = CustomDraft::new(game, &data, &prefs_dir(&dir.0));
+    let texts = draft.texts.clone();
+    commands.insert_resource(draft);
+    let tip = |key: &str| plain_tip(texts.as_ref(), key);
     let (overlay, panel) = spawn_overlay(
         &mut commands,
         &theme,
@@ -519,8 +648,29 @@ fn open_screen(
             Some(side),
             200.0,
         );
+        let techs = small_row(&mut commands, column);
+        commands.spawn((
+            ValueText(format!("techs:{side}")),
+            button_small(&theme, &format!("cb:techs:{side}"), "Technologies"),
+            tip("custom_battle_technologies"),
+            ChildOf(techs),
+        ));
+        commands.spawn((
+            Name::new(format!("TechBody_{side}")),
+            TechBody(side),
+            Node {
+                flex_direction: FlexDirection::Column,
+                display: Display::None,
+                ..default()
+            },
+            ChildOf(column),
+        ));
         let budget = small_row(&mut commands, column);
-        commands.spawn((typed(&theme, "Budget", UiType::Caption), ChildOf(budget)));
+        commands.spawn((
+            typed(&theme, "Budget", UiType::Caption),
+            tip("custom_battle_budget"),
+            ChildOf(budget),
+        ));
         commands.spawn((
             button_small(&theme, &format!("cb:budget:{side}:-1"), "−"),
             ChildOf(budget),
@@ -565,6 +715,13 @@ fn open_screen(
         commands.spawn((
             button_small(&theme, &format!("cb:clear:{side}"), "Vider l’armée"),
             ChildOf(presets),
+        ));
+        let naming = small_row(&mut commands, column);
+        commands.spawn((
+            ValueText(format!("name:{side}")),
+            button_small(&theme, &format!("cb:name:{side}"), "Nom de la composition"),
+            tip("custom_battle_presets"),
+            ChildOf(naming),
         ));
         value_text(
             &mut commands,
@@ -709,6 +866,12 @@ fn open_screen(
     commands.spawn((button_small(&theme, "cb:fort:-1", "−"), ChildOf(siege)));
     value_text(&mut commands, &theme, siege, "fort", 120.0);
     commands.spawn((button_small(&theme, "cb:fort:1", "+"), ChildOf(siege)));
+    commands.spawn((
+        ValueText("hold".into()),
+        button_small(&theme, "cb:hold", "Adversaire : tenir sa position"),
+        tip("custom_battle_hold"),
+        ChildOf(field),
+    ));
     // Errors and actions.
     commands
         .spawn((
@@ -774,11 +937,9 @@ fn handle_buttons(
             ["cb", "launch"] => {
                 if draft.report.ok {
                     draft.save_last();
-                    launches.write(LaunchBattle {
-                        config: draft.battle.clone(),
-                        seed: sim.seed,
-                        label: "custom".to_owned(),
-                    });
+                    let mut launch = LaunchBattle::new(draft.battle.clone(), sim.seed, "custom");
+                    launch.hold_opponent = draft.hold_opponent;
+                    launches.write(launch);
                 }
                 changed = false;
             }
@@ -855,6 +1016,16 @@ fn handle_buttons(
                 draft.set_year(game, year);
             }
             ["cb", "siege"] => draft.battle.siege = !draft.battle.siege,
+            ["cb", "hold"] => draft.hold_opponent = !draft.hold_opponent,
+            ["cb", "techs", side] => {
+                let index = side_index(side);
+                draft.techs_open[index] = !draft.techs_open[index];
+            }
+            ["tech", side, tech] => toggle_technology(game, &mut draft.battle, side, tech),
+            ["cb", "name", side] => {
+                let index = side_index(side);
+                draft.name_focus = (draft.name_focus != Some(index)).then_some(index);
+            }
             ["cb", "fort", _] => {
                 if draft.battle.siege {
                     let now = draft
@@ -911,6 +1082,39 @@ fn handle_buttons(
             _ => changed = false,
         }
         if changed {
+            draft.dirty = true;
+        }
+    }
+}
+
+/// Keys typed into the focused preset name field; Enter keeps the army under that name.
+fn type_preset_name(
+    mut keys: MessageReader<bevy::input::keyboard::KeyboardInput>,
+    draft: Option<ResMut<CustomDraft>>,
+    screens: Query<(), With<CustomScreen>>,
+) {
+    let Some(mut draft) = draft else {
+        keys.clear();
+        return;
+    };
+    if screens.is_empty() {
+        keys.clear();
+        return;
+    }
+    for key in keys.read() {
+        let Some(index) = draft.name_focus else {
+            continue;
+        };
+        if !key.state.is_pressed() {
+            continue;
+        }
+        let side = SIDES[index];
+        if key.logical_key == bevy::input::keyboard::Key::Enter {
+            if let Some(name) = draft.save_preset(side) {
+                draft.chosen[index] = Some(name);
+            }
+            draft.dirty = true;
+        } else if edit_name(&mut draft.names[index], &key.logical_key) {
             draft.dirty = true;
         }
     }
@@ -992,6 +1196,27 @@ fn texts(game: &GameData, draft: &CustomDraft) -> BTreeMap<String, String> {
                 r["cost"], r["budget"], r["units"], r["max_units"]
             ),
         );
+        let granted = composed.technologies.len();
+        out.insert(
+            format!("techs:{side}"),
+            match (granted, draft.techs_open[side_index(side)]) {
+                (0, false) => "Technologies ▸".to_owned(),
+                (0, true) => "Technologies ▾".to_owned(),
+                (n, false) => format!("Technologies ({n}) ▸"),
+                (n, true) => format!("Technologies ({n}) ▾"),
+            },
+        );
+        let typing = draft.name_focus == Some(side_index(side));
+        let typed_name = &draft.names[side_index(side)];
+        out.insert(
+            format!("name:{side}"),
+            match (typed_name.is_empty(), typing) {
+                (true, false) => "Nom de la composition".to_owned(),
+                (true, true) => "Nom de la composition : |".to_owned(),
+                (false, false) => format!("Nom : {typed_name}"),
+                (false, true) => format!("Nom : {typed_name}|"),
+            },
+        );
         out.insert(
             format!("preset:{side}"),
             draft.chosen[side_index(side)]
@@ -1024,6 +1249,13 @@ fn texts(game: &GameData, draft: &CustomDraft) -> BTreeMap<String, String> {
     out.insert("ram".into(), format!("Bélier : {}", on_off(engines.ram)));
     out.insert("towers".into(), towers_label(engines.towers));
     out.insert(
+        "hold".into(),
+        format!(
+            "Adversaire : tenir sa position ({})",
+            on_off(draft.hold_opponent)
+        ),
+    );
+    out.insert(
         "fort".into(),
         format!(
             "Fortification {}",
@@ -1046,7 +1278,9 @@ fn refresh(
     mut child_texts: Query<&mut Text, Without<ValueText>>,
     rosters: Query<(Entity, &RosterBody)>,
     armies: Query<(Entity, &ArmyBody)>,
+    tech_bodies: Query<(Entity, &TechBody)>,
     launch: Query<Entity, With<LaunchButton>>,
+    assets: Res<AssetServer>,
 ) {
     let Some(mut draft) = draft else { return };
     if !draft.dirty {
@@ -1084,6 +1318,38 @@ fn refresh(
         }
     }
     let rules = CustomBattleRules::bundled();
+    for (body, side) in tech_bodies.iter().map(|(e, s)| (e, s.0)) {
+        commands.entity(body).despawn_related::<Children>();
+        let open = draft.techs_open[side_index(side)];
+        commands.entity(body).insert(Node {
+            flex_direction: FlexDirection::Column,
+            display: if open { Display::Flex } else { Display::None },
+            ..default()
+        });
+        let granted = &side_of(&draft.battle, side).technologies;
+        let catalog = grantable(game, &draft.battle, side);
+        if open && catalog.is_empty() {
+            commands.spawn((
+                typed(&theme, "Aucune technologie à accorder.", UiType::Caption),
+                ChildOf(body),
+            ));
+        }
+        for (id, name, units) in catalog {
+            let on = granted.contains(&id);
+            commands.spawn((
+                button_small(
+                    &theme,
+                    &format!("tech:{side}:{id}"),
+                    &format!(
+                        "{} {name} ({})",
+                        if on { "☑" } else { "☐" },
+                        units.join(", ")
+                    ),
+                ),
+                ChildOf(body),
+            ));
+        }
+    }
     for (body, side) in rosters.iter().map(|(e, s)| (e, s.0)) {
         commands.entity(body).despawn_related::<Children>();
         let composed = side_of(&draft.battle, side);
@@ -1108,6 +1374,7 @@ fn refresh(
                     ChildOf(body),
                 ))
                 .id();
+            decorate_row(&mut commands, &theme, &assets, &draft, row, unit);
             if !affordable {
                 commands.entity(row).insert(InteractionDisabled);
             }
@@ -1123,17 +1390,47 @@ fn refresh(
                 || format!("− {unit_id}"),
                 |u| format!("− {} ({})", u.name.display, u.cost.money),
             );
-            commands.spawn((
-                list_item(
-                    &theme,
-                    &format!("army:{side}"),
-                    &format!("rm:{side}:{index}"),
-                    &caption,
-                    false,
-                ),
-                ChildOf(body),
-            ));
+            let row = commands
+                .spawn((
+                    list_item(
+                        &theme,
+                        &format!("army:{side}"),
+                        &format!("rm:{side}:{index}"),
+                        &caption,
+                        false,
+                    ),
+                    ChildOf(body),
+                ))
+                .id();
+            if let Some(unit) = unit {
+                decorate_row(&mut commands, &theme, &assets, &draft, row, unit);
+            }
         }
+    }
+}
+
+/// Painted miniature of the unit type in front of its row, and its tooltip over the row
+/// (`IconLibrary.decorate_button` and `TooltipHost.set_tooltip(button, "unit", id)`).
+fn decorate_row(
+    commands: &mut Commands,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    draft: &CustomDraft,
+    row: Entity,
+    unit: &UnitType,
+) {
+    let id = unit.id.to_string();
+    let icon_id = if theme.icons.has(&id) {
+        id
+    } else {
+        format!("unit_category_{}", unit.category.key())
+    };
+    let miniature = commands.spawn(icon(theme, assets, &icon_id, ROW_ICON)).id();
+    commands.entity(row).insert_children(0, &[miniature]);
+    if let Some(texts) = &draft.texts {
+        commands
+            .entity(row)
+            .insert(Tooltip::new(&unit_type_bbcode(unit, texts)));
     }
 }
 
@@ -1155,6 +1452,13 @@ pub fn dump(world: &World) -> Value {
         "terrain": b.terrain, "season": b.season, "weather": b.weather, "hour": b.hour,
         "year": b.year, "siege": b.siege, "player_side": b.player_side,
         "presets": draft.presets.keys().collect::<Vec<_>>(),
+        "hold_opponent": draft.hold_opponent,
+        "technologies": {"attacker": b.attacker.technologies, "defender": b.defender.technologies},
+        "techs_open": draft.techs_open,
+        "typed_names": draft.names,
+        "name_focus": draft.name_focus,
+        "rows_with_tooltip": world.try_query_filtered::<(), (With<Tooltip>, With<crate::ui::kit::ListItem>)>().map_or(0, |mut q| q.iter(world).count()),
+        "rows_with_icon": world.try_query::<(&crate::ui::kit::icons::Icon, &ChildOf)>().map_or(0, |mut q| q.iter(world).filter(|(_, parent)| world.get::<crate::ui::kit::ListItem>(parent.parent()).is_some()).count()),
         "overlays": world.try_query_filtered::<(), With<MenuOverlay>>().map_or(0, |mut q| q.iter(world).count()),
     })
 }
@@ -1243,6 +1547,70 @@ mod tests {
         let again = CustomDraft::new(&game, &dir, &prefs);
         assert_eq!(again.battle, draft.battle);
         assert_eq!(again.presets.len(), 1);
+        let _ = std::fs::remove_dir_all(prefs);
+    }
+
+    #[test]
+    fn granting_a_technology_unlocks_units_and_withdrawing_prunes_them() {
+        let (game, dir) = load();
+        let prefs = temp_prefs("techs");
+        let mut draft = CustomDraft::new(&game, &dir, &prefs);
+        draft.set_year(&game, 1453);
+        let catalog = grantable(&game, &draft.battle, "attacker");
+        assert!(
+            !catalog.is_empty(),
+            "France has technologies to be granted in 1453"
+        );
+        let (tech, _, units) = catalog[0].clone();
+        assert!(!units.is_empty());
+        let before = side_roster(&game, &draft.battle, "attacker").len();
+        toggle_technology(&game, &mut draft.battle, "attacker", &tech);
+        assert_eq!(draft.battle.attacker.technologies, vec![tech.clone()]);
+        let after = side_roster(&game, &draft.battle, "attacker");
+        assert!(after.len() > before);
+        // Buy a unit that needs it, then withdraw the technology: the unit leaves the army.
+        let gated = after
+            .iter()
+            .find(|u| u.required_technology.as_ref().map(|t| t.as_str()) == Some(tech.as_str()))
+            .map(|u| u.id.as_str().to_owned())
+            .expect("a gated unit");
+        draft.battle.attacker.budget = 20_000;
+        assert!(buy(&game, &mut draft.battle, "attacker", &gated));
+        toggle_technology(&game, &mut draft.battle, "attacker", &tech);
+        assert!(draft.battle.attacker.technologies.is_empty());
+        assert!(!draft.battle.attacker.units.contains(&gated));
+        // An unknown technology is refused.
+        toggle_technology(&game, &mut draft.battle, "attacker", "tech_unknown");
+        assert!(draft.battle.attacker.technologies.is_empty());
+        let _ = std::fs::remove_dir_all(prefs);
+    }
+
+    #[test]
+    fn typed_names_are_kept_and_hold_survives_the_last_file() {
+        let (game, dir) = load();
+        let prefs = temp_prefs("names");
+        let mut draft = CustomDraft::new(&game, &dir, &prefs);
+        for key in ["L", "a", " ", "g"] {
+            let key = if key == " " {
+                bevy::input::keyboard::Key::Space
+            } else {
+                bevy::input::keyboard::Key::Character(key.into())
+            };
+            assert!(edit_name(&mut draft.names[0], &key));
+        }
+        assert_eq!(draft.names[0], "La g");
+        assert!(edit_name(
+            &mut draft.names[0],
+            &bevy::input::keyboard::Key::Backspace
+        ));
+        assert_eq!(draft.save_preset("attacker").as_deref(), Some("La"));
+        assert!(draft.names[0].is_empty());
+        assert!(draft.presets.contains_key("La"));
+        draft.hold_opponent = true;
+        draft.save_last();
+        let again = CustomDraft::new(&game, &dir, &prefs);
+        assert!(again.hold_opponent);
+        assert_eq!(again.battle, draft.battle);
         let _ = std::fs::remove_dir_all(prefs);
     }
 

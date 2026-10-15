@@ -6,7 +6,12 @@
 //! « Retour » / « Commencer ». « Commencer » sets `Sim::player`, builds the 1337 campaign
 //! (`Sim::new_campaign`), applies the difficulty to the new state and enters the campaign.
 //! Not ported: the clickable map and kingdom / rank filters (`FactionMapPicker`), ruler portrait
-//! and key figures on the cards, the seed field, the tutorial invite, the loading screen.
+//! and key figures on the cards, the seed field, the loading screen.
+//!
+//! Tutorial invite: « Commencer » first asks « Jouer le didacticiel ? » (when the guide is enabled
+//! in the settings and not finished). « Oui » starts the campaign and sends
+//! [`StartTutorial`] on entering it; « Non » (or Escape) puts the guide aside (`postponed`), so it
+//! does not start by itself and waits for the Aide menu / advisor.
 
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
@@ -19,8 +24,12 @@ use sim_campaign::difficulty::Difficulty;
 use super::saves::SaveProgress;
 use super::{CoverFit, MenuData, spawn_backdrop};
 use crate::app::AppState;
+use crate::campaign::progress::StartTutorial;
+use crate::campaign::progress::tutorial::Tutorial;
+use crate::settings::Settings;
 use crate::sim::Sim;
 use crate::ui::kit::modal::ToastRequest;
+use crate::ui::kit::modal::{ModalQueue, ModalResult, ModalSpec, PRIORITY_DECISION};
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::{
     ButtonPressed, ListSelected, TabSelected, Toggled, UiTheme, button_primary, button_small,
@@ -41,6 +50,25 @@ impl Default for FactionChoice {
             difficulty: "normal".to_owned(),
         }
     }
+}
+
+/// Key of the tutorial invitation in the modal queue.
+pub const INVITE_KEY: &str = "menu:tutorial_invite";
+
+/// State of the tutorial invitation of a new campaign.
+#[derive(Resource, Default, Debug)]
+pub struct TutorialInvite {
+    /// The question is on screen; the campaign starts with the answer.
+    pub asking: bool,
+    /// « Oui » was answered: the campaign being entered sends [`StartTutorial`].
+    pub start_on_enter: bool,
+    /// Answers given so far (dump).
+    pub answers: Vec<bool>,
+}
+
+/// Whether « Commencer » must ask about the guide first.
+pub fn invite_wanted(settings: Option<&Settings>, tutorial: &Tutorial) -> bool {
+    settings.is_none_or(|s| s.tutorial_enabled) && !tutorial.finished && !tutorial.active()
 }
 
 #[derive(Component)]
@@ -66,10 +94,18 @@ pub struct FactionSelectPlugin;
 impl Plugin for FactionSelectPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<FactionChoice>()
+            .init_resource::<TutorialInvite>()
             .add_systems(OnEnter(AppState::FactionSelect), spawn_screen)
+            .add_systems(OnEnter(AppState::Campaign), send_start_tutorial)
             .add_systems(
                 Update,
-                (handle_buttons, handle_list, refresh_choice, card_visuals)
+                (
+                    handle_buttons,
+                    answer_invite,
+                    handle_list,
+                    refresh_choice,
+                    card_visuals,
+                )
                     .chain()
                     .run_if(in_state(AppState::FactionSelect)),
             )
@@ -535,6 +571,52 @@ fn start_campaign(
     Ok(())
 }
 
+/// « Commencer » (button or Enter): asks about the guide first when it applies, else starts.
+fn request_start(
+    settings: Option<&Settings>,
+    tutorial: &Tutorial,
+    invite: &mut TutorialInvite,
+    modals: &mut ModalQueue,
+) -> bool {
+    if invite.asking {
+        return false;
+    }
+    if !invite_wanted(settings, tutorial) {
+        return true;
+    }
+    invite.asking = true;
+    modals.request(
+        INVITE_KEY,
+        PRIORITY_DECISION,
+        ModalSpec {
+            title: "Jouer le didacticiel ?".to_owned(),
+            text: "Un guide en quelques étapes accompagne les premières saisons : provinces, \
+                   recrutement, armées, diplomatie. On le retrouve ensuite dans l’aide (F1)."
+                .to_owned(),
+            yes_label: "Oui".to_owned(),
+            no_label: "Non".to_owned(),
+            width: 460.0,
+        },
+    );
+    false
+}
+
+/// Starts the campaign and enters it, or reports why not.
+fn begin_campaign(
+    sim: &mut Sim,
+    choice: &FactionChoice,
+    progress: &mut SaveProgress,
+    next: &mut NextState<AppState>,
+    toasts: &mut MessageWriter<ToastRequest>,
+) {
+    match start_campaign(sim, choice, progress) {
+        Ok(()) => next.set(AppState::Campaign),
+        Err(message) => {
+            toasts.write(ToastRequest::new(&message));
+        }
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn handle_buttons(
     mut pressed: MessageReader<ButtonPressed>,
@@ -544,6 +626,10 @@ fn handle_buttons(
     mut toasts: MessageWriter<ToastRequest>,
     mut progress: ResMut<SaveProgress>,
     mut difficulty_buttons: Query<(&DifficultyButton, &mut Toggled)>,
+    settings: Option<Res<Settings>>,
+    tutorial: Res<Tutorial>,
+    mut invite: ResMut<TutorialInvite>,
+    mut modals: ResMut<ModalQueue>,
 ) {
     for press in pressed.read() {
         let name = press.name.as_str();
@@ -556,17 +642,15 @@ fn handle_buttons(
             }
         } else if name == "Retour" {
             next.set(AppState::MainMenu);
-        } else if name == "Commencer" {
-            match start_campaign(&mut sim, &choice, &mut progress) {
-                Ok(()) => next.set(AppState::Campaign),
-                Err(message) => {
-                    toasts.write(ToastRequest::new(&message));
-                }
-            }
+        } else if name == "Commencer"
+            && request_start(settings.as_deref(), &tutorial, &mut invite, &mut modals)
+        {
+            begin_campaign(&mut sim, &choice, &mut progress, &mut next, &mut toasts);
         }
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn enter_starts(
     edges: Res<super::KeyEdges>,
     choice: Res<FactionChoice>,
@@ -574,14 +658,49 @@ fn enter_starts(
     mut next: ResMut<NextState<AppState>>,
     mut progress: ResMut<SaveProgress>,
     mut toasts: MessageWriter<ToastRequest>,
+    settings: Option<Res<Settings>>,
+    tutorial: Res<Tutorial>,
+    mut invite: ResMut<TutorialInvite>,
+    mut modals: ResMut<ModalQueue>,
 ) {
-    if edges.enter {
-        match start_campaign(&mut sim, &choice, &mut progress) {
-            Ok(()) => next.set(AppState::Campaign),
-            Err(message) => {
-                toasts.write(ToastRequest::new(&message));
-            }
+    if edges.enter && request_start(settings.as_deref(), &tutorial, &mut invite, &mut modals) {
+        begin_campaign(&mut sim, &choice, &mut progress, &mut next, &mut toasts);
+    }
+}
+
+/// The answer to the invitation: starts the campaign, with the guide asked for or put aside.
+#[allow(clippy::too_many_arguments)]
+fn answer_invite(
+    mut results: MessageReader<ModalResult>,
+    choice: Res<FactionChoice>,
+    mut sim: ResMut<Sim>,
+    mut next: ResMut<NextState<AppState>>,
+    mut progress: ResMut<SaveProgress>,
+    mut toasts: MessageWriter<ToastRequest>,
+    mut tutorial: ResMut<Tutorial>,
+    mut invite: ResMut<TutorialInvite>,
+) {
+    for result in results.read() {
+        if result.key != INVITE_KEY {
+            continue;
         }
+        invite.asking = false;
+        invite.answers.push(result.confirmed);
+        invite.start_on_enter = result.confirmed;
+        if !result.confirmed && !tutorial.finished {
+            tutorial.postponed = Some(0);
+        }
+        begin_campaign(&mut sim, &choice, &mut progress, &mut next, &mut toasts);
+    }
+}
+
+/// A new campaign was entered after « Oui »: the guide starts.
+fn send_start_tutorial(
+    mut invite: ResMut<TutorialInvite>,
+    mut start: MessageWriter<StartTutorial>,
+) {
+    if std::mem::take(&mut invite.start_on_enter) {
+        start.write(StartTutorial);
     }
 }
 
@@ -703,11 +822,59 @@ fn card_visuals(
 /// Section `menu.faction_choice`.
 pub fn dump(world: &World) -> Value {
     let choice = world.resource::<FactionChoice>();
+    let invite = world.resource::<TutorialInvite>();
     let mut cards = world.try_query::<&FactionCard>().unwrap();
     let cards: Vec<String> = cards.iter(world).map(|c| c.0.clone()).collect();
     json!({
         "faction": choice.faction,
         "difficulty": choice.difficulty,
         "cards": cards,
+        "tutorial_invite": {
+            "asking": invite.asking,
+            "start_on_enter": invite.start_on_enter,
+            "answers": invite.answers,
+            "postponed": world.get_resource::<Tutorial>().and_then(|t| t.postponed),
+            "tutorial_active": world.get_resource::<Tutorial>().is_some_and(|t| t.active()),
+        },
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_invitation_asks_only_while_the_guide_is_enabled_and_unfinished() {
+        let mut tutorial = Tutorial::default();
+        let mut settings = Settings::default();
+        assert!(invite_wanted(Some(&settings), &tutorial));
+        assert!(invite_wanted(None, &tutorial));
+        settings.tutorial_enabled = false;
+        assert!(!invite_wanted(Some(&settings), &tutorial));
+        settings.tutorial_enabled = true;
+        tutorial.finished = true;
+        assert!(!invite_wanted(Some(&settings), &tutorial));
+    }
+
+    #[test]
+    fn a_second_start_while_asking_is_ignored() {
+        let tutorial = Tutorial::default();
+        let mut invite = TutorialInvite::default();
+        let mut modals = ModalQueue::default();
+        assert!(!request_start(None, &tutorial, &mut invite, &mut modals));
+        assert!(invite.asking);
+        assert_eq!(modals.active_key(), INVITE_KEY);
+        assert!(!request_start(None, &tutorial, &mut invite, &mut modals));
+        let off = Settings {
+            tutorial_enabled: false,
+            ..Settings::default()
+        };
+        invite.asking = false;
+        assert!(request_start(
+            Some(&off),
+            &tutorial,
+            &mut invite,
+            &mut modals
+        ));
+    }
 }
