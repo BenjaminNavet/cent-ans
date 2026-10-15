@@ -681,11 +681,11 @@ pub mod tests {
                 segment_m: 15.0,
                 gap: 0.1,
             },
-            1.0,
+            0.1,
         );
         let t = flat();
         let mut found = false;
-        for x in 0..6 {
+        for x in 0..20 {
             let out = cell_instances(&t, &cfg, IVec2::new(x, 2));
             if !out.is_empty() {
                 // 4 sides x 10 segments, minus the gate.
@@ -718,8 +718,8 @@ pub mod tests {
         assert_eq!(out.len(), 20);
         assert!(out.iter().all(|i| i.offset.length() * 719.0 <= 381.0));
         t.roads = vec![RoadSeg {
-            a: Vec2::new(0.0, 0.0),
-            b: Vec2::new(80.0, 0.0),
+            a: Vec2::new(10.0, 100.0),
+            b: Vec2::new(90.0, 100.0),
             main: true,
             id: 5,
         }];
@@ -737,7 +737,7 @@ pub mod tests {
         assert!((40..=75).contains(&out.len()), "{}", out.len());
         assert!(
             out.iter()
-                .all(|i| i.pos.y.abs() < 0.02 && i.yaw.abs() < 1e-4)
+                .all(|i| (i.pos.y - 100.0).abs() < 0.02 && i.yaw.abs() < 1e-4)
         );
     }
 }

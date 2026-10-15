@@ -10,6 +10,8 @@
 pub mod bridge_meshes;
 pub mod bridges;
 pub mod config;
+pub mod decor;
+pub mod decor_plan;
 pub mod layer;
 pub mod placement;
 pub mod scar_meshes;
@@ -58,11 +60,16 @@ impl Plugin for CampaignCountrysidePlugin {
             .init_resource::<layer::Measures>()
             .init_resource::<LoadErrors>()
             .init_resource::<bridges::Bridges>()
+            .init_resource::<decor::DecorView>()
             .init_resource::<scars::ScarCfg>()
             .init_resource::<scars::Scars>()
             .register_dump(dump_countryside)
             .register_dump(scars::dump)
-            .add_systems(OnExit(AppState::Campaign), (reset, scars::reset))
+            .register_dump(decor::dump)
+            .add_systems(
+                OnExit(AppState::Campaign),
+                (reset, scars::reset, decor::reset),
+            )
             .add_systems(
                 Update,
                 (
@@ -85,6 +92,25 @@ impl Plugin for CampaignCountrysidePlugin {
                     .chain()
                     .run_if(in_state(AppState::Campaign))
                     .run_if(resource_exists::<crate::campaign::terrain::surface::Surface>),
+            )
+            .add_systems(
+                Update,
+                (
+                    decor::start_plan
+                        .run_if(not(resource_exists::<decor::DecorPlan>))
+                        .run_if(not(resource_exists::<decor::PendingPlan>))
+                        .run_if(resource_exists::<crate::campaign::markers::places::Places>),
+                    decor::finish_plan.run_if(resource_exists::<decor::PendingPlan>),
+                )
+                    .run_if(in_state(AppState::Campaign))
+                    .run_if(resource_exists::<LoadedCountryside>),
+            )
+            .add_systems(
+                Update,
+                (decor::stream_decor, decor::apply_decor)
+                    .chain()
+                    .run_if(in_state(AppState::Campaign))
+                    .run_if(resource_exists::<decor::DecorPlan>),
             )
             .add_systems(
                 Update,
