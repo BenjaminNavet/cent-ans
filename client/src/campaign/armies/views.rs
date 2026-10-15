@@ -129,6 +129,7 @@ pub fn refresh_views(
                             unit_type.figure.as_deref(),
                         ),
                         strength: u.strength,
+                        unit_type: u.unit_type.as_str().to_owned(),
                     })
                 })
                 .collect(),

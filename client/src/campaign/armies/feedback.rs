@@ -10,6 +10,8 @@ use super::orders::{PathPreviewState, SeaHover};
 use super::views::ArmyViews;
 use super::{HoveredArmy, SelectedArmy};
 use crate::app::AppState;
+use crate::ui::kit::UiTheme;
+use crate::ui::kit::richtext::{RichStyle, rich_text};
 
 const CURSOR_DIR: &str = "ui/cursors_campaign";
 const HOTSPOT: (u16, u16) = (16, 16);
@@ -58,56 +60,61 @@ pub struct HoverHint(pub Option<String>);
 #[derive(Component)]
 pub struct HintNode;
 
-#[derive(Component)]
-pub struct HintText;
-
 pub fn spawn_hint(mut commands: Commands) {
-    commands
-        .spawn((
-            Name::new("ArmyHoverHint"),
-            HintNode,
-            DespawnOnExit(AppState::Campaign),
-            Node {
-                position_type: PositionType::Absolute,
-                max_width: Val::Px(420.0),
-                padding: UiRect::axes(Val::Px(8.0), Val::Px(4.0)),
-                border: UiRect::all(Val::Px(1.0)),
-                ..default()
-            },
-            BackgroundColor(Color::srgba(0.94, 0.89, 0.76, 0.96)),
-            BorderColor::all(Color::srgb(0.30, 0.20, 0.12)),
-            GlobalZIndex(40),
-            Visibility::Hidden,
-        ))
-        .with_children(|node| {
-            node.spawn((
-                HintText,
-                Text::new(""),
-                TextFont {
-                    font_size: bevy::text::FontSize::Px(14.0),
-                    ..default()
-                },
-                TextColor(Color::srgb(0.16, 0.10, 0.05)),
-            ));
-        });
+    commands.spawn((
+        Name::new("ArmyHoverHint"),
+        HintNode,
+        DespawnOnExit(AppState::Campaign),
+        Node {
+            position_type: PositionType::Absolute,
+            max_width: Val::Px(420.0),
+            padding: UiRect::axes(Val::Px(8.0), Val::Px(4.0)),
+            border: UiRect::all(Val::Px(1.0)),
+            ..default()
+        },
+        BackgroundColor(Color::srgba(0.94, 0.89, 0.76, 0.96)),
+        BorderColor::all(Color::srgb(0.30, 0.20, 0.12)),
+        GlobalZIndex(40),
+        Visibility::Hidden,
+    ));
 }
 
+/// Text of the bubble: the rich description of the army or colony under the pointer, then the
+/// order hint (attack, path, voyage) in italics.
+pub fn compose_hint(rich: Option<&str>, hint: Option<&str>) -> Option<String> {
+    match (rich, hint) {
+        (Some(rich), Some(hint)) => Some(format!("{rich}\n[i]{hint}[/i]")),
+        (Some(rich), None) => Some(rich.to_owned()),
+        (None, Some(hint)) => Some(hint.to_owned()),
+        (None, None) => None,
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
 pub fn update_hint(
+    mut commands: Commands,
     hint: Res<HoverHint>,
+    rich: Res<super::bubbles::RichHover>,
+    theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
     window: Query<&Window, With<PrimaryWindow>>,
-    mut node: Query<(&mut Node, &mut Visibility), With<HintNode>>,
-    mut text: Query<&mut Text, With<HintText>>,
+    mut node: Query<(Entity, &mut Node, &mut Visibility), With<HintNode>>,
+    mut shown: Local<Option<String>>,
 ) {
-    let Ok((mut node, mut visibility)) = node.single_mut() else {
+    let Ok((entity, mut node, mut visibility)) = node.single_mut() else {
         return;
     };
     let cursor = window.iter().next().and_then(|w| w.cursor_position());
-    match (&hint.0, cursor) {
-        (Some(shown), Some(at)) => {
-            if let Ok(mut text) = text.single_mut()
-                && text.0 != *shown
-            {
-                text.0 = shown.clone();
+    let wanted = compose_hint(rich.text.as_deref(), hint.0.as_deref());
+    match (&wanted, cursor) {
+        (Some(text), Some(at)) => {
+            if shown.as_ref() != Some(text) {
+                commands.entity(entity).despawn_children();
+                let text_bundle = rich_text(&theme, &assets, text, &RichStyle::caption(&theme));
+                commands.entity(entity).with_children(|inner| {
+                    inner.spawn(text_bundle);
+                });
+                *shown = Some(text.clone());
             }
             node.left = Val::Px(at.x + 18.0);
             node.top = Val::Px(at.y + 22.0);
@@ -177,6 +184,17 @@ pub fn reset_cursor(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn hint_composition() {
+        assert_eq!(compose_hint(None, None), None);
+        assert_eq!(compose_hint(Some("a"), None).as_deref(), Some("a"));
+        assert_eq!(compose_hint(None, Some("h")).as_deref(), Some("h"));
+        assert_eq!(
+            compose_hint(Some("a"), Some("h")).as_deref(),
+            Some("a\n[i]h[/i]")
+        );
+    }
 
     #[test]
     fn attack_wins_over_sea() {

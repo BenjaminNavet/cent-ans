@@ -20,7 +20,9 @@ use super::views::ArmyViews;
 use super::{HoveredArmy, SelectedArmy};
 use crate::app::AppState;
 use crate::battle::units::anim::{self, Mode};
+use crate::battle::units::gaits::{self, GaitMemory};
 use crate::battle::units::library::{FigureLibrary, FigureSpec};
+use crate::battle::units::looks::{self, Look};
 use crate::battle::units::regiments::trim_for;
 use crate::battle::units::skinned::{RECORD_FLOATS, SkinParams, SkinnedBatch, push_record};
 use crate::campaign::camera::zoom::ZoomView;
@@ -132,6 +134,10 @@ type GroupKey = (&'static str, u32);
 
 struct Group {
     entity: Entity,
+    /// Unit type whose outfit look the batch wears (the strongest regiment of the family).
+    look_type: Option<String>,
+    /// Gait memory of a mounted group (walk / trot hysteresis).
+    gait: GaitMemory,
     spec: Arc<FigureSpec>,
     params: SkinParams,
     params_version: u64,
@@ -158,6 +164,8 @@ pub struct SkinnedReport {
     pub batches: usize,
     pub figures: usize,
     pub walking_groups: usize,
+    pub trotting_groups: usize,
+    pub looked_groups: usize,
     pub idle_groups: usize,
     pub highlighted: usize,
     pub clips: Vec<String>,
@@ -177,6 +185,17 @@ pub struct SkinnedArmies {
     library: Option<FigureLibrary>,
     rigs: HashMap<ArmyId, Rig>,
     pub report: SkinnedReport,
+}
+
+impl SkinnedArmies {
+    /// Clock factor of the figure family `key` of an army (1 when absent): the pace of the
+    /// bearer's steps (`ArmyFigures.group_factor`).
+    pub fn group_factor(&self, id: &ArmyId, key: (&'static str, u32)) -> f32 {
+        self.rigs
+            .get(id)
+            .and_then(|rig| rig.groups.get(&key))
+            .map_or(1.0, |group| group.factor)
+    }
 }
 
 /// Loads the figure library (once) when the campaign opens.
@@ -220,13 +239,28 @@ fn srgb_to_linear(rgb: [f32; 3]) -> [f32; 3] {
     [c.red, c.green, c.blue]
 }
 
-fn army_params(spec: &FigureSpec, color: [f32; 3]) -> SkinParams {
+/// Unit type of the strongest regiment of the figure family `key` (its outfit look).
+pub fn look_type(roster: &[RosterEntry], key: GroupKey) -> Option<String> {
+    roster
+        .iter()
+        .filter(|r| (r.kind, r.variant) == key && !r.unit_type.is_empty())
+        .max_by_key(|r| r.strength)
+        .map(|r| r.unit_type.clone())
+}
+
+/// Livery share of a group: the lord and his household wear the livery (0.95), the escort half
+/// of it (0.7) unless its unit type declares another share (`unit_looks.json`).
+pub fn livery_share(variant: u32, look: Option<&Look>) -> f32 {
+    if variant == 0 {
+        0.95
+    } else {
+        look.and_then(|l| l.livery_share).unwrap_or(0.7)
+    }
+}
+
+fn army_params(spec: &FigureSpec, color: [f32; 3], look: Option<&Look>) -> SkinParams {
     let mut params = SkinParams::default();
-    // The lord and his household wear the livery, the escort half of it.
-    params.set_livery(
-        srgb_to_linear(color),
-        if spec.variant == 0 { 0.95 } else { 0.7 },
-    );
+    params.set_livery(srgb_to_linear(color), livery_share(spec.variant, look));
     params.set_trim(srgb_to_linear(trim_for(color)));
     params.set_rig(
         spec.fps,
@@ -238,6 +272,17 @@ fn army_params(spec: &FigureSpec, color: [f32; 3]) -> SkinParams {
     params.set_clips(&spec.clip_table);
     params.set_ga3(spec.ga3_lum, spec.head_y, spec.albedo.is_some());
     params.set_wear(0.0, 0.0);
+    if let Some(look) = look {
+        // Undyed cloth and horse coats of the unit type (same tables as the battle).
+        let cloth = look.cloth_colours();
+        if !cloth.is_empty() {
+            params.set_plain(&looks::padded(&cloth), cloth.len());
+        }
+        let coats = look.coat_colours();
+        if !coats.is_empty() {
+            params.set_coats(&looks::padded(&coats), coats.len());
+        }
+    }
     params
 }
 
@@ -367,7 +412,12 @@ pub fn update_skinned_armies(
                 else {
                     continue;
                 };
-                let params = army_params(&spec, view.color);
+                let look_type = look_type(&rig.roster, key);
+                let params = army_params(
+                    &spec,
+                    view.color,
+                    look_type.as_deref().and_then(|t| library.looks.get(t)),
+                );
                 let entity = commands
                     .spawn((
                         Name::new(format!(
@@ -393,6 +443,8 @@ pub fn update_skinned_armies(
                     key,
                     Group {
                         entity,
+                        look_type,
+                        gait: GaitMemory::default(),
                         spec,
                         params,
                         params_version: 1,
@@ -422,7 +474,24 @@ pub fn update_skinned_armies(
         }
         for (key, group) in &mut rig.groups {
             let walking = marker.walking && skinned.walk.enabled;
-            let state = if walking { "marching" } else { "idle" };
+            // Riders walk or trot by their speed on screen (`BattleCavalryGaits`, no gallop and no
+            // turn clips on the map); everyone else marches.
+            let world_scale = SKINNED_SCALE * transform.scale.x;
+            let state = if !walking {
+                group.gait = GaitMemory::default();
+                "idle"
+            } else if group.spec.mounted && library.settings.gaits.enabled {
+                gaits::pick(
+                    &library.settings.gaits,
+                    &mut group.gait,
+                    marker.ground_speed / world_scale.max(0.001),
+                    false,
+                    0.0,
+                )
+                .key()
+            } else {
+                "marching"
+            };
             let config = anim::state_config(
                 &group.spec.style,
                 &group.spec.clips,
@@ -439,7 +508,6 @@ pub fn update_skinned_armies(
             }
             // Walking advances the clip at the pace of the ground (no sliding feet); at rest
             // the clock runs normally.
-            let world_scale = SKINNED_SCALE * transform.scale.x;
             let target = if walking && config.mode == Mode::Loop {
                 skinned
                     .walk
@@ -452,8 +520,14 @@ pub fn update_skinned_armies(
             if shown {
                 if walking {
                     report.walking_groups += 1;
+                    if state == "trotting" {
+                        report.trotting_groups += 1;
+                    }
                 } else {
                     report.idle_groups += 1;
+                }
+                if group.look_type.is_some() {
+                    report.looked_groups += 1;
                 }
                 if !report.clips.contains(&config.key) {
                     report.clips.push(config.key.clone());
@@ -528,6 +602,8 @@ pub fn dump_fields(skinned: &SkinnedArmies) -> serde_json::Value {
         "skinned_batches": r.batches,
         "skinned_figures": r.figures,
         "skinned_walking_groups": r.walking_groups,
+        "skinned_trotting_groups": r.trotting_groups,
+        "skinned_looked_groups": r.looked_groups,
         "skinned_idle_groups": r.idle_groups,
         "skinned_highlighted_armies": r.highlighted,
         "skinned_clips": r.clips,
@@ -561,6 +637,33 @@ mod tests {
         assert_eq!(lod_for(120.0, Some(0)), 1);
         assert_eq!(lod_for(85.0, Some(1)), 1);
         assert_eq!(lod_for(70.0, Some(1)), 0);
+    }
+
+    #[test]
+    fn look_type_is_the_strongest_regiment_of_the_family() {
+        let entry = |unit_type: &str, strength| RosterEntry {
+            kind: "infantry",
+            variant: 1,
+            strength,
+            unit_type: unit_type.into(),
+        };
+        let roster = vec![entry("unit_a", 100), entry("unit_b", 300), entry("", 900)];
+        assert_eq!(
+            look_type(&roster, ("infantry", 1)).as_deref(),
+            Some("unit_b")
+        );
+        assert_eq!(look_type(&roster, ("archer", 0)), None);
+    }
+
+    #[test]
+    fn livery_share_keeps_the_household_and_lets_the_escort_look_decide() {
+        let look = Look {
+            livery_share: Some(0.3),
+            ..Default::default()
+        };
+        assert_eq!(livery_share(0, Some(&look)), 0.95);
+        assert_eq!(livery_share(1, Some(&look)), 0.3);
+        assert_eq!(livery_share(1, None), 0.7);
     }
 
     #[test]

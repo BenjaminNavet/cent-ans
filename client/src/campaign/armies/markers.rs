@@ -176,6 +176,7 @@ pub fn specs_for(view: &super::views::ArmyView, at_sea: bool) -> Vec<FigureSpec>
             men: view.men,
             sieging: view.status == "siege",
             at_sea,
+            camped: !view.in_settlement && view.status == "idle",
         },
         seed_of(&view.id),
     )
