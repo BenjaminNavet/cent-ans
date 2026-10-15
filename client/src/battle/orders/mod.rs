@@ -6,6 +6,13 @@
 //! Shared interface (fixed before wave 3): [`BattleSelection`] (read by the battle HUD, written
 //! here) and [`SelectBattleUnits`] (sent by the HUD unit cards, applied here).
 
+pub mod drag;
+pub mod groups;
+pub mod hotkeys;
+pub mod input;
+pub mod overlay;
+pub mod picking;
+
 use bevy::prelude::*;
 
 /// Player's selected regiments, by `sim_battle::Unit::id`, in selection order.
