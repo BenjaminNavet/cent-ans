@@ -320,14 +320,8 @@ pub fn rebuild_content(
     let name_of = |faction: &str| -> String {
         data.as_ref()
             .and_then(|d| d.factions.get(faction))
-            .map_or_else(
-                || faction.to_string(),
-                |f| {
-                    f.short_name
-                        .clone()
-                        .unwrap_or_else(|| f.name.display.clone())
-                },
-            )
+            // Full title as Godot (`faction_info.name`): « ROYAUME DE FRANCE ».
+            .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
     };
     content.realms = realms::build_realms(&provinces, &owner_of, name_of);
     let roman = theme.font_title.clone();

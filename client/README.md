@@ -336,3 +336,10 @@ Détail et restes : `docs/wip/bm-look.md`.
 - **Trajets en file** : `marks::RouteCache` appelle `BattleSim::preview_path_from` (le même `plan_route` que l'ordre) pour chaque jambe d'un déplacement en file et pour la destination en cours (`overlay.rs`) ; pas de chemin : ligne rouge droite. Dump `battle_orders.marks.{routed,route_cache}`.
 - **Plan de victoire** (`cinematic.rs`, `victory_shot` de `battle_staging.json`) : bataille gagnée par le joueur, 3 s après la fin, orbite sur son général (sinon centre des régiments), HUD masqué, Échap / Espace / Entrée / clic passent ; l'écran de fin attend (`Cinematic::holds_result`, lu par `hud/result.rs`). Preuve : `CENT_ANS_NO_DEPLOY=1 CENT_ANS_VICTORY_DEMO=1 … --seed 2 --script victory_script.txt`.
 - **Touches** : `hotkeys::action_for_bound` lit d'abord l'action `battle_<id>` de `settings::KeyMap` (absente de `ACTIONS` pour l'instant), puis `Settings::battle_bindings[<id>]`, puis la touche par défaut (ids : `fire_at_will`, `formation`, `halt`, `pursue`, `run`, `guard`, `skirmish`, `melee`, `select_all`, `select_shooters`, `select_cavalry`, `lock_group`, `next_idle`, `prev_idle`). Chiffres (groupes, capacités, préréglages), F2..F4 et Échap/Entrée restent fixes.
+
+## Vue parchemin : mer portulan, ornements, noms (lot `parch`, `campaign/parchment/`)
+- Mer portulan (`sea.wesl`), ornements placés par `decor.rs`, couche UI 2D (`overlay.rs`) : villes
+  et fanions, noms de royaume en arc, noms de province, jetons d'armée ; pondérée par
+  `ZoomView.strategic`. Données : `parchment_ornaments.json`, `coast_dist.png`,
+  `settlement_markers.json`, `stance_cues.json`. Dump : `campaign_parchment`.
+- Frontières épaisses et hachures : shader de terrain (non porté ici). Note : `docs/wip/bm-parch.md`.
