@@ -188,6 +188,7 @@ pub fn spawn_walkers(
                         h01(i as u64, k as u64, 11),
                         ws,
                         Vec3::ZERO,
+                        "walk",
                     );
                     let p = piece.a.lerp(piece.b, pingpong(phase * 2.0));
                     let root = commands
@@ -215,6 +216,7 @@ pub fn spawn_walkers(
 }
 
 pub fn move_walkers(
+    skin: Res<super::skin::FolkSkin>,
     data: Res<LifeData>,
     view: Res<LifeView>,
     ground: GroundHeight,
@@ -233,10 +235,36 @@ pub fn move_walkers(
         let dir = (piece.b - piece.a).normalize_or_zero() * if forward { 1.0 } else { -1.0 };
         let y = ground.at(p.x, p.y).unwrap_or(0.0);
         // Step bounce (a few centimetres of a man).
-        let bounce = (view.time * 6.0 + w.phase * 20.0).sin().abs() * 0.04 * ws;
+        // (Only without the walking clip of the skinned figure, `skin.rs`.)
+        let bounce = if skin.active {
+            0.0
+        } else {
+            (view.time * 6.0 + w.phase * 20.0).sin().abs() * 0.04 * ws
+        };
         t.translation = Vec3::new(p.x, y + bounce, p.y);
         t.rotation = Quat::from_rotation_y(-dir.y.atan2(dir.x));
     }
+}
+
+/// Vertex animation of a prop model: only the DN glb are animated (`AnimalMotion.apply_prop`
+/// is keyed by the DN id); `yaw` is the heading fix of `prop_model` (the `yaw_deg` of the table
+/// plus a quarter turn).
+pub fn prop_bind(
+    path: &str,
+    yaw: f32,
+    model: &str,
+    speed_m_s: f32,
+    seed: f32,
+) -> Option<super::anim::AnimBind> {
+    path.starts_with("models/dn/")
+        .then(|| super::anim::AnimBind {
+            kind: super::anim::AnimKind::Prop {
+                model: model.to_string(),
+                speed_m_s,
+            },
+            seed,
+            yaw: yaw - std::f32::consts::FRAC_PI_2,
+        })
 }
 
 fn cart_prop_id(main: bool, convoy: bool) -> &'static str {
@@ -399,6 +427,10 @@ fn spawn_cart(
         return;
     };
     let cart_world = prop.length_m * ws;
+    let cart_model = cart.model.clone();
+    let team_dn = cart.team_model.clone().unwrap_or_default();
+    let mut n_beast = 0u64;
+    let speed_m_s = WALK_SPEED_M_S * data.props.folk_speed;
     let root_entity = commands
         .spawn((
             Name::new(format!("life:{prop_id}")),
@@ -425,6 +457,9 @@ fn spawn_cart(
             cart_world,
             yaw,
         );
+        if let Some(bind) = prop_bind(&path, yaw, &cart_model, speed_m_s, h01(key, 7, 71)) {
+            commands.entity(model).try_insert(bind);
+        }
         commands.entity(root_entity).add_child(model);
     }
     // Draught team ahead, side by side (`FolkModels.team`): measured positions, else the formula
@@ -457,6 +492,16 @@ fn spawn_cart(
                     animal_m * ws,
                     animal_yaw,
                 );
+                if let Some(bind) = prop_bind(
+                    &animal_path,
+                    animal_yaw,
+                    &team_dn,
+                    speed_m_s,
+                    h01(key, 8 + n_beast, 72),
+                ) {
+                    commands.entity(beast).try_insert(bind);
+                }
+                n_beast += 1;
                 let holder = commands
                     .spawn((
                         Name::new("life:team"),
@@ -484,6 +529,7 @@ fn spawn_cart(
         hc2,
         ws,
         slot_at("carter", Vec2::new(0.45, 0.4 * prop.length_m * 0.5)),
+        "walk",
     );
     commands.entity(root_entity).add_child(carter);
     if prop.slots.contains_key("merchant") {
@@ -495,6 +541,7 @@ fn spawn_cart(
             h01(key, 4, 64),
             ws,
             slot_at("merchant", Vec2::new(0.9, -0.2 * prop.length_m)),
+            "walk",
         );
         commands.entity(root_entity).add_child(merchant);
     }
@@ -507,6 +554,7 @@ fn spawn_cart(
             h01(key, 6, 66),
             ws,
             slot_at("guard", Vec2::new(0.0, -0.6 * prop.length_m)),
+            "guard_walk",
         );
         commands.entity(root_entity).add_child(guard);
     }

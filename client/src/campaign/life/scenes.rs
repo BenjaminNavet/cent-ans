@@ -571,12 +571,11 @@ pub fn spawn_scenes(
                     model,
                 )
             } else {
-                Some(figures.spawn(&mut commands, model, 1, h, h2, ws, Vec3::ZERO))
+                Some(figures.spawn(&mut commands, model, 1, h, h2, ws, Vec3::ZERO, activity))
             };
             let Some(body) = body else {
                 continue;
             };
-            let _ = activity;
             let mut holder = commands.spawn((
                 Name::new(format!("life:scene_item:{model}")),
                 Transform::from_translation(local)

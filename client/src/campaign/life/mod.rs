@@ -10,6 +10,7 @@
 
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
+mod anim;
 mod birds;
 mod boats;
 mod data;
@@ -23,6 +24,7 @@ mod motion;
 mod props;
 mod scene_layers;
 mod scenes;
+mod skin;
 mod stream;
 
 use std::collections::BTreeMap;
@@ -56,6 +58,21 @@ pub struct LifeStats {
     pub scene_roots: BTreeMap<String, usize>,
     pub figures_available: bool,
     pub beasts_bobbing: usize,
+    /// Animated props by model: (instances, bound to the vertex stage, speed m/s, seeds min/max).
+    pub anim_props: BTreeMap<String, AnimRow>,
+    /// Herd animals: (total, vertex-driven, mean moving, leg phase min/max).
+    pub herd_total: usize,
+    pub herd_shader: usize,
+    pub herd_moving: f32,
+    pub herd_phase: (f32, f32),
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct AnimRow {
+    pub count: usize,
+    pub bound: usize,
+    pub speed_m_s: f32,
+    pub seed: (f32, f32),
 }
 
 pub struct CampaignLifePlugin;
@@ -63,7 +80,9 @@ pub struct CampaignLifePlugin;
 impl Plugin for CampaignLifePlugin {
     fn build(&self, app: &mut App) {
         incidents::plugin(app);
-        app.init_resource::<stream::LifeView>()
+        anim::plugin(app);
+        app.init_resource::<skin::FolkSkin>()
+            .init_resource::<stream::LifeView>()
             .init_resource::<stream::LifeIndex>()
             .init_resource::<models::ModelMetrics>()
             .init_resource::<effects::EffectSites>()
@@ -118,7 +137,14 @@ impl Plugin for CampaignLifePlugin {
                         effects::update_fire_lights,
                         stream::ground_statics,
                     ),
-                    (models::fit_models, models::apply_fades, update_stats),
+                    (
+                        models::fit_models,
+                        anim::bind_models,
+                        anim::write_herd_tags,
+                        skin::update_skin,
+                        models::apply_fades,
+                        update_stats,
+                    ),
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign))
@@ -184,6 +210,7 @@ fn update_stats(
     scene_items: Query<&scenes::SceneItem>,
     scene_roots: Query<&scenes::SceneRoot>,
     animals: Query<&fauna::Animal>,
+    binds: Query<(&anim::AnimBind, Option<&anim::AnimBound>)>,
 ) {
     *timer -= time.delta_secs();
     if *timer > 0.0 {
@@ -220,8 +247,38 @@ fn update_stats(
     stats.scene_figures = scene_items.iter().filter(|i| i.figure).count();
     stats.scene_props = scene_items.iter().filter(|i| !i.figure).count();
     stats.fauna_lods = [0; 3];
+    stats.herd_total = 0;
+    stats.herd_shader = 0;
+    let mut moving = 0.0;
+    let mut phase = (f32::MAX, f32::MIN);
     for a in &animals {
         stats.fauna_lods[(a.lod as usize).min(2)] += 1;
+        stats.herd_total += 1;
+        if a.shader {
+            stats.herd_shader += 1;
+            moving += a.moving;
+            phase = (phase.0.min(a.leg_phase.rem_euclid(1.0)), phase.1.max(a.leg_phase.rem_euclid(1.0)));
+        }
+    }
+    stats.herd_moving = if stats.herd_shader > 0 {
+        moving / stats.herd_shader as f32
+    } else {
+        0.0
+    };
+    stats.herd_phase = if stats.herd_shader > 0 { phase } else { (0.0, 0.0) };
+    stats.anim_props.clear();
+    for (bind, bound) in &binds {
+        let anim::AnimKind::Prop { model, speed_m_s } = &bind.kind else {
+            continue;
+        };
+        let row = stats.anim_props.entry(model.clone()).or_insert(AnimRow {
+            seed: (f32::MAX, f32::MIN),
+            ..default()
+        });
+        row.count += 1;
+        row.bound += usize::from(bound.is_some_and(|b| !b.meshes.is_empty()));
+        row.speed_m_s = *speed_m_s;
+        row.seed = (row.seed.0.min(bind.seed), row.seed.1.max(bind.seed));
     }
 }
 
@@ -312,6 +369,7 @@ fn dump_life(world: &World) -> (String, Value) {
                 "visible_seals": incident_stats.visible_seals,
                 "clicks": incident_stats.clicks,
             },
+            "anim": dump_anim(world, stats),
             "fauna_lods": stats.fauna_lods,
             "bird_individuals": stats.bird_individuals,
             "bird_glb_individuals": stats.bird_glb,
@@ -325,4 +383,73 @@ fn dump_life(world: &World) -> (String, Value) {
             },
         }),
     )
+}
+
+/// Probe of the motion curves on the real data: the displacement range of a few vertices of the
+/// model in the Godot frame over ten seconds at the walking speed (CPU reference of the shader).
+fn probe(spec: &motion::MotionSpec, v: Vec3, speed: f32, seed: f32) -> Value {
+    let (mut lo, mut hi) = (Vec3::splat(f32::MAX), Vec3::splat(f32::MIN));
+    for k in 0..200 {
+        let d = motion::prop_pose(spec, v, k as f32 * 0.05, speed, seed) - v;
+        lo = lo.min(d);
+        hi = hi.max(d);
+    }
+    json!({ "from": [v.x, v.y, v.z], "min": [lo.x, lo.y, lo.z], "max": [hi.x, hi.y, hi.z] })
+}
+
+fn dump_anim(world: &World, stats: &LifeStats) -> Value {
+    let anim_stats = world.get_resource::<anim::AnimStats>();
+    let skin = world.get_resource::<skin::FolkSkin>();
+    let table = world.get_resource::<motion::MotionTable>();
+    let walk = folk::WALK_SPEED_M_S * 0.5;
+    let probes = table.map_or(Value::Null, |t| {
+        let mut out = serde_json::Map::new();
+        if let Some(h) = t.spec("animal_horse_draught") {
+            let rear = h.anchor_m - h.half_m * 0.5;
+            out.insert("horse_hind_hoof".into(), probe(h, Vec3::new(0.2, 0.05, rear), 1.2, 0.0));
+            out.insert("horse_head".into(), probe(h, Vec3::new(0.0, h.withers_m, h.anchor_m + h.half_m + 0.1), 0.0, 0.0));
+            out.insert("horse_tail".into(), probe(h, Vec3::new(0.0, h.belly_m, h.anchor_m - h.half_m - 0.03), 1.2, 0.0));
+        }
+        if let Some(c) = t.spec("cart_merchant") {
+            let r = c.wheel_radius_m;
+            out.insert(
+                "cart_wheel_rim".into(),
+                probe(c, Vec3::new(c.wheel_x_min_m + 0.1, 2.0 * r - 0.02, c.axle_z_m[0]), 1.2, 0.0),
+            );
+            out.insert("cart_box".into(), probe(c, Vec3::new(0.0, 1.0, 0.0), 1.2, 0.0));
+        }
+        Value::Object(out)
+    });
+    json!({
+        "walk_speed_m_s": walk,
+        "props": stats.anim_props.iter().map(|(m, r)| (m.clone(), json!({
+            "instances": r.count,
+            "bound_to_shader": r.bound,
+            "speed_m_s": r.speed_m_s,
+            "seed_range": [r.seed.0, r.seed.1],
+        }))).collect::<BTreeMap<_, _>>(),
+        "binder": anim_stats.map(|s| json!({
+            "bound_props": s.bound_props,
+            "bound_herds": s.bound_herds,
+            "rigid_models": s.rigid,
+            "materials": s.materials,
+            "samples": s.samples.iter().map(|(k, m, a, b)| json!({"kind": k, "model": m, "a": a, "b": b})).collect::<Vec<_>>(),
+        })),
+        "herds": {
+            "animals": stats.herd_total,
+            "vertex_driven": stats.herd_shader,
+            "mean_moving": stats.herd_moving,
+            "leg_phase_range": [stats.herd_phase.0, stats.herd_phase.1],
+        },
+        "figures": skin.map(|s| json!({
+            "skinned_active": s.active,
+            "error": s.error,
+            "batches": s.batches(),
+            "animated": s.rows().iter().map(|(role, activity, kind, variant, n, clips, speed)| json!({
+                "role": role, "activity": activity, "figure": format!("{kind}_{variant}"),
+                "count": n, "clips": clips, "clip_speed": speed,
+            })).collect::<Vec<_>>(),
+        })),
+        "pose_probe": probes,
+    })
 }

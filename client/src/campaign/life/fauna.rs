@@ -29,6 +29,25 @@ pub struct Animal {
     pub species: String,
     /// LOD of the model on show (0 fine, 2 distant).
     pub lod: u8,
+    /// (rhythm, phase) seeds of the stops of the herd (`fauna.gdshader`).
+    pub stops: Vec2,
+    /// Leg phase (cycles) and share of movement in [0, 1] written to the mesh tag every frame.
+    pub leg_phase: f32,
+    pub moving: f32,
+    /// The gait is done by the vertex stage (`anim.rs`): no CPU stand-in.
+    pub shader: bool,
+}
+
+/// The vertex animation of a herd animal applies to DN glb only (FK2 placeholders stay rigid).
+pub fn herd_bind(path: &str, gait: &str, seed: f32) -> Option<super::anim::AnimBind> {
+    path.starts_with("models/dn/")
+        .then(|| super::anim::AnimBind {
+            kind: super::anim::AnimKind::Herd {
+                gait: gait.to_string(),
+            },
+            seed,
+            yaw: 0.0,
+        })
 }
 
 /// LOD of a camera distance with hysteresis (`CellFade.lod_with_hysteresis`).
@@ -236,6 +255,9 @@ pub fn spawn_herds(
                         length_world,
                         std::f32::consts::FRAC_PI_2,
                     );
+                    if let Some(bind) = herd_bind(&path, &sp.gait, a as f32 * 0.137) {
+                        commands.entity(model).try_insert(bind);
+                    }
                     let entity = commands
                         .spawn((
                             Name::new(format!("life:{}", sp.id)),
@@ -251,6 +273,10 @@ pub fn spawn_herds(
                                 speed_px: gait.speed_m_s * ws * data.props.folk_speed,
                                 species: sp.id.clone(),
                                 lod,
+                                stops: Vec2::new(h01(herd.id, 0, 81), h01(herd.id, 0, 82)),
+                                leg_phase: 0.0,
+                                moving: 0.0,
+                                shader: false,
                             },
                             LifeItem {
                                 key,
@@ -320,7 +346,11 @@ pub fn update_lods(
             animal.length_world,
             std::f32::consts::FRAC_PI_2,
         );
+        if let Some(bind) = herd_bind(&path, &animal.gait, 0.0) {
+            commands.entity(model).try_insert(bind);
+        }
         commands.entity(entity).add_child(model);
+        animal.shader = false;
         animal.lod = next;
     }
 }
@@ -330,26 +360,36 @@ pub fn move_animals(
     motion: Res<super::motion::MotionTable>,
     view: Res<LifeView>,
     ground: GroundHeight,
-    mut animals: Query<(&Animal, &mut LifeItem, &mut Transform)>,
+    mut animals: Query<(&mut Animal, &mut LifeItem, &mut Transform)>,
 ) {
     let t = view.time;
-    for (a, mut item, mut tr) in &mut animals {
+    for (mut a, mut item, mut tr) in &mut animals {
         let gait = data.fauna.gaits.get(&a.gait).cloned().unwrap_or_default();
+        // Warped time of `fauna.gdshader`: the herd stops to graze, then walks on faster. The legs
+        // follow it, so they stop with the animal.
+        let (tau, moving) = super::motion::herd_clock(t, a.stops.x, a.stops.y);
         // Slow loop around the herd spot at the gait speed.
         let omega = if a.wander_px > 0.0 {
             a.speed_px / a.wander_px
         } else {
             0.0
         };
-        let ang = a.phase + t * omega;
+        let ang = a.phase + tau * omega;
         let wander = Vec2::new(ang.cos(), ang.sin()) * a.wander_px;
         let p = a.herd + a.offset + wander - Vec2::new(a.phase.cos(), a.phase.sin()) * a.wander_px;
         let heading = Vec2::new(-ang.sin(), ang.cos());
         item.anchor = p;
         let y = ground.at(p.x, p.y).unwrap_or(0.0);
+        a.moving = moving;
+        a.leg_phase = tau * gait.cadence + a.phase / std::f32::consts::TAU;
+        if a.shader {
+            // Legs, bounce and head are done by the vertex stage.
+            tr.translation = Vec3::new(p.x, y, p.y);
+            tr.rotation = Quat::from_rotation_y(-heading.y.atan2(heading.x));
+            continue;
+        }
+        // Stand-in without shader (placeholder model): bounce and grazing pitch of the whole body.
         let step = (t * gait.cadence * std::f32::consts::TAU + a.phase).sin();
-        // Grazing from the measured cycle of the species (the head lowers: the whole body pitches a
-        // third of the angle, no neck bone), else the generic gait value.
         let grazing = match motion.spec(&a.species) {
             Some(spec) => {
                 super::motion::graze(spec, t, u64::from(a.phase.to_bits())) * spec.graze_rad * 0.3

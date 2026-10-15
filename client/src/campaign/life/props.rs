@@ -57,6 +57,29 @@ pub struct RoleSpec {
     pub livery: [f32; 3],
 }
 
+/// Animation of an activity (`ACTIVITIES` of `folk_models.gd`): state of the `folk` style for the
+/// villagers, clip set for the other figures (absent clips dropped, then `fallback`).
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct ActivityAnim {
+    pub state: String,
+    pub clips: Vec<String>,
+    pub fallback: Vec<String>,
+}
+
+/// One state of a villager style (`STYLES.folk`).
+#[derive(Debug, Clone, Deserialize)]
+pub struct StyleState {
+    pub set: Vec<String>,
+    #[serde(default = "one")]
+    pub speed: f32,
+    #[serde(default)]
+    pub fallback: Vec<String>,
+}
+
+fn one() -> f32 {
+    1.0
+}
+
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct PropTable {
     #[serde(default)]
@@ -67,6 +90,10 @@ pub struct PropTable {
     pub activities: HashMap<String, f32>,
     #[serde(default)]
     pub drab: Vec<[f32; 3]>,
+    #[serde(default)]
+    pub activity_anims: HashMap<String, ActivityAnim>,
+    #[serde(default)]
+    pub folk_styles: HashMap<String, HashMap<String, StyleState>>,
 }
 
 /// Source of the model of a prop: the generated DN glb when present, else the FK2 placeholder.
