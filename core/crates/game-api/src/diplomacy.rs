@@ -1042,6 +1042,8 @@ pub struct TreatyVerdict {
     pub blocked: String,
     /// Value for them of each clause, in draft order.
     pub clause_values: Vec<i32>,
+    /// French label of each clause, in draft order.
+    pub clause_labels: Vec<String>,
     pub lines: Vec<VerdictLine>,
     /// Single blocking point, if any.
     pub blocker: Option<VerdictLine>,
@@ -1076,6 +1078,11 @@ pub fn evaluate_draft(
         summary: explanation.summary.clone(),
         blocked: evaluation.blocked.clone().unwrap_or_default(),
         clause_values: evaluation.articles.iter().map(|a| a.value).collect(),
+        clause_labels: evaluation
+            .articles
+            .iter()
+            .map(|a| a.label.clone())
+            .collect(),
         lines: explanation.lines.iter().map(line).collect(),
         blocker: explanation.blocker.as_ref().map(|b| VerdictLine {
             text: b.text.clone(),
@@ -1258,6 +1265,7 @@ mod tests {
         let draft = vec![Article::Peace];
         let verdict = evaluate_draft(data, &state, &france, &england, &draft).expect("verdict");
         assert_eq!(verdict.clause_values.len(), 1);
+        assert_eq!(verdict.clause_labels.len(), 1);
         assert!(!verdict.summary.is_empty());
         // Sent through the sim: the answer is either a signed peace or a French refusal.
         let result = submit_order(
