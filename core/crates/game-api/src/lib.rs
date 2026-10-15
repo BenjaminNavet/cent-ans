@@ -13,6 +13,7 @@ pub mod feudal;
 pub mod flow;
 pub mod hud;
 pub mod pprovince;
+pub mod progress;
 pub mod province;
 pub mod recruit;
 pub mod saves;
