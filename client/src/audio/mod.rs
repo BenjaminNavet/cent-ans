@@ -881,6 +881,11 @@ fn tick_ambience(
     }
 }
 
+/// The `audio` dump section's JSON (integration tests).
+pub fn dump_for_tests(world: &World) -> Value {
+    dump_audio(world).1
+}
+
 fn dump_audio(world: &World) -> (String, Value) {
     let Some(director) = world.get_resource::<AudioDirector>() else {
         return ("audio".into(), Value::Null);
