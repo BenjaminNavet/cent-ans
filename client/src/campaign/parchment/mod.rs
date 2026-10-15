@@ -442,6 +442,7 @@ fn dump_parchment(world: &World) -> (String, Value) {
                 "weight": stats.weight,
                 "scale": stats.scale,
                 "realms": stats.realms,
+                "realms_total": stats.realms_total,
                 "letters": stats.letters,
                 "sea_shown": stats.sea_shown,
                 "towns": stats.towns,

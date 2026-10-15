@@ -104,7 +104,9 @@ pub fn cue_category(stance: &str, is_player: bool) -> &'static str {
 pub struct OverlayStats {
     pub weight: f32,
     pub scale: f32,
+    /// Realm names drawn this frame (all realms: `realms_total`).
     pub realms: Vec<String>,
+    pub realms_total: usize,
     pub sea_shown: usize,
     pub towns: usize,
     pub towns_shown: usize,
@@ -318,7 +320,14 @@ pub fn rebuild_content(
     let name_of = |faction: &str| -> String {
         data.as_ref()
             .and_then(|d| d.factions.get(faction))
-            .map_or_else(|| faction.to_string(), |f| f.name.display.clone())
+            .map_or_else(
+                || faction.to_string(),
+                |f| {
+                    f.short_name
+                        .clone()
+                        .unwrap_or_else(|| f.name.display.clone())
+                },
+            )
     };
     content.realms = realms::build_realms(&provinces, &owner_of, name_of);
     let roman = theme.font_title.clone();
@@ -904,6 +913,10 @@ pub fn update_overlay(
                 .push((letter.index, w));
         }
         let mut layout: HashMap<(usize, usize), (Vec2, f32, f32)> = HashMap::new();
+        // Largest realms first (build order); a name that would cross an earlier one is left out
+        // (Godot drew them all, unreadable with ~150 factions on the map).
+        let mut by_realm: Vec<(usize, Vec<(usize, f32)>)> = by_realm.into_iter().collect();
+        by_realm.sort_by_key(|(r, _)| *r);
         for (r, mut list) in by_realm {
             let Some(realm) = content.realms.get(r) else {
                 continue;
@@ -923,14 +936,22 @@ pub fn update_overlay(
             let widths: Vec<f32> = list.iter().map(|(_, w)| *w).collect();
             let arch = realms::arch_layout(pa, pb, pc, &widths, size);
             let mut box_rect = Rect::from_center_size(pc, Vec2::ZERO);
-            for ((i, w), (pos, angle)) in list.iter().zip(arch) {
-                layout.insert((r, *i), (pos, angle, *w));
-                box_rect = box_rect.union_point(pos);
+            for (pos, _) in &arch {
+                box_rect = box_rect.union_point(*pos);
             }
-            placed.push(Rect {
+            let box_rect = Rect {
                 min: box_rect.min - size * 0.7,
                 max: box_rect.max + size * 0.7,
-            });
+            };
+            if view.intersect(box_rect).is_empty()
+                || placed.iter().any(|r| !r.intersect(box_rect).is_empty())
+            {
+                continue;
+            }
+            for ((i, w), (pos, angle)) in list.iter().zip(arch) {
+                layout.insert((r, *i), (pos, angle, *w));
+            }
+            placed.push(box_rect);
         }
         for (
             letter,
@@ -974,7 +995,21 @@ pub fn update_overlay(
         }
     }
     stats.letters = letters;
-    stats.realms = content.realms.iter().map(|r| r.name.clone()).collect();
+    let mut shown: Vec<usize> = Vec::new();
+    {
+        let query = nodes.p3();
+        for (letter, .., visibility, _) in query.iter() {
+            if *visibility != Visibility::Hidden && !shown.contains(&letter.realm) {
+                shown.push(letter.realm);
+            }
+        }
+    }
+    shown.sort_unstable();
+    stats.realms_total = content.realms.len();
+    stats.realms = shown
+        .iter()
+        .filter_map(|r| content.realms.get(*r).map(|x| x.name.clone()))
+        .collect();
     let mut provinces_shown = 0;
     {
         let size = (15.0 * s).clamp(12.0, 22.0).floor();

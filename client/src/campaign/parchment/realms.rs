@@ -73,6 +73,8 @@ pub fn build_realms(
     }
     let mut owners: Vec<&str> = best.keys().copied().collect();
     owners.sort_unstable();
+    // Largest blocks first: the overlay keeps a name only if it crosses no larger one.
+    owners.sort_by(|a, b| best[b].0.total_cmp(&best[a].0).then(a.cmp(b)));
     let mut realms = Vec::new();
     for owner in owners {
         let (area, cluster) = &best[owner];
