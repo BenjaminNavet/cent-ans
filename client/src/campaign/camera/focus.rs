@@ -151,7 +151,7 @@ pub fn apply_focus(
     };
     for request in requests.read() {
         match request {
-            FocusCamera::Province(id) => {
+            FocusCamera::Province(id) | FocusCamera::FrameProvince(id) => {
                 let Some(map) = &map else { continue };
                 let Some(province) = map.province(map.index_of_id(id)) else {
                     warn!("FocusCamera: unknown province {id:?}");

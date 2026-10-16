@@ -34,7 +34,7 @@ pub fn focus_opens_panels(
                     selected_army.0 = Some(id);
                 }
             }
-            FocusCamera::Point(_) | FocusCamera::Follow(_) => {}
+            FocusCamera::FrameProvince(_) | FocusCamera::Point(_) | FocusCamera::Follow(_) => {}
         }
     }
 }

@@ -56,6 +56,9 @@ pub struct CameraSet;
 #[derive(Message, Debug, Clone, PartialEq)]
 pub enum FocusCamera {
     Province(String),
+    /// Frame a province like [`Self::Province`] without selecting it or opening its panel (the
+    /// opening view of a campaign: the first Escape must reach the pause menu).
+    FrameProvince(String),
     Army(String),
     /// Map point (world x, z), keeping the current distance.
     Point(Vec2),
@@ -183,7 +186,7 @@ fn frame_player_capital(
         return;
     }
     if let Some(faction) = state.factions.get(state.player_faction()) {
-        requests.write(FocusCamera::Province(faction.capital.to_string()));
+        requests.write(FocusCamera::FrameProvince(faction.capital.to_string()));
     }
 }
 

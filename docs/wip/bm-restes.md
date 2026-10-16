@@ -62,3 +62,8 @@
 - council2 (16/10): hover/click live-proved, card portrait, glb highlight, flame halo, fallback chain done; left: saturation 0.78 + exact filmic tonemap, capsule not live-proved, portrait cover-crop.
 - fg3 (ready 24fdb137e, contains bherald): steel_occlusion fixed 1; no spear v_prop code, no sky-occlusion radiance on mail; world-space normals; EYE-CHECK mail, horse coat, normal handedness; full cargo test not run by lot.
 - bunits6: steel_occlusion real param, lance v_prop + vertex, sky specular occlusion on mail/plate, handedness-safe tangent frame, impostor arms (docs/wip/bm-fg3.md § bunits6); eye-check pending
+
+## fixes1 (16/10)
+- 1 caméra de départ : déjà sur la capitale (`frame_player_capital`), vérifié par vidage (`last_focus province:prov_ile_de_france`).
+- 2 premier Échap : cause = le cadrage de départ envoyait `FocusCamera::Province`, qui sélectionne et OUVRE le panneau province (`hud/integ.rs`) ; Échap le fermait. Nouvelle variante `FocusCamera::FrameProvince` (cadre sans ouvrir). Le briefing (modal) laisse aussi passer Échap (`ModalSpec::escape_passes` : ferme en « À la guerre », n'éteint plus le réglage, ne bloque pas la pause).
+- 3 `NextState` direct, 4 PlayedBattles (sidecar `.played` + overlay pause), 5 bouton × de la bulle : déjà faits (f8b8585b8, 727b368af), rien à changer.
