@@ -144,6 +144,10 @@ pub struct Region {
     pub rock: String,
     pub beach: String,
     pub beach_width: f32,
+    /// Slope-rule probe distance (map px inland) overriding `cliff.probe_px` in this region: where
+    /// the raster coast sits a few px seaward of the foot of a real cliff (Dover), the default
+    /// 1.6 px reads sea level and the white cliffs came out as shingle.
+    pub cliff_probe_px: Option<f32>,
     pub polygon: Vec<Vec2>,
 }
 
@@ -154,6 +158,7 @@ impl Region {
             rock: entry["rock"].as_str().unwrap_or("rock").to_string(),
             beach: entry["beach"].as_str().unwrap_or("sand").to_string(),
             beach_width: entry["beach_width"].as_f64().unwrap_or(1.0) as f32,
+            cliff_probe_px: entry["cliff_probe_px"].as_f64().map(|v| v as f32),
             polygon: entry["polygon_px"]
                 .as_array()
                 .map(|points| {
@@ -404,7 +409,12 @@ pub fn probe_at(
 
 /// Probe texture data (Rg8, one texel per `PROBE_DOWNSAMPLE` map px): R altitude (m, clamped
 /// 0-255), G 255 on a lake shore. Returns (size, data, texels near a coast).
-pub fn bake_probe(coast: &CoastDist, heights: &HeightGrid, probe_px: f32) -> (UVec2, Vec<u8>, u32) {
+pub fn bake_probe(
+    coast: &CoastDist,
+    heights: &HeightGrid,
+    probe_px: f32,
+    regions: Option<&CoastData>,
+) -> (UVec2, Vec<u8>, u32) {
     let size = UVec2::new(
         coast.width.div_ceil(PROBE_DOWNSAMPLE) as u32,
         coast.height.div_ceil(PROBE_DOWNSAMPLE) as u32,
@@ -415,6 +425,9 @@ pub fn bake_probe(coast: &CoastDist, heights: &HeightGrid, probe_px: f32) -> (UV
     for row in 0..size.y {
         for col in 0..size.x {
             let p = Vec2::new((col as f32 + 0.5) * step, (row as f32 + 0.5) * step);
+            let probe_px = regions
+                .and_then(|data| data.region_at(p).cliff_probe_px)
+                .unwrap_or(probe_px);
             if let Some((h, lake)) = probe_at(coast, heights, probe_px, p) {
                 let i = ((row * size.x + col) * 2) as usize;
                 data[i] = h.clamp(0.0, 255.0).round() as u8;
@@ -489,7 +502,9 @@ fn shore_kind(coast: &CoastDist, heights: &HeightGrid, data: &CoastData, x: i64,
     let inland = if g.length() < 1e-5 {
         shore
     } else {
-        shore + g.normalize() * (data.params.cliff.y - coast.texel(x, y))
+        let region = data.region_at(shore);
+        let probe = region.cliff_probe_px.unwrap_or(data.params.cliff.y);
+        shore + g.normalize() * (probe - coast.texel(x, y))
     };
     let region = data.region_at(shore);
     let h = heights.height_m_at(inland.x, inland.y);
@@ -527,6 +542,26 @@ pub fn shore_kinds(
     counts
 }
 
+/// Region of the shore pixel nearest to `p` (within 90 px).
+fn shore_region(coast: &CoastDist, data: &CoastData, p: Vec2) -> String {
+    let (ox, oy) = (p.x.floor() as i64, p.y.floor() as i64);
+    let mut best = (i64::MAX, Vec2::ZERO);
+    for dy in -90i64..=90 {
+        for dx in -90i64..=90 {
+            let c = coast.texel(ox + dx, oy + dy);
+            let d = dx * dx + dy * dy;
+            if c > 0.0 && c <= 1.01 && d < best.0 {
+                best = (d, Vec2::new((ox + dx) as f32 + 0.5, (oy + dy) as f32 + 0.5));
+            }
+        }
+    }
+    if best.0 == i64::MAX {
+        String::new()
+    } else {
+        data.region_at(best.1).id.clone()
+    }
+}
+
 /// Coast kinds around each reference shore (map px from the map projection).
 fn reference_kinds(
     map_dir: &Path,
@@ -542,7 +577,13 @@ fn reference_kinds(
         .iter()
         .filter_map(|(name, lon, lat)| {
             let px = projection.lonlat_to_px(*lon, *lat)?;
-            let kinds = shore_kinds(coast, heights, data, px, REFERENCE_RADIUS_PX);
+            // The composed map is deformed: widen the search until a shore pixel turns up (the
+            // Mont-Saint-Michel point lies ~30 px inland of the raster's bay corner).
+            let kinds = [1, 2, 3]
+                .iter()
+                .map(|k| shore_kinds(coast, heights, data, px, REFERENCE_RADIUS_PX * k))
+                .find(|kinds| !kinds.is_empty())
+                .unwrap_or_default();
             let main = kinds
                 .iter()
                 .max_by_key(|(_, n)| **n)
@@ -551,6 +592,7 @@ fn reference_kinds(
             Some(serde_json::json!({
                 "name": name, "px": [px.x.round(), px.y.round()],
                 "kind": main, "kinds": kinds, "region": data.region_at(px).id,
+                "region_shore": shore_region(coast, data, px),
             }))
         })
         .collect()
@@ -599,7 +641,8 @@ pub fn bake(map_dir: &Path, heights: &HeightGrid) -> Result<Option<CoastBake>, S
         return Ok(None);
     }
     let coast = decode_gray8(&dist_path)?;
-    let (probe_size, probe_data, probe_texels) = bake_probe(&coast, heights, data.params.cliff.y);
+    let (probe_size, probe_data, probe_texels) =
+        bake_probe(&coast, heights, data.params.cliff.y, Some(&data));
     let (geo_size, geo_data) = data.geology_texels(coast.width as u32, coast.height as u32);
     let references = reference_kinds(map_dir, &coast, heights, &data);
     let mut params = data.params;
@@ -629,6 +672,11 @@ pub struct CoastTextures {
     pub references: Vec<Value>,
     pub ms: f32,
 }
+
+/// `coast_dist.png` as a GPU image shared by the terrain coast band and the sea / lake shaders
+/// (one 43 MB upload, not two). Whoever needs it first creates it.
+#[derive(Resource, Clone)]
+pub struct SharedCoastDist(pub Handle<Image>);
 
 type BakeSlot = Arc<Mutex<Option<Result<Option<CoastBake>, String>>>>;
 
@@ -672,6 +720,7 @@ pub fn start_bake(
 pub fn poll_bake(
     mut commands: Commands,
     pending: Option<Res<PendingCoast>>,
+    shared: Option<Res<SharedCoastDist>>,
     mut images: ResMut<Assets<Image>>,
 ) {
     let Some(pending) = pending else {
@@ -687,9 +736,17 @@ pub fn poll_bake(
                 "campaign terrain: coast baked in {:.0} ms ({} probe texels, {} regions)",
                 baked.ms, baked.probe_texels, baked.regions
             );
+            let dist = match shared {
+                Some(shared) => shared.0.clone(),
+                None => {
+                    let handle = images.add(baked.dist);
+                    commands.insert_resource(SharedCoastDist(handle.clone()));
+                    handle
+                }
+            };
             commands.insert_resource(CoastTextures {
                 params: baked.params,
-                dist: images.add(baked.dist),
+                dist,
                 probe: images.add(baked.probe),
                 geology: images.add(baked.geology),
                 probe_texels: baked.probe_texels,
@@ -735,6 +792,13 @@ pub fn dump(world: &World) -> (String, Value) {
     let mut value = serde_json::json!({
         "status": world.get_resource::<CoastStatus>().map(|s| s.0.clone()).unwrap_or_default(),
     });
+    value["shared_dist"] = serde_json::json!({
+        "resource": world.get_resource::<SharedCoastDist>().is_some(),
+        "same_as_terrain": match (world.get_resource::<SharedCoastDist>(), world.get_resource::<CoastTextures>()) {
+            (Some(s), Some(t)) => Value::Bool(s.0 == t.dist),
+            _ => Value::Null,
+        },
+    });
     if let Some(t) = world.get_resource::<CoastTextures>() {
         let images = world.resource::<Assets<Image>>();
         let size = |h: &Handle<Image>| images.get(h).map(|i| [i.width(), i.height()]);
@@ -758,6 +822,8 @@ pub fn dump(world: &World) -> (String, Value) {
             "swash_amount": e.coast.swash_a.x,
             "glacier": e.glacier.line.to_array(),
             "post_contrast_saturation": [e.post.x, e.post.y, e.post.z],
+            "post_pass_cameras": world.try_query::<&super::post::CampaignAdjust>().map(|mut q| q.iter(world).count()),
+            "aerial": {"base": m.look.aerial_base.to_array(), "sky": m.look.aerial_sky.to_array()},
             "weather": {
                 "any": e.wx.x,
                 "selection": e.wx.y,
@@ -813,6 +879,7 @@ mod tests {
             rock: rock.into(),
             beach: "sand".into(),
             beach_width: 1.0,
+            cliff_probe_px: None,
             polygon: vec![
                 Vec2::ZERO,
                 Vec2::new(size, 0.0),
@@ -842,6 +909,7 @@ mod tests {
             rock: "rock".into(),
             beach: "shingle".into(),
             beach_width: 2.0,
+            cliff_probe_px: None,
             polygon: vec![],
         };
         assert_eq!(r.geology(), [0, 0, 255, 255]);
@@ -888,7 +956,7 @@ mod tests {
         assert!((land_h - 80.0).abs() < 1.0, "{land_h}");
         assert!(!sea_lake, "water below sea level is the sea");
         assert!(probe_at(&coast, &heights, 1.6, Vec2::new(20.0, 20.0)).is_none());
-        let (size, data, near) = bake_probe(&coast, &heights, 1.6);
+        let (size, data, near) = bake_probe(&coast, &heights, 1.6, None);
         assert_eq!(size, UVec2::new(50, 20));
         assert!(near > 0);
         assert_eq!(data[((10 * 50 + 25) * 2) as usize], 80);
@@ -948,6 +1016,16 @@ mod tests {
                 .to_string()
         };
         assert_eq!(kind("etretat"), "chalk_cliff", "{kinds:?}");
+        // Dover: the raster coast sits ~3 px seaward of the foot of the white cliffs; the region's
+        // `cliff_probe_px` reads the cliff top instead of sea level.
+        assert_eq!(kind("douvres"), "chalk_cliff", "{kinds:?}");
+        // Bay of Mont-Saint-Michel: a wide foreshore of its own region, not the Brittany granite.
+        assert_eq!(kind("baie_mont_saint_michel"), "sand_beach", "{kinds:?}");
+        let bay = kinds
+            .iter()
+            .find(|k| k["name"] == "baie_mont_saint_michel")
+            .unwrap();
+        assert_eq!(bay["region_shore"], "msm_bay", "{kinds:?}");
         assert!(kind("cabourg").ends_with("_beach"), "{kinds:?}");
         assert!(kind("berck").ends_with("_beach"), "{kinds:?}");
     }

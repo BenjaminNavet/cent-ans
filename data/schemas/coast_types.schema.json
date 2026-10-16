@@ -105,6 +105,12 @@
           "rock": {"$ref": "#/$defs/rock"},
           "beach": {"$ref": "#/$defs/beach"},
           "beach_width": {"$ref": "#/$defs/beach_width"},
+          "cliff_probe_px": {
+            "description": "Distance de sonde (pixels carte vers l'intérieur) de la règle de pente pour cette région ; remplace `cliff.probe_px`. Utile quand le rivage raster est à quelques pixels du pied de la falaise (Douvres).",
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 6
+          },
           "polygon_px": {
             "description": "Polygone en pixels carte (grille de map.json).",
             "type": "array",

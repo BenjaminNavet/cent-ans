@@ -263,6 +263,13 @@ pub struct Atmosphere {
     pub applied: bool,
     /// Aerial perspective share applied to the camera fog colour (centre ray).
     pub aerial: f32,
+    /// Season fog colour (sRGB, eased) before the aerial blend: the terrain shader blends it
+    /// towards `sky` per pixel with `wx_aerial_fog_color`.
+    pub base: [f32; 3],
+    /// Unweighted aerial perspective share at the camera pitch (`aerial_at`).
+    pub aerial_share: f32,
+    /// Sky tint of the aerial perspective (sRGB).
+    pub sky: [f32; 3],
     /// Sun scatter amount (`fog_sun_scatter`) applied.
     pub scatter: f32,
 }
@@ -308,6 +315,12 @@ fn update_atmosphere(
     for (i, c) in target.to_array().iter().enumerate() {
         state.color[i] += (c - state.color[i]) * t;
     }
+    let base = look.color(season_weights);
+    for (i, c) in base.to_array().iter().enumerate() {
+        state.base[i] += (c - state.base[i]) * t;
+    }
+    state.aerial_share = aerial;
+    state.sky = look.sky.to_array();
     state.aerial = weight;
     state.scatter = scatter;
     let depth = DepthFog::at(&look, distance, pitch);

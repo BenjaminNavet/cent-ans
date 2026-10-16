@@ -54,6 +54,10 @@ pub struct LookParams {
     pub valley_c: Vec4,
     /// Valley mist colour (linear), 0.
     pub valley_color: Vec4,
+    /// Aerial perspective, season fog colour before the blend (sRGB), 1 when `aerial_sky` is set.
+    pub aerial_base: Vec4,
+    /// Aerial perspective, sky tint (sRGB), share of the sky tint at the camera pitch.
+    pub aerial_sky: Vec4,
 }
 
 impl Default for LookParams {
@@ -78,6 +82,8 @@ impl Default for LookParams {
             valley_b: Vec4::new(30.0, 150.0, 0.6, 0.006),
             valley_c: Vec4::new(0.5, 0.6, 0.35, 0.5),
             valley_color: Vec4::new(0.69, 0.67, 0.6, 0.0),
+            aerial_base: Vec4::ZERO,
+            aerial_sky: Vec4::ZERO,
         }
     }
 }
@@ -322,6 +328,30 @@ pub fn sync_weather_ground(
         material.wx_field = field;
         material.wx_clear = clear;
         material.look.mist.y = morning;
+    }
+}
+
+/// Feeds the per-pixel aerial perspective of the fog (`wx_aerial_fog_color`) from the smoothed
+/// camera atmosphere.
+pub fn sync_aerial(
+    atmosphere: Res<crate::campaign::weather::atmosphere::Atmosphere>,
+    handle: Option<Res<TerrainMaterialHandle>>,
+    mut materials: ResMut<Assets<TerrainMaterial>>,
+) {
+    let Some(handle) = handle else {
+        return;
+    };
+    if atmosphere.fog.is_none() {
+        return;
+    }
+    let base = Vec3::from(atmosphere.base).extend(1.0);
+    let sky = Vec3::from(atmosphere.sky).extend(atmosphere.aerial_share);
+    let changed = materials
+        .get(&handle.0)
+        .is_some_and(|m| m.look.aerial_base != base || m.look.aerial_sky != sky);
+    if changed && let Some(mut material) = materials.get_mut(&handle.0) {
+        material.look.aerial_base = base;
+        material.look.aerial_sky = sky;
     }
 }
 

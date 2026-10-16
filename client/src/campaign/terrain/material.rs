@@ -152,8 +152,9 @@ pub struct TerrainMaterial {
 pub struct TerrainExtras {
     pub coast: super::coast::CoastParams,
     pub glacier: super::coast::GlacierParams,
-    /// Post-tonemap adjustment of the Godot campaign environment (`campaign_map.tscn`:
-    /// `adjustment_contrast` 1.06, `adjustment_saturation` 1.08): contrast, saturation, 1 on.
+    /// Contrast / saturation of the Godot campaign environment (`adjustment_contrast` 1.06,
+    /// `adjustment_saturation` 1.08), 0 in z: the adjustment now runs as a post-tonemap pass
+    /// (`post.rs`), not in this shader (the fields stay for the dump).
     pub post: Vec4,
     /// Per-province weather: 1 when the field / selection textures are bound and some province
     /// has weather (`WeatherGround::any`), 1 when a selection mask is bound.
@@ -165,7 +166,7 @@ impl Default for TerrainExtras {
         TerrainExtras {
             coast: Default::default(),
             glacier: Default::default(),
-            post: Vec4::new(1.06, 1.08, 1.0, 0.0),
+            post: Vec4::new(super::post::CONTRAST, super::post::SATURATION, 0.0, 0.0),
             wx: Vec4::ZERO,
         }
     }

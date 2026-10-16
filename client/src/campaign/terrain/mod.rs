@@ -28,6 +28,7 @@ pub mod look;
 pub mod material;
 pub mod mesh;
 pub mod parchment;
+pub mod post;
 pub mod profile;
 pub mod pyramid;
 pub mod relief_floor;
@@ -65,6 +66,7 @@ pub struct CampaignTerrainPlugin;
 impl Plugin for CampaignTerrainPlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "terrain.wesl");
+        post::add_plugin(app);
         embedded_asset!(app, "terrain_shadow.wesl");
         // Shared relief module: `import cent_ans_client::campaign::terrain::relief::{...}`.
         bevy::shader::load_shader_library!(app, "relief.wesl");
@@ -103,6 +105,7 @@ impl Plugin for CampaignTerrainPlugin {
                     look::sync_fog_mask,
                     look::sync_zoom,
                     look::sync_weather_ground,
+                    look::sync_aerial,
                     coast::start_bake,
                     coast::poll_bake,
                     coast::bind_coast,
