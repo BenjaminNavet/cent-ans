@@ -397,6 +397,20 @@ pub fn plan_orchards(field: &Battlefield, look: &DecorLook) -> Vec<Planting> {
     out
 }
 
+/// A planted tree as the Codex decor pick sees it (battle trees keep no collider).
+#[derive(Debug, Clone, PartialEq)]
+pub struct PlantedTree {
+    /// Codex species key (`tree:<species>`).
+    pub species: &'static str,
+    pub foot: Vec3,
+    pub height: f32,
+    pub radius: f32,
+}
+
+/// Every tree of the battle, in world space, for the Codex bubble over the decor.
+#[derive(Resource, Debug, Clone, Default)]
+pub struct PlantedTrees(pub Vec<PlantedTree>);
+
 /// Statistics for the dump.
 #[derive(Resource, Debug, Clone, Default)]
 pub struct TreeStats {
@@ -447,6 +461,7 @@ impl Plugin for TreesPlugin {
             )
             .add_systems(OnExit(AppState::Battle), |mut commands: Commands| {
                 commands.remove_resource::<TreeStats>();
+                commands.remove_resource::<PlantedTrees>();
                 commands.remove_resource::<super::tree_kit::PendingTreeTextures>();
                 commands.insert_resource(super::tree_kit::TreeTextureStats::default());
             });
@@ -722,6 +737,7 @@ fn plant(
     // `impostor_from_m` on (dithered cross-fades of `LOD_BAND` metres).
     let [imp_near, imp_far] = look.far_woods.impostor_from_m;
     let mut impostors = Vec::new();
+    let mut planted = Vec::with_capacity(plan.len());
     for tree in &plan {
         let kit = &kits[tree.species];
         counts[tree.species] += 1;
@@ -731,6 +747,12 @@ fn plant(
         let transform = Transform::from_xyz(tree.x, y - 0.05, tree.z)
             .with_rotation(Quat::from_rotation_y(tree.yaw))
             .with_scale(Vec3::splat(tree.scale));
+        planted.push(PlantedTree {
+            species: species.name,
+            foot: transform.translation,
+            height: species.height * tree.scale,
+            radius: species.width * 0.5 * tree.scale,
+        });
         let switch = if bush {
             BUSH_LOD1_DISTANCE
         } else {
@@ -805,6 +827,7 @@ fn plant(
     stats.impostors = impostor_stats.trees;
     stats.impostor_tiles = impostor_stats.tiles;
     commands.insert_resource(stats);
+    commands.insert_resource(PlantedTrees(planted));
 }
 
 #[cfg(test)]

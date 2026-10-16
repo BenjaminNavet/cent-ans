@@ -13,8 +13,10 @@
 //!
 //! Sources: campaign trees ([`crate::campaign::vegetation::TreeDecor`]) and herd animals
 //! ([`crate::campaign::life::fauna::Animal`]). Not ported: rocks (the countryside rocks keep no
-//! queryable instance list) and the battle trees (plantings are not kept after spawning).
+//! queryable instance list; the battle's outcrops are painted by the ground shader). The battle
+//! trees are picked by [`battle_decor_hover`] from [`PlantedTrees`] (no Godot counterpart).
 
+use bevy::picking::hover::HoverMap;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use serde::Deserialize;
@@ -23,6 +25,8 @@ use serde_json::{Value, json};
 use super::store::CodexStore;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
+use crate::battle::decor::trees::{PlantedTree, PlantedTrees};
+use crate::battle::scene::camera::BattleCamera;
 use crate::campaign::armies::HoveredArmy;
 use crate::campaign::armies::pointer::PointerOverUi;
 use crate::campaign::armies::projection::ray_ground;
@@ -235,7 +239,13 @@ pub fn plugin(app: &mut App) {
     })
     .insert_resource(style)
     .register_dump(dump)
-    .add_systems(Update, decor_hover.run_if(in_state(AppState::Campaign)));
+    .add_systems(
+        Update,
+        (
+            decor_hover.run_if(in_state(AppState::Campaign)),
+            battle_decor_hover.run_if(in_state(AppState::Battle)),
+        ),
+    );
 }
 
 /// Candidates around the ground point `ground` within `reach` map units.
@@ -273,6 +283,152 @@ fn gather(
     found
 }
 
+/// The pointer position, or the proof hook's.
+fn hover_cursor(decor: &DecorHover, window: Option<&Window>) -> Option<Vec2> {
+    match decor.cursor_override {
+        // `center` (no coordinates): the middle of the window.
+        Some(None) => window.map(|window| window.size() * 0.5),
+        Some(Some(point)) => Some(point),
+        None => window.and_then(Window::cursor_position),
+    }
+}
+
+/// Stillness bookkeeping shared by the campaign and the battle pick: closes a shown bubble that
+/// the pointer left, and returns true when the delay elapsed (one pick must run).
+fn advance(
+    decor: &mut DecorHover,
+    style: &DecorStyle,
+    delay: f32,
+    cursor: Vec2,
+    (dt, mouse, keys): (f32, &ButtonInput<MouseButton>, &ButtonInput<KeyCode>),
+    tooltips: &mut TooltipState,
+    panels: &Query<&TooltipPanel>,
+) -> bool {
+    // The bubble requested is up (or about to be).
+    if decor.frames_since_open < OPEN_FRAMES {
+        decor.frames_since_open += 1;
+    }
+    let bubble_alive = !tooltips.chain.is_empty() || decor.frames_since_open < OPEN_FRAMES;
+    let near_bubble = panels.iter().any(|panel| {
+        panel.placed
+            && Rect::from_corners(
+                panel.rect.min - Vec2::splat(style.leave_px),
+                panel.rect.max + Vec2::splat(style.leave_px),
+            )
+            .contains(cursor)
+    });
+    let pressed =
+        mouse.get_just_pressed().next().is_some() || keys.get_just_pressed().next().is_some();
+    let close = if pressed {
+        decor.wait.interrupted(cursor, bubble_alive, near_bubble)
+    } else {
+        decor
+            .wait
+            .note_mouse(cursor, bubble_alive, near_bubble, style)
+    };
+    if close {
+        tooltips.chain.clear();
+        decor.shown_entry.clear();
+    }
+    if decor.cursor_override.is_some() && decor.wait.phase == Phase::Fired {
+        // Proof hook: the forced cursor never moves, so retry until something is found.
+        decor.wait.begin_wait(cursor);
+    }
+    decor.wait.tick(dt, delay)
+}
+
+/// Battle trees whose projected crown is under `cursor` (the best candidate).
+pub fn battle_candidates(trees: &[PlantedTree]) -> Vec<Candidate> {
+    trees
+        .iter()
+        .map(|tree| Candidate {
+            kind: "tree",
+            species: tree.species.to_owned(),
+            foot: tree.foot,
+            height: tree.height,
+            radius: tree.radius,
+        })
+        .collect()
+}
+
+/// The Codex bubble over a battle tree (no Godot counterpart: the Godot battle has no decor hover).
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
+fn battle_decor_hover(
+    (time, mouse, keys): (
+        Res<Time<Real>>,
+        Res<ButtonInput<MouseButton>>,
+        Res<ButtonInput<KeyCode>>,
+    ),
+    (settings, style): (Option<Res<Settings>>, Res<DecorStyle>),
+    (store, registry): (Res<CodexStore>, Res<TooltipRegistry>),
+    (hover_map, nodes): (
+        Option<Res<HoverMap>>,
+        Query<(Option<&BackgroundColor>, Option<&ImageNode>), With<Node>>,
+    ),
+    mut tooltips: ResMut<TooltipState>,
+    mut decor: ResMut<DecorHover>,
+    window: Query<&Window, With<PrimaryWindow>>,
+    camera: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
+    trees: Option<Res<PlantedTrees>>,
+    panels: Query<&TooltipPanel>,
+) {
+    let delay = settings.map_or(DEFAULT_DELAY, |s| s.decor_hover_delay);
+    let decor = &mut *decor;
+    let Some(cursor) = hover_cursor(decor, window.single().ok()) else {
+        return;
+    };
+    if !advance(
+        decor,
+        &style,
+        delay,
+        cursor,
+        (time.delta_secs(), &mouse, &keys),
+        &mut tooltips,
+        &panels,
+    ) {
+        return;
+    }
+    decor.attempts += 1;
+    decor.last_candidates = 0;
+    decor.last_species.clear();
+    let over_ui = hover_map.is_some_and(|hover| {
+        hover.values().flat_map(|hits| hits.keys()).any(|entity| {
+            nodes.get(*entity).is_ok_and(|(background, image)| {
+                image.is_some() || background.is_some_and(|b| b.0.alpha() > 0.05)
+            })
+        })
+    });
+    if over_ui || !tooltips.chain.is_empty() {
+        decor.last_miss = if over_ui { "interface" } else { "bubble" };
+        return;
+    }
+    let (Some((camera, camera_transform)), Some(trees)) = (camera.iter().next(), trees) else {
+        decor.last_miss = "no_camera";
+        return;
+    };
+    let candidates = battle_candidates(&trees.0);
+    decor.last_candidates = candidates.len();
+    let right = camera_transform.right().as_vec3();
+    let Some(hit) = best_candidate(
+        &candidates,
+        cursor,
+        |world| camera.world_to_viewport(camera_transform, world).ok(),
+        right,
+    ) else {
+        decor.last_miss = "nothing";
+        return;
+    };
+    decor.last_species = format!("{}:{}", hit.kind, hit.species);
+    let Some(entry) = store
+        .entry_for_decor(hit.kind, &hit.species)
+        .map(str::to_owned)
+    else {
+        decor.last_miss = "no_entry";
+        return;
+    };
+    open_bubble(decor, &mut tooltips, &registry, &entry, cursor);
+}
+
 #[allow(clippy::too_many_arguments, clippy::type_complexity)]
 fn decor_hover(
     (time, mouse, keys): (
@@ -298,47 +454,18 @@ fn decor_hover(
 ) {
     let delay = settings.map_or(DEFAULT_DELAY, |s| s.decor_hover_delay);
     let decor = &mut *decor;
-    let real = window.single().ok();
-    let cursor = match decor.cursor_override {
-        // `center` (no coordinates): the middle of the window.
-        Some(None) => real.map(|window| window.size() * 0.5),
-        Some(Some(point)) => Some(point),
-        None => real.and_then(Window::cursor_position),
-    };
-    let Some(cursor) = cursor else {
+    let Some(cursor) = hover_cursor(decor, window.single().ok()) else {
         return;
     };
-    // The bubble requested is up (or about to be).
-    if decor.frames_since_open < OPEN_FRAMES {
-        decor.frames_since_open += 1;
-    }
-    let bubble_alive = !tooltips.chain.is_empty() || decor.frames_since_open < OPEN_FRAMES;
-    let near_bubble = panels.iter().any(|panel| {
-        panel.placed
-            && Rect::from_corners(
-                panel.rect.min - Vec2::splat(style.leave_px),
-                panel.rect.max + Vec2::splat(style.leave_px),
-            )
-            .contains(cursor)
-    });
-    let pressed =
-        mouse.get_just_pressed().next().is_some() || keys.get_just_pressed().next().is_some();
-    let close = if pressed {
-        decor.wait.interrupted(cursor, bubble_alive, near_bubble)
-    } else {
-        decor
-            .wait
-            .note_mouse(cursor, bubble_alive, near_bubble, &style)
-    };
-    if close {
-        tooltips.chain.clear();
-        decor.shown_entry.clear();
-    }
-    if decor.cursor_override.is_some() && decor.wait.phase == Phase::Fired {
-        // Proof hook: the forced cursor never moves, so retry until something is found.
-        decor.wait.begin_wait(cursor);
-    }
-    if !decor.wait.tick(time.delta_secs(), delay) {
+    if !advance(
+        decor,
+        &style,
+        delay,
+        cursor,
+        (time.delta_secs(), &mouse, &keys),
+        &mut tooltips,
+        &panels,
+    ) {
         return;
     }
 

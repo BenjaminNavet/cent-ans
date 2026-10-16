@@ -96,6 +96,8 @@ struct Regiment {
     volley_time: f32,
     lod: Option<Lod>,
     version: u64,
+    /// Records, LOD and params versions sent with the latest `version` (perf3: no bump when nothing changed).
+    sent: Option<(Arc<Vec<u8>>, Lod, u64, u64)>,
     drawn: usize,
     state_key: String,
     /// Poses at the last change of head count (slots of the bodies that fall).
@@ -449,6 +451,7 @@ pub fn update_regiments(
                 volley_time: -1000.0,
                 lod: None,
                 version: 0,
+                sent: None,
                 drawn: 0,
                 state_key: String::new(),
                 last_poses: frames.cur.get(&unit.id).cloned().unwrap_or_default(),
@@ -604,12 +607,24 @@ pub fn update_regiments(
             ];
             push_record(&mut bytes, &record);
         }
-        regiment.version += 1;
         let count = poses.len() as u32;
         regiment.drawn = poses.len();
         total += poses.len();
         lod_counts[lod.index()] += poses.len();
-        let records = Arc::new(bytes);
+        let unchanged = is_unchanged(
+            regiment.sent.as_ref(),
+            &bytes,
+            lod,
+            regiment.params_version,
+            regiment.impostor_params_version,
+        );
+        let records = match &regiment.sent {
+            Some((old, ..)) if unchanged => old.clone(),
+            _ => Arc::new(bytes),
+        };
+        if !unchanged {
+            regiment.version += 1;
+        }
         if let Ok(mut batch) = batches.get_mut(regiment.main) {
             let wanted = &regiment.spec.lods[lod.index().min(2)];
             if batch.mesh_handle != *wanted {
@@ -625,7 +640,7 @@ pub fn update_regiments(
         }
         if let Ok(mut batch) = batches.get_mut(regiment.impostor) {
             batch.count = if lod == Lod::Impostor { count } else { 0 };
-            batch.records = records;
+            batch.records = records.clone();
             batch.version = regiment.version;
             if regiment.impostor_params_version != regiment.params_version {
                 let mut p = regiment.params.clone();
@@ -640,6 +655,12 @@ pub fn update_regiments(
                 regiment.impostor_params_version = regiment.params_version;
             }
         }
+        regiment.sent = Some((
+            records,
+            lod,
+            regiment.params_version,
+            regiment.impostor_params_version,
+        ));
     }
     // Regiments that left the field (reserve, destroyed): nothing drawn.
     for (id, regiment) in &mut regiments.map {
@@ -667,9 +688,36 @@ pub fn update_regiments(
     stats.per_batch = per_batch;
 }
 
+/// Whether what was sent with the previous `version` (records, LOD, params versions) is still exact.
+fn is_unchanged(
+    sent: Option<&(Arc<Vec<u8>>, Lod, u64, u64)>,
+    bytes: &[u8],
+    lod: Lod,
+    params_version: u64,
+    impostor_params_version: u64,
+) -> bool {
+    sent.is_some_and(|(old, l, p, ip)| {
+        old.as_slice() == bytes
+            && *l == lod
+            && *p == params_version
+            && *ip == impostor_params_version
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn version_only_moves_when_something_changes() {
+        let sent = Some((Arc::new(vec![1u8, 2, 3]), Lod::Full, 4, 4));
+        assert!(is_unchanged(sent.as_ref(), &[1, 2, 3], Lod::Full, 4, 4));
+        assert!(!is_unchanged(sent.as_ref(), &[1, 2, 4], Lod::Full, 4, 4));
+        assert!(!is_unchanged(sent.as_ref(), &[1, 2, 3], Lod::Far, 4, 4));
+        assert!(!is_unchanged(sent.as_ref(), &[1, 2, 3], Lod::Full, 5, 4));
+        assert!(!is_unchanged(sent.as_ref(), &[1, 2, 3], Lod::Full, 4, 0));
+        assert!(!is_unchanged(None, &[], Lod::Full, 1, 0));
+    }
 
     #[test]
     fn lod_follows_distance_with_hysteresis() {
