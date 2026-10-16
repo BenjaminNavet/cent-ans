@@ -437,3 +437,6 @@ Rien de tout cela n'est dans le binaire joueur. `dev` = liaison dynamique + `bev
 - **Console** : `F8` ou la touche sous Échap (`CENT_ANS_CONSOLE_KEY=<KeyCode>` pour changer F8). `dump-state [fichier absolu]`, `goto <État>`, `wireframe`, `shadows`, `help`. Preuve sans fenêtre : `CENT_ANS_CONSOLE_DEMO="wireframe;goto codex"`.
 - **Ordre des systèmes** : `CENT_ANS_SHUFFLE_SEED=<n>` (mélange, mono-fil, reproductible), `client/tests/shuffle.sh [-s "1 2 3"] [scénario...]`, `CENT_ANS_AMBIGUITIES=1` pour lister les conflits sans ordre.
 - MCP `bevy_brp_mcp` : non adopté (52 outils, ~31 000 jetons) ; voir `docs/wip/bm-devtools2.md` § 2 pour l'activer en local.
+
+## Maquettes : LOD, ombres, faces de bannière (lot towns4)
+- `campaign/markers/lod.rs` : fondu tramé de portée (`VisibilityRange` par maillage, fin = portée du type + écart œil/rig, marge `fade_margin`), `shadow_range` et `model_shadow_distance` (`NotShadowCaster`), `KitMaterial` (`kit_banner.wesl`) pour les faces de bannière du kit, comptage des lots de dessin. Dump `campaign_markers.lod`. Un matériau à fragment personnalisé doit appeler `visibility_range_dither` (fait pour `building_atlas.wesl` et `kit_banner.wesl`). Note : `docs/wip/bm-towns4.md`.

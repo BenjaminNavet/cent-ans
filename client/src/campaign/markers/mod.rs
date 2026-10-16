@@ -46,6 +46,7 @@ pub struct CampaignMarkersPlugin;
 impl Plugin for CampaignMarkersPlugin {
     fn build(&self, app: &mut App) {
         banner::add(app);
+        lod::add(app);
         app.init_resource::<Places>()
             .init_resource::<ShieldCache>()
             .init_resource::<MarkerStats>()
@@ -264,6 +265,7 @@ fn dump_markers(world: &World) -> (String, Value) {
                 "fading_now": l.fading,
                 "shadowless_maquettes": l.shadowless,
                 "kit_banners": l.kit_banners,
+                "kit_faces": l.kit_faces,
                 "kit_banners_recoloured": l.kit_banners_recoloured,
                 "scene_meshes": l.scene_meshes,
                 "draw_batches": l.batches,

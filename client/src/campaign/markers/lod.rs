@@ -15,10 +15,14 @@
 use std::collections::{HashMap, HashSet};
 use std::ops::Range;
 
+use bevy::asset::embedded_asset;
 use bevy::camera::visibility::VisibilityRange;
 use bevy::gltf::GltfMaterialName;
 use bevy::light::NotShadowCaster;
+use bevy::pbr::{ExtendedMaterial, MaterialExtension};
 use bevy::prelude::*;
+use bevy::render::render_resource::AsBindGroup;
+use bevy::shader::ShaderRef;
 use bevy::world_serialization::WorldInstanceReady;
 
 use super::places::Places;
@@ -26,7 +30,9 @@ use super::{DnBanner, Maquette};
 use crate::campaign::camera::zoom::ZoomView;
 use crate::campaign::towns::atlas::BuildingAtlasMaterial;
 
-/// Name of the banner surface of the kit models.
+/// Name of the single surface of the six family kits (banner faces: vertex alpha 0).
+pub const KIT_MATERIAL: &str = "Kit";
+/// Name of the banner surface of the older multi-surface kit models.
 pub const KIT_BANNER_MATERIAL: &str = "Banner";
 /// Colour of a banner whose controller has no heraldic colour.
 pub const DEFAULT_BANNER: Srgba = Srgba::new(0.55, 0.1, 0.08, 1.0);
@@ -48,17 +54,39 @@ pub fn casts_shadow(distance: f32, model_shadow_distance: f32, kind_range: f32) 
     distance < model_shadow_distance.min(kind_range)
 }
 
+/// Extension of the kit material: colour of the banner faces (linear rgb).
+#[derive(Asset, TypePath, AsBindGroup, Clone, Debug)]
+pub struct KitExt {
+    #[uniform(100)]
+    pub tint: Vec4,
+}
+
+impl MaterialExtension for KitExt {
+    fn fragment_shader() -> ShaderRef {
+        "embedded://cent_ans_client/campaign/markers/kit_banner.wesl".into()
+    }
+}
+
+pub type KitMaterial = ExtendedMaterial<StandardMaterial, KitExt>;
+
+pub fn add(app: &mut App) {
+    embedded_asset!(app, "kit_banner.wesl");
+    app.add_plugins(MaterialPlugin::<KitMaterial>::default());
+}
+
 /// Controller colours and the banner materials of the kit maquettes.
 #[derive(Resource, Default)]
 pub struct KitBanners {
     pub colours: HashMap<String, Srgba>,
     materials: HashMap<[u8; 3], Handle<StandardMaterial>>,
+    faces: HashMap<([u8; 3], bevy::asset::AssetId<StandardMaterial>), Handle<KitMaterial>>,
 }
 
 impl KitBanners {
     pub fn clear(&mut self) {
         self.colours.clear();
         self.materials.clear();
+        self.faces.clear();
     }
 
     pub fn colour_of(&self, controller: &str) -> Srgba {
@@ -90,9 +118,41 @@ impl KitBanners {
             .clone()
     }
 
-    pub fn count(&self) -> usize {
-        self.materials.len()
+    /// Kit material of `source` with banner faces of `colour` (shared by colour and source).
+    pub fn face_material(
+        &mut self,
+        assets: &mut Assets<KitMaterial>,
+        source: &StandardMaterial,
+        source_id: bevy::asset::AssetId<StandardMaterial>,
+        colour: Srgba,
+    ) -> Handle<KitMaterial> {
+        let key =
+            [colour.red, colour.green, colour.blue].map(|c| (c.clamp(0.0, 1.0) * 255.0) as u8);
+        self.faces
+            .entry((key, source_id))
+            .or_insert_with(|| {
+                let linear = LinearRgba::from(colour);
+                assets.add(KitMaterial {
+                    base: source.clone(),
+                    extension: KitExt {
+                        tint: Vec4::new(linear.red, linear.green, linear.blue, 1.0),
+                    },
+                })
+            })
+            .clone()
     }
+
+    pub fn count(&self) -> usize {
+        self.materials.len() + self.faces.len()
+    }
+}
+
+/// A `Kit` surface whose banner faces follow the controller of its place.
+#[derive(Component)]
+pub struct KitFaces {
+    pub place: usize,
+    pub controller: String,
+    source: Handle<StandardMaterial>,
 }
 
 /// A banner surface of a kit maquette, repainted when its place changes hands.
@@ -107,6 +167,8 @@ pub struct KitBanner {
 pub struct LodStats {
     pub range_meshes: usize,
     pub kit_banners: usize,
+    /// `Kit` surfaces whose banner faces follow the controller.
+    pub kit_faces: usize,
     pub kit_banners_recoloured: u64,
     /// Maquettes without shadows (beyond their shadow range).
     pub shadowless: usize,
@@ -126,7 +188,8 @@ pub(super) fn prepare_maquette(
     children: Query<&Children>,
     names: Query<&GltfMaterialName>,
     meshes: Query<(), With<Mesh3d>>,
-    standard: Query<(), With<MeshMaterial3d<StandardMaterial>>>,
+    standard: Query<&MeshMaterial3d<StandardMaterial>>,
+    mut face_assets: ResMut<Assets<KitMaterial>>,
     mut maquettes: Query<&mut Maquette>,
     places: Res<Places>,
     mut kit: ResMut<KitBanners>,
@@ -153,7 +216,36 @@ pub(super) fn prepare_maquette(
         let is_banner = names
             .get(entity)
             .is_ok_and(|n| n.0.split('.').next() == Some(KIT_BANNER_MATERIAL));
-        if is_banner && standard.contains(entity) {
+        let is_kit = names
+            .get(entity)
+            .is_ok_and(|n| n.0.split('.').next() == Some(KIT_MATERIAL));
+        if is_kit && let Ok(source) = standard.get(entity) {
+            let colour = kit.colour_of(&controller);
+            let fallback = StandardMaterial {
+                perceptual_roughness: 0.9,
+                double_sided: true,
+                cull_mode: None,
+                ..default()
+            };
+            let handle = kit.face_material(
+                &mut face_assets,
+                materials.get(&source.0).unwrap_or(&fallback),
+                source.0.id(),
+                colour,
+            );
+            commands
+                .entity(entity)
+                .try_remove::<MeshMaterial3d<StandardMaterial>>()
+                .try_insert((
+                    MeshMaterial3d(handle),
+                    KitFaces {
+                        place: maquette.place,
+                        controller: controller.clone(),
+                        source: source.0.clone(),
+                    },
+                ));
+            stats.kit_faces += 1;
+        } else if is_banner && standard.contains(entity) {
             let colour = kit.colour_of(&controller);
             let handle = kit.material(&mut materials, colour);
             commands.entity(entity).try_insert((
@@ -174,10 +266,31 @@ pub fn recolour_kit_banners(
     mut kit: ResMut<KitBanners>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut banners: Query<(&mut KitBanner, &mut MeshMaterial3d<StandardMaterial>)>,
+    mut faces: Query<(&mut KitFaces, &mut MeshMaterial3d<KitMaterial>)>,
+    mut face_assets: ResMut<Assets<KitMaterial>>,
     mut stats: ResMut<LodStats>,
 ) {
     if !places.is_changed() {
         return;
+    }
+    for (mut face, mut material) in &mut faces {
+        let Some(p) = places.places.get(face.place) else {
+            continue;
+        };
+        if p.controller == face.controller {
+            continue;
+        }
+        face.controller = p.controller.clone();
+        let colour = kit.colour_of(&p.controller);
+        let fallback = StandardMaterial {
+            perceptual_roughness: 0.9,
+            double_sided: true,
+            cull_mode: None,
+            ..default()
+        };
+        let source = materials.get(&face.source).unwrap_or(&fallback).clone();
+        material.0 = kit.face_material(&mut face_assets, &source, face.source.id(), colour);
+        stats.kit_banners_recoloured += 1;
     }
     for (mut banner, mut material) in &mut banners {
         let Some(p) = places.places.get(banner.place) else {
@@ -275,6 +388,7 @@ pub(super) fn batch_stats(
         &Mesh3d,
         Option<&MeshMaterial3d<StandardMaterial>>,
         Option<&MeshMaterial3d<BuildingAtlasMaterial>>,
+        Option<&MeshMaterial3d<KitMaterial>>,
     )>,
     mut stats: ResMut<LodStats>,
 ) {
@@ -287,12 +401,13 @@ pub(super) fn batch_stats(
     let mut count = 0;
     for m in &maquettes {
         for &entity in &m.meshes {
-            let Ok((mesh, standard, atlas)) = pieces.get(entity) else {
+            let Ok((mesh, standard, atlas, kit)) = pieces.get(entity) else {
                 continue;
             };
-            let material = match (standard, atlas) {
-                (Some(s), _) => s.0.id().untyped(),
-                (None, Some(a)) => a.0.id().untyped(),
+            let material = match (standard, atlas, kit) {
+                (Some(s), _, _) => s.0.id().untyped(),
+                (None, Some(a), _) => a.0.id().untyped(),
+                (None, None, Some(k)) => k.0.id().untyped(),
                 _ => continue,
             };
             count += 1;
@@ -345,5 +460,28 @@ mod tests {
         assert_ne!(a, c);
         assert_eq!(kit.count(), 2);
         assert_eq!(kit.colour_of("none"), DEFAULT_BANNER);
+    }
+
+    #[test]
+    fn kit_faces_are_shared_by_colour_and_source() {
+        let mut std_assets = Assets::<StandardMaterial>::default();
+        let source = std_assets.add(StandardMaterial::default());
+        let base = StandardMaterial::default();
+        let mut faces = Assets::<KitMaterial>::default();
+        let mut kit = KitBanners::default();
+        let red = Srgba::new(0.8, 0.1, 0.1, 1.0);
+        let a = kit.face_material(&mut faces, &base, source.id(), red);
+        let b = kit.face_material(&mut faces, &base, source.id(), red);
+        let c = kit.face_material(
+            &mut faces,
+            &base,
+            source.id(),
+            Srgba::new(0.1, 0.1, 0.8, 1.0),
+        );
+        assert_eq!(a, b);
+        assert_ne!(a, c);
+        // The tint is linear.
+        let tint = faces.get(&a).unwrap().extension.tint;
+        assert!((tint.x - LinearRgba::from(red).red).abs() < 1e-6);
     }
 }
