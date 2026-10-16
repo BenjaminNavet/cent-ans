@@ -1,5 +1,5 @@
 {
-  "description": "TB5 : type de côte de la carte de campagne (rendu seulement, aucune règle de jeu). `regions` : géologie de la côte par région (polygones en pixels carte, grille de map.json ; la dernière région qui contient un point l’emporte) ; hors région : `default`. La pente choisit entre falaise et plage : altitude lue à `cliff.probe_px` de la côte vers l’intérieur, plage sous `cliff.min_m`, falaise au-dessus de `cliff.max_m`. `types` : couleurs linéaires des roches et des plages. `swash` : ressac (lame d’écume qui avance et recule au trait de côte : période en secondes, recul vers le large, montée sur la plage, liseré et dentelle en pixels carte, part de la montée au pied des falaises). Lu par game/scripts/map/coast_look.gd, game/shaders/coast_band.gdshaderinc et game/shaders/coast_common.gdshaderinc.",
+  "description": "TB5 : type de côte de la carte de campagne (rendu seulement, aucune règle de jeu). `regions` : géologie de la côte par région (polygones en pixels carte, grille de map.json ; la dernière région qui contient un point l’emporte) ; hors région : `default`. La pente choisit entre falaise et plage : altitude lue à `cliff.probe_px` de la côte vers l’intérieur, plage sous `cliff.min_m`, falaise au-dessus de `cliff.max_m` (une région peut décaler la sonde avec `cliff_probe_px` : là où la côte raster est à quelques pixels du pied de la falaise, Douvres). `types` : couleurs linéaires des roches et des plages. `swash` : ressac (lame d’écume qui avance et recule au trait de côte : période en secondes, recul vers le large, montée sur la plage, liseré et dentelle en pixels carte, part de la montée au pied des falaises). Lu par game/scripts/map/coast_look.gd, game/shaders/coast_band.gdshaderinc et game/shaders/coast_common.gdshaderinc.",
   "cell_px": 16,
   "cliff": {
     "probe_px": 1.6,
@@ -109,6 +109,7 @@
       "rock": "chalk",
       "beach": "shingle",
       "beach_width": 1.0,
+      "cliff_probe_px": 5.0,
       "polygon_px": [
         [
           941.3,
@@ -339,6 +340,31 @@
         [
           1089.8,
           3904.5
+        ]
+      ]
+    },
+    {
+      "id": "msm_bay",
+      "label": "Baie du Mont-Saint-Michel : estran de sable et de vase découvert à marée basse, plage très large",
+      "rock": "rock",
+      "beach": "sand",
+      "beach_width": 2.0,
+      "polygon_px": [
+        [
+          880.0,
+          2520.0
+        ],
+        [
+          965.0,
+          2520.0
+        ],
+        [
+          965.0,
+          2600.0
+        ],
+        [
+          880.0,
+          2600.0
         ]
       ]
     }

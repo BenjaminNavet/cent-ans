@@ -288,6 +288,7 @@ struct BuildAssets<'w> {
     ribbon_materials: ResMut<'w, Assets<RoadRibbonMaterial>>,
     standard_materials: ResMut<'w, Assets<StandardMaterial>>,
     images: ResMut<'w, Assets<Image>>,
+    shared_coast: Option<Res<'w, crate::campaign::terrain::coast::SharedCoastDist>>,
 }
 
 fn build_water(
@@ -320,7 +321,18 @@ fn build_water(
         ..default()
     };
     let mut detail = detail::DetailLoader::new(&root);
-    let coast_dist = load_png(&map_dir.join("coast_dist.png"), false).map(|i| ctx.images.add(i));
+    // One GPU copy of `coast_dist.png`, shared with the terrain coast band.
+    let coast_dist = match assets.shared_coast.as_ref() {
+        Some(shared) => Some(shared.0.clone()),
+        None => load_png(&map_dir.join("coast_dist.png"), false).map(|i| {
+            let handle = ctx.images.add(i);
+            ctx.commands
+                .insert_resource(crate::campaign::terrain::coast::SharedCoastDist(
+                    handle.clone(),
+                ));
+            handle
+        }),
+    };
     out.has_coast_dist = coast_dist.is_some();
     build_sea(&mut ctx, &data, coast_dist.clone(), &mut detail, &mut out);
     build_coast(&mut ctx, &data, ground.0.as_ref(), &mut out);

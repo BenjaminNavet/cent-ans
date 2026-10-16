@@ -12,7 +12,7 @@ import bevy_pbr::render::{
     shadows,
 };
 // Per-province weather (lot weather5, wired by coastterr).
-import cent_ans_client::campaign::weather::ground::{wx_field, wx_selection_clear, wx_scatter};
+import cent_ans_client::campaign::weather::ground::{wx_field, wx_selection_clear, wx_scatter, wx_aerial_fog_color};
 
 struct TerrainParams {
     // xyz: direction towards the sun.
@@ -83,6 +83,9 @@ struct LookParams {
     valley_b: vec4<f32>,
     valley_c: vec4<f32>,
     valley_color: vec4<f32>,
+    // Aerial perspective: season fog colour (sRGB) / 1 when set; sky tint (sRGB) / share at the pitch.
+    aerial_base: vec4<f32>,
+    aerial_sky: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(4) var<uniform> look: LookParams;
@@ -673,20 +676,6 @@ fn coast_band(p: vec2<f32>, footprint: f32, hc: f32, world_y: f32, snow: f32, co
     return out;
 }
 
-// Post-tonemap adjustment of the Godot campaign environment (`adjustment_contrast` 1.06,
-// `adjustment_saturation` 1.08, Godot `apply_bcs` on display values). Bevy tonemaps after this
-// shader: the adjustment is applied on a gamma-encoded copy of the colour, which approximates
-// display values for the mid tones where the ground lives.
-fn godot_adjustment(c: vec3<f32>) -> vec3<f32> {
-    if (extras.post.z < 0.5) {
-        return c;
-    }
-    var s = pow(max(c, vec3<f32>(0.0)), vec3<f32>(1.0 / 2.2));
-    s = mix(vec3<f32>(0.5), s, extras.post.x);
-    s = mix(vec3<f32>(dot(s, vec3<f32>(1.0 / 3.0))), s, extras.post.y);
-    return pow(max(s, vec3<f32>(0.0)), vec3<f32>(2.2));
-}
-
 // Fog-of-war veil: sepia ground under a wash, with a drifting remnant of mist (TB2, BR).
 fn fog_of_war_veil(col: vec3<f32>, p: vec2<f32>) -> vec3<f32> {
     if (look.fog_a.w < 0.5) {
@@ -803,6 +792,17 @@ fn camera_distance_fog(color: vec3<f32>, world: vec3<f32>, sun_vis: f32) -> vec3
     }
     let distance = length(world - view.world_position);
     let c = vec4<f32>(color, 1.0);
+    // Aerial perspective per pixel (Godot `fog_aerial_perspective`): the fog takes the sky tint
+    // along the pixel's own view ray. The CPU sets the centre-ray blend as `base_color`; the
+    // blend is redone in sRGB (as the CPU does) from the season colour.
+    var haze = fog;
+    if (look.aerial_base.w > 0.5) {
+        let ray_y = normalize(world - view.world_position).y;
+        let srgb = wx_aerial_fog_color(look.aerial_base.rgb, look.aerial_sky.rgb, look.aerial_sky.w, ray_y);
+        let lo = srgb / 12.92;
+        let hi = pow((srgb + vec3<f32>(0.055)) / 1.055, vec3<f32>(2.4));
+        haze.base_color = vec4<f32>(select(hi, lo, srgb <= vec3<f32>(0.04045)), fog.base_color.a);
+    }
     var none = vec3<f32>(0.0);
     if (fog.directional_light_color.a > 0.0 && lights.n_directional_lights > 0u) {
         let light = lights.directional_lights[0];
@@ -810,11 +810,11 @@ fn camera_distance_fog(color: vec3<f32>, world: vec3<f32>, sun_vis: f32) -> vec3
             light.color.rgb * view.exposure, 1.0, fog.directional_light_exponent) * sun_vis;
     }
     if (fog.mode == mesh_view_types::FOG_MODE_LINEAR) {
-        return bevy_fog::linear_fog(fog, c, distance, none).rgb;
+        return bevy_fog::linear_fog(haze, c, distance, none).rgb;
     } else if (fog.mode == mesh_view_types::FOG_MODE_EXPONENTIAL) {
-        return bevy_fog::exponential_fog(fog, c, distance, none).rgb;
+        return bevy_fog::exponential_fog(haze, c, distance, none).rgb;
     } else if (fog.mode == mesh_view_types::FOG_MODE_EXPONENTIAL_SQUARED) {
-        return bevy_fog::exponential_squared_fog(fog, c, distance, none).rgb;
+        return bevy_fog::exponential_squared_fog(haze, c, distance, none).rgb;
     }
     return color;
 }
@@ -2234,6 +2234,5 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         let haze = 1.0 - smoothstep(0.0, edge_px, min(q.x, q.y));
         color = mix(color, params.edge.rgb, haze);
     }
-    color = godot_adjustment(color);
     return vec4<f32>(color, 1.0);
 }
