@@ -14,7 +14,7 @@
 //!
 //! Impostors use their own instanced pipeline (`billboard.rs`, `billboard.wesl`): azimuth view,
 //! seasonal tint, wind, atlas normals. `clearance.rs` ports `TreeClearance` (lakes, sea, roads);
-//! `reeds.rs` the reed clumps and ponds of the wetlands.
+//! `reeds.rs` the reed clumps of the wetlands (their ponds are drawn by `water/fresh.rs`).
 //!
 //! `edges.rs`: forest-cover edges (lower, sparser trees); `mips.rs`: mip chains of the atlases;
 //! rivers clear the trees (`clearance.rs`, crown radius exact incl. `crown_widen`); the reeds have
@@ -163,31 +163,29 @@ struct WetBlock {
     /// Vertical scale bits of the last seating; `None`: not seated.
     seated: Option<u32>,
     reed_bytes: Arc<Vec<u8>>,
-    pond_bytes: Arc<Vec<u8>>,
 }
 
 /// Blocks and batches of one level of the wetland decor.
 #[derive(Default)]
 struct WetLevel {
     blocks: HashMap<(i32, i32), WetBlock>,
-    /// Reed and pond batches.
-    entities: [Option<Entity>; 2],
-    versions: [u64; 2],
+    /// Reed batch (the ponds are drawn by `water/fresh.rs`).
+    entities: [Option<Entity>; 1],
+    versions: [u64; 1],
     last_focus: Vec2,
     last_radius: f32,
     dirty: bool,
     /// Opacity pushed to the batches (dithered), `fw_alpha`.
     alpha: f32,
     reeds: usize,
-    ponds: usize,
     rebuilds: usize,
 }
 
-/// Reed clumps and ponds around the focus (`reeds.rs`), near and patch levels.
+/// Reed clumps around the focus (`reeds.rs`), near and patch levels.
 #[derive(Resource, Default)]
 struct WetDecor {
     levels: [WetLevel; 2],
-    meshes: Option<(Handle<Mesh>, Handle<Mesh>)>,
+    meshes: Option<Handle<Mesh>>,
     card: Option<Handle<Image>>,
     seeded_blocks: usize,
     seed_ms_total: f32,
@@ -707,7 +705,7 @@ fn sync_season(season: Option<Res<SeasonWeights>>, mut batches: Query<&mut VegBa
     }
 }
 
-/// Seeds, seats and draws the reed clumps and ponds near the focus (both levels of
+/// Seeds, seats and draws the reed clumps near the focus (both levels of
 /// `FreshwaterLayer`: near under a few units, patch up to `patch_max_distance`).
 #[allow(clippy::too_many_arguments)]
 fn update_wetlands(
@@ -741,7 +739,7 @@ fn update_wetlands(
         let slot = &mut wet.levels[level as usize];
         if alpha <= 0.01 {
             // Hidden level: the batches empty out once, the blocks stay cached.
-            if slot.alpha > 0.01 || slot.reeds + slot.ponds > 0 {
+            if slot.alpha > 0.01 || slot.reeds > 0 {
                 for entity in slot.entities.iter().flatten() {
                     if let Ok(mut batch) = batches.get_mut(*entity) {
                         batch.count = 0;
@@ -749,7 +747,6 @@ fn update_wetlands(
                     }
                 }
                 slot.reeds = 0;
-                slot.ponds = 0;
                 slot.dirty = true;
             }
             slot.alpha = 0.0;
@@ -791,8 +788,8 @@ fn update_wetlands(
                 level,
                 key,
             );
-            let (mut reed_bytes, mut pond_bytes) = (Vec::new(), Vec::new());
-            reeds::block_records(&seeded, &mut reed_bytes, &mut pond_bytes, height);
+            let mut reed_bytes = Vec::new();
+            reeds::block_records(&seeded, &mut reed_bytes, height);
             let ms = started.elapsed().as_secs_f32() * 1000.0;
             wet.seeded_blocks += 1;
             wet.seed_ms_total += ms;
@@ -803,7 +800,6 @@ fn update_wetlands(
                     seeded,
                     seated: Some(scale_bits),
                     reed_bytes: Arc::new(reed_bytes),
-                    pond_bytes: Arc::new(pond_bytes),
                 },
             );
             slot.dirty = true;
@@ -820,10 +816,9 @@ fn update_wetlands(
             if block.seated == Some(scale_bits) {
                 continue;
             }
-            let (mut reed_bytes, mut pond_bytes) = (Vec::new(), Vec::new());
-            reeds::block_records(&block.seeded, &mut reed_bytes, &mut pond_bytes, height);
+            let mut reed_bytes = Vec::new();
+            reeds::block_records(&block.seeded, &mut reed_bytes, height);
             block.reed_bytes = Arc::new(reed_bytes);
-            block.pond_bytes = Arc::new(pond_bytes);
             block.seated = Some(scale_bits);
             reseated += 1;
             slot.dirty = true;
@@ -862,45 +857,35 @@ fn update_wetlands(
             continue;
         }
         // Records of the wanted blocks, nearest first, up to `max_instances`.
-        let (mut reed_all, mut pond_all) = (Vec::new(), Vec::new());
+        let mut reed_all = Vec::new();
         let mut total = 0usize;
         for (key, _) in &wanted {
             let Some(block) = slot.blocks.get(key) else {
                 continue;
             };
-            let count = (block.reed_bytes.len() + block.pond_bytes.len()) / billboard::RECORD_BYTES;
+            let count = block.reed_bytes.len() / billboard::RECORD_BYTES;
             if total + count > config.max_instances {
                 break;
             }
             total += count;
             reed_all.extend_from_slice(&block.reed_bytes);
-            pond_all.extend_from_slice(&block.pond_bytes);
         }
         slot.last_focus = focus;
         slot.last_radius = radius;
         slot.dirty = false;
         slot.rebuilds += 1;
         slot.reeds = reed_all.len() / billboard::RECORD_BYTES;
-        slot.ponds = pond_all.len() / billboard::RECORD_BYTES;
-        let (reed_mesh, pond_mesh) = wet
+        let reed_mesh = wet
             .meshes
-            .get_or_insert_with(|| {
-                (
-                    meshes.add(reeds::reed_mesh()),
-                    meshes.add(reeds::pond_mesh()),
-                )
-            })
+            .get_or_insert_with(|| meshes.add(reeds::reed_mesh()))
             .clone();
         let card = wet
             .card
             .get_or_insert_with(|| server.load(reeds::CARD_TEXTURE))
             .clone();
-        for (n, (bytes, mesh, mode, name)) in [
-            (reed_all, reed_mesh, Mode::Reeds, "WetlandReeds"),
-            (pond_all, pond_mesh, Mode::Pond, "WetlandPonds"),
-        ]
-        .into_iter()
-        .enumerate()
+        for (n, (bytes, mesh, mode, name)) in [(reed_all, reed_mesh, Mode::Reeds, "WetlandReeds")]
+            .into_iter()
+            .enumerate()
         {
             slot.versions[n] += 1;
             let count = (bytes.len() / billboard::RECORD_BYTES) as u32;
@@ -975,7 +960,6 @@ fn dump_vegetation(world: &World) -> (String, Value) {
             json!({
                 "blocks_cached": l.blocks.len(),
                 "reed_clumps": l.reeds,
-                "ponds": l.ponds,
                 "alpha": l.alpha,
                 "rebuilds": l.rebuilds,
                 "batches": l.entities.iter().flatten().count(),

@@ -4,8 +4,9 @@
 //!
 //! Blocks of `patch_block_units` map units are seeded around the camera focus (deterministic per
 //! block: ellipses of the wetland sites, `cover` x `density`, no reed in the clearings of the
-//! places nor on water), seated on the displayed ground and drawn as two instanced batches (reeds,
-//! ponds) by `billboard.rs`. A second, near level (blocks of 2 units, a clump every 7 cm, under
+//! places nor on water), seated on the displayed ground and drawn as one instanced batch of reeds
+//! by `billboard.rs`. The ponds are still seeded (the reed draws depend on them) but drawn once, by
+//! `campaign/water/fresh.rs` (port of the `freshwater_layer.gd` ponds), not here. A second, near level (blocks of 2 units, a clump every 7 cm, under
 //! 4 units of camera distance) fades in/out with the patch level by dithered opacity.
 //! Purely visual.
 
@@ -373,13 +374,10 @@ pub fn seed_block(
     out
 }
 
-/// Records of a seeded block on the ground (`height(x, z)`), reeds then ponds.
-pub fn block_records(
-    seeded: &Seeded,
-    reeds: &mut Vec<u8>,
-    ponds: &mut Vec<u8>,
-    height: impl Fn(f32, f32) -> f32,
-) {
+/// Records of the reeds of a seeded block on the ground (`height(x, z)`). The ponds are seeded
+/// (the draws of the reeds depend on them) but drawn by `campaign/water/fresh.rs` (port of the
+/// `freshwater_layer.gd` ponds), not here.
+pub fn block_records(seeded: &Seeded, reeds: &mut Vec<u8>, height: impl Fn(f32, f32) -> f32) {
     for r in &seeded.reeds {
         push_record(
             reeds,
@@ -388,16 +386,6 @@ pub fn block_records(
             r.size,
             r.phase,
             r.tint,
-        );
-    }
-    for p in &seeded.ponds {
-        push_record(
-            ponds,
-            Vec3::new(p.x, height(p.x, p.z) + 0.002, p.z),
-            p.seed * 360.0,
-            p.diameter,
-            p.seed,
-            p.water,
         );
     }
 }
@@ -420,31 +408,6 @@ pub fn reed_mesh() -> Mesh {
             uvs.push(uv);
         }
         indices.extend([base, base + 1, base + 2, base, base + 2, base + 3]);
-    }
-    Mesh::new(
-        PrimitiveTopology::TriangleList,
-        RenderAssetUsages::RENDER_WORLD,
-    )
-    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions.clone())
-    .with_inserted_attribute(
-        Mesh::ATTRIBUTE_NORMAL,
-        vec![[0.0, 1.0, 0.0]; positions.len()],
-    )
-    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs)
-    .with_inserted_indices(Indices::U32(indices))
-}
-
-/// Flat disc of 16 sectors, diameter 1, UV centred.
-pub fn pond_mesh() -> Mesh {
-    let mut positions = vec![[0.0, 0.0, 0.0]];
-    let mut uvs = vec![[0.5, 0.5]];
-    let mut indices: Vec<u32> = Vec::new();
-    for i in 0..16 {
-        let a = i as f32 / 16.0 * std::f32::consts::TAU;
-        positions.push([a.cos() * 0.5, 0.0, a.sin() * 0.5]);
-        uvs.push([0.5 + a.cos() * 0.5, 0.5 + a.sin() * 0.5]);
-        let next = (i + 1) % 16;
-        indices.extend([0, 1 + i as u32, 1 + next as u32]);
     }
     Mesh::new(
         PrimitiveTopology::TriangleList,
@@ -621,10 +584,9 @@ mod tests {
             }],
             ponds: vec![],
         };
-        let (mut reeds, mut ponds) = (Vec::new(), Vec::new());
-        block_records(&seeded, &mut reeds, &mut ponds, |_, _| 3.0);
+        let mut reeds = Vec::new();
+        block_records(&seeded, &mut reeds, |_, _| 3.0);
         assert_eq!(reeds.len(), super::super::billboard::RECORD_BYTES);
-        assert!(ponds.is_empty());
     }
 
     #[test]
@@ -645,5 +607,34 @@ mod tests {
         assert!(wet.sites.len() > 50);
         assert!(wet.kinds.contains_key("marsh"));
         assert_eq!(wet.block_units, 16.0);
+    }
+
+    #[test]
+    fn block_records_carry_reeds_only() {
+        let seeded = Seeded {
+            reeds: vec![
+                Reed {
+                    x: 1.0,
+                    z: 2.0,
+                    size: 0.5,
+                    tint: [0.5; 3],
+                    phase: 0.25
+                };
+                3
+            ],
+            ponds: vec![
+                Pond {
+                    x: 1.0,
+                    z: 2.0,
+                    diameter: 3.0,
+                    water: [0.2; 3],
+                    seed: 0.5
+                };
+                2
+            ],
+        };
+        let mut bytes = Vec::new();
+        block_records(&seeded, &mut bytes, |_, _| 0.0);
+        assert_eq!(bytes.len(), 3 * super::super::billboard::RECORD_BYTES);
     }
 }
