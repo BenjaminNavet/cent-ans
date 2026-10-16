@@ -230,7 +230,12 @@ fn update_precipitation(
         return;
     }
     *timer = 0.0;
-    let sim_weather = super::atmosphere::weather_key(session.sim_mut().weather()).to_owned();
+    // Dev hook (proof of the shower without a historical map): the simulation rains.
+    let sim_weather = if std::env::var_os("CENT_ANS_SHOWER").is_some() {
+        "rain".to_owned()
+    } else {
+        super::atmosphere::weather_key(session.sim_mut().weather()).to_owned()
+    };
     let want = desired_fall(&atmosphere.weather, &sim_weather);
     let have = existing.iter().next().map(|(_, p)| (p.snow, p.shower));
     if have != want {
