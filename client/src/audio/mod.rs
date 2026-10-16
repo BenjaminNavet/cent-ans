@@ -28,7 +28,6 @@ pub mod battle_music;
 pub mod campaign;
 pub mod cues;
 pub mod farbus;
-pub mod farbus;
 pub mod playlist;
 pub mod speech;
 pub mod uisound;
@@ -529,7 +528,6 @@ impl Plugin for AudioPlugin {
                 advisor::AdvisorPlugin,
                 campaign::CampaignAudioPlugin,
                 uisound::UiSoundPlugin,
-                farbus::FarBusPlugin,
                 farbus::FarBusPlugin,
             ))
             .register_dump(dump_audio)

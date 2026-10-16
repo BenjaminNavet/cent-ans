@@ -400,7 +400,7 @@ mod tests {
         assert!((filter.gain_at(100.0, 44100.0) - 1.0).abs() < 0.01);
         let at_cutoff = filter.gain_at(1800.0, 44100.0);
         assert!(
-            (at_cutoff - 0.7071).abs() < 0.01,
+            (at_cutoff - std::f32::consts::FRAC_1_SQRT_2).abs() < 0.01,
             "-3 dB at cutoff: {at_cutoff}"
         );
         assert!(filter.gain_at(7000.0, 44100.0) < 0.1);
@@ -411,7 +411,10 @@ mod tests {
         let dry = FarParams::new(1800.0, 0.0, 0.5);
         let low = rms(&run(200.0, FarParams::new(1800.0, 0.0, 0.5))[4000..]);
         let high = rms(&run(8000.0, dry)[4000..]);
-        assert!((low - 0.7071).abs() < 0.03, "low tone kept: {low}");
+        assert!(
+            (low - std::f32::consts::FRAC_1_SQRT_2).abs() < 0.03,
+            "low tone kept: {low}"
+        );
         assert!(high < 0.05, "high tone cut: {high}");
     }
 

@@ -799,7 +799,7 @@ fn drive_bed(
             let entity = commands
                 .spawn((
                     Name::new(format!("Bed {bed_name}")),
-                    AudioPlayer::new(asset_server.load::<FarSource>(path)),
+                    AudioPlayer(asset_server.load::<FarSource>(path)),
                     PlaybackSettings::LOOP
                         .with_volume(Volume::Linear(volume))
                         .with_spatial(true)
@@ -1140,7 +1140,7 @@ fn handle_sfx_at(
             let entity = commands
                 .spawn((
                     Name::new(format!("Sfx {name}")),
-                    AudioPlayer::new(asset_server.load::<FarSource>(path)),
+                    AudioPlayer(asset_server.load::<FarSource>(path)),
                     PlaybackSettings::DESPAWN
                         .with_volume(Volume::Linear(volume))
                         .with_speed(pitch)
@@ -1287,7 +1287,7 @@ fn drive_ambience(
             commands
                 .spawn((
                     name,
-                    AudioPlayer::new(asset_server.load::<FarSource>(path)),
+                    AudioPlayer(asset_server.load::<FarSource>(path)),
                     player,
                     state,
                     DespawnOnExit(AppState::Battle),
