@@ -240,6 +240,7 @@ fn spawn_puff(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn update_smoke(
     mut commands: Commands,
     session: Res<BattleSession>,
