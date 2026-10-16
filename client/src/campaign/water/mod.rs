@@ -19,6 +19,7 @@ pub mod basins;
 pub mod data;
 pub mod detail;
 pub mod drape;
+pub mod fine;
 pub mod height;
 pub mod label_ui;
 pub mod labels;
@@ -155,6 +156,7 @@ impl Plugin for CampaignWaterPlugin {
     fn build(&self, app: &mut App) {
         materials::register_shaders(app);
         label_ui::build(app);
+        app.add_plugins(fine::FineGeoPlugin);
         app.init_resource::<GroundHeight>()
             .init_resource::<WaterView>()
             .init_resource::<WaterStats>()
