@@ -93,7 +93,7 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
             })),
             "grass": world.get_resource::<grass::GrassStats>().map(|s| serde_json::json!({
                 "tufts": s.tufts, "chunks": s.chunks, "group": s.group, "biome": s.biome,
-                "tufts_by_card": s.tufts_by_card, "fa_atlas": s.atlas, "tufts_by_cell": s.tufts_by_cell,
+                "tufts_by_card": s.tufts_by_card, "fa_atlas": s.atlas, "tufts_by_cell": s.tufts_by_cell, "field_tufts": s.field_tufts,
             })),
             "flatten": world.get_resource::<flatten::FlattenMap>().map(|m| serde_json::json!({
                 "size": [m.width, m.height], "texel": m.texel, "corpse_marks": m.corpse_marks,

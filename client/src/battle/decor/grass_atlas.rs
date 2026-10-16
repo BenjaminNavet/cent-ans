@@ -24,6 +24,20 @@ pub struct Variant {
     pub weight_clump: f32,
 }
 
+/// Grass of the decor fields (`render.fields` of the catalogue; `fa_kind` 1 wheat, 2 stubble,
+/// 3 seedlings in battle_grass.gdshader).
+#[derive(Debug, Clone, PartialEq)]
+pub struct FieldCells {
+    /// Cells of the wheat and of the stubble / seedlings.
+    pub wheat: [usize; 2],
+    pub stubble: [usize; 2],
+    /// Height factor of wheat, fallow, stubble and seedlings.
+    pub height: [f32; 4],
+    pub wheat_gain: [f32; 3],
+    pub wheat_foot_shade: f32,
+    pub seedling_gain: [f32; 3],
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GrassAtlas {
     pub columns: usize,
@@ -45,6 +59,10 @@ pub struct GrassAtlas {
     /// Darkening at the foot of a tuft (1 = none).
     pub foot_shade: f32,
     pub variants: Vec<Variant>,
+    /// Wheat, stubble and seedling fields (`render.fields`).
+    pub fields: FieldCells,
+    /// Tint gain of the atlas (`render.tint_gain`).
+    pub tint_gain: [f32; 3],
     cum_open: Vec<f32>,
     cum_clump: Vec<f32>,
 }
@@ -91,7 +109,34 @@ impl GrassAtlas {
         let cell_w = num(doc, &["atlas", "cell_width"], 512.0);
         let cell_h = num(doc, &["atlas", "cell_height"], 256.0);
         let padding = num(doc, &["atlas", "padding"], 8.0);
+        let cell = |key: &str, i: usize| {
+            let name = doc["render"]["fields"][key][i].as_str().unwrap_or("");
+            variants.iter().position(|v| v.name == name).unwrap_or(0)
+        };
+        let triple = |key: &str, default: f32| {
+            let list = &doc["render"]["fields"][key];
+            [0, 1, 2].map(|i| list[i].as_f64().map_or(default, |v| v as f32))
+        };
+        let fields = FieldCells {
+            wheat: [cell("wheat_variants", 0), cell("wheat_variants", 1)],
+            stubble: [cell("stubble_variants", 0), cell("stubble_variants", 1)],
+            height: [
+                num(doc, &["render", "fields", "wheat_height"], 1.0),
+                num(doc, &["render", "fields", "fallow_height"], 1.2),
+                num(doc, &["render", "fields", "stubble_height"], 1.0),
+                num(doc, &["render", "fields", "seedling_height"], 0.6),
+            ],
+            wheat_gain: triple("wheat_gain", 1.0),
+            wheat_foot_shade: num(doc, &["render", "fields", "wheat_foot_shade"], 0.6),
+            seedling_gain: triple("seedling_gain", 1.0),
+        };
+        let tint_gain = {
+            let list = &doc["render"]["tint_gain"];
+            [0, 1, 2].map(|i| list[i].as_f64().map_or(1.0, |v| v as f32))
+        };
         Some(GrassAtlas {
+            fields,
+            tint_gain,
             columns: columns.max(1),
             rows: rows.max(1),
             pad: [padding / cell_w, padding / cell_h],
@@ -207,6 +252,17 @@ mod tests {
         assert!(short(a.pick(0.0, 0.0)));
         // Every draw lands in the atlas.
         assert!(a.pick(0.999999, 0.5) < a.variants.len());
+    }
+
+    #[test]
+    fn the_catalogue_names_the_field_cells() {
+        let a = atlas();
+        assert_eq!(a.variants[a.fields.wheat[0]].name, "wheat_a");
+        assert_eq!(a.variants[a.fields.wheat[1]].name, "wheat_b");
+        assert_eq!(a.variants[a.fields.stubble[0]].name, "short_a");
+        assert!((a.fields.height[3] - 0.6).abs() < 1e-6);
+        assert!((a.fields.wheat_gain[2] - 0.56).abs() < 1e-6);
+        assert!((a.tint_gain[0] - 1.25).abs() < 1e-6);
     }
 
     #[test]

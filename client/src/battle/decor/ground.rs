@@ -72,6 +72,11 @@ pub(super) fn polyline_distance(points: &[(f64, f64)], x: f64, z: f64) -> f64 {
     best
 }
 
+/// `StampMap::stamp_soft_disc` falloff: `1 - smooth(radius - feather / 2, radius + feather, d)`.
+fn soft_disc(radius: f64, feather: f64, d: f64) -> f64 {
+    1.0 - smooth(radius - feather * 0.5, radius + feather, d)
+}
+
 /// Feathered coverage (0..1) of the discs `zones` at `(x, z)`.
 fn zone_cover(zones: &[sim_battle::Zone], x: f64, z: f64) -> f64 {
     let mut cover: f64 = 0.0;
@@ -85,6 +90,20 @@ fn zone_cover(zones: &[sim_battle::Zone], x: f64, z: f64) -> f64 {
         ));
     }
     cover
+}
+
+/// Trodden grass and bare earth "in places" under a hamlet, church, manor, farm or camp
+/// (`_stamp_decor`: 0.25 hamlet / church, 0.35 other sites). Godot's rectangle is broken by a 3 m
+/// jitter and the noise of the dirt smoothstep; here the edge is feathered over 7 m, so the
+/// site is never a sharp rectangle.
+fn site_dirt(area: &sim_battle::Area, x: f64, z: f64) -> f64 {
+    let inside = -area.footprint().signed_distance(x, z);
+    let level = if matches!(area.kind, AreaKind::Hamlet | AreaKind::Church) {
+        0.25
+    } else {
+        0.35
+    };
+    level * smooth(-1.5, 5.5, inside)
 }
 
 /// Splat weights of the ground at `(x, z)`.
@@ -105,10 +124,22 @@ pub fn splat_at(field: &Battlefield, x: f64, z: f64) -> Splat {
     for area in &field.decor.areas {
         if area.kind == AreaKind::Ploughland && area.contains(x, z) {
             plough = 1.0;
-        } else if matches!(area.kind, AreaKind::Hamlet | AreaKind::Farmstead) && area.contains(x, z)
-        {
-            dirt = dirt.max(0.45);
+        } else if !matches!(
+            area.kind,
+            AreaKind::Vineyard | AreaKind::Meadow | AreaKind::Orchard | AreaKind::Ploughland
+        ) {
+            dirt = dirt.max(site_dirt(area, x, z));
         }
+    }
+    // Farm yards and the surroundings of houses and mills: beaten earth.
+    for house in &field.decor.buildings {
+        let d = (x - house.x).hypot(z - house.z);
+        dirt = dirt.max(soft_disc(house.width * 0.5 + 3.0, 3.0, d) * 0.7);
+    }
+    for camp in &field.decor.camps {
+        let radius = camp.area.length.min(camp.area.width) * 0.5;
+        let d = (x - camp.area.x).hypot(z - camp.area.z);
+        dirt = dirt.max(soft_disc(radius, radius * 0.6, d) * 0.55);
     }
     // Ford and banks: pebbles.
     let stone = if field.water_at(x, z) == Some(true) {
@@ -394,6 +425,24 @@ pub fn field_code(area: &sim_battle::Area) -> u8 {
         AreaKind::Meadow | AreaKind::Orchard => 3,
         AreaKind::Vineyard => 5,
         _ => 0,
+    }
+}
+
+impl DecorFields {
+    /// Field under `(x, z)` (nearest texel, like the shader without its edge warp): the code
+    /// (2 corn, 4 sown, 6 stubble...) and the edge ramp 0..1 (1 deeper than 8 m inside). `None`
+    /// outside the map or off the fields (clear areas included).
+    pub fn field_at(&self, x: f32, z: f32) -> Option<(u8, f32)> {
+        let ix = ((x - self.rect.x) / DECOR_TEXEL as f32).floor();
+        let iz = ((z - self.rect.y) / DECOR_TEXEL as f32).floor();
+        if ix < 0.0 || iz < 0.0 || ix as usize >= self.width || iz as usize >= self.height {
+            return None;
+        }
+        let i = (iz as usize * self.width + ix as usize) * 4;
+        (self.bytes[i + 3] == 255).then(|| {
+            let code = (f32::from(self.bytes[i]) / 255.0 * 8.0).round() as u8;
+            (code, f32::from(self.bytes[i + 2]) / 255.0)
+        })
     }
 }
 
@@ -1120,6 +1169,50 @@ fn main_pass_post_lighting_processing(p: PbrInput, c: vec4<f32>) -> vec4<f32> { 
         assert_eq!(relief.len(), field.nx * field.nz * 4);
         assert!(rect.z > field.width as f32 - 1.0);
         assert!(load_micro(&dir, 2).is_some_and(|m| m.layer_of.len() == LAYER_COUNT));
+    }
+
+    #[test]
+    fn site_dirt_has_no_sharp_rectangle_edge() {
+        use crate::battle::scene::setup;
+        use crate::paths;
+        use data_model::GameData;
+        let root = paths::find_root().unwrap();
+        let dir = paths::data_dir(&root);
+        let (game, _) = GameData::load(&dir).unwrap();
+        setup::install_battle_rules(&dir);
+        let custom = setup::default_custom_battle(&game);
+        let sim = setup::build_sim(&game, &dir, &custom, 7).unwrap();
+        let field = sim.field();
+        let mut sites = 0;
+        for area in field.decor.areas.iter().filter(|a| {
+            !matches!(
+                a.kind,
+                AreaKind::Vineyard | AreaKind::Meadow | AreaKind::Orchard | AreaKind::Ploughland
+            )
+        }) {
+            sites += 1;
+            // Walk across the long axis, 0.5 m steps, through the edge: no jump above 0.05 (a 0.35 level over 7 m, steepest 0.04 per step; a hard edge jumps 0.25-0.35).
+            let (sin, cos) = area.yaw.sin_cos();
+            let half = area.length * 0.5;
+            let mut previous: Option<f32> = None;
+            let mut t = -half - 8.0;
+            while t < half + 8.0 {
+                let dirt = site_dirt(area, area.x + t * cos, area.z + t * sin) as f32;
+                if let Some(p) = previous {
+                    assert!(
+                        (dirt - p).abs() < 0.05,
+                        "{:?} jump {p} -> {dirt}",
+                        area.kind
+                    );
+                }
+                previous = Some(dirt);
+                t += 0.5;
+            }
+        }
+        assert!(
+            sites > 0 || field.decor.areas.is_empty(),
+            "no site on the seed field"
+        );
     }
 
     #[test]
