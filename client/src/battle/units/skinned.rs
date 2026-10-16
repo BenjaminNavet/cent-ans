@@ -55,11 +55,11 @@ use bevy::{
 };
 
 use super::anim::{AnimConfig, Mode};
-use crate::agent::dump::DumpAppExt;
 use super::figures::{
     ATTRIBUTE_ATLAS, ATTRIBUTE_BONES, ATTRIBUTE_MASK, ATTRIBUTE_WEIGHTS, MAX_CLIPS,
 };
 use super::looks::MAX_COLOURS;
+use crate::agent::dump::DumpAppExt;
 
 const SHADER_PATH: &str = "embedded://cent_ans_client/battle/units/skinned.wesl";
 /// Skinned draws issued since the last reset.
@@ -1261,7 +1261,10 @@ mod tests {
         assert_eq!(instances.plan(&[(a, 10, 1), (b, 0, 1)]), Plan::Relayout);
         assert!(instances.capacity >= 64 * 1024);
         // Unchanged versions: nothing to send.
-        assert_eq!(instances.plan(&[(a, 10, 1), (b, 0, 1)]), Plan::Writes(vec![]));
+        assert_eq!(
+            instances.plan(&[(a, 10, 1), (b, 0, 1)]),
+            Plan::Writes(vec![])
+        );
         // a changes within its slot, b gets records: in-place write and an appended slot.
         assert_eq!(
             instances.plan(&[(a, 12, 2), (b, 5, 2)]),
@@ -1271,7 +1274,10 @@ mod tests {
         assert_eq!(sa.offset, 0);
         assert!(sb.offset >= sa.offset + sa.capacity);
         // Emptied batch: kept, nothing written.
-        assert_eq!(instances.plan(&[(a, 0, 3), (b, 5, 2)]), Plan::Writes(vec![]));
+        assert_eq!(
+            instances.plan(&[(a, 0, 3), (b, 5, 2)]),
+            Plan::Writes(vec![])
+        );
         assert_eq!(instances.slots[&a].count, 0);
         // Growth past the buffer end: re-layout, compacted from 0.
         let huge = (instances.capacity / RECORD_BYTES as u64) as u32 + 1;
