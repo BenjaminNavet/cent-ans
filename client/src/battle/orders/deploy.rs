@@ -37,6 +37,8 @@ pub struct Deployment {
     pub active: bool,
     /// Zones of the player `[x0, z0, x1, z1]` (several for an ambusher's flanks).
     pub zones: Vec<[f32; 4]>,
+    /// Zone meshes (shader of `zone.rs`) alive right now.
+    pub zone_meshes: usize,
 }
 
 #[derive(Component)]

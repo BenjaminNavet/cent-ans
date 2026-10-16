@@ -131,13 +131,16 @@ pub fn zone_mesh(field: &Battlefield, zone: [f32; 4]) -> Option<Mesh> {
 /// Spawns the zone meshes while the deployment phase is active and removes them afterwards.
 pub fn sync_zone(
     mut commands: Commands,
-    deployment: Res<Deployment>,
+    mut deployment: ResMut<Deployment>,
     mut session: ResMut<BattleSession>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ZoneMaterial>>,
     existing: Query<Entity, With<ZoneMesh>>,
 ) {
     let present = !existing.is_empty();
+    if deployment.zone_meshes != existing.iter().count() {
+        deployment.zone_meshes = existing.iter().count();
+    }
     if deployment.active && !present {
         for zone in &deployment.zones {
             let Some(mesh) = zone_mesh(session.sim_mut().field(), *zone) else {

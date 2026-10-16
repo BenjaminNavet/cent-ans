@@ -248,6 +248,7 @@ fn dump_orders(world: &World) -> (String, serde_json::Value) {
                 "opened": world.resource::<deploy::Deployment>().opened,
                 "active": world.resource::<deploy::Deployment>().active,
                 "zones": world.resource::<deploy::Deployment>().zones,
+                "zone_meshes": world.resource::<deploy::Deployment>().zone_meshes,
             },
             "formations": {
                 "presets": sim_battle::group_formation::presets().iter().map(|p| p.id.as_str()).collect::<Vec<_>>(),

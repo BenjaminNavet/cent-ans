@@ -2,7 +2,7 @@
 // line, an inner glow that fades inwards, diagonal hatching in a border band and an almost
 // invisible veil in the middle. Hatching and glow fade as the camera moves away; the line keeps
 // a minimum width on screen so it stays readable from afar.
-import bevy_pbr::{
+import bevy_pbr::render::{
     forward_io::{VertexOutput, FragmentOutput},
     mesh_view_bindings::view,
 };
