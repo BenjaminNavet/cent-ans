@@ -1,137 +1,126 @@
-//! Ground shadows of the campaign trees.
+//! Cast shadows of the campaign trees (port of `Vegetation._tree_shadows_on` /
+//! `tree_shadow_limit`, generalised style): the tree batches cast into the sun's shadow maps while
+//! the camera is closer to its focus than `generalised_shadow_distance` (70), capped by the quality
+//! preset's `veg_shadow_distance` (`data/fx/render_quality.json`: 0 on the low preset), with an 8 %
+//! hysteresis so that the shadows do not flicker at the threshold. The drawing itself is
+//! `shadow_pass.rs` (depth-only pass of the instanced pipeline); this module only toggles the
+//! [`VegShadowCaster`] marker on the tree batches.
 //!
-//! Godot casts the tree MultiMeshes into its shadow maps up to `generalised_shadow_distance`
-//! (70 units of camera distance, `Vegetation._shadow_distance`). The instanced vegetation
-//! pipeline has no shadow pass, so each tree batch gets a twin batch of soft ellipses cast along
-//! the sun on the ground (`Mode::Shadow` of `billboard.wesl`), sharing its records, faded out
-//! with the camera distance.
+//! The soft ground ellipses that stood in for the shadows (vegvis) are gone.
 
 use std::collections::HashMap;
 
 use bevy::prelude::*;
+use serde_json::Value;
 
-use super::billboard::{Mode, Params, VegBatch};
-use super::data::style::CROWN_WIDEN;
-use super::{VegRender, VegView, VegWorld};
-use crate::app::AppState;
+use super::shadow_pass::VegShadowCaster;
+use super::{VegRender, VegView};
+use crate::settings::quality::RenderQuality;
 
-/// Full shadows up to this camera distance, none beyond `FADE_END` (`generalised_shadow_distance`).
-pub const FADE_START: f32 = 60.0;
-pub const FADE_END: f32 = 90.0;
-/// Share of the ground light removed under a crown (direct sun lost, sky light kept).
-pub const STRENGTH: f32 = 0.42;
+/// `MapPropScale.generalised_shadow_distance`.
+pub const GENERALISED_SHADOW_DISTANCE: f32 = 70.0;
+/// `Vegetation.shadow_camera_distance` (preset value when the file has none).
+pub const SHADOW_CAMERA_DISTANCE: f32 = 300.0;
+/// `Vegetation.SHADOW_HYSTERESIS`.
+pub const HYSTERESIS: f32 = 0.08;
 
-/// Opacity of the shadows for a camera at `distance` of its focus.
-pub fn opacity(distance: f32) -> f32 {
-    let t = ((distance - FADE_START) / (FADE_END - FADE_START)).clamp(0.0, 1.0);
-    STRENGTH * (1.0 - t * t * (3.0 - 2.0 * t))
-}
-
-/// Twin shadow batches of the tree batches: `(row, model)` -> entity, with the copied version.
+/// Shadow state of the trees.
 #[derive(Resource, Default)]
 pub struct TreeShadows {
-    pub entities: HashMap<(u16, bool), (Entity, u64)>,
-    pub opacity: f32,
+    /// Trees cast shadows now.
+    pub on: bool,
+    /// Camera-distance limit in use.
+    pub limit: f32,
+    /// Tree batches carrying the caster marker.
+    pub casters: usize,
+    /// `veg_shadow_distance` per quality level (read once).
+    presets: Option<HashMap<String, f32>>,
 }
 
-pub(super) fn reset(mut commands: Commands, mut shadows: ResMut<TreeShadows>) {
-    for (_, (entity, _)) in shadows.entities.drain() {
-        commands.entity(entity).try_despawn();
+/// `tree_shadow_limit`: the preset's distance capped by the generalised one.
+pub fn shadow_limit(preset_distance: f32) -> f32 {
+    preset_distance.min(GENERALISED_SHADOW_DISTANCE)
+}
+
+/// Next on/off state for a camera at `distance` (hysteresis around `limit`).
+pub fn next_state(on: bool, distance: f32, limit: f32) -> bool {
+    let threshold = limit
+        * if on {
+            1.0 + HYSTERESIS
+        } else {
+            1.0 - HYSTERESIS
+        };
+    limit > 0.0 && distance < threshold
+}
+
+/// `veg_shadow_distance` of every preset of `render_quality.json`.
+pub fn read_presets(text: &str) -> HashMap<String, f32> {
+    let mut out = HashMap::new();
+    let Ok(root) = serde_json::from_str::<Value>(text) else {
+        return out;
+    };
+    if let Some(map) = root.get("presets").and_then(Value::as_object) {
+        for (name, level) in map {
+            if let Some(d) = level.get("veg_shadow_distance").and_then(Value::as_f64) {
+                out.insert(name.clone(), d as f32);
+            }
+        }
     }
+    out
+}
+
+fn load_presets() -> HashMap<String, f32> {
+    crate::paths::find_root()
+        .ok()
+        .and_then(|root| {
+            std::fs::read_to_string(crate::paths::data_dir(&root).join("fx/render_quality.json"))
+                .ok()
+        })
+        .map(|text| read_presets(&text))
+        .unwrap_or_default()
+}
+
+pub(super) fn reset(mut shadows: ResMut<TreeShadows>) {
+    shadows.on = false;
+    shadows.casters = 0;
 }
 
 pub(super) fn sync_shadows(
     mut commands: Commands,
     view: Res<VegView>,
-    world: Option<Res<VegWorld>>,
     render: Res<VegRender>,
+    quality: Option<Res<RenderQuality>>,
     mut shadows: ResMut<TreeShadows>,
-    mut batches: Query<&mut VegBatch>,
-    suns: Query<&GlobalTransform, With<DirectionalLight>>,
+    casters: Query<(), With<VegShadowCaster>>,
 ) {
-    // Direction to the sun (a directional light shines along its forward axis).
-    let to_sun = suns
-        .iter()
-        .next()
-        .map_or(Vec3::new(0.3, 0.8, 0.5), |t| -t.forward().as_vec3())
-        .normalize_or(Vec3::Y);
-    let Some(world) = world else { return };
-    let alpha = if view.active {
-        opacity(view.distance)
-    } else {
-        0.0
+    if shadows.presets.is_none() {
+        shadows.presets = Some(load_presets());
+    }
+    let preset = match quality.as_ref() {
+        None => SHADOW_CAMERA_DISTANCE,
+        Some(q) if !q.shadows => 0.0,
+        Some(q) => shadows
+            .presets
+            .as_ref()
+            .and_then(|p| p.get(&q.level).copied())
+            .unwrap_or(SHADOW_CAMERA_DISTANCE),
     };
-    shadows.opacity = alpha;
-    let quad = render.assets.quad.clone();
-    let shadows = &mut *shadows;
-    shadows.entities.retain(|key, (entity, _)| {
-        let keep = alpha > 0.0 && render.entities.contains_key(key);
-        if !keep {
-            commands.entity(*entity).try_despawn();
-        }
-        keep
-    });
-    let Some(quad) = quad.filter(|_| alpha > 0.0) else {
-        return;
-    };
-    for (key, source) in &render.entities {
-        let Ok(src) = batches.get(*source) else {
-            continue;
-        };
-        let (records, count, version, albedo) = (
-            src.records.clone(),
-            src.count,
-            src.version,
-            src.albedo.clone(),
-        );
-        match shadows.entities.get_mut(key) {
-            Some((entity, copied)) => {
-                let Ok(mut batch) = batches.get_mut(*entity) else {
-                    continue;
-                };
-                if *copied != version {
-                    batch.records = records;
-                    batch.count = count;
-                    batch.version += 1;
-                    *copied = version;
-                }
-                let range = to_sun.extend(alpha);
-                if batch.params.range.distance_squared(range) > 1e-6 {
-                    batch.params.range = range;
-                    batch.params_version += 1;
-                }
+    let limit = shadow_limit(preset);
+    shadows.limit = limit;
+    shadows.on = view.active && next_state(shadows.on, view.distance, limit);
+    let mut count = 0;
+    for entity in render.entities.values() {
+        let has = casters.contains(*entity);
+        if shadows.on {
+            count += 1;
+            if !has {
+                commands.entity(*entity).try_insert(VegShadowCaster);
             }
-            None => {
-                let ratio = world
-                    .0
-                    .width_ratio
-                    .get(key.0 as usize)
-                    .copied()
-                    .unwrap_or(1.0);
-                let mut params = Params::new(Mode::Shadow);
-                params.extra.x = ratio * CROWN_WIDEN;
-                params.extra.y = f32::from(u8::from(key.1));
-                params.range = to_sun.extend(alpha);
-                let entity = commands
-                    .spawn((
-                        Name::new("TreeShadows"),
-                        VegBatch {
-                            mesh_handle: quad.clone(),
-                            records,
-                            count,
-                            albedo,
-                            normal: None,
-                            params,
-                            version: 1,
-                            params_version: 0,
-                        },
-                        DespawnOnExit(AppState::Campaign),
-                    ))
-                    .id();
-                shadows.entities.insert(*key, (entity, version));
-            }
+        } else if has {
+            commands.entity(*entity).try_remove::<VegShadowCaster>();
         }
     }
+    shadows.casters = count;
 }
 
 #[cfg(test)]
@@ -139,10 +128,20 @@ mod tests {
     use super::*;
 
     #[test]
-    fn shadows_fade_with_the_camera_distance() {
-        assert_eq!(opacity(20.0), STRENGTH);
-        assert_eq!(opacity(FADE_END + 1.0), 0.0);
-        let mid = opacity((FADE_START + FADE_END) * 0.5);
-        assert!(mid > 0.0 && mid < STRENGTH);
+    fn shadows_switch_with_hysteresis() {
+        let limit = shadow_limit(300.0);
+        assert_eq!(limit, GENERALISED_SHADOW_DISTANCE);
+        assert!(next_state(false, 60.0, limit));
+        assert!(!next_state(false, 66.0, limit));
+        assert!(next_state(true, 74.0, limit));
+        assert!(!next_state(true, 80.0, limit));
+        assert!(!next_state(false, 10.0, shadow_limit(0.0)));
+    }
+
+    #[test]
+    fn presets_are_read_from_the_quality_file() {
+        let presets = load_presets();
+        assert!(presets.contains_key("low"), "{presets:?}");
+        assert!(presets.values().any(|d| *d == 0.0));
     }
 }

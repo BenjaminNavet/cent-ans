@@ -55,16 +55,12 @@ pub enum Mode {
     Pond = 2,
     /// Near tree: the normalised glb mesh of the species (`foliage_model.gdshader`).
     Model = 3,
-    /// Soft shadow of a tree on the ground (alpha-blended ellipse cast along the sun), in place
-    /// of the shadow maps Godot gives its tree MultiMeshes (`generalised_shadow_distance`).
-    Shadow = 4,
 }
 
-/// Pipeline key: the mesh key plus the blended variant (ground shadows).
+/// Pipeline key: the mesh key of the view and the mesh.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct VegKey {
     mesh: MeshPipelineKey,
-    blended: bool,
 }
 
 /// Parameter block mirrored by `Params` in `billboard.wesl`.
@@ -232,13 +228,13 @@ impl Plugin for BillboardPlugin {
 }
 
 #[derive(Resource)]
-struct VegPipeline {
+pub(super) struct VegPipeline {
     shader: Handle<Shader>,
     mesh_pipeline: MeshPipeline,
-    material_layout: BindGroupLayoutDescriptor,
+    pub(super) material_layout: BindGroupLayoutDescriptor,
 }
 
-fn init_pipeline(
+pub(super) fn init_pipeline(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mesh_pipeline: Res<MeshPipeline>,
@@ -296,16 +292,6 @@ impl SpecializedMeshPipeline for VegPipeline {
         });
         if let Some(fragment) = descriptor.fragment.as_mut() {
             fragment.shader = self.shader.clone();
-            if key.blended {
-                for target in fragment.targets.iter_mut().flatten() {
-                    target.blend = Some(BlendState::ALPHA_BLENDING);
-                }
-            }
-        }
-        if key.blended
-            && let Some(depth) = descriptor.depth_stencil.as_mut()
-        {
-            depth.depth_write_enabled = Some(false);
         }
         // Cards are seen from both sides.
         descriptor.primitive.cull_mode = None;
@@ -350,7 +336,6 @@ fn queue_batches(
                         mesh.primitive_topology(),
                         mesh.index_format(),
                     ),
-                blended: batch.params.frame.w > Mode::Shadow as u32 as f32 - 0.5,
             };
             let pipeline_id = match pipelines.specialize(
                 &pipeline_cache,
@@ -386,14 +371,14 @@ fn queue_batches(
 }
 
 #[derive(Component)]
-struct InstanceBuffer {
+pub(super) struct InstanceBuffer {
     buffer: Buffer,
     count: u32,
     version: u64,
 }
 
 #[derive(Component)]
-struct MaterialBindGroup {
+pub(super) struct MaterialBindGroup {
     group: BindGroup,
     params_version: u64,
 }
@@ -479,7 +464,7 @@ type DrawVeg = (
     DrawBatch,
 );
 
-struct SetMaterialBindGroup<const I: usize>;
+pub(super) struct SetMaterialBindGroup<const I: usize>;
 
 impl<P: PhaseItem, const I: usize> RenderCommand<P> for SetMaterialBindGroup<I> {
     type Param = ();
@@ -501,7 +486,7 @@ impl<P: PhaseItem, const I: usize> RenderCommand<P> for SetMaterialBindGroup<I> 
     }
 }
 
-struct DrawBatch;
+pub(super) struct DrawBatch;
 
 impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
     type Param = (SRes<RenderAssets<RenderMesh>>, SRes<MeshAllocator>);

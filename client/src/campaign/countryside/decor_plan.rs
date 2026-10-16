@@ -1109,5 +1109,14 @@ mod tests {
         assert_eq!(cfg.render.distance_scale, 3.0);
         assert_eq!(cfg.render.size_distance, 50.0);
         assert_eq!(cfg.render.view_range_units, 220.0);
+        // The plume types (`decor_smoke.rs`).
+        let mut smoky: Vec<&str> = cfg
+            .types
+            .iter()
+            .filter(|t| t.smoke)
+            .map(|t| t.id.as_str())
+            .collect();
+        smoky.sort_unstable();
+        assert_eq!(smoky, ["charcoal_kiln", "forge_water", "glassworks"]);
     }
 }

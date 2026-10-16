@@ -15,8 +15,9 @@
 //! `fade_start` and `fade_end`. Model files: `models/<model>_lod{0,1,2}.glb`, native long side
 //! `model_length_m` metres.
 //!
-//! Not ported: coast rocks (`coast` entries need `coast_dist.png` and the coast geology), the
-//! shader albedo gain and pixel fade, the vertical-follow shear, the visible-triangle cap, the
+//! Coast rocks (`coast` entries): `coast_rocks.rs` (shore distance raster, coast geology).
+//!
+//! Not ported: the shader albedo gain and pixel fade, the vertical-follow shear, the visible-triangle cap, the
 //! pre-examination of flat tiles (the seeding is cheap enough on a thread), simplex noise (a
 //! smooth value noise stands in).
 
@@ -28,6 +29,7 @@ use bevy::prelude::*;
 use serde_json::{Value, json};
 
 use super::LoadedCountryside;
+use super::coast_rocks::{CoastData, CoastRule};
 use super::placement::{Rng, Terrain};
 use super::proto::{Lookup, Prototypes, spawn_prims};
 use crate::app::AppState;
@@ -53,6 +55,8 @@ pub struct Outcrop {
     pub density: f32,
     pub group: [i32; 2],
     pub along_contour: bool,
+    /// Coast rock (`coast` block): only the shore counts (no slope, ridge nor heath).
+    pub coast: Option<CoastRule>,
 }
 
 #[derive(Debug, Clone)]
@@ -85,6 +89,8 @@ pub struct RockConfig {
     pub meters_per_px: f32,
     pub town_clearance_px: f32,
     pub road_cell_px: f32,
+    /// Shore distance and geology for the coast rocks (`None`: coast rocks never placed).
+    pub coast: Option<Arc<CoastData>>,
 }
 
 fn num(v: &Value, key: &str, default: f32) -> f32 {
@@ -142,8 +148,7 @@ pub fn parse(
         .as_array()
         .into_iter()
         .flatten()
-        // Coast rocks need the coast distance raster and the coast geology: not ported.
-        .filter(|e| e.get("coast").is_none() && e["model"].is_string())
+        .filter(|e| e["model"].is_string())
         .map(|e| Outcrop {
             id: e["id"].as_str().unwrap_or("").to_string(),
             model: e["model"].as_str().unwrap_or("").to_string(),
@@ -166,6 +171,7 @@ pub fn parse(
                 [g[0] as i32, g[1] as i32]
             },
             along_contour: e["along_contour"].as_bool().unwrap_or(false),
+            coast: e.get("coast").and_then(CoastRule::parse),
         })
         .collect();
     RockConfig {
@@ -174,6 +180,7 @@ pub fn parse(
         meters_per_px,
         town_clearance_px,
         road_cell_px,
+        coast: None,
     }
 }
 
@@ -252,14 +259,17 @@ fn treeline_m(size_y: f32, y: f32) -> f32 {
 }
 
 /// Suitability [0, 1] of an outcrop at a probed point.
+#[allow(clippy::too_many_arguments)]
 pub fn suitability(
     t: &dyn Terrain,
+    cfg: &RockConfig,
     o: &Outcrop,
     probe: Probe,
     biome: i32,
     heath: f32,
-    y: f32,
+    p: Vec2,
 ) -> f32 {
+    let y = p.y;
     if !t.biome_allows(o.biomes, biome) {
         return 0.0;
     }
@@ -268,6 +278,13 @@ pub fn suitability(
         * (1.0 - smooth(o.max_alt - 150.0, o.max_alt + 150.0, h));
     if window <= 0.0 {
         return 0.0;
+    }
+    if let Some(rule) = &o.coast {
+        let Some(coast) = &cfg.coast else {
+            return 0.0;
+        };
+        let size = t.size();
+        return coast.term(rule, size, p, |q| t.height_m(q)).clamp(0.0, 1.0) * window * o.density;
     }
     let slope_term = smooth(o.min_slope, o.min_slope * 2.5 + 0.05, probe.slope);
     let ridge_term = o.ridge
@@ -410,7 +427,7 @@ fn place_group(
         }
         let probe = terrain_probe(t, cfg.meters_per_px, q);
         let heath = heath_at(t, cfg, q, probe).x;
-        let score = suitability(t, o, probe, t.biome(q), heath, q.y);
+        let score = suitability(t, cfg, o, probe, t.biome(q), heath, q);
         if score < parent_score * 0.4 {
             continue;
         }
@@ -457,7 +474,7 @@ pub fn seed_tile(t: &dyn Terrain, cfg: &RockConfig, tile: IVec2) -> Vec<Rock> {
             let mut best = 0.0f32;
             let mut total = 0.0f32;
             for (m, o) in cfg.outcrops.iter().enumerate() {
-                scores[m] = suitability(t, o, probe, biome, heath.x, p.y) * heath.y;
+                scores[m] = suitability(t, cfg, o, probe, biome, heath.x, p) * heath.y;
                 total += scores[m];
                 best = best.max(scores[m]);
             }
@@ -585,12 +602,16 @@ pub fn build_plan(
         warn!("rocks: art/rock_outcrops.yaml missing or invalid");
         return;
     };
-    let cfg = parse(
+    let mut cfg = parse(
         &doc,
         loaded.config.meters_per_px,
         loaded.config.render.town_clearance_px,
         loaded.config.render.cell_px,
     );
+    cfg.coast = CoastData::load(&crate::paths::data_dir(&root)).map(Arc::new);
+    if cfg.coast.is_none() {
+        warn!("rocks: map/coast_dist.png or map/coast_types.json missing, no coast rocks");
+    }
     let assets = crate::paths::asset_root(&root);
     let files: Vec<[Option<String>; 3]> = cfg
         .outcrops
@@ -869,6 +890,8 @@ pub fn dump(world: &World) -> (String, Value) {
         "rocks".into(),
         json!({
             "outcrops": plan.map_or(0, |p| p.config.outcrops.len()),
+            "coast_outcrops": plan.map_or(0, |p| p.config.outcrops.iter().filter(|o| o.coast.is_some()).count()),
+            "coast_data": plan.is_some_and(|p| p.config.coast.is_some()),
             "models_resolved": plan.map_or(0, |p| p.files.iter().filter(|f| f.iter().any(Option::is_some)).count()),
             "tiles_cached": view.tiles.len(),
             "tiles_sown": view.sown_tiles,
@@ -948,10 +971,16 @@ mod tests {
     }
 
     #[test]
-    fn catalogue_parses_without_coast_entries() {
+    fn catalogue_parses_with_its_coast_entries() {
         let c = config();
         assert!(c.outcrops.len() >= 20, "{}", c.outcrops.len());
-        assert!(c.outcrops.iter().all(|o| !o.id.starts_with("coast_")));
+        assert!(
+            c.outcrops
+                .iter()
+                .filter(|o| o.id.starts_with("coast_"))
+                .all(|o| o.coast.is_some())
+        );
+        assert!(c.outcrops.iter().any(|o| o.coast.is_some()));
         assert!(
             c.outcrops
                 .iter()

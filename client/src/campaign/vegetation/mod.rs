@@ -21,7 +21,10 @@
 //! a near level and dithered level fades.
 //!
 //! Not ported: dense forest detail by zoom (`forest_detail.gd`, off in the generalised style),
-//! aligned hedges (off in the generalised style), cloud shadows on trees, tree shadows.
+//! aligned hedges (off in the generalised style), cloud shadows on trees.
+//!
+//! Tree shadows: real cast shadows in the sun's shadow maps (`shadow_pass.rs`, toggled by
+//! `shadows.rs` with the camera distance).
 
 pub mod billboard;
 pub mod clearance;
@@ -36,6 +39,7 @@ pub mod meshes;
 pub mod mips;
 pub mod reeds;
 pub mod render;
+pub mod shadow_pass;
 pub mod shadows;
 pub mod textures;
 pub mod tiles;
@@ -194,7 +198,7 @@ pub struct CampaignVegetationPlugin;
 
 impl Plugin for CampaignVegetationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(BillboardPlugin)
+        app.add_plugins((BillboardPlugin, shadow_pass::VegShadowPassPlugin))
             .init_resource::<VegTiles>()
             .init_resource::<VegView>()
             .init_resource::<VegRender>()
@@ -1028,7 +1032,7 @@ fn dump_vegetation(world: &World) -> (String, Value) {
             });
         }
         value["shadows"] = json!({
-            "batches": shadows.entities.len(), "opacity": shadows.opacity,
+            "cast": shadows.on, "limit": shadows.limit, "caster_batches": shadows.casters,
         });
     }
     if let Some(render) = world.get_resource::<VegRender>() {
