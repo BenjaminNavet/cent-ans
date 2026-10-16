@@ -62,3 +62,9 @@ correspondent aux manifestes de `918b04e52`, relus par `git show` : la commande 
   `feature` = carte réelle).
 - Rivières de vallée ajoutées par CC (`compose valley-rivers`) et Nil/Euphrate CS2 : absents du réseau
   fin réel ; contraintes d'auteur (crêtes, cols) peuvent décaler `z` localement.
+
+## Note anchors (16/10)
+`fine_anchors.json` / `rivers_fine.json` de bevy-migration sont **justes** (cadre composé, cohérents avec
+`settlements_px.json`, écart ≤ 0,71 px) ; ceux de main (1656 lieux, 02/10) sont dans l'ancien cadre
+EPSG:3035 réel, périmés. Ne pas restaurer ceux de main. `test_landmarks_v2` comparait l'origine réelle de
+Orléans à un ancrage composé : le test ramène désormais l'ancrage au cadre réel (warp inverse).

@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 from cent_ans_tools.geo import landmarks_v2
-from cent_ans_tools.geo.project import default_grid
+from cent_ans_tools.geo.project import default_grid, grid_from_metadata
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 CITIES = sorted((DATA / "landmarks_v2").glob("*.json"))
@@ -34,9 +34,17 @@ def test_links_and_origin(path: Path) -> None:
     grid = default_grid()
     px, py = grid.projected_to_pixel(*city["origin_3035"])
     if "landmark" not in city:
+        # fine_anchors.json is in the composed frame (lot Bevy geofine2, `geo compose-fine`),
+        # whereas the landmark origin and the L1 maquette anchors are in the real 3035 frame.
+        composed = grid_from_metadata(_load(DATA / "map" / "map.json"))
         anchors = _load(DATA / "map" / "fine_anchors.json")
         anchor = anchors["settlements"][city["settlement"]]["px"]
-        offset = math.dist((float(px), float(py)), anchor) * grid.meters_per_px
+        # Distance in real metres: bring the composed anchor back to the real frame.
+        ax, ay = composed.warp.inverse_px(anchor[0], anchor[1])
+        offset = (
+            math.dist((float(px), float(py)), (float(ax), float(ay)))
+            * grid.meters_per_px
+        )
         assert offset < city["extent_m"] * 0.5, offset
         return
     v1 = _load(DATA / "landmarks" / f"{city['landmark']}.json")
