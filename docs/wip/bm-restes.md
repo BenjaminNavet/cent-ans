@@ -8,7 +8,7 @@
 - diplo4: armies/orders.rs → AskWarDeclaration when attacking non-hostile; diplomacy_controller auto-open on weighty offer + pill; diplomacy_map_view.gd central map.
 - campaign start camera centred on Bohemia instead of player's France (sent to campvis).
 - menu4: agent `type` command (agent/); keyboard_free audit.
-- setwire: options with no consumer: stance_fill, show_zoc, unit_size, max_figures, ai_moves_speed, autosave_interval, tutorial_*, cinematic*, auto_pause_on_alert, season_report, confirm_end_turn, news_filter, next_hint, audio_battle_*, voice_*; colourblind hatching + morale symbols; high_contrast stylebox.
+- setwire: all options now read except dev_mode (hidden, no Godot reader either); left: colour-blind province relation markers on the diplomacy map, enemy-plate hatching, high_contrast styleboxes (bm-settings.md setwire4).
 - bdecor5: horses AnimalMotion, snow kit, orchards, building lights, painted panorama, far sea, tree impostors, FA7 atlas; batching/particles not checked.
 - bhud5: mode_icons::tip_of → card badge tooltips; terrain tip eye-check.
 - integ2: NextState direct left in battle/scene/mod.rs + campaign/progress/ending.rs; PlayedBattles not saved/not displayed; codex bubble place_beside untested live.
