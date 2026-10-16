@@ -16,3 +16,8 @@ Branche `bm/bwater`. Voir `client/src/battle/scene/water.rs` + `water.wesl`.
 ## Reste
 - Contrôle visuel (aucune capture dans ce lot), calage des couleurs éclairées.
 - Douves (`features.rs`) gardent un StandardMaterial simple.
+
+## Preuve (dump `battle_water`, CENT_ANS_BATTLE_FIELD)
+- river : 501 rangées, 4509 sommets, largeur max 51 m, profondeur max 1,28 m, 2 ruisseaux, 12 écumes de piles.
+- coast,river : mer 55,2 km², flanc ouest, rivage x=-17,6.
+- Tests client : 1131 ok, clippy propre.
