@@ -9,6 +9,7 @@ pub mod replay;
 pub mod replay_bar;
 pub mod setup;
 pub mod terrain;
+pub mod water;
 
 use bevy::platform::cell::SyncCell;
 use bevy::prelude::*;
@@ -148,6 +149,7 @@ impl Plugin for BattleScenePlugin {
                 terrain::BattleTerrainPlugin,
                 camera::BattleCameraPlugin,
                 lighting::BattleLightingPlugin,
+                water::BattleWaterPlugin,
                 replay_bar::ReplayBarPlugin,
             ))
             .add_systems(OnEnter(AppState::Battle), start_battle)

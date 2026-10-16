@@ -187,20 +187,6 @@ pub fn sea_rect(field: &Battlefield) -> Option<[f32; 4]> {
     ])
 }
 
-fn quad_mesh(rect: [f32; 4], y: f32) -> Mesh {
-    let [x0, x1, z0, z1] = rect;
-    Mesh::new(
-        PrimitiveTopology::TriangleList,
-        RenderAssetUsages::RENDER_WORLD,
-    )
-    .with_inserted_attribute(
-        Mesh::ATTRIBUTE_POSITION,
-        vec![[x0, y, z0], [x1, y, z0], [x1, y, z1], [x0, y, z1]],
-    )
-    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, vec![[0.0, 1.0, 0.0]; 4])
-    .with_inserted_indices(Indices::U32(vec![0, 2, 1, 0, 3, 2]))
-}
-
 fn build_features(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
@@ -289,24 +275,10 @@ fn build_features(
         }
     }
 
-    // Sea of a coastal field.
+    // Sea of a coastal field: counted here, drawn by `scene::water` (swell, Fresnel, foam).
     if let Some(rect) = sea_rect(field) {
         stats.sea = true;
         stats.sea_area_m2 = (rect[1] - rect[0]) * (rect[3] - rect[2]);
-        commands.spawn((
-            Name::new("Sea"),
-            Mesh3d(meshes.add(quad_mesh(rect, SEA_LEVEL))),
-            MeshMaterial3d(materials.add(StandardMaterial {
-                base_color: Color::srgb(0.05, 0.14, 0.18),
-                perceptual_roughness: 0.12,
-                reflectance: 0.7,
-                cull_mode: None,
-                ..default()
-            })),
-            Transform::default(),
-            NotShadowCaster,
-            scope.clone(),
-        ));
     }
     commands.insert_resource(stats);
 }
@@ -319,11 +291,5 @@ mod tests {
     fn flame_has_three_tongues() {
         let mesh = flame_mesh();
         assert_eq!(mesh.indices().map(|i| i.len()), Some(9));
-    }
-
-    #[test]
-    fn quad_covers_the_rectangle() {
-        let mesh = quad_mesh([0.0, 10.0, 0.0, 5.0], 0.0);
-        assert_eq!(mesh.count_vertices(), 4);
     }
 }
