@@ -134,3 +134,4 @@ contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; ar
 - Tête 60b30bc6e, tout vert. Captures after4 envoyées au joueur ; écarts notés dans bm-restes.md § « Captures after4 ».
 - En cours : stab1 (stabilité) + vague 9 (parchedge, bground2, coastfix, batmo2, bfx2, small2, campwater3), base 60b30bc6e, brief scratchpad wave9.md (copie bm-outils/).
 - Ensuite : fusion par fournées (merge_brief.md), captures after5, banc de perf machine calme, partie pilote par agent, ff-only dans main (sans push), lot degodot.
+- 16/10 21 h : vague 9 + anchors fusionnées (16f91d0de ; client 1270+ tests, pytest 2850 vert, smoke OK). Banc carte calme (3 essais) : pan d=30 p50 ~28 ms / p99 52 (régression vs 16,6 du 15/10 ; Godot 19,8/41), limité GPU (submit 11,6 ms). Lot perf4 (Opus, seul agent) : bissection + correctifs. Script banc Crécy : scratchpad bench_crecy.txt (avec prologue_invite:no).
