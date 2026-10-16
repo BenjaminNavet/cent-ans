@@ -156,13 +156,18 @@ pub fn build_start(
     let standards = std::fs::read_to_string(data_dir.join("rules/battle_standards.json"))
         .ok()
         .and_then(|text| serde_json::from_str::<BattleStandardRules>(&text).ok());
-    let setup = custom.battle_setup(
+    let mut setup = custom.battle_setup(
         &data,
         CustomBattleRules::bundled(),
         orders,
         standards,
         abilities,
     )?;
+    // Dev hook (proofs): `CENT_ANS_BATTLE_FIELD=river,coast` forces a river and / or a coast.
+    if let Ok(spec) = std::env::var("CENT_ANS_BATTLE_FIELD") {
+        setup.river |= spec.split(',').any(|k| k.trim() == "river");
+        setup.coastal |= spec.split(',').any(|k| k.trim() == "coast");
+    }
     let start = ReplayStart::new(setup, seed).with_weather(custom.weather()?);
     let sim = start.build()?;
     Ok((sim, start, custom.start_hour()?))

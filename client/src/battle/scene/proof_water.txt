@@ -1,0 +1,6 @@
+# River battle:   CENT_ANS_BATTLE_FIELD=river CENT_ANS_NO_DEPLOY=1 CENT_ANS_MUTE=1
+# Coastal battle: CENT_ANS_BATTLE_FIELD=coast ...  (then rain: custom battle weather)
+# client/run_bg.sh --state Battle --script client/src/battle/scene/proof_water.txt
+wait 120
+dump out/bwater.json
+exit
