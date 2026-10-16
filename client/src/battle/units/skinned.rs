@@ -46,7 +46,7 @@ use bevy::{
             TrackedRenderPass, ViewBinnedRenderPhases, ViewSortedRenderPhases,
         },
         render_resource::*,
-        renderer::RenderDevice,
+        renderer::{RenderDevice, RenderQueue},
         sync_component::SyncComponent,
         sync_world::MainEntity,
         texture::{FallbackImage, GpuImage},
@@ -59,6 +59,7 @@ use super::figures::{
     ATTRIBUTE_ATLAS, ATTRIBUTE_BONES, ATTRIBUTE_MASK, ATTRIBUTE_WEIGHTS, MAX_CLIPS,
 };
 use super::looks::MAX_COLOURS;
+use crate::agent::dump::DumpAppExt;
 
 const SHADER_PATH: &str = "embedded://cent_ans_client/battle/units/skinned.wesl";
 /// Skinned draws issued since the last reset.
@@ -390,12 +391,14 @@ impl Plugin for SkinnedPlugin {
     fn build(&self, app: &mut App) {
         bevy::asset::embedded_asset!(app, "skinned.wesl");
         app.add_plugins(ExtractComponentPlugin::<SkinnedBatch>::default());
+        app.register_dump(probe::dump);
         let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
             return;
         };
         render_app
             .add_render_command::<Transparent3d, DrawSkinned>()
             .add_render_command::<Shadow, DrawSkinnedShadow>()
+            .init_resource::<SkinnedInstances>()
             .init_resource::<SpecializedMeshPipelines<SkinnedPipeline>>()
             .init_resource::<SpecializedMeshPipelines<SkinnedShadowPipeline>>()
             .add_systems(
@@ -418,6 +421,8 @@ impl Plugin for SkinnedPlugin {
                         .in_set(RenderSystems::PrepareResources)
                         .run_if(|batches: Query<(), With<SkinnedBatch>>| !batches.is_empty()),
                     prepare_bind_groups.in_set(RenderSystems::PrepareBindGroups),
+                    probe::render_start.in_set(RenderSystems::ExtractCommands),
+                    probe::render_end.in_set(RenderSystems::PostCleanup),
                 ),
             );
     }
@@ -543,6 +548,9 @@ fn queue_batches(
             continue;
         };
         for (entity, main_entity, batch) in &batches {
+            if batch.count == 0 {
+                continue;
+            }
             let Some(mesh) = meshes.get(batch.mesh_handle.id()) else {
                 continue;
             };
@@ -578,11 +586,119 @@ fn queue_batches(
     }
 }
 
-#[derive(Component)]
-struct InstanceBuffer {
-    buffer: Buffer,
+/// Where one batch's records live in the shared instance buffer.
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct Slot {
+    offset: u64,
+    capacity: u64,
     count: u32,
     version: u64,
+}
+
+/// One persistent vertex buffer holding the records of every skinned batch, each in its own
+/// slot (capacity rounded up to a power of two of records). A changed batch whose records still
+/// fit is rewritten in place with `write_buffer`; the buffer is only re-laid out (compacted,
+/// grown) when a batch outgrows its slot past the end. Replaces one `create_buffer_with_data`
+/// per batch and per frame (lot perf3).
+#[derive(Resource, Default)]
+struct SkinnedInstances {
+    buffer: Option<Buffer>,
+    capacity: u64,
+    end: u64,
+    slots: HashMap<Entity, Slot>,
+}
+
+/// Bytes reserved for `bytes` of records: power of two, at least 16 records.
+fn slot_capacity(bytes: u64) -> u64 {
+    bytes.max(16 * RECORD_BYTES as u64).next_power_of_two()
+}
+
+/// Plan of one frame: in-place writes, or a full re-layout.
+#[derive(Debug, PartialEq)]
+enum Plan {
+    Writes(Vec<Entity>),
+    Relayout,
+}
+
+impl SkinnedInstances {
+    /// Updates the slot table for the batches `(entity, count, version)` and says what to upload.
+    fn plan(&mut self, batches: &[(Entity, u32, u64)]) -> Plan {
+        let live: HashSet<Entity> = batches.iter().map(|b| b.0).collect();
+        self.slots.retain(|entity, _| live.contains(entity));
+        let mut writes = Vec::new();
+        for &(entity, count, version) in batches {
+            let needed = u64::from(count) * RECORD_BYTES as u64;
+            match self.slots.get_mut(&entity) {
+                Some(slot) if slot.version == version => {}
+                Some(slot) if needed <= slot.capacity => {
+                    slot.count = count;
+                    slot.version = version;
+                    if count > 0 {
+                        writes.push(entity);
+                    }
+                }
+                _ if count == 0 => {
+                    // Nothing to draw: no space until it has records.
+                    self.slots.insert(
+                        entity,
+                        Slot {
+                            offset: 0,
+                            capacity: 0,
+                            count: 0,
+                            version,
+                        },
+                    );
+                }
+                _ => {
+                    let capacity = slot_capacity(needed);
+                    if self.end + capacity > self.capacity {
+                        return self.relayout(batches);
+                    }
+                    self.slots.insert(
+                        entity,
+                        Slot {
+                            offset: self.end,
+                            capacity,
+                            count,
+                            version,
+                        },
+                    );
+                    self.end += capacity;
+                    writes.push(entity);
+                }
+            }
+        }
+        Plan::Writes(writes)
+    }
+
+    /// Compacts every batch with records from offset 0; grows the buffer capacity if needed.
+    fn relayout(&mut self, batches: &[(Entity, u32, u64)]) -> Plan {
+        self.slots.clear();
+        self.end = 0;
+        for &(entity, count, version) in batches {
+            let capacity = if count == 0 {
+                0
+            } else {
+                slot_capacity(u64::from(count) * RECORD_BYTES as u64)
+            };
+            self.slots.insert(
+                entity,
+                Slot {
+                    offset: self.end,
+                    capacity,
+                    count,
+                    version,
+                },
+            );
+            self.end += capacity;
+        }
+        if self.end > self.capacity || self.buffer.is_none() {
+            // Headroom so that the next growths fit without a new buffer.
+            self.capacity = (self.end + self.end / 2).max(64 * 1024).next_power_of_two();
+            self.buffer = None;
+        }
+        Plan::Relayout
+    }
 }
 
 #[derive(Component)]
@@ -595,31 +711,75 @@ struct MaterialBindGroup {
 }
 
 fn prepare_buffers(
-    mut commands: Commands,
-    batches: Query<(Entity, &SkinnedBatch, Option<&InstanceBuffer>)>,
+    batches: Query<(Entity, &SkinnedBatch)>,
+    mut instances: ResMut<SkinnedInstances>,
     render_device: Res<RenderDevice>,
+    render_queue: Res<RenderQueue>,
 ) {
-    for (entity, batch, existing) in &batches {
-        if existing.is_some_and(|buffer| buffer.version == batch.version) {
-            continue;
-        }
-        if batch.count == 0 {
-            commands.entity(entity).remove::<InstanceBuffer>();
-            continue;
-        }
-        let bytes = &batch.records[..batch.count as usize * RECORD_BYTES];
-        let buffer = render_device.create_buffer_with_data(&BufferInitDescriptor {
+    let _timer = probe::PrepareTimer::start();
+    let list: Vec<(Entity, u32, u64)> = batches
+        .iter()
+        .map(|(entity, batch)| {
+            let available = (batch.records.len() / RECORD_BYTES) as u32;
+            (entity, batch.count.min(available), batch.version)
+        })
+        .collect();
+    let plan = instances.plan(&list);
+    let instances = &mut *instances;
+    if instances.buffer.is_none() && plan == Plan::Relayout {
+        instances.buffer = Some(render_device.create_buffer(&BufferDescriptor {
             label: Some("skinned records"),
-            contents: bytes,
-            usage: BufferUsages::VERTEX,
-        });
-        commands.entity(entity).insert(InstanceBuffer {
-            buffer,
-            count: batch.count,
-            version: batch.version,
-        });
+            size: instances.capacity,
+            usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        }));
+    }
+    let Some(buffer) = instances.buffer.as_ref() else {
+        return;
+    };
+    let records = |entity: Entity, slot: &Slot| -> Option<&[u8]> {
+        let (_, batch) = batches.get(entity).ok()?;
+        Some(&batch.records[..slot.count as usize * RECORD_BYTES])
+    };
+    // Most batches animate every frame: one copy of the whole used range is cheaper than one
+    // `write_buffer` per batch (each has its own staging allocation).
+    let whole = match &plan {
+        Plan::Relayout => true,
+        Plan::Writes(entities) => {
+            entities.len() >= WHOLE_WRITE_MIN && entities.len() * 2 >= instances.slots.len()
+        }
+    };
+    if whole {
+        // Written straight into wgpu's staging memory (no intermediate copy); the gaps between
+        // slots are never drawn.
+        let Some(size) = std::num::NonZeroU64::new(instances.end) else {
+            return;
+        };
+        let Some(mut view) = render_queue.write_buffer_with(buffer, 0, size) else {
+            return;
+        };
+        for (entity, slot) in &instances.slots {
+            if let Some(bytes) = records(*entity, slot) {
+                let at = slot.offset as usize;
+                view.slice(at..at + bytes.len()).copy_from_slice(bytes);
+            }
+        }
+        probe::uploaded(size.get() as usize);
+    } else if let Plan::Writes(entities) = plan {
+        for entity in entities {
+            let Some(slot) = instances.slots.get(&entity) else {
+                continue;
+            };
+            if let Some(bytes) = records(entity, slot) {
+                probe::uploaded(bytes.len());
+                render_queue.write_buffer(buffer, slot.offset, bytes);
+            }
+        }
     }
 }
+
+/// From this many changed batches (and half of them), one write of the whole buffer.
+const WHOLE_WRITE_MIN: usize = 8;
 
 #[allow(clippy::too_many_arguments)]
 fn prepare_bind_groups(
@@ -932,21 +1092,34 @@ impl<P: PhaseItem, const I: usize> RenderCommand<P> for SetMaterialBindGroup<I> 
 struct DrawBatch;
 
 impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
-    type Param = (SRes<RenderAssets<RenderMesh>>, SRes<MeshAllocator>);
+    type Param = (
+        SRes<RenderAssets<RenderMesh>>,
+        SRes<MeshAllocator>,
+        SRes<SkinnedInstances>,
+    );
     type ViewQuery = ();
-    type ItemQuery = (Read<InstanceBuffer>, Read<SkinnedBatch>);
+    type ItemQuery = Read<SkinnedBatch>;
 
     fn render<'w>(
-        _item: &P,
+        item: &P,
         _view: (),
-        item_query: Option<(&'w InstanceBuffer, &'w SkinnedBatch)>,
-        (meshes, allocator): SystemParamItem<'w, '_, Self::Param>,
+        batch: Option<&'w SkinnedBatch>,
+        (meshes, allocator, instances): SystemParamItem<'w, '_, Self::Param>,
         pass: &mut TrackedRenderPass<'w>,
     ) -> RenderCommandResult {
         let allocator = allocator.into_inner();
-        let Some((instances, batch)) = item_query else {
+        let instances = instances.into_inner();
+        let (Some(batch), Some(slot), Some(buffer)) = (
+            batch,
+            instances.slots.get(&item.entity()),
+            instances.buffer.as_ref(),
+        ) else {
             return RenderCommandResult::Skip;
         };
+        if slot.count == 0 {
+            return RenderCommandResult::Skip;
+        }
+        let records = slot.offset..slot.offset + u64::from(slot.count) * RECORD_BYTES as u64;
         let mesh_id = batch.mesh_handle.id();
         let Some(gpu_mesh) = meshes.into_inner().get(mesh_id) else {
             return RenderCommandResult::Skip;
@@ -955,7 +1128,7 @@ impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
             return RenderCommandResult::Skip;
         };
         pass.set_vertex_buffer(0, vertex_slice.buffer.slice(..));
-        pass.set_vertex_buffer(1, instances.buffer.slice(..));
+        pass.set_vertex_buffer(1, buffer.slice(records));
         match &gpu_mesh.buffer_info {
             RenderMeshBufferInfo::Indexed {
                 index_format,
@@ -968,16 +1141,134 @@ impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
                 pass.draw_indexed(
                     index_slice.range.start..(index_slice.range.start + count),
                     vertex_slice.range.start as i32,
-                    0..instances.count,
+                    0..slot.count,
                 );
             }
             RenderMeshBufferInfo::NonIndexed => {
-                pass.draw(vertex_slice.range, 0..instances.count);
+                pass.draw(vertex_slice.range, 0..slot.count);
             }
         }
         DRAWN_SKINNED.fetch_add(1, Ordering::Relaxed);
-        DRAWN_FIGURES.fetch_add(instances.count, Ordering::Relaxed);
+        DRAWN_FIGURES.fetch_add(slot.count, Ordering::Relaxed);
         RenderCommandResult::Success
+    }
+}
+
+/// Render-side timing probe (lot perf3): CPU time of `prepare_buffers` and of the whole render
+/// schedule per frame, bytes uploaded; dump section `skinned_upload` (last 600 frames with at
+/// least one skinned batch).
+mod probe {
+    use std::sync::Mutex;
+    use std::time::Instant;
+
+    use bevy::prelude::*;
+    use serde_json::json;
+
+    const WINDOW: usize = 600;
+
+    #[derive(Default)]
+    struct Frame {
+        prepare_us: f32,
+        bytes: usize,
+        writes: u32,
+        batches: bool,
+    }
+
+    #[derive(Default)]
+    struct Probe {
+        render_start: Option<Instant>,
+        current: Frame,
+        prepare_us: Vec<f32>,
+        render_ms: Vec<f32>,
+        bytes: Vec<usize>,
+        writes: Vec<u32>,
+    }
+
+    static PROBE: Mutex<Option<Probe>> = Mutex::new(None);
+
+    fn with<R>(f: impl FnOnce(&mut Probe) -> R) -> R {
+        let mut guard = PROBE.lock().unwrap_or_else(|e| e.into_inner());
+        f(guard.get_or_insert_with(Probe::default))
+    }
+
+    pub struct PrepareTimer(Instant);
+
+    impl PrepareTimer {
+        pub fn start() -> Self {
+            Self(Instant::now())
+        }
+    }
+
+    impl Drop for PrepareTimer {
+        fn drop(&mut self) {
+            let us = self.0.elapsed().as_secs_f32() * 1e6;
+            with(|p| {
+                p.current.prepare_us += us;
+                p.current.batches = true;
+            });
+        }
+    }
+
+    pub fn uploaded(bytes: usize) {
+        with(|p| {
+            p.current.bytes += bytes;
+            p.current.writes += 1;
+        });
+    }
+
+    pub fn render_start() {
+        with(|p| p.render_start = Some(Instant::now()));
+    }
+
+    pub fn render_end() {
+        with(|p| {
+            let frame = std::mem::take(&mut p.current);
+            let Some(start) = p.render_start.take() else {
+                return;
+            };
+            if !frame.batches {
+                return;
+            }
+            let push = |v: &mut Vec<f32>, x: f32| {
+                if v.len() == WINDOW {
+                    v.remove(0);
+                }
+                v.push(x);
+            };
+            push(&mut p.render_ms, start.elapsed().as_secs_f32() * 1e3);
+            push(&mut p.prepare_us, frame.prepare_us);
+            if p.bytes.len() == WINDOW {
+                p.bytes.remove(0);
+                p.writes.remove(0);
+            }
+            p.bytes.push(frame.bytes);
+            p.writes.push(frame.writes);
+        });
+    }
+
+    fn percentile(values: &[f32], q: f32) -> f32 {
+        if values.is_empty() {
+            return 0.0;
+        }
+        let mut sorted = values.to_vec();
+        sorted.sort_by(f32::total_cmp);
+        sorted[((sorted.len() - 1) as f32 * q).round() as usize]
+    }
+
+    pub fn dump(_world: &World) -> (String, serde_json::Value) {
+        let value = with(|p| {
+            let n = p.bytes.len().max(1) as f32;
+            json!({
+                "frames": p.render_ms.len(),
+                "render_ms_p50": percentile(&p.render_ms, 0.5),
+                "render_ms_p95": percentile(&p.render_ms, 0.95),
+                "prepare_us_p50": percentile(&p.prepare_us, 0.5),
+                "prepare_us_p95": percentile(&p.prepare_us, 0.95),
+                "bytes_per_frame": p.bytes.iter().sum::<usize>() as f32 / n,
+                "writes_per_frame": p.writes.iter().sum::<u32>() as f32 / n,
+            })
+        });
+        ("skinned_upload".into(), value)
     }
 }
 
@@ -1125,6 +1416,46 @@ mod tests {
             release: 0.3,
             jitter: 0.03,
         }
+    }
+
+    fn entity(index: u32) -> Entity {
+        Entity::from_raw_u32(index).expect("valid index")
+    }
+
+    #[test]
+    fn instances_write_in_place_and_relayout_only_on_overflow() {
+        let (a, b) = (entity(1), entity(2));
+        let mut instances = SkinnedInstances::default();
+        // First records: no buffer yet -> re-layout with headroom.
+        assert_eq!(instances.plan(&[(a, 10, 1), (b, 0, 1)]), Plan::Relayout);
+        assert!(instances.capacity >= 64 * 1024);
+        // Unchanged versions: nothing to send.
+        assert_eq!(
+            instances.plan(&[(a, 10, 1), (b, 0, 1)]),
+            Plan::Writes(vec![])
+        );
+        // a changes within its slot, b gets records: in-place write and an appended slot.
+        assert_eq!(
+            instances.plan(&[(a, 12, 2), (b, 5, 2)]),
+            Plan::Writes(vec![a, b])
+        );
+        let (sa, sb) = (instances.slots[&a], instances.slots[&b]);
+        assert_eq!(sa.offset, 0);
+        assert!(sb.offset >= sa.offset + sa.capacity);
+        // Emptied batch: kept, nothing written.
+        assert_eq!(
+            instances.plan(&[(a, 0, 3), (b, 5, 2)]),
+            Plan::Writes(vec![])
+        );
+        assert_eq!(instances.slots[&a].count, 0);
+        // Growth past the buffer end: re-layout, compacted from 0.
+        let huge = (instances.capacity / RECORD_BYTES as u64) as u32 + 1;
+        assert_eq!(instances.plan(&[(a, huge, 4), (b, 5, 2)]), Plan::Relayout);
+        assert_eq!(instances.slots[&a].offset, 0);
+        assert!(instances.capacity >= instances.end);
+        // Despawned batches leave the table.
+        instances.plan(&[(b, 5, 2)]);
+        assert!(!instances.slots.contains_key(&a));
     }
 
     #[test]
