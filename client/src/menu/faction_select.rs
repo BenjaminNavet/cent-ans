@@ -180,6 +180,7 @@ fn primary_color(sim: &Sim, id: &str) -> Color {
         .map_or(Color::srgb(0.4, 0.4, 0.5), Color::from)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_screen(
     mut commands: Commands,
     theme: Res<UiTheme>,
@@ -430,6 +431,7 @@ fn framed(
     panel
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_cards(
     commands: &mut Commands,
     theme: &UiTheme,

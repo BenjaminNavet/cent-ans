@@ -21,6 +21,7 @@
 
 use std::path::PathBuf;
 
+use bevy::ecs::message::MessageCursor;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -62,10 +63,10 @@ impl PrologueFlags {
         if let Some(parent) = path.parent() {
             let _ = std::fs::create_dir_all(parent);
         }
-        if let Ok(text) = serde_json::to_string_pretty(self) {
-            if let Err(error) = std::fs::write(path, text) {
-                warn!("battle_prologue.json: {error}");
-            }
+        if let Ok(text) = serde_json::to_string_pretty(self)
+            && let Err(error) = std::fs::write(path, text)
+        {
+            warn!("battle_prologue.json: {error}");
         }
     }
 }
@@ -163,29 +164,31 @@ impl Plugin for PrologueInvitePlugin {
 fn gate_launch(
     mut commands: Commands,
     mut launches: ResMut<Messages<LaunchBattle>>,
+    mut cursor: Local<MessageCursor<LaunchBattle>>,
     mut invite: ResMut<PrologueInvite>,
     theme: Res<UiTheme>,
     dir: Option<Res<SaveDir>>,
 ) {
-    if launches.iter_current_update_messages().next().is_none() {
+    let fresh: Vec<bool> = cursor
+        .read(&launches)
+        .map(|launch| launch.label.starts_with("demo:"))
+        .collect();
+    if fresh.is_empty() {
         return;
     }
     if invite.bypass {
         invite.bypass = false;
         return;
     }
-    let ungated = launches
-        .iter_current_update_messages()
-        .all(|launch| launch.label.starts_with("demo:"));
-    if ungated {
+    if fresh.iter().all(|demo| *demo) {
         return;
     }
-    if invite.path.is_none() {
-        if let Some(dir) = dir {
-            let path = prefs_dir(&dir.0).join("battle_prologue.json");
-            invite.flags = PrologueFlags::load(&path);
-            invite.path = Some(path);
-        }
+    if invite.path.is_none()
+        && let Some(dir) = dir
+    {
+        let path = prefs_dir(&dir.0).join("battle_prologue.json");
+        invite.flags = PrologueFlags::load(&path);
+        invite.path = Some(path);
     }
     let present = data_dir().is_some_and(|dir| dir.join("tutorial/battle_prologue.json").is_file());
     if !invite.flags.should_ask(present) || invite.asking {
@@ -299,10 +302,29 @@ pub fn dump(world: &World) -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use sim_battle::custom::CustomBattle;
+    use sim_battle::custom::{CustomBattle, CustomSide};
 
     fn launch(label: &str) -> LaunchBattle {
-        LaunchBattle::new(CustomBattle::default(), 1, label)
+        let side = |faction: &str| CustomSide {
+            faction: faction.to_owned(),
+            budget: 0,
+            units: Vec::new(),
+            technologies: Vec::new(),
+        };
+        let battle = CustomBattle {
+            attacker: side("fac_france"),
+            defender: side("fac_england"),
+            terrain: String::new(),
+            season: String::new(),
+            weather: String::new(),
+            hour: String::new(),
+            siege: false,
+            fortification: None,
+            player_side: "attacker".to_owned(),
+            year: None,
+            engines: None,
+        };
+        LaunchBattle::new(battle, 1, label)
     }
 
     #[test]
@@ -321,9 +343,11 @@ mod tests {
 
     #[test]
     fn no_proceeds_and_asks_again_never_proceeds_and_remembers_yes_drops() {
-        let mut invite = PrologueInvite::default();
-        invite.held = Some(launch("custom"));
-        invite.asking = true;
+        let mut invite = PrologueInvite {
+            held: Some(launch("custom")),
+            asking: true,
+            ..Default::default()
+        };
         let released = invite.answer(Choice::No);
         assert_eq!(released.map(|l| l.label), Some("custom".to_owned()));
         assert!(invite.bypass && !invite.flags.never_ask && !invite.asking);

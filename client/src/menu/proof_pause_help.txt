@@ -1,0 +1,25 @@
+# Nouvelle partie -> pause -> Aide (F1) : la feuille s'ouvre, Échap la ferme, la pause reste (menu5).
+state MainMenu
+wait 40
+click Nouvelle partie
+wait 40
+click Commencer
+wait 10
+click Non
+wait 120
+key Escape
+wait 10
+dump out/menu5_pause_0.json
+key Escape
+wait 20
+dump out/menu5_pause_1.json
+click pause:help
+wait 20
+dump out/menu5_pause_a.json
+key Escape
+wait 20
+dump out/menu5_pause_b.json
+key Escape
+wait 20
+dump out/menu5_pause_c.json
+exit

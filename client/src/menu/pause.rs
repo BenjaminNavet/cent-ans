@@ -45,6 +45,14 @@ pub struct TogglePause;
 #[derive(Resource, Default, Debug)]
 pub struct PauseHelp(pub bool);
 
+/// What « Aide (F1) » needs: the modal queue, the pause flag, the settings and the key map.
+type HelpContext<'w> = (
+    ResMut<'w, ModalQueue>,
+    ResMut<'w, PauseHelp>,
+    Option<Res<'w, crate::settings::Settings>>,
+    Option<Res<'w, crate::settings::KeyMap>>,
+);
+
 /// Key of the shortcut sheet in the modal queue (same as `campaign::hud::help`).
 const HELP_KEY: &str = "hud:shortcuts";
 
@@ -218,12 +226,7 @@ fn pause_buttons(
     mut settings: MessageWriter<OpenSettings>,
     mut dialogs: MessageWriter<OpenSaveDialog>,
     mut played: MessageWriter<crate::flow::history::OpenPlayedBattles>,
-    mut help_context: (
-        ResMut<ModalQueue>,
-        ResMut<PauseHelp>,
-        Option<Res<crate::settings::Settings>>,
-        Option<Res<crate::settings::KeyMap>>,
-    ),
+    mut help_context: HelpContext,
 ) {
     let (modals, help, settings_res, keymap) = &mut help_context;
     for press in pressed.read() {

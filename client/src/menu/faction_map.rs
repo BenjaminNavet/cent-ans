@@ -315,7 +315,7 @@ fn fill_ring(
             }
         }
         crossings.sort_by(f32::total_cmp);
-        for pair in crossings.chunks_exact(2) {
+        for pair in crossings.as_chunks::<2>().0 {
             let from = (pair[0] - 0.5).ceil().max(0.0) as i64;
             let to = ((pair[1] - 0.5).floor() as i64).min(width as i64 - 1);
             for x in from..=to {
@@ -693,14 +693,16 @@ pub fn spawn_tab(
     let scroll = commands
         .spawn((
             crate::ui::kit::scroll_list(theme, "fm:list", 500.0),
-            Node {
-                flex_grow: 1.0,
-                min_width: Val::Px(120.0),
-                ..default()
-            },
             ChildOf(body),
         ))
         .id();
+    commands
+        .entity(scroll)
+        .entry::<Node>()
+        .and_modify(|mut node| {
+            node.flex_grow = 1.0;
+            node.min_width = Val::Px(120.0);
+        });
     commands.spawn((
         Name::new("FactionList"),
         FactionList,
@@ -907,7 +909,6 @@ pub fn refresh_list(
                 commands.spawn((
                     toggle_button(&theme, &format!("fm:{id}"), &name, id == choice.faction),
                     ListButton(id),
-                    Hovered::default(),
                     ChildOf(flow),
                 ));
             }
@@ -985,7 +986,7 @@ pub fn hover_card(
         .front
         .pitch(&sheet.id)
         .map(|pitch| menu.front.difficulty_label(pitch.difficulty));
-    let lines = card_lines(sheet, difficulty.as_deref());
+    let lines = card_lines(sheet, difficulty);
     let Ok(body) = bodies.single() else { return };
     commands.entity(body).despawn_related::<Children>();
     commands.entity(body).insert(Node {
@@ -1089,7 +1090,6 @@ mod tests {
                 [x + side, y + side],
                 [x, y + side],
             ]],
-            ..Default::default()
         }
     }
 
