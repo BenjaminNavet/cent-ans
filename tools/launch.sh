@@ -6,8 +6,9 @@
 #      `cargo build --release` in client/ (cargo decides what to recompile),
 #   1b. downloads the generated 3D models package when absent or older than the published one
 #      (ADR 0212; never fatal: maquettes procédurales de repli),
-#   2. downloads the fine relief cache when it is absent or older than the published package
-#      (ADR 0149; never fatal: without it the close zoom is only limited),
+#   2. checks the composed relief pyramid (data/map/pyramid/relief_pyramid.json; links the usual
+#      store ~/dev/cent-ans-raw/compose/pyramid when present, else prints the generation command;
+#      never fatal: without it the close zoom is only limited),
 #   3. launches the game.
 # Called by the double-click launchers at the root of the repository ("Lancer Cent Ans.*").
 # Usage: tools/launch.sh [--dry-run] [--no-update] [--no-build] [--no-relief]
@@ -15,7 +16,7 @@
 #   --dry-run    print what would be done (tools found, missing libraries, commands), change nothing
 #   --no-update  skip the update check (also: CENT_ANS_NO_UPDATE=1)
 #   --no-build   skip the Rust build (the binary already built is used)
-#   --no-relief  skip the fine relief check (no download)
+#   --no-relief  skip the composed relief check
 #   --no-models  skip the generated models check (no download)
 # Arguments after `--` go to the client (--state, --faction, --seed...).
 # Must stay compatible with the bash 3.2 shipped with macOS.
@@ -170,22 +171,41 @@ if [[ $MODELS -eq 1 ]]; then
 fi
 }
 
-# The installed cache says which package it holds (pyramid/package.json). Only when it differs
-# from the published version does the Python tool decide (and download).
-fetch_relief() {
-if [[ $RELIEF -eq 1 ]]; then
-    RELIEF_WANTED="$(json_version data/map/relief_hosting.json)"
-    RELIEF_HAVE="$(json_version "${CENT_ANS_RELIEF_DIR:-data/map}/pyramid/package.json")"
-    if [[ -n "$RELIEF_WANTED" && "$RELIEF_HAVE" != "$RELIEF_WANTED" ]]; then
-        if command -v uv >/dev/null; then
-            say "Relief fin : vérification du paquet v$RELIEF_WANTED (téléchargement ≈ 5 Go s'il manque ; --no-relief pour passer)…"
-            uv run --project tools cent-ans geo relief-fetch --if-needed ||
-                say "Relief fin non mis à jour (zoom rapproché limité) ; nouvel essai au prochain lancement."
-        else
-            say "Relief fin absent ou ancien, et uv introuvable (https://docs.astral.sh/uv/) : zoom rapproché limité."
+# The Bevy client reads the COMPOSED relief pyramid (ADR 0355): <relief dir>/pyramid/relief_pyramid.json,
+# produced locally by `cent-ans geo compose-relief-real` and kept outside git (the real relief
+# package v3 of the Godot client is NOT used any more). If the pyramid is missing and the usual
+# store (~/dev/cent-ans-raw/compose/pyramid) exists, it is linked in place; otherwise the command
+# to generate it is printed. Never fatal: without it the close zoom falls back to procedural detail.
+COMPOSED_PYRAMID_STORE="${CENT_ANS_COMPOSED_PYRAMID:-$HOME/dev/cent-ans-raw/compose/pyramid}"
+
+relief_dir() { printf '%s\n' "${CENT_ANS_RELIEF_DIR:-data/map}"; }
+
+check_relief() {
+    [[ $RELIEF -eq 1 ]] || return 0
+    local dir manifest
+    dir="$(relief_dir)/pyramid"
+    manifest="$dir/relief_pyramid.json"
+    if [[ -f "$manifest" ]]; then
+        [[ $DRY_RUN -eq 1 ]] && say "(essai à blanc) relief composé : $manifest présent"
+        return 0
+    fi
+    if [[ -f "$COMPOSED_PYRAMID_STORE/relief_pyramid.json" && ! -e "$dir" ]]; then
+        if [[ $DRY_RUN -eq 1 ]]; then
+            say "(essai à blanc) relief composé : $dir serait lié à $COMPOSED_PYRAMID_STORE"
+            return 0
+        fi
+        rm -f "$dir" 2>/dev/null || true
+        if ln -s "$COMPOSED_PYRAMID_STORE" "$dir" 2>/dev/null; then
+            say "Relief composé : $dir lié à $COMPOSED_PYRAMID_STORE."
+            return 0
         fi
     fi
-fi
+    say "Relief composé absent ($manifest) : la carte rapprochée sera limitée."
+    if [[ -e "$dir" || -L "$dir" ]]; then
+        say "  $dir existe mais sans relief_pyramid.json (ancien paquet réel v3 ?) : renommez-le (mv $dir ${dir}_v3_reel) puis relancez."
+    fi
+    say "  Génération (hors git, plusieurs Go) : uv run --project tools cent-ans geo compose-relief-real"
+    say "  puis liez la sortie : ln -s <dossier produit> $dir (voir docs/wip/cc-carte-composee.md)."
 }
 
 # --- Bevy client (ADR 0362) ---------------------------------------------------------
@@ -235,7 +255,7 @@ launch_bevy() {
         [[ "$PLATFORM" == "linux" ]] && { check_linux_libraries || true; }
         [[ $BUILD -eq 1 ]] && say "(essai à blanc) compilation : cargo build --release --manifest-path $CLIENT/Cargo.toml"
         [[ $MODELS -eq 1 ]] && say "(essai à blanc) modèles générés : paquet v$(json_version data/art/dn_models_hosting.json) voulu, v$(json_version "${CENT_ANS_MODELS_DIR:-game/assets/models}/dn/package.json") installé"
-        [[ $RELIEF -eq 1 ]] && say "(essai à blanc) relief fin : paquet v$(json_version data/map/relief_hosting.json) voulu, v$(json_version "${CENT_ANS_RELIEF_DIR:-data/map}/pyramid/package.json") installé"
+        check_relief
         say "(essai à blanc) lancement : CENT_ANS_ROOT=$ROOT $CLIENT_BINARY ${1+$*}"
         exit 0
     fi
@@ -260,7 +280,7 @@ launch_bevy() {
     [[ -x "$CLIENT_BINARY" ]] || fail "Client Bevy absent : $CLIENT_BINARY (relancer sans --no-build)."
 
     fetch_models
-    fetch_relief
+    check_relief
 
     say "Lancement du jeu (Bevy)…"
     export CENT_ANS_ROOT="$ROOT"
