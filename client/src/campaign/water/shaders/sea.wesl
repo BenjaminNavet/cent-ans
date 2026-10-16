@@ -167,6 +167,70 @@ const ROT_B: mat2x2<f32> = mat2x2<f32>(vec2<f32>(0.6, -0.8), vec2<f32>(0.8, 0.6)
 const ROT_OCEAN_A: mat2x2<f32> = mat2x2<f32>(vec2<f32>(0.87, 0.5), vec2<f32>(-0.5, 0.87));
 const ROT_OCEAN_B: mat2x2<f32> = mat2x2<f32>(vec2<f32>(0.5, -0.87), vec2<f32>(0.87, 0.5));
 
+// RV-F (water_glint.gdshaderinc): sun glints readable from the regional view. Every glint is a cell of
+// fixed screen size, drawn at random, that lights up and fades slowly; two neighbouring grid sizes
+// (powers of 2 in world units) are blended by the pixel footprint like mip levels, so the grid follows
+// the zoom without popping or moire. Godot applies it in light(); here it is added to the colour.
+const GLINT_AMOUNT: f32 = 0.55;
+const GLINT_TAIL: f32 = 0.03;
+const GLINT_CELL_PX: f32 = 4.0;
+const GLINT_COVERAGE: f32 = 0.10;
+const GLINT_PATCH_SCALE: f32 = 0.02;
+const GLINT_RATE: f32 = 0.35;
+const GLINT_DRIFT: vec2<f32> = vec2<f32>(0.06, 0.025);
+const GLINT_SLOPE: f32 = 0.32;
+const GLINT_FOOTPRINT: vec2<f32> = vec2<f32>(0.35, 1.2);
+const GLINT_COLOR: vec3<f32> = vec3<f32>(1.0, 0.94, 0.80);
+
+fn glint_grid(p: vec2<f32>, cell: f32, time: f32) -> f32 {
+    let q = p / cell + time * GLINT_DRIFT;
+    let id = floor(q);
+    let f = fract(q) - vec2<f32>(0.5);
+    let h = hash12(id);
+    // Calm and rough patches of sea (wide noise in world space): glints in groups, not a scatter.
+    let g = p * GLINT_PATCH_SCALE + time * vec2<f32>(0.004, 0.002);
+    let gi = floor(g);
+    var gf = fract(g);
+    gf = gf * gf * (3.0 - 2.0 * gf);
+    let patchy = mix(mix(hash12(gi), hash12(gi + vec2<f32>(1.0, 0.0)), gf.x), mix(hash12(gi + vec2<f32>(0.0, 1.0)), hash12(gi + vec2<f32>(1.0, 1.0)), gf.x), gf.y);
+    if h > GLINT_COVERAGE * mix(0.25, 1.75, patchy) {
+        return 0.0;
+    }
+    let h2 = hash12(id + vec2<f32>(17.3));
+    let c = (vec2<f32>(h2, hash12(id + vec2<f32>(5.1))) - vec2<f32>(0.5)) * 0.3;
+    let blob = 1.0 - smoothstep(0.08, 0.42, length(f - c));
+    let phase = time * GLINT_RATE * mix(0.6, 1.4, h2) + h * 37.0;
+    let on = pow(max(sin(phase * 6.2832), 0.0), 3.0);
+    return blob * on;
+}
+
+fn glint_mask(p: vec2<f32>, footprint: f32, time: f32) -> f32 {
+    let w = smoothstep(GLINT_FOOTPRINT.x, GLINT_FOOTPRINT.y, footprint);
+    if w <= 0.0 {
+        return 0.0;
+    }
+    let lod = log2(max(footprint * GLINT_CELL_PX, 1e-4));
+    let l0 = floor(lod);
+    let k = lod - l0;
+    let a = glint_grid(p, exp2(l0), time);
+    let b = glint_grid(p + vec2<f32>(3.7), exp2(l0 + 1.0), time);
+    return mix(a, b, k) * w;
+}
+
+// Light of the glints: wide lobe around the sun reflection (very tilted facets of a rough sea) plus a
+// faint tail. `n_flat`: normal of the resting surface.
+fn glint_light(mask: f32, n_flat: vec3<f32>, to_eye: vec3<f32>, sun: vec3<f32>) -> f32 {
+    if mask <= 0.0 {
+        return 0.0;
+    }
+    let h = normalize(to_eye + sun);
+    let ndh = clamp(dot(n_flat, h), 1e-3, 1.0);
+    let ndh2 = ndh * ndh;
+    let lobe = exp(-(1.0 - ndh2) / (ndh2 * GLINT_SLOPE * GLINT_SLOPE));
+    let sun_up = clamp(dot(n_flat, sun), 0.0, 1.0);
+    return mask * GLINT_AMOUNT * (lobe + GLINT_TAIL * sun_up);
+}
+
 // Slow sine warp that breaks the visible repetition of the detail tile.
 fn detail_warp(p: vec2<f32>) -> vec2<f32> {
     return vec2<f32>(sin(p.y * 0.071 + 1.3), cos(p.x * 0.057 + 0.4)) * 0.9;
@@ -326,6 +390,9 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let h = normalize(to_eye + sun);
     let spec = pow(max(dot(n, h), 0.0), mix(params.sun_spec_power, params.sun_spec_power * 0.25, far_t)) * params.sun_spec_intensity * (1.0 - 0.7 * far_t);
     col = col + vec3<f32>(spec) * (1.0 - clamp(foam, 0.0, 1.0));
+    // RV-F glints, off on foam, on land (alpha) and in the lake ponds.
+    let glint = glint_mask(p, footprint, globals.time) * (1.0 - clamp(foam, 0.0, 1.0)) * alpha;
+    col = col + GLINT_COLOR * glint_light(glint, vec3<f32>(0.0, 1.0, 0.0), to_eye, sun);
 
     // Map-edge haze.
     var edge_mist = 0.0;
