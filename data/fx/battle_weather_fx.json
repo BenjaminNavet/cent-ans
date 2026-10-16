@@ -39,6 +39,7 @@
     "ambient_intensity": 0.0,
     "ground_mist": {"density": 0.01, "height_m": 12.0, "lift_m": 1.0, "height_falloff": 0.35, "edge_fade": 0.3, "lighten": 0.1}
   },
+  "height_fog": {"weather": "fog", "height_m": 12.0, "density": 0.04, "reference_m": 150.0},
   "horizon_smoke": {
     "size_m": [70.0, 420.0],
     "scatter_m": 40.0,

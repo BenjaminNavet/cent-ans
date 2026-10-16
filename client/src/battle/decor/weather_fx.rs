@@ -91,12 +91,22 @@ pub struct HorizonSmokeLook {
     pub opacity: f32,
 }
 
+/// Godot's `fog_height` / `fog_height_density` of the fog weather.
+#[derive(Debug, Clone, Deserialize)]
+pub struct HeightFogLook {
+    pub weather: String,
+    pub height_m: f32,
+    pub density: f32,
+    pub reference_m: f32,
+}
+
 /// `data/fx/battle_weather_fx.json`.
 #[derive(Resource, Debug, Clone, Deserialize)]
 pub struct WeatherFxLook {
     pub precipitation: PrecipitationLook,
     pub volumetric: VolumetricLook,
     pub horizon_smoke: HorizonSmokeLook,
+    pub height_fog: HeightFogLook,
 }
 
 impl WeatherFxLook {

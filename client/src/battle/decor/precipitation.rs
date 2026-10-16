@@ -20,6 +20,7 @@ use bevy::shader::ShaderRef;
 use super::atmosphere::AtmosphereState;
 use super::weather_fx::{FallLook, WeatherFxLook, linear3};
 use crate::app::AppState;
+use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::BattleCamera;
 
 #[derive(ShaderType, Clone, Debug, Default)]
@@ -71,6 +72,9 @@ pub struct Precipitation {
     material: Handle<PrecipitationMaterial>,
     ahead: f32,
     above: f32,
+    snow: bool,
+    /// A shower under a sky that is not the rain sky.
+    shower: bool,
 }
 
 /// What falls (read by the dump).
@@ -79,6 +83,8 @@ pub struct PrecipitationStats {
     /// `rain`, `snow` or empty.
     pub kind: String,
     pub drops: u32,
+    /// The rain is a shower of the simulation, not the sky's rain.
+    pub shower: bool,
     pub centre: [f32; 3],
 }
 
@@ -91,7 +97,7 @@ impl Plugin for PrecipitationPlugin {
             .add_systems(
                 Update,
                 (
-                    spawn_precipitation.run_if(not(resource_exists::<PrecipitationStats>)),
+                    update_precipitation,
                     follow_camera.run_if(resource_exists::<PrecipitationStats>),
                 )
                     .run_if(in_state(AppState::Battle))
@@ -161,31 +167,38 @@ fn params(look: &FallLook, snow: bool) -> FallParams {
     }
 }
 
-fn spawn_precipitation(
-    mut commands: Commands,
-    atmosphere: Res<AtmosphereState>,
-    fx: Res<WeatherFxLook>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<PrecipitationMaterial>>,
+/// What should fall: `(snow, shower)`. The sky's rain and snow are permanent; a shower is rain
+/// from the simulation under a sky that is not the rain sky (historical map: the sky is the one of
+/// the end of the battle) and stops when the simulation changes weather (`add_shower`, and the
+/// poll of battle_scene.gd).
+pub fn desired_fall(sky: &str, sim_weather: &str) -> Option<(bool, bool)> {
+    match sky {
+        "rain" => Some((false, false)),
+        "snow" => Some((true, false)),
+        _ if sim_weather == "rain" => Some((false, true)),
+        _ => None,
+    }
+}
+
+fn spawn_fall(
+    commands: &mut Commands,
+    look: &FallLook,
+    snow: bool,
+    shower: bool,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<PrecipitationMaterial>,
 ) {
-    let snow = atmosphere.weather == "snow";
-    let look = match atmosphere.weather.as_str() {
-        "rain" => &fx.precipitation.rain,
-        "snow" => &fx.precipitation.snow,
-        _ => {
-            commands.insert_resource(PrecipitationStats::default());
-            return;
-        }
-    };
     let material = materials.add(PrecipitationMaterial {
         params: params(look, snow),
     });
     commands.spawn((
-        Name::new("Precipitation"),
+        Name::new(if shower { "Shower" } else { "Precipitation" }),
         Precipitation {
             material: material.clone(),
             ahead: look.ahead_m,
             above: look.above_m,
+            snow,
+            shower,
         },
         Mesh3d(meshes.add(drops_mesh(look.count))),
         MeshMaterial3d(material),
@@ -194,11 +207,78 @@ fn spawn_precipitation(
         NotShadowCaster,
         DespawnOnExit(AppState::Battle),
     ));
-    commands.insert_resource(PrecipitationStats {
-        kind: atmosphere.weather.clone(),
-        drops: look.count,
-        centre: [0.0; 3],
-    });
+}
+
+/// Keeps the falling particles in step with the sky and the simulation weather (polled once a
+/// second like Godot; the first call spawns at once).
+#[allow(clippy::too_many_arguments)]
+fn update_precipitation(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut timer: Local<f32>,
+    mut session: ResMut<BattleSession>,
+    atmosphere: Res<AtmosphereState>,
+    fx: Res<WeatherFxLook>,
+    existing: Query<(Entity, &Precipitation)>,
+    stats: Option<ResMut<PrecipitationStats>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<PrecipitationMaterial>>,
+) {
+    let first = stats.is_none();
+    *timer += time.delta_secs();
+    if !first && *timer < 1.0 {
+        return;
+    }
+    *timer = 0.0;
+    // Dev hook (proof of the shower without a historical map): the simulation rains.
+    let sim_weather = if std::env::var_os("CENT_ANS_SHOWER").is_some() {
+        "rain".to_owned()
+    } else {
+        super::atmosphere::weather_key(session.sim_mut().weather()).to_owned()
+    };
+    let want = desired_fall(&atmosphere.weather, &sim_weather);
+    let have = existing.iter().next().map(|(_, p)| (p.snow, p.shower));
+    if have != want {
+        for (entity, _) in &existing {
+            commands.entity(entity).despawn();
+        }
+        if let Some((snow, shower)) = want {
+            let look = if snow {
+                &fx.precipitation.snow
+            } else {
+                &fx.precipitation.rain
+            };
+            spawn_fall(
+                &mut commands,
+                look,
+                snow,
+                shower,
+                &mut meshes,
+                &mut materials,
+            );
+        }
+    }
+    let new_stats = PrecipitationStats {
+        kind: match want {
+            Some((true, _)) => "snow",
+            Some((false, _)) => "rain",
+            None => "",
+        }
+        .to_owned(),
+        shower: want.is_some_and(|(_, shower)| shower),
+        drops: want.map_or(0, |(snow, _)| {
+            if snow {
+                fx.precipitation.snow.count
+            } else {
+                fx.precipitation.rain.count
+            }
+        }),
+        centre: stats.as_ref().map_or([0.0; 3], |s| s.centre),
+    };
+    match stats {
+        Some(mut stats) => *stats = new_stats,
+        None => commands.insert_resource(new_stats),
+    }
 }
 
 /// Moves the wrap box with the camera (Godot's emitter at camera-local `(0, above, -ahead)`).
@@ -237,5 +317,23 @@ mod tests {
         let mean: f32 = (0..2000).map(|i| hash(i, 1)).sum::<f32>() / 2000.0;
         assert!((mean - 0.5).abs() < 0.03, "{mean}");
         assert!((0..2000).all(|i| (0.0..1.0).contains(&hash(i, 2))));
+    }
+}
+
+#[cfg(test)]
+mod fall_tests {
+    use super::desired_fall;
+
+    #[test]
+    fn sky_rain_and_snow_are_permanent() {
+        assert_eq!(desired_fall("rain", "clear"), Some((false, false)));
+        assert_eq!(desired_fall("snow", "rain"), Some((true, false)));
+    }
+
+    #[test]
+    fn a_shower_falls_from_a_dry_sky_while_the_simulation_rains() {
+        assert_eq!(desired_fall("clear", "rain"), Some((false, true)));
+        assert_eq!(desired_fall("fog", "rain"), Some((false, true)));
+        assert_eq!(desired_fall("clear", "clear"), None);
     }
 }

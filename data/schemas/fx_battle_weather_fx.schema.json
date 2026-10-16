@@ -4,7 +4,7 @@
   "title": "Effets de météo des batailles (client Bevy)",
   "description": "Fichier data/fx/battle_weather_fx.json (lot batmo) : pluie et neige, brouillard volumétrique, fumées d'horizon. Purement visuel.",
   "type": "object",
-  "required": ["precipitation", "volumetric", "horizon_smoke"],
+  "required": ["precipitation", "volumetric", "horizon_smoke", "height_fog"],
   "additionalProperties": false,
   "$defs": {
     "vec3": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
@@ -30,6 +30,18 @@
   },
   "properties": {
     "description": { "type": "string" },
+    "height_fog": {
+      "type": "object",
+      "required": ["weather", "height_m", "density", "reference_m"],
+      "additionalProperties": false,
+      "description": "Brouillard de hauteur de Godot (fog_height / fog_height_density, nappes basses dans les creux), seulement sous la météo indiquée.",
+      "properties": {
+        "weather": { "type": "string", "enum": ["clear", "rain", "fog", "snow"] },
+        "height_m": { "type": "number", "minimum": 0, "description": "Altitude monde sous laquelle le brouillard s'épaissit (m)." },
+        "density": { "type": "number", "minimum": 0, "description": "fog_height_density : opacité = 1 - exp(-density x profondeur sous height_m)." },
+        "reference_m": { "type": "number", "exclusiveMinimum": 0, "description": "Distance (m) sur laquelle l'opacité de hauteur est convertie en densité de brouillard de distance." }
+      }
+    },
     "precipitation": {
       "type": "object",
       "required": ["rain", "snow"],
