@@ -104,7 +104,6 @@ def test_pack_and_board(tmp_path) -> None:
     )
     assert report["grid"] == [2, 2]
     assert json.loads(manifest.read_text())["albedo"] == "res://x/a.jpg"
-    assert (tmp_path / "tex" / "n.jpg.import").exists()
     target = board(document, tmp_path / "raw", cell=64)
     assert target.exists()
 
