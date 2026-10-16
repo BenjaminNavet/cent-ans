@@ -20,6 +20,7 @@
 //! - Gallery: `CENT_ANS_KIT_GALLERY=1` + `MainMenu` shows every widget ([`gallery`]).
 //! - Dump section `ui_kit`: widget counts by kind, open tooltips, modal queue.
 
+pub mod contrast;
 pub mod fa;
 pub mod fr;
 pub mod gallery;
@@ -308,6 +309,7 @@ impl Plugin for UiKitPlugin {
             ))
             .add_plugins(layout::plugin)
             .add_plugins(fa::plugin)
+            .add_plugins(contrast::plugin)
             .add_plugins((super::fader::plugin, super::art_plates::plugin))
             .add_systems(Startup, (load_resources, spawn_ui_camera).chain())
             .add_systems(Update, apply_text_scale)
@@ -434,7 +436,7 @@ pub fn parse_kit_metrics(bytes: &[u8]) -> Result<HashMap<String, SliceMetrics>, 
 }
 
 /// `interface/text_size` -> [`UiTheme::text_scale`] (clamped; no write when unchanged).
-fn apply_text_scale(settings: Option<Res<crate::settings::Settings>>, mut theme: ResMut<UiTheme>) {
+pub(super) fn apply_text_scale(settings: Option<Res<crate::settings::Settings>>, mut theme: ResMut<UiTheme>) {
     let Some(settings) = settings else { return };
     let wanted = settings.text_size.clamp(0.7, 1.6);
     if (theme.text_scale - wanted).abs() > 1e-4 {
@@ -533,6 +535,7 @@ fn dump_ui_kit(world: &World) -> (String, serde_json::Value) {
             "panel_stack": world.resource::<panel_stack::PanelStack>().dump(),
             "layout": layout_probe::dump(world),
             "icons": icons::dump(world),
+            "access": contrast::dump(world),
             "textures": theme.textures.len(),
             "fonts_loaded": !matches!(theme.font, FontSource::Handle(_)),
         }),
