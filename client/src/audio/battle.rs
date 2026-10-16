@@ -602,7 +602,7 @@ fn battle_update(
     }
 
     // Shouted lines.
-    let barks_enabled = player_settings.is_none_or(|settings| settings.voice_barks);
+    let barks_enabled = unit_barks_on(player_settings.as_deref());
     let pending: Vec<BarkRequest> = std::mem::take(&mut audio.pending_barks);
     for request in pending {
         let Some(unit) = by_id.get(&request.unit) else {
@@ -1336,4 +1336,23 @@ pub fn dump_battle_audio(world: &World) -> (String, Value) {
             },
         }),
     )
+}
+
+/// `voice_barks` (Godot `voice/barks`): units answer, shout charges and routs; on without settings.
+pub fn unit_barks_on(settings: Option<&crate::settings::Settings>) -> bool {
+    settings.is_none_or(|settings| settings.voice_barks)
+}
+
+#[cfg(test)]
+mod voice_barks_tests {
+    use super::*;
+
+    #[test]
+    fn voice_barks_setting_gates_the_unit_lines() {
+        let mut settings = crate::settings::Settings::default();
+        assert!(unit_barks_on(Some(&settings)));
+        assert!(unit_barks_on(None));
+        settings.voice_barks = false;
+        assert!(!unit_barks_on(Some(&settings)));
+    }
 }
