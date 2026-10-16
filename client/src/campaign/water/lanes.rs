@@ -695,7 +695,7 @@ mod tests {
 
     #[test]
     fn a_lane_leaving_the_corridor_keeps_its_own_part() {
-        let long = lane("long", &[(0.0, 0.0), (300.0, 0.0)]);
+        let long = lane("long", &[(0.0, 0.0), (400.0, 0.0)]);
         let branch = lane("branch", &[(0.0, 0.0), (100.0, 0.0), (100.0, 200.0)]);
         let runs = build_runs(&[long, branch]);
         let kept: f32 = runs["branch"].iter().map(|r| r.points.len() as f32).sum();
