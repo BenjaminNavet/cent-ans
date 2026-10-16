@@ -47,7 +47,7 @@ pub fn smoothstep(e0: f32, e1: f32, x: f32) -> f32 {
 }
 
 /// Logical pixels of a `FontSize::Px` (0 for the viewport-relative variants, unused here).
-trait FontPx {
+pub(super) trait FontPx {
     fn px(self) -> f32;
 }
 
@@ -60,7 +60,7 @@ impl FontPx for bevy::text::FontSize {
     }
 }
 
-fn rgb(c: [f32; 3], a: f32) -> Color {
+pub(super) fn rgb(c: [f32; 3], a: f32) -> Color {
     Color::srgba(c[0], c[1], c[2], a)
 }
 
@@ -85,6 +85,10 @@ pub struct OverlayAssets {
     /// Stance-cue colours (`stance_cues.json`): `self`, `enemy`, `friend` borders, army rings.
     pub cue_border: HashMap<String, Color>,
     pub cue_ring: HashMap<String, Color>,
+    pub weather_cell: f32,
+    pub enemy_glyph: String,
+    pub memory_turns: u32,
+    pub ghost_alpha: f32,
 }
 
 /// Category of a stance key (`stance_cues.json` `categories`).
@@ -172,6 +176,12 @@ pub enum TokenPart {
     Pulse,
     Arms,
     Men,
+    /// Mark of enemy armies (« ⚔ »), left of the disc.
+    Mark,
+    /// Stance badge: parchment disc ringed with gold and the ink icon, top right.
+    Badge,
+    /// « » » of an army on the march, right of the disc.
+    Moving,
 }
 
 /// Names and towns built from the simulation; rebuilt when owners or places change.
@@ -214,7 +224,7 @@ pub fn spawn_root(mut commands: Commands) {
         });
 }
 
-fn absolute() -> Node {
+pub(super) fn absolute() -> Node {
     Node {
         position_type: PositionType::Absolute,
         ..default()
@@ -564,6 +574,36 @@ pub fn sync_tokens(
                         Pickable::IGNORE,
                     ));
                 }
+                for part in [TokenPart::Mark, TokenPart::Moving] {
+                    t.spawn((
+                        part,
+                        absolute(),
+                        Text::new(""),
+                        TextFont {
+                            font: theme.font_title.clone(),
+                            font_size: 12.0.into(),
+                            ..default()
+                        },
+                        TextColor(Color::NONE),
+                        TextShadow {
+                            offset: Vec2::new(1.0, 1.0),
+                            color: Color::NONE,
+                        },
+                        Pickable::IGNORE,
+                    ));
+                }
+                t.spawn((
+                    TokenPart::Badge,
+                    Node {
+                        position_type: PositionType::Absolute,
+                        border_radius: BorderRadius::MAX,
+                        ..default()
+                    },
+                    ImageNode::default().with_color(Color::NONE),
+                    BackgroundColor(Color::NONE),
+                    BorderColor::all(Color::NONE),
+                    Pickable::IGNORE,
+                ));
                 t.spawn((
                     TokenPart::Men,
                     absolute(),
@@ -595,7 +635,7 @@ pub fn format_men(men: u32) -> String {
     }
 }
 
-fn set_node(node: &mut Mut<Node>, pos: Vec2, size: Option<Vec2>) {
+pub(super) fn set_node(node: &mut Mut<Node>, pos: Vec2, size: Option<Vec2>) {
     let left = Val::Px(pos.x);
     let top = Val::Px(pos.y);
     if node.left != left {
@@ -615,7 +655,7 @@ fn set_node(node: &mut Mut<Node>, pos: Vec2, size: Option<Vec2>) {
     }
 }
 
-fn show(visibility: &mut Mut<Visibility>, on: bool) {
+pub(super) fn show(visibility: &mut Mut<Visibility>, on: bool) {
     let want = if on {
         Visibility::Inherited
     } else {
@@ -627,14 +667,14 @@ fn show(visibility: &mut Mut<Visibility>, on: bool) {
 }
 
 /// Screen projection helper (UI logical px; `None` behind the camera).
-struct Projector<'a> {
-    camera: &'a Camera,
-    transform: &'a GlobalTransform,
-    ui_scale: f32,
+pub(super) struct Projector<'a> {
+    pub(super) camera: &'a Camera,
+    pub(super) transform: &'a GlobalTransform,
+    pub(super) ui_scale: f32,
 }
 
 impl Projector<'_> {
-    fn at(&self, world: Vec3) -> Option<Vec2> {
+    pub(super) fn at(&self, world: Vec3) -> Option<Vec2> {
         self.camera
             .world_to_viewport(self.transform, world)
             .ok()
@@ -650,6 +690,7 @@ pub fn update_overlay(
     content: Res<OverlayContent>,
     views: Option<Res<ArmyViews>>,
     selected: Option<Res<SelectedArmy>>,
+    cues: Option<Res<super::extras::TokenCues>>,
     ui_scale: Res<UiScale>,
     time: Res<Time>,
     ground: GroundHeight,
@@ -1159,6 +1200,93 @@ pub fn update_overlay(
                 set_node(&mut node, Vec2::splat(-side * 0.5), Some(Vec2::splat(side)));
                 if let Some(mut image) = image {
                     image.color = Color::srgba(1.0, 1.0, 1.0, tka);
+                }
+            }
+            TokenPart::Mark => {
+                let gs = (12.0 * s).clamp(11.0, 16.0).floor();
+                let glyph = if entry.hostile {
+                    assets.enemy_glyph.as_str()
+                } else {
+                    ""
+                };
+                if let Some(mut font) = font
+                    && font.font_size.px() != gs
+                {
+                    font.font_size = gs.into();
+                }
+                if let Some(mut text) = text
+                    && text.0 != glyph
+                {
+                    text.0 = glyph.to_owned();
+                }
+                set_node(
+                    &mut node,
+                    Vec2::new(-r - gs * 1.3, -r * 0.4 - gs * 0.8),
+                    None,
+                );
+                if let Some(mut c) = text_color {
+                    c.0 = ring.map_or(Color::NONE, |c| c.with_alpha(tka));
+                }
+                if let Some(mut sh) = shadow {
+                    sh.color = rgb(glyphs::PAPER, tka);
+                }
+            }
+            TokenPart::Moving => {
+                let ms = (14.0 * s).clamp(12.0, 18.0).floor();
+                let moving = entry.status == "moving";
+                if let Some(mut font) = font
+                    && font.font_size.px() != ms
+                {
+                    font.font_size = ms.into();
+                }
+                if let Some(mut text) = text {
+                    let want = if moving { "»" } else { "" };
+                    if text.0 != want {
+                        text.0 = want.to_owned();
+                    }
+                }
+                set_node(&mut node, Vec2::new(r + 3.0, -ms * 0.65), None);
+                if let Some(mut c) = text_color {
+                    c.0 = rgb(glyphs::INK, tka);
+                }
+                if let Some(mut sh) = shadow {
+                    sh.color = rgb(glyphs::PAPER, tka);
+                }
+            }
+            TokenPart::Badge => {
+                let side = r * 1.1;
+                set_node(
+                    &mut node,
+                    Vec2::new(r * 0.8, -r * 0.8) - Vec2::splat(side * 0.5),
+                    Some(Vec2::splat(side)),
+                );
+                node.border = UiRect::all(Val::Px((side * 0.07).max(1.0)));
+                node.padding = UiRect::all(Val::Px(side * 0.12));
+                let stance = cues.as_ref().and_then(|c| c.stance.get(&id));
+                let icon = stance.and_then(|s| cues.as_ref().and_then(|c| c.icons.get(s)));
+                if let Some(icon) = icon {
+                    if let Some(mut image) = image {
+                        if image.image != *icon {
+                            image.image = icon.clone();
+                        }
+                        image.color = Color::srgba(1.0, 1.0, 1.0, tka);
+                    }
+                    if let Some(mut b) = background {
+                        b.0 = rgb(glyphs::PAPER, tka);
+                    }
+                    if let Some(mut b) = border {
+                        *b = BorderColor::all(rgb(glyphs::GOLD, tka));
+                    }
+                } else {
+                    if let Some(mut image) = image {
+                        image.color = Color::NONE;
+                    }
+                    if let Some(mut b) = background {
+                        b.0 = Color::NONE;
+                    }
+                    if let Some(mut b) = border {
+                        *b = BorderColor::all(Color::NONE);
+                    }
                 }
             }
             TokenPart::Men => {

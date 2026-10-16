@@ -57,6 +57,15 @@ pub const PENNANT: GlyphSpec = GlyphSpec {
     unit: 32.0,
 };
 
+/// Weather cloud (`WEATHER_GLYPH_SIZE`, `WEATHER_ANCHOR`, `WEATHER_UNIT` of parchment_overlay.gd).
+pub const WEATHER: GlyphSpec = GlyphSpec {
+    size: Vec2::new(64.0, 56.0),
+    anchor: Vec2::new(32.0, 24.0),
+    unit: 14.0,
+};
+/// Weather glyph names (`WEATHER_GLYPHS`).
+pub const WEATHER_KINDS: [&str; 4] = ["rain", "snow", "storm", "fog"];
+
 fn lighten(c: [f32; 3], k: f32) -> [f32; 3] {
     [
         c[0] + (1.0 - c[0]) * k,
@@ -523,6 +532,85 @@ pub fn paint_pennant(canvas: &mut Canvas, outline: bool) {
     }
 }
 
+/// Ink cloud (scallops), rain as oblique strokes, snow as stars, storm as a bolt, fog as wavy
+/// lines (`paint_weather`).
+pub fn paint_weather(canvas: &mut Canvas, p: Vec2, u: f32, kind: &str) {
+    let ink = [0.25, 0.22, 0.24];
+    let fill = if kind == "storm" {
+        [0.45, 0.44, 0.50]
+    } else {
+        [0.86, 0.85, 0.82]
+    };
+    if kind == "fog" {
+        for k in 0..3 {
+            let line: Vec<Vec2> = (0..13)
+                .map(|i| {
+                    let x = -1.6 + 3.2 * (i as f32 / 12.0);
+                    let y = -0.4 + k as f32 * 0.55 + (i as f32 * 1.3 + k as f32).sin() * 0.12;
+                    p + Vec2::new(x, y) * u
+                })
+                .collect();
+            canvas.stroke(&line, ink, 0.8, 2.0, false);
+        }
+        return;
+    }
+    let lobes = [
+        Vec2::new(-0.9, 0.1),
+        Vec2::new(-0.35, -0.35),
+        Vec2::new(0.35, -0.3),
+        Vec2::new(0.9, 0.1),
+        Vec2::new(0.0, 0.15),
+    ];
+    let radii = [0.55, 0.7, 0.62, 0.5, 0.6];
+    for (lobe, radius) in lobes.iter().zip(radii) {
+        canvas.circle(p + *lobe * u, radius * u + 1.6, ink, 1.0);
+    }
+    for (lobe, radius) in lobes.iter().zip(radii) {
+        canvas.circle(p + *lobe * u, radius * u, fill, 1.0);
+    }
+    let below = p + Vec2::new(0.0, 0.8) * u;
+    match kind {
+        "rain" => {
+            for i in 0..5 {
+                let x = -1.0 + 2.0 * (i as f32 / 4.0);
+                let line = [
+                    below + Vec2::new(x, 0.0) * u,
+                    below + Vec2::new(x - 0.3, 0.9) * u,
+                ];
+                canvas.stroke(&line, [0.16, 0.28, 0.45], 1.0, 2.0, false);
+            }
+        }
+        "snow" => {
+            for i in 0..4 {
+                let c = below
+                    + Vec2::new(-0.9 + 1.8 * (i as f32 / 3.0), 0.35 + 0.3 * (i % 2) as f32) * u;
+                for k in 0..3 {
+                    let ang = k as f32 * std::f32::consts::PI / 3.0;
+                    let d = Vec2::new(ang.cos(), ang.sin()) * 0.22 * u;
+                    canvas.stroke(&[c - d, c + d], [0.25, 0.35, 0.55], 1.0, 1.6, false);
+                }
+            }
+        }
+        "storm" => {
+            let bolt: Vec<Vec2> = [
+                (0.1, -0.1),
+                (-0.35, 0.55),
+                (0.05, 0.5),
+                (-0.25, 1.15),
+                (0.45, 0.3),
+                (0.05, 0.35),
+                (0.35, -0.1),
+            ]
+            .iter()
+            .map(|(x, y)| below + Vec2::new(*x, *y) * u)
+            .collect();
+            canvas.fill(&bolt, [0.95, 0.72, 0.15], 1.0);
+            canvas.stroke(&bolt, [0.45, 0.12, 0.05], 1.0, 1.4, true);
+        }
+        _ => {}
+    }
+}
+
 /// Every glyph the overlay needs, by name.
 pub fn paint(name: &str) -> Option<(GlyphSpec, Image)> {
     let spec = match name {
@@ -531,6 +619,7 @@ pub fn paint(name: &str) -> Option<(GlyphSpec, Image)> {
         "serpent" => SERPENT,
         "whale" => WHALE,
         "pennant" | "pennant_edge" => PENNANT,
+        k if WEATHER_KINDS.contains(&k) => WEATHER,
         _ => return None,
     };
     let mut canvas = Canvas::new(spec.size);
@@ -540,7 +629,8 @@ pub fn paint(name: &str) -> Option<(GlyphSpec, Image)> {
         "serpent" => paint_serpent(&mut canvas, spec.anchor, spec.unit),
         "whale" => paint_whale(&mut canvas, spec.anchor, spec.unit),
         "pennant" => paint_pennant(&mut canvas, false),
-        _ => paint_pennant(&mut canvas, true),
+        "pennant_edge" => paint_pennant(&mut canvas, true),
+        kind => paint_weather(&mut canvas, spec.anchor, spec.unit, kind),
     }
     Some((spec, canvas.into_image()))
 }
@@ -570,6 +660,10 @@ mod tests {
             "whale",
             "pennant",
             "pennant_edge",
+            "rain",
+            "snow",
+            "storm",
+            "fog",
         ] {
             let (spec, image) = paint(name).unwrap();
             assert_eq!(image.width(), (spec.size.x * OVERSAMPLE).ceil() as u32);
