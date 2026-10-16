@@ -369,6 +369,14 @@ impl Builder<'_, '_, '_> {
             ..default()
         });
         let sphere = self.meshes.add(Sphere::new(0.025));
+        // Soft additive halo around each flame (cheap stand-in for a bloom).
+        let halo_mesh = self.meshes.add(Sphere::new(0.075));
+        let halo = self.materials.add(StandardMaterial {
+            base_color: Color::srgba(1.0, 0.6, 0.2, 0.16),
+            unlit: true,
+            alpha_mode: AlphaMode::Add,
+            ..default()
+        });
         for (index, spot) in [
             Vec2::new(-2.1, 0.3),
             Vec2::new(-0.42, 0.3),
@@ -401,6 +409,15 @@ impl Builder<'_, '_, '_> {
                     Transform::from_xyz(dx * 0.75, 0.17, 0.0),
                     ChildOf(stand),
                 ));
+                self.commands.spawn((
+                    Name::new("FlameHalo"),
+                    Mesh3d(halo_mesh.clone()),
+                    MeshMaterial3d(halo.clone()),
+                    NotShadowCaster,
+                    Transform::from_xyz(dx * 0.75, 0.17, 0.0),
+                    ChildOf(stand),
+                ));
+                self.props.halos += 1;
             }
             self.commands.spawn((
                 Name::new(format!("Candle{index}")),

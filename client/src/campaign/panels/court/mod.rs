@@ -14,14 +14,19 @@
 //! skill tree with prerequisite links (`skill_layout.rs`), retinue medallions, ransom screen
 //! (installments, parole, terms, execution) and the advice lines of the councillors.
 //!
-//! Not ported: the 3D council room (`council_room.gd`, SubViewport with seated figures: the
-//! offices are a list), the `NextHint` advice, the `portrait_marks` shader (grey / pallor are a
+//! The 3D council room (`council_room.gd`) lives in `campaign/council/`: its image is inserted
+//! at the top of the « Charges » tab (`view.rs`), hover / click on a councillor select the office
+//! of this panel.
+//!
+//! Not ported: the `NextHint` advice, the `portrait_marks` shader (grey / pallor are a
 //! tint), the zoom and drag of the family tree.
 
 mod family_layout;
 pub mod portrait;
 mod skill_layout;
 mod view;
+
+pub use view::sheet_subject;
 
 use bevy::prelude::*;
 use game_api::court::{
