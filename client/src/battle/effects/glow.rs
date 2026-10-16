@@ -92,6 +92,11 @@ pub fn darkness(light_level: f32) -> f32 {
     ((0.75 - light_level) / 0.5).clamp(0.0, 1.0)
 }
 
+/// Lumens of a point light of Godot energy `energy` (see `REACH_FACTOR`).
+pub fn lumens(energy: f32, unit: f32) -> f32 {
+    energy * unit * std::f32::consts::TAU * 2.0 * REACH_FACTOR
+}
+
 #[derive(Component)]
 struct CampGlow {
     slot: usize,
@@ -155,8 +160,7 @@ fn update_glows(
                 let energy = BASE_ENERGY * dark * intensity;
                 // The flicker of `_process`: 0.85 + 0.15 sin(t * 11 rad/s + x).
                 let flicker = 0.85 + 0.15 * (seconds * 11.0 + position.x).sin();
-                light.intensity =
-                    energy * flicker * unit * std::f32::consts::TAU * 2.0 * REACH_FACTOR;
+                light.intensity = lumens(energy * flicker, unit);
                 transform.translation = position + Vec3::Y * HEIGHT_M;
                 *visibility = Visibility::Inherited;
                 stats.lit += 1;

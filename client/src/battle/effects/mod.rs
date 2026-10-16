@@ -6,12 +6,19 @@
 //! - [`glow`]: the camp fires of the smoke sources light the night (point lights, flicker).
 //!
 //! The puffs are the player's smoke flipbook sprites (`crate::fx::flipbook`), tinted earth.
-//! Not ported: the splashes and wakes at fords, the clods thrown by hooves, the cannon flash and
-//! the legacy arrow layer with its ribbon trails (`battle_projectile_trail.gdshader`: volleys
-//! draw the arrows, siege stones have their own smoke trail in `siege/fx.rs`).
+//! - [`trail`]: ribbon trails of the arrows in flight (`battle_projectile_trail.gdshader`);
+//! - [`ford`]: spray, wakes and entry bursts of the regiments in water;
+//! - [`flash`]: bombard muzzle flash (sprites and a short point light);
+//! - [`siege_lights`]: point lights over the burning houses and gate of a siege.
+//!
+//! Not ported: the clods thrown by the hooves (`Clods` pool).
 
 pub mod dust;
+pub mod flash;
+pub mod ford;
 pub mod glow;
+pub mod siege_lights;
+pub mod trail;
 
 use bevy::prelude::*;
 
@@ -30,7 +37,14 @@ pub struct BattleEffectsPlugin;
 
 impl Plugin for BattleEffectsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((dust::DustPlugin, glow::GlowPlugin));
+        app.add_plugins((
+            dust::DustPlugin,
+            glow::GlowPlugin,
+            trail::TrailPlugin,
+            ford::FordPlugin,
+            flash::FlashPlugin,
+            siege_lights::SiegeLightsPlugin,
+        ));
     }
 }
 

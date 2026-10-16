@@ -338,6 +338,8 @@ fn launch_flights(
     frame: Res<SiegeFrame>,
     mut stats: ResMut<FlightStats>,
     mut fx_stats: ResMut<SiegeStats>,
+    mut flashes: ResMut<crate::battle::effects::flash::MuzzleFlashes>,
+    mut smoke: ResMut<crate::battle::units::smoke::SmokeRequests>,
     flights: Query<(), With<Flight>>,
     particles: Query<(), With<Particle>>,
 ) {
@@ -379,6 +381,11 @@ fn launch_flights(
         } else {
             engine.pos + Vec3::Y * 9.0 - dir * 2.0
         };
+        if bombard {
+            // The flash and the lingering smoke of the muzzle (`cannon_fire`).
+            flashes.0.push((start, dir));
+            smoke.bombard.push(start);
+        }
         let distance = start.distance(end);
         let (speed, low, high) = if bombard {
             (140.0, 0.6, 3.5)
