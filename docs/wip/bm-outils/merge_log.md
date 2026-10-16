@@ -107,3 +107,19 @@ fire_flipbooks drift: bm_wt2.sh copied data/ from gp-bevy's tree before merge8 (
 18:27 siegeland 62a2cfc70 OK clean; skinned.wesl mode 3 role fade uses existing prev_* vars and params.fx.x, RECORD_BYTES stride unchanged; same pass
 18:27 armies6 7659f0ebe OK clean; core game-api in the full core pass; same pass
 18:27 campwater2 41ec0a92b OK clean (carries finegeo + gore); same pass; no fire_flipbooks drift in any worktree
+- À VÉRIFIER (lot écarts): siegeland réutilise params.fx.x (« cycle blend ») pour la durée du fondu de rôle des servants dans skinned.wesl mode 3.
+- FOURNÉE SUIVANTE: bfx prêt (62bd18dd2) — touche main.rs (BattleEffectsPlugin), battle/mod.rs, fx/flipbook.rs, siege/fx.rs, units/volleys.rs, smoke.rs
+- À VÉRIFIER (lot écarts): arrêt silencieux ~3 s après début de bataille 1 run/3 (bfx) + blocage à la sortie 1/9 (perf3) ; « Mesh index 17 contains no vertices » dans toutes les batailles ; lueur des camps de bataille jamais alimentée (SmokeSources::add) ; traînée ruban des flèches non portée
+- FOURNÉE SUIVANTE: setwire4 prêt (19f1d234d) — restaurer la dérive data/fx/battle_lighting* (non committée). bm_wt2.sh corrigé (checkout -- data).
+- FOURNÉE SUIVANTE: geofine2 prêt (bf4050750) — APRÈS fusion: copier gp-bm-geofine2/data/map/compose/derived/fine_geo/pyramid/{hydro_fine,roads_fine} dans ~/dev/cent-ans-raw/compose/pyramid/ (local, AVANT bm_rm) ; pas de relief-update/release (push non autorisé). Restaurer dérive data/fx.
+19:26 bfx 9e59bb9c9 OK clean; fix 093806832 allow too_many_arguments on update_glows (8 args); batch pass: clippy/tests(1269 --features dev)/core fmt+clippy+test(1959)/pytest fine_geo+schemas(1222)/smoke campaign campaign_turns campaign_descent battle crecy siege main_menu faction_select codex (muted, all 9 ok first try)
+19:26 setwire4 5771ea70b OK clean; same pass; data/fx drift restored in worktree
+19:26 geofine2 c5ca5a9a7 OK clean; same pass; ruff: tools/ already 96 errors at base, +2 B008 typer.Option in geo_map.py (existing convention); hydro_fine+roads_fine copied to ~/dev/cent-ans-raw/compose/pyramid; Bevy dump d=60 Paris WITHOUT CENT_ANS_FINE_GEO_ROOT: enabled true, 5244 river / 5245 road tiles, 10 wanted=built=visible, bridges 287/278
+19:26 codex3 15560c22a OK clean; same pass
+19:26 predlg bc297195b OK clean; same pass
+19:26 bprologue 81835603a OK clean; same pass
+19:26 campveg5 131c24a47 OK clean; fix b3406e0b3 ponds were drawn twice (vegetation/reeds.rs + water/fresh.rs): reeds.rs keeps only reeds (ponds still seeded for RNG order), test block_records_carry_reeds_only; same pass
+19:26 diplo7 6c8a01141 OK clean; same pass
+19:26 uileft3 dcbbb6f71 OK clean; same pass (schemas ok)
+19:26 fixes1 e4371b05e OK clean (ModalSpec art + escape_passes both kept); same pass
+19:26 bground 74b74a17e OK clean; same pass
