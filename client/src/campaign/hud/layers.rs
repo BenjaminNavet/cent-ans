@@ -383,7 +383,7 @@ fn rebuild_trade(
     let bucket = zoom
         .as_deref()
         .map_or(0, |z| (z.distance.max(1.0).ln() * 25.0) as i32);
-    let relief_changed = relief.as_deref().is_some_and(|r| r.is_changed());
+    let relief_changed = relief.is_some_and(|r| r.is_changed());
     let key = (state.turn, fog_revision, places.places.len(), bucket);
     if *last == key && !relief_changed && !drawn.0.is_empty() {
         return;

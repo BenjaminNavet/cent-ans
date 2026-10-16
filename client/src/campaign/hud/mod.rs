@@ -208,7 +208,6 @@ impl Plugin for CampaignHudPlugin {
                 capture::plugin,
                 replay::plugin,
                 minimap::plugin,
-                layers::plugin,
                 missions::plugin,
                 journal::plugin,
                 ransom::plugin,
@@ -220,6 +219,7 @@ impl Plugin for CampaignHudPlugin {
                 buttons::plugin,
                 wait::plugin,
             ))
+            .add_plugins(layers::plugin)
             .register_dump(dump_hud)
             .register_dump(dump_layout)
             .add_systems(OnEnter(AppState::Campaign), spawn_hud)
