@@ -19,7 +19,8 @@
 //!
 //! Buses: no bus graph in Bevy; each sound carries its [`Channel`] (sfx / voice) or the ambience
 //! channel, scaled by the `Settings` volumes through [`AudioSettings`]. The Godot low-pass /
-//! reverb of the far battle bus is not ported.
+//! reverb of the far battle bus are real ([`super::farbus`]: biquad + Schroeder reverb in a wrapped
+//! decoder, driven by the camera height).
 //! `CENT_ANS_MUTE=1`: every decision is made and counted, nothing is spawned.
 
 use std::collections::{BTreeMap, HashMap, VecDeque};
@@ -34,6 +35,7 @@ use super::cues::{
     BarkGate, BarkRequest, Cue, Detector, Phase, PieceView, ShotView, Tuning, UnitView,
     attenuation, far_bus, far01,
 };
+use super::farbus::{FarBusParams, FarSource};
 use super::{
     AudioDirector, AudioSettings, Channel, DuckMusic, PlaySfx, PlayVoice, SfxVoice, channel_of_bus,
     db_to_linear, read_json, speech,
@@ -272,6 +274,7 @@ impl Plugin for BattleAudioPlugin {
                     battle_update,
                     handle_sfx_at,
                     attenuate_spatial,
+                    drive_far_bus,
                     drive_ambience,
                 )
                     .chain()
@@ -796,7 +799,7 @@ fn drive_bed(
             let entity = commands
                 .spawn((
                     Name::new(format!("Bed {bed_name}")),
-                    AudioPlayer::new(asset_server.load::<AudioSource>(path)),
+                    AudioPlayer(asset_server.load::<FarSource>(path)),
                     PlaybackSettings::LOOP
                         .with_volume(Volume::Linear(volume))
                         .with_spatial(true)
@@ -1137,7 +1140,7 @@ fn handle_sfx_at(
             let entity = commands
                 .spawn((
                     Name::new(format!("Sfx {name}")),
-                    AudioPlayer::new(asset_server.load::<AudioSource>(path)),
+                    AudioPlayer(asset_server.load::<FarSource>(path)),
                     PlaybackSettings::DESPAWN
                         .with_volume(Volume::Linear(volume))
                         .with_speed(pitch)
@@ -1164,6 +1167,14 @@ fn handle_sfx_at(
     }
 }
 
+/// Camera height to the shared low-pass / reverb settings of the far bus.
+fn drive_far_bus(params: Res<FarBusParams>, camera: Query<&GlobalTransform, With<BattleCamera>>) {
+    if let Some(ear) = camera.iter().next() {
+        let bus = far_bus(far01(ear.translation().y));
+        params.0.set(bus.cutoff_hz, bus.wet, bus.room_size);
+    }
+}
+
 /// Distance fade and live volume of every spatial sound (sliders, camera moves).
 fn attenuate_spatial(
     director: Res<AudioDirector>,
@@ -1174,7 +1185,7 @@ fn attenuate_spatial(
     let listener = camera.iter().next().map(GlobalTransform::translation);
     let dry = listener.map_or(1.0, |ear| {
         let bus = far_bus(far01(ear.y));
-        bus.dry * bus.muffle_gain()
+        bus.dry
     });
     for (spatial, transform, mut sink) in &mut sounds {
         let distance = listener.map_or(0.0, |ear| ear.distance(transform.translation()));
@@ -1222,11 +1233,7 @@ fn drive_ambience(
         (
             "battle_distant",
             if audio.distant_level > 0.01 {
-                wanted("battle_distant", 0.0)
-                    + 20.0
-                        * (audio.distant_level * far_bus(far).distant_bed_gain())
-                            .max(0.0001)
-                            .log10()
+                wanted("battle_distant", 0.0) + 20.0 * (audio.distant_level).max(0.0001).log10()
             } else {
                 -80.0
             },
@@ -1269,18 +1276,34 @@ fn drive_ambience(
         let Some(path) = director.resolve_clip("audio/", &entry.file) else {
             continue;
         };
-        let entity = commands
-            .spawn((
-                Name::new(format!("Battle ambience {layer}")),
-                AudioPlayer::new(asset_server.load::<AudioSource>(path)),
-                PlaybackSettings::LOOP.with_volume(Volume::Linear(0.0)),
-                BattleAmbience {
-                    db: -80.0,
-                    target_db: target,
-                },
-                DespawnOnExit(AppState::Battle),
-            ))
-            .id();
+        let name = Name::new(format!("Battle ambience {layer}"));
+        let player = PlaybackSettings::LOOP.with_volume(Volume::Linear(0.0));
+        let state = BattleAmbience {
+            db: -80.0,
+            target_db: target,
+        };
+        // The far battle is heard through the far bus; the weather beds stay dry.
+        let entity = if layer == "battle_distant" {
+            commands
+                .spawn((
+                    name,
+                    AudioPlayer(asset_server.load::<FarSource>(path)),
+                    player,
+                    state,
+                    DespawnOnExit(AppState::Battle),
+                ))
+                .id()
+        } else {
+            commands
+                .spawn((
+                    name,
+                    AudioPlayer::new(asset_server.load::<AudioSource>(path)),
+                    player,
+                    state,
+                    DespawnOnExit(AppState::Battle),
+                ))
+                .id()
+        };
         audio.ambience.insert(layer.to_string(), entity);
     }
 }
@@ -1310,7 +1333,7 @@ pub fn dump_battle_audio(world: &World) -> (String, Value) {
             "elapsed_s": audio.elapsed,
             "far01": audio.far01,
             "shots_seen": audio.shots_seen,
-            "far_bus": {"cutoff_hz": far_bus(audio.far01).cutoff_hz, "wet": far_bus(audio.far01).wet, "dry_applied": far_bus(audio.far01).dry, "muffle_gain_applied": far_bus(audio.far01).muffle_gain(), "distant_bed_gain": far_bus(audio.far01).distant_bed_gain(), "room_size": far_bus(audio.far01).room_size},
+            "far_bus": {"cutoff_hz": far_bus(audio.far01).cutoff_hz, "wet": far_bus(audio.far01).wet, "dry_applied": far_bus(audio.far01).dry, "room_size": far_bus(audio.far01).room_size},
             "listener": world.get_resource::<BattleCameraState>().is_some(),
             "sounds_played_by_category": audio.played,
             "sounds_requested_by_category": audio.requested,

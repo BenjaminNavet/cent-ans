@@ -428,6 +428,7 @@ fn handle_presses(
     mut wars: MessageWriter<AskWarDeclaration>,
     mut economy: ResMut<crate::campaign::panels::economy::EconomyPanel>,
     mut open: MessageWriter<crate::campaign::panels::OpenPanel>,
+    mut sfx: MessageWriter<crate::audio::PlaySfx>,
 ) {
     for tab in tabs.read() {
         if tab.group == "dip_tab" {
@@ -452,7 +453,14 @@ fn handle_presses(
             open.write(crate::campaign::panels::OpenPanel::Economy);
             continue;
         }
-        press_button(name, &mut ui, &mut sim);
+        if let Some(event) = crate::audio::uisound::panel_sound(
+            &mut ui,
+            |ui| &mut ui.result,
+            |result| result.ok,
+            |ui| press_button(name, ui, &mut sim),
+        ) {
+            sfx.write(crate::audio::PlaySfx::new(event));
+        }
         if let Some(target) = ui.ask_war.take() {
             wars.write(AskWarDeclaration {
                 target,
