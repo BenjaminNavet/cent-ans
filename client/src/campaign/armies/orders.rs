@@ -25,7 +25,7 @@ use super::views::ArmyViews;
 use super::{HoveredArmy, SelectedArmy};
 use crate::campaign::markers::places::Places;
 use crate::campaign::panels::diplomacy::AskWarDeclaration;
-use crate::campaign::panels::diplomacy::war::needs_declaration;
+use crate::campaign::panels::diplomacy::war::{march_follow_up, needs_declaration};
 use crate::campaign::terrain::relief_state::ReliefState;
 use crate::campaign::terrain::surface::{GroundHeight, Surface};
 use crate::sim::Sim;
@@ -588,25 +588,19 @@ fn attack_place(sim: &mut Sim, log: &mut OrderLog, army: &ArmyId, place: &Settle
         army: army.clone(),
         target: MoveOrderTarget::Place(sim_campaign::Place::Settlement(place.clone())),
     };
-    run_order(sim, log, "attack_place", army, march);
-    let sieging = log
-        .last
-        .as_ref()
-        .is_some_and(|r| r.ok && r.stop == "siege_started")
-        && sim
-            .state
-            .as_ref()
-            .and_then(|s| s.army(army))
-            .is_some_and(|a| a.is_at(place));
-    if sieging {
+    let outcome = run_order_outcome(sim, log, "attack_place", army, march);
+    let follow = match (&outcome, &sim.state) {
+        (Some(outcome), Some(state)) => march_follow_up(state, outcome, army, place),
+        _ => None,
+    };
+    if let Some(order) = follow {
+        let kind = if matches!(order, Order::Assault { .. }) {
+            "assault"
+        } else {
+            "attack"
+        };
         let marched = log.last.clone();
-        run_order(
-            sim,
-            log,
-            "assault",
-            army,
-            Order::Assault { army: army.clone() },
-        );
+        run_order(sim, log, kind, army, order);
         if !log.last.as_ref().is_some_and(|r| r.ok) {
             log.last = marched;
         }
@@ -720,6 +714,17 @@ pub fn auto_resolve_naval(mut sim: ResMut<Sim>) {
 
 /// Mirrors `run_order_json` (godot-bridge): validate, apply, report the march.
 fn run_order(sim: &mut Sim, log: &mut OrderLog, kind: &'static str, army: &ArmyId, order: Order) {
+    run_order_outcome(sim, log, kind, army, order);
+}
+
+/// `run_order`, also returning what the core reports for an accepted order.
+fn run_order_outcome(
+    sim: &mut Sim,
+    log: &mut OrderLog,
+    kind: &'static str,
+    army: &ArmyId,
+    order: Order,
+) -> Option<OrderOutcome> {
     log.issued += 1;
     let fail = |error: String| OrderResult {
         kind,
@@ -735,11 +740,13 @@ fn run_order(sim: &mut Sim, log: &mut OrderLog, kind: &'static str, army: &ArmyI
     };
     let (Some(data), Some(state)) = (sim.data.clone(), sim.state.as_mut()) else {
         log.last = Some(fail("aucune campagne en cours".into()));
-        return;
+        return None;
     };
+    let mut accepted = None;
     let result = match state.submit_order_outcome(&data, order) {
         Err(error) => fail(error.to_string()),
         Ok(outcome) => {
+            accepted = Some(outcome.clone());
             let entry = state.army(army);
             let position = entry.map_or([0.0; 2], |a| state.army_point(&data, a));
             let movement_left = entry.map_or(0, |a| a.movement_left);
@@ -765,6 +772,7 @@ fn run_order(sim: &mut Sim, log: &mut OrderLog, kind: &'static str, army: &ArmyI
         log.accepted += 1;
     }
     log.last = Some(result);
+    accepted
 }
 
 /// Reachable area of the selected army, recomputed when the selection or the sim changes.

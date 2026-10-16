@@ -30,3 +30,7 @@ Reste : assaut après déclaration quand la marche s'arrête en ZOC d'une armée
 
 ## campui7 (vague 8)
 Vérifié : chancellerie, don à l’Église, arbitrage féodal et montants libres sont déjà portés (diplo3, `proof_diplo3.txt`) ; `ui_order` y est joué par `panel_sound`. Ajouté : `DiplomacyUi::show(id)` (lettres de la chronique).
+
+## diplo7 (vague 8)
+Vérifié déjà porté (diplo4-6) : `AskWarDeclaration` sur armée/place en paix, curseur d'attaque, ouverture auto + pastille (`notify.rs`), lien Commerce -> Économie. Ajouté : arrêt en zone de contrôle aux portes de la place -> attaque de l'armée qui la tient (`war::march_follow_up`, port de `order_attack_settlement`), utilisé par `orders.rs::attack_place` et par la suite d'une déclaration de guerre (`war.rs`, qui suit aussi le siège -> assaut). `run_order_outcome` renvoie le résultat du cœur. Preuve : test `zone_of_control_stop_at_the_gates_leads_to_an_attack` (client 1166 tests verts).
+Reste : carte diplomatique centrale (écart assumé), vérification en jeu du curseur.
