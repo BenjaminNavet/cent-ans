@@ -1201,6 +1201,7 @@ pub fn dump_armies(world: &World) -> (String, Value) {
             "voyages_gliding": glides.active.len(),
             "pending_naval_battles": world.resource::<Sim>().state.as_ref().map_or(0, |s| s.naval.pending.len()),
             "cursor": cursor.name(),
+            "attack_hover": preview.attack,
             "hover_hint": hint.0,
             "ripples_alive": world.resource::<Ripples>().0.len(),
             "plate_recomputes": plates.recomputes,

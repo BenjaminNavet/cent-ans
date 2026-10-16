@@ -259,4 +259,17 @@ mod tests {
         assert!(mode_text(MapMode::Population, &view, 1, None).ends_with("habitants"));
         assert_eq!(mode_text(MapMode::Unrest, &view, 0, None), "");
     }
+
+    #[test]
+    fn chosen_faction_view_names_the_faction() {
+        assert_eq!(
+            focus_stance_text("self", "Bourgogne"),
+            "terres de Bourgogne"
+        );
+        assert_eq!(
+            focus_stance_text("war", "Bourgogne"),
+            "en guerre contre Bourgogne"
+        );
+        assert_eq!(focus_stance_text("?", "Bourgogne"), "");
+    }
 }

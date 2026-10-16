@@ -6,9 +6,8 @@ use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
 use bevy::window::{CursorIcon, CustomCursor, CustomCursorImage, PrimaryWindow, SystemCursorIcon};
 
+use super::SelectedArmy;
 use super::orders::{PathPreviewState, SeaHover};
-use super::views::ArmyViews;
-use super::{HoveredArmy, SelectedArmy};
 use crate::app::AppState;
 use crate::ui::kit::UiTheme;
 use crate::ui::kit::richtext::{RichStyle, rich_text};

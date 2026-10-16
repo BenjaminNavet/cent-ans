@@ -410,4 +410,13 @@ mod tests {
         assert!(!text.contains("Politique"));
         assert!(text.contains("[color=#00ff00]■[/color][color=#ff0000]■[/color]"));
     }
+
+    #[test]
+    fn diplomacy_legend_renames_us_for_a_chosen_faction() {
+        let tree = json!({"sections": [{"title": "T", "modes": ["diplomacy"], "entries": [
+            {"sample": {"type": "relation", "relation": "self"}, "label": "Nous", "text": "Vos terres."}]}]});
+        assert!(legend_bbcode(&tree, "diplomacy", None).contains("[b]Nous[/b] : Vos terres."));
+        let seen = legend_bbcode(&tree, "diplomacy", Some("Bourgogne"));
+        assert!(seen.contains("[b]Bourgogne[/b] : Terres de Bourgogne."));
+    }
 }
