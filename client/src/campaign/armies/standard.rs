@@ -9,9 +9,11 @@
 //! waves the cloth: here the whole flag only flutters a little, stronger when the troop walks).
 //!
 //! The flag shows the army's banner (`cloth.rs`: royal, house, faction banner, shield, plain
-//! colour; vertex-wave shader `shaders/flag.wesl`, port of `map_banner.gdshader`). Not ported:
-//! the stance badge on the pole, the stern pole of a fleet (fleets keep their own glTF sails),
-//! the fall of the pole to the marker foot in the far view.
+//! colour; vertex-wave shader `shaders/flag.wesl`, port of `map_banner.gdshader`, lit with the
+//! ground light (`VegLight`) by the same wrapped Lambert as Godot). At sea the pole stands in the
+//! stern castle of the first cog (`ArmyFigures.bearer_anchor`, kind `fleet`). The stance badge on
+//! the finial is `panels/diplomacy/stance_badge.rs`. Not ported: the pitch and roll of the ship
+//! (the cogs do not pitch here), the fall of the pole to the marker foot in the far view.
 
 use std::collections::HashMap;
 use std::f32::consts::TAU;
@@ -45,6 +47,15 @@ const FINIAL_REST_Y: f32 = 8.55;
 const FLAG_REST_Y: f32 = 8.2;
 /// Height of a man (`ArmyFigures.FIGURE_SCALE`), used by the bob.
 const FIGURE_SCALE: f32 = super::figures::SKINNED_SCALE;
+/// Foot of the stern pole in the ship frame (`STERN_STAFF` x `SHIP_SCALE`), sunk by 3 in the marker
+/// frame (`bearer_anchor`, fleet).
+const STERN_STAFF: Vec3 = Vec3::new(-0.9, 0.95, 0.0);
+const STERN_SINK: f32 = 3.0;
+
+/// Foot of the pole of a fleet in the marker frame, before the marker's own rotation.
+pub fn stern_anchor() -> Vec3 {
+    STERN_STAFF * super::figures::SHIP_SCALE - Vec3::Y * STERN_SINK
+}
 
 /// `standard_sway` and `enabled` of `data/fx/campaign_army_walk.json`.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -182,6 +193,9 @@ pub struct StandardReport {
     pub max_amp: f32,
     pub max_bob: f32,
     pub max_tilt_deg: f32,
+    pub at_sea: usize,
+    /// Flag materials that received the ground light.
+    pub lit: usize,
 }
 
 /// The standards of the armies and the settings.
@@ -293,6 +307,7 @@ pub fn update_standards(
     glides: Res<Glides>,
     skinned: Res<SkinnedArmies>,
     zoom: Option<Res<ZoomView>>,
+    light: Option<Res<crate::campaign::vegetation::light::VegLight>>,
     markers: Query<(&ArmyMarker, &Transform)>,
     existing: Query<(), With<StandardPart>>,
     mut parts_query: Query<(&StandardPart, &mut Transform, &mut Visibility), Without<ArmyMarker>>,
@@ -379,7 +394,8 @@ pub fn update_standards(
         } else {
             ("infantry", 0)
         };
-        let walking = marker.walking && cfg.enabled && skinned.enabled;
+        let at_sea = glides.active.contains_key(&marker.id);
+        let walking = marker.walking && cfg.enabled && skinned.enabled && !at_sea;
         parts
             .sway
             .advance(walking, dt, skinned.group_factor(&marker.id, bearer), &cfg);
@@ -389,10 +405,18 @@ pub fn update_standards(
             (0.0, Quat::IDENTITY)
         };
         let tilt = tilt_in_marker(local, marker.heading);
-        let anchor = Quat::from_rotation_y(marker.heading) * hand(lord_scale) + Vec3::Y * bob;
+        // At sea the pole stands in the stern of the flagship, which heads along the route.
+        let anchor = if at_sea {
+            transform.rotation * stern_anchor()
+        } else {
+            Quat::from_rotation_y(marker.heading) * hand(lord_scale) + Vec3::Y * bob
+        };
         let scale = transform.scale;
-        let shown = skinned.enabled && !glides.active.contains_key(&marker.id) && !hidden_by_zoom;
+        let shown = skinned.enabled && !hidden_by_zoom;
         report.standards += 1;
+        if at_sea {
+            report.at_sea += 1;
+        }
         if parts.sway.amp > 0.0 {
             report.swaying += 1;
         }
@@ -437,6 +461,19 @@ pub fn update_standards(
             let wanted = pole_dir.extend(gust);
             if material.params.pole_gust != wanted {
                 material.params.pole_gust = wanted;
+            }
+            if let Some(light) = light.as_deref()
+                && light.sun_dir.w > 0.5
+                && (material.params.sun_dir != light.sun_dir
+                    || material.params.sun_color != light.sun_color
+                    || material.params.ambient != light.ambient)
+            {
+                material.params.sun_dir = light.sun_dir;
+                material.params.sun_color = light.sun_color;
+                material.params.ambient = light.ambient;
+            }
+            if material.params.sun_dir.w > 0.5 {
+                report.lit += 1;
             }
         }
     }
@@ -502,6 +539,8 @@ pub fn dump_standards(world: &World) -> (String, Value) {
             "standards": r.standards,
             "flags_shown": shown,
             "swaying": r.swaying,
+            "at_sea": r.at_sea,
+            "lit": r.lit,
             "max_amp": r.max_amp,
             "max_bob": r.max_bob,
             "max_tilt_deg": r.max_tilt_deg,
@@ -584,6 +623,15 @@ mod tests {
         // A quarter turn about Y sends +X to -Z (right-handed): the lean follows.
         let turned = tilt_in_marker(local, std::f32::consts::FRAC_PI_2) * Vec3::Y;
         assert!(turned.z < -0.05 && turned.x.abs() < 1e-5);
+    }
+
+    #[test]
+    fn stern_pole_stands_in_the_cog_castle() {
+        let anchor = stern_anchor();
+        assert!(anchor.x < -4.0 && anchor.y > 2.0 && anchor.y < 3.0);
+        // The fleet heading rotates it with the marker.
+        let turned = Quat::from_rotation_y(std::f32::consts::PI) * anchor;
+        assert!(turned.x > 4.0);
     }
 
     #[test]

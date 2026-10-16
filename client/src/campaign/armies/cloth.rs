@@ -310,6 +310,10 @@ pub struct FlagParams {
     pub pole_gust: Vec4,
     pub wave: Vec4,
     pub flags: Vec4,
+    /// Ground light (xyz sun direction, w = 1 when set; sun colour; ambient with gain in w).
+    pub sun_dir: Vec4,
+    pub sun_color: Vec4,
+    pub ambient: Vec4,
 }
 
 /// Wave material of a standard (one per army: pole direction and gust change every frame).
@@ -337,6 +341,9 @@ impl FlagMaterial {
                     0.0,
                     0.0,
                 ),
+                sun_dir: Vec4::ZERO,
+                sun_color: Vec4::ZERO,
+                ambient: Vec4::ZERO,
             },
             heraldry,
         }
