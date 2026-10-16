@@ -1,4 +1,3 @@
-- uiinfra: FadeToState not sent by menu/flow/campaign; codex/bubbles.rs should use bubble_layout::place_beside (keyword_y); flow/loading.rs + battle/hud/aftermath.rs → ArtPlates; window_resize_grip; build_companion/build_hammer (Colonies).
 - settings: stored options read by nobody (colorblind, text_size, blood…).
 - naval: illustrated banner + heraldry in naval and land pre-battle dialogs.
 - bhud4: ResultExtras → flow/menu history.
