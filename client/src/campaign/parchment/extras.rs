@@ -29,6 +29,8 @@ use crate::ui::kit::{UiCamera, UiTheme};
 pub struct TokenCues {
     pub stance: HashMap<String, String>,
     pub icons: HashMap<String, Handle<Image>>,
+    /// Factions that are allies or vassals of the player (green ring, `stance_cues.json` `friend`).
+    pub friends: HashSet<String>,
 }
 
 /// Refreshes the stance of every army (`StanceBadge`: none in the normal stance, an enemy ambush
@@ -45,6 +47,29 @@ pub fn refresh_cues(
     let (Some(state), Some(theme)) = (sim.state.as_ref(), theme) else {
         return;
     };
+    if let Some(data) = sim.data.as_ref() {
+        let plan = sim_campaign::plan_cache::PlanCache::new(state);
+        let friends: HashSet<String> = state
+            .armies()
+            .values()
+            .map(|army| army.faction.clone())
+            .filter(|faction| *faction != sim.player)
+            .filter(|faction| {
+                let key = sim_campaign::stance::diplomatic_stance_cached(
+                    &plan,
+                    data,
+                    &sim.player,
+                    faction,
+                )
+                .key();
+                super::overlay::cue_category(key, false) == "friend"
+            })
+            .map(|faction| faction.as_str().to_owned())
+            .collect();
+        if cues.friends != friends {
+            cues.friends = friends;
+        }
+    }
     let mut stance = HashMap::new();
     for (id, army) in state.armies() {
         if let Some(key) = badge_stance(army.stance.key(), army.faction == sim.player) {
@@ -274,7 +299,8 @@ pub fn sync_ghosts(
                 ));
             })
             .id();
-        commands.entity(layer).add_child(ghost);
+        // Godot draws the ghosts before the tokens: they go under them.
+        commands.entity(layer).insert_child(0, ghost);
     }
 }
 

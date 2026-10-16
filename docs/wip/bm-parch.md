@@ -45,3 +45,8 @@ Dossier : `client/src/campaign/parchment/`. Port de `parchment_decor.gd`, `parch
 - Écarts : cercle « ami » de l'anneau (alliés) non calculé (le client ne connaît que hostile / joueur) ;
   fantômes dessinés au-dessus des jetons ; texte d'effectif centré approximativement (largeur estimée).
 - Restes : estompage des plaques 3D d'armée au parchemin (lot armies) ; entrées de légende propres aux fantômes.
+
+## parchedge (vague 9)
+- Bande beige au zoom max : cause = `sea.wesl` ne lavait/ne traçait la mer que si `inside` (uv dans [0,1]) ; hors carte il ne restait que le papier brûlé. Godot (`parchment_sea`) lave aussi la marge. Corrigé (plus de garde `inside`, seul l'échantillon du raster de côte reste gardé). Le plan couvre bien la vue : dump `sea_plane_extent` 63720x54936, marge 28320/24416 px >> 6000 (plan lointain max).
+- Anneau ami : `TokenCues.friends` (alliés/vassaux via `diplomatic_stance_cached`), anneau vert `friend` de `stance_cues.json`.
+- Fantômes insérés en tête de la couche jetons (sous les jetons, comme Godot).

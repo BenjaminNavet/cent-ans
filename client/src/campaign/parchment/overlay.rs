@@ -1151,10 +1151,15 @@ pub fn update_overlay(
             continue;
         };
         let faction_color = Color::srgba(entry.color[0], entry.color[1], entry.color[2], tka);
+        let friend = cues
+            .as_ref()
+            .is_some_and(|c| c.friends.contains(entry.faction.as_str()));
         let cue = if entry.player {
             "self"
         } else if entry.hostile {
             "enemy"
+        } else if friend {
+            "friend"
         } else {
             "other"
         };

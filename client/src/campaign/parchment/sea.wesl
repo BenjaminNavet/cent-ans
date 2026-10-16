@@ -190,38 +190,37 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     }
     var parch = pm_paper_at(p, uv, footprint);
     let off = max(-coast, 0.0);
-    if (inside) {
-        // Wash: deeper along the coasts (pigment pooling at the edge), pale out at sea.
-        let wash = mix(0.55, 0.9, exp(-off / 10.0)) * (0.9 + 0.2 * pm_noise(p * 0.05));
-        parch = mix(parch, PM_SEA_WASH * (parch / PM_PAPER), wash);
-        // Water lines parallel to the coast, farther apart and paler outwards.
-        var lines = 0.0;
-        for (var i = 1; i <= 4; i = i + 1) {
-            let fi = f32(i);
-            lines = max(lines, pm_line(off - fi * fi * 1.8 - 1.5, 0.75, footprint) * (1.0 - fi * 0.18));
-        }
-        parch = parch * mix(vec3<f32>(1.0), vec3<f32>(0.78, 0.9, 0.9), exp(-off / 5.0));
-        parch = mix(parch, PM_SEA_WASH * 0.35, lines * 0.75 * step(0.3, off));
-        let painted = params.misc.z > 0.5;
-        let count = i32(params.map.w);
-        var start = 0.9;
-        if (painted) { start = PM_ROSE_EXTENT * PM_ROSE_CIRCLE; }
-        for (var i = 0; i < count; i = i + 1) {
-            let rh = pm_rhumbs(p, params.roses[i], footprint, start);
-            parch = mix(parch, rh.rgb, rh.a * params.misc.y);
-        }
-        for (var i = 0; i < count; i = i + 1) {
-            var ro = vec4<f32>(0.0);
-            if (painted) {
-                ro = pm_rose_painted(p, params.roses[i], gx, gy);
-            } else {
-                ro = pm_rose(p, params.roses[i], footprint);
-            }
-            parch = mix(parch, ro.rgb, ro.a);
-        }
-        parch = mix(parch, PM_INK, pm_line(coast, 1.0, footprint) * 0.9);
-        parch = mix(parch, PM_INK, pm_frame(uv, footprint, map_size) * 0.85);
+    // Like Godot, the wash, rhumbs and roses also cover the margin beyond the map (open sea).
+    // Wash: deeper along the coasts (pigment pooling at the edge), pale out at sea.
+    let wash = mix(0.55, 0.9, exp(-off / 10.0)) * (0.9 + 0.2 * pm_noise(p * 0.05));
+    parch = mix(parch, PM_SEA_WASH * (parch / PM_PAPER), wash);
+    // Water lines parallel to the coast, farther apart and paler outwards.
+    var lines = 0.0;
+    for (var i = 1; i <= 4; i = i + 1) {
+        let fi = f32(i);
+        lines = max(lines, pm_line(off - fi * fi * 1.8 - 1.5, 0.75, footprint) * (1.0 - fi * 0.18));
     }
+    parch = parch * mix(vec3<f32>(1.0), vec3<f32>(0.78, 0.9, 0.9), exp(-off / 5.0));
+    parch = mix(parch, PM_SEA_WASH * 0.35, lines * 0.75 * step(0.3, off));
+    let painted = params.misc.z > 0.5;
+    let count = i32(params.map.w);
+    var start = 0.9;
+    if (painted) { start = PM_ROSE_EXTENT * PM_ROSE_CIRCLE; }
+    for (var i = 0; i < count; i = i + 1) {
+        let rh = pm_rhumbs(p, params.roses[i], footprint, start);
+        parch = mix(parch, rh.rgb, rh.a * params.misc.y);
+    }
+    for (var i = 0; i < count; i = i + 1) {
+        var ro = vec4<f32>(0.0);
+        if (painted) {
+            ro = pm_rose_painted(p, params.roses[i], gx, gy);
+        } else {
+            ro = pm_rose(p, params.roses[i], footprint);
+        }
+        parch = mix(parch, ro.rgb, ro.a);
+    }
+    parch = mix(parch, PM_INK, pm_line(coast, 1.0, footprint) * 0.9);
+    parch = mix(parch, PM_INK, pm_frame(uv, footprint, map_size) * 0.85);
     // Opaque at sea; the coast stays cut by the raster (land hides the plane by depth anyway).
     let sea = 1.0 - smoothstep(-0.2, 0.6, coast);
     return vec4<f32>(parch * 0.95, sea * w);
