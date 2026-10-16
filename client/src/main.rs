@@ -103,6 +103,7 @@ fn main() -> ExitCode {
             flow::FlowPlugin,
         ))
         .add_plugins(fx::FlipbookPlugin)
+        .add_plugins(campaign::perf_switch::PerfSwitchPlugin)
         .insert_resource(cli);
     match bevy_app.run() {
         AppExit::Success => ExitCode::SUCCESS,

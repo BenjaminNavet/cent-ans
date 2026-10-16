@@ -232,6 +232,9 @@ fn queue_shadow_batches(
     mut queued: ResMut<QueuedShadowCasters>,
 ) {
     let draw_function = draw_functions.read().id::<DrawVegShadow>();
+    if crate::campaign::perf_switch::off("vegshadow") {
+        return;
+    }
     let mut seen = Vec::new();
     for (light, view) in &lights {
         if !matches!(light, LightEntity::Directional { .. }) {

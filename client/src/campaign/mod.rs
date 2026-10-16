@@ -9,6 +9,7 @@ pub mod life;
 pub mod markers;
 pub mod panels;
 pub mod parchment;
+pub mod perf_switch;
 pub mod progress;
 pub mod provinces;
 pub mod terrain;
