@@ -3,16 +3,17 @@
 //! stance_fill.gd + stance_cues.gd (ADR 0155 : red = enemies only, ADR 0175 : stance wash).
 //! Pure colouring: the values come from the core (`sim_campaign::stance`, `map_lens`).
 //!
-//! Modes not ported yet: religion, loyalty, supply, claims, feudal (see `docs/wip/bm-provinces.md`).
+//! The five lens modes of the Godot filter menu (religion, loyalty, supply, claims, feudal) read
+//! `game_api::lens_view` (`map_mode_controller.gd`, `feudal_map_lens.gd`).
 
 use std::collections::HashMap;
 use std::path::Path;
 
 use bevy::prelude::*;
 use data_model::{FactionId, GameData, ProvinceId};
+use game_api::{LensCell, LensWanted, lens_view};
 use serde_json::Value;
 use sim_campaign::CampaignState;
-use sim_campaign::map_lens::map_lens;
 use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::stance::diplomatic_stance_cached;
 
@@ -41,20 +42,56 @@ pub enum MapMode {
     Terrain,
     /// Stance of each controller towards the viewed faction.
     Diplomacy,
+    /// Obedience of Avignon / Rome, other faiths, heresy hot spots.
+    Religion,
     Unrest,
     Wealth,
     Population,
+    /// Loyalty of each vassal towards its suzerain.
+    Loyalty,
+    /// Supply gained or lost per season by an army without general.
+    Supply,
+    /// Provinces claimed by the viewer or against the viewer.
+    Claims,
+    /// Sovereign background, holder hatching, party shield of double allegiances.
+    Feudal,
 }
 
 impl MapMode {
-    pub const ALL: [MapMode; 6] = [
+    pub const ALL: [MapMode; 11] = [
         MapMode::Political,
         MapMode::Terrain,
         MapMode::Diplomacy,
+        MapMode::Religion,
         MapMode::Unrest,
         MapMode::Wealth,
         MapMode::Population,
+        MapMode::Loyalty,
+        MapMode::Supply,
+        MapMode::Claims,
+        MapMode::Feudal,
     ];
+
+    /// Core values this mode reads from `game_api::lens_view` (`None`: none).
+    pub fn lens_wanted(self) -> Option<LensWanted> {
+        match self {
+            MapMode::Religion => Some(LensWanted {
+                religion: true,
+                feudal: false,
+            }),
+            MapMode::Feudal => Some(LensWanted {
+                religion: false,
+                feudal: true,
+            }),
+            MapMode::Unrest
+            | MapMode::Wealth
+            | MapMode::Population
+            | MapMode::Loyalty
+            | MapMode::Supply
+            | MapMode::Claims => Some(LensWanted::default()),
+            _ => None,
+        }
+    }
 
     /// Key used in `faction_borders.json` `modes` and in dumps.
     pub fn key(self) -> &'static str {
@@ -62,9 +99,14 @@ impl MapMode {
             MapMode::Political => "political",
             MapMode::Terrain => "terrain",
             MapMode::Diplomacy => "diplomacy",
+            MapMode::Religion => "religion",
             MapMode::Unrest => "unrest",
             MapMode::Wealth => "wealth",
             MapMode::Population => "population",
+            MapMode::Loyalty => "loyalty",
+            MapMode::Supply => "supply",
+            MapMode::Claims => "claims",
+            MapMode::Feudal => "feudal",
         }
     }
 
@@ -77,9 +119,14 @@ impl MapMode {
             MapMode::Political => "Politique",
             MapMode::Terrain => "Terrain",
             MapMode::Diplomacy => "Diplomatie",
+            MapMode::Religion => "Religion",
             MapMode::Unrest => "Mécontentement",
             MapMode::Wealth => "Richesse",
             MapMode::Population => "Population",
+            MapMode::Loyalty => "Loyauté des vassaux",
+            MapMode::Supply => "Ravitaillement",
+            MapMode::Claims => "Revendications",
+            MapMode::Feudal => "Féodalité",
         }
     }
 
@@ -90,9 +137,18 @@ impl MapMode {
             MapMode::Diplomacy => {
                 "Vert allié, bleu accord, jaune neutre, orange tension, rouge guerre, gris vassal"
             }
+            MapMode::Religion => "Obédience d’Avignon ou de Rome, foyers d’hérésie",
             MapMode::Unrest => "Mécontentement moyen de la population (ordre public)",
             MapMode::Wealth => "Impôt de base par saison : population, aisance, dévastation",
             MapMode::Population => "Nombre d’habitants de chaque province",
+            MapMode::Loyalty => "Loyauté de chaque vassal envers son suzerain",
+            MapMode::Supply => {
+                "Ravitaillement gagné ou perdu par saison par une armée sans général"
+            }
+            MapMode::Claims => "Provinces que vous revendiquez, ou que d’autres vous disputent",
+            MapMode::Feudal => {
+                "Royaumes, grands vassaux (hachures) et doubles allégeances (écu parti)"
+            }
         }
     }
 }
@@ -236,6 +292,12 @@ pub struct ProvinceView {
     pub turn: u32,
     /// `(income, population, unrest)` per province, filled for the ramp modes only.
     pub lens: Vec<Option<(f32, f32, f32)>>,
+    /// Full lens cell per province (lens modes only), same indexing.
+    pub cells: Vec<Option<LensCell>>,
+    /// Short names of the factions the cells mention (suzerain, holder, second lord).
+    pub names: HashMap<String, String>,
+    /// Supply lost per winter outside friendly land (`economy_rules.supply_loss_winter`).
+    pub supply_loss_winter: u8,
 }
 
 impl ProvinceView {
@@ -257,6 +319,15 @@ impl ProvinceView {
         }
     }
 
+    /// Short display name of a faction mentioned by a lens cell (its id when unknown).
+    pub fn name_of<'a>(&'a self, faction: &'a str) -> &'a str {
+        self.names.get(faction).map_or(faction, String::as_str)
+    }
+
+    pub fn cell(&self, index: u16) -> Option<&LensCell> {
+        self.cells.get(usize::from(index)).and_then(Option::as_ref)
+    }
+
     pub fn stance_of(&self, faction: &str) -> &'static str {
         if faction == self.viewer {
             return "self";
@@ -273,13 +344,29 @@ impl ProvinceView {
     }
 }
 
-/// Reads owners, controllers and the stances of every faction towards `viewer` from the core.
+/// Reads owners, controllers and the stances of every faction towards `viewer` from the core;
+/// `with_lens` also reads every lens value (all modes).
 pub fn read_view(
     map: &ProvinceMap,
     data: &GameData,
     state: &CampaignState,
     viewer: &FactionId,
     with_lens: bool,
+) -> ProvinceView {
+    let wanted = with_lens.then_some(LensWanted {
+        religion: true,
+        feudal: true,
+    });
+    read_view_wanted(map, data, state, viewer, wanted)
+}
+
+/// [`read_view`] reading only the lens values `wanted` asks for (`None`: no lens).
+pub fn read_view_wanted(
+    map: &ProvinceMap,
+    data: &GameData,
+    state: &CampaignState,
+    viewer: &FactionId,
+    wanted: Option<LensWanted>,
 ) -> ProvinceView {
     let len = usize::from(map.max_index()) + 1;
     let mut view = ProvinceView {
@@ -288,6 +375,7 @@ pub fn read_view(
         viewer: viewer.as_str().to_owned(),
         turn: state.turn,
         lens: vec![None; len],
+        cells: vec![None; len],
         ..Default::default()
     };
     for province in map.provinces() {
@@ -314,22 +402,44 @@ pub fn read_view(
     view.stances
         .entry(REBELS_FACTION.to_owned())
         .or_insert("war");
-    if with_lens {
-        let lens = map_lens(state, data, viewer);
+    if let Some(wanted) = wanted {
+        let lens = lens_view(data, state, viewer, wanted);
+        view.supply_loss_winter = lens.supply_loss_winter;
         for province in map.provinces() {
-            if let Some(values) = ProvinceId::new(province.id.clone())
-                .ok()
-                .and_then(|id| lens.get(&id))
-            {
+            if let Some(cell) = lens.cells.get(&province.id) {
                 view.lens[province.index as usize] = Some((
-                    values.income as f32,
-                    values.population as f32,
-                    values.unrest as f32,
+                    cell.income as f32,
+                    cell.population as f32,
+                    cell.unrest as f32,
                 ));
+                for faction in lens_factions(cell) {
+                    if !view.names.contains_key(faction)
+                        && let Ok(id) = FactionId::new(faction.to_owned())
+                    {
+                        let name = data.faction_name(&id);
+                        let short = crate::campaign::parchment::realms::short_name(&name);
+                        view.names.insert(faction.to_owned(), short.to_owned());
+                    }
+                }
+                view.cells[province.index as usize] = Some(cell.clone());
             }
         }
     }
     view
+}
+
+/// Faction ids a lens cell mentions (suzerain, holder, second lord), empty ones skipped.
+fn lens_factions(cell: &LensCell) -> impl Iterator<Item = &str> {
+    let feudal = cell.feudal.as_ref();
+    [
+        Some(cell.suzerain.as_str()),
+        feudal.map(|f| f.holder.as_str()),
+        feudal.map(|f| f.second_lord.as_str()),
+        feudal.map(|f| f.sovereign.as_str()),
+    ]
+    .into_iter()
+    .flatten()
+    .filter(|f| !f.is_empty())
 }
 
 /// Heraldic colour of every faction (`primary_color`), for the political tint and the borders.
@@ -353,6 +463,78 @@ const WEALTH_LOW: Srgba = Srgba::new(0.93, 0.88, 0.70, 1.0);
 const WEALTH_HIGH: Srgba = Srgba::new(0.62, 0.42, 0.05, 1.0);
 const POPULATION_LOW: Srgba = Srgba::new(0.90, 0.88, 0.80, 1.0);
 const POPULATION_HIGH: Srgba = Srgba::new(0.30, 0.18, 0.45, 1.0);
+// Lens modes (map_mode_controller.gd).
+const RELIGION_AVIGNON: Srgba = Srgba::new(0.20, 0.34, 0.80, 1.0);
+const RELIGION_ROME: Srgba = Srgba::new(0.80, 0.65, 0.20, 1.0);
+const RELIGION_OTHER: Srgba = Srgba::new(0.45, 0.45, 0.45, 1.0);
+const HERESY: Srgba = Srgba::new(0.58, 0.26, 0.72, 1.0);
+/// The great faiths of the East, each its own hue (the others stay grey).
+const RELIGION_FAITHS: [(&str, Srgba); 4] = [
+    ("rel_orthodox", Srgba::new(0.62, 0.22, 0.38, 1.0)),
+    ("rel_islam", Srgba::new(0.12, 0.52, 0.22, 1.0)),
+    ("rel_pagan", Srgba::new(0.55, 0.40, 0.22, 1.0)),
+    ("rel_armenian", Srgba::new(0.80, 0.42, 0.18, 1.0)),
+];
+const LOYALTY_LOW: Srgba = Srgba::new(0.75, 0.15, 0.10, 1.0);
+const LOYALTY_MID: Srgba = Srgba::new(0.88, 0.62, 0.15, 1.0);
+const LOYALTY_HIGH: Srgba = Srgba::new(0.20, 0.40, 0.78, 1.0);
+pub const NEUTRAL: Srgba = Srgba::new(0.62, 0.60, 0.56, 1.0);
+const SUPPLY_GAIN: Srgba = Srgba::new(0.22, 0.55, 0.25, 1.0);
+const SUPPLY_LOSS: Srgba = Srgba::new(0.85, 0.55, 0.15, 1.0);
+const SUPPLY_STARVE: Srgba = Srgba::new(0.60, 0.08, 0.06, 1.0);
+const CLAIM_OURS: Srgba = Srgba::new(0.85, 0.68, 0.20, 1.0);
+const CLAIM_AGAINST_US: Srgba = Srgba::new(0.72, 0.12, 0.10, 1.0);
+const CLAIM_CONTESTED: Srgba = Srgba::new(0.50, 0.25, 0.65, 1.0);
+
+/// Colour of a faith in the religion mode: Avignon (the Church during the Schism, blue), Rome
+/// (gold), the great eastern faiths, else grey; tinted towards the heresy purple by `heresy` (%).
+pub fn religion_color(faith: &str, heresy: u8) -> Srgba {
+    let base = match faith {
+        "rel_catholic" => RELIGION_AVIGNON,
+        "rel_catholic_rome" => RELIGION_ROME,
+        other => RELIGION_FAITHS
+            .iter()
+            .find(|(id, _)| *id == other)
+            .map_or(RELIGION_OTHER, |(_, c)| *c),
+    };
+    mix(base, HERESY, f32::from(heresy) / 100.0 * 1.5)
+}
+
+/// Loyalty ramp: red (about to revolt) - amber - blue (faithful); grey for a non-vassal.
+pub fn loyalty_color(loyalty: Option<u8>) -> Srgba {
+    let Some(loyalty) = loyalty else {
+        return NEUTRAL;
+    };
+    let ratio = (f32::from(loyalty) / 100.0).clamp(0.0, 1.0);
+    if ratio < 0.5 {
+        mix(LOYALTY_LOW, LOYALTY_MID, ratio * 2.0)
+    } else {
+        mix(LOYALTY_MID, LOYALTY_HIGH, ratio * 2.0 - 1.0)
+    }
+}
+
+/// Supply: green when it is regained, amber to dark red as the attrition nears the winter loss.
+pub fn supply_color(change: i8, worst_loss: u8) -> Srgba {
+    if change >= 0 {
+        return SUPPLY_GAIN;
+    }
+    let t = if worst_loss > 0 {
+        f32::from(-i16::from(change)) / f32::from(worst_loss)
+    } else {
+        1.0
+    };
+    mix(SUPPLY_LOSS, SUPPLY_STARVE, t)
+}
+
+pub fn claim_color(claim: &str) -> Srgba {
+    match claim {
+        "ours" => CLAIM_OURS,
+        "against_us" => CLAIM_AGAINST_US,
+        "contested" => CLAIM_CONTESTED,
+        _ => NEUTRAL,
+    }
+}
+
 /// Opacity of the heraldic tint in the political mode and of the ramp / diplomacy fills.
 pub const POLITICAL_TINT_ALPHA: f32 = 0.16;
 pub const MODE_FILL_ALPHA: f32 = 0.55;
@@ -452,6 +634,29 @@ pub fn province_colors_with(
                 let key = view.stance_of(controller);
                 diplomacy_color(key).map_or(Srgba::NONE, |c| c.with_alpha(MODE_FILL_ALPHA))
             }
+            MapMode::Religion | MapMode::Loyalty | MapMode::Supply | MapMode::Claims => {
+                view.cell(index).map_or(Srgba::NONE, |cell| {
+                    match mode {
+                        MapMode::Religion => cell
+                            .religion
+                            .as_ref()
+                            .map_or(NEUTRAL, |r| religion_color(&r.religion, r.heresy)),
+                        MapMode::Loyalty => loyalty_color(cell.vassal_loyalty),
+                        MapMode::Supply => {
+                            supply_color(cell.supply_change, view.supply_loss_winter)
+                        }
+                        _ => claim_color(&cell.claim),
+                    }
+                    .with_alpha(MODE_FILL_ALPHA)
+                })
+            }
+            MapMode::Feudal => view
+                .cell(index)
+                .and_then(|cell| cell.feudal.as_ref())
+                .filter(|feudal| !feudal.sovereign.is_empty())
+                .map_or(Srgba::NONE, |feudal| {
+                    faction_tint(heraldic, &feudal.sovereign).with_alpha(MODE_FILL_ALPHA)
+                }),
             MapMode::Unrest | MapMode::Wealth | MapMode::Population => {
                 match view.lens.get(slot).copied().flatten() {
                     None => Srgba::NONE,
@@ -474,6 +679,47 @@ pub fn province_colors_with(
         };
     }
     colors
+}
+
+/// Heraldic colour of a faction, neutral grey when it has none.
+fn faction_tint(heraldic: &HashMap<String, Srgba>, faction: &str) -> Srgba {
+    heraldic.get(faction).copied().unwrap_or(NEUTRAL)
+}
+
+/// Second fill layer of the Feudal mode, by raster index: the colour of the holder of the
+/// province's title where it is not the sovereign (the fill shader stripes it over the
+/// sovereign's background), transparent elsewhere. Empty outside the Feudal mode.
+pub fn province_hatch(
+    mode: MapMode,
+    max_index: u16,
+    view: &ProvinceView,
+    heraldic: &HashMap<String, Srgba>,
+) -> Vec<Srgba> {
+    let mut hatch = vec![Srgba::NONE; usize::from(max_index) + 1];
+    if mode != MapMode::Feudal {
+        return hatch;
+    }
+    for index in 1..=max_index {
+        if let Some(feudal) = view.cell(index).and_then(|c| c.feudal.as_ref())
+            && !feudal.holder.is_empty()
+            && feudal.holder != feudal.sovereign
+        {
+            hatch[usize::from(index)] =
+                faction_tint(heraldic, &feudal.holder).with_alpha(MODE_FILL_ALPHA);
+        }
+    }
+    hatch
+}
+
+/// Provinces in double allegiance (holder, second lord), by raster index, for the party shields.
+pub fn double_allegiances(view: &ProvinceView, max_index: u16) -> Vec<(u16, String, String)> {
+    (1..=max_index)
+        .filter_map(|index| {
+            let feudal = view.cell(index)?.feudal.as_ref()?;
+            (!feudal.second_lord.is_empty() && !feudal.holder.is_empty())
+                .then(|| (index, feudal.holder.clone(), feudal.second_lord.clone()))
+        })
+        .collect()
 }
 
 /// Opacity of the border layer in `mode` (`faction_borders.json` `modes`); full intensity flag.
@@ -594,6 +840,87 @@ mod tests {
     }
 
     #[test]
+    fn lens_mode_colours_follow_godot() {
+        // religion: Avignon blue, Rome gold, the great eastern faiths, grey otherwise; heresy
+        // drags the colour towards purple, capped at the purple itself
+        assert_eq!(religion_color("rel_catholic", 0), RELIGION_AVIGNON);
+        assert_eq!(religion_color("rel_catholic_rome", 0), RELIGION_ROME);
+        assert_eq!(religion_color("rel_islam", 0), RELIGION_FAITHS[1].1);
+        assert_eq!(religion_color("rel_unknown", 0), RELIGION_OTHER);
+        assert_eq!(religion_color("rel_catholic", 100), HERESY);
+        assert_ne!(religion_color("rel_catholic", 20), RELIGION_AVIGNON);
+        // loyalty: red - amber - blue, grey for no vassal
+        assert_eq!(loyalty_color(Some(0)), LOYALTY_LOW);
+        assert_eq!(loyalty_color(Some(50)), LOYALTY_MID);
+        assert_eq!(loyalty_color(Some(100)), LOYALTY_HIGH);
+        assert_eq!(loyalty_color(None), NEUTRAL);
+        // supply: gain green, attrition amber up to dark red at the winter loss
+        assert_eq!(supply_color(2, 35), SUPPLY_GAIN);
+        assert_eq!(supply_color(0, 35), SUPPLY_GAIN);
+        assert_eq!(supply_color(-35, 35), SUPPLY_STARVE);
+        assert_eq!(supply_color(-5, 0), SUPPLY_STARVE);
+        let mid = supply_color(-10, 35);
+        assert!(mid.red < SUPPLY_LOSS.red && mid.red > SUPPLY_STARVE.red);
+        // claims
+        assert_eq!(claim_color("ours"), CLAIM_OURS);
+        assert_eq!(claim_color("against_us"), CLAIM_AGAINST_US);
+        assert_eq!(claim_color("contested"), CLAIM_CONTESTED);
+        assert_eq!(claim_color(""), NEUTRAL);
+    }
+
+    #[test]
+    fn feudal_background_hatch_and_shields() {
+        use game_api::lens::{FeudalLensCell, LensCell};
+        let cell = |sovereign: &str, holder: &str, second: &str| LensCell {
+            income: 0.0,
+            population: 0,
+            unrest: 0.0,
+            vassal_loyalty: None,
+            suzerain: String::new(),
+            supply_change: 0,
+            claim: String::new(),
+            religion: None,
+            feudal: Some(FeudalLensCell {
+                sovereign: sovereign.into(),
+                holder: holder.into(),
+                second_lord: second.into(),
+            }),
+        };
+        let view = ProvinceView {
+            cells: vec![
+                None,
+                Some(cell("fac_france", "fac_france", "")),
+                Some(cell("fac_france", "fac_burgundy", "")),
+                Some(cell("fac_france", "fac_england", "fac_france")),
+            ],
+            ..Default::default()
+        };
+        let heraldic = HashMap::from([
+            ("fac_france".to_owned(), Srgba::new(0.1, 0.2, 0.7, 1.0)),
+            ("fac_burgundy".to_owned(), Srgba::new(0.7, 0.2, 0.1, 1.0)),
+        ]);
+        let t = tuning();
+        let colors = province_colors(MapMode::Feudal, 3, &view, &heraldic, &t);
+        // background: the sovereign everywhere
+        assert!(colors[1..=3].iter().all(|c| c.red == 0.1 && c.alpha > 0.0));
+        // hatching only where the holder is not the sovereign; an unknown holder is grey
+        let hatch = province_hatch(MapMode::Feudal, 3, &view, &heraldic);
+        assert_eq!(hatch[1], Srgba::NONE);
+        assert_eq!(hatch[2].red, 0.7);
+        assert_eq!(hatch[3].red, NEUTRAL.red);
+        assert!(
+            province_hatch(MapMode::Unrest, 3, &view, &heraldic)
+                .iter()
+                .all(|c| c.alpha == 0.0)
+        );
+        // a party shield on the double allegiance only
+        assert_eq!(
+            double_allegiances(&view, 3),
+            vec![(3, "fac_england".to_owned(), "fac_france".to_owned())]
+        );
+    }
+
+    #[test]
     fn modes_have_keys_and_border_styles() {
         let t = tuning();
         for mode in MapMode::ALL {
@@ -641,5 +968,19 @@ mod sim_tests {
                 assert!(tinted > 100, "{mode:?}: {tinted} tinted");
             }
         }
+        // the Religion mode paints several faiths, the Feudal one names France above Paris
+        let distinct = |mode| {
+            province_colors(mode, map.max_index(), &view, &heraldic, &tuning)
+                .iter()
+                .filter(|c| c.alpha > 0.0)
+                .map(|c| c.to_u8_array())
+                .collect::<std::collections::BTreeSet<_>>()
+                .len()
+        };
+        assert!(distinct(MapMode::Religion) >= 2);
+        assert!(distinct(MapMode::Feudal) >= 3);
+        let feudal = view.cell(paris).and_then(|c| c.feudal.as_ref()).unwrap();
+        assert_eq!(feudal.sovereign, "fac_france");
+        assert_eq!(view.name_of("fac_france"), "France");
     }
 }

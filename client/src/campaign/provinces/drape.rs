@@ -31,11 +31,16 @@ pub fn register_shaders(app: &mut App) {
             "provinces/border.wesl",
         ),
     ] {
-        let source = crate::campaign::water::drape::with_relief(source);
+        let source = with_hatch(&crate::campaign::water::drape::with_relief(source));
         if let Err(error) = shaders.insert(handle.id(), Shader::from_wesl(source, path)) {
             error!("provinces: shader {path}: {error:?}");
         }
     }
+}
+
+/// The shared hatching functions (`hatch.wesl`) inlined where the `//@include hatch` line stands.
+pub fn with_hatch(source: &str) -> String {
+    source.replace("//@include hatch", include_str!("shaders/hatch.wesl"))
 }
 
 /// Uniform block shared by both overlay shaders.
@@ -49,7 +54,8 @@ pub struct OverlayParams {
     /// Fill only: 1 = colour-blind hatching (screen-space stripes whose direction follows the
     /// province colour), 0 = plain wash.
     pub hatch: f32,
-    pub pad1: f32,
+    /// Fill only: 1 = Feudal mode, the second texture is striped over the first.
+    pub feudal: f32,
 }
 
 impl OverlayParams {
@@ -59,7 +65,7 @@ impl OverlayParams {
             lift_base,
             lift_per_distance,
             hatch: 0.0,
-            pad1: 0.0,
+            feudal: 0.0,
         }
     }
 
@@ -80,6 +86,9 @@ pub struct ProvinceFillMaterial {
     #[texture(3)]
     #[sampler(4)]
     pub fill: Handle<Image>,
+    /// Holder colours of the Feudal mode (same layout as `fill`, transparent elsewhere).
+    #[texture(5)]
+    pub hatch_fill: Handle<Image>,
 }
 
 /// Screen-space shape of the border bands (`border.wesl`, `Shape`).

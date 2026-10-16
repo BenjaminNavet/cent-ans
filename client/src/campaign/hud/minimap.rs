@@ -1127,9 +1127,14 @@ fn mode_icon(mode: MapMode) -> &'static str {
         MapMode::Political => "lens_political",
         MapMode::Terrain => "lens_relief",
         MapMode::Diplomacy => "lens_diplomacy",
+        MapMode::Religion => "lens_religion",
         MapMode::Unrest => "lens_unrest",
         MapMode::Wealth => "lens_wealth",
         MapMode::Population => "lens_population",
+        MapMode::Loyalty => "lens_loyalty",
+        MapMode::Supply => "lens_supply",
+        MapMode::Claims => "lens_claims",
+        MapMode::Feudal => "glyph_crown",
     }
 }
 

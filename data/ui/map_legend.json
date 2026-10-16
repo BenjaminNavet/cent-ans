@@ -6,7 +6,11 @@
     "political": "Carte politique",
     "unrest": "Carte du mécontentement (M)",
     "diplomacy": "Carte diplomatique (N)",
-    "religion": "Carte religieuse (R)"
+    "religion": "Carte religieuse (R)",
+    "loyalty": "Carte de la loyauté des vassaux",
+    "supply": "Carte du ravitaillement",
+    "claims": "Carte des revendications",
+    "feudal": "Carte de la féodalité"
   },
   "sections": [
     {
@@ -52,10 +56,56 @@
       "title": "Couleur des terres",
       "modes": ["religion"],
       "entries": [
-        {"sample": {"type": "color", "color": "#4059b3"}, "label": "Obédience d’Avignon", "text": "Provinces fidèles au pape d’Avignon."},
-        {"sample": {"type": "color", "color": "#cca633"}, "label": "Obédience de Rome", "text": "Provinces fidèles au pape de Rome (pendant le Grand Schisme)."},
-        {"sample": {"type": "color", "color": "#33a640"}, "label": "Hérésie", "text": "Plus la teinte verdit, plus l’hérésie y est répandue."},
+        {"sample": {"type": "color", "color": "#3357cc"}, "label": "Obédience d’Avignon", "text": "Provinces fidèles au pape d’Avignon (l’Église pendant le Grand Schisme)."},
+        {"sample": {"type": "color", "color": "#d1a633"}, "label": "Obédience de Rome", "text": "Provinces fidèles au pape de Rome."},
+        {"sample": {"type": "color", "color": "#9442b8"}, "label": "Hérésie", "text": "Plus la teinte vire au violet, plus l’hérésie y est répandue."},
+        {"sample": {"type": "color", "color": "#9e3861"}, "label": "Orthodoxie", "text": "Terres de l’Église orthodoxe."},
+        {"sample": {"type": "color", "color": "#cc6b2e"}, "label": "Église arménienne", "text": "Terres de l’Église arménienne."},
+        {"sample": {"type": "color", "color": "#1f8538"}, "label": "Islam", "text": "Terres musulmanes."},
+        {"sample": {"type": "color", "color": "#8c6638"}, "label": "Paganisme", "text": "Terres restées païennes."},
         {"sample": {"type": "color", "color": "#737373"}, "label": "Autre foi", "text": "Terres d’une autre religion."}
+      ]
+    },
+    {
+      "id": "mode_loyalty",
+      "title": "Couleur des terres",
+      "modes": ["loyalty"],
+      "entries": [
+        {"sample": {"type": "color", "color": "#3366c7"}, "label": "Vassal fidèle", "text": "Loyauté élevée envers son suzerain."},
+        {"sample": {"type": "color", "color": "#e09e26"}, "label": "Hésitant", "text": "Loyauté moyenne."},
+        {"sample": {"type": "color", "color": "#bf261a"}, "label": "Prêt à se révolter", "text": "Loyauté basse : le vassal peut rompre son hommage."},
+        {"sample": {"type": "color", "color": "#9e9990"}, "label": "Pas un vassal", "text": "Terres d’un seigneur sans suzerain."}
+      ]
+    },
+    {
+      "id": "mode_supply",
+      "title": "Couleur des terres",
+      "modes": ["supply"],
+      "entries": [
+        {"sample": {"type": "color", "color": "#388c40"}, "label": "Ravitaillée", "text": "Terres amies : une armée sans général y regagne du ravitaillement chaque saison."},
+        {"sample": {"type": "color", "color": "#d98c26"}, "label": "Attrition", "text": "Hors de nos terres, l’armée perd du ravitaillement chaque saison."},
+        {"sample": {"type": "color", "color": "#991410"}, "label": "Attrition d’hiver", "text": "La perte maximale, en hiver hors des terres amies."}
+      ]
+    },
+    {
+      "id": "mode_claims",
+      "title": "Couleur des terres",
+      "modes": ["claims"],
+      "entries": [
+        {"sample": {"type": "color", "color": "#d9ad33"}, "label": "Nos revendications", "text": "Provinces que vous revendiquez sans les posséder."},
+        {"sample": {"type": "color", "color": "#b81f1a"}, "label": "Revendiquées contre nous", "text": "Provinces à vous que d’autres revendiquent."},
+        {"sample": {"type": "color", "color": "#8040a6"}, "label": "Disputées", "text": "Revendiquées par vous et par un autre."},
+        {"sample": {"type": "color", "color": "#9e9990"}, "label": "Aucune", "text": "Aucune revendication."}
+      ]
+    },
+    {
+      "id": "mode_feudal",
+      "title": "Couleur des terres",
+      "modes": ["feudal"],
+      "entries": [
+        {"sample": {"type": "color", "color": "#8c6b40"}, "label": "Fond : le royaume", "text": "Couleur du souverain au sommet de la chaîne féodale de la province."},
+        {"sample": {"type": "color", "color": "#597399"}, "label": "Hachures : le tenant", "text": "Le grand vassal qui tient le titre de la province, quand ce n’est pas le souverain."},
+        {"sample": {"type": "color", "color": "#bf9e33"}, "label": "Écu parti", "text": "Double allégeance : armes du tenant à gauche, de son autre seigneur à droite."}
       ]
     },
     {
