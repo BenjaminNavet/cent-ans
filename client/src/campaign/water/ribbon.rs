@@ -51,9 +51,10 @@ impl RibbonBuffers {
         if self.is_empty() {
             return None;
         }
+        // Kept in the main world too: `reseat` rewrites the altitudes when fine relief pages arrive.
         let mut mesh = Mesh::new(
             PrimitiveTopology::TriangleList,
-            RenderAssetUsages::RENDER_WORLD,
+            RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
         );
         mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, self.positions);
         mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, self.normals);
@@ -98,22 +99,34 @@ fn push_quads(indices: &mut Vec<u32>, base: u32, count: usize) {
 /// Centre-line ribbons for the screen-width vertex shaders. `position.y` is the ground altitude in
 /// METRES (>= 0): the vertex shader drapes it on the relief (`drape.rs`) and adds the lift.
 pub fn screen_ribbon(lines: &[RibbonLine], ground: &dyn HeightSampler) -> RibbonBuffers {
+    screen_ribbon_dense(lines, ground, f32::INFINITY)
+}
+
+/// [`screen_ribbon`] with intermediate points every `step` map px (widths interpolated): a long
+/// straight chord of the data cuts across the relief between its ends, and its interpolated
+/// altitude passed under the ground (rivers buried at close range, showfix 16/10).
+pub fn screen_ribbon_dense(
+    lines: &[RibbonLine],
+    ground: &dyn HeightSampler,
+    step: f32,
+) -> RibbonBuffers {
     let mut out = RibbonBuffers::default();
     for line in lines {
-        let count = line.points.len();
+        let (points, widths) = densify_with_widths(line.points, line.widths, step);
+        let count = points.len();
         if count < 2 {
             continue;
         }
         let base = out.positions.len() as u32;
         let mut along = 0.0;
         for i in 0..count {
-            let p = line.points[i];
+            let p = points[i];
             if i > 0 {
-                along += p.distance(line.points[i - 1]);
+                along += p.distance(points[i - 1]);
             }
-            let n = perp(tangent_at(line.points, i));
-            let y = ground.height_m(p.x, p.y).max(0.0);
-            let width = line.widths.get(i).copied().unwrap_or(0.0);
+            let n = perp(tangent_at(&points, i));
+            let y = ground.seat_height_m(p.x, p.y).max(0.0);
+            let width = widths.get(i).copied().unwrap_or(0.0);
             for side in [1.0_f32, -1.0] {
                 out.positions.push([p.x, y, p.y]);
                 out.normals.push([n.x * side, 0.0, n.y * side]);
@@ -124,6 +137,26 @@ pub fn screen_ribbon(lines: &[RibbonLine], ground: &dyn HeightSampler) -> Ribbon
         push_quads(&mut out.indices, base, count);
     }
     out
+}
+
+/// Points and per-point widths with intermediate points every `step` (none if not finite).
+fn densify_with_widths(points: &[Vec2], widths: &[f32], step: f32) -> (Vec<Vec2>, Vec<f32>) {
+    let width_at = |i: usize| widths.get(i).copied().unwrap_or(0.0);
+    if !step.is_finite() || step <= 0.0 || points.len() < 2 {
+        return (points.to_vec(), (0..points.len()).map(width_at).collect());
+    }
+    let mut out_points = vec![points[0]];
+    let mut out_widths = vec![width_at(0)];
+    for i in 1..points.len() {
+        let (a, b) = (points[i - 1], points[i]);
+        let n = ((a.distance(b) / step).ceil() as usize).max(1);
+        for k in 1..=n {
+            let t = k as f32 / n as f32;
+            out_points.push(a.lerp(b, t));
+            out_widths.push(width_at(i - 1) + (width_at(i) - width_at(i - 1)) * t);
+        }
+    }
+    (out_points, out_widths)
 }
 
 /// Intermediate points every `step` (the ribbon follows the terrain facets).

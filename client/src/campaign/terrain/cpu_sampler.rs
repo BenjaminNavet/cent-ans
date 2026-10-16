@@ -52,6 +52,13 @@ impl HeightSampler for CpuSampler {
     fn surface_world(&self, x: f32, y: f32) -> f32 {
         self.display_height(x, y)
     }
+
+    fn seat_height_m(&self, x: f32, y: f32) -> f32 {
+        let snap = self.0.read().expect("cpu sampler");
+        snap.surface
+            .as_ref()
+            .map_or(0.0, |s| s.highest_level_height_m(x, y))
+    }
 }
 
 /// Installs the samplers into the water and province lots (every campaign visit).

@@ -202,6 +202,26 @@ fn displayed_y(h: f32, fa: vec2<f32>, fb: vec2<f32>) -> f32 {
     return s * (h - k * max(h - fa.y, 0.0) + g * (1.0 - k) * max(h - fa.x, 0.0) + c * fb.y);
 }
 
+// River bed carved into the close terrain (`river_carve` of `river_banks.gdshaderinc`, lot V4):
+// the ribbons sit on the altitude sampled on their centre line, while the terrain between
+// vertices (and the geomorph towards coarser pages) stays 10-25 m above it in narrow valleys
+// (Seine at Paris), which buried the rivers at close range (showfix, 16/10). Godot carves the
+// fine relief tiles near the camera; here the carve fades out with the camera distance.
+const RIVER_CARVE_DEPTH: f32 = 0.075; // world units (1 m = 0.006)
+const RIVER_BANK_PX: f32 = 1.1;
+const RIVER_CARVE_NEAR: vec2<f32> = vec2<f32>(220.0, 380.0);
+
+fn river_carve(xz: vec2<f32>, local: vec3<f32>) -> f32 {
+    let near = 1.0 - smoothstep(RIVER_CARVE_NEAR.x, RIVER_CARVE_NEAR.y, distance(local, view.world_position));
+    if (near <= 0.0) {
+        return 0.0;
+    }
+    // Signed distance to the bank (map px, negative in the bed), as in `map_cell`; an unbound
+    // texture (white) reads as far from any river.
+    let sd = (textureSampleLevel(ab_dist, ab_dist_sampler, xz / params.map.xy, 0.0).a * 255.0 - 128.0) / 16.0;
+    return RIVER_CARVE_DEPTH * (1.0 - smoothstep(-0.3, RIVER_BANK_PX, sd)) * near;
+}
+
 @vertex
 fn vertex(v: Vertex) -> Varyings {
     var out: Varyings;
@@ -223,7 +243,7 @@ fn vertex(v: Vertex) -> Varyings {
         let sink = 1.0 - smoothstep(0.0, edge_px, min(to_edge.x, to_edge.y));
         y = mix(y, min(y, 0.2), sink);
     }
-    y = y - v.slope.z;
+    y = y - v.slope.z - river_carve(v.position.xz, vec3<f32>(v.position.x, y, v.position.z));
     let world_from_local = mesh_functions::get_world_from_local(v.instance_index);
     let world = mesh_functions::mesh_position_local_to_world(world_from_local, vec4<f32>(v.position.x, y, v.position.z, 1.0));
     out.world = world.xyz;

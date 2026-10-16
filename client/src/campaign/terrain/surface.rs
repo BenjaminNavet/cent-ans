@@ -121,6 +121,24 @@ impl Surface {
         None
     }
 
+    /// Highest altitude (m) among the world heightmap and every resident page under (x, z): the
+    /// level a terrain node shows depends on its distance (and geomorphs towards its parent), and
+    /// in a narrow valley the coarser levels sit tens of metres above the finest one. A ribbon
+    /// seated here is never under the displayed ground.
+    pub fn highest_level_height_m(&self, x: f32, z: f32) -> f32 {
+        let mut best = self.heights.height_m_at(x, z);
+        for level in 0..=self.pyramid.max_level {
+            let (col, row) = ReliefPyramid::tile_at(level, x as f64, z as f64);
+            if col < 0 || row < 0 {
+                continue;
+            }
+            if let Some(h) = self.page_height_m(key_of(level as i64, col, row), x, z) {
+                best = best.max(h);
+            }
+        }
+        best
+    }
+
     /// Altitude (m): finest resident page, else the world heightmap.
     pub fn height_m_at(&self, x: f32, z: f32) -> f32 {
         self.finest_page_height_m(x, z)

@@ -24,6 +24,7 @@ pub mod label_ui;
 pub mod labels;
 pub mod materials;
 pub mod polygon;
+pub mod reseat;
 pub mod ribbon;
 pub mod sea_life;
 
@@ -60,6 +61,8 @@ const MAJOR_WIDTH: f32 = 0.5;
 const MAJOR_IMPORTANCE: i64 = 3;
 /// Sample step (map px) of the dirt-road ribbons; the ground is smooth enough at this step.
 const RIBBON_STEP: f32 = 1.0;
+/// Sample step (map px) of the river ribbons (see `ribbon::screen_ribbon_dense`).
+const RIVER_STEP: f32 = 0.5;
 const RIBBON_MAIN_WIDTH: f32 = 0.55;
 const RIBBON_WIDTH: f32 = 0.38;
 const MAIN_ROAD_WIDTH: f32 = 0.5;
@@ -155,6 +158,7 @@ impl Plugin for CampaignWaterPlugin {
         app.init_resource::<GroundHeight>()
             .init_resource::<WaterView>()
             .init_resource::<WaterStats>()
+            .init_resource::<reseat::ReseatStats>()
             .add_message::<RebuildWater>()
             .register_dump(dump_water);
         if app.world().contains_resource::<Assets<Mesh>>() {
@@ -175,7 +179,7 @@ impl Plugin for CampaignWaterPlugin {
             .add_systems(OnEnter(AppState::Campaign), (build_water, debug_camera))
             .add_systems(
                 Update,
-                (rebuild_water, apply_view)
+                (rebuild_water, apply_view, reseat::reseat_ribbons)
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
             );
@@ -650,7 +654,7 @@ fn build_rivers(
             true,
         ),
     ] {
-        let buffers = ribbon::screen_ribbon(lines, ground);
+        let buffers = ribbon::screen_ribbon_dense(lines, ground, RIVER_STEP);
         out.river_vertices += buffers.positions.len();
         out.river_triangles += buffers.triangle_count();
         if let Some(mesh) = buffers.into_mesh() {
@@ -840,6 +844,9 @@ fn dump_water(world: &World) -> (String, Value) {
             "build_ms": stats.build_ms,
             "map_size": [stats.map_size.x, stats.map_size.y],
             "entities": per_part,
+            "reseat": world.get_resource::<reseat::ReseatStats>().map(|r| json!({
+                "runs": r.runs, "meshes_updated": r.meshes_updated, "vertices_moved": r.vertices_moved,
+                "last_max_shift_m": r.last_max_shift_m, "last_ms": r.last_ms})),
             "view": {"medium": view.medium, "near": view.near,
                      "strategic_weight": view.strategic_weight, "camera_distance": view.camera_distance},
             "sea": {"vertices": stats.sea_vertices, "extent": [stats.sea_extent.x, stats.sea_extent.y],

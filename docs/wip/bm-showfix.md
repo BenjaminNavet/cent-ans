@@ -13,6 +13,31 @@
 - Toits des tours de siège plats : cône de hauteur fixe 5 m, rayon ×1,25, tuile ; Godot : hauteur r×1,55, ardoise
   sombre, une tour sur deux (autres crénelées) — défaut de portage dans `battle/siege/works.rs`.
 
+- Suite (16/10) : le re-calage sur les pages fines (`water/reseat.rs`, max des niveaux résidents) ne déplace les
+  sommets que de 0,3 m : les rubans étaient déjà sur les bonnes hauteurs CPU. Densifier les rivières (0,5 px) et
+  creuser le lit dans le terrain proche (`river_carve`, port de `river_banks.gdshaderinc`) n'en font réapparaître
+  qu'un peu (3 000 px bleus contre 19 000 avec +0,15 de levée). Hypothèse en cours : un autre maillage (zones
+  humides, surcouches) couvre la rivière ; crochet `CENT_ANS_HIDE=<sous-chaîne>` (agent) pour le vérifier.
+- Tours de siège : cône d'ardoise r×1,55 une tour sur deux, merlons sinon, corbeau (`works.rs`), dump `tower_roofs`.
+
+## État à la pause (16/10)
+- Commits : 96a1fce94, 5c46a51f0, puis ce wip (crochet `CENT_ANS_HIDE` rendu collant, réappliqué à chaque image :
+  le LOD remettait `Visibility::Visible` à chaque reconstruction, le test « masquer TerrainNode » était donc
+  invalide ; journal `AGENT_UNNAMED_MESHES` avec `CENT_ANS_HIDE=?`). Ce dernier changement n'est PAS compilé
+  (build arrêté sur demande de pause).
+- Cause des rivières enterrées (10-25 m sous le sol affiché à d=60) toujours non trouvée. Écartés : chargement,
+  page fine vs heightmap côté CPU (reseat ≤ 0,39 m), densification, voiles/provinces/nuages. Formule d'exagération
+  identique (`displayed_y` terrain = `relief_display_height_at_fields` rivière) ; restent à comparer : les
+  `ReliefParams` passés au matériau rivière vs terrain (scale.x/y/z/w), les champs lus en texture
+  (`relief_fields`, centres de texels) vs `fields_at` CPU (bilerp), `fb.y`/lift D, le géomorphe, la jupe `slope.z`.
+- Toits des tours de siège corrigés dans `works.rs`, non vérifiés par capture/dump.
+- Pas encore de recaptures `tools/compare_views.sh --side bevy` ni d'écarts par vue.
+
 ## Prochaine étape
-- Corriger le calage des rivières (hauteur au shader depuis la même source que le terrain, ou recuisson quand les
-  pages fines arrivent) ; toits coniques ; arbres pâles ; recaptures + écarts par vue.
+1. `cargo build --release` (≈ 10 min, arrière-plan) puis `sf/run.sh` avec `CENT_ANS_HIDE=TerrainNode` à d=60 :
+   confirmer que le terrain recouvre la rivière.
+2. Dumper/comparer `ReliefParams` rivière vs terrain et la hauteur affichée au même point (CPU `display_height_fields`
+   vs shader) ; corriger la source divergente. À défaut : relever `lift_base` proche (~0,1-0,15) et documenter.
+3. Vérifier `battle_siege.tower_roofs` ; arbres pâles (pas de grading sur `billboard.wesl`) ; cadrage d=60.
+4. Recaptures `--side bevy`, écarts par vue ; fmt, `clippy --features dev -D warnings`, `cargo test` ; commit final.
+5. Envisager de retirer reseat/dense (sans effet mesuré) si la vraie cause est trouvée.

@@ -16,6 +16,12 @@ pub trait HeightSampler: Send + Sync + 'static {
     /// Altitude in metres at map pixel `(x, y)`.
     fn height_m(&self, x: f32, y: f32) -> f32;
 
+    /// Altitude (m) at which a draped ribbon is seated so that it never ends up under the
+    /// displayed ground (default: [`Self::height_m`]).
+    fn seat_height_m(&self, x: f32, y: f32) -> f32 {
+        self.height_m(x, y)
+    }
+
     /// World `y` of the ground surface at map pixel `(x, y)` (never below the sea).
     fn surface_world(&self, x: f32, y: f32) -> f32 {
         self.height_m(x, y).max(0.0) * HEIGHT_SCALE

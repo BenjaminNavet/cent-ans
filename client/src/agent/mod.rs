@@ -103,7 +103,8 @@ impl Plugin for AgentPlugin {
         .register_dump(dump_state)
         .register_dump(dump_entities)
         .register_dump(dump_frame)
-        .add_systems(Last, drive);
+        .add_systems(Last, drive)
+        .add_systems(Update, hide_named);
         bench::add(app, cli);
         // With `dev`, BrpExtrasPlugin (devtools) installs the same transport with a chosen port.
         #[cfg(all(feature = "remote", not(feature = "dev")))]
@@ -379,3 +380,73 @@ pub fn key_code(name: &str) -> Option<KeyCode> {
         .copied()
         .find(|key| format!("{key:?}").eq_ignore_ascii_case(name))
 }
+
+/// Dev hook for visual A/B checks: `CENT_ANS_HIDE=<sub>,<sub>…` hides every entity whose `Name`
+/// contains one of the substrings; `CENT_ANS_HIDE=?` logs the distinct names of the drawn meshes
+/// once (`AGENT_MESH_NAMES`).
+fn hide_named(
+    mut commands: Commands,
+    named: Query<(Entity, &Name, Has<Mesh3d>), Without<HiddenByAgent>>,
+    mut hidden: Query<&mut Visibility, With<HiddenByAgent>>,
+    mut listed: Local<u32>,
+) {
+    let Ok(spec) = std::env::var("CENT_ANS_HIDE") else {
+        return;
+    };
+    if spec == "?" {
+        *listed += 1;
+        if *listed == 600 {
+            let mut names: std::collections::BTreeMap<String, usize> = Default::default();
+            for (_, name, mesh) in &named {
+                if mesh {
+                    *names.entry(name.as_str().to_owned()).or_default() += 1;
+                }
+            }
+            info!("AGENT_MESH_NAMES {names:?}");
+            commands.queue(|world: &mut World| {
+                let mut kinds: std::collections::BTreeMap<String, usize> = Default::default();
+                let mut query = world.query_filtered::<Entity, (With<Mesh3d>, Without<Name>)>();
+                let entities: Vec<Entity> = query.iter(world).collect();
+                for entity in entities {
+                    let Ok(cell) = world.get_entity(entity) else {
+                        continue;
+                    };
+                    let mut parts: Vec<String> = cell
+                        .archetype()
+                        .components()
+                        .iter()
+                        .filter_map(|id| world.components().get_name(*id))
+                        .map(|n| n.shortname().to_string())
+                        .filter(|n| n.starts_with("MeshMaterial3d") || !n.contains("Transform") && !n.contains("Visib") && !n.contains("Aabb"))
+                        .collect();
+                    parts.sort();
+                    *kinds.entry(parts.join("+")).or_default() += 1;
+                }
+                info!("AGENT_UNNAMED_MESHES {kinds:#?}");
+            });
+        }
+        return;
+    }
+    let parts: Vec<&str> = spec
+        .split(',')
+        .map(str::trim)
+        .filter(|p| !p.is_empty())
+        .collect();
+    // Sticky: systems that re-show their entities (terrain LOD rebuilds) must not undo it.
+    for mut visibility in &mut hidden {
+        if *visibility != Visibility::Hidden {
+            *visibility = Visibility::Hidden;
+        }
+    }
+    for (entity, name, _) in &named {
+        if parts.iter().any(|p| name.as_str().contains(p)) {
+            commands
+                .entity(entity)
+                .try_insert((Visibility::Hidden, HiddenByAgent));
+        }
+    }
+}
+
+/// Marks the entities hidden by [`hide_named`].
+#[derive(Component)]
+struct HiddenByAgent;

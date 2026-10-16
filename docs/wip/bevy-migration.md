@@ -3,7 +3,30 @@
 Mandat (14/10 au soir) : nuit en autonomie complète, largeur maximale avec de nombreux agents Sonnet
 contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; architecture : ADR 0357.
 
-## REPRISE — pause du 15/10 ~15 h (limite hebdomadaire Claude Code)
+## REPRISE — pause du 16/10 ~12 h (demandée par le joueur)
+- Budget joueur (16/10) : 20 agents Sonnet + 10 Opus en parallèle au plus ; des agents Opus fusionnent par fournées.
+- Outils : recopier `docs/wip/bm-outils/*` dans le scratchpad de la session (le dossier temporaire a déjà été
+  effacé une fois) ; corriger le chemin `S=` de merge_brief.md ; `wave8.md` = ajouts de consigne de la vague 8 ;
+  `m8check.sh` (clippy puis tests, codes dans <préfixe>.rc) et `m8rm.sh` (nettoyage contrôlé) pour bm/merge8.
+- **showfix** (Opus, travaille DIRECTEMENT dans gp-bevy, commits 96a1fce94, 5c46a51f0, f915a9f3c non compilé) :
+  note `docs/wip/bm-showfix.md`. Le « 2/255 » était un faux problème (comparaison de deux captures déjà
+  post-fusion ; contre la réf. de 08 h 24 l'écart est 40-74/255). Rivières enterrées de 10-25 m à d=60, cause
+  racine non trouvée (prochaine étape précise dans la note) ; toits coniques des tours de siège corrigés, non
+  vérifiés ; ciel de bataille blanc et arbres proches pâles non traités ; recaptures non faites.
+- **Vague 8** (13 lots Sonnet, tous FINIS, `.bm-ready`, worktrees `../gp-bm-<lot>` intacts) :
+  setbattle (FUSIONNÉ dans bm/merge8, d04fd675e), diplo6, fxsmoke, naval2, bhud6, uisound2, setcamp, flowinteg,
+  uileft2, uiimg2 (touche core sim-campaign), access, econ2, council2. Rapports résumés dans les notes bm-<lot>.md.
+- Fusion : branche intermédiaire `bm/merge8` (worktree `../gp-bm-merge8`, target chaud) pour ne pas gêner showfix
+  dans gp-bevy. Reprendre : un agent de fusion Opus fusionne les 12 lots restants dans merge8 (fournées de 4),
+  puis `bm/merge8` → `bevy-migration` quand showfix a fini. Conflits attendus : advisor.rs (bhud6/setbattle),
+  audio/battle.rs (uisound2/setbattle), armies/mod.rs (fxsmoke/setcamp), panels/diplomacy/mod.rs
+  (diplo6/uisound2), hud/minimap.rs (econ2/uileft2).
+- Ensuite : vague visuelle (végétation, parchemin, villes, eau, ciel, bvis4…) selon showfix ; restes listés dans
+  bm-restes.md et dans chaque bm-<lot>.md ; puis recaptures 8 scènes → écarts au joueur → banc calme → pilote →
+  bascule. Jamais de push. Machine très chargée pendant la vague (charge ~110, clippy à froid 19 min) : 13 lots
+  en parallèle, c'est la limite pratique.
+
+## (ancienne) REPRISE — pause du 15/10 ~15 h (limite hebdomadaire Claude Code)
 - Tout est fusionné dans `bevy-migration` (HEAD `ac91341f1` + ce commit), aucun worktree
   `gp-bm-*`, aucun agent ni verrou. 1029 tests verts, smoke vert (muet). Jamais poussé.
 - Vague « parité visuelle » finie : campvis2-4, bvis1-3, vegvis, weather4, water3, campwater,
