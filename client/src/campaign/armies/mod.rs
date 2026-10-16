@@ -29,6 +29,7 @@ pub mod sea;
 pub mod skinned;
 pub mod standard;
 mod views;
+pub mod zoc;
 
 use bevy::prelude::*;
 use sim_campaign::ArmyId;
@@ -65,6 +66,8 @@ impl Plugin for CampaignArmiesPlugin {
             .init_resource::<OrderLog>()
             .init_resource::<orders::PathPreviewState>()
             .init_resource::<orders::Reachable>()
+            .insert_resource(zoc::ZocTuning::load())
+            .init_resource::<zoc::ZocRings>()
             .init_resource::<orders::Ripples>()
             .init_resource::<orders::ReliefTick>()
             .init_resource::<bubble::BubbleHandles>()
@@ -126,6 +129,12 @@ impl Plugin for CampaignArmiesPlugin {
                         .chain(),
                 )
                     .chain()
+                    .run_if(in_state(AppState::Campaign)),
+            )
+            .add_systems(
+                Update,
+                zoc::draw_zoc
+                    .after(orders::draw_overlays)
                     .run_if(in_state(AppState::Campaign)),
             )
             .add_systems(
