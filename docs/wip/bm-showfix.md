@@ -13,6 +13,13 @@
 - Toits des tours de siège plats : cône de hauteur fixe 5 m, rayon ×1,25, tuile ; Godot : hauteur r×1,55, ardoise
   sombre, une tour sur deux (autres crénelées) — défaut de portage dans `battle/siege/works.rs`.
 
+- Suite (16/10) : le re-calage sur les pages fines (`water/reseat.rs`, max des niveaux résidents) ne déplace les
+  sommets que de 0,3 m : les rubans étaient déjà sur les bonnes hauteurs CPU. Densifier les rivières (0,5 px) et
+  creuser le lit dans le terrain proche (`river_carve`, port de `river_banks.gdshaderinc`) n'en font réapparaître
+  qu'un peu (3 000 px bleus contre 19 000 avec +0,15 de levée). Hypothèse en cours : un autre maillage (zones
+  humides, surcouches) couvre la rivière ; crochet `CENT_ANS_HIDE=<sous-chaîne>` (agent) pour le vérifier.
+- Tours de siège : cône d'ardoise r×1,55 une tour sur deux, merlons sinon, corbeau (`works.rs`), dump `tower_roofs`.
+
 ## Prochaine étape
 - Corriger le calage des rivières (hauteur au shader depuis la même source que le terrain, ou recuisson quand les
   pages fines arrivent) ; toits coniques ; arbres pâles ; recaptures + écarts par vue.

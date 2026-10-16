@@ -179,6 +179,8 @@ pub struct SiegeStats {
     pub street_quads: usize,
     pub atlas_pieces: usize,
     pub atlas_towers: usize,
+    /// Towers crowned with a slate cone (one out of two, the others crenellated).
+    pub tower_roofs: usize,
     pub atlas_house_vertices: usize,
     pub breaches: usize,
     pub collapses_played: usize,
@@ -542,7 +544,7 @@ fn dump_siege(world: &World) -> (String, serde_json::Value) {
             })).collect::<Vec<_>>(),
             "render": {
                 "structure_pieces": stats.pieces, "towers": stats.towers, "houses": stats.houses,
-                "street_quads": stats.street_quads, "atlas_pieces": stats.atlas_pieces, "atlas_towers": stats.atlas_towers, "atlas_house_vertices": stats.atlas_house_vertices,
+                "street_quads": stats.street_quads, "atlas_pieces": stats.atlas_pieces, "atlas_towers": stats.atlas_towers, "tower_roofs": stats.tower_roofs, "atlas_house_vertices": stats.atlas_house_vertices,
                 "breaches_played": stats.collapses_played, "scars": stats.scars,
                 "engine_models": stats.engine_models, "engine_models_loaded": stats.engine_models_loaded, "engine_ga3": stats.engine_ga3, "stone_walls": stats.stone_walls, "engine_files": stats.engine_files,
                 "particles_spawned": stats.particles_spawned, "fire_emitters_started": stats.fires_started, "bars": stats.bars,

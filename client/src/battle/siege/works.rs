@@ -371,7 +371,6 @@ fn build_works(
         ..AtlasStyle::default()
     };
     let planks = atlas.layer("Planks");
-    let roof_tile = atlas.layer("RoofTile");
     let door_mat = atlas.material(&mut atlas_materials, &wall_style(planks, Vec3::ONE));
     let rubble_mat = atlas.material(
         &mut atlas_materials,
@@ -535,7 +534,14 @@ fn build_works(
         &mut atlas_materials,
         &wall_style(masonry, Vec3::splat(0.95)),
     );
-    let roof_mat = atlas.material(&mut atlas_materials, &wall_style(roof_tile, Vec3::ONE));
+    // Slate cones, darker than the house roofs (`battle_siege.gd`: slate 0.55/0.56/0.60, roughness
+    // 0.75), on one tower out of two; the others get a crenellated platform.
+    let roof_slate = atlas.layer("RoofSlate");
+    let roof_mat = atlas.material(
+        &mut atlas_materials,
+        &wall_style(roof_slate, Vec3::new(0.55, 0.56, 0.60)),
+    );
+    let merlon_mesh = meshes.add(Cuboid::new(0.9, 1.3, 0.7));
     for tower in &works.towers {
         let base = ground(tower.x, tower.z) - 1.4;
         let top = ground(tower.x, tower.z) + tower.height as f32;
@@ -550,13 +556,58 @@ fn build_works(
             Some(set) => tower_entity.insert(MeshMaterial3d(set.0[0].clone())),
             None => tower_entity.insert(MeshMaterial3d(tower_mat.clone())),
         };
-        commands.spawn((
-            Name::new("SiegeTowerRoof"),
-            Mesh3d(meshes.add(Cone::new(radius * 1.25, 5.0).mesh().resolution(12))),
-            MeshMaterial3d(roof_mat.clone()),
-            Transform::from_xyz(tower.x as f32, top + 2.5, tower.z as f32),
-            scope.clone(),
-        ));
+        // `_build_tower`: corbel ring, then a proportioned cone (height r x 1.55) above a parapet
+        // ring, or merlons around the platform.
+        let (tx, tz) = (tower.x as f32, tower.z as f32);
+        let corbel = Cylinder::new(radius * 1.14, 1.4).mesh().resolution(14);
+        let corbel = commands
+            .spawn((
+                Name::new("SiegeTowerCorbel"),
+                Mesh3d(meshes.add(corbel)),
+                Transform::from_xyz(tx, top - 0.2, tz),
+                scope.clone(),
+            ))
+            .id();
+        match &stone {
+            Some(set) => commands
+                .entity(corbel)
+                .insert(MeshMaterial3d(set.0[0].clone())),
+            None => commands
+                .entity(corbel)
+                .insert(MeshMaterial3d(tower_mat.clone())),
+        };
+        let roofed = ((tower.x * 7.0 + tower.z * 13.0).abs() as i64) % 2 == 0;
+        if roofed {
+            let cone_h = radius * 1.55;
+            commands.spawn((
+                Name::new("SiegeTowerRoof"),
+                Mesh3d(meshes.add(Cone::new(radius * 1.12, cone_h).mesh().resolution(14))),
+                MeshMaterial3d(roof_mat.clone()),
+                Transform::from_xyz(tx, top + 1.5 + cone_h * 0.5, tz),
+                scope.clone(),
+            ));
+            stats.tower_roofs += 1;
+        } else {
+            let count = ((std::f32::consts::TAU * radius * 1.1 / 2.0) as usize).max(6);
+            for i in 0..count {
+                let a = std::f32::consts::TAU * i as f32 / count as f32;
+                let mut merlon = commands.spawn((
+                    Name::new("SiegeTowerMerlon"),
+                    Mesh3d(merlon_mesh.clone()),
+                    Transform::from_xyz(
+                        tx + a.cos() * radius * 1.08,
+                        top + 1.1,
+                        tz + a.sin() * radius * 1.08,
+                    )
+                    .with_rotation(Quat::from_rotation_y(-a)),
+                    scope.clone(),
+                ));
+                match &stone {
+                    Some(set) => merlon.insert(MeshMaterial3d(set.0[0].clone())),
+                    None => merlon.insert(MeshMaterial3d(tower_mat.clone())),
+                };
+            }
+        }
         stats.towers += 1;
         stats.atlas_towers += 1;
     }
