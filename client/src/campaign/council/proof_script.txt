@@ -1,0 +1,9 @@
+# Proof of hover / card / click of the council room (no real cursor needed):
+# CENT_ANS_NO_BRIEFING=1 CENT_ANS_COUNCIL_AUTOHOVER=chancellor CENT_ANS_COUNCIL_AUTOCLICK=1 \
+#   CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug client/run_bg.sh --state Campaign --offscreen --script client/src/campaign/council/proof_script.txt
+state Campaign
+wait 200
+click hud:open_council
+wait 150
+dump out/council2.json
+exit
