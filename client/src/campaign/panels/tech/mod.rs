@@ -788,6 +788,7 @@ fn handle_buttons(
     mut sim: ResMut<Sim>,
     keys: Res<ButtonInput<KeyCode>>,
     mut toasts: MessageWriter<ToastRequest>,
+    mut sfx: MessageWriter<crate::audio::PlaySfx>,
 ) {
     for tab in tabs.read() {
         if tab.group == TAB_GROUP
@@ -846,9 +847,11 @@ fn handle_buttons(
                 panel.last_order =
                     format!("{} {}", if queue { "queue" } else { "research" }, node.id);
                 panel.dirty = true;
+                sfx.write(crate::audio::PlaySfx::new("ui_order"));
             }
             Err(error) => {
                 panel.last_order = format!("refused {}: {error}", node.id);
+                sfx.write(crate::audio::PlaySfx::new("ui_order_refused"));
                 toasts.write(ToastRequest::new(&error.to_string()));
             }
         }

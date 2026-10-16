@@ -258,6 +258,7 @@ fn handle_presses(
     mut sim: ResMut<Sim>,
     mut panels: MessageWriter<OpenPanel>,
     mut select: MessageWriter<crate::campaign::provinces::SelectProvince>,
+    mut sfx: MessageWriter<crate::audio::PlaySfx>,
 ) {
     for tab in tabs.read() {
         match tab.group.as_str() {
@@ -283,7 +284,14 @@ fn handle_presses(
             }
             continue;
         }
-        press_button(name, &mut ui, &mut sim);
+        if let Some(event) = crate::audio::uisound::panel_sound(
+            &mut ui,
+            |ui| &mut ui.result,
+            |result| result.ok,
+            |ui| press_button(name, ui, &mut sim),
+        ) {
+            sfx.write(crate::audio::PlaySfx::new(event));
+        }
     }
 }
 

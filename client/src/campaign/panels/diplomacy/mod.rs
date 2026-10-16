@@ -426,6 +426,7 @@ fn handle_presses(
     mut ui: ResMut<DiplomacyUi>,
     mut sim: ResMut<Sim>,
     mut wars: MessageWriter<AskWarDeclaration>,
+    mut sfx: MessageWriter<crate::audio::PlaySfx>,
 ) {
     for tab in tabs.read() {
         if tab.group == "dip_tab" {
@@ -443,7 +444,14 @@ fn handle_presses(
         if name == "search" || name.starts_with("amount:") {
             continue;
         }
-        press_button(name, &mut ui, &mut sim);
+        if let Some(event) = crate::audio::uisound::panel_sound(
+            &mut ui,
+            |ui| &mut ui.result,
+            |result| result.ok,
+            |ui| press_button(name, ui, &mut sim),
+        ) {
+            sfx.write(crate::audio::PlaySfx::new(event));
+        }
         if let Some(target) = ui.ask_war.take() {
             wars.write(AskWarDeclaration {
                 target,
