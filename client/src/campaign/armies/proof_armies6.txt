@@ -1,0 +1,37 @@
+# Proof of the armies6 lot: army list with seals and gauges, Tab walks the rows, the bubble mask,
+# then three end of turns (ghost memory, sails when a fleet is at sea).
+# CENT_ANS_OPEN_ROSTER=1 CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug \
+#   client/run_bg.sh --state Campaign --script client/src/campaign/armies/proof_armies6.txt
+wait 90
+dump out/armies6_a.json
+key Tab
+wait 40
+dump out/armies6_b.json
+click hud:end_turn
+wait 10
+click Confirmer
+wait 300
+dump out/armies6_t1.json
+key Escape
+wait 40
+key Escape
+wait 10
+click hud:end_turn
+wait 10
+click Confirmer
+wait 300
+dump out/armies6_t2.json
+key Escape
+wait 40
+key Escape
+wait 10
+click hud:end_turn
+wait 10
+click Confirmer
+wait 300
+dump out/armies6_t3.json
+key Escape
+wait 40
+key Escape
+wait 10
+exit

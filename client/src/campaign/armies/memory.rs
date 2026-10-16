@@ -258,6 +258,42 @@ mod tests {
     }
 
     #[test]
+    fn one_label_per_ghost_and_gone_with_it() {
+        let seen = |men| Seen {
+            faction: "fac_england".into(),
+            general_name: String::new(),
+            point: Vec2::new(10.0, 20.0),
+            men,
+            turn: 1,
+        };
+        let mut app = App::new();
+        app.init_resource::<Ghosts>()
+            .init_resource::<GhostStats>()
+            .add_systems(Update, sync_labels);
+        app.world_mut().resource_mut::<Ghosts>().0 =
+            vec![("army_1".into(), seen(1200)), ("army_2".into(), seen(300))];
+        app.update();
+        let count = |app: &mut App| {
+            app.world_mut()
+                .query::<&GhostLabel>()
+                .iter(app.world())
+                .count()
+        };
+        assert_eq!(count(&mut app), 2);
+        assert_eq!(app.world().resource::<GhostStats>().labels, 2);
+        app.world_mut().resource_mut::<Ghosts>().0 = vec![("army_2".into(), seen(250))];
+        app.update();
+        assert_eq!(count(&mut app), 1);
+        let texts: Vec<String> = app
+            .world_mut()
+            .query::<&Text>()
+            .iter(app.world())
+            .map(|t| t.0.clone())
+            .collect();
+        assert_eq!(texts, vec![label_text(250)]);
+    }
+
+    #[test]
     fn ghost_bubble_is_the_last_known_situation() {
         let text = army_text(&ArmyBubble {
             general_name: "Édouard".into(),

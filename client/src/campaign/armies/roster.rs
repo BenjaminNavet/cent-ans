@@ -636,6 +636,7 @@ fn small_text(theme: &UiTheme, content: &str, size: f32, color: Color) -> impl B
 }
 
 /// One pictogram chip with its tooltip; boxed (rubric frame) for alerts.
+#[allow(clippy::too_many_arguments)]
 fn spawn_chip(
     line: &mut ChildSpawnerCommands,
     theme: &UiTheme,

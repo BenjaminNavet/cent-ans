@@ -13,3 +13,7 @@ Branche `bm/armies6` (base 7ec9a21cf), dossiers `client/src/campaign/armies/` + 
 - Les pastilles fantômes sont en UI projetée (taille fixe), pas en `Label3D` à taille dépendante de la distance.
 - Pictogrammes `hud_infantry` absents du jeu d'icônes ink : lettres de repli (`·`, `▾`).
 - Bulle non suspendue pendant la fin de tour / le rejeu IA (comme avant ce lot).
+
+## Preuve (16/10)
+`proof_armies6.txt` (3 tours, hors écran, muet) : tour 0 liste ouverte 1 ost / 1 sceau portrait, Tab -> `army_0052` sélectionnée, bulle 8 448 quads, masque 638x699 texels, 10 niveaux de mips, aucune erreur GPU ; tours 1-3 sans panique. Aucune armée hostile en vue sur ces 3 tours (0 fantôme) et aucune flotte en mer (0 voile) : fantômes couverts par test (`memory.rs`, `parchment/extras.rs`), voiles non exercées en jeu. `cargo test --features dev` 1134 ok, `cargo test -p game-api` 73 ok, clippy propre.
+Hors dossier : `parchment/extras.rs` (`Seen.general_name`), `camera/focus.rs` (Tab cédé à la liste), `core/crates/game-api` (vue `reach`).
