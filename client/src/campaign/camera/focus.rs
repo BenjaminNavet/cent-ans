@@ -58,11 +58,16 @@ pub fn hotkeys(
     followed: Res<FollowedArmy>,
     sim: Res<Sim>,
     map: Option<Res<ProvinceMap>>,
+    roster: Option<Res<crate::campaign::armies::roster::Roster>>,
     mut last_province: Local<Option<String>>,
     mut requests: MessageWriter<FocusCamera>,
 ) {
-    let next_idle = keymap.just_pressed("campaign_next_idle", &keys);
-    let prev_idle = keymap.just_pressed("campaign_prev_idle", &keys);
+    // The open army list takes Tab / Shift+Tab to walk its rows (`roster::tab_cycle`).
+    let list_cycle = roster
+        .as_ref()
+        .is_some_and(|r| r.open && !r.army_ids.is_empty());
+    let next_idle = !list_cycle && keymap.just_pressed("campaign_next_idle", &keys);
+    let prev_idle = !list_cycle && keymap.just_pressed("campaign_prev_idle", &keys);
     let next_settlement = keymap.just_pressed("campaign_next_settlement", &keys);
     if next_idle || prev_idle || next_settlement {
         if next_settlement {

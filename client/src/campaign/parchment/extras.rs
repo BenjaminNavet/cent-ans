@@ -70,6 +70,8 @@ pub fn refresh_cues(
 #[derive(Debug, Clone, PartialEq)]
 pub struct Seen {
     pub faction: String,
+    /// Name of the commander when last seen (empty: none), for the hover bubble of the ghost.
+    pub general_name: String,
     pub point: Vec2,
     pub men: u32,
     pub turn: u32,
@@ -162,6 +164,16 @@ pub fn update_memory(
                 &id,
                 Seen {
                     faction: view.faction.to_string(),
+                    general_name: sim
+                        .data
+                        .as_ref()
+                        .zip(view.general.as_deref())
+                        .and_then(|(data, id)| {
+                            data_model::CharacterId::new(id)
+                                .ok()
+                                .map(|id| state.character_name(data, &id))
+                        })
+                        .unwrap_or_default(),
                     point: Vec2::from(view.point),
                     men: view.men,
                     turn,
@@ -521,6 +533,7 @@ mod tests {
     fn seen(turn: u32) -> Seen {
         Seen {
             faction: "fac_england".into(),
+            general_name: String::new(),
             point: Vec2::new(10.0, 20.0),
             men: 1200,
             turn,

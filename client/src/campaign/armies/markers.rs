@@ -198,10 +198,11 @@ fn spawn_figures(
     assets: &AssetServer,
     specs: &[FigureSpec],
     color: Color,
+    faction: &str,
 ) {
     for spec in specs {
         let scene = assets.load(GltfAssetLabel::Scene(0).from_asset(spec.path));
-        root.spawn((
+        let mut figure = root.spawn((
             Name::new("Figure"),
             ArmyFigure { path: spec.path },
             Livery(color),
@@ -212,6 +213,12 @@ fn spawn_figures(
                 scale: Vec3::splat(spec.scale),
             },
         ));
+        if spec.path.contains("fleet/cog") {
+            figure.insert(super::sail::SailArms {
+                faction: faction.to_owned(),
+                color,
+            });
+        }
         // Fire of the camp: a thin smoke column over the hearth.
         if let Some(smoke) =
             super::camp_smoke::camp_smoke_bundle(spec.path, spec.offset, spec.scale)
@@ -277,7 +284,9 @@ pub fn sync_markers(
             commands
                 .entity(entity)
                 .despawn_related::<Children>()
-                .with_children(|root| spawn_figures(root, &assets, &specs, color));
+                .with_children(|root| {
+                    spawn_figures(root, &assets, &specs, color, view.faction.as_str())
+                });
             continue;
         }
         commands
@@ -305,7 +314,9 @@ pub fn sync_markers(
                 Visibility::default(),
                 DespawnOnExit(AppState::Campaign),
             ))
-            .with_children(|root| spawn_figures(root, &assets, &specs, color));
+            .with_children(|root| {
+                spawn_figures(root, &assets, &specs, color, view.faction.as_str())
+            });
         if have_plate.insert(view.id.clone()) {
             spawn_plate(&mut commands, view);
         }
