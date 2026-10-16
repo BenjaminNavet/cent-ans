@@ -106,6 +106,8 @@ pub enum FlipbookKind {
     Smoke,
     /// Campaign flame: upright, time driven in the shader, flickers.
     StaticFlame,
+    /// Embers (`fire_ember.gdshader`): small glowing sparks, additive, fading from hot to cold.
+    Ember,
 }
 
 impl FlipbookKind {
@@ -114,6 +116,7 @@ impl FlipbookKind {
             FlipbookKind::Flame => "flame",
             FlipbookKind::Smoke => "smoke",
             FlipbookKind::StaticFlame => "static_flame",
+            FlipbookKind::Ember => "ember",
         }
     }
     fn mode(self) -> f32 {
@@ -121,6 +124,7 @@ impl FlipbookKind {
             FlipbookKind::Flame => 0.0,
             FlipbookKind::Smoke => 1.0,
             FlipbookKind::StaticFlame => 2.0,
+            FlipbookKind::Ember => 3.0,
         }
     }
 }
@@ -161,6 +165,7 @@ impl Material for FlipbookMaterial {
     fn alpha_mode(&self) -> AlphaMode {
         match self.kind.0 {
             FlipbookKind::Smoke => AlphaMode::Blend,
+            FlipbookKind::Ember => AlphaMode::Add,
             _ => AlphaMode::Premultiplied,
         }
     }
@@ -215,6 +220,9 @@ pub struct FlipbookData {
     pub smoke_young_density: f32,
     pub smoke_wind_drift: f32,
     pub flame_height_m: f32,
+    /// Embers rising from the fires (`embers` of `siege_fire.json`) and their HDR energy.
+    pub ember: EmitterSpec,
+    pub ember_energy: f32,
     /// `fx/map_fire_wind.json` `fire`: campaign flame.
     pub map_frames: [u32; 2],
     pub map_loops_per_s: f32,
@@ -253,6 +261,15 @@ impl Default for FlipbookData {
             smoke_young_density: 1.0,
             smoke_wind_drift: 3.5,
             flame_height_m: 7.5,
+            ember: EmitterSpec {
+                amount: 36.0,
+                life: 3.0,
+                size: [0.12, 0.3],
+                velocity: [3.0, 7.0],
+                spread_m: 4.0,
+                loops: 0.0,
+            },
+            ember_energy: 6.0,
             map_frames: [8, 8],
             map_loops_per_s: 0.55,
             map_emission: 2.6,
@@ -302,6 +319,8 @@ impl FlipbookData {
         number(&siege["flame_height_m"], &mut data.flame_height_m);
         emitter(&siege["flames"], &mut data.flame);
         emitter(&siege["smoke"], &mut data.smoke);
+        emitter(&siege["embers"], &mut data.ember);
+        number(&siege["embers"]["energy"], &mut data.ember_energy);
         let mut hot4 = [data.flame_hot[0], data.flame_hot[1], data.flame_hot[2], 1.0];
         floats(&siege["flames"]["color_start"], &mut hot4);
         data.flame_hot = [hot4[0], hot4[1], hot4[2]];
@@ -370,6 +389,8 @@ pub struct FlipbookLooks {
     pub smoke: Handle<FlipbookMaterial>,
     /// Campaign map flame (`map_fire_wind.json`).
     pub map_flame: Handle<FlipbookMaterial>,
+    /// Embers of the fires (`fire_ember.gdshader`).
+    pub ember: Handle<FlipbookMaterial>,
     /// Image counts of the sheets: (flame, smoke, map flame).
     pub totals: [u32; 3],
     /// Parameters and sheet of the smoke look, the base of the tinted variants.
@@ -382,6 +403,11 @@ pub struct FlipbookLooks {
 }
 
 impl FlipbookLooks {
+    /// Sprites alive (refreshed every frame): lets a producer leave room for the fires.
+    pub fn live(&self) -> usize {
+        self.live
+    }
+
     /// The smoke material of a colour (`smoke_color` of `fire_smoke.gdshader`: sRGB rgb, alpha =
     /// base opacity), created on first use.
     pub fn smoke_tint(
@@ -471,6 +497,52 @@ pub fn spawn_smoke_sprite(
     )
 }
 
+/// One flame or ember sprite outside any emitter (fire arrows, impact sparks): `kind` is
+/// [`FlipbookKind::Flame`] or [`FlipbookKind::Ember`]. `None` when the particle budget is full.
+pub fn spawn_fire_sprite(
+    commands: &mut Commands,
+    looks: &mut FlipbookLooks,
+    kind: FlipbookKind,
+    sprite: &SmokeSprite,
+    phase_offset: f32,
+) -> Option<Entity> {
+    if looks.live >= MAX_PARTICLES {
+        return None;
+    }
+    looks.live += 1;
+    let (material, lift, loops) = match kind {
+        FlipbookKind::Ember => (looks.ember.clone(), 0.0, 0.0),
+        _ => (looks.flame.clone(), 0.45, 1.5),
+    };
+    Some(
+        commands
+            .spawn((
+                Name::new("FlipbookParticle"),
+                FlipbookParticle {
+                    kind,
+                    age: 0.0,
+                    life: sprite.life.max(0.05),
+                    position: sprite.position,
+                    velocity: sprite.velocity,
+                    accel: sprite.accel,
+                    damping: sprite.damping,
+                    size: sprite.size,
+                    lift,
+                    loops,
+                    offset: phase_offset,
+                    spin: 0.0,
+                    spin_rate: 0.0,
+                },
+                Mesh3d(looks.quad.clone()),
+                MeshMaterial3d(material),
+                MeshTag::new(0),
+                Transform::from_translation(sprite.position).with_scale(Vec3::splat(1e-3)),
+                bevy::light::NotShadowCaster,
+            ))
+            .id(),
+    )
+}
+
 fn build_looks(
     mut commands: Commands,
     data: Res<FlipbookData>,
@@ -533,6 +605,17 @@ fn build_looks(
         core: rgb(mc[3]),
         smoke: zero,
     };
+    // Ember: colours of `fire_ember.gdshader` (hot orange to dark red), energy from the data.
+    let ember = FlipbookParams {
+        frames: Vec4::new(1.0, 1.0, FlipbookKind::Ember.mode(), 0.0),
+        shape: Vec4::new(data.ember_energy, 1.0, 1.0, 0.0),
+        extra: Vec4::new(1.0, 1.0, 0.0, 0.0),
+        cold: rgb([0.6, 0.08, 0.0]),
+        mid: zero,
+        hot: rgb([1.0, 0.62, 0.2]),
+        core: zero,
+        smoke: zero,
+    };
     let smoke_sheet = sheet(SMOKE_SHEET.to_owned());
     commands.insert_resource(FlipbookLooks {
         quad: meshes.add(Rectangle::new(1.0, 1.0)),
@@ -550,6 +633,11 @@ fn build_looks(
             params: map_flame,
             sheet: sheet(data.map_sheet.clone()),
             kind: FlipbookKindTag(FlipbookKind::StaticFlame),
+        }),
+        ember: materials.add(FlipbookMaterial {
+            params: ember,
+            sheet: sheet(SMOKE_SHEET.to_owned()),
+            kind: FlipbookKindTag(FlipbookKind::Ember),
         }),
         totals: [64, 64, data.map_frames[0] * data.map_frames[1]],
         smoke_base: smoke,
@@ -596,6 +684,25 @@ impl FlipbookEmitter {
             accel: Vec3::Y * 0.5,
             damping: [0.0, 0.0],
             lift: 0.45,
+            active: true,
+            carry: 0.0,
+            serial: 0,
+            tint: None,
+        }
+    }
+
+    /// Ember emitter as built by `_make_embers`: sparks climbing in a 35 degree cone that the wind
+    /// carries off (`wind` is the horizontal drift acceleration).
+    pub fn embers(data: &FlipbookData, radius: f32, wind: Vec3) -> Self {
+        let mut spec = data.ember.clone();
+        spec.spread_m = radius * 0.7;
+        FlipbookEmitter {
+            kind: FlipbookKind::Ember,
+            spec,
+            ratio: 1.0,
+            accel: Vec3::Y * 0.4 + wind * 0.8,
+            damping: [0.5, 1.2],
+            lift: 0.0,
             active: true,
             carry: 0.0,
             serial: 0,
@@ -685,7 +792,12 @@ fn emit(
             } else {
                 dir
             } * spec.spread_m;
-            let tilt = 15f32.to_radians() * r(3);
+            let cone = if emitter.kind == FlipbookKind::Ember {
+                35f32
+            } else {
+                15f32
+            };
+            let tilt = cone.to_radians() * r(3);
             let around = r(4) * TAU;
             let heading = Vec3::new(
                 tilt.sin() * around.cos(),
@@ -700,6 +812,7 @@ fn emit(
                     (looks.smoke_tint(color, &mut materials), FlipbookKind::Smoke)
                 }
                 (FlipbookKind::Smoke, None) => (looks.smoke.clone(), FlipbookKind::Smoke),
+                (FlipbookKind::Ember, _) => (looks.ember.clone(), FlipbookKind::Ember),
                 _ => (looks.flame.clone(), FlipbookKind::Flame),
             };
             let loops = spec.loops * (0.8 + 0.4 * r(7));
@@ -757,6 +870,7 @@ fn advance(
         p.spin += p.spin_rate * dt;
         let (size, value, second) = match p.kind {
             FlipbookKind::Smoke => (p.size * smoke_growth(t), t, 0.0),
+            FlipbookKind::Ember => (p.size, t, 0.0),
             _ => (p.size, flame_phase(t, p.loops, p.offset), t),
         };
         transform.translation = p.position + Vec3::Y * size * p.lift;
@@ -820,7 +934,7 @@ fn count_sprites(
         if stats.sample_frames.len() < 6 {
             let (v, _, _) = unpack_tag(tag.value);
             let (a, b, w) = match p.kind {
-                FlipbookKind::Smoke => smoke_frames(v, total),
+                FlipbookKind::Smoke | FlipbookKind::Ember => smoke_frames(v, total),
                 _ => loop_frames(v, total),
             };
             stats

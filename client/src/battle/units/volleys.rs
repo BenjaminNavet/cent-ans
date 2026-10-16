@@ -5,15 +5,25 @@
 //!
 //! Port of game/scripts/battle/battle_volleys.gd (`on_shot`, `arrow_landing`, the constants of
 //! `battle_volley.gdshaderinc`). The GPU path of the shader is a CPU parabola here, the stuck
-//! layer is a ring buffer of oriented records. Not ported: fire arrows' flames, the stakes and
-//! pavises drawn in front of regiments, the sounds (`sound_event`: the audio lot reads the
-//! [`ShotFeed`]), missiles that stay planted for `STICK_HOLD` seconds before fading (those are
-//! removed at landing, only the sampled share stays).
+//! layer is a ring buffer of oriented records.
+//!
+//! Fire arrows (`incendiary` shots of siege attackers): a share of the volley (at most
+//! `FIRE_ARROWS_PER_VOLLEY`) carries a flame, drawn as flipbook flame sprites shed along the
+//! path and a small fire where each one lands (Godot draws a flame panel on every arrow).
+//! Stakes (`stakes` of the core: archers who stood still) and planted pavises (`pavise_cover`)
+//! are drawn in front of the regiments and stay for the battle ([`Fieldworks`], `update_fieldworks`
+//! and the meshes of `_stake_mesh` / `_pavise_mesh`).
+//!
+//! Not ported: the sounds (`sound_event`: the audio lot reads the [`ShotFeed`]), missiles that
+//! stay planted for `STICK_HOLD` seconds before fading (those are removed at landing, only the
+//! sampled share stays), the ribbon trail of arrows (the oriented batch has no alpha).
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use bevy::prelude::*;
-use sim_battle::{BattleSim, MissileKind, ShotCover, ShotEvent};
+use data_model::Ability;
+use sim_battle::{BattleSim, MissileKind, ShotCover, ShotEvent, SideId, UnitState};
 
 use super::corpses::hash4;
 use super::instancing::MaterialParams;
@@ -23,6 +33,7 @@ use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::BattleCamera;
+use crate::fx::flipbook::{FlipbookKind, FlipbookLooks, SmokeSprite, spawn_fire_sprite};
 
 /// Missiles drawn per simulated man and per volley.
 const ARROWS_PER_MAN: f32 = 3.0;
@@ -52,7 +63,19 @@ pub struct ShotFeed {
     pub shots: Vec<ShotEvent>,
 }
 
+/// Fire arrows of one volley that burn (a flame panel on each in Godot).
+const FIRE_ARROWS_PER_VOLLEY: usize = 24;
+/// Seconds between two flame sprites shed by a burning arrow, and the life of one.
+const FLAME_EVERY_S: f32 = 0.1;
+const FLAME_LIFE_S: f32 = 0.35;
+/// The fire where a burning arrow stands (s), and the flipbook budget kept for the fires.
+const LANDED_FIRE_S: f32 = 2.5;
+const FLAME_SPRITE_ROOM: usize = 650;
+
 struct Missile {
+    fire: bool,
+    /// Next time (s of the volley clock) a flame sprite is shed.
+    next_flame: f32,
     start: Vec3,
     end: Vec3,
     launch: f32,
@@ -78,6 +101,9 @@ pub struct Volleys {
     pub launched: usize,
     pub volleys: usize,
     pub by_kind: [usize; 4],
+    /// Flame sprites shed by burning arrows, and the fires lit where they landed.
+    pub flames_shed: usize,
+    pub fires_lit: usize,
     /// Most missiles in flight at once, and CPU cost (microseconds) of `update_volleys`.
     pub peak_flying: usize,
     pub update_us_peak: u64,
@@ -161,6 +187,8 @@ fn plan_missile(
     let arc = dist * arc_k * (0.85 + 0.3 * r1[3]);
     let _ = r3;
     Missile {
+        fire: false,
+        next_flame: 0.0,
         start,
         end,
         launch,
@@ -202,7 +230,9 @@ pub(super) fn update_volleys(
     mut meshes: ResMut<Assets<Mesh>>,
     mut batches: Query<&mut OrientedBatch>,
     camera: Query<&GlobalTransform, With<BattleCamera>>,
+    looks: Option<ResMut<FlipbookLooks>>,
 ) {
+    let mut looks = looks;
     let started = std::time::Instant::now();
     let dt = if session.paused {
         0.0
@@ -277,6 +307,13 @@ pub(super) fn update_volleys(
             let mut missile =
                 plan_missile(sim, shot, kind, seed, i, shooter_half, target_half, now);
             missile.stick = i % stride == 0;
+            // Fire arrows: an even share of the volley burns, up to the cap.
+            if shot.incendiary && kind == 0 {
+                let burning = total.min(FIRE_ARROWS_PER_VOLLEY);
+                missile.fire =
+                    i % (total / burning).max(1) == 0 && i / (total / burning).max(1) < burning;
+                missile.stick |= missile.fire;
+            }
             volleys.flying.push(missile);
         }
         volleys.launched += total;
@@ -295,13 +332,18 @@ pub(super) fn update_volleys(
     // Positions of the missiles in the air; those that land leave a planted share behind.
     let mut flying_bytes: Vec<u8> = Vec::with_capacity(volleys.flying.len() * 32);
     let mut landed: Vec<([f32; 8], bool)> = Vec::new();
+    let mut flames: Vec<Vec3> = Vec::new();
+    let mut fires: Vec<Vec3> = Vec::new();
     let mut count = 0u32;
-    volleys.flying.retain(|m| {
+    volleys.flying.retain_mut(|m| {
         let t = (now - m.launch) / m.flight;
         if t < 0.0 {
             return true;
         }
         if t >= 1.0 {
+            if m.fire {
+                fires.push(m.end);
+            }
             if m.stick {
                 let (p, d) = m.at(1.0);
                 landed.push(([p.x, p.y, p.z, SCALE[m.kind], d.x, d.y, d.z, 0.0], true));
@@ -309,6 +351,11 @@ pub(super) fn update_volleys(
             return false;
         }
         let (p, d) = m.at(t);
+        if m.fire && now >= m.next_flame {
+            m.next_flame = now + FLAME_EVERY_S;
+            // The flame sits on the shaft, behind the head.
+            flames.push(p - d * 0.4);
+        }
         // Beyond the draw range a bolt is a sub-pixel speck: keep it flying, do not pack it.
         if p.distance_squared(camera_position) <= DRAW_RANGE_M * DRAW_RANGE_M {
             pack(
@@ -319,6 +366,44 @@ pub(super) fn update_volleys(
         }
         true
     });
+    // Flames of the burning arrows, and the small fire where they stand.
+    if let Some(looks) = looks.as_deref_mut() {
+        let mut shed = |position: Vec3, life: f32, size: f32, rise: f32, serial: usize| {
+            if looks.live() >= FLAME_SPRITE_ROOM {
+                return;
+            }
+            let sprite = SmokeSprite {
+                position,
+                velocity: Vec3::Y * rise,
+                accel: Vec3::ZERO,
+                damping: 0.0,
+                life,
+                size,
+                spin: 0.0,
+                spin_rate: 0.0,
+                tint: None,
+            };
+            if let Some(entity) = spawn_fire_sprite(
+                &mut commands,
+                looks,
+                FlipbookKind::Flame,
+                &sprite,
+                serial as f32 * 0.37 % 1.0,
+            ) {
+                commands
+                    .entity(entity)
+                    .insert(DespawnOnExit(AppState::Battle));
+            }
+        };
+        for (n, position) in flames.iter().enumerate() {
+            shed(*position, FLAME_LIFE_S, 0.7, 0.5, n);
+        }
+        for (n, position) in fires.iter().enumerate() {
+            shed(*position + Vec3::Y * 0.1, LANDED_FIRE_S, 0.9, 0.3, n + 7);
+        }
+        volleys.flames_shed += flames.len();
+        volleys.fires_lit += fires.len();
+    }
     volleys.version += 1;
     let version = volleys.version;
     if let Some(entity) = volleys.flying_batch
@@ -362,6 +447,339 @@ pub(super) fn update_volleys(
     volleys.updates += 1;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Stakes and pavises (`update_fieldworks`, `_plant_stakes`, `_plant_pavises` of battle_volleys.gd).
+// ---------------------------------------------------------------------------------------------
+
+const MAX_STAKE_ROWS: usize = 60;
+const MAX_PAVISE_ROWS: usize = 60;
+/// Pavise rows a regiment plants at most, the distance it must move for a new row (m) and the
+/// pivot angle that replants the last row at the new front (~30 degrees).
+const PAVISE_ROWS_PER_UNIT: u8 = 3;
+const PAVISE_STEP_M: f32 = 12.0;
+const PAVISE_REPLANT_ANGLE: f32 = 0.52;
+
+/// What a regiment has planted so far.
+#[derive(Default)]
+struct Planted {
+    stakes: bool,
+    /// Where the last pavise row stood, its facing and the rows planted.
+    pavise_at: Option<Vec2>,
+    pavise_facing: f32,
+    rows: u8,
+    /// Index in [`Fieldworks::pavise_rows`] of its last row.
+    last_row: Option<usize>,
+}
+
+/// A planted row of pavises: the side that planted it (colour) and one record per pavise.
+struct PaviseRow {
+    side: SideId,
+    records: Vec<[f32; 8]>,
+}
+
+/// Stakes and pavises standing on the field.
+#[derive(Resource, Default)]
+pub struct Fieldworks {
+    planted: HashMap<u32, Planted>,
+    stake_records: Vec<[f32; 8]>,
+    stake_rows: usize,
+    pavise_rows: Vec<PaviseRow>,
+    /// Shaft, tip, attacker board, defender board, wood parts.
+    batches: Option<[Entity; 5]>,
+    version: u64,
+    dirty: bool,
+    pub replanted: usize,
+}
+
+impl Fieldworks {
+    pub fn stakes(&self) -> usize {
+        self.stake_records.len()
+    }
+
+    pub fn pavises(&self) -> usize {
+        self.pavise_rows.iter().map(|r| r.records.len()).sum()
+    }
+}
+
+/// Stake of an archer (`_stake_mesh`): a hexagonal debarked pole along +Z from 25 cm in the
+/// ground to 1.5 m, the tip apart.
+fn stake_shaft() -> Mesh {
+    Mesh::from(Cylinder::new(0.055, 1.75).mesh().resolution(6))
+        .rotated_by(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2))
+        .translated_by(Vec3::Z * 0.625)
+}
+
+/// Hatchet-cut point of the stake, fresh wood (`fresh` of `_stake_mesh`).
+fn stake_tip() -> Mesh {
+    Mesh::from(Cone::new(0.047, 0.36).mesh().resolution(6))
+        .rotated_by(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2))
+        .translated_by(Vec3::Z * 1.68)
+}
+
+/// Pavise board (`_pavise_mesh`): 0.6 x 1.15 m, 5 cm thick, faces +Z, standing on the ground.
+fn pavise_board() -> Mesh {
+    Mesh::from(Cuboid::new(0.6, 1.15, 0.05)).translated_by(Vec3::new(0.0, 0.6, 0.0))
+}
+
+/// Central strip and prop of the pavise.
+fn pavise_wood() -> Mesh {
+    let mut strip =
+        Mesh::from(Cuboid::new(0.14, 1.0, 0.02)).translated_by(Vec3::new(0.0, 0.6, 0.03));
+    let prop = Mesh::from(Cuboid::new(0.04, 0.9, 0.04)).translated_by(Vec3::new(0.0, 0.45, -0.3));
+    strip.merge(&prop).expect("same layout");
+    strip
+}
+
+fn fieldwork_batch(mesh: Handle<Mesh>, color: [f32; 4]) -> OrientedBatch {
+    OrientedBatch {
+        mesh_handle: mesh,
+        records: Arc::new(Vec::new()),
+        count: 0,
+        texture_handle: None,
+        params: MaterialParams {
+            base_color: color,
+            alpha_cutoff: 0.0,
+            roughness: 0.9,
+            metallic: 0.0,
+            double_sided: false,
+        },
+        version: 0,
+    }
+}
+
+/// Records of a row of `n` stakes in front of a regiment (`_plant_stakes`).
+fn stake_row(
+    unit_id: u32,
+    centre: Vec2,
+    facing: f32,
+    (width, depth): (f32, f32),
+    ground: &dyn Fn(f32, f32) -> f32,
+) -> Vec<[f32; 8]> {
+    let forward = Vec2::new(facing.sin(), facing.cos());
+    let right = Vec2::new(facing.cos(), -facing.sin());
+    let front = centre + forward * (depth * 0.5 + 1.5);
+    let n = ((width / 1.1) as usize).min(32);
+    let mut records = Vec::with_capacity(n * 2);
+    for row in 0..2 {
+        for k in 0..n {
+            let h = hash4(u64::from(unit_id) * 4099 + (row * 64 + k) as u64);
+            let lateral =
+                (k as f32 - (n as f32 - 1.0) * 0.5) * 1.1 + if row == 1 { 0.55 } else { 0.0 };
+            let p = front + right * (lateral + (h[0] - 0.5) * 0.3) + forward * (row as f32 * 0.8);
+            // Pointing at the enemy, planted at about 40 degrees above the horizon (50 from
+            // the vertical, a few degrees either side), a little crooked and uneven.
+            let lean = (50.0 + (h[1] - 0.5) * 12.0).to_radians();
+            let yaw = facing + (h[2] - 0.5) * 0.24;
+            let scale = 0.88 + 0.22 * h[3];
+            records.push([
+                p.x,
+                ground(p.x, p.y),
+                p.y,
+                scale,
+                yaw.sin() * lean.sin(),
+                lean.cos(),
+                yaw.cos() * lean.sin(),
+                0.0,
+            ]);
+        }
+    }
+    records
+}
+
+/// Records of a row of pavises in front of a regiment (`_plant_pavises`).
+fn pavise_row(
+    unit_id: u32,
+    row_index: u8,
+    centre: Vec2,
+    facing: f32,
+    (width, depth): (f32, f32),
+    ground: &dyn Fn(f32, f32) -> f32,
+) -> Vec<[f32; 8]> {
+    let forward = Vec2::new(facing.sin(), facing.cos());
+    let right = Vec2::new(facing.cos(), -facing.sin());
+    let front = centre + forward * (depth * 0.5 + 0.9);
+    let n = ((width / 1.05) as usize).min(36);
+    (0..n)
+        .map(|k| {
+            let h = hash4(u64::from(unit_id) * 7919 + u64::from(row_index) * 131 + k as u64);
+            let p = front
+                + right * ((k as f32 - (n as f32 - 1.0) * 0.5) * 1.05)
+                + forward * ((h[0] - 0.5) * 0.24);
+            // Leans back against its prop: the top towards the men behind it.
+            let lean = (12.0 + (h[1] - 0.5) * 6.0).to_radians();
+            let yaw = facing + (h[2] - 0.5) * 0.16;
+            [
+                p.x,
+                ground(p.x, p.y),
+                p.y,
+                1.0,
+                yaw.sin() * lean.cos(),
+                lean.sin(),
+                yaw.cos() * lean.cos(),
+                0.0,
+            ]
+        })
+        .collect()
+}
+
+fn angle_difference(a: f32, b: f32) -> f32 {
+    (b - a + std::f32::consts::PI).rem_euclid(std::f32::consts::TAU) - std::f32::consts::PI
+}
+
+fn to_bytes(records: impl Iterator<Item = [f32; 8]>) -> (Vec<u8>, u32) {
+    let mut bytes = Vec::new();
+    let mut count = 0;
+    for record in records {
+        pack(record, &mut bytes);
+        count += 1;
+    }
+    (bytes, count)
+}
+
+/// Plants the stakes of the archers who stood still and the pavises of the crossbowmen behind
+/// them, once each, and keeps them for the battle.
+pub(super) fn update_fieldworks(
+    mut commands: Commands,
+    mut session: ResMut<BattleSession>,
+    mut fieldworks: ResMut<Fieldworks>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut batches: Query<&mut OrientedBatch>,
+) {
+    if fieldworks.batches.is_none() {
+        let shaft = meshes.add(stake_shaft());
+        let tip = meshes.add(stake_tip());
+        let board = meshes.add(pavise_board());
+        let wood = meshes.add(pavise_wood());
+        let mut spawn = |name: &str, mesh: Handle<Mesh>, color: [f32; 4]| {
+            commands
+                .spawn((
+                    Name::new(name.to_owned()),
+                    fieldwork_batch(mesh, color),
+                    DespawnOnExit(AppState::Battle),
+                ))
+                .id()
+        };
+        // Colours: wood of the stake, fresh point, boards tinted by side (the white-ish board
+        // 0.82 / 0.78 / 0.70 times the side colour of the Godot instance), dark wood.
+        let ids = [
+            spawn("StakeShafts", shaft, [0.32, 0.24, 0.15, 1.0]),
+            spawn("StakeTips", tip, [0.74, 0.62, 0.43, 1.0]),
+            spawn(
+                "PaviseAttacker",
+                board.clone(),
+                [0.82 * 0.30, 0.78 * 0.36, 0.70 * 0.62, 1.0],
+            ),
+            spawn(
+                "PaviseDefender",
+                board,
+                [0.82 * 0.62, 0.78 * 0.24, 0.70 * 0.20, 1.0],
+            ),
+            spawn("PaviseWood", wood, [0.35, 0.28, 0.18, 1.0]),
+        ];
+        fieldworks.batches = Some(ids);
+    }
+    let sim = session.sim_mut();
+    let field = sim.field().clone();
+    let ground = |x: f32, z: f32| field.height(f64::from(x), f64::from(z)) as f32;
+    let fw = &mut *fieldworks;
+    for unit in sim.units() {
+        if !unit.present() {
+            continue;
+        }
+        let (width, depth) = unit.extent();
+        let size = (width as f32, depth as f32);
+        let centre = Vec2::new(unit.x as f32, unit.z as f32);
+        let facing = unit.facing as f32;
+        let planted = fw.planted.entry(unit.id).or_default();
+        if unit.stakes_planted && !planted.stakes {
+            planted.stakes = true;
+            if fw.stake_rows < MAX_STAKE_ROWS {
+                fw.stake_rows += 1;
+                fw.stake_records
+                    .extend(stake_row(unit.id, centre, facing, size, &ground));
+                fw.dirty = true;
+            }
+        }
+        let cover = unit.pavise.is_some()
+            || (unit.has(Ability::Pavise) && unit.state != UnitState::Marching);
+        let still = !matches!(unit.state, UnitState::Marching | UnitState::Charging);
+        if !(cover && still) {
+            continue;
+        }
+        let moved = planted
+            .pavise_at
+            .is_none_or(|last| centre.distance(last) > PAVISE_STEP_M);
+        if moved && planted.rows < PAVISE_ROWS_PER_UNIT {
+            if fw.pavise_rows.len() >= MAX_PAVISE_ROWS {
+                continue;
+            }
+            planted.pavise_at = Some(centre);
+            planted.pavise_facing = facing;
+            planted.rows += 1;
+            planted.last_row = Some(fw.pavise_rows.len());
+            fw.pavise_rows.push(PaviseRow {
+                side: unit.side,
+                records: pavise_row(unit.id, planted.rows, centre, facing, size, &ground),
+            });
+            fw.dirty = true;
+        } else if let Some(row) = planted.last_row
+            && angle_difference(planted.pavise_facing, facing).abs() > PAVISE_REPLANT_ANGLE
+        {
+            // Pivot on the spot: the last row follows the new front.
+            planted.pavise_at = Some(centre);
+            planted.pavise_facing = facing;
+            let slots = fw.pavise_rows[row].records.len();
+            let mut records = pavise_row(unit.id, planted.rows, centre, facing, size, &ground);
+            records.truncate(slots);
+            fw.pavise_rows[row].records = records;
+            fw.replanted += 1;
+            fw.dirty = true;
+        }
+    }
+    if !fw.dirty {
+        return;
+    }
+    fw.dirty = false;
+    fw.version += 1;
+    let version = fw.version;
+    let Some(ids) = fw.batches else { return };
+    let (stake_bytes, stake_count) = to_bytes(fw.stake_records.iter().copied());
+    let stake_bytes = Arc::new(stake_bytes);
+    let boards = |side: SideId| {
+        to_bytes(
+            fw.pavise_rows
+                .iter()
+                .filter(move |row| row.side == side)
+                .flat_map(|row| row.records.iter().copied()),
+        )
+    };
+    let (attacker_bytes, attacker_count) = boards(SideId::Attacker);
+    let (defender_bytes, defender_count) = boards(SideId::Defender);
+    let (wood_bytes, wood_count) = to_bytes(
+        fw.pavise_rows
+            .iter()
+            .flat_map(|r| r.records.iter().copied()),
+    );
+    let sets = [
+        (ids[0], stake_bytes.clone(), stake_count),
+        (ids[1], stake_bytes, stake_count),
+        (ids[2], Arc::new(attacker_bytes), attacker_count),
+        (ids[3], Arc::new(defender_bytes), defender_count),
+        (ids[4], Arc::new(wood_bytes), wood_count),
+    ];
+    for (entity, records, count) in sets {
+        if let Ok(mut batch) = batches.get_mut(entity) {
+            batch.records = records;
+            batch.count = count;
+            batch.version = version;
+        }
+    }
+}
+
+fn clear_fieldworks(mut fieldworks: ResMut<Fieldworks>) {
+    *fieldworks = Fieldworks::default();
+}
+
 fn clear_volleys(mut volleys: ResMut<Volleys>, mut feed: ResMut<ShotFeed>) {
     *volleys = Volleys::default();
     feed.shots.clear();
@@ -381,6 +799,11 @@ fn dump_volleys(world: &World) -> (String, serde_json::Value) {
             "update_us_peak": v.update_us_peak,
             "update_us_mean": v.update_us_total.checked_div(v.updates).unwrap_or(0),
             "stuck": v.stuck_count,
+            "flames_shed": v.flames_shed,
+            "fires_lit": v.fires_lit,
+            "stakes": world.get_resource::<Fieldworks>().map_or(0, Fieldworks::stakes),
+            "pavises": world.get_resource::<Fieldworks>().map_or(0, Fieldworks::pavises),
+            "pavise_replants": world.get_resource::<Fieldworks>().map_or(0, |f| f.replanted),
             "by_kind": { "arrow": v.by_kind[0], "bolt": v.by_kind[1], "bullet": v.by_kind[2], "javelin": v.by_kind[3] },
         }),
     )
@@ -391,6 +814,7 @@ pub struct VolleysPlugin;
 impl Plugin for VolleysPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Volleys>()
+            .init_resource::<Fieldworks>()
             .init_resource::<ShotFeed>()
             .register_dump(dump_volleys)
             .add_systems(
@@ -400,7 +824,14 @@ impl Plugin for VolleysPlugin {
                     .run_if(resource_exists::<BattleSession>)
                     .after(crate::battle::scene::StepSet),
             )
-            .add_systems(OnExit(AppState::Battle), clear_volleys);
+            .add_systems(
+                Update,
+                update_fieldworks
+                    .run_if(in_state(AppState::Battle))
+                    .run_if(resource_exists::<BattleSession>)
+                    .after(crate::battle::scene::StepSet),
+            )
+            .add_systems(OnExit(AppState::Battle), (clear_volleys, clear_fieldworks));
     }
 }
 
@@ -411,6 +842,8 @@ mod tests {
     #[test]
     fn missile_path_starts_and_ends_at_its_points() {
         let m = Missile {
+            fire: false,
+            next_flame: 0.0,
             start: Vec3::new(0.0, 1.5, 0.0),
             end: Vec3::new(100.0, 0.0, 0.0),
             launch: 0.0,
