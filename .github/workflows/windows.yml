@@ -1,6 +1,6 @@
-# WIN (ADR 0087): proves the game runs on Windows x86_64 — native MSVC build of the
-# GDExtension, Godot import, then the headless smoke test (dummy renderer, no GPU), all through
-# the double-click launcher "Lancer Cent Ans.exe" committed at the root (ADR 0117, ADR 0153).
+# WIN (ADR 0087, ADR 0362, ADR 0366): proves the Bevy client builds and passes its unit tests on
+# the three OSes of the players, and that the launcher plan is coherent; the Windows run also
+# tests the double-click launcher "Lancer Cent Ans.exe" committed at the root (ADR 0153).
 # On main, a green run then fast-forwards `stable`, the branch the players' launchers follow
 # (ADR 0159): a commit that fails here never reaches them. Also manual, and on the windows/*
 # branches to try a change without touching `stable`.
@@ -21,74 +21,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  smoke:
-    runs-on: windows-latest
-    timeout-minutes: 60
-    env:
-      GODOT_VERSION: "4.7.2-stable"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: Rust toolchain
-        run: rustup target add x86_64-pc-windows-msvc
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: core
-
-      - name: Install Godot
-        shell: bash
-        run: |
-          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_win64.exe.zip"
-          unzip -q godot.zip -d godot
-          ls godot
-
-      - name: Launcher unit tests
-        working-directory: tools/launcher-windows
-        run: cargo test
-
-      # The double-click launcher (ADR 0117) does the whole chain as a player would: finds Git
-      # Bash, builds cent_ans.dll, runs the headless import, then starts Godot. Here Godot runs
-      # the smoke test, which exits 1 on any failure, including "CampaignSim class not
-      # registered" (cent_ans.dll not loaded). The console build prints the log.
-      # The executable is the one committed in the repository (cross-compiled, ADR 0153): this
-      # step is its only run on a real Windows. "Lancer Cent Ans.bat" does the same job.
-      - name: Launcher, build, import and smoke test
-        shell: cmd
-        env:
-          GODOT: ${{ github.workspace }}\godot\Godot_v${{ env.GODOT_VERSION }}_win64_console.exe
-        run: |
-          "Lancer Cent Ans.exe" --godot -- --headless --script res://tests/smoke.gd > smoke.log 2>&1
-          set RC=%errorlevel%
-          type smoke.log
-          exit /b %RC%
-
-      # GT9: a test script with a Parse Error makes Godot exit 0; this step fails the job instead.
-      # The import was done by the launcher step above. Git Bash runs the script, Godot is the console build.
-      - name: GDScript check (game/tests)
-        shell: bash
-        env:
-          GODOT: ${{ github.workspace }}\godot\Godot_v${{ env.GODOT_VERSION }}_win64_console.exe
-        run: tools/check_gd_scripts.sh
-
-      # GT4: the headless unit tests (game/tests/*_test.gd, TestCase) that need no generated asset
-      # pack and no GPU: pure data, rules and UI-theme checks. The full list is `tools/run_godot_tests.sh`
-      # without argument (too long for CI). Each test prints `<name>: OK`; the runner fails on Parse Error too.
-      - name: GDScript unit tests (fast subset)
-        continue-on-error: true
-        shell: bash
-        env:
-          GODOT: ${{ github.workspace }}\godot\Godot_v${{ env.GODOT_VERSION }}_win64_console.exe
-        run: tools/run_godot_tests.sh dn_ui_kit dn_freshwater
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: smoke-log
-          path: smoke.log
-
   # ADR 0362: the launchers start the Bevy client by default. This job proves, on the three OSes
   # of the players, that the client builds in release exactly as `tools/launch.sh` builds it, that
   # its unit tests pass, and that the launcher plan (--dry-run) is coherent. The run of the window
@@ -116,6 +48,11 @@ jobs:
         with:
           workspaces: client
 
+      - name: Launcher unit tests (Windows)
+        if: runner.os == 'Windows'
+        working-directory: tools/launcher-windows
+        run: cargo test
+
       - name: Launcher plan (dry run)
         shell: bash
         run: bash tools/launch.sh --dry-run
@@ -139,7 +76,7 @@ jobs:
   # players' clones, and a re-run of an old commit cannot move `stable` backwards. The first
   # green run creates the branch.
   promote:
-    needs: [smoke, bevy]
+    needs: [bevy]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

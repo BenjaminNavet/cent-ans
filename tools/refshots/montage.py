@@ -1,4 +1,7 @@
-"""Refshots helpers: uniform-frame check and Godot | Bevy side-by-side montages (lot refshots).
+"""Refshots helpers: uniform-frame check and labelled Bevy montages (lot refshots).
+
+The Godot side was removed (ADR 0366); a `reference/<name>.png` image, when present in the output
+folder (an older Bevy run, a mock-up), is shown on the left of the Bevy shot.
 
 Usage:
     python3 montage.py check <image.png>            exit 0 if the image has content, 1 if uniform/missing
@@ -48,12 +51,16 @@ def _half(path: Path, label: str) -> Image.Image:
 
 
 def montage(out_dir: Path, name: str) -> Path:
-    """Godot on the left, Bevy on the right, labelled, into out_dir/montage/name.png."""
-    left = _half(out_dir / "godot" / f"{name}.png", f"Godot - {name}")
+    """Bevy shot (with the optional reference image on its left) into out_dir/montage/name.png."""
     right = _half(out_dir / "bevy" / f"{name}.png", f"Bevy - {name}")
-    sheet = Image.new("RGB", (left.width + right.width + 6, left.height), (0, 0, 0))
-    sheet.paste(left, (0, 0))
-    sheet.paste(right, (left.width + 6, 0))
+    reference = out_dir / "reference" / f"{name}.png"
+    if reference.exists():
+        left = _half(reference, f"Reference - {name}")
+        sheet = Image.new("RGB", (left.width + right.width + 6, left.height), (0, 0, 0))
+        sheet.paste(left, (0, 0))
+        sheet.paste(right, (left.width + 6, 0))
+    else:
+        sheet = right
     target = out_dir / "montage" / f"{name}.png"
     target.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(target)

@@ -1,9 +1,5 @@
 # Rust
 core/target*/
-# Godot
-game/.godot/
-game/*.import
-!game/**/*.import
 # Modèles 3D générés : paquet de release (ADR 0212), installés par tools/launch.sh
 game/assets/models/dn/
 game/export/
@@ -27,7 +23,7 @@ data/map/pyramid/
 data/map/.pyramid.download-*/
 tools/nb_raw/
 
-# Screenshots / captures (outputs of game/tests/*_shot.gd, kept local only)
+# Screenshots / captures (outputs of the screenshot tools, kept local only)
 # except comparison boards the player wants versioned (GA3 generated assets)
 docs/img/*
 !docs/img/ga3/
@@ -56,19 +52,15 @@ game/assets/textures/vegetation/hi/
 game/assets/textures/buildings/hi/
 data/art/tx_*_2048.json
 
-# Local engine prototype: copies of game/third-party assets + its own .godot cache (188 MB)
+# Local engine prototype: copies of game/third-party assets (188 MB)
 tools/proto_moteur/
 
-# Stray captures dropped at the Godot project root (only the icon is versioned)
+# Stray captures dropped at the root of game/ (only the icon is versioned)
 /game/*.png
-/game/*.png.import
 !/game/icon.png
-!/game/icon.png.import
-# Textures extraites des glb par l import Godot (regenerees)
+# Textures extraites des glb par un import de glb (regenerees)
 game/assets/models/**/*_Image_[0-9]*.jpg
-game/assets/models/**/*_Image_[0-9]*.jpg.import
 game/assets/models/**/*_Image_[0-9]*.png
-game/assets/models/**/*_Image_[0-9]*.png.import
 
 # CC CD : masques dérivés de l'érosion (geo compose-erode), régénérables
 data/map/compose/derived/

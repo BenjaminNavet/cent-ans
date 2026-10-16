@@ -1,6 +1,6 @@
 //! Double-click launcher for Windows, "Lancer Cent Ans.exe" at the root of the repository
 //! (ADR 0153). Same job as "Lancer Cent Ans.bat" (ADR 0117): find the bash of Git for Windows
-//! and run `tools/launch.sh`, which rebuilds and reimports what changed, then starts the game.
+//! and run `tools/launch.sh`, which rebuilds what changed, then starts the game.
 //! All the launch logic stays in `tools/launch.sh`; arguments are passed through unchanged.
 
 use std::env;
