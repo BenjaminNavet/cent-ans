@@ -42,7 +42,11 @@ correspondent aux manifestes de `918b04e52`, relus par `git show` : la commande 
   p95 +43 (relief grossier).
 - pytest : nouveaux tests + test_schemas, test_hydro_fine, test_river_render, test_relief_hosting,
   test_zg7a_widths (1262) verts.
-- Dump Bevy : voir plus bas.
+- Dump Bevy (`CENT_ANS_FINE_GEO_ROOT` sur la sortie, `CENT_ANS_CAMERA=xz:1651,2731,60`, état Campaign,
+  600 images, hors écran, muet) : `campaign_fine_geo` `enabled: true`, 5244 tuiles fleuves / 5245 routes
+  indexées, ancrages 400 / 3494 / 335, 10 tuiles voulues = 10 maillées et visibles, 9858 points de
+  fleuve, 26 663 de route, zone rayon 78 poids 1, maillage 1,7 ms en moyenne ; ponts fins 287 ancrages,
+  278 reprofilés.
 
 ## Publication (non faite, aucune release)
 - Pour que le jeu s'en serve sans crochet : copier
