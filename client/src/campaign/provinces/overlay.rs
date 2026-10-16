@@ -617,4 +617,16 @@ mod tests {
         assert!(red > 100, "{red} red pixels");
         assert_eq!(&pixels[0..4], &[0, 0, 0, 0]);
     }
+
+    #[test]
+    fn stance_fill_option_reads_the_setting() {
+        use crate::settings::Settings;
+        assert!(stance_fill_enabled(None));
+        assert!(stance_fill_enabled(Some(&Settings::default())));
+        let off = Settings {
+            stance_fill: false,
+            ..Settings::default()
+        };
+        assert!(!stance_fill_enabled(Some(&off)));
+    }
 }
