@@ -6,8 +6,8 @@
 //! `campaign_map.gd::_toggle_trade_layer` and `MapReadability.sign_shown` (rules of the `signs`
 //! block of `data/ui/campaign_map.json`). Routes come from `sim_campaign::trade_routes`.
 //!
-//! Differences from Godot: sea lanes are not drawn yet (a port-to-port leg is a straight line),
-//! and there is no hover tooltip on a route (the economy window lists them).
+//! The hover tooltip of a route is `hud::hover` (`nearest_route`, `route_tooltip`). Difference
+//! from Godot: a port-to-port leg is a straight line (the sea lanes are `water::lanes`).
 
 use std::collections::BTreeMap;
 
@@ -141,6 +141,58 @@ pub struct RibbonRoute {
     pub points: Vec<Vec2>,
     pub width: f32,
     pub cut: bool,
+    /// Hover text (`campaign_map.gd::_trade_route_tooltip`).
+    pub tooltip: String,
+}
+
+/// Hover text of a trade route: « A ↔ B : route coupée (raison) » or
+/// « A ↔ B — 12 livres/saison (drap, laine) — accord commercial — menacée ».
+#[allow(clippy::too_many_arguments)]
+pub fn route_tooltip(
+    from: &str,
+    to: &str,
+    cut_reason: Option<&str>,
+    total_value: i64,
+    goods: &[String],
+    agreement: bool,
+    security: f64,
+    cut: bool,
+) -> String {
+    if cut {
+        return format!(
+            "{from} ↔ {to} : route coupée ({})",
+            cut_reason.unwrap_or("")
+        );
+    }
+    let mut text = format!("{from} ↔ {to} — {total_value} livres/saison");
+    if !goods.is_empty() {
+        text.push_str(&format!(" ({})", goods.join(", ")));
+    }
+    if agreement {
+        text.push_str(" — accord commercial");
+    }
+    if security < 0.99 {
+        text.push_str(" — menacée");
+    }
+    text
+}
+
+/// Route of `routes` closest to `point` within `max_distance` (`TradeRouteLayer.nearest_route`).
+pub fn nearest_route(
+    routes: &[RibbonRoute],
+    point: Vec2,
+    max_distance: f32,
+) -> Option<&RibbonRoute> {
+    let mut best: Option<(&RibbonRoute, f32)> = None;
+    for route in routes {
+        for pair in route.points.windows(2) {
+            let d = crate::campaign::water::lanes::distance_to_segment(point, pair[0], pair[1]);
+            if d < best.map_or(max_distance, |b| b.1) {
+                best = Some((route, d));
+            }
+        }
+    }
+    best.map(|b| b.0)
 }
 
 /// Width of a ribbon from the value of the route.
@@ -214,7 +266,7 @@ pub struct TradeStats {
 }
 
 #[derive(Resource, Default)]
-struct DrawnRoutes(Vec<RibbonRoute>);
+pub struct DrawnRoutes(pub Vec<RibbonRoute>);
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<MapLayers>()
@@ -343,11 +395,36 @@ fn collect_routes(sim: &Sim, places: &Places, fog: Option<&FogOfWar>) -> (usize,
         if points.len() < 2 {
             continue;
         }
+        let hub_name = |hub: &str| -> String {
+            data.trade
+                .as_ref()
+                .and_then(|catalog| catalog.hub(hub))
+                .map_or_else(|| hub.to_owned(), |h| h.name.display.clone())
+        };
+        let goods: Vec<String> = route
+            .goods
+            .iter()
+            .map(|g| {
+                data.resources
+                    .get(g)
+                    .map_or_else(|| g.as_str().to_owned(), |r| r.name.display.to_lowercase())
+            })
+            .collect();
         routes.push(RibbonRoute {
             id: route.id.clone(),
             points,
             width: route_width(route.total_value()),
             cut: route.cut,
+            tooltip: route_tooltip(
+                &hub_name(&route.from_hub),
+                &hub_name(&route.to_hub),
+                route.cut_reason.as_deref(),
+                route.total_value(),
+                &goods,
+                route.agreement,
+                route.security,
+                route.cut,
+            ),
         });
     }
     (total, routes)
@@ -571,6 +648,7 @@ mod tests {
             points: vec![Vec2::new(0.0, 0.0), Vec2::new(12.0, 0.0)],
             width: 2.0,
             cut: false,
+            tooltip: String::new(),
         };
         let mesh = ribbon_mesh(&[&route], &|x, _| x);
         // 12 units at STEP 6: three samples, six vertices, two quads.
@@ -583,5 +661,32 @@ mod tests {
         };
         assert!((p[4][1] - (12.0 + LIFT)).abs() < 1e-4);
         assert!((p[0][2].abs() - 1.0).abs() < 1e-4, "offset by half width");
+    }
+
+    #[test]
+    fn route_tooltip_reads_like_godot() {
+        let goods = vec!["drap".to_owned(), "laine".to_owned()];
+        assert_eq!(
+            route_tooltip("Bruges", "Londres", None, 24, &goods, true, 0.5, false),
+            "Bruges ↔ Londres — 24 livres/saison (drap, laine) — accord commercial — menacée"
+        );
+        assert_eq!(
+            route_tooltip("A", "B", Some("guerre"), 0, &[], false, 0.0, true),
+            "A ↔ B : route coupée (guerre)"
+        );
+    }
+
+    #[test]
+    fn nearest_route_respects_the_radius() {
+        let route = RibbonRoute {
+            id: "r".into(),
+            points: vec![Vec2::new(0.0, 0.0), Vec2::new(100.0, 0.0)],
+            width: 2.0,
+            cut: false,
+            tooltip: "t".into(),
+        };
+        let routes = [route];
+        assert!(nearest_route(&routes, Vec2::new(50.0, 2.0), 3.0).is_some());
+        assert!(nearest_route(&routes, Vec2::new(50.0, 9.0), 3.0).is_none());
     }
 }

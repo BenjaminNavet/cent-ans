@@ -928,6 +928,9 @@ mod tests {
         }
         assert!(mode_border_style(MapMode::Diplomacy, &t).1);
         assert!(!mode_border_style(MapMode::Political, &t).1);
+        // The feudal filter has its own entry (it no longer borrows the political one).
+        assert!(t.borders["modes"].get("feudal").is_some());
+        assert_eq!(mode_border_style(MapMode::Feudal, &t), (1.0, false));
     }
 }
 

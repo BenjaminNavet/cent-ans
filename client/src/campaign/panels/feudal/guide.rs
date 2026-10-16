@@ -6,9 +6,9 @@
 //! open the feudal tree (objective met when the panel is open), the map (manual step), the
 //! war escalation box (manual step).
 //!
-//! Differences from Godot: there is no « Féodalité » map filter in the Bevy client yet
-//! (`feudal_map_lens.gd` not ported), so the second step is manual and its text no longer
-//! sends the player to a filter; the pulsing target frame of the general guide is not drawn.
+//! The second step is met when the « Féodalité » map filter ([`MapMode::Feudal`]) is chosen
+//! (`tutorial_objective_met`). Difference from Godot: the pulsing target frame of the general
+//! guide is not drawn.
 //! Dev hook: `CENT_ANS_FEUDAL_GUIDE=1` starts the guide at the first frame (`off` disables it).
 //! Widget names: `feudal_guide:next`, `:skip`, `:later`, `:quit`.
 
@@ -20,6 +20,7 @@ use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::hud::flow::TurnAdvanced;
 use crate::campaign::progress::tutorial::Tutorial;
+use crate::campaign::provinces::modes::{MapMode, MapModeState};
 use crate::menu::pause::GamePaused;
 use crate::settings::{Settings, SettingsFile, SettingsScreen};
 use crate::ui::kit::richtext::{RichStyle, rich_text};
@@ -36,6 +37,8 @@ const ENV_GUIDE: &str = "CENT_ANS_FEUDAL_GUIDE";
 pub enum Objective {
     /// Met when the feudal tree is open.
     TreeOpen,
+    /// Met when the « Féodalité » map filter is the current mode.
+    FeudalFilter,
     /// Read-only step: « Continuer ».
     Manual,
 }
@@ -57,11 +60,11 @@ pub const STEPS: [Step; 3] = [
         kind: Objective::TreeOpen,
     },
     Step {
-        id: "feudal_lands",
-        title: "Les fiefs et leurs titres",
-        text: "Dans la fiche d’une province, le fil d’Ariane donne ses titres, du royaume au comté ; l’arbre féodal liste les terres tenues sous chaque titre, et l’écu parti marque les doubles allégeances, comme la Guyenne anglaise tenue du roi de France.",
-        objective: "",
-        kind: Objective::Manual,
+        id: "feudal_filter",
+        title: "La carte des fiefs",
+        text: "Le filtre de carte [b]« Féodalité »[/b] (bouton « Filtres ») peint chaque royaume ; les hachures montrent les terres des grands vassaux, l’écu parti les doubles allégeances, comme la Guyenne anglaise tenue du roi de France. Dans la fiche d’une province, le fil d’Ariane donne ses titres, du royaume au comté.",
+        objective: "Choisir le filtre « Féodalité ».",
+        kind: Objective::FeudalFilter,
     },
     Step {
         id: "feudal_war",
@@ -117,8 +120,12 @@ impl FeudalGuide {
 }
 
 /// Whether the objective of step `index` is met.
-pub fn objective_met(index: usize, tree_open: bool) -> bool {
-    matches!(STEPS[index].kind, Objective::TreeOpen) && tree_open
+pub fn objective_met(index: usize, tree_open: bool, mode: MapMode) -> bool {
+    match STEPS[index].kind {
+        Objective::TreeOpen => tree_open,
+        Objective::FeudalFilter => mode == MapMode::Feudal,
+        Objective::Manual => false,
+    }
 }
 
 #[derive(Component)]
@@ -199,14 +206,20 @@ fn handle_buttons(mut pressed: MessageReader<ButtonPressed>, mut guide: ResMut<F
 }
 
 /// Moves on when the objective of the current step is met (checked 4 times a second).
-fn check_objective(mut guide: ResMut<FeudalGuide>, ui: Res<FeudalUi>, time: Res<Time<Real>>) {
+fn check_objective(
+    mut guide: ResMut<FeudalGuide>,
+    ui: Res<FeudalUi>,
+    modes: Option<Res<MapModeState>>,
+    time: Res<Time<Real>>,
+) {
     let Some(index) = guide.index else { return };
     guide.check_timer -= time.delta_secs();
     if guide.check_timer > 0.0 {
         return;
     }
     guide.check_timer = CHECK_INTERVAL;
-    if objective_met(index, ui.open) {
+    let mode = modes.map_or(MapMode::Political, |m| m.mode);
+    if objective_met(index, ui.open, mode) {
         guide.completed.push(STEPS[index].id.to_owned());
         guide.advance();
     }
@@ -361,8 +374,15 @@ mod tests {
 
     #[test]
     fn first_step_objective_is_the_open_tree() {
-        assert!(!objective_met(0, false));
-        assert!(objective_met(0, true));
-        assert!(!objective_met(1, true));
+        assert!(!objective_met(0, false, MapMode::Political));
+        assert!(objective_met(0, true, MapMode::Political));
+        assert!(!objective_met(2, true, MapMode::Feudal));
+    }
+
+    #[test]
+    fn second_step_waits_for_the_feudal_filter() {
+        assert_eq!(STEPS[1].id, "feudal_filter");
+        assert!(!objective_met(1, true, MapMode::Political));
+        assert!(objective_met(1, false, MapMode::Feudal));
     }
 }

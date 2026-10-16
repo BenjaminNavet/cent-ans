@@ -12,7 +12,7 @@ use serde_json::{Value, json};
 
 use super::HudSet;
 use crate::agent::dump::DumpAppExt;
-use crate::campaign::provinces::modes::{MapMode, MapModeState};
+use crate::campaign::provinces::modes::{MapMode, MapModeState, diplomacy_color};
 use crate::menu::KeyEdges;
 use crate::settings::Settings;
 use crate::ui::kit::ButtonPressed;
@@ -217,8 +217,17 @@ pub fn sheet_bbcode_with(
     parts.join("\n")
 }
 
+/// Colour-blind symbol of a stance key (`DiplomaticStances.SYMBOL_KEYS`), empty if unmarked.
+pub fn stance_symbol(key: &str) -> &'static str {
+    match key {
+        "self" | "neutral" | "war" | "vassal" => crate::ui::kit::contrast::relation_symbol(key),
+        "ally" => crate::ui::kit::contrast::relation_symbol("alliance"),
+        _ => "",
+    }
+}
+
 /// Legend BBCode for a map mode key (`data/ui/map_legend.json`).
-pub fn legend_bbcode(tree: &Value, mode: &str, focus: Option<&str>) -> String {
+pub fn legend_bbcode(tree: &Value, mode: &str, focus: Option<&str>, colorblind: bool) -> String {
     let mut parts: Vec<String> = Vec::new();
     if let Some(intro) = tree.get("intro").and_then(Value::as_str) {
         parts.push(format!("[i]{intro}[/i]"));
@@ -254,7 +263,19 @@ pub fn legend_bbcode(tree: &Value, mode: &str, focus: Option<&str>) -> String {
                     .and_then(Value::as_str)
                     .map(|hex| format!("[color={hex}]■[/color]"))
             };
+            // Diplomacy swatches: stance colour (`DiplomaticStances.COLORS`) and, in
+            // colour-blind mode, the relation symbol (`DiplomaticStances.symbol`).
+            let relation = sample
+                .filter(|s| s.get("type").and_then(Value::as_str) == Some("relation"))
+                .and_then(|s| s.get("relation"))
+                .and_then(Value::as_str);
+            let relation_mark = relation.and_then(|key| {
+                let hex = diplomacy_color(key)?.to_hex();
+                let symbol = if colorblind { stance_symbol(key) } else { "" };
+                Some(format!("[color={}]■[/color]{symbol} ", &hex[..7]))
+            });
             let mark = match (swatch("color"), swatch("from"), swatch("to")) {
+                _ if relation_mark.is_some() => relation_mark.unwrap_or_default(),
                 (Some(c), _, _) => format!("{c} "),
                 (None, Some(a), Some(b)) => format!("{a}{b} "),
                 _ => "• ".to_owned(),
@@ -300,6 +321,7 @@ fn open_help(
     edges: Option<Res<KeyEdges>>,
     keys: Res<ButtonInput<KeyCode>>,
     settings: Option<Res<Settings>>,
+    palette: Option<Res<crate::settings::palette::Palette>>,
     keymap: Option<Res<crate::settings::KeyMap>>,
     modes: Option<Res<MapModeState>>,
     sim: Res<crate::sim::Sim>,
@@ -343,7 +365,15 @@ fn open_help(
             .and_then(Value::as_str)
             .unwrap_or("Légende de la carte")
             .to_owned();
-        let mut spec = ModalSpec::info(&title, &legend_bbcode(&tree, mode.key(), focus.as_deref()));
+        let mut spec = ModalSpec::info(
+            &title,
+            &legend_bbcode(
+                &tree,
+                mode.key(),
+                focus.as_deref(),
+                palette.is_some_and(|p| p.colorblind),
+            ),
+        );
         spec.width = 520.0;
         queue.request(LEGEND_KEY, PRIORITY_REPORT, spec);
         help.legend_opened += 1;
@@ -405,7 +435,7 @@ mod tests {
                 {"sample": {"type": "gradient", "from": "#00ff00", "to": "#ff0000"}, "label": "L2", "text": "t2"}]},
             {"id": "c", "title": "Toujours", "entries": [
                 {"sample": {"type": "color", "color": "#112233"}, "label": "L3", "text": "t3"}]}]});
-        let text = legend_bbcode(&tree, "unrest", None);
+        let text = legend_bbcode(&tree, "unrest", None, false);
         assert!(text.contains("Carte M") && text.contains("Troubles") && text.contains("Toujours"));
         assert!(!text.contains("Politique"));
         assert!(text.contains("[color=#00ff00]■[/color][color=#ff0000]■[/color]"));
@@ -415,8 +445,25 @@ mod tests {
     fn diplomacy_legend_renames_us_for_a_chosen_faction() {
         let tree = json!({"sections": [{"title": "T", "modes": ["diplomacy"], "entries": [
             {"sample": {"type": "relation", "relation": "self"}, "label": "Nous", "text": "Vos terres."}]}]});
-        assert!(legend_bbcode(&tree, "diplomacy", None).contains("[b]Nous[/b] : Vos terres."));
-        let seen = legend_bbcode(&tree, "diplomacy", Some("Bourgogne"));
+        assert!(
+            legend_bbcode(&tree, "diplomacy", None, false).contains("[b]Nous[/b] : Vos terres.")
+        );
+        let seen = legend_bbcode(&tree, "diplomacy", Some("Bourgogne"), false);
         assert!(seen.contains("[b]Bourgogne[/b] : Terres de Bourgogne."));
+    }
+
+    #[test]
+    fn diplomacy_swatches_use_stance_colours_and_colourblind_symbols() {
+        let tree = json!({"sections": [{"title": "T", "modes": ["diplomacy"], "entries": [
+            {"sample": {"type": "relation", "relation": "war"}, "label": "Guerre", "text": "x"},
+            {"sample": {"type": "relation", "relation": "tension"}, "label": "Tensions", "text": "y"}]}]});
+        let plain = legend_bbcode(&tree, "diplomacy", None, false);
+        assert!(
+            plain.contains("[color=#C71F1A]■[/color] [b]Guerre[/b]"),
+            "{plain}"
+        );
+        let access = legend_bbcode(&tree, "diplomacy", None, true);
+        assert!(access.contains("■[/color]⚔ [b]Guerre[/b]"), "{access}");
+        assert!(access.contains("■[/color] [b]Tensions[/b]"), "{access}");
     }
 }
