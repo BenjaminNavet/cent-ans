@@ -15,7 +15,7 @@ mod birds;
 mod boats;
 mod data;
 mod effects;
-mod fauna;
+pub mod fauna;
 mod figures;
 mod folk;
 mod incidents;

@@ -1,0 +1,13 @@
+# codex3 proof. Environment (run_bg.sh forwards CENT_ANS_*):
+#   CENT_ANS_CODEX_PROOF=cdx_chene   opens the bubble of an entry once the campaign runs
+#   CENT_ANS_DECOR_CURSOR=center     decor pick at the middle of the window
+#   CENT_ANS_CAMERA=xz:<x>,<z>,70    camera close to a forest (see out/camera.txt)
+# Run: client/run_bg.sh --state Campaign --script client/src/codex/proof_codex3.script
+wait 120
+dump out/codex3_a.json
+key KeyT
+wait 20
+dump out/codex3_b.json
+wait 250
+dump out/codex3_c.json
+exit

@@ -222,6 +222,7 @@ fn record_turns(
     mut log: ResMut<ChronicleLog>,
     mut panel: ResMut<ChroniclePanel>,
     mut toasts: MessageWriter<ToastRequest>,
+    codex: Option<Res<CodexStore>>,
 ) {
     let mode = settings
         .as_ref()
@@ -231,7 +232,7 @@ fn record_turns(
             continue;
         };
         let journal = game_api::turn_journal(data, state, &sim.player, &turn.events, mode);
-        log.record(&journal);
+        log.record_with(&journal, codex.as_deref());
         for notice in &journal.expired {
             toasts.write(ToastRequest::new(notice));
         }

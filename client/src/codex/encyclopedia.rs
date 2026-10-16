@@ -25,6 +25,26 @@ pub const TABS: [(&str, &str); 6] = [
     ("agents", "Agents"),
 ];
 
+/// Icon of the tab of a rules category (`TABS` of game/scripts/ui/encyclopedia.gd).
+pub fn tab_icon(category: &str) -> Option<&'static str> {
+    Some(match category {
+        "units" => "cat_unit",
+        "buildings" => "cat_building",
+        "technologies" => "cat_technology",
+        "resources" => "cat_resource",
+        "traits" => "cat_trait",
+        "skills" => "cat_skill",
+        "retinue" => "hud_army",
+        "factions" | "agents" => "hud_diplomacy",
+        "religions" => "bld_parish_church",
+        "mechanics" => "hud_menu",
+        _ => return None,
+    })
+}
+
+/// Side of a tab icon (`icon_max_width` 18 in Godot).
+pub const TAB_ICON_PX: f32 = 18.0;
+
 /// `+5 %`, `+2`, `= 3` for an effect value (`mode`: add, percent, set…).
 pub fn effect_line(effect: &Value) -> String {
     let name = str_of(effect, "effect").replace('_', " ");

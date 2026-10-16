@@ -238,6 +238,53 @@ pub fn target_id(target: &str) -> Option<&str> {
     target.strip_prefix(META_PREFIX)
 }
 
+/// Prefix of the link target of an interface bubble (`ib:<kind>:<id>`: entity or rule).
+pub const IB_PREFIX: &str = "ib:";
+
+/// Entity kind of an id by its prefix (`RichTooltip.ENTITY_KINDS`), `None` when unknown.
+pub fn entity_kind(id: &str) -> Option<&'static str> {
+    [
+        ("unit_", "unit"),
+        ("bld_", "building"),
+        ("tech_", "technology"),
+        ("res_", "resource"),
+        ("trait_", "trait"),
+        ("skill_", "skill"),
+    ]
+    .into_iter()
+    .find_map(|(prefix, kind)| id.starts_with(prefix).then_some(kind))
+}
+
+/// BBCode of a link to the entity bubble `ib:<kind>:<id>` (`CodexText.ib_link`): rubric red and
+/// underlined until `read`.
+pub fn ib_link(kind: &str, id: &str, label: &str, read: bool) -> String {
+    if label.is_empty() || id.is_empty() {
+        return label.to_owned();
+    }
+    if read {
+        format!("[url={IB_PREFIX}{kind}:{id}][color={READ_COLOR}]{label}[/color][/url]")
+    } else {
+        format!("[url={IB_PREFIX}{kind}:{id}][color={UNREAD_COLOR}][u]{label}[/u][/color][/url]")
+    }
+}
+
+/// [`ib_link`] of a game entity whose kind follows from its id; the plain label otherwise.
+pub fn entity_link(id: &str, label: &str, read: bool) -> String {
+    entity_kind(id).map_or_else(|| label.to_owned(), |kind| ib_link(kind, id, label, read))
+}
+
+/// The `ib:<kind>:<id>` key of a link target, `None` for other targets.
+pub fn ib_key(target: &str) -> Option<&str> {
+    (target.starts_with(IB_PREFIX) && target.matches(':').count() >= 2).then_some(target)
+}
+
+/// Id of the entity behind an `ib:<kind>:<id>` key (`rule` keys have none).
+pub fn ib_entity(key: &str) -> Option<&str> {
+    let mut parts = key.splitn(3, ':');
+    let (_, kind, id) = (parts.next()?, parts.next()?, parts.next()?);
+    (kind != "rule").then_some(id)
+}
+
 /// Lowercase without accents, typographic apostrophe as a straight one (search « epee » finds
 /// « Épée »).
 pub fn fold(text: &str) -> String {
@@ -360,6 +407,23 @@ mod tests {
             auto_link(&store, "[color=#fff]rien[/color]"),
             "[color=#fff]rien[/color]"
         );
+    }
+
+    #[test]
+    fn ib_links_and_keys() {
+        assert_eq!(entity_kind("unit_archer"), Some("unit"));
+        assert_eq!(entity_kind("chr_x"), None);
+        assert_eq!(
+            entity_link("tech_x", "Étrier", false),
+            "[url=ib:technology:tech_x][color=#8b1a1a][u]Étrier[/u][/color][/url]"
+        );
+        assert_eq!(entity_link("chr_x", "Jean", false), "Jean");
+        assert!(ib_link("unit", "unit_a", "A", true).contains("5a3a1a"));
+        assert_eq!(ib_key("ib:rule:morale"), Some("ib:rule:morale"));
+        assert_eq!(ib_key("ib:x"), None);
+        assert_eq!(ib_key("cdx:a"), None);
+        assert_eq!(ib_entity("ib:unit:unit_archer"), Some("unit_archer"));
+        assert_eq!(ib_entity("ib:rule:morale"), None);
     }
 
     #[test]

@@ -13,7 +13,13 @@
 //!   ([`super::bubble_layout::place_beside`], `keyword_y`), below any other open bubble it would
 //!   cover; when nothing fits it keeps the kit's place.
 //!
-//! Not ported: pinned bubbles (right click, T), `ib:` entity bubbles, the decor bubble of ADR 0219.
+//! - `ib:<kind>:<id>` links (entities and rules, [`text::ib_key`]) open the bubble registered under
+//!   their key in the [`TooltipRegistry`] (nothing when unknown); every Codex entry that describes
+//!   a unit, building, technology, resource, trait or skill registers one (unless a screen already
+//!   registered a richer one). A click opens the sheet of the entity (`entry_for_entity`).
+//!
+//! Pinned bubbles (right click, T) are in [`super::pinned`], the decor bubble of ADR 0219 in
+//! [`super::decor`].
 
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
@@ -22,6 +28,7 @@ use bevy::ui::UiGlobalTransform;
 use bevy::window::PrimaryWindow;
 use serde_json::{Value, json};
 
+use super::pinned::PinnedBubble;
 use super::store::CodexStore;
 use super::{CodexOverlay, CodexRoot, OpenCodex, text};
 use crate::agent::dump::DumpAppExt;
@@ -33,6 +40,13 @@ use crate::ui::kit::tooltip::{Anchor, TooltipPanel, TooltipRegistry, TooltipStat
 pub const HOVER_DELAY: f32 = 0.35;
 /// Seconds outside every link and bubble before the bubbles close.
 pub const CLOSE_GRACE: f32 = 0.4;
+
+/// Registry key of the bubble a link target opens: `cdx:<id>` or `ib:<kind>:<id>`.
+pub fn bubble_key(target: &str) -> Option<&str> {
+    text::target_id(target)
+        .map(|_| target)
+        .or_else(|| text::ib_key(target))
+}
 
 /// BBCode of the bubble of `id`: title, category (and era), summary with its links.
 pub fn bubble_bbcode(store: &CodexStore, id: &str) -> Option<String> {
@@ -47,7 +61,7 @@ pub fn bubble_bbcode(store: &CodexStore, id: &str) -> Option<String> {
 }
 
 #[derive(Resource, Default)]
-struct BubbleState {
+pub(super) struct BubbleState {
     /// Link being timed: (target, seconds).
     pending: Option<(String, f32)>,
     /// Target of the bubble this system opened, and seconds spent outside.
@@ -56,9 +70,33 @@ struct BubbleState {
     clicked_total: usize,
     last_opened: String,
     registered: usize,
+    /// Key of the bubble opened by the proof hook (`CENT_ANS_CODEX_PROOF`).
+    proof_key: Option<String>,
+    /// `ib:` entity bubbles registered from the Codex entries.
+    registered_ib: usize,
+    /// `ib:` bubbles opened (hover), keys read (links lose their underline).
+    ib_opened: usize,
+    ib_seen: std::collections::BTreeSet<String>,
     /// Child bubbles moved beside their link's line, and the last line used.
     aligned_total: usize,
     last_keyword_y: Option<f32>,
+}
+
+impl BubbleState {
+    /// Key of the hover bubble this module opened, while it is up.
+    pub(super) fn open_key(&self) -> Option<&str> {
+        self.open
+            .as_ref()
+            .map(|(key, _)| key.as_str())
+            .or(self.proof_key.as_deref())
+    }
+
+    /// The hover bubble was closed or pinned elsewhere.
+    pub(super) fn forget_open(&mut self) {
+        self.open = None;
+        self.proof_key = None;
+        self.pending = None;
+    }
 }
 
 pub fn plugin(app: &mut App) {
@@ -68,11 +106,45 @@ pub fn plugin(app: &mut App) {
             Update,
             (register_bubbles, hover_bubbles, click_links).chain(),
         )
+        .add_systems(Update, proof_open.run_if(in_state(AppState::Campaign)))
         // After the kit placed the new bubbles (Update), before this frame's layout.
         .add_systems(
             PostUpdate,
             align_child_bubbles.before(bevy::ui::UiSystems::Layout),
         );
+}
+
+/// Proof hook: `CENT_ANS_CODEX_PROOF=<cdx id or ib key>` opens that bubble at (320, 180) once the
+/// campaign runs (scripts cannot hover); a `key KeyT` of the script then pins it.
+fn proof_open(
+    mut done: Local<bool>,
+    mut frames: Local<u32>,
+    registry: Res<TooltipRegistry>,
+    store: Res<CodexStore>,
+    mut tooltips: ResMut<TooltipState>,
+    mut state: ResMut<BubbleState>,
+) {
+    if *done || store.is_empty() {
+        return;
+    }
+    let Ok(wanted) = std::env::var("CENT_ANS_CODEX_PROOF") else {
+        *done = true;
+        return;
+    };
+    *frames += 1;
+    if *frames < 30 {
+        return;
+    }
+    *done = true;
+    let key = if wanted.starts_with(text::IB_PREFIX) || wanted.starts_with(text::META_PREFIX) {
+        wanted
+    } else {
+        format!("{}{wanted}", text::META_PREFIX)
+    };
+    tooltips.open_at(&registry.resolve(&key), Vec2::new(320.0, 180.0), false);
+    state.proof_key = Some(key.clone());
+    state.last_opened = key;
+    state.opened_total += 1;
 }
 
 /// Fills the registry with the bubble of every entry (colours follow the read state).
@@ -85,19 +157,30 @@ fn register_bubbles(
         return;
     }
     let mut count = 0;
+    let mut ib_count = 0;
     for id in store.ids_in_family(None) {
-        if let Some(bbcode) = bubble_bbcode(&store, id) {
-            registry.register(&format!("{}{id}", text::META_PREFIX), &bbcode);
-            count += 1;
+        let Some(bbcode) = bubble_bbcode(&store, id) else {
+            continue;
+        };
+        registry.register(&format!("{}{id}", text::META_PREFIX), &bbcode);
+        count += 1;
+        let entity = store.entry(id).map_or("", |entry| entry.entity.as_str());
+        if let Some(kind) = text::entity_kind(entity) {
+            let key = format!("{}{kind}:{entity}", text::IB_PREFIX);
+            if !registry.contains(&key) {
+                registry.register(&key, &bbcode);
+                ib_count += 1;
+            }
         }
     }
     state.registered = count;
+    state.registered_ib = ib_count;
 }
 
 fn in_panel(
     entity: Entity,
     parents: &Query<&ChildOf>,
-    panels: &Query<(), With<TooltipPanel>>,
+    panels: &Query<(), Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
 ) -> bool {
     std::iter::once(entity)
         .chain(parents.iter_ancestors(entity))
@@ -114,13 +197,13 @@ fn hover_bubbles(
     window: Query<&Window, With<PrimaryWindow>>,
     links: Query<(Entity, &RichLink, &Hovered)>,
     parents: Query<&ChildOf>,
-    panels: Query<(), With<TooltipPanel>>,
-    panel_hover: Query<&Hovered, With<TooltipPanel>>,
+    panels: Query<(), Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
+    panel_hover: Query<&Hovered, Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
 ) {
     let dt = time.delta_secs();
     let hovered_link = links.iter().find_map(|(entity, link, hovered)| {
-        let target = text::target_id(&link.0)?;
-        (hovered.get() && !in_panel(entity, &parents, &panels)).then(|| target.to_owned())
+        let key = bubble_key(&link.0)?;
+        (hovered.get() && !in_panel(entity, &parents, &panels)).then(|| key.to_owned())
     });
     let on_panel = panel_hover.iter().any(Hovered::get);
     let state = &mut *state;
@@ -132,15 +215,23 @@ fn hover_bubbles(
                 Some((pending, elapsed)) if pending == target => elapsed + dt,
                 _ => 0.0,
             };
-            if elapsed >= HOVER_DELAY {
+            let known = text::target_id(target).is_some() || registry.contains(target);
+            if elapsed >= HOVER_DELAY && !known {
+                // An `ib:` link nobody registered: no bubble (as in Godot), try again after a move.
+                state.pending = Some((target.clone(), f32::NEG_INFINITY));
+            } else if elapsed >= HOVER_DELAY {
                 let cursor = window
                     .single()
                     .ok()
                     .and_then(Window::cursor_position)
                     .unwrap_or(Vec2::ZERO);
-                let key = format!("{}{target}", text::META_PREFIX);
-                tooltips.open_at(&registry.resolve(&key), cursor, false);
-                store.discover(target);
+                tooltips.open_at(&registry.resolve(target), cursor, false);
+                if let Some(id) = text::target_id(target) {
+                    store.discover(id);
+                } else {
+                    state.ib_seen.insert(target.clone());
+                    state.ib_opened += 1;
+                }
                 state.open = Some((target.clone(), 0.0));
                 state.opened_total += 1;
                 state.last_opened.clone_from(target);
@@ -172,9 +263,10 @@ fn click_links(
     mouse: Res<ButtonInput<MouseButton>>,
     state_now: Res<State<AppState>>,
     overlay: Res<CodexOverlay>,
+    store: Res<CodexStore>,
     links: Query<(Entity, &RichLink, &Hovered)>,
     parents: Query<&ChildOf>,
-    panels: Query<(), With<TooltipPanel>>,
+    panels: Query<(), Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
     roots: Query<(), With<CodexRoot>>,
     mut tooltips: ResMut<TooltipState>,
     mut state: ResMut<BubbleState>,
@@ -185,16 +277,21 @@ fn click_links(
     }
     let screen = *state_now.get() == AppState::Codex || overlay.open;
     let clicked = links.iter().find_map(|(entity, link, hovered)| {
-        let target = text::target_id(&link.0)?;
+        let key = bubble_key(&link.0)?;
         if !hovered.get() {
             return None;
         }
+        // The sheet behind the link: a Codex entry, or the entry of the entity of an `ib:` link.
+        let sheet = text::target_id(key).map(str::to_owned).or_else(|| {
+            let entity = text::ib_entity(key)?;
+            store.entry_for_entity(entity).map(str::to_owned)
+        })?;
         let bubble = in_panel(entity, &parents, &panels);
         let on_screen = std::iter::once(entity)
             .chain(parents.iter_ancestors(entity))
             .any(|ancestor| roots.contains(ancestor));
         // The Codex screen handles its own links; bubbles and other texts open the sheet.
-        (bubble || !(on_screen || screen)).then(|| target.to_owned())
+        (bubble || !(on_screen || screen)).then_some(sheet)
     });
     if let Some(id) = clicked {
         tooltips.chain.clear();
@@ -257,7 +354,7 @@ fn align_child_bubbles(
         else {
             continue;
         };
-        if done.contains(&level.id) || text::target_id(target).is_none() {
+        if done.contains(&level.id) || bubble_key(target).is_none() {
             continue;
         }
         let placed: Vec<(Entity, u64, Rect)> = panels
@@ -317,6 +414,9 @@ fn dump(world: &World) -> (String, Value) {
         "codex_bubbles".to_owned(),
         json!({
             "registered": state.registered,
+            "registered_ib": state.registered_ib,
+            "ib_opened": state.ib_opened,
+            "ib_seen": state.ib_seen,
             "opened": state.opened_total,
             "clicked": state.clicked_total,
             "last_opened": state.last_opened,

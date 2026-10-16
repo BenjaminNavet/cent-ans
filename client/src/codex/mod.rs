@@ -32,13 +32,17 @@
 //! - **Encyclopedia tabs** ([`encyclopedia`]): Traits, Compétences, Suite, Factions, Religion,
 //!   Agents. Unread entries are dimmed in the list.
 //!
-//! Not ported: the decor hover bubble of ADR 0219 (needs the 3D decor picking of the battle and
-//! campaign scenes), rich `ib:` entity bubbles, bubble pinning (right click, T).
+//! - **Pinned bubbles** ([`pinned`]), **`ib:` entity bubbles** ([`bubbles`]) and the delayed
+//!   **decor bubble** of ADR 0219 ([`decor`]); rules tabs carry the icon of their category.
+//!
+//! Not ported: see the « codex3 » section of client/README.md.
 
 pub mod bubble_layout;
 pub mod bubbles;
+pub mod decor;
 pub mod encyclopedia;
 pub mod herbarium;
+pub mod pinned;
 pub mod rules;
 pub mod store;
 pub mod text;
@@ -59,8 +63,8 @@ use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::text_field::{TextField, TextFieldChanged, TextInputFocus, text_field_limited};
 use crate::ui::kit::{
     ButtonPressed, ListSelected, RichLink, RichStyle, TabButton, TabSelected, UiTheme,
-    button_small, caption, heading, list_item, panel_note, panel_page, rich_text, scroll_list,
-    separator, tab_bar, typed,
+    button_small, caption, heading, icons::icon, list_item, panel_note, panel_page, rich_text,
+    scroll_list, separator, tab_bar, typed,
 };
 use rules::{RulesBook, RulesEntry};
 use store::{CodexStore, FAMILIES};
@@ -92,6 +96,47 @@ fn dim_unread(rows: Query<&Children, Added<UnreadRow>>, mut colors: Query<&mut T
                 color.0 = style::INK_FADED;
             }
         }
+    }
+}
+
+/// Icon in front of the caption of a rules tab.
+#[derive(Component)]
+struct TabIcon;
+
+/// Adds the icon of its category in front of the caption of every new rules tab (`rcat:<i>`).
+fn add_tab_icons(
+    mut commands: Commands,
+    theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
+    book: Res<RulesBookRes>,
+    tabs: Query<(Entity, &Name, &TabButton), Added<TabButton>>,
+) {
+    for (entity, name, tab) in &tabs {
+        if tab.group != "rcat" {
+            continue;
+        }
+        let Some(index) = name
+            .as_str()
+            .strip_prefix("rcat:")
+            .and_then(|index| index.parse::<usize>().ok())
+        else {
+            continue;
+        };
+        let Some(icon_id) = book
+            .0
+            .categories
+            .get(index)
+            .and_then(|category| encyclopedia::tab_icon(category.id))
+        else {
+            continue;
+        };
+        let icon = commands
+            .spawn((
+                TabIcon,
+                icon(&theme, &assets, icon_id, encyclopedia::TAB_ICON_PX),
+            ))
+            .id();
+        commands.entity(entity).insert_children(0, &[icon]);
     }
 }
 
@@ -249,6 +294,7 @@ impl Plugin for CodexPlugin {
                         sync_search,
                         refresh,
                         dim_unread,
+                        add_tab_icons,
                     )
                         .chain()
                         .run_if(codex_active),
@@ -256,6 +302,8 @@ impl Plugin for CodexPlugin {
                     .chain(),
             );
         bubbles::plugin(app);
+        pinned::plugin(app);
+        decor::plugin(app);
         herbarium::plugin(app);
     }
 }
@@ -1305,6 +1353,10 @@ fn dump_codex(world: &World) -> (String, Value) {
             .map(|c| json!({"id": c.id, "count": c.entries.len()}))
             .collect::<Vec<_>>(),
         "rules_listed": page.rules_listed,
+        "tab_icons": world
+            .iter_entities()
+            .filter(|entity| entity.contains::<TabIcon>())
+            .count(),
         "current": {
             "kind": kind, "id": id, "title": page.title, "art": page.art,
             "links": page.links, "see_also": page.see_also,

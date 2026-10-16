@@ -5,6 +5,8 @@
 
 use game_api::chronicle::{self, JournalEntry, LineStyle, NewsLetter, TurnJournal};
 
+use crate::codex::{store::CodexStore, text as codex_text};
+
 /// Lines kept in the journal (`JournalView.MAX_LOG_LINES`), date headers included.
 pub const MAX_LOG_LINES: usize = 200;
 /// Letters kept (`NewsLetters.MAX_KEPT`).
@@ -31,7 +33,17 @@ pub struct ChronicleLog {
 
 /// BBCode of a journal entry (`JournalView.format_line`); brackets of the text are escaped.
 pub fn format_line(entry: &JournalEntry) -> String {
-    let text = escape(&entry.text);
+    format_line_with(entry, None)
+}
+
+/// [`format_line`] with the Codex links of the text (`CodexText.format(text, true)` in Godot):
+/// `[[id|label]]` markup and the first occurrence of each alias become links. Without a store the
+/// text is escaped instead.
+pub fn format_line_with(entry: &JournalEntry, store: Option<&CodexStore>) -> String {
+    let text = match store {
+        Some(store) if !store.is_empty() => codex_text::format_auto(store, &entry.text),
+        _ => escape(&entry.text),
+    };
     let Some(LineStyle { color, bold, glyph }) = entry.style else {
         return text;
     };
@@ -69,11 +81,16 @@ fn with_header(new: Vec<Line>, date: &str, previous: &[Line]) -> Vec<Line> {
 impl ChronicleLog {
     /// Adds a resolved turn on top of the history.
     pub fn record(&mut self, turn: &TurnJournal) {
+        self.record_with(turn, None);
+    }
+
+    /// [`Self::record`] with the Codex links of the lines.
+    pub fn record_with(&mut self, turn: &TurnJournal, store: Option<&CodexStore>) {
         self.turns += 1;
         let mut new_lines: Vec<Line> = turn
             .entries
             .iter()
-            .map(|e| (e.genre.clone(), format_line(e)))
+            .map(|e| (e.genre.clone(), format_line_with(e, store)))
             .collect();
         if new_lines.is_empty() {
             new_lines.push((String::new(), "[i]Rien à signaler.[/i]".to_owned()));
@@ -83,7 +100,7 @@ impl ChronicleLog {
             let new_world = turn
                 .world
                 .iter()
-                .map(|e| (e.genre.clone(), format_line(e)))
+                .map(|e| (e.genre.clone(), format_line_with(e, store)))
                 .collect();
             self.world = with_header(new_world, &turn.date_label, &self.world);
         }
@@ -176,6 +193,30 @@ mod tests {
         let war = log.shown_lines("war");
         assert_eq!(war.len(), 2);
         assert!(war[1].1.contains("Bataille"));
+    }
+
+    #[test]
+    fn lines_get_codex_links_with_a_store() {
+        let store = CodexStore::parse(
+            r#"{"entries":[{"id":"cdx_crecy","title":"Crécy","category":"bataille","aliases":["Crécy"],"summary":"s"}]}"#
+                .as_bytes(),
+        )
+        .unwrap();
+        let mut log = ChronicleLog::default();
+        log.record_with(
+            &turn(
+                "A",
+                vec![entry(
+                    "battle",
+                    "war",
+                    "Victoire à Crécy, voir [[cdx_crecy|la bataille]]",
+                )],
+            ),
+            Some(&store),
+        );
+        let line = &log.lines[1].1;
+        assert!(line.contains("[url=cdx:cdx_crecy]"), "{line}");
+        assert!(line.starts_with("[color="));
     }
 
     #[test]
