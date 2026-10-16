@@ -70,3 +70,6 @@
 15:01 econ2 def8c1047 OK clippy/tests(1082 full --features dev, batch uiimg2+access+econ2+council2, merge8); no conflicts, no fixes
 15:01 council2 2ad5df5b3 OK clippy/tests(1082 full --features dev, batch uiimg2+access+econ2+council2, merge8); no conflicts, no fixes
 15:01 merge8 smoke campaign campaign_turns battle crecy siege main_menu OK (muted; siege timed out once under load ~95 with no app output, retry ok 31s)
+15:11 bdecor5 3195cdb85 OK clippy/tests(1092 full --features dev, batch bdecor5+parch2+portaudit, merge8)/smoke battle crecy campaign (muted); no conflicts, no fixes
+15:11 parch2 c7aa30628 OK clippy/tests(1092 full --features dev, batch bdecor5+parch2+portaudit, merge8)/smoke battle crecy campaign (muted); no conflicts, no fixes
+15:11 portaudit d9d05f64a OK clippy/tests(1092 full --features dev, batch bdecor5+parch2+portaudit, merge8)/smoke battle crecy campaign (muted); no conflicts, no fixes
