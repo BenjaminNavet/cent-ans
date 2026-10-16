@@ -454,6 +454,41 @@ pub fn button_icon(
     )
 }
 
+/// Small button showing the library icon `icon_id` (or the `fallback` text when the library has
+/// no PNG for it), like Godot's `BuildHammer`. Press it by mouse or `click <name>`.
+pub fn button_glyph<'t>(
+    theme: &'t UiTheme,
+    assets: &AssetServer,
+    name: &'t str,
+    icon_id: &str,
+    fallback: &str,
+    size: f32,
+) -> impl Bundle + use<'t> {
+    let image = theme
+        .icons
+        .get(icon_id)
+        .map(|entry| assets.load::<Image>(entry.path.clone()));
+    let font = theme.text_font(false, false, UiType::Body.size());
+    let fallback = fallback.to_owned();
+    (
+        kit_button(theme, name, ButtonKind::Normal, 0.0),
+        Children::spawn(SpawnWith(move |parent: &mut ChildSpawner| {
+            if let Some(image) = image {
+                parent.spawn((
+                    Node {
+                        width: Val::Px(size),
+                        height: Val::Px(size),
+                        ..default()
+                    },
+                    ImageNode::new(image),
+                ));
+            } else {
+                parent.spawn((Text::new(fallback), font, TextColor(style::INK)));
+            }
+        })),
+    )
+}
+
 /// Toggle button: stays pressed while on. Emits [`ToggleChanged`].
 pub fn toggle_button(theme: &UiTheme, name: &str, caption: &str, on: bool) -> impl Bundle {
     (

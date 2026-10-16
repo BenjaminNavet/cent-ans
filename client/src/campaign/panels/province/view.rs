@@ -66,6 +66,10 @@ pub struct Snapshot {
     pub lent_text: Option<String>,
     /// Descriptions with Codex words linked, by choice key (`table`, `edict`).
     pub linked: std::collections::BTreeMap<String, String>,
+    /// « Can build here » verdict of every colony the player holds (hammer, companion selector).
+    pub verdicts: Vec<super::companion::Verdict>,
+    /// The build companion is open under the Colonies list.
+    pub companion: bool,
 }
 
 pub type Kids<'a, 'b> = ChildSpawnerCommands<'a>;
@@ -150,7 +154,7 @@ pub fn build(
         body.spawn(tab_pane(TAB_GROUP, TABS[1].0, tab == 1))
             .with_children(|pane| buildings_tab(pane, theme, assets, labels, images, snap));
         body.spawn(tab_pane(TAB_GROUP, TABS[2].0, tab == 2))
-            .with_children(|pane| settlements_tab(pane, theme, assets, snap));
+            .with_children(|pane| settlements_tab(pane, theme, assets, labels, images, snap));
         body.spawn(tab_pane(TAB_GROUP, TABS[3].0, tab == 3))
             .with_children(|pane| garrison_tab(pane, theme, snap));
     });
@@ -561,6 +565,19 @@ fn buildings_tab(
             None,
         );
     }
+    buildings_view(pane, theme, assets, labels, images, snap);
+}
+
+/// Tree of buildings of the selected colony: tier plate, slots, queue, buildable nodes
+/// (`SettlementBuildingsView`). Shared by the Buildings tab and the Colonies companion.
+pub(super) fn buildings_view(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    labels: &UiLabels,
+    images: &BuildingImages,
+    snap: &Snapshot,
+) {
     let Some(tree) = &snap.tree else {
         pane.spawn(caption(theme, "Arbre de construction indisponible."));
         return;
@@ -911,6 +928,9 @@ fn settlement_card(
                 &format!("{} ({})", place.name, labels::settlement_kind(&place.kind)),
                 UiType::Body,
             ));
+            if let Some(verdict) = snap.verdicts.iter().find(|v| v.settlement == place.id) {
+                super::companion::spawn_hammer(line, theme, assets, verdict);
+            }
             line.spawn(button_small(
                 theme,
                 &format!("prov:colony:{}", place.id),
@@ -942,7 +962,14 @@ fn settlement_card(
     });
 }
 
-fn settlements_tab(pane: &mut Kids, theme: &UiTheme, assets: &AssetServer, snap: &Snapshot) {
+fn settlements_tab(
+    pane: &mut Kids,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    labels: &UiLabels,
+    images: &BuildingImages,
+    snap: &Snapshot,
+) {
     pane.spawn(typed(
         theme,
         &format!("{} colonie(s)", snap.sheet.settlements.len()),
@@ -950,6 +977,9 @@ fn settlements_tab(pane: &mut Kids, theme: &UiTheme, assets: &AssetServer, snap:
     ));
     for place in &snap.sheet.settlements {
         settlement_card(pane, theme, assets, snap, place);
+    }
+    if snap.companion {
+        super::companion::section(pane, theme, assets, labels, images, snap);
     }
 }
 
