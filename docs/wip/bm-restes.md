@@ -72,3 +72,4 @@
 - camp_2600 (parchemin) : bande beige à gauche avec un bord en diagonale qui coupe l'Atlantique à l'ouest de l'Irlande → bord du plan parchemin/fond vu en biais (étendue ou fond de mer à corriger).
 - battle_default : plaques de sol piétiné rectangulaires à bords francs (claires, très visibles) → fondre les bords (bruit + dégradé) comme Godot.
 - camp_0060, siege_paris : rien de flagrant ; anneaux de sélection bleus visibles sur le siège (normal).
+- Scripts de lancement de bataille depuis le menu (cb:launch, Crécy historique, « Batailles ») : l'invite du didacticiel (battle_prologue_invite.rs) retient le lancement → ajouter `click prologue_invite:no` (cf. menu/proof_prologue_pause.txt). menu/proof_custom_options.txt et proof_crecy.txt à corriger ; à rappeler à l'agent de la partie pilote.
