@@ -635,7 +635,7 @@ fn build_lakes(
     let Some(mesh) = lake_mesh(&data.lakes, out) else {
         return;
     };
-    let mut params = RiverParams::lake(data.map_size);
+    let mut params = RiverParams::lake_with(&data.display, data.map_size);
     params.has_coast_dist = if coast_dist.is_some() { 1.0 } else { 0.0 };
     let material = ctx.river_materials.add(RiverMaterial {
         params,

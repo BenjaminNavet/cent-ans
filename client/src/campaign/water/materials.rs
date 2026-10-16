@@ -287,6 +287,15 @@ pub struct RiverParams {
     /// Linear mean colour of the detail albedo (w unused).
     pub detail_mean: Vec4,
     pub silt_color: Vec4,
+    /// VQ look: far-distance colour (rgb), muddy shallow-edge colour (rgb, w = strength).
+    pub far_color: Vec4,
+    pub mud_color: Vec4,
+    /// Sun glint colour (rgb) and power (w).
+    pub glint_color: Vec4,
+    /// x = saturation, y = brightness, z = glint strength, w = base sky reflection.
+    pub look: Vec4,
+    /// x = far blend start, y = far blend end (eye distance, map units), z = bank wet start (0-1 across), w unused.
+    pub look2: Vec4,
     /// Fine hydrography disc (`fine_zone`: centre xz, radius, weight): the ribbon fades out inside.
     pub fine_zone: Vec4,
     /// Fords and ferries (`river_crossings.gd` `ford_uniforms`): x, z, radius, 1 ford / 0.25 ferry.
@@ -433,6 +442,21 @@ impl RiverParams {
             detail: Vec4::ZERO,
             detail_mean: Vec4::ONE,
             silt_color: linear([0.34, 0.31, 0.22], 1.0),
+            far_color: linear(display.look.far_color, 1.0),
+            mud_color: linear(display.look.mud_color, display.look.mud_strength),
+            glint_color: linear(display.look.glint_color, display.look.glint_power),
+            look: Vec4::new(
+                display.look.saturation,
+                display.look.brightness,
+                display.look.glint_strength,
+                display.look.base_reflect,
+            ),
+            look2: Vec4::new(
+                display.look.far_blend[0],
+                display.look.far_blend[1],
+                display.look.bank_wet_start,
+                0.0,
+            ),
             fine_zone: Vec4::new(0.0, 0.0, -1.0, 0.0),
             fords: [Vec4::ZERO; 32],
             ford_count: 0.0,
@@ -473,8 +497,13 @@ impl RiverParams {
 
     /// Lake sheets (`LakesRenderer._water_material`, colours in sRGB there).
     pub fn lake(map_size: Vec2) -> Self {
+        Self::lake_with(&super::data::RiverDisplay::default(), map_size)
+    }
+
+    /// Lake sheets with the display file (`look` block shared with the rivers).
+    pub fn lake_with(display: &super::data::RiverDisplay, map_size: Vec2) -> Self {
         let mut p = Self::river(
-            &super::data::RiverDisplay::default(),
+            display,
             1.0,
             map_size,
             1.0,
@@ -482,8 +511,8 @@ impl RiverParams {
             719.0,
         );
         p.gen_width_scale = 0.0;
-        p.shallow_color = linear([0.26, 0.46, 0.52], 1.0);
-        p.deep_color = linear([0.13, 0.31, 0.44], 1.0);
+        p.shallow_color = linear(display.look.lake_shallow_color, 1.0);
+        p.deep_color = linear(display.look.lake_deep_color, 1.0);
         p.sky_reflect = 0.55;
         p.sheet = 1.0;
         p.sheet_alpha = 0.88;

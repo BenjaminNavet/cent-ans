@@ -143,7 +143,48 @@ pub struct RiverDisplay {
     pub sky_reflect: f32,
     pub sky_color: [f32; 3],
     pub generalised: Generalised,
+    pub look: WaterLook,
     pub labels: LabelConfig,
+}
+
+/// `river_display.json` -> `look` (VQ rivers): natural water colour grade, far line, wet banks, glint.
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(default)]
+pub struct WaterLook {
+    pub saturation: f32,
+    pub brightness: f32,
+    pub base_reflect: f32,
+    pub far_color: [f32; 3],
+    /// Eye distance (map units) where the colour starts / finishes going to `far_color`.
+    pub far_blend: [f32; 2],
+    pub mud_color: [f32; 3],
+    pub mud_strength: f32,
+    pub bank_wet_start: f32,
+    pub glint_color: [f32; 3],
+    pub glint_strength: f32,
+    pub glint_power: f32,
+    pub lake_shallow_color: [f32; 3],
+    pub lake_deep_color: [f32; 3],
+}
+
+impl Default for WaterLook {
+    fn default() -> Self {
+        Self {
+            saturation: 1.0,
+            brightness: 1.0,
+            base_reflect: 0.12,
+            far_color: [0.3, 0.4, 0.46],
+            far_blend: [0.0, 0.0],
+            mud_color: [0.34, 0.31, 0.22],
+            mud_strength: 0.0,
+            bank_wet_start: 0.7,
+            glint_color: [1.0, 0.92, 0.75],
+            glint_strength: 0.0,
+            glint_power: 80.0,
+            lake_shallow_color: [0.26, 0.46, 0.52],
+            lake_deep_color: [0.13, 0.31, 0.44],
+        }
+    }
 }
 
 /// `river_display.json` -> `generalised` (GC, ADR 0158): wider rivers, `max(w, scale * sqrt(w * ref))`.
@@ -173,6 +214,7 @@ impl Default for RiverDisplay {
             sky_reflect: 0.55,
             sky_color: [0.66, 0.72, 0.76],
             generalised: Generalised::default(),
+            look: WaterLook::default(),
             labels: LabelConfig::default(),
         }
     }

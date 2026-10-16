@@ -3,7 +3,7 @@
 import bevy_pbr::render::mesh_bindings::mesh;
 import bevy_pbr::render::mesh_functions::get_world_from_local;
 import cent_ans_client::campaign::terrain::relief::{ReliefParams, relief_display_height};
-import bevy_pbr::render::mesh_view_bindings::{view, globals};
+import bevy_pbr::render::mesh_view_bindings::{view, globals, lights};
 
 struct Params {
     shallow_color: vec4<f32>,
@@ -16,6 +16,11 @@ struct Params {
     detail: vec4<f32>,
     detail_mean: vec4<f32>,
     silt_color: vec4<f32>,
+    far_color: vec4<f32>,
+    mud_color: vec4<f32>,
+    glint_color: vec4<f32>,
+    look: vec4<f32>,
+    look2: vec4<f32>,
     fine_zone: vec4<f32>,
     fords: array<vec4<f32>, 32>,
     map_size: vec2<f32>,
@@ -158,7 +163,7 @@ fn vertex(in: VertexInput) -> VertexOutput {
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let sheet = params.sheet > 0.5;
     let edge = abs(in.side);
-    var deep = 1.0 - smoothstep(0.35, 1.05, edge);
+    var deep = 1.0 - smoothstep(0.1, 1.0, edge);
     var lake_coast = -8.0;
     if sheet {
         deep = 0.75;
@@ -241,8 +246,28 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     if sheet {
         sheet_sky = 0.04 + 0.26 * vnoise(in.world.xz * 0.06 + globals.time * 0.02);
     }
-    col = mix(col, params.sky_color.rgb, clamp(fresnel * params.sky_reflect + 0.12 + sheet_sky, 0.0, 0.85) * (1.0 - foam));
-    col = mix(col, params.bank_ink_color.rgb, ink);
+    let eye_dist = length(view.world_position - in.world);
+    let far_t = smoothstep(params.look2.x, max(params.look2.y, params.look2.x + 1.0), eye_dist);
+    // VQ: muddy, lighter shallows along the banks (silt stirred up where the water is thin).
+    let shallow = 1.0 - deep;
+    col = mix(col, params.mud_color.rgb * (0.85 + 0.3 * n2), clamp(shallow * shallow * params.mud_color.w, 0.0, 1.0) * (1.0 - far_t));
+    // Sky reflection: fresnel only (grazing), weaker with the water's own colour below.
+    col = mix(col, params.sky_color.rgb, clamp(fresnel * params.sky_reflect + params.look.w + sheet_sky, 0.0, 0.85) * (1.0 - foam));
+    // Sun glint (Blinn-Phong on the ripple normal), strong near, gone at distance.
+    if lights.n_directional_lights > 0u && params.look.z > 0.0 {
+        let to_sun = lights.directional_lights[0].direction_to_light;
+        let h = normalize(to_sun + to_eye);
+        let spec = pow(max(dot(n, h), 0.0), params.glint_color.w) * smoothstep(0.0, 0.12, to_sun.y);
+        col = col + params.glint_color.rgb * spec * params.look.z * (1.0 - 0.8 * far_t) * (1.0 - foam);
+    }
+    // Campaign grade: water is not more saturated / brighter than the ground it lies on.
+    let luma = dot(col, vec3<f32>(0.2126, 0.7152, 0.0722));
+    col = (vec3<f32>(luma) + (col - vec3<f32>(luma)) * params.look.x) * params.look.y;
+    // Far: sober blue-grey line, still readable (opacity is untouched).
+    col = mix(col, params.far_color.rgb, far_t * select(1.0, 0.6, sheet));
+    // Wet bank: the outer edge of the ribbon darkens like soaked ground.
+    let wet = smoothstep(params.look2.z, 1.0, edge) * (1.0 - in.carved * 0.5);
+    col = mix(col, params.bank_ink_color.rgb, clamp(ink + wet * params.bank_ink_strength, 0.0, 1.0));
 
     var alpha = 0.9 * in.alpha * in.far;
     if !sheet {
