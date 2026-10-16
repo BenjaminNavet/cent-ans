@@ -11,7 +11,7 @@ Dernière mise à jour : 2026-10-09 (synthèse rédigée le 2026-09-24 ; histori
   historique (K), manuel (`docs/manuel.md`), crédits, export macOS vérifié (`tools/export_macos.sh`).
 - **Victoire** : tous les objectifs historiques tenus `hold_turns` saisons d'affilée (France 20, Angleterre et
   Bourgogne 12). Sonde : `cargo run --release -p ai --example playthrough [graine]`.
-- **Qualité** : 310 tests Rust, 87 tests Python, smoke Godot 20 étapes, clippy propre.
+- **Qualité** : 310 tests Rust, 87 tests Python, smoke Bevy (`client/tests/smoke.sh`), clippy propre.
 - **Art** : 88/88 portraits, 117/117 miniatures de chronique (bandeau de la fenêtre de chronique,
   `cent-ans assets event-art`), 116 illustrations de l'encyclopédie (unités, bâtiments, technologies,
   factions, `cent-ans assets illustrations`), miniature en tête des 231 fiches du Codex (84 générées par

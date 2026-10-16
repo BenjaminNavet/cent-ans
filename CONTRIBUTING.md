@@ -12,7 +12,7 @@ corrections historiques, équilibrage, traductions, portages (Linux notamment), 
 
 ## Architecture en une phrase
 
-Toute règle de jeu vit dans `core/` (Rust) ; `game/` (Godot 4.7, GDScript) ne fait que le rendu,
+Toute règle de jeu vit dans `core/` (Rust) ; `client/` (Bevy) ne fait que le rendu,
 l'interface et les entrées ; les données de jeu sont dans `data/` (JSON/YAML) validées par
 `data/schemas/`, jamais codées en dur.
 
@@ -26,7 +26,7 @@ Voir [Compiler et lancer](README.md#compiler-et-lancer) dans le README.
   français.
 - **Rust** : `cargo fmt`, `cargo clippy -- -D warnings` et `cargo test` doivent passer.
 - **Python** (`tools/`) : `uv`, `uvx ruff check --fix`, `uvx ruff format`.
-- **Godot** : `godot --headless --path game --script res://tests/smoke.gd` doit passer.
+- **Client Bevy** : `cargo clippy --features dev --all-targets -- -D warnings`, `cargo test --features dev` dans `client/`, puis `CENT_ANS_MUTE=1 client/tests/smoke.sh` doivent passer.
 - **Données historiques** : toute donnée ajoutée cite ses sources (champ `sources`).
 - **Assets** : uniquement sous licence libre compatible (CC0, CC BY, CC BY-SA, OFL, domaine public),
   jamais NC ni ND ; ajoutez l'attribution dans [`CREDITS.md`](CREDITS.md).
