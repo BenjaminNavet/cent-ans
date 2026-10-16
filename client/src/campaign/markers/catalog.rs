@@ -242,6 +242,10 @@ pub struct Maquettes {
     pub visibility: HashMap<String, f32>,
     #[serde(default)]
     pub collision: Collision,
+    /// Rig distance beyond which a kind casts no shadow (`shadow_range`; the `description` key and
+    /// absent kinds are ignored: unlimited).
+    #[serde(default)]
+    pub shadow_range: HashMap<String, Value>,
     #[serde(default)]
     pub weight_gain: WeightGain,
     #[serde(default)]
@@ -326,6 +330,14 @@ impl Maquettes {
         self.visibility.get(kind).copied().unwrap_or(0.0)
     }
 
+    /// Shadow range of a kind (`TownMaquetteData.shadow_range`): infinity when not listed.
+    pub fn shadow_range(&self, kind: &str) -> f32 {
+        self.shadow_range
+            .get(kind)
+            .and_then(Value::as_f64)
+            .map_or(f32::INFINITY, |v| v as f32)
+    }
+
     pub fn fade_margin(&self) -> f32 {
         self.visibility.get("fade_margin").copied().unwrap_or(0.0)
     }
@@ -355,6 +367,29 @@ impl Maquettes {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn shadow_range_reads_numbers_only() {
+        let m: Maquettes = serde_json::from_value(serde_json::json!({
+            "shadow_range": {"description": "text", "castle": 120.0, "village": 100}
+        }))
+        .unwrap();
+        assert_eq!(m.shadow_range("castle"), 120.0);
+        assert_eq!(m.shadow_range("village"), 100.0);
+        assert!(m.shadow_range("city").is_infinite());
+        assert!(m.shadow_range("description").is_infinite());
+    }
+
+    #[test]
+    fn real_data_has_shadow_ranges_for_small_places() {
+        let Ok(root) = crate::paths::find_root() else {
+            return;
+        };
+        let m = Maquettes::load(&crate::paths::data_dir(&root));
+        assert_eq!(m.shadow_range("castle"), 120.0);
+        assert_eq!(m.shadow_range("abbey"), 100.0);
+        assert!(m.shadow_range("city").is_infinite());
+    }
 
     fn catalog() -> MarkerCatalog {
         serde_json::from_value(serde_json::json!({

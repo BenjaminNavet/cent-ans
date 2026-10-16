@@ -112,6 +112,16 @@ mod tests {
     }
 
     #[test]
+    fn variant_and_yaw_use_godot_hash() {
+        // `"set_paris".hash()` = 1125892655 in Godot 4: odd -> variant `b`; 1125892655 % 2 = 1.
+        let v = vec!["a".to_string(), "b".to_string()];
+        assert_eq!(variant_of("set_paris", &v), Some("b"));
+        // `"set_paris|yaw".hash() % 360` in degrees.
+        let deg = (stable_hash("set_paris|yaw") % 360) as f32;
+        assert!((yaw_of("set_paris") - deg.to_radians()).abs() < 1e-5);
+    }
+
+    #[test]
     fn world_convention() {
         assert_eq!(
             px_to_world(Vec2::new(10.0, 20.0), 3.0),
