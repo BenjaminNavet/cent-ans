@@ -85,6 +85,15 @@ impl Plugin for BloodPlugin {
     }
 }
 
+/// Pool size factor of the `blood` level: 0 none, 1 moderate (smaller pools), 2 full.
+pub fn pool_scale(level: u32) -> f32 {
+    match level {
+        0 => 0.0,
+        1 => 0.7,
+        _ => 1.0,
+    }
+}
+
 fn lay_decals(
     mut session: ResMut<BattleSession>,
     losses: Res<Losses>,
@@ -105,9 +114,7 @@ fn lay_decals(
         }
         blood.counter += 1;
         let h = hash4(blood.counter);
-        let size = (0.7 + 0.7 * h[0])
-            * if level >= 2 { 1.0 } else { 0.7 }
-            * if fall.cavalry { 1.4 } else { 1.0 };
+        let size = (0.7 + 0.7 * h[0]) * pool_scale(level) * if fall.cavalry { 1.4 } else { 1.0 };
         new.push(Decal {
             pos: fall.pos,
             size: Vec2::new(size, size * (0.7 + 0.3 * h[1])),
@@ -248,6 +255,14 @@ fn rebuild_mesh(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn blood_level_scales_the_pools() {
+        assert_eq!(pool_scale(0), 0.0);
+        assert!(pool_scale(1) < pool_scale(2));
+        assert_eq!(pool_scale(2), 1.0);
+        assert_eq!(pool_scale(7), 1.0, "levels above full stay full");
+    }
 
     #[test]
     fn pool_replaces_at_random_when_full() {

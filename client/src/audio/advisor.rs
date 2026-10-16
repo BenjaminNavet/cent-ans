@@ -407,9 +407,12 @@ fn blocked(stack: Option<&PanelStack>) -> bool {
 }
 
 fn enabled(settings: &Option<Res<Settings>>) -> bool {
-    settings
-        .as_ref()
-        .is_none_or(|settings| settings.voice_advisor)
+    advisor_voice_on(settings.as_deref())
+}
+
+/// `voice_advisor` (Godot `voice/advisor`): the advisor speaks; on when no settings exist.
+pub fn advisor_voice_on(settings: Option<&Settings>) -> bool {
+    settings.is_none_or(|settings| settings.voice_advisor)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -656,6 +659,15 @@ fn dump_advisor(world: &World) -> (String, Value) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn voice_advisor_setting_gates_the_advisor() {
+        let mut settings = Settings::default();
+        assert!(advisor_voice_on(Some(&settings)));
+        assert!(advisor_voice_on(None));
+        settings.voice_advisor = false;
+        assert!(!advisor_voice_on(Some(&settings)));
+    }
 
     fn data() -> VoiceData {
         VoiceData {
