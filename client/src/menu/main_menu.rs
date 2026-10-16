@@ -257,6 +257,10 @@ fn spawn_battles(commands: &mut Commands, theme: &UiTheme) {
         .entity(overlay)
         .insert((MainMenuOverlay, DespawnOnExit(AppState::MainMenu)));
     for (name, enabled) in [
+        (
+            crate::battle::tutorial::MENU_ENTRY,
+            crate::battle::tutorial::available(),
+        ),
         ("Bataille personnalisée", true),
         ("Batailles historiques", true),
         ("Batailles de démonstration", true),
