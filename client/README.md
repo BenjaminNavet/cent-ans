@@ -440,3 +440,8 @@ Rien de tout cela n'est dans le binaire joueur. `dev` = liaison dynamique + `bev
 
 ## Accessibilité (lot access)
 `ui/kit/contrast.rs` : cadre contraste (Outline sombre + vélin éclairci sur panneaux / cartes du kit, selon `Palette::high_contrast`) et redimensionnement en direct des textes déjà affichés quand `text_size` change. Hachures du lavis de faction en daltonien : `provinces/shaders/fill.wesl` (`OverlayParams.hatch`, rayures en pixels écran, direction choisie par hachage de la couleur). Symboles ▲■▼ du moral sur les cartes de régiment (`battle/hud/cards.rs`). Dumps : `ui_kit.access`, `campaign_provinces.fill.hatch`, `battle_hud` cartes `morale_symbols`.
+
+## campui7 (panneaux féodal, chronique, cour)
+- Féodal : liste « Événements féodaux » + toasts de fin de tour (`TurnAdvanced`), guide de 3 étapes `feudal/guide.rs` (`Settings::feudal_tutorial_done`, `CENT_ANS_FEUDAL_GUIDE=1|off`, section de dump `feudal_guide`).
+- Chronique : sceaux de cire à l'écu, mots du Codex cliquables dans les décisions, lettre dépliée = caméra sur la province ou fiche diplomatique (`DiplomacyUi::show`).
+- Cour : conseil `NextHint` parmi les conseils ; `portrait_marks.wesl` (`PortraitMarksMaterial`, `UiMaterialPlugin`) ; zoom/glisser de l'arbre familial ; hook `CENT_ANS_OPEN_COURT=character:<id>[@sheet|skills|family|orders]` (ouverture retardée de 30 images).
