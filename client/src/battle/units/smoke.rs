@@ -3,8 +3,8 @@
 //! [`SmokeSources`]. Camera-facing soft puffs drifting with the battle wind.
 //! Port of game/scripts/battle/battle_smoke.gd (settings `smoke` of `data/fx/battle_staging.json`).
 //! The puffs are the player's smoke flipbook sprites (`crate::fx::flipbook`, `fire_smoke.gdshader`),
-//! one tinted material per kind. Not ported: the night glow of camp fires (`OmniLight3D`), the
-//! soft contact fade and the near fade of the shader.
+//! one tinted material per kind. The night glow of camp fires is carried by `effects/glow.rs`
+//! (fed by `effects/campfires.rs`). Not ported: the soft contact fade and the near fade of the shader.
 
 use std::collections::HashMap;
 
