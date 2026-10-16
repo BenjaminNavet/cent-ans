@@ -14,6 +14,7 @@ pub mod camp_loot;
 pub mod far_woods;
 pub mod features;
 pub mod flatten;
+pub mod gore;
 pub mod grass;
 pub mod ground;
 pub mod horizon;
@@ -47,6 +48,7 @@ impl Plugin for BattleDecorPlugin {
                 features::FeaturesPlugin,
                 flatten::FlattenPlugin,
                 blood::BloodPlugin,
+                gore::GorePlugin,
                 site::SitePlugin,
                 camp_loot::CampLootPlugin,
             ))

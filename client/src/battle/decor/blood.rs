@@ -5,7 +5,7 @@
 //! rebuilt a few times per second when new decals arrived. Each corner follows the ground height.
 //! Sources: the bodies that fell ([`Losses::falls`]) and the trails behind regiments routing
 //! after heavy losses. Setting `battle/blood`: 0 none, 1 moderate (smaller pools), 2 full
-//! (splashes and trails). No pool in water. Not ported: the sprays of particles at impact.
+//! (splashes and trails). No pool in water. The sprays of particles at impact are in `gore.rs`; pool size follows `levels.stains`.
 
 use std::f32::consts::{PI, TAU};
 
@@ -90,8 +90,13 @@ fn lay_decals(
     losses: Res<Losses>,
     mut blood: ResMut<BloodDecals>,
     settings: Option<Res<crate::settings::Settings>>,
+    gore: Option<Res<super::gore::GoreState>>,
 ) {
     let level = settings.map_or(1, |s| s.blood);
+    // `levels.stains` of battle_gore.json scales the pools (0.7 was hard-coded for moderate).
+    let pool_scale = gore.map_or(if level >= 2 { 1.0 } else { 0.7 }, |g| {
+        g.data.level(level).stains
+    });
     if level == 0 {
         return;
     }
@@ -105,9 +110,7 @@ fn lay_decals(
         }
         blood.counter += 1;
         let h = hash4(blood.counter);
-        let size = (0.7 + 0.7 * h[0])
-            * if level >= 2 { 1.0 } else { 0.7 }
-            * if fall.cavalry { 1.4 } else { 1.0 };
+        let size = (0.7 + 0.7 * h[0]) * pool_scale * if fall.cavalry { 1.4 } else { 1.0 };
         new.push(Decal {
             pos: fall.pos,
             size: Vec2::new(size, size * (0.7 + 0.3 * h[1])),
