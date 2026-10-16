@@ -115,7 +115,8 @@ pub fn default_custom_battle(game: &GameData) -> CustomBattle {
         ),
         terrain: "plains".into(),
         season: "summer".into(),
-        weather: String::new(),
+        // Dev hook (proofs of the weather effects): `CENT_ANS_BATTLE_WEATHER=rain|snow|fog|clear`.
+        weather: std::env::var("CENT_ANS_BATTLE_WEATHER").unwrap_or_default(),
         hour: String::new(),
         siege: false,
         fortification: None,

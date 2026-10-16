@@ -15,5 +15,6 @@
     "ground_darken": 0.45,
     "horizon_floor": 0.015
   },
-  "grade": { "temperature_scale": 0.3, "strength": 1.0 }
+  "grade": { "mode": "lut", "temperature_scale": 0.3, "strength": 1.0 },
+  "sun_disc": { "inner_cos": 0.99965, "outer_cos": 0.99985, "strength": 6.0 }
 }

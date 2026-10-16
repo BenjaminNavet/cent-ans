@@ -53,8 +53,20 @@
       "required": ["temperature_scale", "strength"],
       "additionalProperties": false,
       "properties": {
-        "temperature_scale": { "type": "number", "minimum": 0, "description": "Température Godot (LUT) vers celle de ColorGrading de Bevy." },
+        "mode": { "enum": ["lut", "bevy"], "description": "lut : passe plein écran après le tonemapping, formule de la LUT de Godot (lift/gain/gamma par canal, virages) ; bevy : ColorGrading de Bevy (contraste, saturation, température seulement)." },
+        "temperature_scale": { "type": "number", "minimum": 0, "description": "Température Godot (LUT) vers celle de ColorGrading de Bevy (mode bevy)." },
         "strength": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "sun_disc": {
+      "type": "object",
+      "required": ["inner_cos", "outer_cos", "strength"],
+      "additionalProperties": false,
+      "description": "Disque solaire ajouté au fond de ciel HDRI (hdri_sky.gdshader : smoothstep(0,99965, 0,99985) x sun_disc x 6) ; seulement pour les ciels ensoleillés et la météo dont sun_disc > 0.",
+      "properties": {
+        "inner_cos": { "type": "number", "minimum": 0.99, "maximum": 1 },
+        "outer_cos": { "type": "number", "minimum": 0.99, "maximum": 1 },
+        "strength": { "type": "number", "minimum": 0 }
       }
     }
   }

@@ -20,13 +20,17 @@ pub mod grass;
 pub mod grass_atlas;
 pub mod ground;
 pub mod horizon;
+pub mod horizon_smoke;
 pub mod kit_site;
 pub mod look;
 pub mod panorama;
+pub mod precipitation;
 pub mod props;
 pub mod site;
 pub mod sky_clouds;
 pub mod trees;
+pub mod volumetric;
+pub mod weather_fx;
 pub mod wind;
 
 use bevy::prelude::*;
