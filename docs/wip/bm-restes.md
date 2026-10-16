@@ -73,3 +73,7 @@
 - battle_default : plaques de sol piétiné rectangulaires à bords francs (claires, très visibles) → fondre les bords (bruit + dégradé) comme Godot.
 - camp_0060, siege_paris : rien de flagrant ; anneaux de sélection bleus visibles sur le siège (normal).
 - Scripts de lancement de bataille depuis le menu (cb:launch, Crécy historique, « Batailles ») : l'invite du didacticiel (battle_prologue_invite.rs) retient le lancement → ajouter `click prologue_invite:no` (cf. menu/proof_prologue_pause.txt). menu/proof_custom_options.txt et proof_crecy.txt à corriger ; à rappeler à l'agent de la partie pilote.
+
+## Captures more1 (17/10, 10 vues hors parcours)
+- Douvres d=25 : toujours une plage turquoise, pas de falaises de craie visibles malgré coastfix (`chalk_cliff`) → vérifier le rendu du type de côte, pas seulement la classification.
+- Siège d'Avignon : le Rhône en arrière-plan est un rectangle gris plat à bords droits ; blocs blancs/clairs isolés dans le pré (rochers ou animaux non texturés ?).
