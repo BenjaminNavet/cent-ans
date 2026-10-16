@@ -6,14 +6,18 @@
 //! Illustrated banner ([`banner`]: a loading plate of `ui::art_plates::ArtPlates`, cover-cropped,
 //! darkened towards the gold rule, title and subtitle over it) and the arms of each side
 //! ([`arms`], `heraldry/<faction>.png`); both are shared with the naval dialog.
-//! Not ported: the site mini-map and the weather preview (they read a preview `BattleSim`),
-//! general medallions, the hover bubbles on the buttons.
+//! The site mini-map, the forecast weather and the general medallions come from [`SitePreview`]:
+//! a read-only `BattleSim` built from the same setup and seed as the battle that will be fought
+//! (same site, same weather), drawn with the battle minimap's raster. Not ported: the hover
+//! bubbles on the buttons.
 
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
-use game_api::flow::{BattleBrief, BriefSide};
+use game_api::flow::{BattleBrief, BattleLaunch, BriefSide};
+use sim_battle::BattleSim;
 
 use crate::app::AppState;
+use crate::battle::hud::minimap::{self, Raster};
 use crate::battle::scene::setup::side_color;
 use crate::paths;
 use crate::ui::art_plates::ArtPlates;
@@ -32,6 +36,20 @@ pub struct PreBattleDialog {
     pub share: f64,
     pub regiments: [usize; 2],
     pub can_withdraw: bool,
+    /// What the site preview showed (`None` when the preview could not be built).
+    pub preview: Option<PreviewSummary>,
+}
+
+/// The dump's view of a [`SitePreview`].
+#[derive(Debug, Clone, PartialEq)]
+pub struct PreviewSummary {
+    pub weather: String,
+    pub site_label: String,
+    pub own_dots: usize,
+    pub enemy_dots: usize,
+    pub generals: [Option<String>; 2],
+    /// Medallion picture of each side's general.
+    pub medallions: [Option<String>; 2],
 }
 
 /// Names of the three buttons.
@@ -45,6 +63,191 @@ fn tone_color(tone: &str) -> Color {
         "fair" => Color::srgb(0.55, 0.40, 0.08),
         _ => style::RUBRIC,
     }
+}
+
+/// Size of the site map in the dialog (Godot `SITE_MAP_SIZE`).
+const SITE_MAP_SIZE: Vec2 = Vec2::new(300.0, 186.0);
+/// Diameter of a general's medallion (Godot 76).
+const MEDALLION_SIZE: f32 = 76.0;
+
+/// What a preview `BattleSim` of the battle to come tells (Godot `_preview`, `_fill_site_map`,
+/// `_fill_conditions`): the field, where both armies start, the weather and the site, the
+/// generals' characters. Read only; no rule lives here.
+#[derive(Clone)]
+pub struct SitePreview {
+    pub weather_key: String,
+    pub weather_label: String,
+    pub site_label: String,
+    pub field: Vec2,
+    /// Static layer of the minimap, turned so the player's camp is at the bottom.
+    pub base: Raster,
+    pub flipped: bool,
+    /// Start positions of the player's regiments then the enemy's (world x, z).
+    pub own: Vec<Vec2>,
+    pub enemy: Vec<Vec2>,
+    /// Character id of the general of each brief slot (player first), when there is one.
+    pub generals: [Option<String>; 2],
+}
+
+impl SitePreview {
+    /// Previews `launch` on `site` (same construction as the battle); `player_side` is
+    /// `attacker` or `defender`.
+    pub fn build(
+        launch: &BattleLaunch,
+        site: Option<&sim_battle::HistoricalMap>,
+        player_side: &str,
+    ) -> Result<Self, String> {
+        let root = paths::find_root()?;
+        crate::battle::scene::setup::install_battle_rules(&paths::data_dir(&root));
+        let sim = super::launch::start_of(launch, site).build()?;
+        Ok(Self::of(&sim, player_side))
+    }
+
+    /// Reads an already built simulation.
+    pub fn of(sim: &BattleSim, player_side: &str) -> Self {
+        let player = if player_side == "defender" {
+            SideId::Defender
+        } else {
+            SideId::Attacker
+        };
+        let foe = if player == SideId::Attacker {
+            SideId::Defender
+        } else {
+            SideId::Attacker
+        };
+        let field = sim.field();
+        let (mut own, mut enemy) = (Vec::new(), Vec::new());
+        for unit in sim.units() {
+            let at = Vec2::new(unit.x as f32, unit.z as f32);
+            if unit.side == player {
+                own.push(at);
+            } else {
+                enemy.push(at);
+            }
+        }
+        let general = |side: SideId| {
+            sim.setup()
+                .side(side)
+                .general
+                .as_ref()
+                .map(|g| g.character.clone())
+        };
+        let weather = sim.weather();
+        SitePreview {
+            weather_key: weather.key().to_owned(),
+            weather_label: weather.label_fr().to_lowercase(),
+            site_label: field.site_label_fr(),
+            field: Vec2::new(field.width as f32, field.depth as f32),
+            base: minimap::render_base(field, player == SideId::Attacker),
+            flipped: player == SideId::Attacker,
+            own,
+            enemy,
+            generals: [general(player), general(foe)],
+        }
+    }
+
+    /// The picture: relief, obstacles and both armies' start positions in the side colours.
+    pub fn raster(&self, colors: [Color; 2]) -> Raster {
+        minimap::render_dynamic(
+            &self.base,
+            self.field,
+            self.flipped,
+            &self.own,
+            &self.enemy,
+            colors,
+            false,
+            None,
+            None,
+        )
+    }
+}
+
+fn asset_exists(path: &str) -> bool {
+    paths::find_root()
+        .ok()
+        .is_some_and(|root| paths::asset_root(&root).join(path).exists())
+}
+
+/// Picture of a general's medallion and whether it is his portrait (Godot `_general_row`): his
+/// portrait, else the arms of his house, else those of his faction; `None` when nothing exists.
+pub fn medallion_image(character: &str, faction: &str) -> Option<(String, bool)> {
+    if !character.is_empty() {
+        let portrait = format!("portraits/{character}.png");
+        if asset_exists(&portrait) {
+            return Some((portrait, true));
+        }
+        let house = paths::find_root().ok().and_then(|root| {
+            let data_dir = paths::data_dir(&root);
+            let text =
+                std::fs::read_to_string(data_dir.join(format!("characters/{character}.json")))
+                    .ok()?;
+            let value: serde_json::Value = serde_json::from_str(&text).ok()?;
+            crate::battle::units::banners::house_id(&data_dir, value.get("house")?.as_str()?)
+        });
+        if let Some(house) = house {
+            let arms = format!("heraldry/houses/{house}.png");
+            if asset_exists(&arms) {
+                return Some((arms, false));
+            }
+        }
+    }
+    let arms = format!("heraldry/{faction}.png");
+    (!faction.is_empty() && asset_exists(&arms)).then_some((arms, false))
+}
+
+impl SitePreview {
+    /// Dump summary, with the medallion of each side (`factions` in slot order).
+    pub fn summary(&self, factions: [&str; 2]) -> PreviewSummary {
+        PreviewSummary {
+            weather: self.weather_key.clone(),
+            site_label: self.site_label.clone(),
+            own_dots: self.own.len(),
+            enemy_dots: self.enemy.len(),
+            generals: self.generals.clone(),
+            medallions: [0, 1].map(|slot| {
+                medallion_image(self.generals[slot].as_deref().unwrap_or(""), factions[slot])
+                    .map(|(path, _)| path)
+            }),
+        }
+    }
+}
+
+fn medallion(
+    row: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    image: Option<(String, bool)>,
+    color: Color,
+) {
+    row.spawn((
+        Name::new("flow:medallion"),
+        Node {
+            width: Val::Px(MEDALLION_SIZE),
+            height: Val::Px(MEDALLION_SIZE),
+            flex_shrink: 0.0,
+            border: UiRect::all(Val::Px(2.0)),
+            overflow: Overflow::clip(),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            border_radius: BorderRadius::MAX,
+            ..default()
+        },
+        BackgroundColor(color.darker(0.3)),
+        BorderColor::all(style::GOLD),
+    ))
+    .with_children(|disc| {
+        if let Some((path, is_portrait)) = image {
+            // Portraits fill the disc, arms are fitted inside it (Godot 1.3 × radius).
+            let size = if is_portrait { 100.0 } else { 66.0 };
+            disc.spawn((
+                Node {
+                    width: Val::Percent(size),
+                    height: Val::Percent(size),
+                    ..default()
+                },
+                ImageNode::new(assets.load(path)),
+            ));
+        }
+    });
 }
 
 /// Banner height (Godot `BANNER_HEIGHT`; `BANNER_HEIGHT_SHORT` under 760 px of window).
@@ -236,6 +439,8 @@ pub fn spawn(
     brief: &BattleBrief,
     siege: bool,
     seed: u64,
+    preview: Option<&SitePreview>,
+    images: &mut Assets<Image>,
 ) {
     let dialog = PreBattleDialog {
         index: brief.index,
@@ -244,6 +449,7 @@ pub fn spawn(
         share: brief.share,
         regiments: [brief.sides[0].regiments, brief.sides[1].regiments],
         can_withdraw: brief.can_withdraw,
+        preview: preview.map(|p| p.summary([&brief.sides[0].faction, &brief.sides[1].faction])),
     };
     let colors: [Color; 2] = [0, 1].map(|slot| {
         let side = &brief.sides[slot];
@@ -344,11 +550,50 @@ pub fn spawn(
                         })
                         .with_children(|columns| {
                             for (slot, side) in brief.sides.iter().enumerate() {
-                                side_column(columns, theme, art.assets, side, slot, colors[slot]);
+                                side_column(
+                                    columns,
+                                    theme,
+                                    art.assets,
+                                    side,
+                                    slot,
+                                    colors[slot],
+                                    preview.and_then(|p| p.generals[slot].as_deref()),
+                                );
                             }
                         });
                     panel.spawn(separator(theme));
+                    if let Some(preview) = preview {
+                        let raster = preview.raster(colors);
+                        let image = Image::new(
+                            bevy::render::render_resource::Extent3d {
+                                width: raster.width,
+                                height: raster.height,
+                                depth_or_array_layers: 1,
+                            },
+                            bevy::render::render_resource::TextureDimension::D2,
+                            raster.data,
+                            bevy::render::render_resource::TextureFormat::Rgba8UnormSrgb,
+                            bevy::asset::RenderAssetUsages::default(),
+                        );
+                        panel.spawn((
+                            Name::new("flow:site_map"),
+                            Node {
+                                width: Val::Px(SITE_MAP_SIZE.x),
+                                height: Val::Px(SITE_MAP_SIZE.y),
+                                flex_shrink: 0.0,
+                                ..default()
+                            },
+                            ImageNode::new(images.add(image)),
+                        ));
+                    }
                     panel.spawn(caption(theme, &brief.conditions));
+                    if let Some(preview) = preview {
+                        let mut line = format!("Météo prévue\u{a0}: {}", preview.weather_label);
+                        if !preview.site_label.is_empty() {
+                            line += &format!("   ·   Site\u{a0}: {}", preview.site_label);
+                        }
+                        panel.spawn((Name::new("flow:weather"), caption(theme, &line)));
+                    }
                     if !brief.modifiers.is_empty() {
                         panel.spawn((
                             Name::new("flow:modifiers"),
@@ -388,6 +633,67 @@ pub fn spawn(
         });
 }
 
+/// General of a side: medallion (portrait, else arms), name and command stars
+/// (Godot `_general_row`); the player's medallion is on the left, the enemy's on the right.
+fn general_row(
+    column: &mut ChildSpawnerCommands,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    side: &BriefSide,
+    slot: usize,
+    color: Color,
+    character: Option<&str>,
+) {
+    let image = medallion_image(character.unwrap_or(""), &side.faction);
+    column
+        .spawn((
+            Name::new("flow:general"),
+            Node {
+                column_gap: Val::Px(10.0),
+                align_items: AlignItems::Center,
+                flex_direction: if slot == 0 {
+                    FlexDirection::Row
+                } else {
+                    FlexDirection::RowReverse
+                },
+                ..default()
+            },
+        ))
+        .with_children(|row| {
+            medallion(row, assets, image, color);
+            row.spawn(Node {
+                flex_direction: FlexDirection::Column,
+                align_items: if slot == 0 {
+                    AlignItems::FlexStart
+                } else {
+                    AlignItems::FlexEnd
+                },
+                ..default()
+            })
+            .with_children(|texts| match &side.general {
+                Some(g) => {
+                    texts.spawn(typed(theme, &g.name, UiType::Heading));
+                    texts
+                        .spawn(caption(
+                            theme,
+                            &format!(
+                                "{}{}",
+                                "★".repeat(usize::from(g.command.min(10))),
+                                "☆".repeat(usize::from(10 - g.command.min(10)))
+                            ),
+                        ))
+                        .insert(TextColor(style::GOLD));
+                }
+                None => {
+                    texts.spawn(typed(theme, "Sans chef", UiType::Heading));
+                    texts
+                        .spawn(caption(theme, "L’ost combat sans général : moral fragile."))
+                        .insert(TextColor(style::RUBRIC));
+                }
+            });
+        });
+}
+
 fn side_column(
     columns: &mut ChildSpawnerCommands,
     theme: &UiTheme,
@@ -395,6 +701,7 @@ fn side_column(
     side: &BriefSide,
     slot: usize,
     color: Color,
+    general_character: Option<&str>,
 ) {
     columns
         .spawn((
@@ -438,18 +745,7 @@ fn side_column(
                     side.regiments
                 ),
             ));
-            let general = side.general.as_ref().map_or_else(
-                || "L’ost combat sans général : moral fragile.".to_owned(),
-                |g| {
-                    format!(
-                        "{} — {}{}",
-                        g.name,
-                        "★".repeat(usize::from(g.command.min(10))),
-                        "☆".repeat(usize::from(10 - g.command.min(10)))
-                    )
-                },
-            );
-            column.spawn((Name::new("flow:general"), caption(theme, &general)));
+            general_row(column, theme, assets, side, slot, color, general_character);
             let reinforcements = if side.reinforcements.is_empty() {
                 "Aucun renfort à portée.".to_owned()
             } else {
@@ -526,5 +822,43 @@ mod banner_tests {
         assert_eq!(banner_image(&plates, "battle", 3).1, "events/evt_crecy.jpg");
         assert_eq!(banner_image(&plates, "siege", 3).1, "events/evt_sluys.jpg");
         assert_eq!(banner_image(&plates, "naval", 0).1, "events/evt_sluys.jpg");
+    }
+}
+
+#[cfg(test)]
+mod preview_tests {
+    use super::*;
+
+    fn preview(player: &str) -> SitePreview {
+        let root = paths::find_root().expect("repo root");
+        let dir = paths::data_dir(&root);
+        let (game, _) = GameData::load(&dir).expect("game data");
+        crate::battle::scene::setup::install_battle_rules(&dir);
+        let custom = crate::battle::scene::setup::default_custom_battle(&game);
+        let sim = crate::battle::scene::setup::build_sim(&game, &dir, &custom, 7).unwrap();
+        SitePreview::of(&sim, player)
+    }
+
+    #[test]
+    fn preview_reads_weather_site_and_both_armies() {
+        let p = preview("attacker");
+        assert!(["clear", "rain", "fog", "snow"].contains(&p.weather_key.as_str()));
+        assert!(!p.weather_label.is_empty());
+        assert!(!p.own.is_empty() && !p.enemy.is_empty());
+        assert!(p.flipped);
+        let raster = p.raster([Color::srgb(0.2, 0.3, 0.8), Color::srgb(0.8, 0.2, 0.1)]);
+        assert_eq!((raster.width, raster.height), (400, 248));
+        // Same seed, same weather; the defender's view only turns the map.
+        let q = preview("defender");
+        assert_eq!(p.weather_key, q.weather_key);
+        assert!(!q.flipped);
+        assert_eq!(p.own.len(), q.enemy.len());
+    }
+
+    #[test]
+    fn medallion_falls_back_to_arms() {
+        assert!(medallion_image("no_such_character", "").is_none());
+        let found = medallion_image("no_such_character", "fac_alania");
+        assert_eq!(found, Some(("heraldry/fac_alania.png".to_owned(), false)));
     }
 }

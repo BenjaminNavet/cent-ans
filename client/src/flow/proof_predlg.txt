@@ -1,0 +1,7 @@
+# predlg : dialogue d'avant-bataille avec minicarte du site, météo prévue, médaillons des généraux.
+# CENT_ANS_STAGE_BATTLE=1 CENT_ANS_LOADING_SECONDS=0 CENT_ANS_MUTE=1
+# client/run_bg.sh --offscreen --state Campaign --faction fac_france --script client/src/flow/proof_predlg.txt
+# Résultat : out/predlg_dialog.json (section flow.dialog.preview).
+wait 150
+dump out/predlg_dialog.json
+exit
