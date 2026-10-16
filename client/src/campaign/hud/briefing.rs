@@ -161,6 +161,7 @@ fn show(
     spec.yes_label = texts.start.clone();
     spec.no_label = texts.never_again.clone();
     spec.width = 620.0;
+    spec.escape_passes = true;
     queue.request(KEY, PRIORITY_DECISION, spec);
     briefing.shown += 1;
     briefing.body = text;

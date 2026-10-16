@@ -39,6 +39,9 @@ pub struct ModalSpec {
     pub width: f32,
     /// Illuminated picture above the text, cover-cropped to the card width (season report).
     pub art: Option<ModalArt>,
+    /// Escape neither answers nor holds back the pause menu: it closes this dialog as confirmed
+    /// and passes through (the campaign briefing, which Godot never closed on Escape).
+    pub escape_passes: bool,
 }
 
 /// Picture of a modal: asset path (relative to `game/assets`), aspect ratio (width / height) and
@@ -59,6 +62,7 @@ impl ModalSpec {
             no_label: "Renoncer".to_owned(),
             width: 440.0,
             art: None,
+            escape_passes: false,
         }
     }
 
@@ -93,6 +97,16 @@ impl ModalQueue {
     /// True while a modal is active or waiting.
     pub fn is_busy(&self) -> bool {
         self.active.is_some() || !self.pending.is_empty()
+    }
+
+    /// True while a modal that holds Escape back is active or waiting: the pause menu opens over
+    /// a lone dialog that lets Escape through ([`ModalSpec::escape_passes`]).
+    pub fn blocks_escape(&self) -> bool {
+        !self.pending.is_empty()
+            || self
+                .active
+                .as_ref()
+                .is_some_and(|entry| !entry.spec.escape_passes)
     }
 
     pub fn active_key(&self) -> &str {
@@ -393,7 +407,7 @@ fn modal_escape(
         && let Some(entry) = queue.active.as_ref()
     {
         // Information dialogs close as "confirmed"; confirmations cancel.
-        let confirmed = entry.spec.no_label.is_empty();
+        let confirmed = entry.spec.no_label.is_empty() || entry.spec.escape_passes;
         if let Some(key) = queue.finish() {
             results.write(ModalResult { key, confirmed });
         }
@@ -520,6 +534,18 @@ mod tests {
 
     fn spec() -> ModalSpec {
         ModalSpec::confirm("t", "x")
+    }
+
+    #[test]
+    fn escape_passing_modal_does_not_hold_back_the_pause_menu() {
+        let mut queue = ModalQueue::default();
+        assert!(!queue.blocks_escape());
+        let mut spec = spec();
+        spec.escape_passes = true;
+        queue.request("briefing", PRIORITY_DECISION, spec);
+        assert!(queue.is_busy() && !queue.blocks_escape());
+        queue.request("other", PRIORITY_REPORT, self::spec());
+        assert!(queue.blocks_escape());
     }
 
     #[test]

@@ -110,7 +110,7 @@ pub fn pause_escape(
         commands.entity(root).despawn();
         paused.0 = false;
         time.unpause();
-    } else if !modals.is_busy() {
+    } else if !modals.blocks_escape() {
         spawn_pause(&mut commands, &theme, &sim);
         paused.0 = true;
         time.pause();
