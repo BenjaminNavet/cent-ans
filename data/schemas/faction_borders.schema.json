@@ -127,7 +127,7 @@
       "type": "object",
       "description": "Par filtre de carte (MF1) : opacité et encre neutre.",
       "required": ["political"],
-      "propertyNames": {"enum": ["political", "diplomacy", "religion", "unrest", "wealth", "population", "loyalty", "supply", "claims"]},
+      "propertyNames": {"enum": ["political", "diplomacy", "religion", "unrest", "wealth", "population", "loyalty", "supply", "claims", "feudal"]},
       "additionalProperties": {"$ref": "#/$defs/mode"}
     },
     "neutral_color": { "$ref": "common.schema.json#/$defs/color_hex" },

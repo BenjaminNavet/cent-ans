@@ -12,10 +12,14 @@ use serde_json::{Value, json};
 use super::{HudSet, HudWidget};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
+use crate::campaign::camera::zoom::ZoomView;
 use crate::campaign::provinces::data::ProvinceMap;
 use crate::campaign::provinces::modes::{MapMode, MapModeState, ProvinceView};
 use crate::campaign::provinces::overlay::OverlayState;
 use crate::campaign::provinces::picker::HoveredProvince;
+use crate::campaign::provinces::picker::pick_ray;
+use crate::campaign::terrain::surface::GroundHeight;
+use crate::campaign::water::lanes::{SeaLaneLayer, lane_tooltip, nearest_lane};
 use crate::settings::Settings;
 use crate::sim::Sim;
 use crate::ui::kit::richtext::RichStyle;
@@ -170,11 +174,78 @@ pub struct Hover {
 #[derive(Component)]
 struct HoverNote;
 
+/// Tooltip of the sea lane under the pointer (`_update_sea_lane_hover`): shown at once, without
+/// the province delay; leaving the lane gives the province hover back.
+#[derive(Resource, Default, Debug)]
+pub struct LaneHover {
+    pub text: Option<String>,
+    /// The note currently shows a lane.
+    shown: bool,
+}
+
+/// Lane picking radius (map units) at a camera distance (Godot `distance * 0.008`, 2..30).
+pub fn lane_threshold(camera_distance: f32) -> f32 {
+    (camera_distance * 0.008).clamp(2.0, 30.0)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn pick_lane_hover(
+    windows: Query<&Window, With<PrimaryWindow>>,
+    cameras: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
+    map: Option<Res<ProvinceMap>>,
+    ground: GroundHeight,
+    layer: Option<Res<SeaLaneLayer>>,
+    layers: Option<Res<super::layers::MapLayers>>,
+    drawn: Option<Res<super::layers::DrawnRoutes>>,
+    zoom: Option<Res<ZoomView>>,
+    widgets: Query<&bevy::picking::hover::Hovered, With<HudWidget>>,
+    mut out: ResMut<LaneHover>,
+) {
+    out.text = None;
+    let Some(map) = map else { return };
+    let trade_on = layers.is_some_and(|l| l.trade);
+    let lanes = layer.as_deref().filter(|l| !l.views.is_empty());
+    if widgets.iter().any(|h| h.get()) || (lanes.is_none() && !trade_on) {
+        return;
+    }
+    let Some(cursor) = windows.single().ok().and_then(Window::cursor_position) else {
+        return;
+    };
+    let Some((camera, transform)) = cameras.iter().find(|(camera, _)| camera.is_active) else {
+        return;
+    };
+    let Ok(ray) = camera.viewport_to_world(transform, cursor) else {
+        return;
+    };
+    let size = Vec2::new(map.width as f32, map.height as f32);
+    let height = |x: f32, z: f32| ground.at(x, z).unwrap_or(0.0);
+    let Some(hit) = pick_ray(ray.origin, *ray.direction, size, &height) else {
+        return;
+    };
+    let distance = zoom.map_or(0.0, |z| z.distance);
+    let point = Vec2::new(hit.x, hit.z);
+    // A trade route under the pointer wins over the sea lane beneath it (campaign_map.gd).
+    if let (true, Some(drawn)) = (trade_on, drawn.as_deref()) {
+        let reach = (distance * 0.01).clamp(3.0, 40.0);
+        if let Some(route) = super::layers::nearest_route(&drawn.0, point, reach) {
+            out.text = Some(route.tooltip.clone());
+            return;
+        }
+    }
+    if let Some(layer) = lanes {
+        out.text = nearest_lane(layer, point, lane_threshold(distance)).map(lane_tooltip);
+    }
+}
+
 pub fn plugin(app: &mut App) {
     app.init_resource::<Hover>()
+        .init_resource::<LaneHover>()
         .register_dump(dump_hover)
         .add_systems(OnEnter(AppState::Campaign), spawn_note)
-        .add_systems(Update, update_hover.in_set(HudSet::Ui));
+        .add_systems(
+            Update,
+            (pick_lane_hover, update_hover).chain().in_set(HudSet::Ui),
+        );
 }
 
 fn spawn_note(mut commands: Commands, theme: Res<UiTheme>) {
@@ -208,6 +279,7 @@ fn update_hover(
     modes: Option<Res<MapModeState>>,
     settings: Option<Res<Settings>>,
     sim: Res<Sim>,
+    mut lane: ResMut<LaneHover>,
     widgets: Query<&bevy::picking::hover::Hovered, With<HudWidget>>,
     mut note: Query<(Entity, &mut Node), With<HoverNote>>,
     assets: Res<AssetServer>,
@@ -224,6 +296,33 @@ fn update_hover(
         hover.shown_for = None;
         return;
     };
+    if let Some(text) = lane.text.clone() {
+        commands.entity(note_entity).despawn_children();
+        commands.entity(note_entity).with_children(|inner| {
+            inner.spawn(rich_text(
+                &theme,
+                &assets,
+                &text,
+                &RichStyle::caption(&theme),
+            ));
+        });
+        node.left = Val::Px(cursor.x + 18.0);
+        node.top = Val::Px(cursor.y + 18.0);
+        node.display = Display::Flex;
+        hover.shown_for = None;
+        hover.cursor = cursor;
+        hover.still = 0.0;
+        if !lane.shown {
+            hover.shown += 1;
+        }
+        lane.shown = true;
+        hover.text = text;
+        return;
+    }
+    if lane.shown {
+        lane.shown = false;
+        node.display = Display::None;
+    }
     if cursor.distance(hover.cursor) > STILL_PX || hovered.index != hover.shown_for.unwrap_or(0) {
         hover.cursor = cursor;
         hover.still = 0.0;
@@ -291,7 +390,8 @@ fn dump_hover(world: &World) -> (String, Value) {
     let hover = world.resource::<Hover>();
     (
         "hover_text".to_owned(),
-        json!({ "shown": hover.shown, "visible": hover.shown_for, "text": hover.text }),
+        json!({ "shown": hover.shown, "visible": hover.shown_for, "text": hover.text,
+            "lane": world.get_resource::<LaneHover>().and_then(|l| l.text.clone()) }),
     )
 }
 
@@ -309,6 +409,13 @@ mod tests {
         };
         view.stances.insert("fac_england".into(), "war");
         view
+    }
+
+    #[test]
+    fn lane_threshold_follows_the_zoom() {
+        assert_eq!(lane_threshold(0.0), 2.0);
+        assert_eq!(lane_threshold(1000.0), 8.0);
+        assert_eq!(lane_threshold(1e6), 30.0);
     }
 
     #[test]

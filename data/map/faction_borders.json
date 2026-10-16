@@ -83,6 +83,10 @@
       "alpha": 0.9,
       "neutral": true
     },
+    "feudal": {
+      "alpha": 1.0,
+      "neutral": false
+    },
     "supply": {
       "alpha": 0.0,
       "neutral": true
