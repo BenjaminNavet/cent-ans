@@ -436,7 +436,10 @@ pub fn parse_kit_metrics(bytes: &[u8]) -> Result<HashMap<String, SliceMetrics>, 
 }
 
 /// `interface/text_size` -> [`UiTheme::text_scale`] (clamped; no write when unchanged).
-pub(super) fn apply_text_scale(settings: Option<Res<crate::settings::Settings>>, mut theme: ResMut<UiTheme>) {
+pub(super) fn apply_text_scale(
+    settings: Option<Res<crate::settings::Settings>>,
+    mut theme: ResMut<UiTheme>,
+) {
     let Some(settings) = settings else { return };
     let wanted = settings.text_size.clamp(0.7, 1.6);
     if (theme.text_scale - wanted).abs() > 1e-4 {

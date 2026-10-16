@@ -165,7 +165,10 @@ mod tests {
         let mut app = app(true);
         let card = app
             .world_mut()
-            .spawn((KitWidget("card"), BackgroundColor(Color::srgb(0.97, 0.93, 0.82))))
+            .spawn((
+                KitWidget("card"),
+                BackgroundColor(Color::srgb(0.97, 0.93, 0.82)),
+            ))
             .id();
         let button = app.world_mut().spawn(KitWidget("button")).id();
         app.update();

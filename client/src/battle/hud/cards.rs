@@ -604,7 +604,7 @@ pub fn highlighted(selection: &BattleSelection, data: &HudData) -> Vec<u32> {
         .collect()
 }
 
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
 fn card_clicks(
     mut pressed: MessageReader<ButtonPressed>,
     keys: Res<ButtonInput<KeyCode>>,
@@ -733,7 +733,7 @@ fn update_badges(
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
 fn update_cards(
     data: Res<HudData>,
     selection: Res<BattleSelection>,

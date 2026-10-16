@@ -437,3 +437,6 @@ Rien de tout cela n'est dans le binaire joueur. `dev` = liaison dynamique + `bev
 - **Console** : `F8` ou la touche sous Échap (`CENT_ANS_CONSOLE_KEY=<KeyCode>` pour changer F8). `dump-state [fichier absolu]`, `goto <État>`, `wireframe`, `shadows`, `help`. Preuve sans fenêtre : `CENT_ANS_CONSOLE_DEMO="wireframe;goto codex"`.
 - **Ordre des systèmes** : `CENT_ANS_SHUFFLE_SEED=<n>` (mélange, mono-fil, reproductible), `client/tests/shuffle.sh [-s "1 2 3"] [scénario...]`, `CENT_ANS_AMBIGUITIES=1` pour lister les conflits sans ordre.
 - MCP `bevy_brp_mcp` : non adopté (52 outils, ~31 000 jetons) ; voir `docs/wip/bm-devtools2.md` § 2 pour l'activer en local.
+
+## Accessibilité (lot access)
+`ui/kit/contrast.rs` : cadre contraste (Outline sombre + vélin éclairci sur panneaux / cartes du kit, selon `Palette::high_contrast`) et redimensionnement en direct des textes déjà affichés quand `text_size` change. Hachures du lavis de faction en daltonien : `provinces/shaders/fill.wesl` (`OverlayParams.hatch`, rayures en pixels écran, direction choisie par hachage de la couleur). Symboles ▲■▼ du moral sur les cartes de régiment (`battle/hud/cards.rs`). Dumps : `ui_kit.access`, `campaign_provinces.fill.hatch`, `battle_hud` cartes `morale_symbols`.
