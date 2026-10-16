@@ -437,3 +437,6 @@ Rien de tout cela n'est dans le binaire joueur. `dev` = liaison dynamique + `bev
 - **Console** : `F8` ou la touche sous Échap (`CENT_ANS_CONSOLE_KEY=<KeyCode>` pour changer F8). `dump-state [fichier absolu]`, `goto <État>`, `wireframe`, `shadows`, `help`. Preuve sans fenêtre : `CENT_ANS_CONSOLE_DEMO="wireframe;goto codex"`.
 - **Ordre des systèmes** : `CENT_ANS_SHUFFLE_SEED=<n>` (mélange, mono-fil, reproductible), `client/tests/shuffle.sh [-s "1 2 3"] [scénario...]`, `CENT_ANS_AMBIGUITIES=1` pour lister les conflits sans ordre.
 - MCP `bevy_brp_mcp` : non adopté (52 outils, ~31 000 jetons) ; voir `docs/wip/bm-devtools2.md` § 2 pour l'activer en local.
+
+## Fleuves et routes fins (lot `bm/finegeo`)
+`campaign/water/fine/` : port de `fine_geo_layer/store.gd`, `fine_ribbon_job.gd`, `cafv_tile.gd`, `river_fine`/`road_fine.gdshader` (WESL drapés par `relief.wesl`). Tuiles CAFV E2 lues sur `IoTaskPool`, maillées sur `AsyncComputeTaskPool`, sous le palier proche. Ponts sur ancrages fins : `countryside/bridges.rs` (`FineBridgeMode`, `apply_fine_bridges`). Inactif sur la carte composée (pas de `pyramid/hydro_fine` dans son cadre) ; `CENT_ANS_FINE_GEO_ROOT=<dossier avec pyramid/hydro_fine>` pour l'essayer, `CENT_ANS_FINE_DEBUG=1` en couleurs de débogage. Dump `campaign_fine_geo`. Note : `docs/wip/bm-finegeo.md`.

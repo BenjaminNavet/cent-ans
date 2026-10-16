@@ -12,6 +12,14 @@
   showfix) pour les deux matériaux.
 - Dump `campaign_fine_geo` (activé, raison, tuiles indexées/chargées/maillées, zone, poids, ponts fins).
 
+## Vérification (16/10)
+- fmt, `clippy --features dev --all-targets -D warnings`, `cargo test --features dev` : 1043 + annexes verts.
+- Dump d=60 à Paris (xz 1651,2731), données du dépôt : `enabled: false`, raison « pas de tuiles fines ».
+- Même vue avec `CENT_ANS_FINE_GEO_ROOT` → pyramide réelle : 4446 / 3545 tuiles indexées, 9 tuiles
+  voulues = 9 maillées et visibles, 27 253 points de fleuve, 11 225 de route, zone = rayon complet (78),
+  poids 1, maillage 0,37 ms en moyenne (fil), mise à jour ≤ 0,09 ms, 299 ponts sur ancrage fin ; aucun
+  message d'erreur de shader dans le journal.
+
 ## Constat important : données fines absentes de la carte composée
 - `data/map/pyramid` → `~/dev/cent-ans-raw/compose/pyramid` : pas de `hydro_fine` ni `roads_fine`.
   Godot désactive donc `FineGeoLayer` sur la carte actuelle (`store.available` faux) ; Bevy aussi
