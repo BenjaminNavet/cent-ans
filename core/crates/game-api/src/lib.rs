@@ -19,6 +19,7 @@ pub mod ransoms;
 pub mod recruit;
 pub mod saves;
 pub mod siege;
+pub mod start_sheets;
 pub mod tech;
 pub mod turn;
 

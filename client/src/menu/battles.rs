@@ -10,8 +10,8 @@
 //! consumes it on entry) and changes state. A demo siege brings its own `staged` launch package
 //! (built from a throw-away 1337 campaign, see `demos`), which becomes a
 //! [`crate::flow::CampaignBattle`] like a campaign battle. « Rejeux » sends [`OpenReplays`] (the
-//! screen belongs to another lot). Not ported: the battle tutorial invite
-//! (`battle_prologue_invite.gd`), the scene fader.
+//! screen belongs to another lot). The battle tutorial invite (`battle_prologue_invite.gd`) holds
+//! custom and historical launches first, see `battle_prologue_invite`.
 
 use std::path::PathBuf;
 
@@ -186,7 +186,7 @@ impl Plugin for BattlesPlugin {
     }
 }
 
-fn launch_battle(
+pub(super) fn launch_battle(
     mut commands: Commands,
     mut launches: MessageReader<LaunchBattle>,
     mut memory: ResMut<BattleMemory>,

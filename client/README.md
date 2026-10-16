@@ -440,3 +440,8 @@ Rien de tout cela n'est dans le binaire joueur. `dev` = liaison dynamique + `bev
 
 ## Accessibilité (lot access)
 `ui/kit/contrast.rs` : cadre contraste (Outline sombre + vélin éclairci sur panneaux / cartes du kit, selon `Palette::high_contrast`) et redimensionnement en direct des textes déjà affichés quand `text_size` change. Hachures du lavis de faction en daltonien : `provinces/shaders/fill.wesl` (`OverlayParams.hatch`, rayures en pixels écran, direction choisie par hachage de la couleur). Symboles ▲■▼ du moral sur les cartes de régiment (`battle/hud/cards.rs`). Dumps : `ui_kit.access`, `campaign_provinces.fill.hatch`, `battle_hud` cartes `morale_symbols`.
+
+## menu5 : carte des factions, aide de la pause, invite du didacticiel de bataille
+- `menu/faction_map.rs` : onglet « Toutes les factions » de la sélection de faction. Boutons de script : `fm:<faction>` (liste), `banner:<faction>` (factions sans terre), `fmk:<titre royaume>` (`fmk:` = tous), `fmr:<kingdom|duchy|county>` (`fmr:` = tous). Ressources `StartSheets` (fiches 1337, `game_api::start_sheets`) et `FactionMapState`. Dump `menu.faction_map` (provinces, pixels de terre, bannières, filtres, groupes, survol, repeints, clics).
+- `menu/pause.rs` : `pause:help` (feuille d'aide F1 en modale), infobulle de difficulté.
+- `menu/battle_prologue_invite.rs` : boutons `prologue_invite:{yes,no,never}` ; message `StartBattlePrologue` à lire par le lot du didacticiel ; dump `menu.battle_prologue_invite`. Note : `docs/wip/bm-menu5.md`.
