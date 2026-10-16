@@ -14,8 +14,10 @@
 //! - the servants ([`super::crew`]) stand at the posts of the layout of each engine and make the
 //!   gesture of their role from the reload.
 //!
-//! Not ported: the rolling wheels and body sway of the ram and the tower, the simplified `_lod`
-//! meshes, the GA3 variants (the procedural models carry the named parts), the ammunition
+//! The wheels (`Wheel_<n>`) roll with the distance covered and the body of a ram / tower sways
+//! while it moves (`animate_mover`, `_update_mover` of Godot).
+//!
+//! Not ported: the simplified `_lod` meshes, the GA3 variants (the procedural models carry the named parts), the ammunition
 //! carriers, the release points of the projectiles.
 
 use std::collections::HashMap;

@@ -13,6 +13,9 @@
 //!   tint, scars of the engine shots, collapse of a breached piece, ruins of burnt houses.
 //! - `engines` : glTF models of the rams, siege towers and trebuchets / mangonels / bombards.
 //! - `fx` : dust, debris, oil, fire and smoke particles, ladders of the climbing regiments.
+//! - `backdrop` : model of what lies beyond the far wall of the seven emblematic towns
+//!   (`landmark_backdrop.gd`, `landmark.gdshader`), draped on the battle ground.
+//! - `crew_fade` : fade between two gestures of a servant (`siege_crew_fx.gd`).
 //! - `streets` : paved great streets of an emblematic town (`landmark_siege_town.gd`).
 //! - `overlay` : health bars of the engines and of the battered pieces, capture points.
 //! - `historical` : scripted historical battles (`setup_historical`).
@@ -25,7 +28,9 @@
 //! stands in), the capture stage cinematic (`battle_capture_stage.gd`).
 
 pub mod animation;
+pub mod backdrop;
 pub mod crew;
+pub mod crew_fade;
 pub mod engines;
 pub mod fx;
 pub mod historical;
@@ -210,6 +215,8 @@ pub struct SiegeStats {
     pub crew_shown: usize,
     pub crew_batches: usize,
     pub crew_by_clip: BTreeMap<String, usize>,
+    /// Servants whose previous gesture is still fading out (`crew_fade`).
+    pub crew_fading: usize,
     /// Latest pose of each static engine (dump).
     pub engine_poses: Vec<serde_json::Value>,
 }
@@ -223,6 +230,7 @@ impl Plugin for BattleSiegePlugin {
             .register_dump(dump_siege)
             .add_plugins((
                 stone::StonePlugin,
+                backdrop::BackdropPlugin,
                 crate::battle::decor::props::PropsPlugin,
                 works::WorksPlugin,
                 engines::EnginesPlugin,
@@ -550,7 +558,7 @@ fn dump_siege(world: &World) -> (String, serde_json::Value) {
                 "particles_spawned": stats.particles_spawned, "fire_emitters_started": stats.fires_started, "bars": stats.bars,
                 "kit_pieces": stats.kit_pieces, "kit_models": stats.kit_models, "kit_ruins": stats.kit_ruins,
                 "swings": stats.swings, "predicted_swings": stats.predicted_swings,
-                "crew_listed": stats.crew_listed, "crew_shown": stats.crew_shown, "crew_batches": stats.crew_batches, "crew_by_clip": stats.crew_by_clip,
+                "crew_listed": stats.crew_listed, "crew_shown": stats.crew_shown, "crew_batches": stats.crew_batches, "crew_by_clip": stats.crew_by_clip, "crew_fading": stats.crew_fading,
                 "engine_poses": stats.engine_poses,
             },
             "events_seen": stats.events_seen,

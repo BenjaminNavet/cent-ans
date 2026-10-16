@@ -7,8 +7,10 @@
 //! batches (one draw per figure and side, shader mode `Pick`: clip chosen per record, played
 //! from the instant the servant began the gesture, looping). Rendering only, no rule.
 //!
-//! Not ported: the fade from the previous gesture (a gesture switches abruptly), the ammunition
-//! carriers (`haul`) and their piles.
+//! A gesture change fades from the previous clip over `role_blend_s` (`crew_fade.rs`, decoded in
+//! `units/skinned.wesl`, mode 3).
+//!
+//! Not ported: the ammunition carriers (`haul`) and their piles.
 
 use std::collections::{BTreeMap, HashMap};
 use std::sync::Arc;
@@ -17,6 +19,7 @@ use bevy::prelude::*;
 use sim_battle::SideId;
 
 use super::animation::EngineSettings;
+use super::crew_fade::{Gestures, role_blend_s};
 use super::{SiegeFrame, SiegeStats};
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
@@ -66,8 +69,10 @@ struct CrewBatch {
 #[derive(Resource, Default)]
 pub struct CrewState {
     batches: HashMap<(u32, usize), CrewBatch>,
-    /// Gesture of each servant and the instant it began.
-    gestures: HashMap<String, (String, f32)>,
+    /// Gesture of each servant, with the previous one while it fades out (`crew_fade`).
+    gestures: Gestures,
+    /// `role_blend_s` of the animation data (0 = a gesture switches abruptly).
+    blend_s: Option<f32>,
     slots: HashMap<String, usize>,
 }
 
@@ -155,6 +160,7 @@ pub fn draw_crew(
     }
     let mut shown = 0usize;
     let mut by_clip: BTreeMap<String, usize> = BTreeMap::new();
+    let mut fades = 0usize;
     for (key, entries) in &groups {
         if !state.batches.contains_key(key) {
             let Some(spec) = library.spec("crew", key.0, &mut meshes, &mut images, &assets) else {
@@ -233,21 +239,27 @@ pub fn draw_crew(
             let Some(pick) = names.iter().position(|n| n == clip) else {
                 continue;
             };
-            // A new gesture restarts its clip (a slight offset between servants).
+            // A new gesture restarts its clip (a slight offset between servants) and the
+            // previous one keeps playing for the fade (NT10).
             let slot = {
                 let next = state.slots.len();
                 *state.slots.entry(entry.key.clone()).or_insert(next)
             };
-            let since = match state.gestures.get(&entry.key) {
-                Some((current, since)) if current == clip => *since,
-                _ => {
-                    let since = now - 0.13 * (slot % 5) as f32;
-                    state
-                        .gestures
-                        .insert(entry.key.clone(), (clip.clone(), since));
-                    since
-                }
-            };
+            let blend_s = *state.blend_s.get_or_insert_with(|| {
+                crate::paths::find_root()
+                    .map(|root| role_blend_s(&crate::paths::data_dir(&root)))
+                    .unwrap_or(0.0)
+            });
+            let stagger_s = 0.13 * (slot % 5) as f32;
+            let gesture = state
+                .gestures
+                .update(&entry.key, clip, now, stagger_s, blend_s)
+                .clone();
+            let fade = gesture
+                .fade(now, blend_s, |c| names.iter().position(|n| n == c))
+                .unwrap_or(-1000.0);
+            let since = gesture.since;
+            fades += usize::from(fade > 0.0);
             let record: [f32; RECORD_FLOATS] = [
                 entry.pos.x,
                 entry.pos.y,
@@ -257,7 +269,7 @@ pub fn draw_crew(
                 key_hash(&entry.key),
                 since,
                 0.0,
-                -1000.0,
+                fade,
                 0.0,
                 pick as f32,
                 1.0e6,
@@ -267,10 +279,12 @@ pub fn draw_crew(
             *by_clip.entry(clip.clone()).or_default() += 1;
         }
         shown += count as usize;
+        let blend_s = state.blend_s.unwrap_or(0.0);
         let Some(batch) = state.batches.get_mut(key) else {
             continue;
         };
         batch.params.set_now(now);
+        batch.params.set_cycle_blend(blend_s);
         batch.params_version += 1;
         batch.version += 1;
         let mesh = batch.spec.lods[lod].clone();
@@ -304,6 +318,7 @@ pub fn draw_crew(
     stats.crew_shown = shown;
     stats.crew_batches = state.batches.len();
     stats.crew_by_clip = by_clip;
+    stats.crew_fading = fades;
 }
 
 #[cfg(test)]
