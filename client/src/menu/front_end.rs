@@ -82,7 +82,13 @@ impl FrontEnd {
         let path = data_dir.join("ui/front_end.json");
         let text =
             std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
-        let mut parsed: FrontEnd = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+        let value: serde_json::Value = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+        Self::from_value(value, assets)
+    }
+
+    /// Builds the data from the parsed document (also used by the `data://` asset reload).
+    pub fn from_value(value: serde_json::Value, assets: &Path) -> Result<Self, String> {
+        let mut parsed: FrontEnd = serde_json::from_value(value).map_err(|e| e.to_string())?;
         for pitch in &mut parsed.factions {
             let relative = pitch
                 .illustration

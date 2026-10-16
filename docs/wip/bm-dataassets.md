@@ -38,3 +38,8 @@ Pour chaque fichier : type `Asset` (document `Value` d'abord), ajout à `ClientD
 - `CampaignLightingLive` (vue typée) n'a pas de consommateur : les lecteurs de campagne passent par `from_json` ; à retirer ou à faire lire par `LightData` si l'on veut une seule forme typée.
 - Vérifier à l'œil qu'un rechargement de `campaign_lighting.json` en campagne s'applique (les ressources sont remplacées ; les systèmes les lisent à chaque image).
 - Étendre aux lots 1 à 3 ci-dessus.
+
+## Lot dataassets2 (UI)
+Migrés vers `data://` (module `client/src/dataassets/ui.rs`, collection `UiData` ajoutée à l'état `DataLoad`) : `ui/illustrations.json` (-> ressource `ArtPlates`) et `ui/front_end.json` (-> `MenuData::front`, via `FrontEnd::from_value`). Adoption initiale en `OnEnter(DataLoad::Ready)` (les événements `LoadedWithDependencies` précèdent `Ready` : ne pas s'y fier), rechargement sur `Modified`. Lectures synchrones gardées pour le démarrage et les tests. Dump : section `dataassets_ui`.
+Non migrés, à faire ensuite : `ui/battle_demos.json` et `rules/battle_time_of_day.json` (fonctions prenant `data_dir`, lues à la construction de l'écran), `fx/render_quality.json` (lu avant `Ready` par les réglages), `ui/encyclopedia.json` (codex, assemblé dans un gros `RulesBook`), `ui/tooltips`, audio (aucun JSON lu directement).
+Hors dossier : `menu/front_end.rs` (`from_value`).

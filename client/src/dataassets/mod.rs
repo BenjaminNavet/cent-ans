@@ -16,6 +16,8 @@
 //! unchanged: the JSON files are the same, validated by the same Python tool.
 //! Game rules stay in `core/`.
 
+pub mod ui;
+
 use bevy::asset::AssetLoadFailedEvent;
 use bevy::asset::io::{AssetSourceBuilder, AssetSourceId};
 use bevy::prelude::*;
@@ -179,6 +181,7 @@ impl Plugin for DataAssetsPlugin {
             JsonAssetPlugin::<CampaignLightingDoc>::new(&["json"]),
             JsonAssetPlugin::<AtmosphereRules>::new(&["json"]),
             JsonAssetPlugin::<TownLookDoc>::new(&["json"]),
+            ui::UiDataPlugin,
         ))
         .init_state::<DataLoad>()
         .init_resource::<ReloadStats>()
@@ -186,7 +189,8 @@ impl Plugin for DataAssetsPlugin {
             LoadingState::new(DataLoad::Loading)
                 .continue_to_state(DataLoad::Ready)
                 .on_failure_continue_to_state(DataLoad::Failed)
-                .load_collection::<ClientData>(),
+                .load_collection::<ClientData>()
+                .load_collection::<ui::UiData>(),
         )
         .add_systems(
             Update,
@@ -260,7 +264,7 @@ const FILES: [&str; 3] = [
 fn report_failure(mut stats: ResMut<ReloadStats>) {
     // The loader only says "failed": name the missing files explicitly.
     if let Ok(root) = crate::paths::find_root() {
-        for relative in FILES {
+        for relative in FILES.into_iter().chain(ui::UI_FILES) {
             let path = crate::paths::data_dir(&root).join(relative);
             if !path.exists() {
                 stats
@@ -413,7 +417,7 @@ fn apply_town_look(
 }
 
 /// Modification time of a `data/` file (ms since epoch), for the hot reload delay measure.
-fn mtime_ms(relative: &str) -> Option<u128> {
+pub(crate) fn mtime_ms(relative: &str) -> Option<u128> {
     let root = crate::paths::find_root().ok()?;
     let modified = std::fs::metadata(crate::paths::data_dir(&root).join(relative))
         .ok()?
@@ -427,7 +431,7 @@ fn mtime_ms(relative: &str) -> Option<u128> {
     )
 }
 
-fn now_ms() -> u128 {
+pub(crate) fn now_ms() -> u128 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map_or(0, |d| d.as_millis())
