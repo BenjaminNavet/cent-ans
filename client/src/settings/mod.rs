@@ -8,6 +8,7 @@
 //! Owned by a single lot of agent (ADR 0357); other lots do not edit this folder.
 
 pub mod keymap;
+pub mod migrate;
 mod model;
 pub mod palette;
 pub mod quality;
@@ -42,6 +43,8 @@ pub struct SettingsFile {
     pub path: PathBuf,
     pub saves: u32,
     pub last_error: Option<String>,
+    /// Godot `settings.cfg` imported at this launch (first launch only).
+    pub migrated: Option<migrate::Migration>,
 }
 
 impl SettingsFile {
@@ -64,6 +67,14 @@ pub struct SettingsPlugin;
 impl Plugin for SettingsPlugin {
     fn build(&self, app: &mut App) {
         let path = Settings::file_path();
+        let migrated = migrate::migrate_at_startup(&path);
+        if let Some(migration) = &migrated {
+            info!(
+                "settings: imported {} Godot keys from {}",
+                migration.carried_keys,
+                migration.source.display()
+            );
+        }
         let loaded = Settings::load_from(&path);
         let bindings = loaded.bindings.clone();
         let quality_presets = QualityPresets::load();
@@ -86,6 +97,7 @@ impl Plugin for SettingsPlugin {
                 path,
                 saves: 0,
                 last_error: None,
+                migrated,
             })
             .insert_resource(KeyMap::from_bindings(&bindings))
             .init_resource::<AppliedReport>()
@@ -294,6 +306,12 @@ fn dump_settings(world: &World) -> (String, Value) {
             "path": file.path.display().to_string(),
             "saves": file.saves,
             "last_error": file.last_error,
+            "migrated": file.migrated.as_ref().map(|m| json!({
+                "source": m.source.display().to_string(),
+                "carried_keys": m.carried_keys,
+                "bindings": m.bindings,
+            })),
+            "hidden_rows": rows::NO_EFFECT,
             "values": settings,
             "palette": world.resource::<palette::Palette>(),
             "audio": {

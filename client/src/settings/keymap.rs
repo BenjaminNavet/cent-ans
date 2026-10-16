@@ -134,7 +134,7 @@ pub fn key_label(key: KeyCode) -> Option<String> {
         .map(|(_, name)| (*name).to_owned())
 }
 
-fn key_from_label(label: &str) -> Option<KeyCode> {
+pub(super) fn key_from_label(label: &str) -> Option<KeyCode> {
     let mut chars = label.chars();
     if let (Some(c), None) = (chars.next(), chars.next()) {
         if c.is_ascii_uppercase() {

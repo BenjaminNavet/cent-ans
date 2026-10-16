@@ -260,7 +260,7 @@ pub static ROWS: &[Row] = &[
         Interface,
         high_contrast,
         "Contraste renforcé",
-        "Encre plus sombre, parchemin plus clair, bords plus épais."
+        "Encre plus sombre pour les textes et les bords."
     ),
     check!(
         Interface,
@@ -379,6 +379,11 @@ pub static ROWS: &[Row] = &[
         "Change les lettres affichées sur les boutons et dans l’aide.",
         ["auto" => "Automatique", "azerty" => "AZERTY", "qwerty" => "QWERTY"]),
 ];
+
+/// Rows kept in the table (and the file) but not shown: no Bevy consumer yet, so they would
+/// promise an effect the game does not have. `upscale`: MetalFX / FSR is not ported (see
+/// `quality.rs`). Remove from here when a consumer exists.
+pub const NO_EFFECT: &[&str] = &["upscale"];
 
 pub fn row(key: &str) -> Option<&'static Row> {
     ROWS.iter().find(|row| row.key == key)
