@@ -20,6 +20,7 @@ use bevy::state::state_scoped::DespawnOnExit;
 
 use super::data::LifeData;
 use super::figures::RestPose;
+use super::models::Fade;
 use super::props::PropTable;
 use super::stream::LifeView;
 use crate::app::AppState;
@@ -275,10 +276,27 @@ pub fn record_of(
     scale: f32,
     id: f32,
     clock: f32,
+    fade: f32,
 ) -> [f32; RECORD_FLOATS] {
+    // `far_blend` < 0 asks the shader for the dithered fade (`folk_fade.gdshaderinc`).
+    let dither = if fade < 0.999 { -(1.0 - fade) } else { 0.0 };
     [
-        position.x, position.y, position.z, yaw_deg, scale, id, clock, 0.0, -1000.0, 0.0, 0.0, 0.0,
+        position.x, position.y, position.z, yaw_deg, scale, id, clock, dither, -1000.0, 0.0, 0.0,
+        0.0,
     ]
+}
+
+/// Visible share (eased) of the nearest `Fade` among the ancestors, 1 without one.
+pub fn fade_above(start: Option<&ChildOf>, parents: &Query<&ChildOf>, fades: &Query<&Fade>) -> f32 {
+    let mut node = start.map(ChildOf::parent);
+    for _ in 0..8 {
+        let Some(entity) = node else { return 1.0 };
+        if let Ok(fade) = fades.get(entity) {
+            return fade.visible();
+        }
+        node = parents.get(entity).ok().map(ChildOf::parent);
+    }
+    1.0
 }
 
 /// Draws every `SkinFigure` through the batches, one per (figure, role, activity).
@@ -295,7 +313,10 @@ pub fn update_skin(
         &GlobalTransform,
         &InheritedVisibility,
         Option<&Children>,
+        Option<&ChildOf>,
     )>,
+    parents: Query<&ChildOf>,
+    fades: Query<&Fade>,
     rest: Query<(), With<RestPose>>,
     mut batches: Query<&mut SkinnedBatch>,
 ) {
@@ -321,7 +342,7 @@ pub fn update_skin(
     let clock = view.time;
     let mut groups: HashMap<BatchKey, Vec<u8>> = HashMap::new();
     let mut counts: HashMap<BatchKey, u32> = HashMap::new();
-    for (mut figure, global, visible, children) in &mut figures {
+    for (mut figure, global, visible, children, parent) in &mut figures {
         let key = BatchKey {
             kind: figure.kind,
             variant: figure.variant,
@@ -394,7 +415,20 @@ pub fn update_skin(
             continue;
         }
         let (scale, rotation, position) = global.to_scale_rotation_translation();
-        let record = record_of(position, yaw_deg(rotation), scale.x, figure.id, clock);
+        // The root of the instance grows from zero; the figure keeps its size and fades dithered
+        // like Godot (`fk_dither`), the root's scale is divided out.
+        let fade = fade_above(parent, &parents, &fades);
+        if fade <= 0.02 {
+            continue;
+        }
+        let record = record_of(
+            position,
+            yaw_deg(rotation),
+            scale.x / fade.max(1e-3),
+            figure.id,
+            clock,
+            fade,
+        );
         push_record(groups.entry(key.clone()).or_default(), &record);
         *counts.entry(key).or_default() += 1;
     }
@@ -538,7 +572,7 @@ mod tests {
         // Facing +X: forward (1,0,0) gives 90 degrees.
         assert!((yaw_deg(Quat::from_rotation_y(std::f32::consts::FRAC_PI_2)) - 90.0).abs() < 1e-3);
         assert!(yaw_deg(Quat::IDENTITY).abs() < 1e-4);
-        let r = record_of(Vec3::new(1.0, 2.0, 3.0), 45.0, 0.5, 7.0, 1.5);
+        let r = record_of(Vec3::new(1.0, 2.0, 3.0), 45.0, 0.5, 7.0, 1.5, 1.0);
         assert_eq!(&r[..7], &[1.0, 2.0, 3.0, 45.0, 0.5, 7.0, 1.5]);
         assert_eq!(r[8], -1000.0);
     }

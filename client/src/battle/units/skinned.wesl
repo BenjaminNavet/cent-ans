@@ -1,6 +1,6 @@
 // GPU-skinned, GPU-animated figures (port of the vertex stage of battle_soldier_skinned.gdshader
 // and of its colour logic for the generated `GA3_TEX` figures). Lit with Bevy's PBR code.
-// Instance record: (x, y, z, yaw_deg) (scale, id, anim_time, far_blend) (volley_time, highlight, 0, 0).
+// Instance record: (x, y, z, yaw_deg) (scale, id, anim_time, far_blend; < 0 = dithered fade, -(1 - visible share)) (volley_time, highlight, 0, 0).
 import bevy_pbr::render::{
     mesh_types,
     pbr_functions,
@@ -514,8 +514,20 @@ fn plane_uv(p: vec3<f32>, n: vec3<f32>) -> vec2<f32> {
     return p.xz;
 }
 
+// Ordered dither (Bayer 4x4, as `folk_fade.gdshaderinc::fk_dither`): true when the pixel is dropped
+// for a visible share `fade`.
+fn bayer_drops(fade: f32, frag: vec2<f32>) -> bool {
+    var m = array<f32, 16>(0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
+    let q = vec2<u32>(u32(frag.x) % 4u, u32(frag.y) % 4u);
+    return fade < (m[q.x + q.y * 4u] + 0.5) / 16.0;
+}
+
 @fragment
 fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @location(0) vec4<f32> {
+    // The living map's folk fade in and out dithered (record far_blend < 0 = -(1 - visible share)).
+    if in.misc.x < 0.0 && bayer_drops(1.0 + in.misc.x, in.position.xy) {
+        discard;
+    }
     if params.extra.z > 0.0 {
         let imp = impostor_colour(in);
         if imp.a < 0.5 {

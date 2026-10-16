@@ -726,6 +726,11 @@ fn build_site(
         .unwrap_or_default();
     let kit_plan = super::kit_site::plan(field, &kit, &ground);
     let mut scenes: HashMap<String, Handle<WorldAsset>> = HashMap::new();
+    let horse_models: Vec<String> = kit
+        .models_of("horse")
+        .iter()
+        .map(|m| m.name.clone())
+        .collect();
     for (piece_index, piece) in kit_plan.pieces.iter().enumerate() {
         let handle = scenes
             .entry(piece.model.clone())
@@ -740,6 +745,9 @@ fn build_site(
             Visibility::default(),
             DespawnOnExit(AppState::Battle),
         ));
+        if horse_models.contains(&piece.model) {
+            entity.insert(super::camp_horse::CampHorse);
+        }
         if let Some((_, side)) = kit_plan.camp_tents.iter().find(|(i, _)| *i == piece_index) {
             entity.insert(super::camp_loot::CampTent { side: *side });
         }

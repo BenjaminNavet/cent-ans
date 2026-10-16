@@ -9,6 +9,7 @@ use bevy::asset::RenderAssetUsages;
 use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 
+use super::anim::{AnimBind, AnimKind};
 use super::data::{BirdSpecies, LifeData, h01, text_seed};
 use super::models::{Fade, FitAxis, ModelMetrics, spawn_model};
 use super::stream::{Cat, LifeIndex, LifeItem, LifeView};
@@ -34,8 +35,8 @@ pub struct Bird {
     pub slot: Vec2,
 }
 
-/// Marker on a bird drawn from a generated glb (`dn_model`) instead of the wing-triangle V: the
-/// flap becomes a roll of the whole body (the Godot shader bends the vertices, not available here).
+/// Marker on a bird drawn from a generated glb (`dn_model`) instead of the wing-triangle V: its
+/// wings beat in the vertex stage (`AnimKind::Bird`).
 #[derive(Component)]
 pub struct ModelBird;
 
@@ -290,6 +291,7 @@ pub fn manage_flocks(
                 let bird = if let Some((path, model)) = &glb {
                     // Beak on -Z after `yaw_deg` (as the Godot bake), then turned to the +X heading axis.
                     let yaw_fix = model.yaw_deg.to_radians() - std::f32::consts::FRAC_PI_2;
+                    let flapping = matches!(sp.behavior.as_str(), "transit" | "orbit");
                     let body = spawn_model(
                         &mut commands,
                         &asset_server,
@@ -299,6 +301,18 @@ pub fn manage_flocks(
                         model.length * sp.scale,
                         yaw_fix,
                     );
+                    // The wing beat is a vertex shader (`anim_pose.wesl::bird_pose`, as
+                    // `life_birds.gdshader`); the glb is turned by `yaw_deg` into the Godot frame.
+                    commands.entity(body).try_insert(AnimBind {
+                        kind: AnimKind::Bird {
+                            flap_rate: sp.flap_rate,
+                            flap_amount: sp.flap_amount,
+                            wing_fold: sp.wing_fold,
+                            flapping,
+                        },
+                        seed: bird_data.phase / std::f32::consts::TAU,
+                        yaw: model.yaw_deg.to_radians(),
+                    });
                     commands
                         .spawn((
                             Name::new("life:bird"),
@@ -354,7 +368,7 @@ pub fn move_birds(
         let ground_y = ground.at(flock.anchor.x, flock.anchor.y).unwrap_or(0.0);
         let base_y = ground_y - flock_t.translation.y;
         for child in children.iter() {
-            let Ok((bird, mut bt, wing_children, model_bird)) = birds.get_mut(child) else {
+            let Ok((bird, mut bt, wing_children, _model_bird)) = birds.get_mut(child) else {
                 continue;
             };
             let jitter = |k: f32| sp.jitter * (t * 0.9 + bird.jitter_phase + k).sin() * 0.5;
@@ -413,10 +427,6 @@ pub fn move_birds(
             } else {
                 0.1
             };
-            if model_bird {
-                // Glb body: the flap is a roll about the flight axis (X), a third of the wing angle.
-                bt.rotation *= Quat::from_rotation_x(angle * 0.3);
-            }
             for wing_entity in wing_children.iter() {
                 if let Ok((wing, mut wt)) = wings.get_mut(wing_entity) {
                     wt.rotation = Quat::from_rotation_x(-(angle * wing.side));

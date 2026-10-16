@@ -166,6 +166,8 @@ pub struct BirdSpecies {
     pub jitter: f32,
     pub flap_rate: f32,
     pub flap_amount: f32,
+    /// Fold of the wings (`wing_fold` of the species, 0 = open).
+    pub wing_fold: f32,
     /// Season weights (spring, summer, autumn, winter).
     pub seasons: [f32; 4],
     pub surface: String,
@@ -601,6 +603,7 @@ pub fn parse_birds(v: &Value) -> BirdsCfg {
             jitter: f32_of(s, "jitter", 0.0),
             flap_rate: f32_of(s, "flap_rate", 8.0),
             flap_amount: f32_of(s, "flap_amount", 0.5),
+            wing_fold: f32_of(s, "wing_fold", 0.0),
             seasons: season_weights(s.get("seasons")),
             surface: h["surface"].as_str().unwrap_or("land").to_string(),
             coast_max_px: h
