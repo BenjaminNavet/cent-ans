@@ -165,6 +165,20 @@ impl SmokeSources {
         self.sources.len()
     }
 
+    /// The glowing sources (camp fires) as `(position, intensity)`, the strongest first and at
+    /// most `max` (`_update_glows`: they light the night).
+    pub fn glow_points(&self, max: usize) -> Vec<(Vec3, f32)> {
+        let mut fires: Vec<(Vec3, f32)> = self
+            .sources
+            .values()
+            .filter(|s| s.kind == "campfire")
+            .map(|s| (s.position, s.intensity))
+            .collect();
+        fires.sort_by(|a, b| b.1.total_cmp(&a.1));
+        fires.truncate(max);
+        fires
+    }
+
     pub fn is_empty(&self) -> bool {
         self.sources.is_empty()
     }

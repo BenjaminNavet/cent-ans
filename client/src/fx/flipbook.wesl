@@ -85,6 +85,16 @@ fn blackbody(heat: f32) -> vec3<f32> {
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let total = params.frames.x * params.frames.y;
     let mode = params.frames.z;
+    if mode > 2.5 {
+        // Ember (fire_ember.gdshader): glowing spot, hot orange to dark red, twinkling, fading
+        // in the second half of its life; additive.
+        let r = length(in.uv - vec2<f32>(0.5)) * 2.0;
+        let spot = pow(clamp(1.0 - r, 0.0, 1.0), 2.0);
+        let age = clamp(in.values.x, 0.0, 1.0);
+        let twinkle = 0.7 + 0.3 * sin(age * 40.0 + in.values.z * 20.0);
+        let life = 1.0 - smoothstep(0.5, 1.0, age);
+        return vec4<f32>(mix(params.hot.rgb, params.cold.rgb, age) * params.shape.x, spot * life * twinkle);
+    }
     var first: f32;
     var next: f32;
     var blend: f32;

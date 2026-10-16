@@ -99,6 +99,7 @@ fn main() -> ExitCode {
             battle::hud::BattleHudPlugin,
             battle::decor::BattleDecorPlugin,
             battle::siege::BattleSiegePlugin,
+            battle::effects::BattleEffectsPlugin,
             flow::FlowPlugin,
         ))
         .add_plugins(fx::FlipbookPlugin)
