@@ -62,6 +62,8 @@ impl IconCache {
     }
 }
 
+use crate::ui::kit::contrast::{AccessLabel, level_symbol};
+
 fn text(theme: &UiTheme, content: &str, variation: UiType, color: Color) -> impl Bundle {
     (
         Text::new(content),
@@ -338,11 +340,10 @@ pub fn spawn_army_panel(
                         style::INK_SOFT,
                     ));
                     let morale = f32::from(unit.morale) / 100.0;
-                    c.spawn(text(
-                        theme,
-                        &format!("moral {}", unit.morale),
-                        UiType::Caption,
-                        style::gauge_color(morale.min(1.0)),
+                    let moral = format!("moral {}", unit.morale);
+                    c.spawn((
+                        text(theme, &moral, UiType::Caption, style::gauge_color(morale.min(1.0))),
+                        AccessLabel::new(level_symbol(morale.clamp(0.0, 1.0)), moral),
                     ));
                 });
             }

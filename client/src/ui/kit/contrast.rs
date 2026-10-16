@@ -118,6 +118,78 @@ pub fn rescale_existing_text(
     }
 }
 
+// ---- colour-blind symbols (Accessibility.relation_symbol / level_symbol) -------------------
+
+/// Symbol of a diplomatic relation key (`Accessibility.RELATION_SYMBOLS`), empty if unknown.
+pub fn relation_symbol(relation: &str) -> &'static str {
+    match relation {
+        "self" => "♔",
+        "war" | "enemy" => "⚔",
+        "truce" => "⌛",
+        "peace" | "neutral" => "·",
+        "alliance" | "ally" => "⚭",
+        "vassal" | "suzerain" => "⚜",
+        _ => "",
+    }
+}
+
+/// Symbol of a 0..1 level (morale, attitude): ▲ good, ■ medium, ▼ low.
+pub fn level_symbol(ratio: f32) -> &'static str {
+    if ratio >= 0.6 {
+        "▲"
+    } else if ratio >= 0.3 {
+        "■"
+    } else {
+        "▼"
+    }
+}
+
+/// A text that gets a symbol in front of it in colour-blind mode (`"⚔ En guerre"`), the plain
+/// `base` otherwise. Spawn it next to the `Text`; [`sync_access_labels`] keeps the text in step
+/// with the setting, live.
+#[derive(Component, Debug, Clone)]
+pub struct AccessLabel {
+    pub symbol: &'static str,
+    pub base: String,
+}
+
+impl AccessLabel {
+    pub fn new(symbol: &'static str, base: impl Into<String>) -> Self {
+        Self {
+            symbol,
+            base: base.into(),
+        }
+    }
+
+    /// Text shown for the given mode.
+    pub fn shown(&self, colorblind: bool) -> String {
+        if colorblind && !self.symbol.is_empty() {
+            format!("{} {}", self.symbol, self.base)
+        } else {
+            self.base.clone()
+        }
+    }
+}
+
+/// Rewrites the text of every [`AccessLabel`] (new ones and on a mode change).
+pub fn sync_access_labels(
+    palette: Option<Res<Palette>>,
+    mut labels: Query<(Ref<AccessLabel>, &mut Text)>,
+    mut last: Local<bool>,
+) {
+    let colorblind = palette.is_some_and(|p| p.colorblind);
+    let mode_changed = *last != colorblind;
+    *last = colorblind;
+    for (label, mut text) in &mut labels {
+        if mode_changed || label.is_added() || label.is_changed() {
+            let shown = label.shown(colorblind);
+            if text.0 != shown {
+                text.0 = shown;
+            }
+        }
+    }
+}
+
 /// Dump: scale in force, framed panels and cards.
 pub fn dump(world: &World) -> serde_json::Value {
     let outlined = world
@@ -130,6 +202,12 @@ pub fn dump(world: &World) -> serde_json::Value {
         "text_scale": theme.text_scale,
         "framed_panels": outlined,
         "high_contrast": world.get_resource::<Palette>().is_some_and(|p| p.high_contrast),
+        "symbol_labels": world
+            .try_query::<&AccessLabel>()
+            .map_or(0, |mut q| q.iter(world).count()),
+        "symbols_shown": world
+            .try_query::<(&AccessLabel, &Text)>()
+            .map_or(0, |mut q| q.iter(world).filter(|(l, t)| !l.symbol.is_empty() && t.0 != l.base).count()),
     })
 }
 
@@ -141,6 +219,7 @@ pub fn plugin(app: &mut App) {
                 .run_if(resource_changed::<UiTheme>)
                 .after(super::apply_text_scale),
             apply_contrast_frames,
+            sync_access_labels,
         ),
     );
 }
@@ -158,6 +237,29 @@ mod tests {
             })
             .add_systems(Update, apply_contrast_frames);
         app
+    }
+
+    #[test]
+    fn symbols_follow_the_mode() {
+        assert_eq!(relation_symbol("war"), "⚔");
+        assert_eq!(relation_symbol("ally"), "⚭");
+        assert_eq!(relation_symbol("tension"), "");
+        assert_eq!(level_symbol(0.2), "▼");
+        let mut app = App::new();
+        app.insert_resource(Palette::default())
+            .add_systems(Update, sync_access_labels);
+        let id = app
+            .world_mut()
+            .spawn((Text::new("En guerre"), AccessLabel::new("⚔", "En guerre")))
+            .id();
+        app.update();
+        assert_eq!(app.world().get::<Text>(id).unwrap().0, "En guerre");
+        app.world_mut().resource_mut::<Palette>().colorblind = true;
+        app.update();
+        assert_eq!(app.world().get::<Text>(id).unwrap().0, "⚔ En guerre");
+        app.world_mut().resource_mut::<Palette>().colorblind = false;
+        app.update();
+        assert_eq!(app.world().get::<Text>(id).unwrap().0, "En guerre");
     }
 
     #[test]

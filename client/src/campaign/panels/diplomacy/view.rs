@@ -109,6 +109,8 @@ pub fn restore_focus(
     }
 }
 
+use crate::ui::kit::contrast::{AccessLabel, relation_symbol};
+
 fn ink(theme: &UiTheme, content: &str, ui_type: UiType, color: Color) -> impl Bundle {
     (
         Text::new(content),
@@ -449,11 +451,17 @@ fn faction_row(
             ..default()
         })
         .with_children(|right| {
-            right.spawn(ink(
-                theme,
-                format::status_label(&row.status),
-                UiType::Caption,
-                format::status_color(&row.status),
+            right.spawn((
+                ink(
+                    theme,
+                    format::status_label(&row.status),
+                    UiType::Caption,
+                    format::status_color(&row.status),
+                ),
+                AccessLabel::new(
+                    relation_symbol(&row.status),
+                    format::status_label(&row.status),
+                ),
             ));
             right.spawn(ink(
                 theme,
@@ -634,6 +642,10 @@ fn head_section(
                     &format!("{status} — {attitude}"),
                     UiType::Body,
                     format::status_color(&row.status),
+                ),
+                AccessLabel::new(
+                    relation_symbol(&row.status),
+                    format!("{status} — {attitude}"),
                 ),
             ));
         });
