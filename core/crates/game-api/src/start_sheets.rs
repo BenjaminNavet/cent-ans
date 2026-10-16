@@ -8,8 +8,8 @@
 
 use data_model::{FactionId, GameData, TitleId};
 use serde::Serialize;
-use sim_campaign::CampaignState;
 use sim_campaign::feudal;
+use sim_campaign::CampaignState;
 
 /// One objective title of a sheet.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
