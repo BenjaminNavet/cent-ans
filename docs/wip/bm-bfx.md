@@ -1,6 +1,6 @@
 # bm-bfx : effets de bataille (V16-V19, reste « braises »)
 
-Branche `bm/bfx`. État : en cours (voir l'historique git pour le dernier commit `wip:`).
+Branche `bm/bfx`. État : terminé (preuves : bataille de Crécy, siège de Paris au crépuscule, voir ci-dessous).
 
 ## Fait
 - `fx/flipbook.rs` + `.wesl` : sorte `Ember` (braises, additive, `fire_ember.gdshader`), `FlipbookEmitter::embers`, `spawn_fire_sprite` (flammes / braises hors émetteur), `FlipbookLooks::live`.
@@ -15,3 +15,9 @@ Branche `bm/bfx`. État : en cours (voir l'historique git pour le dernier commit
 - Éclaboussures et sillages aux gués, mottes des sabots, éclair de bombarde : non portés.
 - Turbulence des braises (bruit) non portée ; lumières de feux de siège (`siege_fire_fx.gd` `_assign_lights`) : toujours un reste.
 - Calibrage de la lueur de camp (lumens) non vérifié à l'œil (pas de capture).
+
+## Preuves (dumps, offscreen, muet)
+- Crécy (`CENT_ANS_BATTLE_SPEED=8`, sans déploiement) : pieux 1024, pavois 756 (3 replantés après pivot), 296 026 traits lancés, 136 chocs de charge ; poussière coupée (sol détrempé, comme Godot).
+- Siège de Paris au crépuscule : braises 221 vivantes sur 8 foyers, 10 projectiles de siège (1857 bouffées de traînée, flèche max 36,8 m), flèches enflammées : 44 252 flammes, 3216 petits feux ; obscurité 0,77 (aucune source de camp alimentée : `battle_smoke.sources` = 0, personne n'appelle encore `SmokeSources::add` pour les camps de bataille).
+- Une exécution sur trois s'est arrêtée sans message environ 3 s après le début (infrastructure `open -W`, pas un panic) ; relancée, elle passe.
+- Avertissement `Mesh index 17 contains no vertices` vu dans toutes les exécutions de bataille ; non attribué (pas confirmé comme venant de ce lot).

@@ -105,7 +105,9 @@ pub struct GlowStats {
     pub strongest_lumens: f32,
 }
 
-fn spawn_glows(mut commands: Commands) {
+/// The lights are made the first time a camp fire burns in the dark: a battle by day (or
+/// without camp fires) has no point light at all.
+fn spawn_glows(commands: &mut Commands) {
     for slot in 0..MAX_GLOWS {
         commands.spawn((
             Name::new("CampGlow"),
@@ -125,6 +127,7 @@ fn spawn_glows(mut commands: Commands) {
 }
 
 fn update_glows(
+    mut commands: Commands,
     mut session: ResMut<BattleSession>,
     daylight: Res<Daylight>,
     sources: Res<SmokeSources>,
@@ -136,6 +139,9 @@ fn update_glows(
     let level = daylight.level(session.sim_mut().hour() as f32);
     let dark = darkness(level);
     let fires = sources.glow_points(MAX_GLOWS);
+    if dark > 0.0 && !fires.is_empty() && lights.is_empty() {
+        spawn_glows(&mut commands);
+    }
     let unit = look.map_or(2650.0, |l| l.unit());
     stats.light_level = level;
     stats.darkness = dark;
@@ -184,7 +190,6 @@ impl Plugin for GlowPlugin {
         app.insert_resource(Daylight::load())
             .init_resource::<GlowStats>()
             .register_dump(dump_glow)
-            .add_systems(OnEnter(AppState::Battle), spawn_glows)
             .add_systems(
                 Update,
                 update_glows
@@ -222,6 +227,18 @@ mod tests {
             after_midnight < 0.26 && after_midnight > 0.13,
             "{after_midnight}"
         );
+    }
+
+    #[test]
+    fn only_camp_fires_glow_the_strongest_first() {
+        let mut sources = SmokeSources::default();
+        sources.add(Vec3::new(1.0, 0.0, 0.0), 0.4, "campfire");
+        sources.add(Vec3::new(2.0, 0.0, 0.0), 1.5, "column");
+        sources.add(Vec3::new(3.0, 0.0, 0.0), 0.9, "campfire");
+        let points = sources.glow_points(MAX_GLOWS);
+        assert_eq!(points.len(), 2, "the burning house does not light a camp");
+        assert_eq!(points[0].0.x, 3.0);
+        assert_eq!(sources.glow_points(1).len(), 1);
     }
 
     #[test]
