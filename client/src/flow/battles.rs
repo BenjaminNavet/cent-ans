@@ -72,6 +72,7 @@ pub fn offer_pending(
     assets: Res<AssetServer>,
     plates: Res<ArtPlates>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    mut images: ResMut<Assets<Image>>,
 ) {
     let (Some(data), Some(state)) = (sim.data.as_ref(), sim.state.as_ref()) else {
         return;
@@ -98,6 +99,20 @@ pub fn offer_pending(
                 plates: &plates,
                 window_height: loading::window_height(&windows),
             };
+            // Read-only preview of the battle to come: site map, weather, generals.
+            let preview = flow::battle_launch(data, state, first.index)
+                .and_then(|launch| {
+                    let site = crate::paths::find_root().ok().and_then(|root| {
+                        launch::campaign_site(
+                            &crate::paths::data_dir(&root),
+                            &launch.setup,
+                            state.year(),
+                        )
+                    });
+                    dialog::SitePreview::build(&launch, site.as_ref(), &brief.player_side)
+                })
+                .map_err(|message| warn!("pre-battle preview: {message}"))
+                .ok();
             dialog::spawn(
                 &mut commands,
                 &theme,
@@ -106,6 +121,8 @@ pub fn offer_pending(
                 &brief,
                 first.siege,
                 first.seed,
+                preview.as_ref(),
+                &mut images,
             );
         }
         Err(message) => {

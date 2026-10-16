@@ -355,6 +355,11 @@ fn dump_flow(world: &World) -> (String, Value) {
             json!({
                 "index": d.index, "title": d.title, "verdict": d.verdict, "share": d.share,
                 "regiments": d.regiments, "can_withdraw": d.can_withdraw,
+                "preview": d.preview.as_ref().map(|p| json!({
+                    "weather": p.weather, "site_label": p.site_label,
+                    "own_dots": p.own_dots, "enemy_dots": p.enemy_dots,
+                    "generals": p.generals, "medallions": p.medallions,
+                })),
             })
         });
     let mut window_query = world.try_query::<&encounters::EncounterWindow>();
