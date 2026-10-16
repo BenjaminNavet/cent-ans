@@ -7,8 +7,9 @@
 //! object seen from `size_distance`, constant with the camera. Range: `view_range_units`, fading
 //! (here shrinking) from `fade_from_units`; per type `max_distance` x `distance_scale`.
 //!
-//! Not ported: procedural fallback volumes (all 52 types have a glb), smoke plumes of the `smoke`
-//! types, shadows by distance, the rebuild-on-move batching (instances are streamed one by one).
+//! Smoke plumes of the `smoke` types: `decor_smoke.rs` (flipbook column on the instance).
+//!
+//! Not ported: procedural fallback volumes (all 52 types have a glb), shadows by distance, the rebuild-on-move batching (instances are streamed one by one).
 
 use std::collections::HashMap;
 use std::path::Path;
@@ -512,6 +513,10 @@ pub fn stream_decor(
             ))
             .with_children(|p| {
                 p.spawn(WorldAssetRoot(handle));
+                let kind = &cfg.types[inst.kind];
+                if kind.smoke {
+                    p.spawn(super::decor_smoke::smoke_bundle(kind.size_m));
+                }
             })
             .id();
         view.live.insert(*i, root);
@@ -633,6 +638,8 @@ pub fn dump(world: &World_) -> (String, Value) {
             "lod": view.lod,
             "spawned": view.spawned,
             "despawned": view.despawned,
+            "smoke_plumes": super::decor_smoke::counts(world).0,
+            "smoke_active": super::decor_smoke::counts(world).1,
         }),
     )
 }

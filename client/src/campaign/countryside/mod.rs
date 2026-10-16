@@ -10,9 +10,11 @@
 pub mod bridge_meshes;
 pub mod bridges;
 pub mod clutter;
+pub mod coast_rocks;
 pub mod config;
 pub mod decor;
 pub mod decor_plan;
+pub mod decor_smoke;
 pub mod field_plan;
 pub mod landuse;
 pub mod layer;
@@ -210,7 +212,11 @@ impl Plugin for CampaignCountrysidePlugin {
             )
             .add_systems(
                 Update,
-                (decor::stream_decor, decor::apply_decor)
+                (
+                    decor::stream_decor,
+                    decor::apply_decor,
+                    decor_smoke::update_decor_smoke,
+                )
                     .chain()
                     .run_if(in_state(AppState::Campaign))
                     .run_if(resource_exists::<decor::DecorPlan>),

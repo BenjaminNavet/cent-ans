@@ -6,9 +6,7 @@
 // Modes (`params.frame.w`): 0 tree impostor (camera-facing card, baked view chosen by azimuth and
 // dithered between the two nearest, seasonal tint, wind), 1 reed clump (two crossed cards),
 // 2 pond (flat disc), 3 near tree model (normalised glb mesh, `foliage_model.gdshader`: texture
-// saturated by `model_chroma`, gain, seasonal tint, wind), 4 ground shadow of a tree (blended
-// ellipse cast along the sun from the crown; `extra.x` crown width / height, `range.xyz` direction
-// to the sun, `range.w` opacity).
+// saturated by `model_chroma`, gain, seasonal tint, wind). Cast shadows: `shadow_cast.wesl`.
 import bevy_pbr::render::{
     pbr_functions,
     pbr_types,
@@ -189,25 +187,6 @@ fn vertex(in: Vertex) -> VertexOutput {
         let size = in.scale_seed.x * magnify;
         let scaled = vec3<f32>(p.x * params.extra.x * size, p.y * params.extra.y * size, p.z * params.extra.x * size);
         world = rotate_y(scaled, c, s) + origin;
-    } else if mode > 3.5 {
-        // Ground shadow: the crown (centre at 0.62 of the height) projected along the sun onto
-        // the plane of the foot, stretched by the low sun, the trunk joining it to the foot.
-        // Direction to the sun from the main world (`range.xyz`): the light bindings are not
-        // visible to the vertex stage.
-        let to_sun = normalize(params.range.xyz + vec3<f32>(0.0, 1e-4, 0.0));
-        let elevation = max(to_sun.y, 0.25);
-        let flat = normalize(vec2<f32>(to_sun.x, to_sun.z) + vec2<f32>(1e-4, 0.0));
-        let height = in.scale_seed.x * (1.0 + 0.25 * (2.0 * fract(seed * 53.17) - 1.0));
-        let crown = height * params.extra.x;
-        let reach = height * 0.62 * min(sqrt(1.0 - elevation * elevation) / elevation, 2.5);
-        let along = -flat;
-        let side = vec2<f32>(-along.y, along.x);
-        let span = crown * 0.5 / elevation + reach * 0.5;
-        let centre = origin.xz + along * (reach * 0.55);
-        let local = vec2<f32>(in.uv.x * 2.0 - 1.0, in.uv.y * 2.0 - 1.0);
-        let xz = centre + along * local.y * max(span, crown * 0.5) + side * local.x * crown * 0.55;
-        world = vec3<f32>(xz.x, origin.y + 0.04 * height, xz.y);
-        out.local = local;
     } else if mode > 2.5 {
         // Tree model: mesh of height 1 (foot at 0), crown width already set by the normalisation.
         let jitter = 1.0 + 0.25 * (2.0 * fract(seed * 53.17) - 1.0);
@@ -408,16 +387,6 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         }
         color = vec4<f32>(t.rgb * in.tint * 1.6, 1.0);
         roughness = 0.85;
-    } else if mode > 3.5 {
-        let r = length(in.local);
-        // Band trees have two records (model and impostor): each casts its share (`extra.y`: 1
-        // for the shadows of model records).
-        let share = select(1.0 - zone, zone, params.extra.y > 0.5);
-        let a = smoothstep(1.0, 0.45, r) * params.range.w * share;
-        if a < 0.004 {
-            discard;
-        }
-        return vec4<f32>(0.0, 0.0, 0.0, a);
     } else if mode > 2.5 {
         let t = textureSample(albedo_texture, albedo_sampler, in.uv0);
         let seed = in.misc.y;
