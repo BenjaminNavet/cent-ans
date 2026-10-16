@@ -1,0 +1,9 @@
+# Opens Crécy (defender) from the main menu for `bench.sh --bench-battle` (run with CENT_ANS_NO_DEPLOY=1).
+wait 30
+click Batailles
+wait 10
+click Batailles historiques
+wait 20
+click Battle_crecy_defender
+wait 10
+click_if prologue_invite:no

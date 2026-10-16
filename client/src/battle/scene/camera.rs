@@ -342,7 +342,7 @@ fn action_held(
 }
 
 #[allow(clippy::too_many_arguments)]
-fn control_camera(
+pub fn control_camera(
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,
     buttons: Res<ButtonInput<MouseButton>>,

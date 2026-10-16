@@ -23,6 +23,12 @@ pub struct BenchConfig {
     pub pan_only: bool,
     /// `--bench-descent-only`: skip the pan.
     pub descent_only: bool,
+    /// `--bench-battle`: bench the battle scene instead of the campaign map (`agent::bench_battle`).
+    pub battle: bool,
+    /// `--bench-calm-seconds <n>`: duration of the calm phase of the battle bench (15 s).
+    pub calm_seconds: f32,
+    /// `--bench-melee-seconds <n>`: duration of the melee phase of the battle bench (20 s).
+    pub melee_seconds: f32,
 }
 
 impl Default for BenchConfig {
@@ -33,6 +39,9 @@ impl Default for BenchConfig {
             seconds: 20.0,
             pan_only: false,
             descent_only: false,
+            battle: false,
+            calm_seconds: 15.0,
+            melee_seconds: 20.0,
         }
     }
 }
@@ -123,6 +132,25 @@ impl Cli {
                 "--offscreen" => cli.offscreen = true,
                 "--bench-map" => {
                     cli.bench.get_or_insert_with(BenchConfig::default);
+                }
+                "--bench-battle" => {
+                    cli.bench.get_or_insert_with(BenchConfig::default).battle = true;
+                }
+                "--bench-calm-seconds" => {
+                    let n = value()?
+                        .parse()
+                        .map_err(|e| format!("--bench-calm-seconds: {e}"))?;
+                    cli.bench
+                        .get_or_insert_with(BenchConfig::default)
+                        .calm_seconds = n;
+                }
+                "--bench-melee-seconds" => {
+                    let n = value()?
+                        .parse()
+                        .map_err(|e| format!("--bench-melee-seconds: {e}"))?;
+                    cli.bench
+                        .get_or_insert_with(BenchConfig::default)
+                        .melee_seconds = n;
                 }
                 "--bench-out" => {
                     let path = absolute(&value()?);
