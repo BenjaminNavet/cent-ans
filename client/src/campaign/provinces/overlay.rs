@@ -65,6 +65,8 @@ pub struct OverlayState {
     pub border_alpha: f32,
     pub border_vertices: usize,
     pub fill_alpha: f32,
+    /// Colour-blind hatching on the fill (`Palette::colorblind`).
+    pub hatch: bool,
     fill_image: Handle<Image>,
     fill_material: Handle<ProvinceFillMaterial>,
     fill_mesh: Handle<Mesh>,
@@ -106,6 +108,7 @@ pub(super) fn build(app: &mut App) {
                 rebuild_on_ground,
                 refresh_overlays,
                 fade_with_zoom,
+                sync_hatch,
                 pulse_halo,
             )
                 .chain()
@@ -234,6 +237,7 @@ fn load_province_map(
         border_alpha: 0.0,
         border_vertices: 0,
         fill_alpha: 0.0,
+        hatch: false,
         fill_image,
         fill_material,
         fill_mesh,
@@ -569,6 +573,22 @@ fn fade_with_zoom(
         if let Some(mut m) = fill_materials.get_mut(&overlay.fill_material) {
             m.params.set_alpha(fill);
         }
+    }
+}
+
+/// Colour-blind hatching of the fills, following `settings::palette::Palette`.
+fn sync_hatch(
+    palette: Option<Res<crate::settings::palette::Palette>>,
+    mut overlay: ResMut<OverlayState>,
+    mut fill_materials: ResMut<Assets<ProvinceFillMaterial>>,
+) {
+    let wanted = palette.is_some_and(|p| p.colorblind);
+    if overlay.hatch == wanted {
+        return;
+    }
+    overlay.hatch = wanted;
+    if let Some(mut m) = fill_materials.get_mut(&overlay.fill_material) {
+        m.params.hatch = if wanted { 1.0 } else { 0.0 };
     }
 }
 

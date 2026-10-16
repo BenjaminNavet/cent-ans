@@ -1,0 +1,4 @@
+# bm-access (accessibilité, client Bevy)
+Fait : symboles de moral ▲■▼ sur les cartes de régiment (battle/hud/cards.rs) en daltonien ; hachures du lavis de faction (provinces/shaders/fill.wesl, `OverlayParams.hatch`, `sync_hatch`) ; cadre contraste (ui/kit/contrast.rs : Outline + vélin éclairci) ; text_size appliqué en direct aux textes déjà affichés. Preuve : tests unitaires + dump Campaign (settings daltonien+contraste+1,3) : `ui_kit.access`, `fill.hatch=true`, `settings.palette`.
+Écarts : bords des panneaux peints = Outline (pas d'épaississement de texture) ; hachures en espace écran, 3 directions par hachage de couleur ; symboles de moral non vérifiés en bataille (dump `morale_symbols` ajouté, tests seulement).
+Restes : hachures des plaques ennemies (army_strip.gd), symboles de relation diplomatique en daltonien (map_mode_controller.gd `_place_relation_markers`, diplomatic_stances.gd), `show_zoc`.

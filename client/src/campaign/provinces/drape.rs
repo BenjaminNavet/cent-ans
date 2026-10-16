@@ -46,7 +46,9 @@ pub struct OverlayParams {
     /// World units above the draped ground, constant and per world unit of eye distance.
     pub lift_base: f32,
     pub lift_per_distance: f32,
-    pub pad0: f32,
+    /// Fill only: 1 = colour-blind hatching (screen-space stripes whose direction follows the
+    /// province colour), 0 = plain wash.
+    pub hatch: f32,
     pub pad1: f32,
 }
 
@@ -56,7 +58,7 @@ impl OverlayParams {
             tint: Vec4::ONE,
             lift_base,
             lift_per_distance,
-            pad0: 0.0,
+            hatch: 0.0,
             pad1: 0.0,
         }
     }

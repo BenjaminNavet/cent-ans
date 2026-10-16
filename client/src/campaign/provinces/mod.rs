@@ -131,6 +131,7 @@ fn dump_provinces(world: &World) -> (String, Value) {
             "tinted_provinces": tinted,
             "rebuilds": overlay.fill_rebuilds,
             "alpha": overlay.fill_alpha,
+            "hatch": overlay.hatch,
         });
         let bound = |scale: Option<f32>| scale.is_some_and(|w| w > 0.5);
         let fill_bound = world
