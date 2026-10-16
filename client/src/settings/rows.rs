@@ -382,8 +382,9 @@ pub static ROWS: &[Row] = &[
 
 /// Rows kept in the table (and the file) but not shown: no Bevy consumer yet, so they would
 /// promise an effect the game does not have. `upscale`: MetalFX / FSR is not ported (see
-/// `quality.rs`). Remove from here when a consumer exists.
-pub const NO_EFFECT: &[&str] = &["upscale"];
+/// `quality.rs`). `dev_mode`: Godot's `Settings.is_dev()` has no reader either (no tool text is
+/// gated in either client). Remove from here when a consumer exists.
+pub const NO_EFFECT: &[&str] = &["upscale", "dev_mode"];
 
 pub fn row(key: &str) -> Option<&'static Row> {
     ROWS.iter().find(|row| row.key == key)
@@ -407,6 +408,14 @@ mod tests {
             }
             assert_eq!(ROWS.iter().filter(|other| other.key == row.key).count(), 1);
         }
+    }
+
+    #[test]
+    fn hidden_rows_exist_in_the_table() {
+        for key in NO_EFFECT {
+            assert!(row(key).is_some(), "{key} is hidden but has no row");
+        }
+        assert!(NO_EFFECT.contains(&"dev_mode"));
     }
 
     #[test]
