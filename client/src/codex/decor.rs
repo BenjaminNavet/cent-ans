@@ -101,12 +101,12 @@ pub struct Candidate {
 /// The candidate under `cursor`: smallest `distance to its projected centre / projected radius`
 /// below 1. `project` maps a world point to the screen (None behind the camera); `right` is the
 /// camera's right vector (projects the radius).
-pub fn best_candidate<'a>(
-    candidates: &'a [Candidate],
+pub fn best_candidate(
+    candidates: &[Candidate],
     cursor: Vec2,
     project: impl Fn(Vec3) -> Option<Vec2>,
     right: Vec3,
-) -> Option<&'a Candidate> {
+) -> Option<&Candidate> {
     let mut best = None;
     let mut best_score = 1.0;
     for candidate in candidates {
@@ -217,6 +217,8 @@ pub struct DecorHover {
     last_miss: &'static str,
     last_candidates: usize,
     last_species: String,
+    /// Tiles and trees held by the vegetation at the last attempt.
+    last_trees: (usize, usize),
     /// Proof hook `CENT_ANS_DECOR_CURSOR` (`center` or `x,y`): scripts cannot move the pointer.
     cursor_override: Option<Option<Vec2>>,
 }
@@ -332,6 +334,10 @@ fn decor_hover(
         tooltips.chain.clear();
         decor.shown_entry.clear();
     }
+    if decor.cursor_override.is_some() && decor.wait.phase == Phase::Fired {
+        // Proof hook: the forced cursor never moves, so retry until something is found.
+        decor.wait.begin_wait(cursor);
+    }
     if !decor.wait.tick(time.delta_secs(), delay) {
         return;
     }
@@ -378,6 +384,7 @@ fn decor_hover(
     }
     let candidates = gather(point, reach, &trees, &animals);
     decor.last_candidates = candidates.len();
+    decor.last_trees = trees.stats();
     let right = camera_transform.right().as_vec3();
     let Some(hit) = best_candidate(
         &candidates,
@@ -427,6 +434,7 @@ fn dump(world: &World) -> (String, Value) {
             "last_miss": decor.last_miss,
             "last_candidates": decor.last_candidates,
             "last_species": decor.last_species,
+            "last_trees": [decor.last_trees.0, decor.last_trees.1],
         }),
     )
 }

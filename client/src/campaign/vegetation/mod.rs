@@ -1136,6 +1136,21 @@ pub struct TreeDecor<'w> {
 }
 
 impl TreeDecor<'_> {
+    /// (tiles ready, trees held) for the dumps.
+    pub fn stats(&self) -> (usize, usize) {
+        let Some(tiles) = &self.tiles else {
+            return (0, 0);
+        };
+        tiles
+            .tiles
+            .values()
+            .filter_map(|state| match state {
+                TileState::Ready { trees, .. } => Some(trees.len()),
+                TileState::Pending => None,
+            })
+            .fold((0, 0), |(count, total), len| (count + 1, total + len))
+    }
+
     /// Trees within `reach` map units of (x, z).
     pub fn near(&self, x: f32, z: f32, reach: f32) -> Vec<TreeHit> {
         let (Some(tiles), Some(world)) = (&self.tiles, &self.world) else {

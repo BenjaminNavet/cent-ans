@@ -38,6 +38,9 @@ pub const FOOTER_FREE: &str = "Clic droit : détacher";
 const CURSOR_OFFSET: Vec2 = Vec2::new(14.0, 18.0);
 const SCREEN_MARGIN: f32 = 4.0;
 
+/// Any bubble of the screen: a hover bubble of the kit or a pinned one.
+pub(super) type AnyBubble = Or<(With<TooltipPanel>, With<PinnedBubble>)>;
+
 /// A pinned bubble: the registry key it shows (empty for a free text) and the Codex sheet a
 /// click on it opens.
 #[derive(Component, Debug)]
@@ -164,11 +167,7 @@ fn place_pinned(
     }
 }
 
-fn in_bubble(
-    entity: Entity,
-    parents: &Query<&ChildOf>,
-    bubbles: &Query<(), Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
-) -> bool {
+fn in_bubble(entity: Entity, parents: &Query<&ChildOf>, bubbles: &Query<(), AnyBubble>) -> bool {
     std::iter::once(entity)
         .chain(parents.iter_ancestors(entity))
         .any(|ancestor| bubbles.contains(ancestor))
@@ -178,7 +177,7 @@ fn in_bubble(
 fn hovered_link_key(
     links: &Query<(Entity, &RichLink, &Hovered)>,
     parents: &Query<&ChildOf>,
-    bubbles: &Query<(), Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
+    bubbles: &Query<(), AnyBubble>,
 ) -> Option<String> {
     links.iter().find_map(|(entity, link, hovered)| {
         let key = bubble_key(&link.0)?;
@@ -205,6 +204,7 @@ fn chain_rects(
 }
 
 /// Pins the whole open hover chain where it stands and closes the chain.
+#[allow(clippy::too_many_arguments)]
 fn pin_chain(
     commands: &mut Commands,
     theme: &UiTheme,
@@ -266,7 +266,7 @@ fn pin_key(
     (links, parents, bubble_nodes): (
         Query<(Entity, &RichLink, &Hovered)>,
         Query<&ChildOf>,
-        Query<(), Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
+        Query<(), AnyBubble>,
     ),
 ) {
     let pressed = match &keymap {
@@ -404,7 +404,7 @@ fn pin_with_right_click(
     (links, parents, bubble_nodes): (
         Query<(Entity, &RichLink, &Hovered)>,
         Query<&ChildOf>,
-        Query<(), Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
+        Query<(), AnyBubble>,
     ),
 ) {
     if !mouse.just_pressed(MouseButton::Right) {

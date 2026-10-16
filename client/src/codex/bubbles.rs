@@ -28,7 +28,7 @@ use bevy::ui::UiGlobalTransform;
 use bevy::window::PrimaryWindow;
 use serde_json::{Value, json};
 
-use super::pinned::PinnedBubble;
+use super::pinned::AnyBubble;
 use super::store::CodexStore;
 use super::{CodexOverlay, CodexRoot, OpenCodex, text};
 use crate::agent::dump::DumpAppExt;
@@ -174,14 +174,10 @@ fn register_bubbles(
         }
     }
     state.registered = count;
-    state.registered_ib = ib_count;
+    state.registered_ib += ib_count;
 }
 
-fn in_panel(
-    entity: Entity,
-    parents: &Query<&ChildOf>,
-    panels: &Query<(), Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
-) -> bool {
+fn in_panel(entity: Entity, parents: &Query<&ChildOf>, panels: &Query<(), AnyBubble>) -> bool {
     std::iter::once(entity)
         .chain(parents.iter_ancestors(entity))
         .any(|ancestor| panels.contains(ancestor))
@@ -197,8 +193,8 @@ fn hover_bubbles(
     window: Query<&Window, With<PrimaryWindow>>,
     links: Query<(Entity, &RichLink, &Hovered)>,
     parents: Query<&ChildOf>,
-    panels: Query<(), Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
-    panel_hover: Query<&Hovered, Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
+    panels: Query<(), AnyBubble>,
+    panel_hover: Query<&Hovered, AnyBubble>,
 ) {
     let dt = time.delta_secs();
     let hovered_link = links.iter().find_map(|(entity, link, hovered)| {
@@ -266,7 +262,7 @@ fn click_links(
     store: Res<CodexStore>,
     links: Query<(Entity, &RichLink, &Hovered)>,
     parents: Query<&ChildOf>,
-    panels: Query<(), Or<(With<TooltipPanel>, With<PinnedBubble>)>>,
+    panels: Query<(), AnyBubble>,
     roots: Query<(), With<CodexRoot>>,
     mut tooltips: ResMut<TooltipState>,
     mut state: ResMut<BubbleState>,
