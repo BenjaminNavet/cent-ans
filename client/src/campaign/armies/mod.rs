@@ -10,6 +10,7 @@
 
 mod bubble;
 pub mod bubbles;
+pub mod camp_smoke;
 pub mod cloth;
 mod feedback;
 pub mod figures;
@@ -77,6 +78,13 @@ impl Plugin for CampaignArmiesPlugin {
             .init_resource::<bubbles::RichHover>()
             .add_message::<ArmyCommand>()
             .register_dump(orders::dump_armies)
+            .register_dump(camp_smoke::dump_camp_smoke)
+            .add_systems(
+                Update,
+                camp_smoke::update_camp_smoke
+                    .after(markers::place_markers)
+                    .run_if(in_state(AppState::Campaign)),
+            )
             .add_systems(
                 OnEnter(AppState::Campaign),
                 (

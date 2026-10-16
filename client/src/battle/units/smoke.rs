@@ -2,25 +2,21 @@
 //! (camp fires: pale smoke, burning houses: dark column) that other lots feed through
 //! [`SmokeSources`]. Camera-facing soft puffs drifting with the battle wind.
 //! Port of game/scripts/battle/battle_smoke.gd (settings `smoke` of `data/fx/battle_staging.json`).
-//! Not ported: the flipbook smoke shader (`fire_smoke.gdshader`: soft puffs instead), the night
-//! glow of camp fires (`OmniLight3D`).
+//! The puffs are the player's smoke flipbook sprites (`crate::fx::flipbook`, `fire_smoke.gdshader`),
+//! one tinted material per kind. Not ported: the night glow of camp fires (`OmniLight3D`), the
+//! soft contact fade and the near fade of the shader.
 
 use std::collections::HashMap;
 
-use bevy::asset::RenderAssetUsages;
-use bevy::camera::visibility::NoFrustumCulling;
 use bevy::prelude::*;
-use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 
 use super::corpses::hash4;
 use super::wind::BattleWind;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
-use crate::battle::scene::camera::BattleCamera;
+use crate::fx::flipbook::{FlipbookLooks, FlipbookMaterial, SmokeSprite, spawn_smoke_sprite};
 
-/// Puffs alive at once.
-const POOL: usize = 360;
 /// Short cloud of a handgun shot: puffs, life (s), size (m) range.
 const GUN_PUFFS: usize = 3;
 const GUN_LIFE_S: f32 = 3.5;
@@ -183,54 +179,11 @@ pub struct SmokeRequests {
     pub puffs: Vec<Vec3>,
 }
 
-struct Puff {
-    entity: Entity,
-    material: Handle<StandardMaterial>,
-    age: f32,
-    life: f32,
-    start: Vec3,
-    velocity: Vec3,
-    size: [f32; 2],
-    color: [f32; 4],
-    alive: bool,
-}
-
 #[derive(Resource, Default)]
 pub struct Smoke {
-    puffs: Vec<Puff>,
-    next: usize,
-    quad: Option<Handle<Mesh>>,
-    texture: Option<Handle<Image>>,
     kinds: HashMap<String, SmokeKind>,
     counter: u64,
     pub emitted: usize,
-}
-
-fn puff_texture() -> Image {
-    // Soft round puff: alpha falls off with the radius.
-    const N: u32 = 64;
-    let mut data = Vec::with_capacity((N * N * 4) as usize);
-    for y in 0..N {
-        for x in 0..N {
-            let dx = (x as f32 + 0.5) / N as f32 * 2.0 - 1.0;
-            let dy = (y as f32 + 0.5) / N as f32 * 2.0 - 1.0;
-            let r = (dx * dx + dy * dy).sqrt();
-            let a = (1.0 - r).clamp(0.0, 1.0);
-            let a = a * a * (3.0 - 2.0 * a);
-            data.extend_from_slice(&[255, 255, 255, (a * 255.0) as u8]);
-        }
-    }
-    Image::new(
-        Extent3d {
-            width: N,
-            height: N,
-            depth_or_array_layers: 1,
-        },
-        TextureDimension::D2,
-        data,
-        TextureFormat::Rgba8UnormSrgb,
-        RenderAssetUsages::default(),
-    )
 }
 
 impl Smoke {
@@ -244,69 +197,49 @@ impl Smoke {
         self.kinds.insert(name.to_owned(), kind.clone());
         kind
     }
-
-    pub fn alive(&self) -> usize {
-        self.puffs.iter().filter(|p| p.alive).count()
-    }
 }
 
-#[allow(clippy::too_many_arguments)]
-fn spawn_puff(
-    commands: &mut Commands,
-    smoke: &mut Smoke,
-    materials: &mut Assets<StandardMaterial>,
+/// Wind push applied to the sprites as an acceleration (`gravity` of `battle_smoke.gd`).
+struct Puff {
     position: Vec3,
     velocity: Vec3,
+    accel: Vec3,
+    damping: f32,
     life: f32,
     size: [f32; 2],
     color: [f32; 4],
+}
+
+/// Spawns a puff as a flipbook smoke sprite. Godot scales its particles 0.35 -> `size[1]` / 1.2
+/// of `size[0]`; the sprite grows 0.5 -> 1.25 of its size, so that it ends at `size[1]`.
+fn spawn_puff(
+    commands: &mut Commands,
+    smoke: &mut Smoke,
+    looks: &mut FlipbookLooks,
+    materials: &mut Assets<FlipbookMaterial>,
+    puff: Puff,
+    random: [f32; 4],
 ) {
-    let (Some(quad), Some(texture)) = (smoke.quad.clone(), smoke.texture.clone()) else {
-        return;
-    };
-    smoke.emitted += 1;
-    let puff_data = |entity, material| Puff {
-        entity,
-        material,
-        age: 0.0,
-        life,
-        start: position,
-        velocity,
+    let size = puff.size[1] / 1.25 * (0.8 + 0.2 * random[0]);
+    let sprite = SmokeSprite {
+        position: puff.position,
+        velocity: puff.velocity,
+        accel: puff.accel,
+        damping: puff.damping,
+        life: puff.life,
         size,
-        color,
-        alive: true,
+        spin: (random[1] - 0.5) * std::f32::consts::TAU,
+        spin_rate: (random[2] - 0.5) * 24f32.to_radians(),
+        tint: Some(puff.color),
     };
-    if smoke.puffs.len() < POOL {
-        let material = materials.add(StandardMaterial {
-            base_color: Color::NONE,
-            base_color_texture: Some(texture),
-            unlit: true,
-            alpha_mode: AlphaMode::Blend,
-            double_sided: true,
-            cull_mode: None,
-            ..default()
-        });
-        let entity = commands
-            .spawn((
-                Name::new("SmokePuff"),
-                Mesh3d(quad),
-                MeshMaterial3d(material.clone()),
-                Transform::from_translation(position),
-                NoFrustumCulling,
-                DespawnOnExit(AppState::Battle),
-            ))
-            .id();
-        smoke.puffs.push(puff_data(entity, material));
-    } else {
-        // Pool full: the next slot in turn is reused.
-        let slot = smoke.next % POOL;
-        smoke.next += 1;
-        let (entity, material) = (smoke.puffs[slot].entity, smoke.puffs[slot].material.clone());
-        smoke.puffs[slot] = puff_data(entity, material);
+    if let Some(entity) = spawn_smoke_sprite(commands, looks, materials, &sprite) {
+        commands
+            .entity(entity)
+            .insert(DespawnOnExit(AppState::Battle));
+        smoke.emitted += 1;
     }
 }
 
-#[allow(clippy::too_many_arguments)]
 fn update_smoke(
     mut commands: Commands,
     session: Res<BattleSession>,
@@ -315,16 +248,15 @@ fn update_smoke(
     mut smoke: ResMut<Smoke>,
     mut sources: ResMut<SmokeSources>,
     mut requests: ResMut<SmokeRequests>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut images: ResMut<Assets<Image>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    camera: Query<&GlobalTransform, With<BattleCamera>>,
-    mut transforms: Query<&mut Transform, Without<BattleCamera>>,
+    looks: Option<ResMut<FlipbookLooks>>,
+    mut materials: ResMut<Assets<FlipbookMaterial>>,
 ) {
-    if smoke.quad.is_none() {
-        smoke.quad = Some(meshes.add(Rectangle::new(1.0, 1.0)));
-        smoke.texture = Some(images.add(puff_texture()));
-    }
+    let Some(mut looks) = looks else {
+        // No flipbook plugin: nothing is drawn, the requests are dropped.
+        requests.bombard.clear();
+        requests.puffs.clear();
+        return;
+    };
     let dt = if session.paused {
         0.0
     } else {
@@ -340,18 +272,23 @@ fn update_smoke(
             smoke.counter += 1;
             let h = hash4(smoke.counter * 7 + k as u64);
             let offset = Vec3::new(h[0] - 0.5, h[1] * 0.4, h[2] - 0.5) * 3.0;
-            let velocity = Vec3::new(h[0] - 0.5, 0.3 + h[3] * kind.rise, h[2] - 0.5) * 0.6
-                + wind_dir * kind.drift * wind_push * 0.35;
-            let life = kind.life * (0.6 + 0.4 * h[3]);
+            let velocity = Vec3::new(h[0] - 0.5, 0.3 + h[3] * kind.rise, h[2] - 0.5) * 0.6;
+            let puff = Puff {
+                position: muzzle + offset,
+                velocity,
+                accel: wind_dir * kind.drift * wind_push * 0.35 + Vec3::Y * kind.rise * 0.05,
+                damping: 0.1 + 1.1 * h[1],
+                life: kind.life * (0.6 + 0.4 * h[3]),
+                size: kind.size,
+                color: kind.color,
+            };
             spawn_puff(
                 &mut commands,
                 &mut smoke,
+                &mut looks,
                 &mut materials,
-                muzzle + offset,
-                velocity,
-                life,
-                kind.size,
-                kind.color,
+                puff,
+                h,
             );
         }
     }
@@ -359,17 +296,23 @@ fn update_smoke(
         for k in 0..GUN_PUFFS {
             smoke.counter += 1;
             let h = hash4(smoke.counter * 11 + k as u64);
-            let velocity = Vec3::new(h[0] - 0.5, 0.5 + h[1] * 0.5, h[2] - 0.5) * 0.8
-                + wind_dir * wind_push * 0.6;
+            let puff = Puff {
+                position: muzzle + Vec3::new(h[0] - 0.5, h[3] * 0.3, h[2] - 0.5),
+                velocity: Vec3::new(h[0] - 0.5, 0.5 + h[1] * 0.5, h[2] - 0.5) * 0.8
+                    + wind_dir * wind_push * 0.6,
+                accel: Vec3::ZERO,
+                damping: 0.3,
+                life: GUN_LIFE_S * (0.7 + 0.3 * h[1]),
+                size: [0.8, 2.6],
+                color: [0.85, 0.84, 0.8, 0.35],
+            };
             spawn_puff(
                 &mut commands,
                 &mut smoke,
+                &mut looks,
                 &mut materials,
-                muzzle + Vec3::new(h[0] - 0.5, h[3] * 0.3, h[2] - 0.5),
-                velocity,
-                GUN_LIFE_S * (0.7 + 0.3 * h[1]),
-                [0.8, 2.6],
-                [0.85, 0.84, 0.8, 0.35],
+                puff,
+                h,
             );
         }
     }
@@ -393,55 +336,27 @@ fn update_smoke(
         if emit && dt > 0.0 {
             smoke.counter += 1;
             let h = hash4(smoke.counter * 5 + u64::from(id));
-            let velocity = Vec3::new(
-                (h[0] - 0.5) * 0.5,
-                kind.rise * (0.6 + 0.6 * h[1]),
-                (h[2] - 0.5) * 0.5,
-            ) + wind_dir * kind.drift * wind_push * 0.35;
+            let puff = Puff {
+                position: position + Vec3::new((h[3] - 0.5) * 2.4, 0.0, (h[0] - 0.5) * 2.4),
+                velocity: Vec3::new(
+                    (h[0] - 0.5) * 0.5,
+                    kind.rise * (0.6 + 0.6 * h[1]),
+                    (h[2] - 0.5) * 0.5,
+                ),
+                accel: wind_dir * kind.drift * wind_push * 0.35 + Vec3::Y * kind.rise * 0.05,
+                damping: 0.1 + 0.3 * h[2],
+                life: kind.life,
+                size: kind.size,
+                color: kind.color,
+            };
             spawn_puff(
                 &mut commands,
                 &mut smoke,
+                &mut looks,
                 &mut materials,
-                position + Vec3::new((h[3] - 0.5) * 1.2, 0.0, (h[0] - 0.5) * 1.2),
-                velocity,
-                kind.life,
-                kind.size,
-                kind.color,
+                puff,
+                h,
             );
-        }
-    }
-    // Ageing: rise, grow, fade, face the camera.
-    let rotation = camera.iter().next().map(|t| t.rotation());
-    for puff in &mut smoke.puffs {
-        if !puff.alive {
-            continue;
-        }
-        puff.age += dt;
-        let t = puff.age / puff.life.max(0.1);
-        if t >= 1.0 {
-            puff.alive = false;
-            if let Ok(mut transform) = transforms.get_mut(puff.entity) {
-                transform.scale = Vec3::ZERO;
-            }
-            continue;
-        }
-        let alpha = puff.color[3]
-            * if t < 0.1 {
-                t / 0.1
-            } else {
-                1.0 - 0.55 * ((t - 0.1) / 0.9)
-            }
-            * (1.0 - t.powi(4));
-        if let Some(mut material) = materials.get_mut(&puff.material) {
-            material.base_color = Color::srgba(puff.color[0], puff.color[1], puff.color[2], alpha);
-        }
-        if let Ok(mut transform) = transforms.get_mut(puff.entity) {
-            let size = puff.size[0] + (puff.size[1] - puff.size[0]) * t.sqrt();
-            transform.translation = puff.start + puff.velocity * puff.age * (1.0 - 0.3 * t);
-            transform.scale = Vec3::splat(size);
-            if let Some(rotation) = rotation {
-                transform.rotation = rotation;
-            }
         }
     }
 }
@@ -463,9 +378,8 @@ fn dump_smoke(world: &World) -> (String, serde_json::Value) {
     (
         "battle_smoke".into(),
         serde_json::json!({
-            "alive": smoke.alive(),
             "emitted": smoke.emitted,
-            "pool": smoke.puffs.len(),
+            "flipbook_tints": world.get_resource::<FlipbookLooks>().map_or(0, FlipbookLooks::tint_count),
             "sources": world.get_resource::<SmokeSources>().map_or(0, SmokeSources::len),
         }),
     )

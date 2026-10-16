@@ -14,6 +14,7 @@
 
 use std::collections::{HashMap, HashSet};
 
+use bevy::mesh::MeshTag;
 use bevy::prelude::*;
 
 use super::data::{LifeData, h01, text_seed};
@@ -377,7 +378,8 @@ pub fn spawn_sites(
     assets: Res<AssetServer>,
     metrics: Res<ModelMetrics>,
     effects: Option<Res<EffectAssets>>,
-    flipbook: Option<Res<crate::fx::flipbook::FlipbookLooks>>,
+    mut flipbook: Option<ResMut<crate::fx::flipbook::FlipbookLooks>>,
+    mut flipbook_materials: ResMut<Assets<crate::fx::flipbook::FlipbookMaterial>>,
     data: Res<LifeData>,
     view: Res<LifeView>,
     sites: Res<EffectSites>,
@@ -423,7 +425,10 @@ pub fn spawn_sites(
                         }
                         index.0.insert(key);
                         spawned += 1;
-                        spawn_plume(&mut commands, &effects, site, key, dark, rank);
+                        let smoke = flipbook
+                            .as_deref_mut()
+                            .map(|looks| PlumeSmoke::new(looks, &mut flipbook_materials, dark));
+                        spawn_plume(&mut commands, &effects, smoke, site, key, dark, rank);
                     }
                     SiteKind::Mill {
                         yaw,
@@ -551,9 +556,34 @@ pub fn spawn_sites(
     }
 }
 
+/// Flipbook look of a plume's puffs (`life_smoke.gdshader` colours, the FA smoke sheet).
+struct PlumeSmoke {
+    quad: Handle<Mesh>,
+    material: Handle<crate::fx::flipbook::FlipbookMaterial>,
+}
+
+/// Light and dark plume colours (sRGB) and opacity, as the two `StandardMaterial`s they replace.
+const PLUME_LIGHT: [f32; 4] = [0.78, 0.78, 0.77, 0.55];
+const PLUME_DARK: [f32; 4] = [0.12, 0.11, 0.10, 0.9];
+
+impl PlumeSmoke {
+    fn new(
+        looks: &mut crate::fx::flipbook::FlipbookLooks,
+        materials: &mut Assets<crate::fx::flipbook::FlipbookMaterial>,
+        dark: bool,
+    ) -> Self {
+        let color = if dark { PLUME_DARK } else { PLUME_LIGHT };
+        PlumeSmoke {
+            quad: looks.quad.clone(),
+            material: looks.smoke_tint(color, materials),
+        }
+    }
+}
+
 fn spawn_plume(
     commands: &mut Commands,
     effects: &EffectAssets,
+    smoke: Option<PlumeSmoke>,
     site: &Site,
     key: u64,
     dark: bool,
@@ -577,20 +607,31 @@ fn spawn_plume(
         ))
         .id();
     for n in 0..PUFFS {
-        let puff = commands
-            .spawn((
-                Mesh3d(effects.puff.clone()),
-                MeshMaterial3d(if dark {
-                    effects.smoke_dark.clone()
-                } else {
-                    effects.smoke_light.clone()
-                }),
-                Transform::from_scale(Vec3::splat(1e-4)),
-                Puff {
-                    phase: n as f32 / PUFFS as f32 + rank,
-                },
-            ))
-            .id();
+        let phase = n as f32 / PUFFS as f32 + rank;
+        let puff = match &smoke {
+            Some(smoke) => commands
+                .spawn((
+                    Mesh3d(smoke.quad.clone()),
+                    MeshMaterial3d(smoke.material.clone()),
+                    MeshTag::new(0),
+                    Transform::from_scale(Vec3::splat(1e-4)),
+                    Puff { phase },
+                    bevy::light::NotShadowCaster,
+                ))
+                .id(),
+            None => commands
+                .spawn((
+                    Mesh3d(effects.puff.clone()),
+                    MeshMaterial3d(if dark {
+                        effects.smoke_dark.clone()
+                    } else {
+                        effects.smoke_light.clone()
+                    }),
+                    Transform::from_scale(Vec3::splat(1e-4)),
+                    Puff { phase },
+                ))
+                .id(),
+        };
         commands.entity(root).add_child(puff);
     }
 }
@@ -600,7 +641,7 @@ pub fn animate_plumes(
     data: Res<LifeData>,
     view: Res<LifeView>,
     plumes: Query<(&Plume, &Children)>,
-    mut puffs: Query<(&Puff, &mut Transform)>,
+    mut puffs: Query<(&Puff, &mut Transform, Option<&mut MeshTag>)>,
 ) {
     let wind = Vec3::new(data.fire.wind_dir.x, 0.0, data.fire.wind_dir.y);
     let d = view.distance;
@@ -611,10 +652,14 @@ pub fn animate_plumes(
         let height = 0.028 * d * gain * SCREEN_PER_DISTANCE / 0.83;
         let rate = if plume.dark { 0.22 } else { 0.14 };
         for child in children.iter() {
-            let Ok((puff, mut t)) = puffs.get_mut(child) else {
+            let Ok((puff, mut t, tag)) = puffs.get_mut(child) else {
                 continue;
             };
             let age = (view.time * rate + puff.phase).fract();
+            if let Some(mut tag) = tag {
+                // The sheet plays once over the life of the puff, turning slowly.
+                tag.value = crate::fx::flipbook::pack_tag(age, 0.0, puff.phase * 0.5);
+            }
             let grow = 0.45 + 1.1 * age;
             let appear = (age / 0.12).clamp(0.0, 1.0);
             let vanish = ((1.0 - age) / 0.3).clamp(0.0, 1.0);
