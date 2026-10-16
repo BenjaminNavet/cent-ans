@@ -55,3 +55,5 @@
 14:18 bherald a2a265753 OK already carried by fg3 merge (ancestor), worktree/branch removed
 14:50 devtools2 05d6e9947 OK clippy+tests with and without --features dev (1024, snapshots 3)/smoke battle crecy siege main_menu campaign (muted); conflicts Cargo.toml (dev = file_watcher + devtools2 deps), main.rs (DataSourcePlugin + tune_default_plugins), INDEX (0362-0365), Cargo.lock regenerated; ADR 0364 ref 0362->0365; fix 83ed754ef insta sort_maps (dev turns on serde_json preserve_order)
 15:00 campvis4 ac91341f1 OK clippy/tests(1029, full --features dev)/smoke campaign campaign_descent campaign_turns (muted), clean merge after campwater (terrain bindings 0-26 unique), no fixes
+11:58 setbattle d04fd675e OK clippy/tests(1033) in bm/merge8, smoke after batch, no conflicts, no fixes
+12:00 diplo6 merge 3ec8994f0 RESET (pause requested by player before checks finished); bm/merge8 back at d04fd675e, worktree/branch kept

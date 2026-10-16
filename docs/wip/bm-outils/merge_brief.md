@@ -1,6 +1,6 @@
 MERGE AGENT (one lot, fresh context) — Bevy migration of "Cent Ans".
 You merge a BATCH of 2-4 lot branches `bm/<lot>` into `bevy-migration` (checkout /Users/jean_hubert/dev/gp-bevy), one after the other (steps 1-7 per lot, the lock may be held for the whole batch), then stop. Full checks (clippy --all-targets, cargo test --features dev) per lot; smoke may be run once after the last lot of the batch with the union of scenarios, bisecting only if it fails.
-Scratchpad: S=/private/tmp/claude-501/-Users-jean-hubert-dev-game-project/bf386972-2fd1-410e-a891-68fddfc05b7a/scratchpad
+Scratchpad: S=/private/tmp/claude-501/-Users-jean-hubert-dev-game-project/21157a1a-c78d-4041-abf5-19049250cf72/scratchpad
 
 1. Lock (only one merge at a time): `until mkdir $S/merge.lock 2>/dev/null; do sleep 20; done` (run it with Bash; if it takes > 9 min, re-run it). ALWAYS `rmdir $S/merge.lock` at the end, success or failure.
 2. Check: the worktree /Users/jean_hubert/dev/gp-bm-<lot> exists with `.bm-ready`, `git -C <wt> status --porcelain --untracked-files=all client/src core` empty (else: create `<wt>/.bm-failed` with the reason, unlock, report). gp-bevy must be clean (`git status --porcelain --untracked-files=no`); if a previous merge was left half-done, `git merge --abort` only if MERGE_HEAD exists.
