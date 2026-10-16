@@ -11,10 +11,11 @@
 //! rule is decided here.
 
 use bevy::prelude::*;
+use data_model::SettlementId;
 use data_model::{FactionId, GameData};
 use game_api::diplomacy::{EscalationView, faction_list, preview_order, war_escalation};
 use serde_json::{Value, json};
-use sim_campaign::{CampaignState, Order};
+use sim_campaign::{ArmyId, CampaignState, MoveOrderTarget, Order, OrderOutcome};
 
 use super::format;
 use crate::agent::dump::DumpAppExt;
@@ -240,17 +241,61 @@ fn answer_dialog(
         }
         toasts.write(ToastRequest::new("La guerre est déclarée."));
         if let Some(order) = ask.then {
-            let followed = game_api::diplomacy::submit_order(&data, state, order);
-            if !followed.ok {
-                toasts.write(ToastRequest::new(&followed.message));
-            } else if let Some(army) = ask.assault_after {
-                // A siege opened by the march: the assault follows; a refusal leaves the siege.
-                let besieging = state.army(&army).is_some_and(|a| a.settlement().is_some());
-                if besieging {
-                    let _ = state.submit_order_outcome(&data, Order::Assault { army });
+            // A march to a place: the assault (or the attack on the army that blocked it at the
+            // gates) follows, as in `army_movement_controller.order_attack_settlement`.
+            let place = match (&order, &ask.assault_after) {
+                (
+                    Order::MoveArmy {
+                        target: MoveOrderTarget::Place(sim_campaign::Place::Settlement(place)),
+                        ..
+                    },
+                    Some(army),
+                ) => Some((army.clone(), place.clone())),
+                _ => None,
+            };
+            match state.submit_order_outcome(&data, order) {
+                Err(error) => {
+                    toasts.write(ToastRequest::new(&error.to_string()));
+                }
+                Ok(outcome) => {
+                    let follow = place
+                        .and_then(|(army, place)| march_follow_up(state, &outcome, &army, &place));
+                    if let Some(order) = follow {
+                        let _ = state.submit_order_outcome(&data, order);
+                    }
                 }
             }
         }
+    }
+}
+
+/// What follows a march ordered to attack `place` (`order_attack_settlement`): the assault when
+/// the march opened the siege of that very place, an attack on the army that stopped the march
+/// at the gates (`enemy_zone_of_control`) when that army stands in the place.
+pub fn march_follow_up(
+    state: &CampaignState,
+    outcome: &OrderOutcome,
+    army: &ArmyId,
+    place: &SettlementId,
+) -> Option<Order> {
+    let OrderOutcome::Moved(report) = outcome else {
+        return None;
+    };
+    match &report.stop {
+        sim_campaign::StopReason::SiegeStarted { .. }
+            if state.army(army).is_some_and(|a| a.is_at(place)) =>
+        {
+            Some(Order::Assault { army: army.clone() })
+        }
+        sim_campaign::StopReason::EnemyZoneOfControl { army: defender }
+            if state.army(defender).is_some_and(|d| d.is_at(place)) =>
+        {
+            Some(Order::Attack {
+                army: army.clone(),
+                target_army: defender.clone(),
+            })
+        }
+        _ => None,
     }
 }
 
@@ -301,5 +346,58 @@ mod tests {
         let text = escalation_bbcode(&[step("A", "likely"), step("B", "unlikely")]);
         assert!(text.starts_with("[b]Qui peut entrer en guerre :[/b] A ([color=#8b1a1a]"));
         assert!(text.contains(" \u{2192} B ([color=#2a6a2a]"));
+    }
+
+    /// The follow-up of a march to attack a place: an army in that place that stopped the march
+    /// is attacked (`enemy_zone_of_control`), any other stop gives nothing.
+    #[test]
+    fn zone_of_control_stop_at_the_gates_leads_to_an_attack() {
+        let root =
+            crate::paths::find_root_from(std::path::Path::new(env!("CARGO_MANIFEST_DIR"))).unwrap();
+        let (data, _) = GameData::load(&crate::paths::data_dir(&root)).unwrap();
+        let france = FactionId::new("fac_france").unwrap();
+        let state = CampaignState::new_1337(&data, france, 1337).unwrap();
+        let (defender, place) = state
+            .armies
+            .iter()
+            .find_map(|(id, a)| a.settlement().map(|s| (id.clone(), s.clone())))
+            .expect("an army stationed in a settlement");
+        let mover = state
+            .armies
+            .keys()
+            .find(|id| **id != defender)
+            .unwrap()
+            .clone();
+        let stopped = |stop| {
+            OrderOutcome::Moved(sim_campaign::MoveReport {
+                army: mover.clone(),
+                walked: Vec::new(),
+                cost: 0,
+                stop,
+                planned_path: Vec::new(),
+            })
+        };
+        let zoc = stopped(sim_campaign::StopReason::EnemyZoneOfControl {
+            army: defender.clone(),
+        });
+        assert_eq!(
+            march_follow_up(&state, &zoc, &mover, &place),
+            Some(Order::Attack {
+                army: mover.clone(),
+                target_army: defender.clone()
+            })
+        );
+        // The blocking army stands elsewhere: no attack.
+        let elsewhere = SettlementId::new("set_nowhere").unwrap();
+        assert_eq!(march_follow_up(&state, &zoc, &mover, &elsewhere), None);
+        let out_of_movement = stopped(sim_campaign::StopReason::OutOfMovement);
+        assert_eq!(
+            march_follow_up(&state, &out_of_movement, &mover, &place),
+            None
+        );
+        assert_eq!(
+            march_follow_up(&state, &OrderOutcome::Done, &mover, &place),
+            None
+        );
     }
 }
