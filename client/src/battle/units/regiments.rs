@@ -122,6 +122,21 @@ impl Regiments {
         self.map.is_empty()
     }
 
+    /// Regiments whose figure carries a rider's lance, and the lowest steel occlusion in use.
+    pub fn lance_stats(&self) -> (usize, f32) {
+        let lances = self
+            .map
+            .values()
+            .filter(|r| r.params.prop_bone() >= 0)
+            .count();
+        let steel = self
+            .map
+            .values()
+            .map(|r| r.params.steel_occlusion())
+            .fold(1.0f32, f32::min);
+        (lances, steel)
+    }
+
     /// `(state key, level of detail, drawn figures)` of each regiment, for the dump.
     pub fn summaries(&self) -> impl Iterator<Item = (u32, &str, &str, Lod, usize)> {
         self.map.iter().map(|(id, r)| {
@@ -254,6 +269,7 @@ fn build_params(
     params.set_clips(&spec.clip_table);
     params.set_ga3(spec.ga3_lum, spec.head_y, spec.albedo.is_some());
     params.set_fine(spec.atlas_layer);
+    params.set_prop(spec.lance.as_ref());
     params.set_wear(
         if spec.mounted {
             MUD_HEIGHT_HORSE

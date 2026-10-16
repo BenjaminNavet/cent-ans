@@ -93,10 +93,18 @@ const P_CHEST: usize = 108;
 const P_BADGE_CROSS: usize = 112;
 const P_BADGE_PATCH: usize = 116;
 const P_FINE: usize = 120;
-const P_CLIPS: usize = 124;
-/// Floats of the parameter block (127 `vec4`).
+/// Rider's lance: (bone, pennon share, steel occlusion unused), grip, axis, side (4 `vec4`).
+const P_PROP: usize = 124;
+const P_CLIPS: usize = 140;
+/// Floats of the parameter block (131 `vec4`).
 pub const PARAM_FLOATS: usize = P_CLIPS + MAX_CLIPS * 4;
 const PARAM_BYTES: u64 = (PARAM_FLOATS * 4) as u64;
+
+/// `steel_occlusion` uniform of the Godot soldier shader (CR2/CR4 specular occlusion of steel and
+/// mail, 0 = SR1 look). Godot never overrides the default.
+pub const STEEL_OCCLUSION: f32 = 1.0;
+/// `pennon_share` uniform: share of the riders whose lance carries a pennon.
+pub const PENNON_SHARE: f32 = 0.6;
 
 /// Parameters of a batch.
 #[derive(Clone, Debug)]
@@ -119,6 +127,12 @@ impl Default for SkinParams {
         // No fine maps (FG3) until the figure names an atlas layer.
         data[P_FINE] = -1.0;
         data[P_FINE + 1] = super::fine_maps::FINE_DISTANCE;
+        data[P_FINE + 2] = STEEL_OCCLUSION;
+        // No rider's lance (bone -1), Godot's defaults for the rest.
+        data[P_PROP] = -1.0;
+        data[P_PROP + 1] = PENNON_SHARE;
+        data[P_PROP + 6] = 1.0;
+        data[P_PROP + 8] = 1.0;
         // No arms atlas; Godot's default bust box and banneret share.
         data[P_ARMS..P_ARMS + 4].copy_from_slice(&[-1.0; 4]);
         data[P_CHEST_BOX..P_CHEST_BOX + 4].copy_from_slice(&[0.0, 1.22, 0.3, 0.38]);
@@ -243,6 +257,33 @@ impl SkinParams {
     pub fn set_fine(&mut self, atlas_layer: i32) {
         self.data[P_FINE] = atlas_layer as f32;
         self.data[P_FINE + 1] = super::fine_maps::FINE_DISTANCE;
+    }
+
+    /// `steel_occlusion` (0 = no specular occlusion, 1 = Godot's default).
+    pub fn set_steel_occlusion(&mut self, value: f32) {
+        self.data[P_FINE + 2] = value.clamp(0.0, 1.0);
+    }
+
+    pub fn steel_occlusion(&self) -> f32 {
+        self.data[P_FINE + 2]
+    }
+
+    /// Rider's lance (`_setup_lance`): rig bone of the `Prop`, grip, axis and side in the rest
+    /// pose. `None`: no lance (bone -1).
+    pub fn set_prop(&mut self, prop: Option<&super::library::LanceSpec>) {
+        match prop {
+            Some(l) => {
+                self.data[P_PROP] = l.bone as f32;
+                self.data[P_PROP + 4..P_PROP + 7].copy_from_slice(&l.grip);
+                self.data[P_PROP + 8..P_PROP + 11].copy_from_slice(&l.axis);
+                self.data[P_PROP + 12..P_PROP + 15].copy_from_slice(&l.side);
+            }
+            None => self.data[P_PROP] = -1.0,
+        }
+    }
+
+    pub fn prop_bone(&self) -> i32 {
+        self.data[P_PROP] as i32
     }
 
     pub fn set_wear(&mut self, mud_height: f32, weathering: f32) {
@@ -942,6 +983,134 @@ impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
 
 #[cfg(test)]
 mod tests {
+    type V3 = [f32; 3];
+
+    fn sub_dot(a: V3, b: V3) -> f32 {
+        a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+    }
+
+    fn cross(a: V3, b: V3) -> V3 {
+        [
+            a[1] * b[2] - a[2] * b[1],
+            a[2] * b[0] - a[0] * b[2],
+            a[0] * b[1] - a[1] * b[0],
+        ]
+    }
+
+    fn scale(a: V3, k: f32) -> V3 {
+        [a[0] * k, a[1] * k, a[2] * k]
+    }
+
+    fn add(a: V3, b: V3) -> V3 {
+        [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
+    }
+
+    fn normalized(a: V3) -> V3 {
+        scale(a, 1.0 / sub_dot(a, a).sqrt())
+    }
+
+    /// Rust mirror of `fg3_perturb` in skinned.wesl (tangent frame solved from the derivatives).
+    fn perturb_reference(
+        n: V3,
+        dp1: V3,
+        dp2: V3,
+        duv1: [f32; 2],
+        duv2: [f32; 2],
+        nxy: [f32; 2],
+    ) -> V3 {
+        let det = duv1[0] * duv2[1] - duv1[1] * duv2[0];
+        let sgn = if det >= 0.0 { 1.0 } else { -1.0 };
+        let t = scale(add(scale(dp1, duv2[1]), scale(dp2, -duv1[1])), sgn);
+        let b = scale(add(scale(dp2, duv1[0]), scale(dp1, -duv2[0])), sgn);
+        let m = sub_dot(t, t).max(sub_dot(b, b));
+        let inv = m.sqrt().recip();
+        normalized(add(add(scale(t, inv * nxy[0]), scale(b, inv * nxy[1])), n))
+    }
+
+    /// The previous (Schuler) cotangent frame, kept to show why the sign is now explicit.
+    fn schuler_reference(
+        n: V3,
+        dp1: V3,
+        dp2: V3,
+        duv1: [f32; 2],
+        duv2: [f32; 2],
+        nxy: [f32; 2],
+    ) -> V3 {
+        let dp2perp = cross(dp2, n);
+        let dp1perp = cross(n, dp1);
+        let t = add(scale(dp2perp, duv1[0]), scale(dp1perp, duv2[0]));
+        let b = add(scale(dp2perp, duv1[1]), scale(dp1perp, duv2[1]));
+        let m = sub_dot(t, t).max(sub_dot(b, b));
+        let inv = m.sqrt().recip();
+        normalized(add(add(scale(t, inv * nxy[0]), scale(b, inv * nxy[1])), n))
+    }
+
+    /// A map tilted towards +u (red > 0.5) must lean the normal towards the world direction in
+    /// which u grows, whatever the direction of the screen y axis and the mirroring of the uv.
+    #[test]
+    fn tangent_space_normals_follow_the_uv_direction() {
+        let n = [0.0, 0.0, 1.0];
+        let k = 0.01;
+        // u grows towards world +x, v (up) towards world +y.
+        for y_down in [true, false] {
+            let sy = if y_down { -1.0 } else { 1.0 }; // world y change per screen y step
+            let dp1 = [k, 0.0, 0.0];
+            let dp2 = [0.0, sy * k, 0.0];
+            let duv1 = [k, 0.0];
+            let duv2 = [0.0, sy * k];
+            let r = perturb_reference(n, dp1, dp2, duv1, duv2, [0.5, 0.0]);
+            assert!(
+                r[0] > 0.3 && r[1].abs() < 1e-5,
+                "+u -> +x ({y_down}): {r:?}"
+            );
+            let r = perturb_reference(n, dp1, dp2, duv1, duv2, [0.0, 0.5]);
+            assert!(
+                r[1] > 0.3 && r[0].abs() < 1e-5,
+                "+v -> +y ({y_down}): {r:?}"
+            );
+            // Mirrored uv (u towards -x): the tilt follows u.
+            let r = perturb_reference(n, dp1, dp2, [-k, 0.0], duv2, [0.5, 0.0]);
+            assert!(r[0] < -0.3, "mirrored u ({y_down}): {r:?}");
+        }
+        // The previous formula flipped with the screen y direction (hence the explicit sign).
+        let a = schuler_reference(
+            n,
+            [k, 0.0, 0.0],
+            [0.0, -k, 0.0],
+            [k, 0.0],
+            [0.0, -k],
+            [0.5, 0.0],
+        );
+        let b = schuler_reference(
+            n,
+            [k, 0.0, 0.0],
+            [0.0, k, 0.0],
+            [k, 0.0],
+            [0.0, k],
+            [0.5, 0.0],
+        );
+        assert!(a[0] * b[0] < 0.0, "{a:?} {b:?}");
+    }
+
+    #[test]
+    fn steel_occlusion_and_lance_defaults_match_godot() {
+        let mut p = SkinParams::default();
+        assert_eq!(p.steel_occlusion(), 1.0);
+        assert_eq!(p.prop_bone(), -1);
+        assert_eq!(p.data[P_PROP + 1], 0.6);
+        p.set_steel_occlusion(0.4);
+        assert!((p.steel_occlusion() - 0.4).abs() < 1e-6);
+        p.set_prop(Some(&super::super::library::LanceSpec {
+            bone: 9,
+            grip: [1.0, 2.0, 3.0],
+            axis: [0.0, 0.0, 1.0],
+            side: [-1.0, 0.0, 0.0],
+        }));
+        assert_eq!(p.prop_bone(), 9);
+        assert_eq!(p.data[P_PROP + 5], 2.0);
+        assert_eq!(p.data[P_PROP + 12], -1.0);
+    }
+
     use super::*;
     use crate::battle::units::anim::{AnimConfig, Mode};
 
@@ -959,8 +1128,8 @@ mod tests {
     }
 
     #[test]
-    fn param_block_is_127_vec4() {
-        assert_eq!(PARAM_FLOATS, 127 * 4);
+    fn param_block_is_131_vec4() {
+        assert_eq!(PARAM_FLOATS, 131 * 4);
         assert_eq!(SkinParams::default().data.len(), PARAM_FLOATS);
     }
 

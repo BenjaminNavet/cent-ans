@@ -59,6 +59,13 @@ pub struct FigureEntry {
     /// FG3: layer of the figure in the baked atlas arrays (`fine_atlas_lod0|1`).
     #[serde(default)]
     pub atlas_layer: Option<i32>,
+    /// Rider's lance in the rest pose (`prop_grip`, `prop_axis`, `prop_side`).
+    #[serde(default)]
+    pub prop_grip: Option<[f32; 3]>,
+    #[serde(default)]
+    pub prop_axis: Option<[f32; 3]>,
+    #[serde(default)]
+    pub prop_side: Option<[f32; 3]>,
 }
 
 fn one() -> u32 {
@@ -381,6 +388,32 @@ mod tests {
         assert!(rig.clips().get("walk").is_some());
         assert!(manifest.is_noble("infantry", 0));
         assert!(manifest.figure_or_default("infantry", 99).is_some());
+    }
+
+    #[test]
+    fn riders_carry_a_lance_frame_and_a_prop_bone() {
+        let manifest = Manifest::load(&root()).expect("manifest");
+        let (mut with_lance, mut bone_seen) = (0, 0);
+        for variant in 0..12 {
+            let Some((_, fig)) = manifest.figure_or_default("cavalry", variant) else {
+                continue;
+            };
+            if fig.prop_grip.is_some() {
+                with_lance += 1;
+                assert!(fig.prop_axis.is_some() && fig.prop_side.is_some());
+                let rig = manifest.rig(&fig.rig).expect("rig");
+                bone_seen += rig
+                    .bones
+                    .iter()
+                    .filter(|b| b.ends_with("Prop"))
+                    .count()
+                    .min(1);
+            }
+        }
+        assert!(
+            with_lance > 0 && bone_seen == with_lance,
+            "{with_lance} {bone_seen}"
+        );
     }
 
     #[test]

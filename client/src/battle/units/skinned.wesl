@@ -31,7 +31,11 @@ struct Params {
     chest: vec4<f32>,         // z min, z max, banneret share, chest arms (nobles)
     badge_cross: vec4<f32>,   // livery cross of the commons (a > 0.5 = active)
     badge_patch: vec4<f32>,   // cloth patch under the cross
-    fine: vec4<f32>,          // FG3 atlas layer (< 0 none), map distance (m)
+    fine: vec4<f32>,          // FG3 atlas layer (< 0 none), map distance (m), steel occlusion
+    prop: vec4<f32>,          // rider's lance: bone (< 0 none), pennon share
+    prop_grip: vec4<f32>,
+    prop_axis: vec4<f32>,
+    prop_side: vec4<f32>,
     clips: array<vec4<f32>, 96>,
 }
 
@@ -77,6 +81,8 @@ struct VertexOutput {
     @location(8) atlas: vec2<f32>,
     // 0 none, 1 LOD0 atlas, 3 LOD1 atlas, 2 horse coat (constant over a mesh).
     @location(9) @interpolate(flat) src: u32,
+    // 1 on the rider's lance (Godot `v_prop`).
+    @location(10) prop: f32,
 }
 
 const C_LIVERY = 0;
@@ -248,6 +254,7 @@ fn vertex(in: Vertex) -> VertexOutput {
         out.rest_normal = vec3<f32>(0.0, 1.0, 0.0);
         out.atlas = vec2<f32>(0.0);
         out.src = 0u;
+        out.prop = 0.0;
         out.hash = vec4<f32>(
             hash1(id * 1.37 + 0.11), hash1(id * 2.71 + 0.53),
             hash1(id * 0.73 + 1.9), hash1(id * 3.91 + 2.3),
@@ -281,9 +288,41 @@ fn vertex(in: Vertex) -> VertexOutput {
         let s = smoothstep(0.0, 1.0, blend);
         pose = Pose(mix(prev.a, pose.a, s), mix(prev.b, pose.b, s), mix(prev.c, pose.c, s));
     }
-    let p = vec4<f32>(in.position, 1.0);
+    // CR4: the rider's own lance (length, angle, pennon wave) about the rest-pose grip, before
+    // the skinning.
+    var rest_pos = in.position;
+    var rest_nrm = in.normal;
+    var on_prop = 0.0;
+    if params.prop.x >= 0.0 && idx.x == i32(params.prop.x + 0.5) && in.weights.x > 0.99 {
+        on_prop = 1.0;
+        let grip = params.prop_grip.xyz;
+        let axis = params.prop_axis.xyz;
+        let side = params.prop_side.xyz;
+        let out_dir = normalize(cross(axis, side));
+        var r = in.position - grip;
+        let s_ax = dot(r, axis);
+        if i32(in.color.a + 0.5) == C_LIVERY {
+            if fract(h.z * 13.1 + h.x * 3.7) > params.prop.y {
+                r = vec3<f32>(0.0);
+            } else {
+                // Pennon: a wave running to the free tip, growing in amplitude.
+                let d = length(r - axis * s_ax);
+                r += side * (0.07 * d * sin(anim_time * 7.0 - d * 11.0 + h.y * 6.283));
+            }
+        }
+        let k_len = mix(0.9, 1.1, fract(h.x * 7.31 + h.z * 3.17));
+        r += axis * (max(s_ax - 0.3, 0.0) * (k_len - 1.0));
+        // Angle: +-3 degrees (lowered or raised), +-2 degrees sideways.
+        let t1 = radians(3.0) * (fract(h.y * 5.7 + h.w * 1.3) * 2.0 - 1.0);
+        let t2 = radians(2.0) * (fract(h.w * 9.1 + h.x * 2.3) * 2.0 - 1.0);
+        r += t1 * cross(side, r) + t2 * cross(out_dir, r);
+        rest_nrm = normalize(in.normal + t1 * cross(side, in.normal) + t2 * cross(out_dir, in.normal));
+        rest_pos = grip + r;
+    }
+    out.prop = on_prop;
+    let p = vec4<f32>(rest_pos, 1.0);
     var v = vec3<f32>(dot(pose.a, p), dot(pose.b, p), dot(pose.c, p));
-    let n = vec3<f32>(dot(pose.a.xyz, in.normal), dot(pose.b.xyz, in.normal), dot(pose.c.xyz, in.normal));
+    let n = vec3<f32>(dot(pose.a.xyz, rest_nrm), dot(pose.b.xyz, rest_nrm), dot(pose.c.xyz, rest_nrm));
     let sj = params.timing.w;
     v *= mix(1.0 - sj, 1.0 + sj, h.y);
 
@@ -407,6 +446,17 @@ fn impostor_colour(in: VertexOutput) -> vec4<f32> {
     }
     let u = in.uv.x - 0.5;
     let v = in.uv.y;
+    // Arms (nobles) or livery cross (commons) on the torso patch, so a regiment keeps its
+    // heraldry beyond 300 m (Godot paints none on its billboards). Gradients first: the sample
+    // sits in branches.
+    let rider = params.extra.z > 1.5;
+    let patch_lo = select(vec2<f32>(-0.15, 0.2), vec2<f32>(-0.09, 0.12), rider);
+    let patch_hi = select(vec2<f32>(0.15, 0.5), vec2<f32>(0.09, 0.4), rider);
+    let patch_uv = (vec2<f32>(u, v) - patch_lo) / (patch_hi - patch_lo);
+    let patch_arms_uv = mix(vec2<f32>(0.1, 0.06), vec2<f32>(0.9, 0.94), patch_uv);
+    let patch_dx = dpdx(patch_arms_uv);
+    let patch_dy = dpdy(patch_arms_uv);
+    let in_patch = all(patch_uv > vec2<f32>(0.0)) && all(patch_uv < vec2<f32>(1.0));
     var rgb = vec3<f32>(0.0);
     var alpha = 0.0;
     if params.extra.z > 1.5 {
@@ -429,18 +479,33 @@ fn impostor_colour(in: VertexOutput) -> vec4<f32> {
             rgb = vec3<f32>(0.07, 0.06, 0.055);
         }
     }
+    if alpha > 0.5 && in_patch {
+        if params.chest.w > 0.5 && h5 < params.livery.w {
+            let arms = arms_sample(patch_arms_uv, arms_layer(h), patch_dx, patch_dy);
+            rgb = mix(rgb, arms.rgb * mix(0.86, 0.98, h.y), arms.a);
+        } else if params.badge_cross.a > 0.5 {
+            let d = abs(patch_uv - vec2<f32>(0.5, 0.56));
+            if (d.x < 0.07 && d.y < 0.26) || (abs(patch_uv.y - 0.5) < 0.06 && d.x < 0.26) {
+                rgb = params.badge_cross.rgb * mix(0.8, 0.95, h.y);
+            }
+        }
+    }
     return vec4<f32>(rgb, alpha);
 }
 
 // --- FG3 fine maps (port of the FG3_BAKED parts of battle_soldier_skinned.gdshader) ---
 
-// Normal perturbed by a tangent-space map without stored tangents: cotangent frame from the
-// screen derivatives of the position and of the uv (v up the map).
+// Normal perturbed by a tangent-space map without stored tangents: tangent T (towards +u) and
+// bitangent B (towards +v of the map space, v up) solved from the screen derivatives of the
+// position and of the uv, scaled by 1 / max(|T|, |B|) like Godot's cotangent frame. Unlike the
+// Schuler formula, the sign of the uv determinant is applied explicitly, so the result does not
+// depend on the direction of the screen y axis (`dpdy` is downwards in wgpu). Mirrored in Rust
+// (`perturb_reference`, tested for handedness).
 fn fg3_perturb(n: vec3<f32>, dp1: vec3<f32>, dp2: vec3<f32>, duv1: vec2<f32>, duv2: vec2<f32>, nxy: vec2<f32>) -> vec3<f32> {
-    let dp2perp = cross(dp2, n);
-    let dp1perp = cross(n, dp1);
-    let t = dp2perp * duv1.x + dp1perp * duv2.x;
-    let b = dp2perp * duv1.y + dp1perp * duv2.y;
+    let det = duv1.x * duv2.y - duv1.y * duv2.x;
+    let sgn = select(-1.0, 1.0, det >= 0.0);
+    let t = (dp1 * duv2.y - dp2 * duv1.y) * sgn;
+    let b = (dp2 * duv1.x - dp1 * duv2.x) * sgn;
     let m = max(dot(t, t), dot(b, b));
     if m < 1e-20 {
         return n;
@@ -550,6 +615,8 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
         return pbr_functions::main_pass_post_lighting_processing(pbr_input, lit_imp);
     }
     let code = i32(in.color.a + 0.5);
+    // CR2/CR4 specular occlusion of steel and mail (Godot `steel_occlusion`, 0 = SR1 look).
+    let steel_occ = params.fine.z;
     let h = in.hash;
     let h5 = fract(h.x * 7.31 + h.z * 3.17);
     let h6 = fract(h.y * 5.13 + h.x * 11.7);
@@ -582,6 +649,17 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
     }
     // FG3 derivatives (uniform control flow): position, atlas uv, tile plane uv, normal.
     var fg_q = plane_uv(in.rest, in.rest_normal);
+    // CR4: coordinates of the shaft (turn, length along the axis): wood grain along the lance.
+    var lance_s = 0.0;
+    let on_lance = in.prop > 0.5;
+    if on_lance {
+        let lr = in.rest - params.prop_grip.xyz;
+        let l_axis = params.prop_axis.xyz;
+        let l_side = params.prop_side.xyz;
+        lance_s = dot(lr, l_axis);
+        let rr = lr - l_axis * lance_s;
+        fg_q = vec2<f32>(atan2(dot(rr, l_side), dot(rr, normalize(cross(l_axis, l_side)))) * 0.03, lance_s);
+    }
     if code == C_COAT && in.src == 2u {
         // Coat lying backwards and down on the trunk (tile: hair along v), straight on the legs.
         let ang = 1.15 * smoothstep(0.75, 1.0, in.rest.y);
@@ -759,7 +837,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
             relief = 0.0;
         } else if code == C_PLATE {
             tl = true;
-            amt = mix(0.05, 0.22, mask) + 0.3;
+            amt = mix(0.05, 0.22, mask) + 0.3 * steel_occ;
             relief = 0.06;
         } else if code == C_TRIM {
             tl = true;
@@ -841,10 +919,10 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
             if code == C_MAIL {
                 // Rings and hollows carried by the generated albedo; rings smooth (~0.35),
                 // hollows rougher and nearly black.
-                albedo = in.color.rgb * mix(0.85, 1.1, h.z) * ga_albedo * 0.55;
-                albedo *= mix(0.08, 0.95, smoothstep(0.38, 0.66, d.b));
+                albedo = in.color.rgb * mix(0.85, 1.1, h.z) * ga_albedo * mix(1.0, 0.55, steel_occ);
+                albedo *= mix(1.0, mix(0.08, 0.95, smoothstep(0.38, 0.66, d.b)), steel_occ);
                 metallic = 0.6;
-                roughness = max(d.a, 0.5);
+                roughness = max(d.a, mix(0.0, 0.5, steel_occ));
                 fg_ao = mix(0.55, 1.0, fg_ao);
             } else if code == C_HAIR {
                 // Beards and hair: lighter and varied colour, the density (mask) melts edges
@@ -875,13 +953,16 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
             }
             if code == C_PLATE {
                 let lf = noise2(fg_q * 3.0 + h.xy * 17.0);
-                let rough = clamp(mix(0.2, 0.42, lf) + (roughness - 0.4) * 0.2, 0.16, 0.8);
+                let rough = clamp(
+                    mix(mix(0.45, 0.2, steel_occ), mix(0.75, 0.42, steel_occ), lf)
+                        + (roughness - 0.4) * mix(0.4, 0.2, steel_occ),
+                    mix(0.4, 0.16, steel_occ), 0.8);
                 roughness = mix(roughness, rough, sr_w);
-                let steel = vec3<f32>(0.42, 0.415, 0.40) * mix(0.85, 1.1, lf);
+                let steel = mix(vec3<f32>(0.50, 0.50, 0.52), vec3<f32>(0.42, 0.415, 0.40), steel_occ) * mix(0.85, 1.1, lf);
                 albedo = mix(albedo, steel * (0.6 + 0.4 * dot(albedo, vec3<f32>(0.33))), 0.7 * sr_w);
                 albedo *= mix(1.0, mix(0.55, 1.0, fg_ao), sr_w);
                 let gb = smoothstep(0.5, 0.85, noise2(fg_q * 7.0 + h.zw * 29.0));
-                let grime = clamp((1.0 - smoothstep(0.5, 0.95, fg_ao)) * 0.8 + gb * 0.35, 0.0, 1.0) * sr_w;
+                let grime = clamp((1.0 - smoothstep(0.5, 0.95, fg_ao)) * 0.8 + gb * 0.35, 0.0, 1.0) * sr_w * steel_occ;
                 albedo = mix(albedo, vec3<f32>(0.13, 0.11, 0.085), 0.75 * grime);
                 roughness = mix(roughness, 0.85, grime);
                 metallic = mix(metallic, 0.2, grime);
@@ -916,13 +997,48 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
         normal = n;
     }
 
+    if on_lance && code == C_WOOD {
+        // CR4: worn grip (wood blackened and polished by the gauntlets) from the handle to the
+        // vamplate.
+        let grip = smoothstep(-0.34, -0.22, lance_s) * (1.0 - smoothstep(0.06, 0.14, lance_s));
+        albedo = mix(albedo, albedo * vec3<f32>(0.42, 0.36, 0.3), grip);
+        roughness = mix(roughness, 0.42, grip);
+    }
+
     // Occlusion near the ground, selection highlight.
     let ao = mix(0.6, 1.0, smoothstep(0.0, 1.2, in.rest.y));
     albedo = albedo * ao * (1.0 + in.misc.y * 0.25);
 
     var pbr_input = pbr_types::pbr_input_new();
     pbr_input.diffuse_occlusion = vec3<f32>(fg_ao);
-    pbr_input.specular_occlusion = fg_ao;
+    var spec_occ = fg_ao;
+    if steel_occ > 0.0 && code == C_MAIL {
+        // CR4: grazing mail (backlit): the rings hide each other, no Fresnel veil. Godot lowers
+        // SPECULAR to 0.08 (f0 = 0.08 * SPECULAR, Bevy: 0.16 * reflectance^2 -> 0.2).
+        let graz = 1.0 - smoothstep(0.12, 0.55, abs(dot(normal, pbr_functions::calculate_view(vec4<f32>(in.world_position, 1.0), false))));
+        metallic = mix(metallic, 0.0, graz * steel_occ);
+        pbr_input.material.reflectance = vec3<f32>(mix(0.447, 0.2, graz * steel_occ));
+    }
+    if steel_occ > 0.0 && (code == C_PLATE || code == C_TRIM || code == C_MAIL) {
+        // CR2: sky occlusion of the reflection (Godot RADIANCE alpha): the reflection only reaches
+        // the free sky when looking up (troops, ground, tree lines hide the horizon), hardly at all
+        // in the baked hollows. Transition widened with roughness. Applied to the indirect
+        // specular through the specular occlusion.
+        let view_dir = pbr_functions::calculate_view(vec4<f32>(in.world_position, 1.0), false);
+        let ry = reflect(-view_dir, normal).y;
+        let w = 0.3 * clamp(roughness, 0.05, 1.0);
+        let sky_seen = smoothstep(0.02 - w, 0.62 + w, ry);
+        var occ = mix(0.12, 1.0, sky_seen * sky_seen);
+        if code == C_MAIL {
+            // Interlocked rings: each hides a good part of the sky from its neighbours.
+            occ *= 0.5;
+        }
+        if in.src != 0u && dist < params.fine.y {
+            occ *= mix(0.35, 1.0, smoothstep(0.35, 0.95, fg_ao));
+        }
+        spec_occ = fg_ao * mix(1.0, occ, steel_occ);
+    }
+    pbr_input.specular_occlusion = spec_occ;
     pbr_input.material.base_color = vec4<f32>(albedo, 1.0);
     pbr_input.material.perceptual_roughness = clamp(roughness, 0.05, 1.0);
     pbr_input.material.metallic = metallic;

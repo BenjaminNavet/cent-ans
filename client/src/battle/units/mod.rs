@@ -297,6 +297,8 @@ fn dump_units(world: &World) -> (String, serde_json::Value) {
             })),
             "library_error": world.get_resource::<UnitsReport>().and_then(|r| r.library_error.clone()),
             "regiments": stats.regiments,
+            "regiments_with_lance": regiments.map(|r| r.lance_stats().0),
+            "steel_occlusion_min": regiments.map(|r| r.lance_stats().1),
             "soldiers_drawn": stats.drawn,
             "soldiers_by_lod": named(stats.lod),
             "regiments_by_lod": named(by_lod),

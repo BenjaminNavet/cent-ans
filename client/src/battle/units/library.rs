@@ -17,6 +17,15 @@ use super::figures::{self, Manifest};
 use super::gaits::GaitSettings;
 use super::looks::UnitLooks;
 
+/// Rider's lance of a figure (Godot `_setup_lance`): `Prop` bone of the rig and the rest-pose frame.
+#[derive(Debug, Clone, PartialEq)]
+pub struct LanceSpec {
+    pub bone: i32,
+    pub grip: [f32; 3],
+    pub axis: [f32; 3],
+    pub side: [f32; 3],
+}
+
 /// One resolved figure: meshes (three levels of detail), textures and animation tables.
 pub struct FigureSpec {
     /// Manifest key, `<kind>_<variant>`.
@@ -40,6 +49,8 @@ pub struct FigureSpec {
     pub chest: Option<super::heraldry::ChestBox>,
     /// FG3: layer in the baked fine atlases (`-1`: the figure has none).
     pub atlas_layer: i32,
+    /// Rider's lance (cavalry), from the manifest's `prop_*` and the rig's `Prop` bone.
+    pub lance: Option<LanceSpec>,
 }
 
 /// `battle_animation.json` and `battle_gore.json` settings the units need.
@@ -255,6 +266,19 @@ impl FigureLibrary {
             .ga3_albedo
             .as_deref()
             .map(|p| assets.load::<Image>(figures::relative_asset_path(p)));
+        let lance = match (entry.prop_grip, entry.prop_axis, entry.prop_side) {
+            (Some(grip), Some(axis), Some(side)) => rig
+                .bones
+                .iter()
+                .position(|b| b.ends_with("Prop"))
+                .map(|bone| LanceSpec {
+                    bone: bone as i32,
+                    grip,
+                    axis,
+                    side,
+                }),
+            _ => None,
+        };
         Some(Arc::new(FigureSpec {
             key: format!("{kind}_{variant}"),
             kind,
@@ -274,6 +298,7 @@ impl FigureLibrary {
             mounted: kind == "cavalry",
             chest,
             atlas_layer: entry.atlas_layer.unwrap_or(-1),
+            lance,
         }))
     }
 }
