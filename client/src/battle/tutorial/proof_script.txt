@@ -1,0 +1,13 @@
+# Menu principal -> Batailles -> Didacticiel de bataille, parcours scripté (CENT_ANS_PROLOGUE_DEMO=1).
+state MainMenu
+wait 60
+click Batailles
+wait 10
+click Didacticiel de bataille
+wait 200
+dump out/bprologue_a.json
+wait 900
+dump out/bprologue_b.json
+wait 2400
+dump out/bprologue_c.json
+exit

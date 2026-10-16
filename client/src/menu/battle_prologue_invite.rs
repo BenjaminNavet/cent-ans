@@ -108,6 +108,16 @@ pub struct PrologueInvite {
 }
 
 impl PrologueInvite {
+    /// Locates the flags file from the saves folder (when a launch did not go through the
+    /// invitation, e.g. the menu entry) and reads it.
+    pub fn ensure_path(&mut self, save_dir: &std::path::Path) {
+        if self.path.is_none() {
+            let path = prefs_dir(save_dir).join("battle_prologue.json");
+            self.flags = PrologueFlags::load(&path);
+            self.path = Some(path);
+        }
+    }
+
     /// Marks the tutorial as finished (called by the tutorial when the skirmish is won).
     pub fn mark_done(&mut self) {
         self.flags.done = true;
@@ -171,7 +181,7 @@ fn gate_launch(
 ) {
     let fresh: Vec<bool> = cursor
         .read(&launches)
-        .map(|launch| launch.label.starts_with("demo:"))
+        .map(|launch| launch.label.starts_with("demo:") || launch.label.starts_with("tutorial:"))
         .collect();
     if fresh.is_empty() {
         return;

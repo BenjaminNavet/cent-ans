@@ -70,6 +70,7 @@ impl Plugin for MenuPlugin {
                 pause::PausePlugin,
                 battles::BattlesPlugin,
                 battle_prologue_invite::PrologueInvitePlugin,
+                crate::battle::tutorial::BattleTutorialPlugin,
             ))
             .add_systems(Startup, load_front_end)
             .init_resource::<KeyEdges>()
