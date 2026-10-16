@@ -391,6 +391,7 @@ mod tests {
             province: province.map(|p| ProvinceId::new(p).expect("id")),
             province_name: "Normandie".into(),
             presentation,
+            kind: String::new(),
         }
     }
 

@@ -334,3 +334,41 @@ fn measure_incidents() -> (u32, u32, u32) {
     }
     (turns, map, dialog)
 }
+
+/// The decision view carries the journal genre of its event (fallback vignette of the UI).
+#[test]
+fn decision_view_carries_the_event_genre() {
+    use data_model::EventEffect;
+    use sim_campaign::chronicle::event_kind_key;
+    let data = game_data();
+    let mut seen = 0;
+    for event in data.events.values() {
+        let key = event_kind_key(event);
+        if event.map_scene == Some(SceneKind::Plague) {
+            assert_eq!(key, "plague", "{}", event.id);
+        }
+        if event.map_scene.is_none()
+            && event
+                .options
+                .iter()
+                .flat_map(|o| o.effects.iter())
+                .any(|e| matches!(e, EventEffect::PlagueWave { .. }))
+        {
+            assert!(!key.is_empty(), "{}", event.id);
+        }
+        seen += usize::from(!key.is_empty());
+    }
+    assert!(seen > 0, "no event maps to a vignette genre");
+    let mut state = start(data, "fac_france", 2);
+    state.chronicle.pending_decisions.push(Decision {
+        id: 98,
+        event: evt("evt_crue"),
+        faction: fac("fac_france"),
+        province: Some(prov("prov_blois")),
+        options: vec![0],
+        expires_turn: state.turn + 2,
+    });
+    let views = state.decision_views(data, &fac("fac_france"));
+    let view = views.iter().find(|v| v.id == 98).unwrap();
+    assert_eq!(view.kind, event_kind_key(&data.events[&evt("evt_crue")]));
+}

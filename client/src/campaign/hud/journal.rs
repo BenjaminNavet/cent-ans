@@ -14,6 +14,7 @@ use super::{AdvisorColumn, HudSet, HudWidget};
 use crate::agent::dump::DumpAppExt;
 use crate::campaign::panels::chronicle::ChroniclePanel;
 use crate::campaign::panels::chronicle::log::ChronicleLog;
+use crate::ui::art_plates::ArtPlates;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
 use crate::ui::kit::widgets::{button_small, caption, panel_note, scroll_list, toggle_button};
 use crate::ui::kit::{ButtonPressed, UiTheme};
@@ -21,6 +22,8 @@ use game_api::chronicle::genre_choices;
 
 const WIDTH: f32 = 280.0;
 const LIST_HEIGHT: f32 = 150.0;
+/// Height of the vignette of the newest turn above the lines.
+const VIGNETTE_HEIGHT: f32 = 64.0;
 const TOGGLE: &str = "hud:journal_toggle";
 const GENRE_PREFIX: &str = "hud:journal_genre:";
 const WORLD: &str = "hud:journal_world";
@@ -53,6 +56,15 @@ pub fn title(log: &ChronicleLog) -> String {
     }
 }
 
+/// Asset path of the vignette of the newest turn's most urgent genre
+/// (`ArtPlates.vignette_for_events`, as for the season report).
+pub fn vignette_path(log: &ChronicleLog, plates: Option<&ArtPlates>) -> Option<String> {
+    plates?
+        .vignette_for_events(log.newest_kinds.iter().map(String::as_str))
+        .filter(|v| !v.image.is_empty())
+        .map(|v| v.image.clone())
+}
+
 pub fn plugin(app: &mut App) {
     app.init_resource::<JournalState>()
         .register_dump(dump_journal)
@@ -83,6 +95,7 @@ fn rebuild(
     panel: Res<ChroniclePanel>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
+    plates: Option<Res<ArtPlates>>,
     column: Query<Entity, With<AdvisorColumn>>,
     card: Query<Entity, With<JournalCard>>,
     mut built: Local<Option<BuiltKey>>,
@@ -138,6 +151,15 @@ fn rebuild(
             });
             if !state.expanded {
                 return;
+            }
+            if let Some(path) = vignette_path(&log, plates.as_deref()) {
+                box_.spawn(super::cover::cover_image(
+                    &assets,
+                    &path,
+                    "hud:journal_vignette".to_owned(),
+                    WIDTH - 12.0,
+                    VIGNETTE_HEIGHT,
+                ));
             }
             box_.spawn(Node {
                 flex_wrap: FlexWrap::Wrap,
@@ -202,6 +224,7 @@ fn dump_journal(world: &World) -> (String, Value) {
             "world_open": panel.world_open(),
             "world_lines": log.world_count(),
             "shown": log.shown_lines(panel.genre()).len(),
+            "vignette": vignette_path(log, world.get_resource::<ArtPlates>()),
             "built": cards.as_mut().map_or(0, |q| q.iter(world).count()),
         }),
     )
@@ -244,6 +267,21 @@ mod tests {
         assert_eq!(panel.genre(), "war");
         assert!(panel.world_open());
         assert!(!app.world().resource::<JournalState>().expanded);
+    }
+
+    #[test]
+    fn journal_vignette_follows_the_newest_turn_genres() {
+        let plates = ArtPlates::parse(&json!({"vignettes": [
+            {"id": "vg_war", "kinds": ["war_declared"], "image": "res://assets/art/vignettes/w.jpg"},
+            {"id": "vg_birth", "kinds": ["birth"], "image": "res://assets/art/vignettes/b.jpg"}]}));
+        let mut log = ChronicleLog::default();
+        assert_eq!(vignette_path(&log, Some(&plates)), None);
+        log.newest_kinds = vec!["birth".into(), "war_declared".into()];
+        assert_eq!(
+            vignette_path(&log, Some(&plates)).as_deref(),
+            Some("art/vignettes/w.jpg")
+        );
+        assert_eq!(vignette_path(&log, None), None);
     }
 
     #[test]

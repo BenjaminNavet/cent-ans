@@ -1,6 +1,6 @@
 //! Decision art of the chronicle (`chronicle_window.gd`: `EVENT_ART_DIR + event + ".jpg"`).
-//! The Godot fallback (`ArtPlates.vignette_for_kind(decision.kind)`) has no equivalent: a
-//! `DecisionView` carries no event kind, and its dictionary `kind` never matched a vignette.
+//! Without its own picture a decision shows the vignette of its genre (`DecisionView::kind`,
+//! `ArtPlates.vignette_for_kind`): see `hud::cover::decision_picture`.
 
 use std::path::Path;
 

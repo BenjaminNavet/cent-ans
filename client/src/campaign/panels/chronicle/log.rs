@@ -25,6 +25,8 @@ pub struct ChronicleLog {
     pub turns: u32,
     /// Expired-decision notices of the last turn (shown as toasts).
     pub last_expired: Vec<String>,
+    /// Event kinds of the newest turn's journal lines (picks the journal vignette).
+    pub newest_kinds: Vec<String>,
 }
 
 /// BBCode of a journal entry (`JournalView.format_line`); brackets of the text are escaped.
@@ -90,6 +92,7 @@ impl ChronicleLog {
         }
         self.letters.truncate(MAX_LETTERS);
         self.last_expired = turn.expired.clone();
+        self.newest_kinds = turn.entries.iter().map(|e| e.kind.clone()).collect();
     }
 
     /// Journal lines of `genre` (date headers only before a matching line).

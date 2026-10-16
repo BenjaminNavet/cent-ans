@@ -38,6 +38,7 @@ pub mod briefing;
 pub mod buttons;
 pub mod capture;
 pub mod cluster;
+pub mod cover;
 pub mod decision;
 pub mod flow;
 pub mod help;
