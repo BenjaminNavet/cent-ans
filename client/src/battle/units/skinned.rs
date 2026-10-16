@@ -55,6 +55,7 @@ use bevy::{
 };
 
 use super::anim::{AnimConfig, Mode};
+use crate::agent::dump::DumpAppExt;
 use super::figures::{
     ATTRIBUTE_ATLAS, ATTRIBUTE_BONES, ATTRIBUTE_MASK, ATTRIBUTE_WEIGHTS, MAX_CLIPS,
 };
@@ -349,6 +350,7 @@ impl Plugin for SkinnedPlugin {
     fn build(&self, app: &mut App) {
         bevy::asset::embedded_asset!(app, "skinned.wesl");
         app.add_plugins(ExtractComponentPlugin::<SkinnedBatch>::default());
+        app.register_dump(probe::dump);
         let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
             return;
         };
@@ -377,6 +379,8 @@ impl Plugin for SkinnedPlugin {
                         .in_set(RenderSystems::PrepareResources)
                         .run_if(|batches: Query<(), With<SkinnedBatch>>| !batches.is_empty()),
                     prepare_bind_groups.in_set(RenderSystems::PrepareBindGroups),
+                    probe::render_start.in_set(RenderSystems::ExtractCommands),
+                    probe::render_end.in_set(RenderSystems::PostCleanup),
                 ),
             );
     }
@@ -558,6 +562,7 @@ fn prepare_buffers(
     batches: Query<(Entity, &SkinnedBatch, Option<&InstanceBuffer>)>,
     render_device: Res<RenderDevice>,
 ) {
+    let _timer = probe::PrepareTimer::start();
     for (entity, batch, existing) in &batches {
         if existing.is_some_and(|buffer| buffer.version == batch.version) {
             continue;
@@ -567,6 +572,7 @@ fn prepare_buffers(
             continue;
         }
         let bytes = &batch.records[..batch.count as usize * RECORD_BYTES];
+        probe::uploaded(bytes.len());
         let buffer = render_device.create_buffer_with_data(&BufferInitDescriptor {
             label: Some("skinned records"),
             contents: bytes,
@@ -937,6 +943,124 @@ impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
         DRAWN_SKINNED.fetch_add(1, Ordering::Relaxed);
         DRAWN_FIGURES.fetch_add(instances.count, Ordering::Relaxed);
         RenderCommandResult::Success
+    }
+}
+
+/// Render-side timing probe (lot perf3): CPU time of `prepare_buffers` and of the whole render
+/// schedule per frame, bytes uploaded; dump section `skinned_upload` (last 600 frames with at
+/// least one skinned batch).
+mod probe {
+    use std::sync::Mutex;
+    use std::time::Instant;
+
+    use bevy::prelude::*;
+    use serde_json::json;
+
+    const WINDOW: usize = 600;
+
+    #[derive(Default)]
+    struct Frame {
+        prepare_us: f32,
+        bytes: usize,
+        writes: u32,
+        batches: bool,
+    }
+
+    #[derive(Default)]
+    struct Probe {
+        render_start: Option<Instant>,
+        current: Frame,
+        prepare_us: Vec<f32>,
+        render_ms: Vec<f32>,
+        bytes: Vec<usize>,
+        writes: Vec<u32>,
+    }
+
+    static PROBE: Mutex<Option<Probe>> = Mutex::new(None);
+
+    fn with<R>(f: impl FnOnce(&mut Probe) -> R) -> R {
+        let mut guard = PROBE.lock().unwrap_or_else(|e| e.into_inner());
+        f(guard.get_or_insert_with(Probe::default))
+    }
+
+    pub struct PrepareTimer(Instant);
+
+    impl PrepareTimer {
+        pub fn start() -> Self {
+            Self(Instant::now())
+        }
+    }
+
+    impl Drop for PrepareTimer {
+        fn drop(&mut self) {
+            let us = self.0.elapsed().as_secs_f32() * 1e6;
+            with(|p| {
+                p.current.prepare_us += us;
+                p.current.batches = true;
+            });
+        }
+    }
+
+    pub fn uploaded(bytes: usize) {
+        with(|p| {
+            p.current.bytes += bytes;
+            p.current.writes += 1;
+        });
+    }
+
+    pub fn render_start() {
+        with(|p| p.render_start = Some(Instant::now()));
+    }
+
+    pub fn render_end() {
+        with(|p| {
+            let frame = std::mem::take(&mut p.current);
+            let Some(start) = p.render_start.take() else {
+                return;
+            };
+            if !frame.batches {
+                return;
+            }
+            let push = |v: &mut Vec<f32>, x: f32| {
+                if v.len() == WINDOW {
+                    v.remove(0);
+                }
+                v.push(x);
+            };
+            push(&mut p.render_ms, start.elapsed().as_secs_f32() * 1e3);
+            push(&mut p.prepare_us, frame.prepare_us);
+            if p.bytes.len() == WINDOW {
+                p.bytes.remove(0);
+                p.writes.remove(0);
+            }
+            p.bytes.push(frame.bytes);
+            p.writes.push(frame.writes);
+        });
+    }
+
+    fn percentile(values: &[f32], q: f32) -> f32 {
+        if values.is_empty() {
+            return 0.0;
+        }
+        let mut sorted = values.to_vec();
+        sorted.sort_by(f32::total_cmp);
+        sorted[((sorted.len() - 1) as f32 * q).round() as usize]
+    }
+
+    pub fn dump(_world: &World) -> (String, serde_json::Value) {
+        let value = with(|p| {
+            let n = p.bytes.len().max(1) as f32;
+            json!({
+                "frames": p.render_ms.len(),
+                "render_ms_p50": percentile(&p.render_ms, 0.5),
+                "render_ms_p95": percentile(&p.render_ms, 0.95),
+                "prepare_us_p50": percentile(&p.prepare_us, 0.5),
+                "prepare_us_p95": percentile(&p.prepare_us, 0.95),
+                "bytes_per_frame": p.bytes.iter().sum::<usize>() as f32 / n,
+                "writes_per_frame": p.writes.iter().sum::<u32>() as f32 / n,
+            })
+        });
+        ("skinned_upload".into(), value)
     }
 }
 
