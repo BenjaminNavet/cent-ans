@@ -57,3 +57,16 @@
 15:00 campvis4 ac91341f1 OK clippy/tests(1029, full --features dev)/smoke campaign campaign_descent campaign_turns (muted), clean merge after campwater (terrain bindings 0-26 unique), no fixes
 11:58 setbattle d04fd675e OK clippy/tests(1033) in bm/merge8, smoke after batch, no conflicts, no fixes
 12:00 diplo6 merge 3ec8994f0 RESET (pause requested by player before checks finished); bm/merge8 back at d04fd675e, worktree/branch kept
+14:21 diplo6 4890ab7cf OK clippy/tests(1054, batch diplo6+fxsmoke+naval2+bhud6, merge8) clean merges, no fixes; smoke at end
+14:21 fxsmoke 76742e890 OK clippy/tests(1054, batch diplo6+fxsmoke+naval2+bhud6, merge8) clean merges, no fixes; smoke at end
+14:21 naval2 4e51870c4 OK clippy/tests(1054, batch diplo6+fxsmoke+naval2+bhud6, merge8) clean merges, no fixes; smoke at end
+14:21 bhud6 a04c78916 OK clippy/tests(1054, batch diplo6+fxsmoke+naval2+bhud6, merge8) clean merges, no fixes; smoke at end
+14:26 uisound2 9fef974b5 OK clippy/tests(1067, batch uisound2+setcamp+flowinteg+uileft2, merge8); conflict diplomacy/mod.rs (trade shortcut + panel_sound kept), fix 09e5bb700 too_many_arguments; smoke at end
+14:26 setcamp 05b1b227d OK clippy/tests(1067, batch uisound2+setcamp+flowinteg+uileft2, merge8); no fixes; smoke at end
+14:26 flowinteg f73d6d663 OK clippy/tests(1067, batch uisound2+setcamp+flowinteg+uileft2, merge8); no fixes; smoke at end
+14:26 uileft2 fc1f8b734 OK clippy/tests(1067, batch uisound2+setcamp+flowinteg+uileft2, merge8); no fixes; smoke at end
+15:01 uiimg2 d653e16ef OK clippy/tests(1082 full --features dev, batch uiimg2+access+econ2+council2, merge8); conflict hud/journal.rs vs uileft2 (vignette + genre bar, both dump fields, both tests); core clippy/tests sim-campaign+game-api (1145) OK
+15:01 access ef4b1a990 OK clippy/tests(1082 full --features dev, batch uiimg2+access+econ2+council2, merge8); no conflicts, no fixes
+15:01 econ2 def8c1047 OK clippy/tests(1082 full --features dev, batch uiimg2+access+econ2+council2, merge8); no conflicts, no fixes
+15:01 council2 2ad5df5b3 OK clippy/tests(1082 full --features dev, batch uiimg2+access+econ2+council2, merge8); no conflicts, no fixes
+15:01 merge8 smoke campaign campaign_turns battle crecy siege main_menu OK (muted; siege timed out once under load ~95 with no app output, retry ok 31s)
