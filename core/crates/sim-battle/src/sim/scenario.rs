@@ -213,6 +213,17 @@ impl BattleSim {
         self.scenario.is_some()
     }
 
+    /// Weather at the end of the scripted changes of a historical battle (the sky it is rendered
+    /// under; a shower at the start falls from it), `None` without scripted change.
+    pub fn scenario_final_weather(&self) -> Option<Weather> {
+        self.scenario
+            .as_ref()?
+            .weather_changes
+            .iter()
+            .max_by(|a, b| a.at_s.total_cmp(&b.at_s))
+            .map(|c| c.weather)
+    }
+
     /// EP7: waves of `side`: `(label, released)`.
     pub fn scenario_waves(&self, side: SideId) -> Vec<(String, bool)> {
         self.scenario.as_ref().map_or_else(Vec::new, |s| {

@@ -36,7 +36,7 @@ pub fn weather_from_key(key: &str) -> Weather {
     }
 }
 
-fn weather_key(weather: Weather) -> &'static str {
+pub fn weather_key(weather: Weather) -> &'static str {
     match weather {
         Weather::Clear => "clear",
         Weather::Rain => "rain",
@@ -121,6 +121,16 @@ pub fn light_direction(elevation_deg: f32, azimuth_deg: f32) -> Vec3 {
     Vec3::new(-e.cos() * a.sin(), -e.sin(), -e.cos() * a.cos())
 }
 
+/// Weather of the sky of the battle: a historical map is rendered under the sky of its end (the
+/// shower of its start falls from it, see `precipitation`); `CENT_ANS_BATTLE_WEATHER` wins.
+pub fn sky_weather(sim: &sim_battle::BattleSim) -> Weather {
+    let forced = std::env::var("CENT_ANS_BATTLE_WEATHER").is_ok_and(|w| !w.is_empty());
+    if forced {
+        return sim.weather();
+    }
+    sim.scenario_final_weather().unwrap_or(sim.weather())
+}
+
 pub struct AtmospherePlugin;
 
 impl Plugin for AtmospherePlugin {
@@ -131,6 +141,8 @@ impl Plugin for AtmospherePlugin {
         app.add_plugins((
             super::precipitation::PrecipitationPlugin,
             super::volumetric::VolumetricPlugin,
+            super::height_fog::HeightFogPlugin,
+            super::horizon_silhouettes::HorizonSilhouettesPlugin,
             super::horizon_smoke::HorizonSmokePlugin,
         ))
         .register_dump(dump_weather);
@@ -194,7 +206,7 @@ fn spawn_atmosphere(
     look: Res<DecorLook>,
 ) {
     let sim = session.sim_mut();
-    let weather = sim.weather();
+    let weather = sky_weather(sim);
     let phase = sim.day_phase().key.clone();
     let rules = read_rules();
     let time_key = time_key_for(&rules, &phase);
@@ -278,7 +290,7 @@ fn follow_day(
     }
     *timer = 0.0;
     let sim = session.sim_mut();
-    let weather = sim.weather();
+    let weather = weather_from_key(&state.weather);
     let phase = sim.day_phase().key.clone();
     if phase == state.phase {
         return;
@@ -322,7 +334,7 @@ fn dump_weather(world: &World) -> (String, serde_json::Value) {
             "data_loaded": world.contains_resource::<super::weather_fx::WeatherFxLook>(),
             "weather": world.get_resource::<AtmosphereState>().map(|a| a.weather.clone()),
             "precipitation": rain.map(|r| serde_json::json!({
-                "kind": r.kind, "drops": r.drops, "centre": r.centre,
+                "kind": r.kind, "drops": r.drops, "shower": r.shower, "centre": r.centre,
                 "entities": precipitation_entities,
             })),
             "volumetric": vol.map(|v| serde_json::json!({
@@ -330,6 +342,15 @@ fn dump_weather(world: &World) -> (String, serde_json::Value) {
                 "anisotropy": v.anisotropy, "volumes": v.volumes, "ground_mist": v.ground_mist,
                 "cameras_with_fog": fog_cameras, "volumetric_suns": volumetric_suns,
                 "fog_volume_entities": fog_volumes,
+            })),
+            "height_fog": world.get_resource::<super::height_fog::HeightFogStats>().map(|h| serde_json::json!({
+                "active": h.active, "ground_mean": h.ground_mean, "camera_y": h.camera_y,
+                "density": h.density, "base_density": h.base_density,
+            })),
+            "horizon_silhouettes": world.get_resource::<super::horizon_silhouettes::HorizonSilhouettes>().map(|s| serde_json::json!({
+                "villages": s.villages, "castles": s.castles, "triangles": s.triangles,
+                "sites": s.sites.len(),
+                "distances_m": s.sites.iter().map(|p| p.xz().distance(s.centre)).collect::<Vec<_>>(),
             })),
             "horizon_smoke": smoke.map(|s| serde_json::json!({
                 "columns": s.columns, "distances_m": s.distances, "light_tint": s.light_tint,
