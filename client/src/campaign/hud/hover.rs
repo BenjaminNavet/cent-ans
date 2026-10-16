@@ -42,12 +42,38 @@ pub fn stance_text(stance: &str) -> &'static str {
     }
 }
 
+/// Diplomacy hover seen from a chosen faction (`_focus_hover_text`, DZ).
+pub fn focus_stance_text(stance: &str, faction_name: &str) -> String {
+    let template = match stance {
+        "self" => "terres de %s",
+        "war" => "en guerre contre %s",
+        "ally" | "alliance" => "allié de %s",
+        "agreement" => "en paix avec %s, avec un accord",
+        "neutral" | "peace" | "truce" => "neutre envers %s",
+        "tension" => "tensions avec %s",
+        "vassal" | "suzerain" => "vassal ou suzerain de %s",
+        _ => "",
+    };
+    template.replace("%s", faction_name)
+}
+
 /// Text added to the name of the hovered province in the current map mode ("" in political).
-pub fn mode_text(mode: MapMode, view: &ProvinceView, index: u16) -> String {
+pub fn mode_text(
+    mode: MapMode,
+    view: &ProvinceView,
+    index: u16,
+    focus_name: Option<&str>,
+) -> String {
     let lens = view.lens.get(usize::from(index)).copied().flatten();
     match mode {
         MapMode::Political | MapMode::Terrain => String::new(),
-        MapMode::Diplomacy => stance_text(view.stance_of(view.controller_of(index))).to_owned(),
+        MapMode::Diplomacy => {
+            let stance = view.stance_of(view.controller_of(index));
+            match focus_name {
+                Some(name) => focus_stance_text(stance, name),
+                None => stance_text(stance).to_owned(),
+            }
+        }
         MapMode::Unrest => lens.map_or_else(String::new, |(_, _, unrest)| {
             format!("mécontentement {} %", unrest.round() as i64)
         }),
@@ -152,7 +178,7 @@ fn update_hover(
     let Some(province) = map.province(hovered.index) else {
         return;
     };
-    let mode = modes.map_or(MapMode::Political, |m| m.mode);
+    let mode = modes.as_ref().map_or(MapMode::Political, |m| m.mode);
     let lord = {
         let id = overlay.view.controller_of(hovered.index);
         match (sim.data.as_ref(), data_model::FactionId::new(id)) {
@@ -160,7 +186,14 @@ fn update_hover(
             _ => String::new(),
         }
     };
-    let extra = mode_text(mode, &overlay.view, hovered.index);
+    let focus_name = modes
+        .and_then(|m| m.focus_faction.clone())
+        .and_then(|id| data_model::FactionId::new(id).ok())
+        .zip(sim.data.as_ref())
+        .map(|(id, data)| {
+            crate::campaign::parchment::realms::short_name(&data.faction_name(&id)).to_owned()
+        });
+    let extra = mode_text(mode, &overlay.view, hovered.index, focus_name.as_deref());
     let mut bbcode = format!("[b]{}[/b]", province.name);
     if !lord.is_empty() {
         bbcode.push_str(&format!("\n{lord}"));
@@ -211,16 +244,32 @@ mod tests {
 
     #[test]
     fn political_adds_nothing() {
-        assert_eq!(mode_text(MapMode::Political, &view(), 1), "");
+        assert_eq!(mode_text(MapMode::Political, &view(), 1, None), "");
     }
 
     #[test]
     fn modes_read_their_figure() {
         let view = view();
-        assert_eq!(mode_text(MapMode::Diplomacy, &view, 1), "en guerre");
-        assert_eq!(mode_text(MapMode::Unrest, &view, 1), "mécontentement 18 %");
-        assert!(mode_text(MapMode::Wealth, &view, 1).contains("livres par saison"));
-        assert!(mode_text(MapMode::Population, &view, 1).ends_with("habitants"));
-        assert_eq!(mode_text(MapMode::Unrest, &view, 0), "");
+        assert_eq!(mode_text(MapMode::Diplomacy, &view, 1, None), "en guerre");
+        assert_eq!(
+            mode_text(MapMode::Unrest, &view, 1, None),
+            "mécontentement 18 %"
+        );
+        assert!(mode_text(MapMode::Wealth, &view, 1, None).contains("livres par saison"));
+        assert!(mode_text(MapMode::Population, &view, 1, None).ends_with("habitants"));
+        assert_eq!(mode_text(MapMode::Unrest, &view, 0, None), "");
+    }
+
+    #[test]
+    fn chosen_faction_view_names_the_faction() {
+        assert_eq!(
+            focus_stance_text("self", "Bourgogne"),
+            "terres de Bourgogne"
+        );
+        assert_eq!(
+            focus_stance_text("war", "Bourgogne"),
+            "en guerre contre Bourgogne"
+        );
+        assert_eq!(focus_stance_text("?", "Bourgogne"), "");
     }
 }
