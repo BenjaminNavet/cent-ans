@@ -26,3 +26,6 @@ Passe découpée en tranches (`ReseatJob`, budget 1,5 ms/image) au lieu d'un bal
   Les rendre constantes hors zone de fondu supprime ce coût CPU mais fait REPASSER le GPU a 28 ms (reproductible, valeur/diversité des plages sans effet, une seule plage modifiée par image sans effet, une mise a jour toutes les 4 images = bimodal 14 ms p50). Mécanisme non élucidé (suspect : ré-extraction des instances de mesh / ordre de dessin du terrain) ; laissé tel quel.
 - Descente : une image a ~170 ms au début (calculate_bounds / check_entities_needing_specialization sur rafale de spawns, 94-130 ms) : a étaler.
 - Le fil de rendu dépend encore du GPU (submit 3 ms) ; main thread 8 ms.
+
+## Banc bataille calme (16/10 soir, 6c15f5266, release, hors écran, muet)
+Crécy (`Battle_crecy_defender`, NO_DEPLOY, script scratchpad bench_crecy.txt) : 3 essais, moyenne 9,1 ms/image sur 900 images (≈ 110 i/s) ; rendu CPU p50 8,4 / p95 9,0 ms ; envoi skinned 880 Kio, 1 écriture/image.
