@@ -254,10 +254,12 @@ pub fn evaluate(condition: &Condition, state: &Observed, base: &Baseline) -> boo
             category,
             min_ratio,
         } => own_units(state, category).any(|u| {
-            base.units.get(&u.id).is_some_and(|(_, _, width, formation)| {
-                u.formation != *formation
-                    || (*width > 0.0 && (u.width - width).abs() / width >= *min_ratio)
-            })
+            base.units
+                .get(&u.id)
+                .is_some_and(|(_, _, width, formation)| {
+                    u.formation != *formation
+                        || (*width > 0.0 && (u.width - width).abs() / width >= *min_ratio)
+                })
         }),
         Condition::UnitState { category, states } => {
             own_units(state, category).any(|u| states.contains(&u.state))

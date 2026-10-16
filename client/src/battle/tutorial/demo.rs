@@ -64,8 +64,11 @@ pub fn run_demo(
     demo.acted = true;
     let Some(player) = session.player else { return };
     let id = run.current().id.clone();
+    if session.speed < 4.0 && !session.paused {
+        session.speed = 4.0;
+    }
     let sim = session.sim_mut();
-    let own: Vec<(u32, sim_battle::UnitCategory, f64, f64, f64)> = sim
+    let own: Vec<(u32, data_model::UnitCategory, f64, f64, f64)> = sim
         .units()
         .iter()
         .filter(|u| u.side == player && u.present() && !u.synthetic)
@@ -77,7 +80,7 @@ pub fn run_demo(
         .filter(|u| u.side != player && u.present() && !u.synthetic)
         .map(|u| (u.id, u.x, u.z))
         .collect();
-    let first = |category: sim_battle::UnitCategory| own.iter().find(|u| u.1 == category).copied();
+    let first = |category: data_model::UnitCategory| own.iter().find(|u| u.1 == category).copied();
     let Some(any_enemy) = enemies.first().copied() else {
         return;
     };
@@ -104,7 +107,7 @@ pub fn run_demo(
             format!("select {ids:?}")
         }
         "move" => {
-            let Some(unit) = first(sim_battle::UnitCategory::Infantry) else {
+            let Some(unit) = first(data_model::UnitCategory::Infantry) else {
                 return;
             };
             let dir = (any_enemy.2 - unit.3).signum();
@@ -122,7 +125,7 @@ pub fn run_demo(
             format!("move {} by 45 m", unit.0)
         }
         "formation" => {
-            let Some(unit) = first(sim_battle::UnitCategory::Infantry) else {
+            let Some(unit) = first(data_model::UnitCategory::Infantry) else {
                 return;
             };
             orders.write(IssueBattleCommand(Command::Move {
@@ -139,21 +142,28 @@ pub fn run_demo(
             format!("narrow the front of {} to {:.0} m", unit.0, unit.4 * 0.5)
         }
         "charge" => {
-            let Some(unit) = first(sim_battle::UnitCategory::Cavalry) else {
+            let Some(unit) = first(data_model::UnitCategory::Cavalry) else {
                 return;
             };
+            let nearest = enemies
+                .iter()
+                .min_by(|a, b| {
+                    let d = |e: &&(u32, f64, f64)| (e.1 - unit.2).hypot(e.2 - unit.3);
+                    d(a).total_cmp(&d(b))
+                })
+                .map_or(any_enemy.0, |e| e.0);
             orders.write(IssueBattleCommand(Command::Attack {
                 units: vec![unit.0],
-                target: any_enemy.0,
+                target: nearest,
                 run: true,
                 queue: false,
             }));
-            format!("charge {} on {}", unit.0, any_enemy.0)
+            format!("charge {} on {nearest}", unit.0)
         }
         "fire" => {
             let archers: Vec<u32> = own
                 .iter()
-                .filter(|u| u.1 == sim_battle::UnitCategory::Ranged)
+                .filter(|u| u.1 == data_model::UnitCategory::Ranged)
                 .map(|u| u.0)
                 .collect();
             orders.write(IssueBattleCommand(Command::Attack {

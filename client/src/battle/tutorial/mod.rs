@@ -723,7 +723,11 @@ fn unit_point(
 type HaloQuery<'w, 's> = Query<
     'w,
     's,
-    (&'static mut Node, &'static mut Visibility, &'static mut BorderColor),
+    (
+        &'static mut Node,
+        &'static mut Visibility,
+        &'static mut BorderColor,
+    ),
     (With<PrologueHalo>, Without<PrologueArrow>),
 >;
 type ArrowQuery<'w, 's> = Query<
