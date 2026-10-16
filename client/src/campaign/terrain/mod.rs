@@ -16,6 +16,7 @@
 //! point). Dump section `campaign_terrain`. Owned by a single lot of agent (ADR 0357).
 
 pub mod bc1;
+pub mod coast;
 pub mod colormap;
 pub mod cpu_sampler;
 pub mod decode;
@@ -68,8 +69,7 @@ impl Plugin for CampaignTerrainPlugin {
         // Shared relief module: `import cent_ans_client::campaign::terrain::relief::{...}`.
         bevy::shader::load_shader_library!(app, "relief.wesl");
         app.init_resource::<cpu_sampler::CpuSampler>()
-            .init_resource::<season::SeasonWeights>()
-            .init_resource::<look::GroundWeather>();
+            .init_resource::<season::SeasonWeights>();
         app.add_plugins(MaterialPlugin::<TerrainMaterial>::default())
             .add_plugins(lighting::CampaignLightPlugin)
             .add_systems(
@@ -102,7 +102,10 @@ impl Plugin for CampaignTerrainPlugin {
                     apply_season,
                     look::sync_fog_mask,
                     look::sync_zoom,
-                    look::sync_weather,
+                    look::sync_weather_ground,
+                    coast::start_bake,
+                    coast::poll_bake,
+                    coast::bind_coast,
                     look::sync_cumulus,
                     ensure_lod,
                     update_lod
@@ -125,7 +128,8 @@ impl Plugin for CampaignTerrainPlugin {
                 PreUpdate,
                 cpu_sampler::sync_snapshot.run_if(in_state(AppState::Campaign)),
             )
-            .register_dump(dump_terrain);
+            .register_dump(dump_terrain)
+            .register_dump(coast::dump);
     }
 }
 
@@ -484,11 +488,25 @@ fn create_material(
         landuse: None,
         terroir: None,
         occlusion: None,
+        extras: material::TerrainExtras::default(),
+        coast_dist: None,
+        coast_probe: None,
+        coast_types: None,
+        wx_field: None,
+        wx_clear: None,
     };
     if let Some(textures) = ground_textures {
         bind_ground(&mut material, &textures);
     }
     material.height_lod = height_lod.map(|h| h.0.clone());
+    // DN-ME4 glaciers and névés (`FreshwaterLayer._apply_glacier`).
+    if let Some(json) = paths::find_root()
+        .ok()
+        .and_then(|root| std::fs::read_to_string(root.join("data/map/map_freshwater.json")).ok())
+        .and_then(|text| serde_json::from_str::<Value>(&text).ok())
+    {
+        material.extras.glacier = coast::GlacierParams::from_json(&json);
+    }
     let handle = materials.add(material);
     commands.insert_resource(TerrainMaterialHandle(handle));
 }

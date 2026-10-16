@@ -1,7 +1,7 @@
 //! Look of the ground that depends on the game state: the fog-of-war veil (`FogOfWar::mask` as an
 //! R8 texture, ports the `fog_*` uniforms of `terrain.gdshader`, data `data/ui/campaign_map.json`
 //! `fog_of_war`), the parchment fade of the strategic view (`ZoomView::strategic`, ADR 0124) and
-//! the wet ground / fresh snow of the weather under the camera focus. Everything is a uniform or
+//! the per-province weather of the ground (`WeatherGround` textures). Everything is a uniform or
 //! one small texture of [`TerrainMaterial`]; the shading lives in `terrain.wesl`.
 
 use bevy::asset::RenderAssetUsages;
@@ -15,7 +15,7 @@ use super::material::TerrainMaterial;
 use crate::campaign::camera::zoom::ZoomView;
 use crate::campaign::weather::WeatherView;
 use crate::campaign::weather::fog::FogOfWar;
-use crate::campaign::weather::model::Kind;
+use crate::campaign::weather::ground::WeatherGround;
 
 /// Uniform block `LookParams` of `terrain.wesl`.
 #[derive(Clone, Copy, Debug, ShaderType)]
@@ -214,36 +214,6 @@ pub fn sync_cumulus(
     }
 }
 
-/// Eased wet ground / fresh snow (0..1) following the weather under the camera focus.
-#[derive(Resource, Debug, Default, Clone, Copy)]
-pub struct GroundWeather {
-    pub wet: f32,
-    pub fresh_snow: f32,
-    /// Fog weight under the focus (the B channel of the Godot weather mask), eased.
-    pub fog: f32,
-}
-
-/// Wet and snow targets of a weather kind at an intensity.
-pub fn weather_targets(kind: Kind, intensity: f32) -> (f32, f32) {
-    let k = 0.45 + 0.55 * intensity.clamp(0.0, 1.0);
-    match kind {
-        // Godot wets the ground under rain and storm only (`max(w.r, w.a)`).
-        Kind::Rain => (0.9 * k, 0.0),
-        Kind::Storm => (1.0, 0.0),
-        Kind::Snow => (0.0, 0.8 * k),
-        Kind::Fog | Kind::Clear => (0.0, 0.0),
-    }
-}
-
-/// Fog weight of a weather kind at an intensity (B channel of the Godot weather mask).
-pub fn fog_target(kind: Kind, intensity: f32) -> f32 {
-    if kind == Kind::Fog {
-        intensity.clamp(0.0, 1.0)
-    } else {
-        0.0
-    }
-}
-
 /// R8 image of a fog mask (linear, clamped).
 pub fn mask_image(width: u32, height: u32, coverage: Vec<u8>) -> Image {
     let mut image = Image::new(
@@ -320,40 +290,37 @@ pub fn sync_zoom(
     }
 }
 
-/// Eases wet ground / fresh snow towards the weather under the camera focus.
-pub fn sync_weather(
-    time: Res<Time<Real>>,
+/// Per-province weather of the ground (lot weather5 wired by coastterr): binds the baked
+/// `WeatherGround` field (rain, snow, fog, storm per map point) and selection textures; the
+/// shader reads the weather where it draws, as Godot `wx_sample`, instead of the scalar under the
+/// camera focus. Also passes the morning share of the fog clock.
+pub fn sync_weather_ground(
     view: Option<Res<WeatherView>>,
-    mut ground: ResMut<GroundWeather>,
+    weather: Option<Res<WeatherGround>>,
     handle: Option<Res<TerrainMaterialHandle>>,
     mut materials: ResMut<Assets<TerrainMaterial>>,
 ) {
-    let (Some(view), Some(handle)) = (view, handle) else {
+    let (Some(weather), Some(handle)) = (weather, handle) else {
         return;
     };
-    let (wet, snow) = weather_targets(view.focus_entry.kind, view.focus_entry.intensity);
-    // Ground dries slowly and wets quickly.
-    let rate = |from: f32, to: f32| {
-        let speed = if to > from { 0.8 } else { 0.25 };
-        from + (to - from) * (speed * time.delta_secs()).clamp(0.0, 1.0)
-    };
-    ground.wet = rate(ground.wet, wet);
-    ground.fresh_snow = rate(ground.fresh_snow, snow);
-    ground.fog = rate(
-        ground.fog,
-        fog_target(view.focus_entry.kind, view.focus_entry.intensity),
-    );
-    let morning = view.morning_mist.clamp(0.0, 1.0);
+    let morning = view.map_or(1.0, |v| v.morning_mist.clamp(0.0, 1.0));
+    let baked = weather.field_revision.is_some();
+    let any = if baked && weather.any { 1.0 } else { 0.0 };
+    let selection = if weather.selected.is_some() { 1.0 } else { 0.0 };
+    let field = baked.then(|| weather.field.clone());
+    let clear = weather.selected.map(|_| weather.clear.clone());
     let changed = materials.get(&handle.0).is_some_and(|m| {
-        (m.look.weather.x - ground.wet).abs() > 1e-4
-            || (m.look.weather.y - ground.fresh_snow).abs() > 1e-4
-            || (m.look.mist.x - ground.fog).abs() > 1e-4
+        m.extras.wx.x != any
+            || m.extras.wx.y != selection
+            || m.wx_field != field
+            || m.wx_clear != clear
             || (m.look.mist.y - morning).abs() > 1e-3
     });
     if changed && let Some(mut material) = materials.get_mut(&handle.0) {
-        material.look.weather.x = ground.wet;
-        material.look.weather.y = ground.fresh_snow;
-        material.look.mist.x = ground.fog;
+        material.extras.wx.x = any;
+        material.extras.wx.y = selection;
+        material.wx_field = field;
+        material.wx_clear = clear;
         material.look.mist.y = morning;
     }
 }
@@ -385,19 +352,6 @@ mod tests {
         assert!((p.fog_a.y - 0.8).abs() < 1e-5);
         assert!(p.fog_veil.x > 0.3, "veil colour parsed (linear)");
         assert!((p.fog_mist.w - 0.1).abs() < 1e-5);
-    }
-
-    #[test]
-    fn weather_targets_are_wet_in_rain_and_white_in_snow() {
-        assert_eq!(weather_targets(Kind::Clear, 1.0), (0.0, 0.0));
-        let (wet, snow) = weather_targets(Kind::Rain, 0.5);
-        assert!(wet > 0.5 && snow == 0.0);
-        let (wet, snow) = weather_targets(Kind::Snow, 1.0);
-        assert!(snow > 0.7 && wet < snow);
-        // Fog does not wet the ground (Godot `max(w.r, w.a)`), it lays the morning mist.
-        assert_eq!(weather_targets(Kind::Fog, 1.0), (0.0, 0.0));
-        assert_eq!(fog_target(Kind::Fog, 0.8), 0.8);
-        assert_eq!(fog_target(Kind::Rain, 0.8), 0.0);
     }
 
     #[test]

@@ -125,6 +125,50 @@ pub struct TerrainMaterial {
     /// RV-D valley occlusion (R8, half grid), sampled with `terroir_sampler` (linear, clamp).
     #[texture(26)]
     pub occlusion: Option<Handle<Image>>,
+    /// Coast band, glaciers, post adjustment, per-province weather flags (lot coastterr).
+    #[uniform(27)]
+    pub extras: TerrainExtras,
+    /// Signed distance to the coast (R8, `coast_dist.png`, `(v - 128) / 2` px, > 0 on land).
+    #[texture(28)]
+    #[sampler(29)]
+    pub coast_dist: Option<Handle<Image>>,
+    /// Slope-rule probe (`coast::bake_probe`, Rg8, half resolution), sampled with `coast_sampler`.
+    #[texture(30)]
+    pub coast_probe: Option<Handle<Image>>,
+    /// Coast geology (`CoastLook.texture`, Rgba8, one texel per 16 px).
+    #[texture(31)]
+    pub coast_types: Option<Handle<Image>>,
+    /// Per-province weather (`WeatherGround::field`, Rgba8: rain, snow, fog, storm).
+    #[texture(32)]
+    #[sampler(33)]
+    pub wx_field: Option<Handle<Image>>,
+    /// Selected province (`WeatherGround::clear`, R8), sampled with `wx_sampler`.
+    #[texture(34)]
+    pub wx_clear: Option<Handle<Image>>,
+}
+
+/// Uniform block `TerrainExtras` of `terrain.wesl` (binding 27).
+#[derive(Clone, Copy, Debug, ShaderType)]
+pub struct TerrainExtras {
+    pub coast: super::coast::CoastParams,
+    pub glacier: super::coast::GlacierParams,
+    /// Post-tonemap adjustment of the Godot campaign environment (`campaign_map.tscn`:
+    /// `adjustment_contrast` 1.06, `adjustment_saturation` 1.08): contrast, saturation, 1 on.
+    pub post: Vec4,
+    /// Per-province weather: 1 when the field / selection textures are bound and some province
+    /// has weather (`WeatherGround::any`), 1 when a selection mask is bound.
+    pub wx: Vec4,
+}
+
+impl Default for TerrainExtras {
+    fn default() -> Self {
+        TerrainExtras {
+            coast: Default::default(),
+            glacier: Default::default(),
+            post: Vec4::new(1.06, 1.08, 1.0, 0.0),
+            wx: Vec4::ZERO,
+        }
+    }
 }
 
 impl Material for TerrainMaterial {
