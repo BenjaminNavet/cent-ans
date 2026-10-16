@@ -61,6 +61,14 @@ impl Fade {
     }
 }
 
+impl Fade {
+    /// Eased visible share in [0, 1] (what `apply_fades` writes into the scale).
+    pub fn visible(&self) -> f32 {
+        let c = self.current.clamp(0.0, 1.0);
+        c * c * (3.0 - 2.0 * c)
+    }
+}
+
 /// Seconds of a full fade.
 pub const FADE_SECONDS: f32 = 0.6;
 

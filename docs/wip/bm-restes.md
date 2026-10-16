@@ -2,7 +2,7 @@
 - settings: stored options read by nobody (colorblind, text_size, blood…).
 - naval: illustrated banner + heraldry in naval and land pre-battle dialogs.
 - bhud4: ResultExtras → flow/menu history.
-- folk2: ga3_kit.gd (BuildingKit, battle decor) unported → battle decor lot; bird wing flap = body roll (no vertex shader).
+- folk2: ga3_kit.gd (BuildingKit, battle decor) unported → battle decor lot; bird wing flap = vertex shader (lifeanim2, bm-lifeanim2.md).
 - econ: HUD treasury field click → economy; trade routes overlay on map; HUD button grid (9 buttons) eye-check.
 - mapui: capture window layout eye-check.
 - veg4: meshes.rs fallback for glb-less species; dense forest layer (forest_detail.gd); field layer (field_layer.gd, dn_fields enabled false); landuse raster → terrain shader.
@@ -53,7 +53,7 @@
 - ga3 (b7aee2cf5, ready): GA3 trebuchet/ram glb + moving parts, props_ga replacing Kit_*, castle_wall_varriation triplanar restored. Left: ram period fixed 3 s vs ram_period, Hash.vec24 differs. Tool: cloned target → dyld path into gp-bevy; bm_wt.sh no longer clones target.
 - uiimg2: done (voir bm-uiimg.md); reste : vignette du rapport de saison en fit (rich text).
 - uisound (ready 4b96fecb5): no real low-pass/reverb (needs wrapped rodio decoder; gain approximations); battle refused order only unit-tested; diplomacy/tech/other panels play no ui_order; full cargo test not run by lot.
-- lifeanim (ready cc1a466ea, MERGE PENDING — batch with next ready lot): prepass shadows ignore vertex motion; battle camp horses (camp_horse.gdshader) not ported; skinned folk lack Godot dithered fade; EYE-CHECK yaw convention (frame.x rotation in anim.wesl if carts/horses deform sideways).
+- lifeanim: merged; lifeanim2 (branche bm/lifeanim2) fait : ombres du prépassage, chevaux de camp, fondu tramé, ailes en shader, convention de lacet testée ; restes dans bm-lifeanim2.md.
 - campwater (ready 321e21414): freshwater_surface/pool, sea_lane, water_glint not ported; texture load blocks main thread (~469 ms) → worker; not eye-checked.
 - fxfire (ready 44a8b6984, MERGE PENDING — batch with next): no soft depth fade, smoke lighting, embers, fire lights, siege wind; battle_smoke/life_smoke/army smoke still to hook onto FlipbookEmitter::smoke; campaign StaticFlame unverified (0 fire sites at 1337); fire_flipbooks.json says 16x4 but sheet is 8x8 (Godot reads 8x8) → fix data.
 - uileft (ready c0242efd6, contains hudfix): HUD journal lacks genre filter/"Monde" tab; battle chronicler bubble has no close button; audio integration test plays_and_crossfades_without_device failed in lot (to check on base).

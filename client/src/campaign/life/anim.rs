@@ -128,6 +128,18 @@ impl AnimParams {
     }
 }
 
+impl AnimParams {
+    /// Parameters of a bird drawn from a glb (`life_birds.gdshader`): `yaw` turns the glb so that
+    /// the beak points to -Z and the wings lie along X (`yaw_deg` of the water-model table).
+    pub fn for_bird(flap_rate: f32, flap_amount: f32, wing_fold: f32, yaw: f32) -> AnimParams {
+        AnimParams {
+            frame: Vec4::new(yaw, 2.0, 0.0, 0.0),
+            herd_gait: Vec4::new(flap_rate, flap_amount, wing_fold, 0.0),
+            ..default()
+        }
+    }
+}
+
 #[derive(Asset, TypePath, AsBindGroup, Clone, Debug, Default)]
 pub struct AnimExtension {
     #[uniform(100)]
@@ -137,6 +149,11 @@ pub struct AnimExtension {
 impl MaterialExtension for AnimExtension {
     fn vertex_shader() -> ShaderRef {
         "embedded://cent_ans_client/campaign/life/anim.wesl".into()
+    }
+
+    // The shadow pass (and any depth prepass) draws the same posed vertices.
+    fn prepass_vertex_shader() -> ShaderRef {
+        "embedded://cent_ans_client/campaign/life/anim_shadow.wesl".into()
     }
 }
 
@@ -149,6 +166,13 @@ pub enum AnimKind {
     Prop { model: String, speed_m_s: f32 },
     /// Herd animal of a species (gait from `map_fauna.json`); the tag is driven every frame.
     Herd { gait: String },
+    /// Bird from a glb: wing beat in the vertex stage; the tag is written once (phase, flapping).
+    Bird {
+        flap_rate: f32,
+        flap_amount: f32,
+        wing_fold: f32,
+        flapping: bool,
+    },
 }
 
 /// Marks the model entity of an instance whose materials are to be swapped.
@@ -173,6 +197,7 @@ pub struct AnimBound {
 pub struct AnimStats {
     pub bound_props: usize,
     pub bound_herds: usize,
+    pub bound_birds: usize,
     pub rigid: usize,
     pub materials: usize,
     /// (kind, model/species, speed or moving, seed or phase) of a few instances.
@@ -185,7 +210,9 @@ pub struct AnimMaterials {
 }
 
 pub fn plugin(app: &mut App) {
+    bevy::shader::load_shader_library!(app, "anim_pose.wesl");
     bevy::asset::embedded_asset!(app, "anim.wesl");
+    bevy::asset::embedded_asset!(app, "anim_shadow.wesl");
     app.add_plugins(MaterialPlugin::<AnimMaterial>::default())
         .init_resource::<AnimMaterials>()
         .init_resource::<AnimStats>();
@@ -212,6 +239,7 @@ pub fn bind_models(
         if found.is_empty() {
             continue;
         }
+        let bird = matches!(bind.kind, AnimKind::Bird { .. });
         let (params, key, tag, herd) = match &bind.kind {
             AnimKind::Prop { model, speed_m_s } => {
                 let Some(spec) = table.spec(model) else {
@@ -229,6 +257,20 @@ pub fn bind_models(
                     false,
                 )
             }
+            AnimKind::Bird {
+                flap_rate,
+                flap_amount,
+                wing_fold,
+                flapping,
+            } => (
+                AnimParams::for_bird(*flap_rate, *flap_amount, *wing_fold, bind.yaw),
+                format!(
+                    "bird:{flap_rate:.2}:{flap_amount:.2}:{wing_fold:.2}:{:.3}",
+                    bind.yaw
+                ),
+                motion::pack_herd_tag(bind.seed, if *flapping { 1.0 } else { 0.0 }),
+                true,
+            ),
             AnimKind::Herd { gait } => {
                 // The bounds come from the Aabb of the meshes, ready one frame after the scene.
                 if found.iter().any(|f| f.2.is_none()) {
@@ -270,12 +312,20 @@ pub fn bind_models(
                 .entity(mesh)
                 .try_remove::<MeshMaterial3d<StandardMaterial>>()
                 .try_insert((MeshMaterial3d(handle), MeshTag::new(tag)));
+            if bird {
+                // Godot: `shadows_disabled` on the birds.
+                commands
+                    .entity(mesh)
+                    .try_insert(bevy::light::NotShadowCaster);
+            }
             meshes.push(mesh);
         }
         if meshes.is_empty() {
             continue;
         }
-        if herd {
+        if bird {
+            stats.bound_birds += 1;
+        } else if herd {
             stats.bound_herds += 1;
         } else {
             stats.bound_props += 1;
@@ -284,6 +334,7 @@ pub fn bind_models(
             let (kind, name) = match &bind.kind {
                 AnimKind::Prop { model, .. } => ("prop", model.clone()),
                 AnimKind::Herd { gait } => ("herd", gait.clone()),
+                AnimKind::Bird { .. } => ("bird", String::new()),
             };
             let (a, b) = if herd {
                 motion::unpack_herd_tag(tag)
@@ -292,9 +343,10 @@ pub fn bind_models(
             };
             stats.samples.push((kind.into(), name, a, b));
         }
-        commands
-            .entity(entity)
-            .try_insert(AnimBound { meshes, herd });
+        commands.entity(entity).try_insert(AnimBound {
+            meshes,
+            herd: herd && !bird,
+        });
     }
 }
 
@@ -372,5 +424,89 @@ mod tests {
         let q = AnimParams::for_herd(&gait, Vec3::new(-1.0, 0.0, -0.5), Vec3::new(1.0, 1.0, 0.5));
         assert_eq!(q.herd_size.z, 1.0, "long axis is X");
         assert_eq!(q.herd_origin.w, 0.2);
+    }
+
+    /// `rotate_y` of `anim_pose.wesl` as written in the shader (same formula, in Rust).
+    fn shader_rotate_y(v: Vec3, a: f32) -> Vec3 {
+        let (c, s) = (a.cos(), a.sin());
+        Vec3::new(c * v.x + s * v.z, v.y, -s * v.x + c * v.z)
+    }
+
+    /// The yaw convention of `frame.x`: the shader turns the glb by `yaw_deg` (right-handed
+    /// rotation about +Y, `Basis(UP, yaw)` of Godot, `Quat::from_rotation_y` here) to bring its
+    /// front to +Z; the model node is then turned by `yaw + 90 deg` so the front looks along +X.
+    #[test]
+    fn yaw_convention_matches_a_known_matrix() {
+        // The formula of the shader source is the one mirrored above.
+        let src = include_str!("anim_pose.wesl");
+        assert!(src.contains("return vec3<f32>(c * v.x + s * v.z, v.y, -s * v.x + c * v.z);"));
+        // Known matrix: +90 deg about Y sends +X to -Z and +Z to +X.
+        let quarter = std::f32::consts::FRAC_PI_2;
+        let x = shader_rotate_y(Vec3::X, quarter);
+        assert!((x - Vec3::NEG_Z).length() < 1e-5, "{x:?}");
+        let z = shader_rotate_y(Vec3::Z, quarter);
+        assert!((z - Vec3::X).length() < 1e-5, "{z:?}");
+        // Same as glam's matrix and quaternion, for any angle.
+        for deg in [-135.0f32, -90.0, 0.0, 30.0, 90.0, 180.0, 250.0] {
+            let a = deg.to_radians();
+            let v = Vec3::new(0.3, 0.7, -1.9);
+            assert!((shader_rotate_y(v, a) - Mat3::from_rotation_y(a) * v).length() < 1e-5);
+            assert!((shader_rotate_y(v, a) - Quat::from_rotation_y(a) * v).length() < 1e-5);
+        }
+        // A glb whose front is -X has `yaw_deg` = 90: the shader brings it to +Z ...
+        let yaw = 90.0f32.to_radians();
+        let front = shader_rotate_y(Vec3::NEG_X, yaw);
+        assert!((front - Vec3::Z).length() < 1e-5, "{front:?}");
+        // ... and the model node (`prop_model`: yaw + 90 deg) puts that front on the +X heading.
+        let heading = Quat::from_rotation_y(yaw + std::f32::consts::FRAC_PI_2) * Vec3::NEG_X;
+        assert!((heading - Vec3::X).length() < 1e-5, "{heading:?}");
+        // `prop_bind` hands the shader the table's yaw (the quarter turn removed).
+        let bind = super::super::folk::prop_bind(
+            "models/dn/x.glb",
+            yaw + std::f32::consts::FRAC_PI_2,
+            "cart_merchant",
+            1.0,
+            0.5,
+        )
+        .unwrap();
+        assert!((bind.yaw - yaw).abs() < 1e-6);
+    }
+
+    /// The shared pose module compiles (WESL -> WGSL) and validates (naga) for both passes.
+    #[test]
+    fn pose_module_compiles_and_validates() {
+        use wesl::syntax::{ModulePath, PathOrigin};
+        let abs = |name: &str| ModulePath::new(PathOrigin::Absolute, vec![name.to_string()]);
+        let mut resolver = wesl::resolver::VirtualResolver::new();
+        resolver.add_module(abs("pose"), include_str!("anim_pose.wesl").into());
+        resolver.add_module(
+            abs("consumer"),
+            r#"
+import super::pose::{AnimParams, pose_local};
+@group(0) @binding(0) var<uniform> anim: AnimParams;
+@fragment
+fn fs(@location(0) p: vec3<f32>, @location(1) @interpolate(flat) tag: u32) -> @location(0) vec4<f32> {
+    return vec4<f32>(pose_local(anim, p, tag, 2.5), 1.0);
+}
+"#
+            .into(),
+        );
+        let mut compiler = wesl::Compiler::default().with_resolver(resolver);
+        compiler.options.keep_main = true;
+        let wgsl = compiler.compile("consumer").expect("wesl").to_string();
+        let module = naga::front::wgsl::parse_str(&wgsl).unwrap_or_else(|e| panic!("{e}\n{wgsl}"));
+        naga::valid::Validator::new(
+            naga::valid::ValidationFlags::all(),
+            naga::valid::Capabilities::all(),
+        )
+        .validate(&module)
+        .unwrap_or_else(|e| panic!("{e:?}\n{wgsl}"));
+    }
+
+    #[test]
+    fn bird_params_carry_the_species_and_the_frame() {
+        let p = AnimParams::for_bird(11.0, 0.55, 0.25, 1.5);
+        assert_eq!(p.frame, Vec4::new(1.5, 2.0, 0.0, 0.0));
+        assert_eq!(p.herd_gait, Vec4::new(11.0, 0.55, 0.25, 0.0));
     }
 }

@@ -113,8 +113,8 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
                 "wall_runs": s.wall_runs, "lychgates": s.lychgates, "horses": s.horses, "kit_models": s.kit_models, "camp_tents": s.camp_tents, "snow_kit": s.snow_kit,
             })),
             "camp_horses": world.get_resource::<camp_horse::CampHorseStats>().map(|s| serde_json::json!({
-                "enabled": world.get_resource::<camp_horse::CampHorseSettings>().is_some_and(|c| c.enabled),
-                "animated_horses": s.horses, "materials": s.materials, "hair_materials": s.hair_materials,
+                "horses": s.horses, "bound": s.bound, "meshes": s.meshes,
+                "hair_meshes": s.hair_meshes, "materials": s.materials,
             })),
             "camp_loot": world.get_resource::<camp_loot::CampLootStats>().map(|s| serde_json::json!({
                 "looted_camps": s.looted_camps, "tents_down": s.tents_down, "smoke_columns": s.smoke_columns,
