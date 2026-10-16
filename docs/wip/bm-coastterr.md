@@ -25,8 +25,18 @@ Branche `bm/coastterr` (worktree gp-bm-coastterr). Spécification : `docs/wip/bm
   `CampaignSun` × exposition × `DistanceFog.directional_light_color`), atténué par l'ombre portée.
 - Pas de rugosité (le terrain Bevy est lambertien) : la rugosité de la plage mouillée est ignorée.
 
+## Preuve (16/10)
+- Tests : 1150 client verts (dont 7 `terrain::coast` : données réelles, régions, sonde synthétique,
+  berge de lac, glaciers, types de côte réels autour d'Étretat / Cabourg / Berck).
+- Vidage `CENT_ANS_WEATHER=fog`, caméra Étretat puis pointe du Raz (705 images, aucune erreur de
+  shader) : `terrain_coast.status` ready, cuisson 298 ms (279 036 texels de sonde, 7 régions),
+  Étretat `chalk_cliff` ×45, Raz `granite_cliff` 9 / `sand_beach` 1, Cabourg et Berck `sand_beach`,
+  Douvres `shingle_beach` (la carte composée n'y donne pas 36 m à 1,6 px du rivage : même règle
+  que Godot) ; matériau : côte liée, glacier 2600/3100 m, post 1,06/1,08, météo `field_bound`,
+  `clear_bound`, `any` 1.
+
 ## Prochaine étape
-- Vérifier par vidage (`CENT_ANS_WEATHER=fog`, côte normande / bretonne).
+- Lot terminé ; regard du joueur sur les falaises / plages et le contraste.
 
 ## Points ouverts
 - Le lot water (finegeo) peut réutiliser `CoastTextures` (geology, dist) pour le ressac côté mer au
