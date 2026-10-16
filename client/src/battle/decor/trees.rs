@@ -3,16 +3,15 @@
 //!
 //! Placement is the Godot one: trees drawn in each wood disc of the simulation (`forests` and
 //! `forest_parts`), uniform density from `woodland`, roads and water kept clear, smaller and
-//! sparser at the edge, a fringe of bushes, a few bushes scattered over the field. Each species is
-//! one trunk mesh and one crown mesh (crossed leaf-spray cards of the species' texture) drawn by
-//! Bevy's automatic instancing. Not ported: branching skeleton, three LODs, impostor atlas, the
-//! near / far decorative ring of woods, the leaf-sprays winter variant, wind.
+//! sparser at the edge, a fringe of bushes, a few bushes scattered over the field, the decorative
+//! wood ring and the orchards. Each species is a branched skeleton of battle_trees.gd
+//! ([`super::tree_kit`]) at two levels (full, light) drawn by Bevy's automatic instancing, then
+//! the atlas impostors of `far_woods.rs`; regional barks and leaves (TX T3), bare twigs in winter,
+//! wind sway (`wind.wesl`).
 
 use std::f32::consts::TAU;
 
-use bevy::asset::RenderAssetUsages;
 use bevy::camera::visibility::VisibilityRange;
-use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 use data_model::Terrain;
 use sim_battle::{BattleSeason, Battlefield, Weather};
@@ -23,91 +22,7 @@ use super::wind::{WindExtension, WindMaterial, WindParams};
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
 
-/// Species parameters (battle_trees.gd `SPECIES`): height, crown width, crown base, trunk height,
-/// trunk radius, card size, cards per crown, leaf tint.
-struct Species {
-    name: &'static str,
-    height: f32,
-    width: f32,
-    crown_base: f32,
-    trunk_radius: f32,
-    card: f32,
-    cards: usize,
-    leaf: [f32; 3],
-}
-
-const SPECIES: [Species; 7] = [
-    Species {
-        name: "oak",
-        height: 15.0,
-        width: 14.5,
-        crown_base: 3.6,
-        trunk_radius: 0.46,
-        card: 3.3,
-        cards: 46,
-        leaf: [0.9, 0.96, 0.82],
-    },
-    Species {
-        name: "beech",
-        height: 19.0,
-        width: 12.5,
-        crown_base: 4.8,
-        trunk_radius: 0.38,
-        card: 3.1,
-        cards: 44,
-        leaf: [1.0, 1.0, 0.8],
-    },
-    Species {
-        name: "ash",
-        height: 18.0,
-        width: 10.5,
-        crown_base: 6.0,
-        trunk_radius: 0.32,
-        card: 2.6,
-        cards: 38,
-        leaf: [1.0, 1.06, 0.88],
-    },
-    Species {
-        name: "poplar",
-        height: 22.0,
-        width: 9.0,
-        crown_base: 5.0,
-        trunk_radius: 0.42,
-        card: 2.8,
-        cards: 40,
-        leaf: [0.94, 1.0, 0.82],
-    },
-    Species {
-        name: "willow",
-        height: 8.5,
-        width: 7.5,
-        crown_base: 2.6,
-        trunk_radius: 0.52,
-        card: 2.1,
-        cards: 26,
-        leaf: [0.95, 1.0, 0.96],
-    },
-    Species {
-        name: "fruit",
-        height: 5.6,
-        width: 6.2,
-        crown_base: 1.8,
-        trunk_radius: 0.17,
-        card: 2.0,
-        cards: 22,
-        leaf: [0.95, 1.0, 0.84],
-    },
-    Species {
-        name: "bush",
-        height: 2.4,
-        width: 3.0,
-        crown_base: 0.2,
-        trunk_radius: 0.06,
-        card: 1.8,
-        cards: 14,
-        leaf: [0.9, 0.96, 0.82],
-    },
-];
+use super::tree_kit::TREE_SPECIES as SPECIES;
 
 fn species_index(name: &str) -> usize {
     SPECIES.iter().position(|s| s.name == name).unwrap_or(0)
@@ -482,123 +397,6 @@ pub fn plan_orchards(field: &Battlefield, look: &DecorLook) -> Vec<Planting> {
     out
 }
 
-fn push_quad(
-    mesh: &mut MeshBuffers,
-    centre: Vec3,
-    right: Vec3,
-    up: Vec3,
-    normal: Vec3,
-    shade: f32,
-) {
-    let base = mesh.positions.len() as u32;
-    for (corner, uv) in [
-        (-right - up, [0.0, 1.0]),
-        (right - up, [1.0, 1.0]),
-        (right + up, [1.0, 0.0]),
-        (-right + up, [0.0, 0.0]),
-    ] {
-        mesh.positions.push((centre + corner).to_array());
-        mesh.normals.push(normal.to_array());
-        mesh.uvs.push(uv);
-        mesh.colors.push([shade, shade, shade, 1.0]);
-    }
-    mesh.indices
-        .extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
-}
-
-#[derive(Default)]
-struct MeshBuffers {
-    positions: Vec<[f32; 3]>,
-    normals: Vec<[f32; 3]>,
-    uvs: Vec<[f32; 2]>,
-    colors: Vec<[f32; 4]>,
-    indices: Vec<u32>,
-}
-
-impl MeshBuffers {
-    fn into_mesh(self) -> Mesh {
-        Mesh::new(
-            PrimitiveTopology::TriangleList,
-            RenderAssetUsages::RENDER_WORLD,
-        )
-        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, self.positions)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, self.normals)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, self.uvs)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, self.colors)
-        .with_inserted_indices(Indices::U32(self.indices))
-    }
-}
-
-/// Crown of a species: `cards` leaf-spray quads scattered in the crown ellipsoid, normals rounded
-/// outward from its centre, darker towards the core and the bottom (baked shade).
-fn crown_mesh(species: &Species) -> Mesh {
-    let mut mesh = MeshBuffers::default();
-    let half_w = species.width * 0.5;
-    let half_h = (species.height - species.crown_base) * 0.5;
-    let centre = Vec3::new(0.0, species.crown_base + half_h, 0.0);
-    let mut rng = Lcg(species.name.bytes().map(u64::from).sum::<u64>() * 7919 + 1);
-    for _ in 0..species.cards {
-        // Point in the ellipsoid, biased to the surface.
-        let dir = Vec3::new(
-            rng.range(-1.0, 1.0),
-            rng.range(-1.0, 1.0),
-            rng.range(-1.0, 1.0),
-        )
-        .normalize_or(Vec3::Y);
-        let reach = 0.35 + 0.65 * rng.next().sqrt();
-        let offset = Vec3::new(dir.x * half_w, dir.y * half_h, dir.z * half_w) * reach;
-        let position = centre + offset;
-        let outward = dir;
-        let spin = rng.next() * TAU;
-        let tangent = outward.cross(Vec3::Y).normalize_or(Vec3::X);
-        let bitangent = outward.cross(tangent);
-        let right = (tangent * spin.cos() + bitangent * spin.sin()) * species.card * 0.5;
-        let up = outward.cross(right).normalize_or(Vec3::Y) * species.card * 0.5;
-        let shade = (0.55 + 0.45 * reach * (0.6 + 0.4 * (dir.y * 0.5 + 0.5))).clamp(0.0, 1.0);
-        let normal = (outward * 0.8 + Vec3::Y * 0.4).normalize();
-        push_quad(&mut mesh, position, right, up, normal, shade);
-    }
-    mesh.into_mesh()
-}
-
-/// Trunk: tapered 7-sided prism up into the crown, with a flared foot.
-fn trunk_mesh(species: &Species) -> Mesh {
-    let mut mesh = MeshBuffers::default();
-    let top = species.crown_base + (species.height - species.crown_base) * 0.55;
-    let sides = 7u32;
-    let rings = [
-        (-0.1, species.trunk_radius * 1.25),
-        (0.0, species.trunk_radius * 1.1),
-        (top * 0.5, species.trunk_radius * 0.85),
-        (top, species.trunk_radius * 0.35),
-    ];
-    for (ring, (y, radius)) in rings.iter().enumerate() {
-        for side in 0..=sides {
-            let a = side as f32 / sides as f32 * TAU;
-            let (s, c) = a.sin_cos();
-            mesh.positions.push([c * radius, *y, s * radius]);
-            mesh.normals.push([c, 0.15, s]);
-            mesh.uvs
-                .push([side as f32 / sides as f32 * 2.0, *y / top * 3.0]);
-            mesh.colors.push([1.0; 4]);
-            if ring > 0 && side < sides {
-                let ring_len = sides + 1;
-                let here = (ring as u32) * ring_len + side;
-                let below = here - ring_len;
-                mesh.indices.extend_from_slice(&[
-                    below,
-                    below + 1,
-                    here,
-                    below + 1,
-                    here + 1,
-                    here,
-                ]);
-            }
-        }
-    }
-    mesh.into_mesh()
-}
-
 /// Statistics for the dump.
 #[derive(Resource, Debug, Clone, Default)]
 pub struct TreeStats {
@@ -611,22 +409,70 @@ pub struct TreeStats {
     /// Impostor cards of the trees beyond `impostor_from_m`, and their tiles.
     pub impostors: usize,
     pub impostor_tiles: usize,
+    /// Bare winter crowns (twigs, or the dead leaves of the oak).
+    pub winter: bool,
+    /// Entities of each level: full bark, full foliage, light bark, light foliage.
+    pub lod_entities: [usize; 4],
+    /// Per species: sprays and bark quads of the full mesh, vertices of the full and light
+    /// foliage.
+    pub meshes: Vec<SpeciesMeshStats>,
+    /// Species drawn with the regional bark / leaves packs (TX T3).
+    pub tx_bark: Vec<String>,
+    pub tx_leaves: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, serde::Serialize)]
+pub struct SpeciesMeshStats {
+    pub species: String,
+    pub clusters: usize,
+    pub bark_quads: usize,
+    pub leaf_vertices: [usize; 2],
+    pub bark_vertices: [usize; 2],
 }
 
 pub struct TreesPlugin;
 
 impl Plugin for TreesPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            plant
-                .after(super::horizon::build_horizon)
-                .run_if(resource_added::<BattleSession>),
-        )
-        .add_systems(OnExit(AppState::Battle), |mut commands: Commands| {
-            commands.remove_resource::<TreeStats>();
-        });
+        app.init_resource::<super::tree_kit::TreeTextureStats>()
+            .add_systems(
+                Update,
+                (
+                    plant
+                        .after(super::horizon::build_horizon)
+                        .run_if(resource_added::<BattleSession>),
+                    super::tree_kit::prepare_tree_textures
+                        .run_if(resource_exists::<super::tree_kit::PendingTreeTextures>),
+                ),
+            )
+            .add_systems(OnExit(AppState::Battle), |mut commands: Commands| {
+                commands.remove_resource::<TreeStats>();
+                commands.remove_resource::<super::tree_kit::PendingTreeTextures>();
+                commands.insert_resource(super::tree_kit::TreeTextureStats::default());
+            });
+        crate::agent::dump::DumpAppExt::register_dump(app, dump_trees);
     }
+}
+
+fn dump_trees(world: &World) -> (String, serde_json::Value) {
+    let textures = world.get_resource::<super::tree_kit::TreeTextureStats>();
+    (
+        "battle_trees".to_owned(),
+        serde_json::json!({
+            "stats": world.get_resource::<TreeStats>().map(|s| serde_json::json!({
+                "trees": s.trees, "bushes": s.bushes, "winter": s.winter,
+                "lod_entities": {"full_bark": s.lod_entities[0], "full_leaves": s.lod_entities[1],
+                    "light_bark": s.lod_entities[2], "light_leaves": s.lod_entities[3],
+                    "impostors": s.impostors, "impostor_tiles": s.impostor_tiles},
+                "meshes": s.meshes, "tx_bark": s.tx_bark, "tx_leaves": s.tx_leaves,
+            })),
+            "textures_prepared": textures.map(|t| t.prepared),
+            "textures_failed": textures.map(|t| t.failed),
+            "textures_pending": world
+                .get_resource::<super::tree_kit::PendingTreeTextures>()
+                .map_or(0, |p| p.0.len()),
+        }),
+    )
 }
 
 /// Foliage tint of a season and weather (multiplies the leaf texture).
@@ -644,6 +490,191 @@ fn foliage_tint(season: BattleSeason, weather: Weather) -> [f32; 3] {
     }
 }
 
+/// Meshes and materials of one species: per level (full, light) a bark and a foliage.
+struct Kit {
+    bark: [Option<Handle<Mesh>>; 2],
+    leaves: [Handle<Mesh>; 2],
+    bark_material: Handle<StandardMaterial>,
+    /// Three tint buckets of the foliage.
+    leaf_materials: [Handle<WindMaterial>; 3],
+}
+
+/// Desaturates a tint like the foliage shader does its colour.
+fn muted(c: [f32; 3]) -> [f32; 3] {
+    let l = c[0] * 0.3 + c[1] * 0.59 + c[2] * 0.11;
+    c.map(|v| l + (v - l) * super::tree_kit::DECOR_SATURATION)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn make_kits(
+    images: &mut Assets<Image>,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+    wind_materials: &mut Assets<WindMaterial>,
+    assets: &AssetServer,
+    look: &DecorLook,
+    tint: [f32; 3],
+    winter: bool,
+    stats: &mut TreeStats,
+) -> (Vec<Kit>, Vec<super::tree_kit::PendingTreeTexture>) {
+    use super::tree_kit::{PendingTreeTexture, TexturePrep, build_tree, placeholder};
+    use crate::campaign::vegetation::textures::{Quality, TreeTextures};
+    let textures = crate::paths::find_root()
+        .ok()
+        .map(|root| {
+            TreeTextures::load(
+                &crate::paths::data_dir(&root),
+                &crate::paths::asset_root(&root),
+                Quality::Medium,
+                true,
+            )
+        })
+        .unwrap_or_default();
+    let grid = |pack: &crate::campaign::vegetation::textures::Pack| {
+        (pack.grid.0.max(1), pack.grid.1.max(1))
+    };
+    let mut jobs = Vec::new();
+    let mut job = |source: Handle<Image>, grid: (u32, u32), layer: u32, prep: TexturePrep| {
+        let srgb = !matches!(prep, TexturePrep::BarkNormal { .. });
+        let target = images.add(placeholder(srgb));
+        jobs.push(PendingTreeTexture {
+            source,
+            target: target.clone(),
+            grid,
+            layer,
+            prep,
+        });
+        target
+    };
+    let linear = |path: String| -> Handle<Image> {
+        assets
+            .load_builder()
+            .with_settings(|s: &mut bevy::image::ImageLoaderSettings| s.is_srgb = false)
+            .load(path)
+    };
+    let legacy_bark: Handle<Image> = assets.load("textures/battle/bark_brown_02_diff.jpg");
+    let legacy_normal = linear("textures/battle/bark_brown_02_nor.jpg".to_owned());
+    let bark_pack: Option<Handle<Image>> = textures.bark.albedo.clone().map(|p| assets.load(p));
+    let bark_normal_pack = textures.bark.normal.clone().map(linear);
+    let leaves_pack: Option<Handle<Image>> = textures.leaves.albedo.clone().map(|p| assets.load(p));
+    let kits = SPECIES
+        .iter()
+        .map(|species| {
+            let smooth = species.smooth;
+            let bark_layer = textures.bark_layer(species.name);
+            let (bark_albedo, bark_normal, bark_tint) = match (&bark_pack, bark_layer) {
+                (Some(pack), layer) if layer >= 0 => {
+                    stats.tx_bark.push(species.name.to_owned());
+                    let g = grid(&textures.bark);
+                    let normal = bark_normal_pack
+                        .clone()
+                        .map(|n| job(n, g, layer as u32, TexturePrep::BarkNormal { smooth }));
+                    // TX T3: the generated bark has its own colour; the species tint only shades it.
+                    (
+                        job(pack.clone(), g, layer as u32, TexturePrep::Bark { smooth }),
+                        normal,
+                        species.bark.map(|c| c + (1.0 - c) * 0.5),
+                    )
+                }
+                _ => (
+                    job(legacy_bark.clone(), (1, 1), 0, TexturePrep::Bark { smooth }),
+                    Some(job(
+                        legacy_normal.clone(),
+                        (1, 1),
+                        0,
+                        TexturePrep::BarkNormal { smooth },
+                    )),
+                    species.bark,
+                ),
+            };
+            let leaves_layer = textures.leaves_layer(species.name);
+            let mut leaf_tint = species.leaf;
+            let leaf_texture = if winter {
+                leaf_tint = [1.0; 3];
+                let path = if species.marcescent {
+                    "textures/battle/dead_leaves_oak.png"
+                } else {
+                    "textures/battle/twig_spray.png"
+                };
+                job(assets.load(path), (1, 1), 0, TexturePrep::Leaves)
+            } else if let (Some(pack), true) = (&leaves_pack, leaves_layer >= 0) {
+                stats.tx_leaves.push(species.name.to_owned());
+                // TX T3: generated leaves already carry their colour.
+                leaf_tint = leaf_tint.map(|c| c + (1.0 - c) * 0.6);
+                job(
+                    pack.clone(),
+                    grid(&textures.leaves),
+                    leaves_layer as u32,
+                    TexturePrep::Leaves,
+                )
+            } else {
+                let path = format!("textures/battle/leaf_spray_{}.png", species.name);
+                job(assets.load(path), (1, 1), 0, TexturePrep::Leaves)
+            };
+            let full = build_tree(species, 0);
+            let light = build_tree(species, 1);
+            let vertices = |m: &Option<Mesh>| m.as_ref().map_or(0, Mesh::count_vertices);
+            stats.meshes.push(SpeciesMeshStats {
+                species: species.name.to_owned(),
+                clusters: full.clusters,
+                bark_quads: full.bark_quads,
+                leaf_vertices: [full.leaves.count_vertices(), light.leaves.count_vertices()],
+                bark_vertices: [vertices(&full.bark), vertices(&light.bark)],
+            });
+            let bark_material = materials.add(StandardMaterial {
+                base_color: Color::srgb(bark_tint[0], bark_tint[1], bark_tint[2]),
+                base_color_texture: Some(bark_albedo),
+                normal_map_texture: bark_normal,
+                perceptual_roughness: 0.92,
+                reflectance: 0.3,
+                ..default()
+            });
+            let mut wind = WindParams::new(&look.tree_wind, 1.0, (species.height * 0.8).max(2.0));
+            if winter {
+                wind.sway.x *= 0.5;
+                wind.sway.z *= 0.5;
+            }
+            let make = |factor: f32, wind_materials: &mut Assets<WindMaterial>| {
+                let c = muted([
+                    leaf_tint[0] * tint[0] * factor,
+                    leaf_tint[1] * tint[1] * factor,
+                    leaf_tint[2] * tint[2] * factor,
+                ]);
+                wind_materials.add(WindMaterial {
+                    base: StandardMaterial {
+                        base_color: Color::srgb(c[0], c[1], c[2]),
+                        base_color_texture: Some(leaf_texture.clone()),
+                        alpha_mode: AlphaMode::Mask(0.5),
+                        double_sided: true,
+                        cull_mode: None,
+                        perceptual_roughness: 0.82,
+                        reflectance: 0.22,
+                        diffuse_transmission: if winter { 0.06 } else { 0.25 },
+                        ..default()
+                    },
+                    extension: WindExtension {
+                        params: wind,
+                        ..default()
+                    },
+                })
+            };
+            Kit {
+                bark: [
+                    full.bark.map(|m| meshes.add(m)),
+                    light.bark.map(|m| meshes.add(m)),
+                ],
+                leaves: [meshes.add(full.leaves), meshes.add(light.leaves)],
+                bark_material,
+                leaf_materials: [
+                    make(0.92, wind_materials),
+                    make(1.0, wind_materials),
+                    make(1.08, wind_materials),
+                ],
+            }
+        })
+        .collect();
+    (kits, jobs)
+}
 #[allow(clippy::too_many_arguments)]
 fn plant(
     mut commands: Commands,
@@ -651,10 +682,12 @@ fn plant(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut wind_materials: ResMut<Assets<WindMaterial>>,
+    mut images: ResMut<Assets<Image>>,
     assets: Res<AssetServer>,
     look: Res<DecorLook>,
     relief: Option<Res<super::horizon::RealRelief>>,
 ) {
+    use super::tree_kit::{BUSH_LOD1_DISTANCE, LOD_BAND, LOD1_DISTANCE};
     let seed = session.seed;
     let sim = session.sim_mut();
     let field = sim.field();
@@ -666,108 +699,79 @@ fn plant(
     let ring_count = ring_trees.len();
     plan.extend(ring_trees);
     let tint = foliage_tint(field.season, weather);
-    let bark: Handle<Image> = assets.load("textures/battle/bark_brown_02_diff.jpg");
+    let winter = matches!(field.season, BattleSeason::Winter);
     let scope = DespawnOnExit(AppState::Battle);
-    // Per species: trunk mesh, crown mesh, three crown materials.
-    struct Kit {
-        trunk: Handle<Mesh>,
-        crown: Handle<Mesh>,
-        trunk_material: Handle<StandardMaterial>,
-        leaves: [Handle<WindMaterial>; 3],
-    }
-    let bare = matches!(field.season, BattleSeason::Winter);
-    let kits: Vec<Kit> = SPECIES
-        .iter()
-        .map(|species| {
-            let leaf_texture: Handle<Image> =
-                assets.load(format!("textures/battle/leaf_spray_{}.png", species.name));
-            let make = |factor: f32, materials: &mut Assets<WindMaterial>| {
-                materials.add(WindMaterial {
-                    base: StandardMaterial {
-                        base_color: Color::srgb(
-                            species.leaf[0] * tint[0] * factor,
-                            species.leaf[1] * tint[1] * factor,
-                            species.leaf[2] * tint[2] * factor,
-                        ),
-                        base_color_texture: Some(leaf_texture.clone()),
-                        alpha_mode: AlphaMode::Mask(0.5),
-                        double_sided: true,
-                        cull_mode: None,
-                        perceptual_roughness: 0.9,
-                        reflectance: 0.05,
-                        ..default()
-                    },
-                    extension: WindExtension {
-                        params: WindParams::new(&look.tree_wind, 1.0, species.height),
-                        ..default()
-                    },
-                })
-            };
-            Kit {
-                trunk: meshes.add(trunk_mesh(species)),
-                crown: meshes.add(crown_mesh(species)),
-                trunk_material: materials.add(StandardMaterial {
-                    base_color: Color::srgb(0.7, 0.66, 0.6),
-                    base_color_texture: Some(bark.clone()),
-                    perceptual_roughness: 1.0,
-                    reflectance: 0.03,
-                    ..default()
-                }),
-                leaves: [
-                    make(0.92, &mut wind_materials),
-                    make(1.0, &mut wind_materials),
-                    make(1.08, &mut wind_materials),
-                ],
-            }
-        })
-        .collect();
-    let mut counts = vec![0usize; SPECIES.len()];
-    // Beyond `impostor_from_m` trees are atlas cards (Godot impostors): crowns of alpha-tested
-    // leaf sprays thin out to nothing in the mips at a distance.
-    let [lod_near, lod_far] = look.far_woods.impostor_from_m;
-    let crown_range = VisibilityRange {
-        start_margin: 0.0..0.0,
-        end_margin: lod_near..lod_far,
-        use_aabb: false,
+    let mut stats = TreeStats {
+        winter,
+        ..default()
     };
+    let (kits, jobs) = make_kits(
+        &mut images,
+        &mut meshes,
+        &mut materials,
+        &mut wind_materials,
+        &assets,
+        &look,
+        tint,
+        winter,
+        &mut stats,
+    );
+    commands.insert_resource(super::tree_kit::PendingTreeTextures(jobs));
+    let mut counts = vec![0usize; SPECIES.len()];
+    // Three levels: full mesh, light mesh, then the atlas impostors of `far_woods` from
+    // `impostor_from_m` on (dithered cross-fades of `LOD_BAND` metres).
+    let [imp_near, imp_far] = look.far_woods.impostor_from_m;
     let mut impostors = Vec::new();
     for tree in &plan {
         let kit = &kits[tree.species];
         counts[tree.species] += 1;
+        let species = &SPECIES[tree.species];
+        let bush = species.trunk <= 0.0;
         let y = planted_height(field, &look, relief, tree.x, tree.z);
         let transform = Transform::from_xyz(tree.x, y - 0.05, tree.z)
             .with_rotation(Quat::from_rotation_y(tree.yaw))
             .with_scale(Vec3::splat(tree.scale));
-        // LOD: trunks vanish beyond `trunk_range_m`, crowns beyond `impostor_from_m`.
-        let trunk_range = VisibilityRange {
-            start_margin: 0.0..0.0,
-            end_margin: (look.forest_ring.trunk_range_m - 30.0)..look.forest_ring.trunk_range_m,
-            use_aabb: false,
-        };
-        commands.spawn((
-            Name::new("Tree"),
-            Mesh3d(kit.trunk.clone()),
-            MeshMaterial3d(kit.trunk_material.clone()),
-            transform,
-            trunk_range,
-            scope.clone(),
-        ));
-        // Bare crowns in winter: half the cards would be left, drawn smaller and without cast.
-        let crown_transform = if bare {
-            transform.with_scale(Vec3::splat(tree.scale * 0.8))
+        let switch = if bush {
+            BUSH_LOD1_DISTANCE
         } else {
-            transform
+            LOD1_DISTANCE
         };
-        commands.spawn((
-            Name::new("TreeCrown"),
-            Mesh3d(kit.crown.clone()),
-            MeshMaterial3d(kit.leaves[usize::from(tree.tint)].clone()),
-            crown_transform,
-            crown_range.clone(),
-            scope.clone(),
-        ));
-        let species = &SPECIES[tree.species];
-        if species.name != "bush" {
+        let band = (switch - LOD_BAND * 0.5)..(switch + LOD_BAND * 0.5);
+        let ranges = [
+            VisibilityRange {
+                start_margin: 0.0..0.0,
+                end_margin: band.clone(),
+                use_aabb: false,
+            },
+            VisibilityRange {
+                start_margin: band,
+                end_margin: imp_near..imp_far,
+                use_aabb: false,
+            },
+        ];
+        for (level, range) in ranges.into_iter().enumerate() {
+            if let Some(bark) = &kit.bark[level] {
+                commands.spawn((
+                    Name::new("TreeBark"),
+                    Mesh3d(bark.clone()),
+                    MeshMaterial3d(kit.bark_material.clone()),
+                    transform,
+                    range.clone(),
+                    scope.clone(),
+                ));
+                stats.lod_entities[level * 2] += 1;
+            }
+            commands.spawn((
+                Name::new("TreeCrown"),
+                Mesh3d(kit.leaves[level].clone()),
+                MeshMaterial3d(kit.leaf_materials[usize::from(tree.tint)].clone()),
+                transform,
+                range,
+                scope.clone(),
+            ));
+            stats.lod_entities[level * 2 + 1] += 1;
+        }
+        if !bush {
             impostors.push(super::far_woods::FarTree {
                 x: tree.x,
                 y: y - 0.05,
@@ -789,34 +793,23 @@ fn plant(
         &impostors,
     );
     let bush = species_index("bush");
-    commands.insert_resource(TreeStats {
-        trees: plan.len() - counts[bush],
-        bushes: counts[bush],
-        species: SPECIES
-            .iter()
-            .zip(&counts)
-            .map(|(s, n)| (s.name.to_owned(), *n))
-            .collect(),
-        zones: field.forests.len() + field.forest_parts.len(),
-        ring_trees: ring_count,
-        impostors: impostor_stats.trees,
-        impostor_tiles: impostor_stats.tiles,
-    });
+    stats.trees = plan.len() - counts[bush];
+    stats.bushes = counts[bush];
+    stats.species = SPECIES
+        .iter()
+        .zip(&counts)
+        .map(|(s, n)| (s.name.to_owned(), *n))
+        .collect();
+    stats.zones = field.forests.len() + field.forest_parts.len();
+    stats.ring_trees = ring_count;
+    stats.impostors = impostor_stats.trees;
+    stats.impostor_tiles = impostor_stats.tiles;
+    commands.insert_resource(stats);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn crown_and_trunk_meshes_are_well_formed() {
-        for species in &SPECIES {
-            let crown = crown_mesh(species);
-            assert_eq!(crown.count_vertices(), species.cards * 4);
-            let trunk = trunk_mesh(species);
-            assert!(trunk.count_vertices() > 0);
-        }
-    }
 
     #[test]
     fn lcg_is_deterministic_and_in_unit_range() {

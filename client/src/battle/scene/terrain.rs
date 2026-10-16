@@ -14,10 +14,7 @@ use sim_battle::{BattleSeason, Battlefield, Weather};
 use super::BattleSession;
 use crate::agent::OffscreenTarget;
 use crate::app::AppState;
-use crate::battle::decor::ground::{
-    GroundExtension, GroundMaterial, GroundParams, GroundStats, PendingStrip, PendingStrips,
-    load_pack, season_tint, splat_at,
-};
+use crate::battle::decor::ground::{GroundMaterial, build_ground_material, splat_at};
 use crate::paths;
 
 /// Mesh vertex spacing (m): half the sim grid resolution, the colours follow the finer sample.
@@ -168,6 +165,7 @@ fn spawn_scene(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<GroundMaterial>>,
     mut standard: ResMut<Assets<StandardMaterial>>,
+    mut images: ResMut<Assets<Image>>,
     look: Res<crate::battle::decor::look::DecorLook>,
     assets: Res<AssetServer>,
     target: Option<Res<OffscreenTarget>>,
@@ -184,66 +182,17 @@ fn spawn_scene(
     let data_dir = paths::find_root()
         .map(|root| paths::data_dir(&root))
         .unwrap_or_default();
-    let biome = crate::battle::decor::ground::biome_for_terrain(&data_dir, field.terrain.key());
-    let mut params = GroundParams {
-        season: season_tint(field, weather),
-        ..default()
-    };
-    params.water.w = look.ground.texture_fade_m;
-    params.detail = Vec4::new(
-        look.ground.normal_strength,
-        look.ground.normal_fade_m,
-        0.0,
-        look.ground.macro_contrast,
-    );
-    let mut albedo = None;
-    let mut normal = None;
-    let pack_loaded = load_pack(&data_dir, biome).is_some();
-    if let Some(pack) = load_pack(&data_dir, biome) {
-        for (slot, layer) in params.layers.iter_mut().zip(&pack.layers) {
-            *slot = *layer;
-        }
-        let albedo_handle: Handle<Image> = assets.load(pack.albedo_path);
-        let mut strips = vec![PendingStrip {
-            handle: albedo_handle.clone(),
-            layers: pack.layers.len() as u32,
-            anisotropy: look.ground.anisotropy,
-        }];
-        albedo = Some(albedo_handle);
-        if let Some(path) = pack.normal_path {
-            // Normals are data, not colours: no sRGB decoding.
-            let handle: Handle<Image> = assets
-                .load_builder()
-                .with_settings(|settings: &mut bevy::image::ImageLoaderSettings| {
-                    settings.is_srgb = false
-                })
-                .load(path);
-            strips.push(PendingStrip {
-                handle: handle.clone(),
-                layers: pack.layers.len() as u32,
-                anisotropy: look.ground.anisotropy,
-            });
-            params.detail.z = 1.0;
-            normal = Some(handle);
-        }
-        commands.insert_resource(PendingStrips(strips));
-    } else {
-        warn!("battle ground: no texture pack for biome {biome}, flat colours");
-    }
-    commands.insert_resource(GroundStats::of(biome, pack_loaded, &splat_colors, &splat_b));
-    let ground = materials.add(GroundMaterial {
-        base: StandardMaterial {
-            base_color: Color::WHITE,
-            perceptual_roughness: 1.0,
-            reflectance: 0.05,
-            ..default()
-        },
-        extension: GroundExtension {
-            params,
-            albedo,
-            normal,
-        },
-    });
+    let ground = materials.add(build_ground_material(
+        &mut commands,
+        &mut images,
+        &assets,
+        &look,
+        &data_dir,
+        field,
+        weather,
+        &splat_colors,
+        &splat_b,
+    ));
     commands.spawn((
         Name::new("BattleTerrain"),
         BattleTerrain,

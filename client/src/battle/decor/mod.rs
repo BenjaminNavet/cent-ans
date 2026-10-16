@@ -28,6 +28,7 @@ pub mod precipitation;
 pub mod props;
 pub mod site;
 pub mod sky_clouds;
+pub mod tree_kit;
 pub mod trees;
 pub mod volumetric;
 pub mod weather_fx;
