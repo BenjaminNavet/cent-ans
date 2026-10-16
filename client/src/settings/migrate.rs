@@ -535,6 +535,7 @@ fn apply_key(s: &mut Settings, key: &str, v: &Variant) -> bool {
         "tutorial/step" => set!(s.tutorial_step, count(v)),
         "tutorial/done" => set!(s.tutorial_done, v.as_bool()),
         "tutorial/postponed" => set!(s.tutorial_postponed, v.as_bool()),
+        "feudal_tutorial/done" => set!(s.feudal_tutorial_done, v.as_bool()),
         "battle/blood" => set!(s.blood, count(v).map(|n| n.min(2))),
         "battle/unit_size" => set!(s.unit_size, positive(v)),
         "battle/max_figures" => set!(s.max_figures, count(v)),
@@ -802,6 +803,8 @@ done=true
         assert_eq!((s.blood, s.max_figures), (2, 8000));
         assert_eq!(s.keyboard_layout, "azerty");
         assert_eq!((s.tutorial_step, s.tutorial_done), (3, true));
+        let (s, _) = settings_from_godot(&parse_config("[feudal_tutorial]\ndone=true\n"));
+        assert!(s.feudal_tutorial_done);
     }
 
     #[test]
