@@ -1113,3 +1113,78 @@ fn dump_ported(world: &World) -> (String, Value) {
         }),
     )
 }
+
+/// A scattered tree seen by the decor picking of the Codex (ADR 0219).
+#[derive(Debug, Clone, PartialEq)]
+pub struct TreeHit {
+    /// Species id of the data (`oak`, `beech`…), the key of `CodexStore::entry_for_decor("tree", …)`.
+    pub species: String,
+    /// Foot of the trunk, displayed world position.
+    pub foot: Vec3,
+    pub height: f32,
+    /// Crown half width.
+    pub radius: f32,
+}
+
+/// Read access to the trees on show, for the decor bubble of the Codex (`DecorHover`). Trees
+/// thinned out by the current density are not returned.
+#[derive(bevy::ecs::system::SystemParam)]
+pub struct TreeDecor<'w> {
+    tiles: Option<Res<'w, VegTiles>>,
+    view: Option<Res<'w, VegView>>,
+    world: Option<Res<'w, VegWorld>>,
+}
+
+impl TreeDecor<'_> {
+    /// (tiles ready, trees held) for the dumps.
+    pub fn stats(&self) -> (usize, usize) {
+        let Some(tiles) = &self.tiles else {
+            return (0, 0);
+        };
+        tiles
+            .tiles
+            .values()
+            .filter_map(|state| match state {
+                TileState::Ready { trees, .. } => Some(trees.len()),
+                TileState::Pending => None,
+            })
+            .fold((0, 0), |(count, total), len| (count + 1, total + len))
+    }
+
+    /// Trees within `reach` map units of (x, z).
+    pub fn near(&self, x: f32, z: f32, reach: f32) -> Vec<TreeHit> {
+        let (Some(tiles), Some(world)) = (&self.tiles, &self.world) else {
+            return Vec::new();
+        };
+        let (Some(grid), density) = (&tiles.grid, self.view.as_ref().map_or(1.0, |v| v.density))
+        else {
+            return Vec::new();
+        };
+        let mut found = Vec::new();
+        for (index, state) in &tiles.tiles {
+            let TileState::Ready { trees, .. } = state else {
+                continue;
+            };
+            if grid.distance(*index, x, z) > reach {
+                continue;
+            }
+            for tree in trees.iter() {
+                if tree.seed < 1.0 - density
+                    || (tree.x - x).powi(2) + (tree.z - z).powi(2) > reach * reach
+                {
+                    continue;
+                }
+                let Some(species) = world.0.species_ids.get(tree.row as usize) else {
+                    continue;
+                };
+                found.push(TreeHit {
+                    species: species.clone(),
+                    foot: Vec3::new(tree.x, tree.y + tree.height * tiles::GROUND_SINK, tree.z),
+                    height: tree.height,
+                    radius: tree.crown,
+                });
+            }
+        }
+        found
+    }
+}
