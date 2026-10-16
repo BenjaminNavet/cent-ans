@@ -18,6 +18,10 @@ pub struct VegLight {
     pub ambient: Vec4,
     pub fog: Vec4,
     pub fog_range: Vec4,
+    /// Colour grade of the ground (`TerrainParams::grade`, `lift`, `highlights`).
+    pub grade: Vec4,
+    pub lift: Vec4,
+    pub highlights: Vec4,
 }
 
 impl VegLight {
@@ -28,6 +32,9 @@ impl VegLight {
             ambient: params.ambient,
             fog: params.fog,
             fog_range: Vec4::new(params.map.z, params.edge.w, 0.0, 0.0),
+            grade: params.grade,
+            lift: params.lift,
+            highlights: params.highlights,
         }
     }
 }
@@ -54,6 +61,9 @@ pub(super) fn sync_light(
             && p.ambient == light.ambient
             && p.fog == light.fog
             && p.fog_range == light.fog_range
+            && p.grade == light.grade
+            && p.lift == light.lift
+            && p.highlights == light.highlights
         {
             continue;
         }
@@ -63,6 +73,9 @@ pub(super) fn sync_light(
         p.ambient = light.ambient;
         p.fog = light.fog;
         p.fog_range = light.fog_range;
+        p.grade = light.grade;
+        p.lift = light.lift;
+        p.highlights = light.highlights;
         batch.params_version += 1;
     }
 }

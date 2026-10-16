@@ -204,9 +204,8 @@ fn displayed_y(h: f32, fa: vec2<f32>, fb: vec2<f32>) -> f32 {
 
 // River bed carved into the close terrain (`river_carve` of `river_banks.gdshaderinc`, lot V4):
 // the ribbons sit on the altitude sampled on their centre line, while the terrain between
-// vertices (and the geomorph towards coarser pages) stays 10-25 m above it in narrow valleys
-// (Seine at Paris), which buried the rivers at close range (showfix, 16/10). Godot carves the
-// fine relief tiles near the camera; here the carve fades out with the camera distance.
+// vertices can stay a few metres above it in narrow valleys. Godot carves the fine relief tiles
+// near the camera; here the carve fades out with the camera distance (showfix, 16/10).
 const RIVER_CARVE_DEPTH: f32 = 0.075; // world units (1 m = 0.006)
 const RIVER_BANK_PX: f32 = 1.1;
 const RIVER_CARVE_NEAR: vec2<f32> = vec2<f32>(220.0, 380.0);

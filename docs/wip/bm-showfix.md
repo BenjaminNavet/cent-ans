@@ -20,6 +20,20 @@
   humides, surcouches) couvre la rivière ; crochet `CENT_ANS_HIDE=<sous-chaîne>` (agent) pour le vérifier.
 - Tours de siège : cône d'ardoise r×1,55 une tour sur deux, merlons sinon, corbeau (`works.rs`), dump `tower_roofs`.
 
+## Causes prouvées (reprise 16/10 après-midi)
+- **Rivières/routes enterrées** : le uniform `ReliefParams` n'atteignait jamais les matériaux drapés
+  (dump : `relief_scale` = [0,0,0,0] sur les deux matériaux rivière, alors que `relief_gpu.scale` =
+  [0.006,0,1,1]) ; `relief_display_height` inactif renvoie `h × scale.x` = 0 → rubans à y = 0 + lift,
+  sous le sol (Paris ≈ 30 m = 0,18 u, le relèvement de debug requis était 0,15). `sync_drape` ne
+  copiait que si `ReliefGpu` changeait ou si le NOMBRE de matériaux changeait (matériaux remplacés à
+  nombre égal). Correctif : vérification à chaque image (`water/drape.rs`), commit 666d2a240. Mesure
+  d=60 : pixels bleus 85 030 → 104 360 (= relèvement de debug 0,15 : 104 218).
+- Complément conservé : reseat sur le treillis des patchs affichés (+ niveau parent), creusement du lit.
+  Retirés : pente de berge dans `normal.y` (sans effet).
+- **Arbres pâles** : le terrain est multiplié par `ambient.a` = `TERRAIN_EXPOSURE` 0,78 puis étalonné
+  (`campaign_grade`), la végétation ni l'un ni l'autre (Godot étalonnait toute l'image). Correctif :
+  exposition + `foliage_grade` dans `billboard.wesl` (grade/lift/highlights copiés via `VegLight`).
+
 ## État à la pause (16/10)
 - Commits : 96a1fce94, 5c46a51f0, puis ce wip (crochet `CENT_ANS_HIDE` rendu collant, réappliqué à chaque image :
   le LOD remettait `Visibility::Visible` à chaque reconstruction, le test « masquer TerrainNode » était donc

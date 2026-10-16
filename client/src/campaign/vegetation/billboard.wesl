@@ -33,6 +33,9 @@ struct Params {
     ambient: vec4<f32>,
     fog: vec4<f32>,       // distance fog colour, strength
     fog_range: vec4<f32>, // fog begin, end
+    grade: vec4<f32>,      // saturation, contrast, shadow saturation, strength (terrain grade)
+    lift: vec4<f32>,
+    highlights: vec4<f32>,
 }
 
 @group(2) @binding(0) var albedo_texture: texture_2d<f32>;
@@ -313,6 +316,21 @@ fn foliage_sun_shadow(world: vec3<f32>, l: vec3<f32>, frag_xy: vec2<f32>) -> f32
     return shadows::fetch_directional_shadow(0u, wp, l, view_z, frag_xy);
 }
 
+// `campaign_grade` of `terrain.wesl`.
+fn foliage_grade(c: vec3<f32>) -> vec3<f32> {
+    if (params.grade.w <= 0.0) {
+        return c;
+    }
+    var col = (c - vec3<f32>(0.5)) * params.grade.y + vec3<f32>(0.5);
+    col = max(col, vec3<f32>(0.0));
+    let luma = dot(col, vec3<f32>(0.2126, 0.7152, 0.0722));
+    col = col + params.lift.rgb * (1.0 - smoothstep(0.0, 0.5, luma));
+    col = col * mix(vec3<f32>(1.0), params.highlights.rgb, smoothstep(0.3, 0.9, luma));
+    let sat = mix(params.grade.z, params.grade.x, smoothstep(0.02, 0.35, luma));
+    col = vec3<f32>(luma) + (col - vec3<f32>(luma)) * sat;
+    return mix(c, max(col, vec3<f32>(0.0)), params.grade.w);
+}
+
 fn shade_foliage(albedo: vec3<f32>, n: vec3<f32>, occlusion: f32, backlight: f32, world: vec3<f32>, frag_xy: vec2<f32>) -> vec3<f32> {
     let l = normalize(params.sun_dir.xyz);
     // Cast shadow of the relief / towns on the sun term only (Godot lights the foliage in
@@ -323,8 +341,12 @@ fn shade_foliage(albedo: vec3<f32>, n: vec3<f32>, occlusion: f32, backlight: f32
     let v = normalize(view.world_position - world);
     let through = max(-ndl, 0.0) * smoothstep(-0.2, 0.6, dot(-v, l));
     // AO: full on the sky light, 0.4 on the sun (`AO_LIGHT_AFFECT`).
+    // Exposure (ambient.a) and grade of the ground: Godot tonemapped and graded the whole frame,
+    // so the trees read as pale blobs on the darker graded ground without them (showfix, 16/10).
     var color = albedo * (params.ambient.rgb * occlusion
-        + params.sun_color.rgb * (wrap + backlight * through) * mix(1.0, occlusion, 0.4) * shadow);
+        + params.sun_color.rgb * (wrap + backlight * through) * mix(1.0, occlusion, 0.4) * shadow)
+        * select(1.0, params.ambient.a, params.ambient.a > 0.0);
+    color = foliage_grade(color);
     let d = distance(world, view.world_position);
     let begin = params.fog_range.x;
     let t = clamp((d - begin) / max(params.fog_range.y - begin, 1.0), 0.0, 1.0);

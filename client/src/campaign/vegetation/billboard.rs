@@ -45,7 +45,7 @@ const SHADER_PATH: &str = "embedded://cent_ans_client/campaign/vegetation/billbo
 /// Bytes of one record: x, y, z, yaw (deg), scale, 0, seed, r, g, b.
 pub const RECORD_BYTES: usize = 40;
 /// Bytes of the parameter block (`Params` of `billboard.wesl`: twelve `vec4`).
-const PARAM_BYTES: u64 = 192;
+const PARAM_BYTES: u64 = 240;
 
 /// What a batch draws (`params.frame.w`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -92,6 +92,11 @@ pub struct Params {
     pub ambient: Vec4,
     pub fog: Vec4,
     pub fog_range: Vec4,
+    /// Colour grade of the ground (saturation, contrast, shadow saturation, strength), shadow lift
+    /// and highlight tint: Godot graded the whole frame, trees included.
+    pub grade: Vec4,
+    pub lift: Vec4,
+    pub highlights: Vec4,
 }
 
 impl Params {
@@ -109,6 +114,9 @@ impl Params {
             ambient: Vec4::ZERO,
             fog: Vec4::ZERO,
             fog_range: Vec4::ZERO,
+            grade: Vec4::ZERO,
+            lift: Vec4::ZERO,
+            highlights: Vec4::ONE,
         }
     }
 
@@ -126,6 +134,9 @@ impl Params {
             self.ambient,
             self.fog,
             self.fog_range,
+            self.grade,
+            self.lift,
+            self.highlights,
         ]
         .iter()
         .flat_map(|v| v.to_array())

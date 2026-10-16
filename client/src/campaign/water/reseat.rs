@@ -1,20 +1,18 @@
 //! Re-seats the draped ribbons (rivers, roads) on the finest relief pages near the camera.
 //!
 //! The ribbons store the ground altitude in metres in `position.y` (the shaders drape it on the
-//! exaggerated relief). They are built when the terrain sampler first becomes ready, i.e. on the
-//! world heightmap, before the fine relief pages around the camera are resident. The close terrain
-//! then shows those pages, which differ from the heightmap by tens of metres (Paris: -51..+54 m),
-//! and the level a terrain node shows depends on its distance (coarser levels sit tens of metres
-//! higher in narrow valleys), so the rivers ended up buried under the ground at close range
-//! (showfix, 16/10). Godot carves the beds into the pages (`FineBedCarver`); here every ribbon
-//! vertex near the camera is re-seated on the highest resident level whenever the pages change
-//! (the terrain also carves the bed near the camera, `river_carve` in `terrain.wesl`).
+//! exaggerated relief). They are built on the world heightmap, before the fine relief pages around
+//! the camera are resident; the close terrain then shows those pages (Paris: -51..+54 m from the
+//! heightmap) and its triangles bridge narrow valleys between vertices. Every ribbon vertex near
+//! the camera is re-seated on the highest resident level and on the displayed patch lattice (own
+//! and parent level, both diagonals) whenever the pages or the patches change. (The rivers buried
+//! at close range, showfix 16/10, were mostly the relief uniform never reaching the ribbon
+//! materials, see `drape::sync_drape`; this pass removes the remaining few metres.)
 
 use bevy::prelude::*;
 
 use super::WaterPart;
 use super::height::GroundHeight;
-use super::ribbon::bank_slope;
 use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::terrain::lod::TerrainLod;
 use crate::campaign::terrain::mesh::NodeSpec;
@@ -29,8 +27,6 @@ const RADIUS_BASE: f32 = 200.0;
 const LOOKUP_CELL: f32 = 32.0;
 /// Altitude change (m) below which a vertex is left alone.
 const EPSILON_M: f32 = 0.25;
-/// Bank slope change (world units per px) below which a vertex is left alone.
-const RISE_EPSILON: f32 = 0.001;
 
 /// Counters for the dump.
 #[derive(Resource, Debug, Default, Clone, Copy)]
@@ -115,18 +111,13 @@ pub fn reseat_ribbons(
         let Some(mesh) = meshes.get(&mesh3d.0) else {
             continue;
         };
-        let (
-            Some(bevy::mesh::VertexAttributeValues::Float32x3(positions)),
-            Some(bevy::mesh::VertexAttributeValues::Float32x3(normals)),
-        ) = (
-            mesh.attribute(Mesh::ATTRIBUTE_POSITION),
-            mesh.attribute(Mesh::ATTRIBUTE_NORMAL),
-        )
+        let Some(bevy::mesh::VertexAttributeValues::Float32x3(positions)) =
+            mesh.attribute(Mesh::ATTRIBUTE_POSITION)
         else {
             continue;
         };
-        let mut changes: Vec<(usize, f32, f32)> = Vec::new();
-        for (i, (p, n)) in positions.iter().zip(normals).enumerate() {
+        let mut changes: Vec<(usize, f32)> = Vec::new();
+        for (i, p) in positions.iter().enumerate() {
             let dx = p[0] - focus.x;
             let dz = p[2] - focus.y;
             if dx * dx + dz * dz > radius2 {
@@ -137,11 +128,10 @@ pub fn reseat_ribbons(
                 y = y.max(mesh_height_m(&surface, spec, p[0], p[2]));
             }
             let y = y.max(0.0);
-            let rise = bank_slope(ground.0.as_ref(), p[0], p[2], Vec2::new(n[0], n[2]));
             let shift = (y - p[1]).abs();
-            if shift > EPSILON_M || (rise - n[1]).abs() > RISE_EPSILON {
+            if shift > EPSILON_M {
                 max_shift = max_shift.max(shift);
-                changes.push((i, y, rise));
+                changes.push((i, y));
             }
         }
         if changes.is_empty() {
@@ -153,15 +143,8 @@ pub fn reseat_ribbons(
         if let Some(bevy::mesh::VertexAttributeValues::Float32x3(positions)) =
             mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION)
         {
-            for (i, y, _) in &changes {
+            for (i, y) in &changes {
                 positions[*i][1] = *y;
-            }
-        }
-        if let Some(bevy::mesh::VertexAttributeValues::Float32x3(normals)) =
-            mesh.attribute_mut(Mesh::ATTRIBUTE_NORMAL)
-        {
-            for (i, _, rise) in &changes {
-                normals[*i][1] = *rise;
             }
         }
         stats.meshes_updated += 1;
