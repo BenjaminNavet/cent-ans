@@ -17,6 +17,7 @@ pub mod banner;
 pub mod clouds;
 pub mod cumulus;
 pub mod fog;
+pub mod ground;
 pub mod model;
 pub mod precip;
 pub mod sky;
@@ -102,6 +103,7 @@ impl Plugin for CampaignWeatherPlugin {
         clouds::build(app);
         precip::build(app);
         atmosphere::build(app);
+        ground::build(app);
         sky::build(app);
         aurora::build(app);
         cumulus::build(app);

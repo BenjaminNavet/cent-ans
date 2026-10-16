@@ -22,6 +22,7 @@
 - launcher: prebuilt Bevy binary in releases (first build 10-30 min); CI bevy job unverified on Win/Linux. Pending merge: parch, bvis, launcher.
 - perf2: skinned prepare_buffers 2-4 ms real upload → persistent buffer/write_buffer or visible-only upload. Pending merge: parch, bvis, launcher, perf2.
 - mats (29177fcdf, ready): leftovers → siegemat lot (siege walls/towers/fallback houses on BuildingAtlas, paved streets, hedges/palisades, kit bridge_* models); not ported: per-town soot on 1:1 kit, TX T4 regional matters, masonry micro-grain, roofscape far colour, seasonal campaign snow.
+- weather5 (bm-weather.md § weather5): aerial + sun scatter on camera fog, baked per-province weather field + selection-clear textures + ground.wesl; terrain.wesl wiring left to the terrain owner.
 - weather4 (05f1a5021, ready): single fog layer = Godot depth fog (linear fit); not ported: aerial perspective term, fog_sun_scatter; 0.07 ground veil in terrain.wesl to eye-check. Sets TerrainMaterial params.fog.w=0 at runtime (watch conflict with campvis2).
 - water3 (2de78dd43): generalised width_scale wired; not ported: carved river bed water_sink, minor_max_distance cut-off; eye-check at 1200.
 - READY TO MERGE: mats, weather4, water3 (batch launched)
