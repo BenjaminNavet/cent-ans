@@ -194,10 +194,34 @@ impl Plugin for CampaignWaterPlugin {
             .add_systems(OnEnter(AppState::Campaign), (build_water, debug_camera))
             .add_systems(
                 Update,
-                (rebuild_water, apply_view, reseat::reseat_ribbons)
+                (
+                    rebuild_water,
+                    apply_view,
+                    reseat::reseat_ribbons,
+                    sync_fine_zone,
+                )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
             );
+        }
+    }
+}
+
+/// `fine_geo_layer.gd` line 336: the fine hydrography disc is also handed to the coarse ribbons
+/// (`river_material.fine_zone`), which fade out inside it. Lakes ignore it (`sheet`).
+fn sync_fine_zone(
+    fine: Res<fine::FineGeo>,
+    mut rivers: ResMut<Assets<RiverMaterial>>,
+    mut last: Local<(Vec4, usize)>,
+) {
+    let count = rivers.len();
+    if last.0.abs_diff_eq(fine.zone, 1e-4) && last.1 == count {
+        return;
+    }
+    *last = (fine.zone, count);
+    for (_, material) in rivers.iter_mut() {
+        if material.params.sheet < 0.5 {
+            material.params.fine_zone = fine.zone;
         }
     }
 }
@@ -692,6 +716,7 @@ fn build_rivers(
             if let Some(layer) = &layer {
                 params.set_detail(layer);
             }
+            params.set_fords(&data.crossings);
             let material = ctx.river_materials.add(RiverMaterial {
                 params,
                 coast_dist: None,
@@ -886,11 +911,30 @@ fn dump_water(world: &World) -> (String, Value) {
                        "on_screen": world.get_resource::<label_ui::RiverLabelStats>().map(|s| s.shown.clone()),
                        "suppressed": world.get_resource::<label_ui::RiverLabelStats>().map(|s| s.suppressed)},
             "river_legibility": legibility(world),
+            "river_fords": river_fords(world),
             "river_bands": river_bands(world),
             "detail_textures": detail_dump(world),
             "freshwater_sites": stats.freshwater,
         }),
     )
+}
+
+/// Fords bound to the river materials and the fine disc they fade in.
+fn river_fords(world: &World) -> Value {
+    let Some(materials) = world.get_resource::<Assets<RiverMaterial>>() else {
+        return Value::Null;
+    };
+    let rows: Vec<Value> = materials
+        .iter()
+        .filter(|(_, m)| m.params.sheet < 0.5)
+        .map(|(_, m)| {
+            let z = m.params.fine_zone;
+            let first = m.params.fords[0];
+            json!({"ford_count": m.params.ford_count, "first_ford": [first.x, first.y, first.z, first.w],
+                   "fine_zone": [z.x, z.y, z.z, z.w]})
+        })
+        .collect();
+    json!(rows)
 }
 
 /// River ribbons at [`materials::LEGIBILITY_DISTANCE`] units: pixel floors per importance tier and

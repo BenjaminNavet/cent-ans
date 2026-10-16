@@ -287,8 +287,13 @@ pub struct RiverParams {
     /// Linear mean colour of the detail albedo (w unused).
     pub detail_mean: Vec4,
     pub silt_color: Vec4,
+    /// Fine hydrography disc (`fine_zone`: centre xz, radius, weight): the ribbon fades out inside.
+    pub fine_zone: Vec4,
+    /// Fords and ferries (`river_crossings.gd` `ford_uniforms`): x, z, radius, 1 ford / 0.25 ferry.
+    pub fords: [Vec4; 32],
     pub map_size: Vec2,
     pub distance_fade: Vec2,
+    pub ford_count: f32,
     pub min_px: f32,
     pub thin_fade: f32,
     pub far_alpha: f32,
@@ -330,6 +335,16 @@ pub struct RiverMaterial {
 }
 
 impl RiverParams {
+    /// Fords and ferries of the snapped crossings (`RiversRenderer._set_fords`, 32 at most).
+    pub fn set_fords(&mut self, crossings: &[super::data::Crossing]) {
+        let list = ford_uniforms(crossings);
+        self.fords = [Vec4::ZERO; 32];
+        for (slot, value) in self.fords.iter_mut().zip(&list) {
+            *slot = *value;
+        }
+        self.ford_count = list.len().min(32) as f32;
+    }
+
     /// Binds a detail layer (`WaterDetail.apply` + `flow_speed` + `turbidity`).
     pub fn set_detail(&mut self, layer: &super::detail::Layer) {
         self.detail = Vec4::new(
@@ -350,6 +365,22 @@ impl Drape for RiverMaterial {
     fn relief(&self) -> (ReliefParams, &Handle<Image>) {
         (self.relief, &self.relief_floor)
     }
+}
+
+/// `river_crossings.gd` `ford_uniforms`: (x, z, width x 0.8 + 0.35, 1 for a ford / 0.25 for a ferry).
+pub fn ford_uniforms(crossings: &[super::data::Crossing]) -> Vec<Vec4> {
+    crossings
+        .iter()
+        .filter(|c| c.structure == "ford" || c.structure == "ferry")
+        .map(|c| {
+            Vec4::new(
+                c.px.x,
+                c.px.y,
+                c.width * 0.8 + 0.35,
+                if c.structure == "ford" { 1.0 } else { 0.25 },
+            )
+        })
+        .collect()
 }
 
 /// Camera distance (world units) at which the campaign legibility of the river ribbons is checked.
@@ -402,6 +433,9 @@ impl RiverParams {
             detail: Vec4::ZERO,
             detail_mean: Vec4::ONE,
             silt_color: linear([0.34, 0.31, 0.22], 1.0),
+            fine_zone: Vec4::new(0.0, 0.0, -1.0, 0.0),
+            fords: [Vec4::ZERO; 32],
+            ford_count: 0.0,
             map_size,
             distance_fade: if minor {
                 Vec2::new(display.minor_fade[0], display.minor_fade[1]) * extent
@@ -715,5 +749,64 @@ mod tests {
         let (_, near) = minor.legibility(0.0);
         let (_, far) = minor.legibility(1.0e9);
         assert!(near >= far);
+    }
+}
+
+#[cfg(test)]
+mod carve_tests {
+    use super::*;
+
+    fn constant(source: &str, name: &str) -> Vec<f32> {
+        let line = source
+            .lines()
+            .find(|l| l.trim_start().starts_with(&format!("const {name}")))
+            .unwrap_or_else(|| panic!("const {name} missing"));
+        let value = line.split('=').nth(1).unwrap().split(';').next().unwrap();
+        value
+            .replace("vec2<f32>(", "")
+            .replace(['(', ')'], "")
+            .split(',')
+            .map(|v| v.trim().parse().unwrap())
+            .collect()
+    }
+
+    /// The river water follows the same carve weight as the terrain (`river_carve`): same camera
+    /// radii, and the water sink stays inside the carved depth (water under the bank, above the bed:
+    /// neither floating nor buried).
+    #[test]
+    fn water_sink_matches_terrain_carve() {
+        let river = include_str!("shaders/river.wesl");
+        let terrain = include_str!("../terrain/terrain.wesl");
+        let near_water = constant(river, "CARVE_NEAR");
+        let near_terrain = constant(terrain, "RIVER_CARVE_NEAR");
+        assert_eq!(near_water, near_terrain);
+        let sink = constant(river, "WATER_SINK")[0];
+        let depth = constant(terrain, "RIVER_CARVE_DEPTH")[0];
+        assert!(sink > 0.0 && sink < depth, "sink {sink} depth {depth}");
+        // Bed floor under the water by at least half the sink so the surface never z-fights it.
+        assert!(depth - sink > sink * 0.5);
+    }
+
+    #[test]
+    fn ford_uniforms_keep_fords_and_ferries() {
+        let crossing = |structure: &str| super::super::data::Crossing {
+            id: String::new(),
+            name: String::new(),
+            structure: structure.into(),
+            px: Vec2::new(3.0, 4.0),
+            dir: Vec2::X,
+            width: 1.0,
+        };
+        let list = ford_uniforms(&[crossing("stone"), crossing("ford"), crossing("ferry")]);
+        assert_eq!(
+            list,
+            vec![
+                Vec4::new(3.0, 4.0, 1.15, 1.0),
+                Vec4::new(3.0, 4.0, 1.15, 0.25)
+            ]
+        );
+        let mut params = RiverParams::lake(Vec2::ONE);
+        params.set_fords(&[crossing("ford")]);
+        assert_eq!(params.ford_count, 1.0);
     }
 }
