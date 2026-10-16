@@ -1,5 +1,4 @@
-// River ribbons and lake sheets. Port of river_water.gdshader (without carved bed, fords, detail
-// textures: those depend on terrain/fine layers). Mesh: centre line, NORMAL = signed perpendicular,
+// River ribbons and lake sheets. Port of river_water.gdshader (carved bed, fords, fine-zone fade). Mesh: centre line, NORMAL = signed perpendicular,
 // UV0 = (world width, side +-1), UV1 = (distance downstream, importance 0-6). Lakes: `sheet` = 1.
 import bevy_pbr::render::mesh_bindings::mesh;
 import bevy_pbr::render::mesh_functions::get_world_from_local;
@@ -17,8 +16,11 @@ struct Params {
     detail: vec4<f32>,
     detail_mean: vec4<f32>,
     silt_color: vec4<f32>,
+    fine_zone: vec4<f32>,
+    fords: array<vec4<f32>, 32>,
     map_size: vec2<f32>,
     distance_fade: vec2<f32>,
+    ford_count: f32,
     min_px: f32,
     thin_fade: f32,
     far_alpha: f32,
@@ -78,6 +80,15 @@ fn vnoise(p: vec2<f32>) -> f32 {
     let f = fract(p);
     let u = f * f * (3.0 - 2.0 * f);
     return mix(mix(hash21(i), hash21(i + vec2<f32>(1.0, 0.0)), u.x), mix(hash21(i + vec2<f32>(0.0, 1.0)), hash21(i + vec2<f32>(1.0, 1.0)), u.x), u.y);
+}
+
+// river_bed.gdshaderinc `fine_zone_mask`: 1 inside the fine hydrography disc, soft edge at 85-100 %.
+fn fine_zone_mask(p: vec2<f32>) -> f32 {
+    let z = params.fine_zone;
+    if z.z <= 0.0 || z.w <= 0.0 {
+        return 0.0;
+    }
+    return z.w * (1.0 - smoothstep(z.z * 0.85, z.z, distance(p, z.xy)));
 }
 
 fn importance_px_scale(importance: f32) -> f32 {
@@ -164,6 +175,28 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let nx = vnoise(q + vec2<f32>(-t + 0.07, 0.0)) - n1;
     let ny = vnoise(q + vec2<f32>(-t, 0.07)) - n1;
 
+    // Fords and ferries: clear shallow water, riffles and stones (only close up, like Godot).
+    var ford = 0.0;
+    var riffle = 0.0;
+    var fords_here = 0;
+    if !sheet && fwidth(in.flow.x) < 0.5 {
+        fords_here = i32(params.ford_count);
+    }
+    for (var i = 0; i < 32; i = i + 1) {
+        if i >= fords_here {
+            break;
+        }
+        let f = params.fords[i];
+        let d = distance(in.world.xz, f.xy);
+        ford = max(ford, (1.0 - smoothstep(f.z * 0.4, f.z, d)) * f.w);
+    }
+    if ford > 0.0 {
+        let stones = smoothstep(0.62, 0.7, vnoise(in.world.xz * 14.0)) * ford;
+        riffle = smoothstep(0.55, 0.85, vnoise(vec2<f32>(in.flow.x * 9.0 - globals.time * 1.5, in.flow.y * 30.0))) * ford;
+        deep = min(deep, 1.0 - 0.8 * ford);
+        riffle = max(riffle, stones * 0.6);
+    }
+
     var col = mix(params.shallow_color.rgb, params.deep_color.rgb, deep);
     col = col * (0.92 + 0.16 * n2);
     if sheet {
@@ -183,7 +216,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let streak = textureSample(detail_albedo, detail_sampler, rc_uv * vec2<f32>(0.6, 1.4) + vec2<f32>(-globals.time * params.detail.z * 1.5, 0.0)).a * d_on;
     var bank_foam = smoothstep(0.82, 1.0, edge) * (0.5 + 0.5 * n2) * (1.0 - in.carved) * 0.25;
     bank_foam = bank_foam + smoothstep(0.6, 1.0, edge) * streak * 0.35 * (1.0 - in.carved * 0.5);
-    let foam = clamp(bank_foam, 0.0, 1.0);
+    let foam = clamp(bank_foam + riffle, 0.0, 1.0);
     col = mix(col, params.foam_color.rgb, foam * 0.7);
 
     let half_px = select(1.0 / max(fwidth(in.side), 1e-4), 1000.0, sheet);
@@ -216,6 +249,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         // The water ends on the carved slope by itself (depth test): no soft border there.
         let soft = 1.0 - (1.0 - smoothstep(0.0, params.edge_soft_px, px_edge)) * (1.0 - in.carved);
         alpha = mix(0.9, 0.97, in.carved) * in.alpha * in.far * soft;
+        alpha = alpha * (1.0 - ford * 0.35) * (1.0 - fine_zone_mask(in.world.xz));
     } else {
         alpha = params.sheet_alpha;
         if params.has_coast_dist > 0.5 {
