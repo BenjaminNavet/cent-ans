@@ -14,6 +14,11 @@ struct Params {
     wave: vec4<f32>,
     // x: mode, y: has_heraldry.
     flags: vec4<f32>,
+    // Ground light of the campaign (`TerrainParams`): xyz direction to the sun, w = 1 when set;
+    // sun colour x energy; ambient colour x energy (w: gain).
+    sun_dir: vec4<f32>,
+    sun_color: vec4<f32>,
+    ambient: vec4<f32>,
 }
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> params: Params;
@@ -31,6 +36,8 @@ struct VertexOutput {
     @builtin(position) clip: vec4<f32>,
     @location(0) uv: vec2<f32>,
     @location(1) fold: f32,
+    // World normal of the cloth: the billboard faces the camera.
+    @location(2) normal: vec3<f32>,
 }
 
 @vertex
@@ -77,6 +84,7 @@ fn vertex(in: VertexInput) -> VertexOutput {
     out.clip = view.clip_from_world * vec4<f32>(world, 1.0);
     out.uv = in.uv;
     out.fold = fold;
+    out.normal = axis_z;
     return out;
 }
 
@@ -106,5 +114,17 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     if (alpha < 0.5) {
         discard;
     }
-    return vec4<f32>(color * (0.86 + 0.18 * in.fold), 1.0);
+    let albedo = color * (0.86 + 0.18 * in.fold);
+    if (params.sun_dir.w < 0.5) {
+        return vec4<f32>(albedo, 1.0);
+    }
+    // `diffuse_lambert_wrap` of the Godot shader (roughness 0.9) and its BACKLIGHT, with the
+    // light of the ground (sun + ambient), not Bevy's exposure.
+    let n = normalize(in.normal);
+    let ndl = dot(n, normalize(params.sun_dir.xyz));
+    let wrap = max((ndl + 0.9) / 1.9, 0.0);
+    let back = max(-ndl, 0.0);
+    let lit = albedo * (params.ambient.rgb * params.ambient.a + params.sun_color.rgb * wrap)
+        + color * 0.3 * params.sun_color.rgb * back;
+    return vec4<f32>(lit, 1.0);
 }
