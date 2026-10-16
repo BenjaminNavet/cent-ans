@@ -420,6 +420,7 @@ fn commit_field(ui: &mut DiplomacyUi) {
 }
 
 /// Handles the buttons of the screen (`dip:*` names) and the tab messages.
+#[allow(clippy::too_many_arguments)] // Bevy system: one parameter per resource/message.
 fn handle_presses(
     mut pressed: MessageReader<ButtonPressed>,
     mut tabs: MessageReader<TabSelected>,
