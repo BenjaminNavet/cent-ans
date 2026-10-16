@@ -10,12 +10,13 @@
 //!
 //! Widget names (script `click <Name>`): `prov:close`, `prov:tab_city|buildings|settlements|garrison`,
 //! `prov:set:<settlement>`, `prov:build:<building>`, `prov:cancel:<queue row>`,
-//! `prov:raze:<building>`, `prov:tax:<low|normal|high|default>`, `prov:colony:<settlement>`, `prov:slot:<settlement>:<root>`,
+//! `prov:raze:<building>`, `prov:tax:<low|normal|high|default>`, `prov:colony:<settlement>`, `prov:hammer:<settlement>` (build companion, `companion.rs`), `prov:csel:<settlement>`, `prov:companion_close`, `prov:slot:<settlement>:<root>`,
 //! `prov:recruit`, `prov:crumb:<faction>`, `prov:choose:<table|edict|vocation>`,
 //! `prov:table:<diet>`, `prov:edict:<edict>`, `prov:vocation:<vocation>`,
 //! `prov:garrison_pick:<index>` (checkbox), `prov:form_army`.
 
 mod choices;
+mod companion;
 mod images;
 mod labels;
 mod view;
@@ -26,6 +27,7 @@ use data_model::{BuildingId, DietId, EdictId, ProvinceId, SettlementId};
 use serde_json::{Value, json};
 use sim_campaign::{ArmyId, Order, Place, TaxRate};
 
+use self::companion::COMPANION_GROUP;
 use self::labels::UiLabels;
 use self::view::{SETTLEMENT_GROUP, Snapshot, TAB_GROUP, TABS};
 use super::OpenPanel;
@@ -80,6 +82,8 @@ pub struct ProvincePanel {
     tab: usize,
     /// Settlement of the Buildings tab (`None` = the province's city).
     settlement: Option<String>,
+    /// Build companion open under the Colonies list.
+    companion: bool,
     dirty: bool,
     /// Serialized snapshot of the last build, to rebuild only on change.
     last: String,
@@ -106,6 +110,7 @@ impl ProvincePanel {
     fn open_province(&mut self, id: &str) {
         if self.open.as_deref() != Some(id) {
             self.settlement = None;
+            self.companion = false;
             self.error.clear();
             self.open_choice.clear();
             self.picked.clear();
@@ -116,6 +121,7 @@ impl ProvincePanel {
 
     fn close(&mut self) {
         self.open = None;
+        self.companion = false;
         self.dirty = true;
         self.last.clear();
         self.open_choice.clear();
@@ -204,6 +210,12 @@ fn track_selection(
         }
     }
     for item in lists.read() {
+        if item.group == COMPANION_GROUP
+            && let Some(id) = item.name.strip_prefix("prov:csel:")
+        {
+            panel.settlement = Some(id.to_owned());
+            panel.dirty = true;
+        }
         if item.group == SETTLEMENT_GROUP
             && let Some(id) = item.name.strip_prefix("prov:set:")
         {
@@ -272,9 +284,12 @@ fn snapshot(
             linked.insert(key.to_owned(), crate::codex::text::format_auto(codex, text));
         }
     }
+    let verdicts = companion::verdicts(data, state, sim.player.as_str(), &sheet.settlements);
     let tier = state.settlement_tier(data, &settlement);
     let tier_progress = state.settlement_tier_progress(data, &settlement);
     Some(Snapshot {
+        companion: panel.companion && !verdicts.is_empty(),
+        verdicts,
         tier,
         tier_progress,
         linked,
@@ -470,6 +485,17 @@ fn handle_buttons(
                 panel.dirty = true;
             }
             continue;
+        } else if action == "companion_close" {
+            panel.companion = false;
+            panel.dirty = true;
+            continue;
+        } else if let Some(id) = action.strip_prefix("hammer:") {
+            // Inert (disabled button) when the core says one cannot build there.
+            panel.settlement = Some(id.to_owned());
+            panel.companion = true;
+            panel.tab = 2;
+            panel.dirty = true;
+            continue;
         } else if let Some(id) = action.strip_prefix("colony:") {
             panel.settlement = Some(id.to_owned());
             panel.tab = 1;
@@ -625,6 +651,8 @@ fn dump_panel(world: &World) -> (String, Value) {
             "province": s.sheet.id, "name": s.sheet.name, "owner": s.sheet.owner,
             "controller": s.sheet.controller, "mine": s.mine,
             "settlement": s.selected_settlement,
+            "companion": s.companion,
+            "build_verdicts": s.verdicts,
             "settlements": s.sheet.settlements.len(),
             "unrest": s.sheet.unrest, "income": s.sheet.income,
             "tax": s.sheet.tax.rate, "population": s.sheet.population_total,

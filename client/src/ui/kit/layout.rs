@@ -110,16 +110,22 @@ fn px(value: Option<f32>) -> Val {
 /// Places every [`FitZone`] node from the window size and the [`HudReserve`].
 pub fn apply_fit_zones(
     reserve: Res<HudReserve>,
-    mut nodes: Query<(&FitZone, &mut Node, &ComputedUiRenderTargetInfo)>,
+    mut nodes: Query<(
+        &FitZone,
+        &mut Node,
+        &ComputedUiRenderTargetInfo,
+        Option<&super::resize_grip::ResizableWindow>,
+    )>,
 ) {
-    for (zone, mut node, target) in &mut nodes {
+    for (zone, mut node, target, resizable) in &mut nodes {
         let screen = target.logical_size();
         if screen.y < 1.0 {
             continue;
         }
         let b = zone_box(*zone, screen, *reserve);
         let max_height = px(b.max_height);
-        let max_height = if b.max_height.is_none() {
+        // A window the player resized keeps the height they chose.
+        let max_height = if b.max_height.is_none() || resizable.is_some_and(|r| r.user_sized) {
             node.max_height
         } else {
             max_height
