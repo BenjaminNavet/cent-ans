@@ -189,6 +189,26 @@ fn anim_pose(
     if mode > 2.5 {
         clip = set_at(s0, s1, clamp(i32(pick + 0.5), 0, n - 1));
         t = clamp(params.cur.w - anim_time, 0.0, max_t);
+        // Role fade (siege crew gestures, `siege/crew_fade.rs`): `volley_time` > 0 packs the
+        // previous clip slot + 1, 128 * (change - previous start) and 128 * 256 * (change - start)
+        // in 1/16 s. The previous clip keeps playing from its own start while the new one fades
+        // in over `params.fx.x` seconds from the change (`params.fx.x` = role blend, 0 = cut).
+        if volley_time > 0.5 && params.fx.x > 0.001 {
+            let whole = floor(volley_time + 0.5);
+            let stagger_q = floor(whole / 32768.0);
+            let rest = whole - stagger_q * 32768.0;
+            let delta_q = floor(rest / 128.0);
+            let prev_pick = i32(rest - delta_q * 128.0) - 1;
+            let age = params.cur.w - anim_time - stagger_q / 16.0;
+            if prev_pick >= 0 && age >= 0.0 && age < params.fx.x {
+                prev_clip = set_at(s0, s1, clamp(prev_pick, 0, n - 1));
+                if prev_clip != clip {
+                    blend_prev = true;
+                    prev_t = age + delta_q / 16.0;
+                    prev_k = smoothstep(0.0, params.fx.x, age);
+                }
+            }
+        }
     } else if mode > 1.5 {
         clip = set_at(s0, s1, min(i32(h.x * f32(n)), n - 1));
         let reload = max(params.timing.y, 0.5);
