@@ -28,6 +28,7 @@ pub mod encounters;
 pub mod history;
 pub mod launch;
 pub mod loading;
+pub mod loading_veil;
 pub mod naval;
 pub mod notice;
 pub mod replays;
@@ -169,7 +170,8 @@ pub struct FlowPlugin;
 impl Plugin for FlowPlugin {
     fn build(&self, app: &mut App) {
         naval::enable_dialog();
-        app.add_message::<LeaveBattle>()
+        app.add_plugins(loading_veil::plugin)
+            .add_message::<LeaveBattle>()
             .add_message::<FlowCommand>()
             .add_message::<BattleResolved>()
             .init_resource::<FlowState>()

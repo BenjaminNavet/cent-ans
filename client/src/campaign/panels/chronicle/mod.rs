@@ -289,6 +289,7 @@ fn handle_buttons(
 }
 
 /// Spawns or despawns the screen to match `open` / `dirty`.
+#[allow(clippy::too_many_arguments)]
 fn rebuild(
     mut commands: Commands,
     mut panel: ResMut<ChroniclePanel>,
@@ -297,6 +298,7 @@ fn rebuild(
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
     settings: Option<Res<Settings>>,
+    plates: Option<Res<crate::ui::art_plates::ArtPlates>>,
 ) {
     if !panel.open {
         if let Some(root) = panel.root.take() {
@@ -319,10 +321,20 @@ fn rebuild(
     let mode = settings
         .as_ref()
         .map_or(NewsMode::Interest, |s| NewsMode::parse(&s.news_filter));
-    let root = spawn_screen(&mut commands, &theme, &assets, &view, &log, &panel, mode);
+    let root = spawn_screen(
+        &mut commands,
+        &theme,
+        &assets,
+        &view,
+        &log,
+        &panel,
+        mode,
+        plates.as_deref(),
+    );
     panel.root = Some(root);
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_screen(
     commands: &mut Commands,
     theme: &UiTheme,
@@ -331,6 +343,7 @@ fn spawn_screen(
     log: &ChronicleLog,
     panel: &ChroniclePanel,
     mode: NewsMode,
+    plates: Option<&crate::ui::art_plates::ArtPlates>,
 ) -> Entity {
     let theme = theme.clone();
     let body = RichStyle::body(&theme);
@@ -387,7 +400,7 @@ fn spawn_screen(
                     });
                     page.spawn(separator(&theme));
                     match panel.tab {
-                        Tab::Decisions => decisions_tab(page, &theme, assets, &body, view),
+                        Tab::Decisions => decisions_tab(page, &theme, assets, &body, view, plates),
                         Tab::Journal => journal_tab(page, &theme, assets, &body, log, panel),
                         Tab::Letters => letters_tab(page, &theme, log, panel, mode),
                     }
@@ -405,6 +418,7 @@ fn decisions_tab(
     assets: &AssetServer,
     body: &RichStyle,
     view: &ChronicleView,
+    plates: Option<&crate::ui::art_plates::ArtPlates>,
 ) {
     page.spawn(caption(theme, &view.tooltip));
     page.spawn(scroll_list(theme, "chronicle:decisions", LIST_HEIGHT))
@@ -443,17 +457,19 @@ fn decisions_tab(
                             TextColor(style::RUBRIC),
                         ));
                     });
-                    if let Some(path) =
-                        art::decision_art(art::assets_root().as_deref(), decision.event.as_str())
-                    {
-                        card.spawn((
-                            Name::new(format!("chronicle:art:{}", decision.id)),
-                            Node {
-                                height: Val::Px(art::ART_HEIGHT),
-                                aspect_ratio: Some(16.0 / 9.0),
-                                ..default()
-                            },
-                            ImageNode::new(assets.load(path)),
+                    let root = art::assets_root();
+                    if let Some(path) = crate::campaign::hud::cover::decision_picture(
+                        plates,
+                        root.as_deref(),
+                        decision.event.as_str(),
+                        &decision.kind,
+                    ) {
+                        card.spawn(crate::campaign::hud::cover::cover_image(
+                            assets,
+                            &path,
+                            format!("chronicle:art:{}", decision.id),
+                            art::ART_HEIGHT * 16.0 / 9.0,
+                            art::ART_HEIGHT,
                         ));
                     }
                     card.spawn(typed(theme, &decision.title, UiType::Heading));
@@ -653,7 +669,13 @@ fn dump_chronicle(world: &World) -> (String, Value) {
             "pending_decisions": view.as_ref().map_or(0, |v| v.count),
             "decision_art": view.as_ref().map(|v| v.decisions.iter().map(|d| json!({
                 "id": d.id, "event": d.event.as_str(),
-                "art": art::decision_art(art::assets_root().as_deref(), d.event.as_str()),
+                "kind": d.kind,
+                "art": crate::campaign::hud::cover::decision_picture(
+                    world.get_resource::<crate::ui::art_plates::ArtPlates>(),
+                    art::assets_root().as_deref(),
+                    d.event.as_str(),
+                    &d.kind,
+                ),
             })).collect::<Vec<_>>()),
             "decision_titles": view.as_ref().map(|v| v.decisions.iter().map(|d| d.title.clone()).collect::<Vec<_>>()),
             "turns_recorded": log.turns,
