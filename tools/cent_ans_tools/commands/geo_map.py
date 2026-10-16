@@ -77,6 +77,38 @@ def geo_compose(
     console.print_json(data=report)
 
 
+@geo_app.command("compose-fine")
+def geo_compose_fine(
+    real_root: Path = typer.Option(
+        None,
+        help="Dossier des tuiles fines réelles (hydro_fine/, roads_fine/) ; "
+        "défaut ~/dev/cent-ans-raw/pyramid-reelle",
+    ),
+    out: Path = typer.Option(
+        None,
+        help="Dossier recevant pyramid/hydro_fine et pyramid/roads_fine "
+        "(défaut data/map/compose/derived/fine_geo, hors git)",
+    ),
+) -> None:
+    """Fleuves fins, routes drapées et ancrages fins portés dans le cadre composé (lot Bevy geofine2)."""
+    from cent_ans_tools.compose import fine_geo
+
+    result = fine_geo.build(real_root=real_root or fine_geo.REAL_ROOT, out_root=out)
+    console.print_json(
+        data={
+            "layers": {k: vars(v) for k, v in result.layers.items()},
+            "settlements": result.settlements,
+            "settlements_missing": result.settlements_missing,
+            "hamlets": result.hamlets,
+            "hamlets_matched": result.hamlets_matched,
+            "crossings": result.crossings,
+            "crossings_without_real_anchor": len(result.crossings_missing),
+            "crossings_snapped_composed": result.crossings_snapped,
+            "anchor_offset_px": result.anchor_offset_px,
+        }
+    )
+
+
 @geo_app.command("compose-relief")
 def geo_compose_relief(
     write: bool = typer.Option(
