@@ -101,3 +101,9 @@
 17:30 campui6 d12b446f3 OK clean; same pass
 fire_flipbooks drift: bm_wt2.sh copied data/ from gp-bevy's tree before merge8 (pre-a4d95924d text); not real work, restored in each worktree before removal
 17:50 menu5 40511a750 OK clean; clippy/tests(1182)/game-api clippy+tests/smoke main_menu faction_select campaign battle crecy siege campaign_turns (muted); fix: core fmt of start_sheets.rs (import order)
+18:27 coastterr 0bfd0dd78 OK clean; clippy/tests(1225 --features dev)/core fmt+clippy+test full(1959)/pytest schemas(1216)/smoke campaign campaign_turns campaign_descent battle crecy siege main_menu (muted; main_menu timed out once under load with no app output, retry ok 4s)
+18:27 batmo 7ce30563e OK clean; same pass (schemas ok)
+18:27 bwater 9bdef1f57 OK clean (no setup.rs conflict: CENT_ANS_BATTLE_WEATHER + CENT_ANS_BATTLE_FIELD both kept); same pass
+18:27 siegeland 62a2cfc70 OK clean; skinned.wesl mode 3 role fade uses existing prev_* vars and params.fx.x, RECORD_BYTES stride unchanged; same pass
+18:27 armies6 7659f0ebe OK clean; core game-api in the full core pass; same pass
+18:27 campwater2 41ec0a92b OK clean (carries finegeo + gore); same pass; no fire_flipbooks drift in any worktree
