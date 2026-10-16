@@ -40,5 +40,16 @@ Branche `bm/batmo`, worktree `gp-bm-batmo`.
   devraient alors partir de leurs sites.
 - Brouillard de hauteur de Godot (`fog_height` 12 m par brouillard) dans le brouillard de distance.
 
+## Preuves (16/10)
+- Vidages `--state Battle --frames 300`, `CENT_ANS_BATTLE_WEATHER=` rain / snow / fog / clear (qualité
+  `high` = volumétrique `weather`), aucune erreur de shader dans les journaux :
+  pluie 9 000 gouttes, neige 7 000 flocons (boîte suivant la caméra) ; volumétrique actif pluie/neige/
+  brouillard (caméra + soleil + 1 volume, 2 avec la nappe au brouillard), coupé par temps clair ;
+  fumées : 2 colonnes à 3,6 et 3,9 km (clair, brouillard), 0 sous pluie/neige ; passe d'étalonnage sur
+  la caméra (3 étalonnages, lift du brouillard [0,006 0,006 0,008]) ; disque solaire 6 (clear_midday),
+  0 sur ciels couverts.
+- Tests client 1136 + annexes, clippy `-D warnings`, schémas (1216) verts.
+
 ## Prochaine étape
-Compiler, tests, vidages `--state Battle` avec `CENT_ANS_BATTLE_WEATHER=rain|snow|fog`.
+Lot prêt à fusionner. Contrôle visuel par le joueur ou la session principale (pas de capture ici) :
+densité perçue de la pluie (traits de 12 mm, comme Godot), intensité du volumétrique, disque solaire.
