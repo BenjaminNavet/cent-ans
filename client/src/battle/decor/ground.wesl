@@ -38,17 +38,16 @@ struct GroundParams {
 @group(constants::MATERIAL_BIND_GROUP) @binding(101) var albedo_array: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(102) var albedo_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(103) var normal_array: texture_2d_array<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(104) var normal_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(105) var micro_albedo: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(106) var micro_albedo_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(107) var micro_normal: texture_2d_array<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(108) var micro_normal_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(109) var decor_fields: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(110) var decor_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(111) var relief_map: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(112) var relief_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(113) var trample_map: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(114) var trample_sampler: sampler;
+// Samplers are shared (Metal allows 16 per stage): the normal arrays use their albedo
+// sampler, the trample map the relief sampler (both linear, clamped).
 
 const L_GRASS: i32 = 0;
 const L_MEADOW: i32 = 1;
@@ -203,7 +202,7 @@ fn layer_normal_xy(k: i32, uv: vec2<f32>, g: Grads, scale: f32) -> vec2<f32> {
     if ground.detail.z < 0.5 {
         return vec2<f32>(0.0);
     }
-    return textureSampleGrad(normal_array, normal_sampler, uv, k, g.dx * scale, g.dy * scale).xy * 2.0 - 1.0;
+    return textureSampleGrad(normal_array, albedo_sampler, uv, k, g.dx * scale, g.dy * scale).xy * 2.0 - 1.0;
 }
 
 @fragment
@@ -319,7 +318,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     var trampled = 0.0;
     if ground.weather.y > 0.0 && ground.trample_rect.z > 0.0 {
         let tuv = (p - ground.trample_rect.xy) / ground.trample_rect.zw;
-        let tm = textureSampleLevel(trample_map, trample_sampler, tuv, 0.0).r;
+        let tm = textureSampleLevel(trample_map, relief_sampler, tuv, 0.0).r;
         if all(tuv >= vec2<f32>(0.0)) && all(tuv <= vec2<f32>(1.0)) {
             trampled = smoothstep(0.08, 0.85, tm + (fine - 0.5) * 0.35 * tm);
         }
@@ -438,7 +437,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
         let mref = textureSampleLevel(micro_albedo, micro_albedo_sampler, muv, ml, 12.0).rgb;
         let mlum = bt_luma(mcol) / max(bt_luma(mref), 0.02);
         albedo = albedo * mix(1.0, clamp(mlum, 0.5, 1.6), nd_k * ground.micro.y);
-        let mn = textureSampleGrad(micro_normal, micro_normal_sampler, muv, ml, mdx, mdy).xy * 2.0 - 1.0;
+        let mn = textureSampleGrad(micro_normal, micro_albedo_sampler, muv, ml, mdx, mdy).xy * 2.0 - 1.0;
         nxy = nxy + mn * nd_k * 0.8;
     }
     // Furrows, faded where their period goes under a few pixels and at mid distance.

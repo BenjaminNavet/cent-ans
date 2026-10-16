@@ -17,7 +17,19 @@ Hors dossier, modification minimale : `battle/scene/terrain.rs` (appel de
   complet / allégé, planches TX `tx_bark_pack` / `tx_leaves_pack` découpées, hiver : ramilles nues
   `twig_spray.png`, chêne marcescent `dead_leaves_oak.png`), `trees.rs` : 3 niveaux = complet
   (< 120 m, buissons < 60 m, fondu 16 m), allégé, puis imposteurs `far_woods`. Vidage `battle_trees`.
-- Tests, clippy : verts. Reste : vidages été / hiver (scripts dans le scratchpad).
+- Tests, clippy : verts. Vidages (bataille personnalisée plaines, `run_bg.sh --offscreen` muet,
+  script menu → `cb:season` / `cb:weather` → `cb:launch`) sans erreur de shader ni panique :
+  - été : paquet biome 2 + normales + grain fin chargés, 5 543 cellules EP6 (blé 2 196, semé 1 389…),
+    relief 121×81, 11 124 arbres + 1 093 buissons, LOD complet 12 217 / allégé 12 217 / imposteurs
+    11 124 (214 tuiles), 21 textures d'arbre préparées, 0 échec ;
+  - hiver : chaume / labour à la place du blé, `winter: true`, feuilles d'hiver (ramilles) ;
+  - été + neige : `snow` 0,85, piétinement actif ; été + pluie : humidité 0,75, piétinement actif.
+- Corrigés au premier lancement : chaîne de mips passée à `Image::new` (panique), 17 échantillonneurs
+  > limite Metal de 16 (échantillonneurs partagés : normales ← albédo, piétinement ← relief).
+- L'avertissement « Mesh index 17 contains no vertices » existe aussi hors de ce lot (journal bfx).
+
+## Prochaine étape
+- Aucune : lot terminé, en attente de fusion.
 
 ## Écarts à la spec
 - Piétinement neige / boue : réutilise la carte d'herbe couchée de `flatten.rs` (pas de 2e carte).

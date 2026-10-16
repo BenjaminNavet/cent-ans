@@ -337,7 +337,7 @@ pub fn build_tree(species: &TreeSpecies, lod: u32) -> TreeMeshes {
             branch(&mut ctx, start, dir, reach * 1.2, species.radius, 1);
         }
     }
-    let bark = (ctx.bark_quads > 0).then(|| {
+    let bark = (!ctx.bark.indices.is_empty()).then(|| {
         let mut mesh = into_mesh(std::mem::take(&mut ctx.bark), false);
         if let Err(error) = mesh.generate_tangents() {
             warn!("battle trees: no tangents for the bark: {error}");
@@ -731,7 +731,7 @@ pub fn prepare_tree_textures(
                 depth_or_array_layers: 1,
             },
             TextureDimension::D2,
-            data,
+            data[..(size * size * 4) as usize].to_vec(),
             if srgb {
                 TextureFormat::Rgba8UnormSrgb
             } else {
@@ -739,6 +739,8 @@ pub fn prepare_tree_textures(
             },
             RenderAssetUsages::RENDER_WORLD,
         );
+        // `Image::new` only accepts the base level; the chain replaces it afterwards.
+        image.data = Some(data);
         image.texture_descriptor.mip_level_count = levels;
         let address = if job.prep == TexturePrep::Leaves {
             ImageAddressMode::ClampToEdge
@@ -786,6 +788,13 @@ mod tests {
                 assert!(light.bark.is_some());
             } else {
                 assert!(light.bark.is_none(), "light bush has no stems");
+            }
+            for bark in [&full.bark, &light.bark].into_iter().flatten() {
+                assert!(
+                    bark.count_vertices() > 0,
+                    "{}: empty bark mesh",
+                    species.name
+                );
             }
         }
     }

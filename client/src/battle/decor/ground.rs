@@ -195,14 +195,12 @@ pub struct GroundExtension {
     #[sampler(102)]
     pub albedo: Option<Handle<Image>>,
     #[texture(103, dimension = "2d_array")]
-    #[sampler(104)]
     pub normal: Option<Handle<Image>>,
     /// Micro grain pack (`micro_ground`): albedo and normal arrays.
     #[texture(105, dimension = "2d_array")]
     #[sampler(106)]
     pub micro_albedo: Option<Handle<Image>>,
     #[texture(107, dimension = "2d_array")]
-    #[sampler(108)]
     pub micro_normal: Option<Handle<Image>>,
     /// EP6 decor fields (RGBA8, nearest): kind / 8, yaw / pi, edge ramp, coverage.
     #[texture(109)]
@@ -214,7 +212,6 @@ pub struct GroundExtension {
     pub relief: Option<Handle<Image>>,
     /// Trodden ground: the flattened-grass map of `flatten.rs` (R).
     #[texture(113)]
-    #[sampler(114)]
     pub trample: Option<Handle<Image>>,
 }
 
