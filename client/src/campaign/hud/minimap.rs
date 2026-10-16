@@ -3,8 +3,10 @@
 //! A small parchment frame with the lands painted by faction colour (the colours of the province
 //! fill, `OverlayState::colors`), sea, the armies as dots (the player's ringed), the camera focus
 //! and the pings of alerts. Click or drag = [`FocusCamera::Point`]. Two modes: political, and
-//! relief (land and sea only: the height-shaded relief of Godot needs the terrain pyramid; the
-//! frame is cropped to the extent of the provinces). The fog mask is not ported.
+//! relief. Both sit on the height-shaded relief baked from the terrain pyramid (`bake_relief`,
+//! north-west light, sea by depth) and the fog of war veils what the player does not see
+//! (`paint`, per-cell mask with a soft edge); the frame is cropped to the extent of the
+//! provinces. Dump section `minimap`: `relief_baked`, `fogged`.
 
 use bevy::asset::RenderAssetUsages;
 use bevy::picking::hover::Hovered;

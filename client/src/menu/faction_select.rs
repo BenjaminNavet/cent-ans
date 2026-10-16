@@ -610,6 +610,7 @@ fn request_start(
             yes_label: "Oui".to_owned(),
             no_label: "Non".to_owned(),
             width: 460.0,
+            art: None,
         },
     );
     false

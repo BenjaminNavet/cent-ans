@@ -22,7 +22,7 @@
 //! `Settings` (`tutorial_step`, `tutorial_done`, `tutorial_postponed`: `tutorial/step|done|
 //! postponed` of Godot) and the guide resumes where it was left.
 //!
-//! Not ported: the encyclopedia (Codex lot).
+//! Step texts and advice carry Codex links (`format_auto`, like `CodexText.format(text, true)`).
 //! Dev hooks: `CENT_ANS_TUTORIAL=<step index>` starts the guide at that step; `CENT_ANS_TUTORIAL=off`
 //! disables the autostart.
 
@@ -535,6 +535,7 @@ fn rebuild(
     mut tutorial: ResMut<Tutorial>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
+    codex: Res<crate::codex::store::CodexStore>,
     paused: Option<Res<GamePaused>>,
     settings_screen: Option<Res<SettingsScreen>>,
 ) {
@@ -559,6 +560,12 @@ fn rebuild(
         Vec::new()
     };
     let total = tutorial.steps.len();
+    // `[[id]]` / `[[id|label]]` words of the step become Codex links (`CodexText.format`).
+    let step = TutorialStep {
+        text: crate::codex::text::format_auto(&codex, &step.text),
+        advice: crate::codex::text::format_auto(&codex, &step.advice),
+        ..step
+    };
     tutorial.root = Some(spawn(
         &mut commands,
         &theme,
@@ -647,9 +654,11 @@ fn spawn(
                         TextColor(if done { style::GOOD } else { style::RUBRIC }),
                     ));
                     if !step.advice.is_empty() {
-                        page.spawn(caption(
+                        page.spawn(rich_text(
                             &theme,
-                            &format!("Conseil historique : {}", step.advice),
+                            assets,
+                            &format!("[i]Conseil historique : {}[/i]", step.advice),
+                            &body,
                         ));
                     }
                     page.spawn(Node {

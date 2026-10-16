@@ -62,6 +62,8 @@ pub struct Snapshot {
     pub open_choice: String,
     /// Slot bar of every colony of the province (Colonies tab), then of the selected one.
     pub bars: Vec<SlotBarView>,
+    /// Building row marked after a click on a slot cell (empty = none).
+    pub focus_building: String,
     /// Full Lent text (BBCode, rule values and Codex link resolved) when it is Lent.
     pub lent_text: Option<String>,
     /// Descriptions with Codex words linked, by choice key (`table`, `edict`).
@@ -715,13 +717,16 @@ fn node_row(
         _ => style::INK,
     };
     let indent = f32::from(node.depth.saturating_sub(1)) * 12.0;
+    let focused = !snap.focus_building.is_empty() && snap.focus_building == node.building;
     pane.spawn((
         Name::new(format!("prov:node:{}", node.building)),
         Tooltip::new(&node_tooltip(node, labels)),
         Node {
             padding: UiRect::left(Val::Px(indent)),
+            border: UiRect::all(Val::Px(if focused { 2.0 } else { 0.0 })),
             ..row()
         },
+        BorderColor::all(if focused { style::GOLD } else { Color::NONE }),
     ))
     .with_children(|line| {
         node_image(line, theme, assets, images, &node.building);

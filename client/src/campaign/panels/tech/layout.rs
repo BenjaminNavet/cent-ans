@@ -212,9 +212,11 @@ pub fn path_of(nodes: &[&TechNode], id: &str) -> HashSet<String> {
     path
 }
 
-/// UX5-T3 filters (the search box is not ported: Bevy UI has no text field yet).
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+/// UX5-T3 filters, including the free-text search (`query`, matched against the technology name
+/// and the names of the units and buildings it unlocks, like `tech_tree_view.gd`).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Filter {
+    pub query: String,
     pub reach: bool,
     pub unlock: bool,
     pub fade_known: bool,
@@ -222,7 +224,7 @@ pub struct Filter {
 
 impl Filter {
     pub fn active(&self) -> bool {
-        self.reach || self.unlock || self.fade_known
+        !self.query.trim().is_empty() || self.reach || self.unlock || self.fade_known
     }
 
     pub fn matches(&self, node: &TechNode) -> bool {
@@ -232,7 +234,19 @@ impl Filter {
         if self.reach && node.state != "available" {
             return false;
         }
-        !(self.unlock && node.unit_unlocks.is_empty() && node.building_unlocks.is_empty())
+        if self.unlock && node.unit_unlocks.is_empty() && node.building_unlocks.is_empty() {
+            return false;
+        }
+        let query = self.query.trim().to_lowercase();
+        if query.is_empty() {
+            return true;
+        }
+        let mut haystack = node.name.to_lowercase();
+        for unlocked in node.unit_unlocks.iter().chain(&node.building_unlocks) {
+            haystack.push(' ');
+            haystack.push_str(&unlocked.name.to_lowercase());
+        }
+        haystack.contains(&query)
     }
 }
 
@@ -376,6 +390,9 @@ pub fn turns_for(remaining: u32, points: u32) -> Option<u32> {
 /// One card of the queue ribbon: `(caption, gauge ratio, turns line)`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct RibbonCard {
+    /// Technology id of a queued card (the "retirer" button targets it); `None` for the research
+    /// in progress and empty slots.
+    pub queued_id: Option<String>,
     pub caption: String,
     pub ratio: f32,
     pub turns: String,
@@ -389,6 +406,7 @@ pub fn ribbon(
     current_turn: u32,
 ) -> (Vec<RibbonCard>, Option<String>) {
     struct Entry {
+        id: Option<String>,
         name: String,
         max: u32,
         value: u32,
@@ -402,6 +420,7 @@ pub fn ribbon(
         never = r.turns_left.is_none();
         elapsed = r.turns_left.unwrap_or(0);
         entries.push(Entry {
+            id: None,
             name: r.name.clone(),
             max: r.cost.max(1),
             value: r.progress,
@@ -417,6 +436,7 @@ pub fn ribbon(
             }
         }
         entries.push(Entry {
+            id: Some(q.id.clone()),
             name: q.name.clone(),
             max: q.cost.max(1),
             value: 0,
@@ -429,6 +449,7 @@ pub fn ribbon(
     for index in 0..3 {
         match entries.get(index) {
             Some(e) => cards.push(RibbonCard {
+                queued_id: e.id.clone(),
                 caption: format!("{}. {}", numerals[index], e.name),
                 ratio: e.value as f32 / e.max as f32,
                 turns: if index == 0 {
@@ -438,6 +459,7 @@ pub fn ribbon(
                 },
             }),
             None => cards.push(RibbonCard {
+                queued_id: None,
                 caption: "—".into(),
                 ratio: 0.0,
                 turns: "emplacement libre".into(),
@@ -611,6 +633,20 @@ mod tests {
         assert!(f.matches(&n));
         f.unlock = true;
         assert!(!f.matches(&n));
+        f.unlock = false;
+        n.name = "Arc long".into();
+        f.query = " ARC ".into();
+        assert!(f.active() && f.matches(&n));
+        f.query = "lance".into();
+        assert!(!f.matches(&n));
+        n.unit_unlocks.push(UnlockView {
+            id: "l".into(),
+            name: "Lancier".into(),
+        });
+        assert!(f.matches(&n), "unlocked unit names are searched too");
+        n.unit_unlocks.clear();
+        f.unlock = true;
+        f.query.clear();
         n.unit_unlocks.push(UnlockView {
             id: "u".into(),
             name: "U".into(),

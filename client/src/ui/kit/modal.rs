@@ -37,6 +37,17 @@ pub struct ModalSpec {
     /// Empty = no cancel button (information dialog).
     pub no_label: String,
     pub width: f32,
+    /// Illuminated picture above the text, cover-cropped to the card width (season report).
+    pub art: Option<ModalArt>,
+}
+
+/// Picture of a modal: asset path (relative to `game/assets`), aspect ratio (width / height) and
+/// a title shown under it.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ModalArt {
+    pub path: String,
+    pub aspect: f32,
+    pub caption: String,
 }
 
 impl ModalSpec {
@@ -47,6 +58,7 @@ impl ModalSpec {
             yes_label: "Confirmer".to_owned(),
             no_label: "Renoncer".to_owned(),
             width: 440.0,
+            art: None,
         }
     }
 
@@ -293,6 +305,31 @@ fn spawn_modal(commands: &mut Commands, theme: &UiTheme, assets: &AssetServer, e
             .with_children(|card| {
                 if !spec.title.is_empty() {
                     card.spawn(typed(theme, &spec.title, UiType::Heading));
+                }
+                if let Some(art) = &spec.art {
+                    card.spawn((
+                        Name::new("modal:art"),
+                        Node {
+                            width: Val::Percent(100.0),
+                            aspect_ratio: Some(art.aspect),
+                            flex_shrink: 0.0,
+                            ..default()
+                        },
+                        ImageNode::new(assets.load(art.path.clone())),
+                        crate::menu::CoverFit::new(Vec2::splat(0.5)),
+                    ));
+                    if !art.caption.is_empty() {
+                        card.spawn((
+                            Name::new("modal:art_caption"),
+                            Node {
+                                flex_shrink: 0.0,
+                                ..default()
+                            },
+                            Text::new(art.caption.clone()),
+                            theme.text_font(false, true, UiType::Caption.size()),
+                            TextColor(style::RUBRIC),
+                        ));
+                    }
                 }
                 if !spec.text.is_empty() {
                     card.spawn((

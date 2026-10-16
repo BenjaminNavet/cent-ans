@@ -2,7 +2,7 @@
 //! the picture fills the whole box, keeps its proportions and the overflow is cut, centred.
 //! Bevy UI 0.20 has no object-fit: reuses the menu's [`CoverFit`] source-rect crop.
 //! Used by the decision art (HUD window and chronicle tab) and the journal vignette.
-//! (The report vignette is a rich-text `[img]`, which cannot be cropped.)
+//! The season report vignette goes through `ModalSpec::art` (same crop).
 
 use std::path::Path;
 

@@ -434,19 +434,13 @@ pub fn poll_turn(
             flow.last_report_vignette = vignette
                 .map(|v| (v.id.clone(), v.image.clone()))
                 .unwrap_or_default();
-            let assets_root = crate::paths::find_root()
-                .ok()
-                .map(|root| crate::paths::asset_root(&root));
-            let body = format!(
-                "{}{}",
-                vignette
-                    .map(|v| report::vignette_block(v, assets_root.as_deref()))
-                    .unwrap_or_default(),
-                report::bbcode(&rep)
-            );
+            let body = report::bbcode(&rep);
             let held = HeldReport {
                 key: REPORT_KEY.to_owned(),
-                spec: ModalSpec::info(&format!("Rapport de saison — {date}"), &body),
+                spec: ModalSpec {
+                    art: vignette.and_then(report::vignette_art),
+                    ..ModalSpec::info(&format!("Rapport de saison — {date}"), &body)
+                },
             };
             let speed = settings.as_deref().map_or(1.0, |s| s.ai_moves_speed);
             let replayed = match sim.data.clone() {
