@@ -41,6 +41,8 @@ pub struct KitPlan {
     pub horses: usize,
     /// Horse lines (the posts and the rope stay volumes).
     pub horse_lines: usize,
+    /// Indices in `pieces` of the horses (animated by `camp_horse`).
+    pub horse_pieces: Vec<usize>,
     /// `(index in pieces, side)` of the tents and pavilions of the camps (knocked down when the
     /// camp is looted, `_loot`).
     pub camp_tents: Vec<(usize, SideId)>,
@@ -227,6 +229,7 @@ fn horses(plan: &mut KitPlan, kit: &Kit, prop: &DecorProp, ground: &impl Fn(f64,
         let jitter = hash01(i as f32, centre.x, 71.0) * 0.5 - 0.25;
         let angle = (-nose.y).atan2(-nose.x) + jitter;
         let model = models[(i + centre.x as i32 as usize) % models.len()];
+        plan.horse_pieces.push(plan.pieces.len());
         plan.pieces.push(KitPiece {
             model: model.name.clone(),
             transform: Transform::from_translation(Vec3::new(
@@ -468,6 +471,7 @@ mod tests {
         let mut plan = KitPlan::default();
         horses(&mut plan, &kit(), &prop, &|_, _| 0.0);
         assert_eq!(plan.horses, 6);
+        assert_eq!(plan.horse_pieces, (0..6).collect::<Vec<_>>());
         let north = plan
             .pieces
             .iter()

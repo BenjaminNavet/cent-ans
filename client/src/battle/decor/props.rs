@@ -21,7 +21,7 @@ use bevy::camera::visibility::VisibilityRange;
 use bevy::gltf::GltfAssetLabel;
 use bevy::prelude::*;
 use bevy::world_serialization::{WorldAsset, WorldAssetRoot};
-use sim_battle::{BattleSeason, ObstacleKind};
+use sim_battle::ObstacleKind;
 
 use super::hash01;
 use crate::agent::dump::DumpAppExt;
@@ -260,8 +260,18 @@ fn ensure_loaded(props: &mut Ga3Props) {
     }
 }
 
+/// Snow on the field (`BattleDecor._snowy`: falling snow or snowy ground), which is what takes
+/// the generated variants away; the winter season alone does not (field name kept: `winter`).
 fn is_winter(session: &mut BattleSession) -> bool {
-    matches!(session.sim_mut().field().season, BattleSeason::Winter)
+    let sim = session.sim_mut();
+    let weather = sim.weather();
+    super::site::snow_kit(weather, sim.field().ground)
+}
+
+/// Kinds that keep a generated variant under snow: the props batch of Godot is built without the
+/// snow variant (carts and wells of the site); houses, churches, mills and camp tents lose it.
+pub fn snow_keeps_variant(kit_kind: &str) -> bool {
+    matches!(kit_kind, "cart" | "well")
 }
 
 type FreshKit = (Added<WorldAssetRoot>, Without<Ga3Swapped>);
@@ -281,9 +291,10 @@ fn swap_kit_models(
     let Some(mut session) = session else { return };
     ensure_loaded(&mut props);
     stats.winter = is_winter(&mut session);
-    if stats.winter || props.manifest.entries.is_empty() {
+    if props.manifest.entries.is_empty() {
         return;
     }
+    let snowy = stats.winter;
     for (entity, name, mut transform, mut root) in &mut fresh {
         let Some(model) = name.as_str().strip_prefix("Kit_") else {
             continue;
@@ -295,6 +306,9 @@ fn swap_kit_models(
         let Some(ga3) = props.manifest.variant_for(kit, transform.translation) else {
             continue;
         };
+        if snowy && !snow_keeps_variant(&ga3.kit_kind) {
+            continue;
+        }
         *transform = fitted_transform(ga3, kit, &transform);
         let end = visibility_end(&ga3.kit_kind);
         root.0 = lod_scene(&assets, &ga3.name, 0);

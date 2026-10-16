@@ -56,6 +56,8 @@ pub struct SiteStats {
     pub horses: usize,
     pub kit_models: usize,
     pub camp_tents: usize,
+    /// Snow variant of the kit (snow falling or snowy ground).
+    pub snow_kit: bool,
 }
 
 pub struct SitePlugin;
@@ -703,6 +705,11 @@ fn vertex_material() -> StandardMaterial {
     }
 }
 
+/// Snow variant of the kit (`_snowy` of battle_decor.gd): falling snow or a snowy ground.
+pub fn snow_kit(weather: sim_battle::Weather, ground: sim_battle::Ground) -> bool {
+    matches!(weather, sim_battle::Weather::Snow) || matches!(ground, sim_battle::Ground::Snowy)
+}
+
 #[allow(clippy::too_many_arguments)]
 fn build_site(
     mut commands: Commands,
@@ -716,6 +723,7 @@ fn build_site(
 ) {
     let colors = session.colors;
     let sim = session.sim_mut();
+    let weather = sim.weather();
     let field: &Battlefield = sim.field();
     let ground = |x: f64, z: f64| field.height(x, z) as f32;
     let mut structures = Volumes::default();
@@ -740,6 +748,9 @@ fn build_site(
             Visibility::default(),
             DespawnOnExit(AppState::Battle),
         ));
+        if kit_plan.horse_pieces.contains(&piece_index) {
+            entity.insert(super::camp_horse::CampHorse);
+        }
         if let Some((_, side)) = kit_plan.camp_tents.iter().find(|(i, _)| *i == piece_index) {
             entity.insert(super::camp_loot::CampTent { side: *side });
         }
@@ -790,15 +801,18 @@ fn build_site(
         stats.camps += 1;
     }
     let winter = matches!(field.season, BattleSeason::Winter);
-    // Kit buildings of the battle (site, camps, siege town): metres, snow on the roofs in winter.
+    // Kit buildings of the battle (site, camps, siege town): metres, snow on the roofs when it
+    // snows or the ground is snowy (`BattleTerrain.snowy()`, not the winter season alone).
+    let snowy = snow_kit(weather, field.ground);
+    stats.snow_kit = snowy;
     if let Some(atlas) = atlas.as_mut() {
         atlas.kit_style = AtlasStyle {
-            snow: if winter { 0.85 } else { 0.0 },
+            snow: if snowy { 0.85 } else { 0.0 },
             ..AtlasStyle::default()
         };
     }
     // Generated palisade segments (`props.rs`) replace the palisade volumes.
-    let ga3_palisades = super::props::replaces_palisades(winter);
+    let ga3_palisades = super::props::replaces_palisades(snowy);
     for obstacle in &field.obstacles {
         if ga3_palisades && matches!(obstacle.kind, ObstacleKind::Palisade) {
             continue;
@@ -952,6 +966,15 @@ mod tests {
                 .iter()
                 .all(|p| p.iter().all(|c| c.is_finite()))
         );
+    }
+
+    #[test]
+    fn snow_kit_follows_the_weather_and_the_ground_not_the_season() {
+        use sim_battle::{Ground, Weather};
+        assert!(snow_kit(Weather::Snow, Ground::Dry));
+        assert!(snow_kit(Weather::Clear, Ground::Snowy));
+        assert!(!snow_kit(Weather::Clear, Ground::Muddy));
+        assert!(!snow_kit(Weather::Rain, Ground::Dry));
     }
 
     #[test]
