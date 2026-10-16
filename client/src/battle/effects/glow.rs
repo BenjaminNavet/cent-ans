@@ -126,6 +126,7 @@ fn spawn_glows(commands: &mut Commands) {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn update_glows(
     mut commands: Commands,
     mut session: ResMut<BattleSession>,
