@@ -8,11 +8,14 @@
 //! close button or any other central panel (`Diplomacy`, `CloseAll`) closes it.
 //!
 //! Widget names (agent `click`): `tech:<technology id>`, `tech:tab_military|civil|medicine`,
-//! `tech:filter_reach|unlock|known`, `tech:queue_mode`, `tech:close`.
+//! `tech:filter_reach|unlock|known`, `tech:queue_mode`, `tech:search`, `tech:dequeue_<id>`,
+//! `tech:close`.
 //!
-//! Not ported: the free-text search box (Bevy UI has no text field yet); the tree is not
-//! re-centred on the current research (the first available node of the open branch is not
-//! scrolled to).
+//! Search box `tech:search` (name and unlocked unit/building names, dims non-matches) and queue
+//! removal (`Order::DequeueResearch`): the "Retirer" button of a queued ribbon card
+//! (`tech:dequeue_<id>`) or a click on a node already in the queue.
+//!
+//! Not ported: the tree is not re-centred on the current research.
 
 pub mod layout;
 
@@ -33,7 +36,7 @@ use crate::sim::Sim;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::style::{self, UiTier, UiType};
-use crate::ui::kit::text_field::{TextInputFocus, keyboard_free};
+use crate::ui::kit::text_field::{TextFieldChanged, TextInputFocus, keyboard_free, text_field};
 use crate::ui::kit::widgets::{
     TabSelected, ToggleChanged, button_small, caption, checkbox, gauge, panel_sized, tab_bar,
     tab_pane,
@@ -409,6 +412,13 @@ fn spawn_screen(
                                             260.0,
                                         ));
                                         slot.spawn(caption(&theme, &card.turns));
+                                        if let Some(id) = &card.queued_id {
+                                            slot.spawn(button_small(
+                                                &theme,
+                                                &format!("tech:dequeue_{id}"),
+                                                "Retirer de la file",
+                                            ));
+                                        }
                                     });
                             }
                         });
@@ -424,6 +434,13 @@ fn spawn_screen(
                         ..default()
                     })
                     .with_children(|row| {
+                        row.spawn(text_field(
+                            &theme,
+                            "tech:search",
+                            &panel.filter.query,
+                            "Chercher un savoir",
+                            220.0,
+                        ));
                         row.spawn(checkbox(&theme, "tech:filter_reach", "À portée", panel.filter.reach));
                         row.spawn(checkbox(
                             &theme,
@@ -785,6 +802,7 @@ fn handle_buttons(
     mut pressed: MessageReader<ButtonPressed>,
     mut toggled: MessageReader<ToggleChanged>,
     mut tabs: MessageReader<TabSelected>,
+    mut searched: MessageReader<TextFieldChanged>,
     mut sim: ResMut<Sim>,
     keys: Res<ButtonInput<KeyCode>>,
     mut toasts: MessageWriter<ToastRequest>,
@@ -795,6 +813,11 @@ fn handle_buttons(
             && let Some(index) = BRANCHES.iter().position(|(_, name, _)| *name == tab.name)
         {
             panel.branch = index;
+        }
+    }
+    for change in searched.read() {
+        if change.name == "tech:search" {
+            panel.filter.query = change.text.clone();
         }
     }
     for change in toggled.read() {
@@ -818,15 +841,41 @@ fn handle_buttons(
             panel.open = false;
             continue;
         }
+        let dequeue_id = key.strip_prefix("dequeue_").map(str::to_owned);
         let Some(node) = panel
             .tree
             .as_ref()
-            .and_then(|t| t.techs.iter().find(|n| n.id == key))
+            .and_then(|t| {
+                t.techs
+                    .iter()
+                    .find(|n| n.id == dequeue_id.as_deref().unwrap_or(key))
+            })
             .cloned()
         else {
             continue;
         };
         if node.state != "available" {
+            continue;
+        }
+        // A queued technology: its ribbon button or a second click takes it out of the queue.
+        if dequeue_id.is_some() || node.queue_position > 0 {
+            let Ok(technology) = data_model::TechnologyId::new(node.id.clone()) else {
+                continue;
+            };
+            let (Some(data), Some(state)) = (sim.data.clone(), sim.state.as_mut()) else {
+                continue;
+            };
+            match state.submit_order(&data, Order::DequeueResearch { technology }) {
+                Ok(()) => {
+                    panel.last_order = format!("dequeue {}", node.id);
+                    panel.dirty = true;
+                    sfx.write(crate::audio::PlaySfx::new("ui_order"));
+                }
+                Err(error) => {
+                    panel.last_order = format!("refused dequeue {}: {error}", node.id);
+                    toasts.write(ToastRequest::new(&error.to_string()));
+                }
+            }
             continue;
         }
         let shift = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
@@ -883,7 +932,7 @@ fn refresh_visuals(
     {
         return;
     }
-    *last = (panel.focus.clone(), panel.filter, panel.epoch);
+    *last = (panel.focus.clone(), panel.filter.clone(), panel.epoch);
     let Some(tree) = &panel.tree else {
         return;
     };
@@ -989,7 +1038,7 @@ fn dump_tech(world: &World) -> (String, serde_json::Value) {
             "dimmed": dimmed,
             "links": links,
             "queue_mode": panel.queue_mode,
-            "filter": { "reach": panel.filter.reach, "unlock": panel.filter.unlock, "fade_known": panel.filter.fade_known },
+            "filter": { "query": panel.filter.query, "reach": panel.filter.reach, "unlock": panel.filter.unlock, "fade_known": panel.filter.fade_known },
             "focus": panel.focus,
             "points_per_turn": panel.tree.as_ref().map(|t| t.points_per_turn),
             "panel_research": research.map(|r| r.technology.as_str()),

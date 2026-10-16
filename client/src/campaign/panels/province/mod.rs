@@ -19,6 +19,7 @@ mod choices;
 mod companion;
 mod images;
 mod labels;
+mod mates;
 mod view;
 
 use bevy::prelude::*;
@@ -53,7 +54,8 @@ pub struct PanelProvincePlugin;
 
 impl Plugin for PanelProvincePlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<ProvincePanel>()
+        app.add_plugins(mates::plugin)
+            .init_resource::<ProvincePanel>()
             .insert_resource(UiLabels::load())
             .insert_resource(images::BuildingImages::load())
             .register_dump(dump_panel)
@@ -97,6 +99,9 @@ pub struct ProvincePanel {
     open_choice: String,
     /// Garrison indices ticked for the new army.
     picked: std::collections::BTreeSet<usize>,
+    /// Building the clicked slot cell points at (first step of its chain): the Buildings tab
+    /// marks its row, like Godot's focus on the matching "Construire" button.
+    focus_building: String,
 }
 
 #[derive(Component)]
@@ -107,6 +112,13 @@ fn reset_panel(mut panel: ResMut<ProvincePanel>) {
 }
 
 impl ProvincePanel {
+    /// Province and selected colony the map overlay [`mates`] marks: set while the Buildings or
+    /// Colonies tab is showing.
+    fn mates_view(&self) -> Option<(&str, Option<&str>)> {
+        let province = self.open.as_deref()?;
+        (self.tab == 1 || self.tab == 2).then_some((province, self.settlement.as_deref()))
+    }
+
     fn open_province(&mut self, id: &str) {
         if self.open.as_deref() != Some(id) {
             self.settlement = None;
@@ -114,6 +126,7 @@ impl ProvincePanel {
             self.error.clear();
             self.open_choice.clear();
             self.picked.clear();
+            self.focus_building.clear();
         }
         self.open = Some(id.to_owned());
         self.dirty = true;
@@ -220,6 +233,7 @@ fn track_selection(
             && let Some(id) = item.name.strip_prefix("prov:set:")
         {
             panel.settlement = Some(id.to_owned());
+            panel.focus_building.clear();
             panel.dirty = true;
         }
     }
@@ -295,6 +309,7 @@ fn snapshot(
         linked,
         bars,
         lent_text,
+        focus_building: panel.focus_building.clone(),
         mine,
         possession,
         table,
@@ -479,7 +494,18 @@ fn handle_buttons(
                 "Armée formée.".to_owned(),
             )
         } else if let Some(rest) = action.strip_prefix("slot:") {
-            if let Some((id, _root)) = rest.split_once(':') {
+            if let Some((id, root)) = rest.split_once(':') {
+                // A slot cell (an empty one above all) leads to the building site: the
+                // Buildings tab of its colony, its next step marked.
+                panel.focus_building = match (sim.data.as_ref(), sim.state.as_ref()) {
+                    (Some(data), Some(state)) => SettlementId::new(id)
+                        .ok()
+                        .and_then(|sid| game_api::pprovince::slot_bar(data, state, &sid))
+                        .and_then(|bar| bar.slots.into_iter().find(|c| c.root == root))
+                        .map(|cell| cell.next_building)
+                        .unwrap_or_default(),
+                    _ => String::new(),
+                };
                 panel.settlement = Some(id.to_owned());
                 panel.tab = 1;
                 panel.dirty = true;
@@ -661,8 +687,10 @@ fn dump_panel(world: &World) -> (String, Value) {
             "slot_bars": s.bars.iter().map(|b| json!({
                 "settlement": b.settlement, "cells": b.slots.len(), "used": b.used, "max": b.max,
                 "states": b.slots.iter().map(|c| c.state.as_str()).collect::<Vec<_>>(),
+                "roots": b.slots.iter().map(|c| c.root.as_str()).collect::<Vec<_>>(),
             })).collect::<Vec<_>>(),
             "lent_text": s.lent_text,
+            "focus_building": s.focus_building,
             "linked_descriptions": s.linked.keys().collect::<Vec<_>>(),
             "garrison_units": s.sheet.garrison.len(),
             "possession": s.possession.as_ref().map(|p| json!({

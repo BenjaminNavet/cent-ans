@@ -452,3 +452,8 @@ Onze modes (`MapMode::ALL`, menu « Filtres » de la minicarte, un bouton `hud:m
 - Cour : conseil `NextHint` parmi les conseils ; `portrait_marks.wesl` (`PortraitMarksMaterial`, `UiMaterialPlugin`) ; zoom/glisser de l'arbre familial ; hook `CENT_ANS_OPEN_COURT=character:<id>[@sheet|skills|family|orders]` (ouverture retardée de 30 images).
 ## Fleuves et routes fins (lot `bm/finegeo`)
 `campaign/water/fine/` : port de `fine_geo_layer/store.gd`, `fine_ribbon_job.gd`, `cafv_tile.gd`, `river_fine`/`road_fine.gdshader` (WESL drapés par `relief.wesl`). Tuiles CAFV E2 lues sur `IoTaskPool`, maillées sur `AsyncComputeTaskPool`, sous le palier proche. Ponts sur ancrages fins : `countryside/bridges.rs` (`FineBridgeMode`, `apply_fine_bridges`). Inactif sur la carte composée (pas de `pyramid/hydro_fine` dans son cadre) ; `CENT_ANS_FINE_GEO_ROOT=<dossier avec pyramid/hydro_fine>` pour l'essayer, `CENT_ANS_FINE_DEBUG=1` en couleurs de débogage. Dump `campaign_fine_geo`. Note : `docs/wip/bm-finegeo.md`.
+
+## campui6 : Tech, colonies de la province, rapport, Codex
+- **Tech** : champ `tech:search` (nom + unités/bâtiments débloqués) ; retrait de file `tech:dequeue_<id>` ou second clic sur un nœud en file (`Order::DequeueResearch`). Dump `tech.filter.query`.
+- **Province** : `panels/province/mates.rs` (pastilles sur la carte + pointillés + cartouche ; dump `province_mates`) ; un clic sur une case `prov:slot:<colonie>:<racine>` ouvre l'onglet Bâtiments de la colonie et encadre le premier palier (`focus_building`).
+- **Rapport de saison** : `ModalSpec::art` (image recadrée « cover » en tête d'une fenêtre ; dump `ui_kit.modal.art`). **Didacticiel** : liens Codex (`progress_tutorial.codex_links`).

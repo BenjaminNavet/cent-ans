@@ -295,4 +295,47 @@ mod tests {
         assert!(tech_tree(data, &state, &FactionId::new("fac_nowhere").unwrap()).is_none());
         assert!(serde_json::to_string(&after).is_ok());
     }
+
+    #[test]
+    fn dequeue_takes_a_technology_out_of_the_queue() {
+        let data = data_model::test_support::game_data();
+        let mut state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
+        let faction = FactionId::new("fac_france").unwrap();
+        let tree = tech_tree(data, &state, &faction).unwrap();
+        let available: Vec<String> = tree
+            .techs
+            .iter()
+            .filter(|t| t.state == "available")
+            .map(|t| t.id.clone())
+            .collect();
+        assert!(available.len() >= 2, "two available technologies");
+        let id = |index: usize| data_model::TechnologyId::new(available[index].clone()).unwrap();
+        state
+            .submit_order(data, Order::Research { technology: id(0) })
+            .unwrap();
+        state
+            .submit_order(data, Order::QueueResearch { technology: id(1) })
+            .unwrap();
+        let queued = tech_tree(data, &state, &faction).unwrap();
+        assert_eq!(queued.queue.len(), 1);
+        assert_eq!(queued.queue[0].id, available[1]);
+        let node = queued.techs.iter().find(|t| t.id == available[1]).unwrap();
+        assert_eq!(node.queue_position, 1);
+        state
+            .submit_order(data, Order::DequeueResearch { technology: id(1) })
+            .unwrap();
+        let after = tech_tree(data, &state, &faction).unwrap();
+        assert!(after.queue.is_empty());
+        let node = after.techs.iter().find(|t| t.id == available[1]).unwrap();
+        assert_eq!((node.queue_position, node.state.as_str()), (0, "available"));
+        // Removing a technology that is not queued is a harmless no-op.
+        state
+            .submit_order(data, Order::DequeueResearch { technology: id(1) })
+            .unwrap();
+        // The research in progress is untouched.
+        assert_eq!(
+            after.research.map(|r| r.technology),
+            Some(available[0].clone())
+        );
+    }
 }
