@@ -76,20 +76,7 @@ fn vertex(in: VertexInput) -> VertexOutput {
     return out;
 }
 
-// Diagonal hatching fixed to the map, period in screen pixels: two scale octaves cross-faded
-// (fr1_hatch_at).
-fn hatch_at(p: vec2<f32>, world_per_px: f32) -> f32 {
-    let lv = log2(max(world_per_px, 1e-4));
-    let l0 = floor(lv);
-    let s0 = exp2(l0) * shape.hatch_period_px;
-    let c = (p.x + p.y) * 0.70710678;
-    let a0 = fract(c / s0);
-    let a1 = fract(c / (s0 * 2.0));
-    let edge = 0.08;
-    let h0 = smoothstep(0.0, edge, a0) * (1.0 - smoothstep(shape.hatch_duty, shape.hatch_duty + edge, a0));
-    let h1 = smoothstep(0.0, edge, a1) * (1.0 - smoothstep(shape.hatch_duty, shape.hatch_duty + edge, a1));
-    return mix(h0, h1, lv - l0);
-}
+//@include hatch
 
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
@@ -98,7 +85,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     if in.info.y > 0.0 {
         alpha = alpha * pow(1.0 - u, shape.glow_exponent);
     } else if in.info.y < 0.0 {
-        alpha = alpha * (1.0 - smoothstep(0.6, 1.0, u)) * hatch_at(in.world_xz, in.info.z);
+        alpha = alpha * (1.0 - smoothstep(0.6, 1.0, u)) * hatch_stripes(in.world_xz, in.info.z, shape.hatch_period_px, shape.hatch_duty);
     }
     return vec4<f32>(in.color.rgb * params.tint.rgb, alpha);
 }

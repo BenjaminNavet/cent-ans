@@ -74,6 +74,34 @@ pub fn mode_text(
                 None => stance_text(stance).to_owned(),
             }
         }
+        MapMode::Religion => religion_text(view, index),
+        MapMode::Loyalty => {
+            view.cell(index)
+                .map_or_else(String::new, |cell| match cell.vassal_loyalty {
+                    None => "pas un vassal".to_owned(),
+                    Some(loyalty) => {
+                        format!("loyauté {loyalty} envers {}", view.name_of(&cell.suzerain))
+                    }
+                })
+        }
+        MapMode::Supply => view.cell(index).map_or_else(String::new, |cell| {
+            let change = cell.supply_change;
+            if change >= 0 {
+                format!("ravitaillement +{change} par saison")
+            } else {
+                format!("attrition : ravitaillement {change} par saison")
+            }
+        }),
+        MapMode::Claims => view.cell(index).map_or_else(String::new, |cell| {
+            match cell.claim.as_str() {
+                "ours" => "vous la revendiquez",
+                "against_us" => "revendiquée contre vous",
+                "contested" => "revendiquée par vous et par un autre",
+                _ => "",
+            }
+            .to_owned()
+        }),
+        MapMode::Feudal => feudal_text(view, index),
         MapMode::Unrest => lens.map_or_else(String::new, |(_, _, unrest)| {
             format!("mécontentement {} %", unrest.round() as i64)
         }),
@@ -87,6 +115,47 @@ pub fn mode_text(
             format!("{} habitants", fr::digits(population.round() as i64))
         }),
     }
+}
+
+/// Religion mode: faith, heresy share, conversion under way (`_religion_hover`, ADR 0326).
+fn religion_text(view: &ProvinceView, index: u16) -> String {
+    let Some(faith) = view.cell(index).and_then(|c| c.religion.as_ref()) else {
+        return String::new();
+    };
+    let mut text = faith.religion_name.clone();
+    if faith.heresy > 0 {
+        text.push_str(&format!(", hérésie {} %", faith.heresy));
+    }
+    if faith.conversion_progress > 0 {
+        text.push_str(&format!(
+            ", conversion vers {} : {} %",
+            faith.conversion_to_name, faith.conversion_progress
+        ));
+    }
+    text
+}
+
+/// Feudal mode: « tenu par Bourgogne, sous France ; double allégeance (fief de Y) ».
+fn feudal_text(view: &ProvinceView, index: u16) -> String {
+    let Some(cell) = view.cell(index).and_then(|c| c.feudal.as_ref()) else {
+        return String::new();
+    };
+    let mut text = if cell.holder == cell.sovereign || cell.holder.is_empty() {
+        format!("royaume de {}", view.name_of(&cell.sovereign))
+    } else {
+        format!(
+            "tenu par {}, sous {}",
+            view.name_of(&cell.holder),
+            view.name_of(&cell.sovereign)
+        )
+    };
+    if !cell.second_lord.is_empty() {
+        text.push_str(&format!(
+            " ; double allégeance (fief de {})",
+            view.name_of(&cell.second_lord)
+        ));
+    }
+    text
 }
 
 #[derive(Resource, Default)]

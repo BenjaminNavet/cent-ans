@@ -7,7 +7,7 @@
   "required": ["title", "intro", "factions", "mode_titles", "sections"],
   "additionalProperties": false,
   "$defs": {
-    "mode": {"type": "string", "enum": ["political", "unrest", "diplomacy", "religion"]},
+    "mode": {"type": "string", "enum": ["political", "unrest", "diplomacy", "religion", "loyalty", "supply", "claims", "feudal"]},
     "hex_color": { "$ref": "common.schema.json#/$defs/color_hex" },
     "owner": {"type": "string", "enum": ["player", "other"]},
     "sample": {

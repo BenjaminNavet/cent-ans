@@ -67,7 +67,12 @@ pub struct OverlayState {
     pub fill_alpha: f32,
     /// Colour-blind hatching on the fill (`Palette::colorblind`).
     pub hatch: bool,
+    /// Feudal mode: holder colours per raster index (second fill layer), and the provinces in
+    /// double allegiance `(index, holder, second lord)` that get a party shield.
+    pub hatch_colors: Vec<Srgba>,
+    pub doubles: Vec<(u16, String, String)>,
     fill_image: Handle<Image>,
+    hatch_image: Handle<Image>,
     fill_material: Handle<ProvinceFillMaterial>,
     fill_mesh: Handle<Mesh>,
     border_mesh: Handle<Mesh>,
@@ -100,6 +105,13 @@ pub(super) fn build(app: &mut App) {
         .init_resource::<ProvinceOverlayConfig>()
         .add_message::<SetMapMode>()
         .add_systems(OnEnter(AppState::Campaign), load_province_map)
+        .add_systems(
+            Update,
+            mode_keys
+                .before(apply_mode_requests)
+                .run_if(resource_exists::<OverlayState>)
+                .run_if(in_state(AppState::Campaign)),
+        )
         .add_systems(
             Update,
             (
@@ -165,12 +177,14 @@ fn load_province_map(
         RenderAssetUsages::default(),
     );
     fill.sampler = ImageSampler::nearest();
+    let hatch_image = images.add(fill.clone());
     let fill_image = images.add(fill);
     let fill_material = fill_materials.add(ProvinceFillMaterial {
         params: OverlayParams::new(config.fill_height, LIFT_PER_DISTANCE),
         relief: ReliefParams::default(),
         relief_floor: Handle::default(),
         fill: fill_image.clone(),
+        hatch_fill: hatch_image.clone(),
     });
     let shape = BorderShape::from_tuning(&tuning.borders);
     let border_material = border_materials.add(ProvinceBorderMaterial {
@@ -238,7 +252,10 @@ fn load_province_map(
         border_vertices: 0,
         fill_alpha: 0.0,
         hatch: false,
+        hatch_colors: Vec::new(),
+        doubles: Vec::new(),
         fill_image,
+        hatch_image,
         fill_material,
         fill_mesh,
         border_mesh,
@@ -338,6 +355,35 @@ pub fn paint_fill(map: &ProvinceMap, colors: &[Srgba], width: u32, height: u32, 
     }
 }
 
+/// Keys of the filter menu (`map_mode_controller.handle_input`): the same key twice goes back to
+/// the political map. Menu entries without a key (wealth...) are only reachable by their button.
+fn mode_keys(
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    keys: Res<ButtonInput<KeyCode>>,
+    focus: Option<Res<crate::ui::kit::text_field::TextInputFocus>>,
+    state: Res<MapModeState>,
+    mut requests: MessageWriter<SetMapMode>,
+) {
+    let Some(keymap) = keymap else { return };
+    if !crate::ui::kit::text_field::keyboard_free(focus) {
+        return;
+    }
+    for (action, mode) in [
+        ("map_mode_diplomacy", MapMode::Diplomacy),
+        ("map_mode_religion", MapMode::Religion),
+        ("map_toggle_unrest", MapMode::Unrest),
+    ] {
+        if keymap.just_pressed(action, &keys) {
+            requests.write(SetMapMode(if state.mode == mode {
+                MapMode::Political
+            } else {
+                mode
+            }));
+            return;
+        }
+    }
+}
+
 fn apply_mode_requests(mut requests: MessageReader<SetMapMode>, mut state: ResMut<MapModeState>) {
     for SetMapMode(mode) in requests.read() {
         if state.mode != *mode {
@@ -391,6 +437,7 @@ fn refresh_overlays(
     mut overlay: ResMut<OverlayState>,
     mut images: ResMut<Assets<Image>>,
     mut meshes: ResMut<Assets<Mesh>>,
+    mut fill_materials: ResMut<Assets<ProvinceFillMaterial>>,
     mut generation: Local<u32>,
     settings: Option<Res<crate::settings::Settings>>,
 ) {
@@ -420,14 +467,11 @@ fn refresh_overlays(
         }
     }
     let viewer = data_model::FactionId::new(viewer_name).unwrap_or_else(|_| sim.player.clone());
-    let with_lens = matches!(
-        mode.mode,
-        MapMode::Unrest | MapMode::Wealth | MapMode::Population
-    );
+    let wanted = mode.mode.lens_wanted();
     let mut refreshed = false;
     if mode_changed || overlay.since_refresh >= REFRESH_PERIOD_S {
         overlay.since_refresh = 0.0;
-        let view = modes::read_view(&map, data, state, &viewer, with_lens);
+        let view = modes::read_view_wanted(&map, data, state, &viewer, wanted);
         if view != overlay.view || mode_changed {
             overlay.view = view;
             if overlay.heraldic.is_empty() {
@@ -447,6 +491,26 @@ fn refresh_overlays(
             &tuning,
             stance_fill,
         );
+        let hatch =
+            modes::province_hatch(mode.mode, map.max_index(), &overlay.view, &overlay.heraldic);
+        if hatch != overlay.hatch_colors {
+            let (fw, fh) = overlay.fill_pixels;
+            if let Some(mut image) = images.get_mut(&overlay.hatch_image) {
+                let mut data = image.data.take().unwrap_or_default();
+                data.resize((fw * fh * 4) as usize, 0);
+                paint_fill(&map, &hatch, fw, fh, &mut data);
+                image.data = Some(data);
+            }
+            overlay.hatch_colors = hatch;
+            if let Some(mut m) = fill_materials.get_mut(&overlay.fill_material) {
+                m.params.feudal = if mode.mode == MapMode::Feudal {
+                    1.0
+                } else {
+                    0.0
+                };
+            }
+        }
+        overlay.doubles = modes::double_allegiances(&overlay.view, map.max_index());
         if colors != overlay.colors {
             let (fw, fh) = overlay.fill_pixels;
             if let Some(mut image) = images.get_mut(&overlay.fill_image) {

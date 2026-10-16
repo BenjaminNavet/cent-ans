@@ -1,0 +1,27 @@
+# Proof of the lens map modes: every mode of the filter menu is activated in turn and dumped
+# (section campaign_provinces: map_mode, fill, feudal_shields, mode_palettes).
+# client/run_bg.sh --state Campaign --script client/src/campaign/provinces/modes_script.txt
+state Campaign
+wait 150
+click hud:mode:religion
+wait 40
+dump out/mapmodes_religion.json
+click hud:mode:loyalty
+wait 40
+dump out/mapmodes_loyalty.json
+click hud:mode:supply
+wait 40
+dump out/mapmodes_supply.json
+click hud:mode:claims
+wait 40
+dump out/mapmodes_claims.json
+click hud:mode:feudal
+wait 60
+dump out/mapmodes_feudal.json
+key KeyR
+wait 40
+dump out/mapmodes_key_r.json
+key KeyR
+wait 40
+dump out/mapmodes_back.json
+exit

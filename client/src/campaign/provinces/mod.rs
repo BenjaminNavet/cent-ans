@@ -25,6 +25,7 @@ pub mod overlay;
 pub mod picker;
 pub mod projection;
 pub mod relation_markers;
+pub mod shields;
 
 pub struct CampaignProvincesPlugin;
 
@@ -34,6 +35,7 @@ impl Plugin for CampaignProvincesPlugin {
         labels::build(app);
         relation_markers::build(app);
         overlay::build(app);
+        shields::build(app);
         drape::register_shaders(app);
         if app.world().contains_resource::<Assets<Mesh>>() {
             app.add_plugins((
@@ -165,6 +167,13 @@ fn dump_provinces(world: &World) -> (String, Value) {
             "border_lift": world.get_resource::<Assets<drape::ProvinceBorderMaterial>>()
                 .and_then(|a| a.iter().next().map(|(_, m)| m.params.lift_base)),
         });
+        if let Some(stats) = world.get_resource::<shields::ShieldStats>() {
+            section["feudal_shields"] = json!({
+                "spawned": stats.spawned, "visible": stats.visible, "rebuilds": stats.rebuilds,
+                "hatch_layer": overlay.hatch_colors.iter().filter(|c| c.alpha > 0.0).count(),
+                "doubles": overlay.doubles.len(),
+            });
+        }
         section["mode_palettes"] = mode_palettes(world, map, overlay);
         section["factions_seen"] = json!(modes::faction_count(&overlay.view));
         section["viewer"] = json!(overlay.view.viewer);
@@ -188,14 +197,8 @@ fn mode_palettes(world: &World, map: &data::ProvinceMap, overlay: &overlay::Over
     };
     let view = modes::read_view(map, data, state, &sim.player, true);
     let mut out = serde_json::Map::new();
-    for mode in [
-        MapMode::Political,
-        MapMode::Terrain,
-        MapMode::Diplomacy,
-        MapMode::Unrest,
-        MapMode::Wealth,
-        MapMode::Population,
-    ] {
+    let paris = map.index_of_id("prov_ile_de_france");
+    for mode in MapMode::ALL {
         let colors =
             modes::province_colors(mode, map.max_index(), &view, &overlay.heraldic, tuning);
         let mut counts: BTreeMap<String, usize> = BTreeMap::new();
@@ -207,9 +210,15 @@ fn mode_palettes(world: &World, map: &data::ProvinceMap, overlay: &overlay::Over
         }
         let mut top: Vec<(&String, &usize)> = counts.iter().collect();
         top.sort_by(|a, b| b.1.cmp(a.1).then(a.0.cmp(b.0)));
+        let hatch = modes::province_hatch(mode, map.max_index(), &view, &overlay.heraldic);
         out.insert(
             mode.key().to_owned(),
             json!({
+                "hatched": hatch.iter().filter(|c| c.alpha > 0.0).count(),
+                "double_allegiances": if mode == MapMode::Feudal {
+                    modes::double_allegiances(&view, map.max_index()).len()
+                } else { 0 },
+                "hover_paris": crate::campaign::hud::hover::mode_text(mode, &view, paris, None),
                 "tinted": counts.values().sum::<usize>(),
                 "distinct": counts.len(),
                 "top": top.iter().take(5).map(|(k, n)| json!([k, n])).collect::<Vec<_>>(),

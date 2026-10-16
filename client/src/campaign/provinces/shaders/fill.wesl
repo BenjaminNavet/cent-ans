@@ -9,7 +9,8 @@ struct Params {
     lift_base: f32,
     lift_per_distance: f32,
     hatch: f32,
-    pad1: f32,
+    // 1 = Feudal mode: stripes of the second texture (holder) over the first (sovereign).
+    feudal: f32,
 }
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> params: Params;
@@ -17,6 +18,7 @@ struct Params {
 @group(constants::MATERIAL_BIND_GROUP) @binding(2) var relief_floor: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(3) var fill_texture: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(4) var fill_sampler: sampler;
+@group(constants::MATERIAL_BIND_GROUP) @binding(5) var hatch_texture: texture_2d<f32>;
 
 struct VertexInput {
     @builtin(instance_index) instance_index: u32,
@@ -27,6 +29,8 @@ struct VertexInput {
 struct VertexOutput {
     @builtin(position) clip: vec4<f32>,
     @location(0) uv: vec2<f32>,
+    @location(1) world_xz: vec2<f32>,
+    @location(2) world_per_px: f32,
 }
 
 @vertex
@@ -38,10 +42,19 @@ fn vertex(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     out.clip = view.clip_from_world * world;
     out.uv = in.uv;
+    out.world_xz = world.xz;
+    let depth = max(-(view.view_from_world * world).z, 1e-3);
+    out.world_per_px = 2.0 * depth / (view.clip_from_view[1][1] * view.viewport.w);
     return out;
 }
 
 const FILL_SATURATION = 0.55;
+// Feudal mode: holder stripes over the sovereign's background (same pattern as the occupation
+// bands of border.wesl).
+const FEUDAL_PERIOD_PX = 7.0;
+const FEUDAL_DUTY = 0.5;
+
+//@include hatch
 // Colour-blind hatching: stripes of HATCH_PERIOD screen pixels, a province-colour hash picks one of
 // three directions (/, \ and horizontal) so neighbouring realms differ without their colours.
 const HATCH_PERIOD = 8.0;
@@ -61,7 +74,14 @@ fn hatch_factor(pixel: vec2<f32>, color: vec3<f32>, strength: f32) -> f32 {
 
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
-    let texel = textureSample(fill_texture, fill_sampler, in.uv);
+    var texel = textureSample(fill_texture, fill_sampler, in.uv);
+    if params.feudal > 0.5 {
+        let holder = textureSample(hatch_texture, fill_sampler, in.uv);
+        if holder.a > 0.01 {
+            let stripe = hatch_stripes(in.world_xz, in.world_per_px, FEUDAL_PERIOD_PX, FEUDAL_DUTY);
+            texel = vec4<f32>(mix(texel.rgb, holder.rgb, stripe), texel.a);
+        }
+    }
     // Multiplicative blend (AlphaMode::Multiply): the faction colour at constant luminance
     // (`colorized` of terrain.gdshader, `faction_saturation` 0.55) so the relief is never washed
     // pastel; 1 = ground unchanged.
