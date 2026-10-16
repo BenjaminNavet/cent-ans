@@ -210,6 +210,12 @@ impl SkinParams {
         self.data[P_FX] = seconds;
     }
 
+    /// Fade between two gestures of a fixed-mode figure (siege servants, NT10 `role_blend_s`;
+    /// Godot's own `role_blend` uniform, distinct from `cycle_blend`): `hitn.y` (s, 0 = hard cut).
+    pub fn set_role_blend(&mut self, seconds: f32) {
+        self.data[P_HITN + 1] = seconds;
+    }
+
     /// Reaction clips to losses (`hit` set, at most 8) and how long each plays.
     pub fn set_hit_set(&mut self, clips: &[u32], seconds: f32, share: f32) {
         for slot in 0..MAX_SETSLOTS {
@@ -1489,5 +1495,22 @@ mod tests {
         let mut bytes = Vec::new();
         push_record(&mut bytes, &[0.0; RECORD_FLOATS]);
         assert_eq!(bytes.len(), RECORD_BYTES);
+    }
+
+    #[test]
+    fn role_blend_has_its_own_slot_apart_from_the_cycle_blend() {
+        let mut params = super::SkinParams::default();
+        params.set_cycle_blend(0.2);
+        params.set_role_blend(0.25);
+        params.set_hit_set(&[1, 2], 0.6, 0.3);
+        assert_eq!(params.data[super::P_FX], 0.2);
+        assert_eq!(params.data[super::P_HITN], 2.0);
+        assert_eq!(params.data[super::P_HITN + 1], 0.25);
+        // The shader's fixed-mode gesture fade reads `hitn.y`, never the cycle blend.
+        let shader = include_str!("skinned.wesl");
+        let fixed = &shader
+            [shader.find("if mode > 2.5").unwrap()..shader.find("} else if mode > 1.5").unwrap()];
+        assert!(fixed.contains("params.hitn.y"));
+        assert!(!fixed.contains("params.fx.x"));
     }
 }

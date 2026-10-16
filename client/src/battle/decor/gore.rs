@@ -509,17 +509,12 @@ fn setup_gore(
         meshes: mesh_handles,
         materials: material_handles,
     });
-    let empty = Mesh::new(
-        PrimitiveTopology::TriangleList,
-        RenderAssetUsages::default(),
-    )
-    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<[f32; 3]>::new())
-    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, Vec::<[f32; 3]>::new())
-    .with_inserted_indices(Indices::U32(Vec::new()));
+    // No mesh until the first droplet flies: an empty mesh asset makes the render allocator warn
+    // (`Mesh … contains no vertices`, every battle) and draws nothing.
     commands.spawn((
         Name::new("GoreDrops"),
         GoreDrops,
-        Mesh3d(meshes.add(empty)),
+        Visibility::Hidden,
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: Color::srgb(0.16, 0.005, 0.004),
             perceptual_roughness: 0.25,
@@ -657,7 +652,7 @@ fn update_gore(
     mut gore: ResMut<GoreState>,
     camera: Query<&GlobalTransform, With<BattleCamera>>,
     mut transforms: Query<&mut Transform>,
-    drops_mesh: Query<&Mesh3d, With<GoreDrops>>,
+    mut drops: Query<(Entity, Option<&Mesh3d>, &mut Visibility), With<GoreDrops>>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
     if !session.paused {
@@ -749,16 +744,39 @@ fn update_gore(
     }
     gore.last_drawn = !positions.is_empty();
     gore.rebuilds += 1;
-    if let Ok(handle) = drops_mesh.single() {
-        let mesh = Mesh::new(
+    let Ok((entity, handle, mut visibility)) = drops.single_mut() else {
+        return;
+    };
+    let Some(mesh) = drops_mesh(positions, normals, indices) else {
+        // Nothing left in the air: hide the last mesh rather than upload an empty one.
+        *visibility = Visibility::Hidden;
+        return;
+    };
+    *visibility = Visibility::Inherited;
+    match handle {
+        Some(handle) => {
+            let _ = meshes.insert(&handle.0, mesh);
+        }
+        None => {
+            commands.entity(entity).try_insert(Mesh3d(meshes.add(mesh)));
+        }
+    }
+}
+
+/// The droplets' mesh, `None` when there is none to draw (never an empty mesh).
+fn drops_mesh(positions: Vec<[f32; 3]>, normals: Vec<[f32; 3]>, indices: Vec<u32>) -> Option<Mesh> {
+    if positions.is_empty() || indices.is_empty() {
+        return None;
+    }
+    Some(
+        Mesh::new(
             PrimitiveTopology::TriangleList,
             RenderAssetUsages::default(),
         )
         .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
         .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
-        .with_inserted_indices(Indices::U32(indices));
-        let _ = meshes.insert(&handle.0, mesh);
-    }
+        .with_inserted_indices(Indices::U32(indices)),
+    )
 }
 
 fn dump_gore(world: &World) -> (String, serde_json::Value) {
@@ -784,6 +802,18 @@ fn dump_gore(world: &World) -> (String, serde_json::Value) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn no_droplet_mesh_without_droplets() {
+        assert!(drops_mesh(Vec::new(), Vec::new(), Vec::new()).is_none());
+        let mesh = drops_mesh(
+            vec![[0.0; 3], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+            vec![[0.0, 1.0, 0.0]; 3],
+            vec![0, 1, 2],
+        )
+        .expect("one droplet");
+        assert_eq!(mesh.count_vertices(), 3);
+    }
 
     fn data() -> GoreData {
         let root = crate::paths::find_root().expect("repo root");

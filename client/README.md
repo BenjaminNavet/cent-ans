@@ -496,3 +496,9 @@ Port de `battle_effects.gd` (poussière), `siege_assault_fx.gd` (projectiles de 
 - **Onglets de l'encyclopédie** : icône 18 px devant chaque catégorie des règles (`encyclopedia::tab_icon`, mêmes icônes que `encyclopedia.gd`). Dump `codex.tab_icons`.
 - **Chronique** : `ChronicleLog::record_with(&journal, Some(&store))` passe les lignes par `codex::text::format_auto` (alias auto-liés, `[[id|libellé]]`) ; sans fiches, texte échappé comme avant.
 - Non porté : roches et arbres de bataille pour la bulle du décor, fil d'Ariane / réduction des ancêtres, parenté entre bulles épinglées, fiche Codex d'une règle `ib:rule:*` au clic, état « lu » des liens `ib:`.
+
+## Stabilité (stab1)
+- **Sortie** : `app/window_keepalive.rs` garde une copie du `RawHandleWrapper` de la fenêtre principale dans un statique jamais libéré, pour que la dernière référence à la fenêtre winit ne meure pas sur le fil de rendu (sous macOS, `Window::drop` attend le fil principal, qui attend lui-même le fil de rendu dans `RenderAppChannels::drop` : blocage à la sortie). Dump `window_keepalive.kept`.
+- **Feux de camp** : `battle/effects/campfires.rs` (port de `BattleDecor.attach_smoke` et `BattleStaging._place_campfires`) alimente `SmokeSources` en `campfire` : feux des camps du décor (`camp_fires_per_side` selon la qualité), sinon derrière les lignes hors siège ; aucun sous `no_campfire_weather`. La lueur nocturne (`effects/glow.rs`) en dépend. Dump `battle_campfires`.
+- **Servants d'engins** : le fondu de geste (mode 3 de `skinned.wesl`) lit `params.hitn.y` (`SkinParams::set_role_blend`, `role_blend_s`), plus le `fx.x` du fondu de cycle de mêlée.
+- **Scripts d'agent et bataille personnalisée** : une exécution d'agent sans `CENT_ANS_PREFS` lit et écrit `custom_battle_last.json` / les armées gardées dans un dossier temporaire propre au processus (`menu::battles::custom_prefs_dir`) : un script part toujours de la composition par défaut et n'écrase plus celle du joueur.

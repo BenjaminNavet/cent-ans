@@ -34,7 +34,7 @@ use sim_battle::custom::{
 };
 
 use super::battles::{
-    BattleScreen, DayPhase, LaunchBattle, OpenBattleScreen, data_dir, day_phases, prefs_dir,
+    BattleScreen, DayPhase, LaunchBattle, OpenBattleScreen, custom_prefs_dir, data_dir, day_phases,
 };
 use super::presets::{self, PresetArmy};
 use super::saves::SaveDir;
@@ -561,6 +561,7 @@ fn open_screen(
     sim: Res<Sim>,
     dir: Res<SaveDir>,
     open: Query<(), With<CustomScreen>>,
+    cli: Option<Res<crate::agent::cli::Cli>>,
 ) {
     if !requests.read().any(|r| r.0 == BattleScreen::Custom) || !open.is_empty() {
         return;
@@ -568,7 +569,8 @@ fn open_screen(
     let (Some(game), Some(data)) = (sim.data.as_deref(), data_dir()) else {
         return;
     };
-    let draft = CustomDraft::new(game, &data, &prefs_dir(&dir.0));
+    let agent_run = cli.is_some_and(|cli| cli.is_agent_run());
+    let draft = CustomDraft::new(game, &data, &custom_prefs_dir(&dir.0, agent_run));
     let texts = draft.texts.clone();
     commands.insert_resource(draft);
     let tip = |key: &str| plain_tip(texts.as_ref(), key);

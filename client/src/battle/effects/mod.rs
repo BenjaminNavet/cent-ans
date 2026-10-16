@@ -3,6 +3,7 @@
 //! battle_smoke.gd):
 //! - [`dust`]: dust kicked up by marching, charging and routing regiments (dry ground, no rain
 //!   or snow), dust columns of big troops far away, the cloud at the contact of a charge;
+//! - [`campfires`]: the camp fire smoke sources (decor camps, else behind the lines);
 //! - [`glow`]: the camp fires of the smoke sources light the night (point lights, flicker).
 //!
 //! The puffs are the player's smoke flipbook sprites (`crate::fx::flipbook`), tinted earth.
@@ -10,6 +11,7 @@
 //! the legacy arrow layer with its ribbon trails (`battle_projectile_trail.gdshader`: volleys
 //! draw the arrows, siege stones have their own smoke trail in `siege/fx.rs`).
 
+pub mod campfires;
 pub mod dust;
 pub mod glow;
 
@@ -30,7 +32,11 @@ pub struct BattleEffectsPlugin;
 
 impl Plugin for BattleEffectsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((dust::DustPlugin, glow::GlowPlugin));
+        app.add_plugins((
+            campfires::CampfirePlugin,
+            dust::DustPlugin,
+            glow::GlowPlugin,
+        ));
     }
 }
 

@@ -24,7 +24,7 @@ struct Params {
     coat: array<vec4<f32>, 4>,
     extra: vec4<f32>,         // prev cycle, prev release, impostor width (0 = figures), impostor height
     fx: vec4<f32>,            // cycle blend (s), hit time, hit length, hit share
-    hitn: vec4<f32>,          // hit set size
+    hitn: vec4<f32>,          // hit set size, role blend (s, mode 3 gesture fade), 0, 0
     hit_set: array<vec4<f32>, 2>,
     arms: vec4<f32>,          // atlas layers: lord (or faction), 3 bannerets (-1 = none)
     chest_box: vec4<f32>,     // bust of the rest pose: centre x/y, width, height
@@ -192,20 +192,22 @@ fn anim_pose(
         // Role fade (siege crew gestures, `siege/crew_fade.rs`): `volley_time` > 0 packs the
         // previous clip slot + 1, 128 * (change - previous start) and 128 * 256 * (change - start)
         // in 1/16 s. The previous clip keeps playing from its own start while the new one fades
-        // in over `params.fx.x` seconds from the change (`params.fx.x` = role blend, 0 = cut).
-        if volley_time > 0.5 && params.fx.x > 0.001 {
+        // in over `params.hitn.y` seconds from the change (role blend, 0 = cut; not the melee
+        // cycle blend in `fx.x`, which corpses of the same mode inherit).
+        let role_blend = params.hitn.y;
+        if volley_time > 0.5 && role_blend > 0.001 {
             let whole = floor(volley_time + 0.5);
             let stagger_q = floor(whole / 32768.0);
             let rest = whole - stagger_q * 32768.0;
             let delta_q = floor(rest / 128.0);
             let prev_pick = i32(rest - delta_q * 128.0) - 1;
             let age = params.cur.w - anim_time - stagger_q / 16.0;
-            if prev_pick >= 0 && age >= 0.0 && age < params.fx.x {
+            if prev_pick >= 0 && age >= 0.0 && age < role_blend {
                 prev_clip = set_at(s0, s1, clamp(prev_pick, 0, n - 1));
                 if prev_clip != clip {
                     blend_prev = true;
                     prev_t = age + delta_q / 16.0;
-                    prev_k = smoothstep(0.0, params.fx.x, age);
+                    prev_k = smoothstep(0.0, role_blend, age);
                 }
             }
         }

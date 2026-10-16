@@ -284,7 +284,7 @@ pub fn draw_crew(
             continue;
         };
         batch.params.set_now(now);
-        batch.params.set_cycle_blend(blend_s);
+        batch.params.set_role_blend(blend_s);
         batch.params_version += 1;
         batch.version += 1;
         let mesh = batch.spec.lods[lod].clone();
