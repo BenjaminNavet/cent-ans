@@ -44,6 +44,9 @@ const FAR_DISTANCE: f32 = 700.0;
 const MAX_FLYING: usize = 24_000;
 /// Missiles farther than this from the camera are not drawn (not packed or uploaded).
 const DRAW_RANGE_M: f32 = 1200.0;
+/// Arrows given a ribbon trail at once, and how near the camera they must be.
+pub const MAX_TRAILS: usize = 3000;
+pub const TRAIL_RANGE_M: f32 = 500.0;
 const MAX_STUCK: usize = 8_000;
 const STUCK_PER_VOLLEY: usize = 96;
 const STUCK_STRIDE: usize = 5;
@@ -109,6 +112,11 @@ pub struct Volleys {
     pub update_us_peak: u64,
     pub update_us_total: u64,
     pub updates: u64,
+    /// Tip and direction of each arrow in flight near the camera, for the ribbon trails of
+    /// `effects::trail` (rebuilt every update).
+    pub trail_tips: Vec<(Vec3, Vec3)>,
+    /// Muzzle and direction of the field bombards fired since `effects::flash` last drained this.
+    pub muzzle_flashes: Vec<(Vec3, Vec3)>,
 }
 
 fn kind_index(kind: MissileKind) -> Option<usize> {
@@ -279,6 +287,20 @@ pub(super) fn update_volleys(
         let Some(kind) = kind_index(shot.kind) else {
             // Engines: the bombards' muzzle smoke lingers.
             if matches!(shot.kind, MissileKind::Ball) {
+                let muzzle = Vec3::new(
+                    shot.from.0 as f32,
+                    sim.field().height(shot.from.0, shot.from.1) as f32 + 0.85,
+                    shot.from.1 as f32,
+                );
+                let toward = Vec3::new(
+                    (shot.aim.0 - shot.from.0) as f32,
+                    0.0,
+                    (shot.aim.1 - shot.from.1) as f32,
+                )
+                .normalize_or_zero();
+                if volleys.muzzle_flashes.len() < 64 {
+                    volleys.muzzle_flashes.push((muzzle + toward * 1.4, toward));
+                }
                 smoke.bombard.push(Vec3::new(
                     shot.from.0 as f32,
                     sim.field().height(shot.from.0, shot.from.1) as f32 + 1.0,
@@ -335,6 +357,7 @@ pub(super) fn update_volleys(
     let mut flames: Vec<Vec3> = Vec::new();
     let mut fires: Vec<Vec3> = Vec::new();
     let mut count = 0u32;
+    let mut tips: Vec<(Vec3, Vec3)> = Vec::new();
     volleys.flying.retain_mut(|m| {
         let t = (now - m.launch) / m.flight;
         if t < 0.0 {
@@ -363,9 +386,17 @@ pub(super) fn update_volleys(
                 &mut flying_bytes,
             );
             count += 1;
+            // Arrows only (bolts and bullets are too quick to show a ribbon); nearest range.
+            if m.kind == 0
+                && tips.len() < MAX_TRAILS
+                && p.distance_squared(camera_position) <= TRAIL_RANGE_M * TRAIL_RANGE_M
+            {
+                tips.push((p, d));
+            }
         }
         true
     });
+    volleys.trail_tips = tips;
     // Flames of the burning arrows, and the small fire where they stand.
     if let Some(looks) = looks.as_deref_mut() {
         let mut shed = |position: Vec3, life: f32, size: f32, rise: f32, serial: usize| {
