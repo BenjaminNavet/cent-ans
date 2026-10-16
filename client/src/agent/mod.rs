@@ -387,6 +387,7 @@ pub fn key_code(name: &str) -> Option<KeyCode> {
 fn hide_named(
     mut commands: Commands,
     named: Query<(Entity, &Name, Has<Mesh3d>), Without<HiddenByAgent>>,
+    mut hidden: Query<&mut Visibility, With<HiddenByAgent>>,
     mut listed: Local<u32>,
 ) {
     let Ok(spec) = std::env::var("CENT_ANS_HIDE") else {
@@ -402,6 +403,27 @@ fn hide_named(
                 }
             }
             info!("AGENT_MESH_NAMES {names:?}");
+            commands.queue(|world: &mut World| {
+                let mut kinds: std::collections::BTreeMap<String, usize> = Default::default();
+                let mut query = world.query_filtered::<Entity, (With<Mesh3d>, Without<Name>)>();
+                let entities: Vec<Entity> = query.iter(world).collect();
+                for entity in entities {
+                    let Ok(cell) = world.get_entity(entity) else {
+                        continue;
+                    };
+                    let mut parts: Vec<String> = cell
+                        .archetype()
+                        .components()
+                        .iter()
+                        .filter_map(|id| world.components().get_name(*id))
+                        .map(|n| n.shortname().to_string())
+                        .filter(|n| n.starts_with("MeshMaterial3d") || !n.contains("Transform") && !n.contains("Visib") && !n.contains("Aabb"))
+                        .collect();
+                    parts.sort();
+                    *kinds.entry(parts.join("+")).or_default() += 1;
+                }
+                info!("AGENT_UNNAMED_MESHES {kinds:#?}");
+            });
         }
         return;
     }
@@ -410,6 +432,12 @@ fn hide_named(
         .map(str::trim)
         .filter(|p| !p.is_empty())
         .collect();
+    // Sticky: systems that re-show their entities (terrain LOD rebuilds) must not undo it.
+    for mut visibility in &mut hidden {
+        if *visibility != Visibility::Hidden {
+            *visibility = Visibility::Hidden;
+        }
+    }
     for (entity, name, _) in &named {
         if parts.iter().any(|p| name.as_str().contains(p)) {
             commands
