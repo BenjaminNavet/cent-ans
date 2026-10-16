@@ -4,9 +4,12 @@
 //! campaign <-> battle hand-over of game/scripts/map/campaign_map.gd. Screen entities carry
 //! `DespawnOnExit(state)`.
 
+pub mod window_keepalive;
+
 use bevy::prelude::*;
 
 use crate::agent::cli::Cli;
+use crate::agent::dump::DumpAppExt;
 use crate::sim::Sim;
 
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
@@ -44,7 +47,14 @@ pub struct AppPlugin;
 impl Plugin for AppPlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<AppState>()
-            .add_systems(Update, leave_boot.run_if(in_state(AppState::Boot)));
+            .add_systems(Update, leave_boot.run_if(in_state(AppState::Boot)))
+            .add_systems(PostUpdate, window_keepalive::keep_primary_window)
+            .register_dump(|_| {
+                (
+                    "window_keepalive".into(),
+                    serde_json::json!({ "kept": window_keepalive::kept_windows() }),
+                )
+            });
     }
 }
 

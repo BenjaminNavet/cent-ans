@@ -152,6 +152,18 @@ pub fn data_dir() -> Option<PathBuf> {
 
 /// Folder of the per-user files (kept armies, last composition): the `Cent Ans` folder holding
 /// the saves folder, or `CENT_ANS_PREFS` when set.
+/// Folder of the custom battle's last composition and kept armies. Agent runs (script, dump,
+/// offscreen) without `CENT_ANS_PREFS` get a folder of their own process: a script starts from
+/// the default composition and never reads or overwrites the player's
+/// `custom_battle_last.json` (relative `cb:season:1` clicks used to land on whatever season the
+/// previous run had saved, so they looked lost).
+pub fn custom_prefs_dir(save_dir: &std::path::Path, agent_run: bool) -> PathBuf {
+    if agent_run && std::env::var_os("CENT_ANS_PREFS").is_none() {
+        return std::env::temp_dir().join(format!("cent-ans-agent-prefs-{}", std::process::id()));
+    }
+    prefs_dir(save_dir)
+}
+
 pub fn prefs_dir(save_dir: &std::path::Path) -> PathBuf {
     if let Some(dir) = std::env::var_os("CENT_ANS_PREFS") {
         return PathBuf::from(dir);
@@ -277,4 +289,24 @@ fn dump_battles(world: &World) -> (String, Value) {
         "demos": super::demos::dump(world),
     });
     ("menu_battles".to_owned(), value)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn agent_runs_keep_their_own_custom_battle_prefs() {
+        if std::env::var_os("CENT_ANS_PREFS").is_some() {
+            return;
+        }
+        let saves = std::path::Path::new("/tmp/player/Cent Ans/saves");
+        assert_eq!(
+            custom_prefs_dir(saves, false),
+            std::path::Path::new("/tmp/player/Cent Ans")
+        );
+        let agent = custom_prefs_dir(saves, true);
+        assert!(agent.starts_with(std::env::temp_dir()));
+        assert!(agent.ends_with(format!("cent-ans-agent-prefs-{}", std::process::id())));
+    }
 }
