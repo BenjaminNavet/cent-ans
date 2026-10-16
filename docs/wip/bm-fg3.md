@@ -22,3 +22,11 @@ Branche bm/fg3 (sur bm/bherald), dossier `client/src/battle/units/`.
 ## Restes
 - Œil : aucune capture (consigne), à regarder en jeu (maille, cheval).
 - Dump montre `mesh_atlas_sources` par lot : 12 m -> [1,2], 45 m -> [2,3].
+
+## bunits6 (suite)
+- `steel_occlusion` est un vrai paramètre (`fine.z`, `SkinParams::set_steel_occlusion`, défaut 1.0 comme Godot, qui ne le surcharge jamais) : toutes les expressions `mix(.., steel_occlusion)` de Godot sont portées.
+- Lances : `prop_*` du manifeste -> `FigureSpec.lance` (os `Prop` du rig) -> 4 vec4 `prop*` du bloc (131 vec4). Sommet : longueur, angle, flamme avant skinning ; `v_prop` -> coordonnées de fût, prise usée.
+- Occlusion du ciel : pas de RADIANCE en Bevy ; équivalent `specular_occlusion` (lumière indirecte seule) ; maille rasante : metallic + reflectance 0.2 (SPECULAR 0.08 de Godot).
+- Normales : cadre T/B résolu des dérivées avec signe du déterminant explicite (indépendant du sens de dpdy) ; miroir Rust testé (`tangent_space_normals_follow_the_uv_direction`). Écart : Godot (Schüler) dépend du sens de dFdy.
+- Imposteurs > 300 m : armoiries (nobles) ou croix de livrée (communs) sur un patch de torse (amélioration, Godot n'en peint pas).
+- Reste : oeil (maille, plates, lance, ciel), pas de test GPU du shader.
