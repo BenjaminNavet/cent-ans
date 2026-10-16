@@ -113,7 +113,6 @@ impl Plugin for CampaignArmiesPlugin {
                     orders::update_bubble,
                     orders::preview_under_cursor,
                     orders::draw_overlays,
-                    zoc::draw_zoc,
                     (
                         feedback::update_cursor,
                         bubbles::update_rich_hover,
@@ -122,6 +121,12 @@ impl Plugin for CampaignArmiesPlugin {
                         .chain(),
                 )
                     .chain()
+                    .run_if(in_state(AppState::Campaign)),
+            )
+            .add_systems(
+                Update,
+                zoc::draw_zoc
+                    .after(orders::draw_overlays)
                     .run_if(in_state(AppState::Campaign)),
             )
             .add_systems(

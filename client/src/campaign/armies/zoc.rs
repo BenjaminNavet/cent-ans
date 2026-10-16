@@ -4,6 +4,7 @@
 //! enemy army in view gets its ring (at most `zoc.max_rings`). Fogged armies are not in `ArmyViews`.
 
 use bevy::prelude::*;
+use sim_campaign::ArmyId;
 
 use super::projection::px_to_world;
 use super::views::{ArmyView, ArmyViews};
@@ -62,18 +63,18 @@ pub struct ZocRings {
 /// `hover`), the enemies in view only with an own army selected and `show_zoc` on.
 pub fn ring_centres(
     views: &[ArmyView],
-    selected: Option<&str>,
-    hovered: Option<&str>,
+    selected: Option<&ArmyId>,
+    hovered: Option<&ArmyId>,
     show_zoc: bool,
     max_rings: usize,
 ) -> Vec<Vec2> {
     let at = |v: &ArmyView| Vec2::new(v.point[0], v.point[1]);
     let mut centres = Vec::new();
-    let selected_is_own = selected.is_some_and(|id| views.iter().any(|v| v.id == id && v.player));
+    let selected_is_own = selected.is_some_and(|id| views.iter().any(|v| &v.id == id && v.player));
     if selected_is_own && show_zoc {
         centres.extend(views.iter().filter(|v| v.hostile).take(max_rings).map(at));
     }
-    if let Some(view) = hovered.and_then(|id| views.iter().find(|v| v.id == id && v.hostile)) {
+    if let Some(view) = hovered.and_then(|id| views.iter().find(|v| &v.id == id && v.hostile)) {
         let centre = at(view);
         if !centres.contains(&centre) {
             centres.push(centre);
@@ -82,6 +83,7 @@ pub fn ring_centres(
     centres
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn draw_zoc(
     sim: Res<Sim>,
     views: Res<ArmyViews>,
@@ -101,8 +103,8 @@ pub fn draw_zoc(
     rings.centres = if radius > 0.0 {
         ring_centres(
             &views.0,
-            selected.0.as_deref(),
-            hovered.0.as_deref(),
+            selected.0.as_ref(),
+            hovered.0.as_ref(),
             show,
             tuning.max_rings,
         )
@@ -123,10 +125,20 @@ pub fn draw_zoc(
 mod tests {
     use super::*;
 
+    fn id_of(text: &str) -> ArmyId {
+        let number = match text {
+            "mine" => 1,
+            "e1" => 2,
+            "e2" => 3,
+            _ => 4,
+        };
+        ArmyId::parse(&format!("army_{number:04}")).expect("id")
+    }
+
     fn view(id: &str, x: f32, player: bool, hostile: bool) -> ArmyView {
         ArmyView {
-            id: id.into(),
-            faction: "f".into(),
+            id: id_of(id),
+            faction: data_model::FactionId::new("fac_x").expect("faction"),
             color: [0.0; 3],
             point: [x, 0.0],
             men: 1,
@@ -152,24 +164,24 @@ mod tests {
             view("e2", 20.0, false, true),
             view("friend", 30.0, false, false),
         ];
-        let on = ring_centres(&views, Some("mine"), None, true, 16);
+        let on = ring_centres(&views, Some(&id_of("mine")), None, true, 16);
         assert_eq!(on, vec![Vec2::new(10.0, 0.0), Vec2::new(20.0, 0.0)]);
-        assert!(ring_centres(&views, Some("mine"), None, false, 16).is_empty());
+        assert!(ring_centres(&views, Some(&id_of("mine")), None, false, 16).is_empty());
         // Hover outlines an enemy even with the option off; not a friend.
         assert_eq!(
-            ring_centres(&views, None, Some("e2"), false, 16),
+            ring_centres(&views, None, Some(&id_of("e2")), false, 16),
             vec![Vec2::new(20.0, 0.0)]
         );
-        assert!(ring_centres(&views, None, Some("friend"), false, 16).is_empty());
+        assert!(ring_centres(&views, None, Some(&id_of("friend")), false, 16).is_empty());
         // No own army selected: no enemy rings.
-        assert!(ring_centres(&views, Some("e1"), None, true, 16).is_empty());
+        assert!(ring_centres(&views, Some(&id_of("e1")), None, true, 16).is_empty());
         // Cap, and no duplicate when the hovered one already has its ring.
         assert_eq!(
-            ring_centres(&views, Some("mine"), Some("e1"), true, 1).len(),
+            ring_centres(&views, Some(&id_of("mine")), Some(&id_of("e1")), true, 1).len(),
             1
         );
         assert_eq!(
-            ring_centres(&views, Some("mine"), Some("e2"), true, 1).len(),
+            ring_centres(&views, Some(&id_of("mine")), Some(&id_of("e2")), true, 1).len(),
             2
         );
     }
