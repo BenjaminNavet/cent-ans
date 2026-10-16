@@ -12,6 +12,7 @@
 //! take the materials from [`FlipbookLooks`]. Not ported: the soft contact fade with the depth
 //! texture, the lighting of smoke by scene lights (it keeps the sheet's own shading, G channel).
 
+use std::collections::HashMap;
 use std::f32::consts::TAU;
 
 use bevy::asset::{AssetServer, embedded_asset};
@@ -371,6 +372,103 @@ pub struct FlipbookLooks {
     pub map_flame: Handle<FlipbookMaterial>,
     /// Image counts of the sheets: (flame, smoke, map flame).
     pub totals: [u32; 3],
+    /// Parameters and sheet of the smoke look, the base of the tinted variants.
+    smoke_base: FlipbookParams,
+    smoke_sheet: Handle<Image>,
+    /// Smoke materials of other colours (battle camp fires, columns, plumes, ...), by colour.
+    tints: HashMap<[u32; 4], Handle<FlipbookMaterial>>,
+    /// Sprites alive, refreshed every frame and incremented by [`spawn_smoke_sprite`].
+    live: usize,
+}
+
+impl FlipbookLooks {
+    /// The smoke material of a colour (`smoke_color` of `fire_smoke.gdshader`: sRGB rgb, alpha =
+    /// base opacity), created on first use.
+    pub fn smoke_tint(
+        &mut self,
+        color: [f32; 4],
+        materials: &mut Assets<FlipbookMaterial>,
+    ) -> Handle<FlipbookMaterial> {
+        let key = color.map(|c| (c.clamp(0.0, 1.0) * 1000.0).round() as u32);
+        if let Some(handle) = self.tints.get(&key) {
+            return handle.clone();
+        }
+        let mut params = self.smoke_base.clone();
+        let l = Color::srgb(color[0], color[1], color[2]).to_linear();
+        params.smoke = Vec4::new(l.red, l.green, l.blue, color[3]);
+        let handle = materials.add(FlipbookMaterial {
+            params,
+            sheet: self.smoke_sheet.clone(),
+            kind: FlipbookKindTag(FlipbookKind::Smoke),
+        });
+        self.tints.insert(key, handle.clone());
+        handle
+    }
+
+    /// Number of tinted smoke materials built so far.
+    pub fn tint_count(&self) -> usize {
+        self.tints.len()
+    }
+}
+
+/// One smoke sprite for [`spawn_smoke_sprite`] (positions and speeds in the world frame).
+#[derive(Clone, Debug)]
+pub struct SmokeSprite {
+    pub position: Vec3,
+    pub velocity: Vec3,
+    pub accel: Vec3,
+    pub damping: f32,
+    pub life: f32,
+    /// Size at the middle of the growth curve (it runs 0.5 -> 1.25 times this).
+    pub size: f32,
+    pub spin: f32,
+    pub spin_rate: f32,
+    /// sRGB colour and opacity; `None` = the siege smoke look.
+    pub tint: Option<[f32; 4]>,
+}
+
+/// Spawns a smoke sprite outside any emitter. `None` when the particle budget is full.
+pub fn spawn_smoke_sprite(
+    commands: &mut Commands,
+    looks: &mut FlipbookLooks,
+    materials: &mut Assets<FlipbookMaterial>,
+    sprite: &SmokeSprite,
+) -> Option<Entity> {
+    if looks.live >= MAX_PARTICLES {
+        return None;
+    }
+    looks.live += 1;
+    let material = match sprite.tint {
+        Some(color) => looks.smoke_tint(color, materials),
+        None => looks.smoke.clone(),
+    };
+    Some(
+        commands
+            .spawn((
+                Name::new("FlipbookParticle"),
+                FlipbookParticle {
+                    kind: FlipbookKind::Smoke,
+                    age: 0.0,
+                    life: sprite.life.max(0.1),
+                    position: sprite.position,
+                    velocity: sprite.velocity,
+                    accel: sprite.accel,
+                    damping: sprite.damping,
+                    size: sprite.size,
+                    lift: 0.0,
+                    loops: 0.0,
+                    offset: 0.0,
+                    spin: sprite.spin,
+                    spin_rate: sprite.spin_rate,
+                },
+                Mesh3d(looks.quad.clone()),
+                MeshMaterial3d(material),
+                MeshTag::new(0),
+                Transform::from_translation(sprite.position).with_scale(Vec3::splat(1e-3)),
+                bevy::light::NotShadowCaster,
+            ))
+            .id(),
+    )
 }
 
 fn build_looks(
@@ -435,6 +533,7 @@ fn build_looks(
         core: rgb(mc[3]),
         smoke: zero,
     };
+    let smoke_sheet = sheet(SMOKE_SHEET.to_owned());
     commands.insert_resource(FlipbookLooks {
         quad: meshes.add(Rectangle::new(1.0, 1.0)),
         flame: materials.add(FlipbookMaterial {
@@ -443,8 +542,8 @@ fn build_looks(
             kind: FlipbookKindTag(FlipbookKind::Flame),
         }),
         smoke: materials.add(FlipbookMaterial {
-            params: smoke,
-            sheet: sheet(SMOKE_SHEET.to_owned()),
+            params: smoke.clone(),
+            sheet: smoke_sheet.clone(),
             kind: FlipbookKindTag(FlipbookKind::Smoke),
         }),
         map_flame: materials.add(FlipbookMaterial {
@@ -453,6 +552,10 @@ fn build_looks(
             kind: FlipbookKindTag(FlipbookKind::StaticFlame),
         }),
         totals: [64, 64, data.map_frames[0] * data.map_frames[1]],
+        smoke_base: smoke,
+        smoke_sheet,
+        tints: HashMap::new(),
+        live: 0,
     });
 }
 
@@ -477,6 +580,8 @@ pub struct FlipbookEmitter {
     pub active: bool,
     pub carry: f32,
     pub serial: u32,
+    /// Smoke colour (sRGB rgb + opacity); `None` = the siege smoke look.
+    pub tint: Option<[f32; 4]>,
 }
 
 impl FlipbookEmitter {
@@ -494,6 +599,7 @@ impl FlipbookEmitter {
             active: true,
             carry: 0.0,
             serial: 0,
+            tint: None,
         }
     }
 
@@ -511,6 +617,7 @@ impl FlipbookEmitter {
             active: true,
             carry: 0.0,
             serial: 0,
+            tint: None,
         }
     }
 }
@@ -546,11 +653,12 @@ pub fn smoke_growth(t: f32) -> f32 {
 fn emit(
     mut commands: Commands,
     time: Res<Time>,
-    looks: Option<Res<FlipbookLooks>>,
+    looks: Option<ResMut<FlipbookLooks>>,
+    mut materials: ResMut<Assets<FlipbookMaterial>>,
     mut emitters: Query<(&mut FlipbookEmitter, &GlobalTransform)>,
     live: Query<(), With<FlipbookParticle>>,
 ) {
-    let Some(looks) = looks else { return };
+    let Some(mut looks) = looks else { return };
     let mut count = live.iter().count();
     let dt = time.delta_secs().min(0.1);
     for (mut emitter, at) in &mut emitters {
@@ -587,9 +695,12 @@ fn emit(
             let speed = spec.velocity[0] + (spec.velocity[1] - spec.velocity[0]) * r(5);
             let size = spec.size[0] + (spec.size[1] - spec.size[0]) * r(6);
             let smoke = emitter.kind == FlipbookKind::Smoke;
-            let (material, kind) = match emitter.kind {
-                FlipbookKind::Smoke => (&looks.smoke, FlipbookKind::Smoke),
-                _ => (&looks.flame, FlipbookKind::Flame),
+            let (material, kind) = match (emitter.kind, emitter.tint) {
+                (FlipbookKind::Smoke, Some(color)) => {
+                    (looks.smoke_tint(color, &mut materials), FlipbookKind::Smoke)
+                }
+                (FlipbookKind::Smoke, None) => (looks.smoke.clone(), FlipbookKind::Smoke),
+                _ => (looks.flame.clone(), FlipbookKind::Flame),
             };
             let loops = spec.loops * (0.8 + 0.4 * r(7));
             let position = at.translation() + start;
@@ -615,7 +726,7 @@ fn emit(
                     },
                 },
                 Mesh3d(looks.quad.clone()),
-                MeshMaterial3d(material.clone()),
+                MeshMaterial3d(material),
                 MeshTag::new(0),
                 Transform::from_translation(position).with_scale(Vec3::splat(1e-3)),
                 bevy::light::NotShadowCaster,
@@ -690,7 +801,7 @@ pub struct FlipbookStats {
 
 fn count_sprites(
     mut stats: ResMut<FlipbookStats>,
-    looks: Option<Res<FlipbookLooks>>,
+    looks: Option<ResMut<FlipbookLooks>>,
     emitters: Query<&FlipbookEmitter>,
     particles: Query<(&FlipbookParticle, &MeshTag)>,
     statics: Query<(), With<StaticFlame>>,
@@ -700,7 +811,10 @@ fn count_sprites(
     for e in &emitters {
         stats.by_kind.entry(e.kind.key()).or_default().0 += 1;
     }
-    let total = looks.map_or(64, |l| l.totals[0]);
+    let total = looks.as_ref().map_or(64, |l| l.totals[0]);
+    if let Some(mut looks) = looks {
+        looks.live = particles.iter().count();
+    }
     for (p, tag) in &particles {
         stats.by_kind.entry(p.kind.key()).or_default().1 += 1;
         if stats.sample_frames.len() < 6 {
