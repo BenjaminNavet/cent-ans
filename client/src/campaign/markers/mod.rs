@@ -159,6 +159,8 @@ struct Maquette {
     shadow_range: f32,
     /// Shadow state applied to `meshes` (`None`: not yet).
     casting: Option<bool>,
+    /// Meshes carry a per-mesh dithered range (inside the fade band; `lod::fade_maquettes`).
+    banded: bool,
     /// Meshes of the scene (filled by `lod::prepare_maquette`).
     meshes: Vec<Entity>,
     handle: Handle<WorldAsset>,
@@ -428,6 +430,7 @@ fn build_markers(
                     range: places.maquettes.range(p.shown_kind),
                     shadow_range: places.maquettes.shadow_range(p.shown_kind),
                     casting: None,
+                    banded: false,
                     meshes: Vec::new(),
                     handle,
                 },
