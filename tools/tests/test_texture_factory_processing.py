@@ -15,7 +15,7 @@ from cent_ans_tools.texture_factory.checks import (
     seam_ratio,
 )
 from cent_ans_tools.texture_factory.color import linear_to_srgb, srgb_to_linear
-from cent_ans_tools.texture_factory.pack import grid_shape, import_file, pack
+from cent_ans_tools.texture_factory.pack import grid_shape, pack
 from cent_ans_tools.texture_factory.pbr import (
     derive_normal_rough,
     equalize_luminance,
@@ -92,7 +92,6 @@ def test_pack_and_board(tmp_path) -> None:
         Image.new("RGB", (16, 16), (128, 128, 255)).save(tiles / f"m{index}_normal.png")
     document = {"layer_size": 16, "materials": materials}
     assert grid_shape(4) == (2, 2)
-    assert "slices/horizontal=2" in import_file(2, 2, "a.jpg", "res://x/")
     manifest = tmp_path / "pack.json"
     report = pack(
         document,

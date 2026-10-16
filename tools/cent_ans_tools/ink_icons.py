@@ -35,8 +35,8 @@ from PIL import Image, ImageDraw, ImageFilter
 from scipy import ndimage
 from skimage.morphology import skeletonize
 
-from cent_ans_tools.portraits import PortraitJob
 from cent_ans_tools.paths import REPO_DIR
+from cent_ans_tools.portraits import PortraitJob
 
 CATALOG_PATH = REPO_DIR / "data" / "ui" / "icons_ink.json"
 RAW_DIR = REPO_DIR / "tools" / "da5_raw"
@@ -394,7 +394,6 @@ def build_cursors(
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / f"{cursor['id']}.png"
         image.save(out_path, optimize=True)
-        ensure_cursor_import_settings(out_path)
         written.append(cursor["id"])
     return written, missing
 
@@ -436,7 +435,6 @@ def build(catalog: dict | None = None) -> dict[str, list[str]]:
         else:
             image = process_medallion(raw, catalog["medallion_style"]["size"])
         image.save(entry.out_path, optimize=True)
-        ensure_import_settings(entry.out_path)
         report[f"{entry.kind}s"].append(entry.id)
         for target in entry.targets:
             indexes[entry.kind][target] = entry.out_path.name
@@ -518,56 +516,3 @@ def lot_spent(ledger, prefix: str = "DA5 :") -> Decimal:  # noqa: ANN001
         (entry.actual for entry in ledger.entries if entry.subject.startswith(prefix)),
         Decimal("0.00"),
     )
-
-
-# Godot import settings: lossless, mipmaps so that 128/256 px images stay smooth at 16-40 px.
-IMPORT_TEMPLATE = """[remap]
-
-importer="texture"
-type="CompressedTexture2D"
-
-[params]
-
-compress/mode=0
-mipmaps/generate=true
-process/fix_alpha_border=true
-"""
-
-
-# Cursors are read back as an Image (``Input.set_custom_mouse_cursor``): lossless, no mipmaps.
-CURSOR_IMPORT_TEMPLATE = """[remap]
-
-importer="texture"
-type="CompressedTexture2D"
-
-[params]
-
-compress/mode=0
-mipmaps/generate=false
-process/fix_alpha_border=true
-"""
-
-
-def ensure_cursor_import_settings(png_path: Path) -> bool:
-    """Creates ``<png>.import`` for a cursor (lossless, no mipmaps) if missing."""
-    import_path = png_path.with_name(png_path.name + ".import")
-    if import_path.exists():
-        return False
-    import_path.write_text(CURSOR_IMPORT_TEMPLATE, encoding="utf-8")
-    return True
-
-
-def ensure_import_settings(png_path: Path) -> bool:
-    """Creates ``<png>.import`` with mipmaps on (kept as is when Godot already wrote one)."""
-    import_path = png_path.with_name(png_path.name + ".import")
-    if import_path.exists():
-        text = import_path.read_text(encoding="utf-8")
-        if "mipmaps/generate=false" not in text:
-            return False
-        import_path.write_text(
-            text.replace("mipmaps/generate=false", "mipmaps/generate=true"),
-            encoding="utf-8",
-        )
-        return True
-    import_path.write_text(IMPORT_TEMPLATE, encoding="utf-8")
-    return True

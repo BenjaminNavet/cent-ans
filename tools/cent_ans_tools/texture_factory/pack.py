@@ -40,33 +40,6 @@ def grid_shape(count: int, layer_size: int = 1024) -> tuple[int, int]:
         n += 1
 
 
-def import_file(columns: int, rows: int, source: str, res_dir: str = RES_DIR) -> str:
-    """Godot ``.import`` of a grid image as a VRAM-compressed Texture2DArray (as GA4)."""
-    return f"""[remap]
-
-importer="2d_array_texture"
-type="CompressedTexture2DArray"
-
-[deps]
-
-source_file="{res_dir}{source}"
-
-[params]
-
-compress/mode=2
-compress/high_quality=false
-compress/lossy_quality=0.7
-compress/uastc_level=0
-compress/rdo_quality_loss=0.0
-compress/hdr_compression=1
-compress/channel_pack=0
-mipmaps/generate=true
-mipmaps/limit=-1
-slices/horizontal={columns}
-slices/vertical={rows}
-"""
-
-
 def _resize_normal(normal: Image.Image, size: int) -> Image.Image:
     """Downsample a normal + roughness tile, renormalising the XY normal."""
     small = (
@@ -145,12 +118,6 @@ def pack(
     )
     albedo_grid.save(albedo_path, quality=albedo_quality, subsampling=0, optimize=True)
     normal_grid.save(normal_path, quality=normal_quality, subsampling=0, optimize=True)
-    for path in (albedo_path, normal_path):
-        imported = Path(f"{path}.import")
-        slicing = f"slices/horizontal={columns}\nslices/vertical={rows}"
-        # Keep Godot's own .import (uid, imported paths) while the grid is unchanged.
-        if not imported.exists() or slicing not in imported.read_text():
-            imported.write_text(import_file(columns, rows, path.name, res_dir))
     total = albedo_path.stat().st_size + normal_path.stat().st_size
     if total > max_bytes:
         raise ValueError(
@@ -167,52 +134,3 @@ def pack(
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + "\n")
     return {"grid": [columns, rows], "bytes": total, "layers": len(layers)}
-
-
-def texture_import(res_source: str, *, normal: bool = False) -> str:
-    """Godot ``.import`` of a plain texture used in 3D: VRAM compressed, mipmapped (QW-D rule)."""
-    return f"""[remap]
-
-importer="texture"
-type="CompressedTexture2D"
-
-[deps]
-
-source_file="{res_source}"
-
-[params]
-
-compress/mode=2
-compress/high_quality=false
-compress/lossy_quality=0.7
-compress/uastc_level=0
-compress/rdo_quality_loss=0.0
-compress/hdr_compression=1
-compress/normal_map={1 if normal else 0}
-compress/channel_pack=0
-mipmaps/generate=true
-mipmaps/limit=-1
-roughness/mode=0
-roughness/src_normal=""
-process/fix_alpha_border=true
-process/premult_alpha=false
-process/normal_map_invert_y=false
-process/hdr_as_srgb=false
-process/hdr_clamp_exposure=false
-process/size_limit=0
-detect_3d/compress_to=1
-"""
-
-
-def write_texture_import(
-    path: Path, game_dir: Path, *, normal: bool = False, overwrite: bool = False
-) -> Path:
-    """Write ``<path>.import`` unless Godot already did (its uid and paths are kept)."""
-    imported = Path(f"{path}.import")
-    if overwrite or not imported.exists():
-        imported.write_text(
-            texture_import(
-                "res://" + path.relative_to(game_dir).as_posix(), normal=normal
-            )
-        )
-    return imported

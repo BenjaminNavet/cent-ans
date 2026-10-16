@@ -39,7 +39,6 @@ from cent_ans_tools.texture_factory.color import LUMA, linear_to_srgb, srgb_to_l
 from cent_ans_tools.texture_factory.pack import (  # noqa: F401  (re-exported)
     _resize_normal,
     grid_shape,
-    import_file,
 )
 from cent_ans_tools.texture_factory.pack import pack as factory_pack
 from cent_ans_tools.texture_factory.pbr import (
