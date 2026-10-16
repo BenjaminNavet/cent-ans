@@ -426,6 +426,8 @@ fn handle_presses(
     mut ui: ResMut<DiplomacyUi>,
     mut sim: ResMut<Sim>,
     mut wars: MessageWriter<AskWarDeclaration>,
+    mut economy: ResMut<crate::campaign::panels::economy::EconomyPanel>,
+    mut open: MessageWriter<crate::campaign::panels::OpenPanel>,
 ) {
     for tab in tabs.read() {
         if tab.group == "dip_tab" {
@@ -443,12 +445,20 @@ fn handle_presses(
         if name == "search" || name.starts_with("amount:") {
             continue;
         }
+        if name == "trade" {
+            // `trade_view_requested`: close this screen, open Economy on the Commerce tab.
+            ui.open = false;
+            economy.tab = "trade".to_owned();
+            open.write(crate::campaign::panels::OpenPanel::Economy);
+            continue;
+        }
         press_button(name, &mut ui, &mut sim);
         if let Some(target) = ui.ask_war.take() {
             wars.write(AskWarDeclaration {
                 target,
                 target_label: String::new(),
                 then: None,
+                assault_after: None,
             });
         }
     }

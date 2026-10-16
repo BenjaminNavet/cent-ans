@@ -218,7 +218,7 @@ pub fn sheet_bbcode_with(
 }
 
 /// Legend BBCode for a map mode key (`data/ui/map_legend.json`).
-pub fn legend_bbcode(tree: &Value, mode: &str) -> String {
+pub fn legend_bbcode(tree: &Value, mode: &str, focus: Option<&str>) -> String {
     let mut parts: Vec<String> = Vec::new();
     if let Some(intro) = tree.get("intro").and_then(Value::as_str) {
         parts.push(format!("[i]{intro}[/i]"));
@@ -259,11 +259,22 @@ pub fn legend_bbcode(tree: &Value, mode: &str) -> String {
                 (None, Some(a), Some(b)) => format!("{a}{b} "),
                 _ => "• ".to_owned(),
             };
-            parts.push(format!(
-                "{mark}[b]{}[/b] : {}",
-                entry.get("label").and_then(Value::as_str).unwrap_or(""),
-                entry.get("text").and_then(Value::as_str).unwrap_or("")
-            ));
+            let mut label = entry.get("label").and_then(Value::as_str).unwrap_or("");
+            let mut text = entry
+                .get("text")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_owned();
+            // DZ: seen from a chosen faction, « Nous » is that faction.
+            let own = sample
+                .and_then(|s| s.get("relation"))
+                .and_then(Value::as_str)
+                == Some("self");
+            if let (true, Some(name)) = (own && mode == "diplomacy", focus) {
+                label = name;
+                text = format!("Terres de {name}.");
+            }
+            parts.push(format!("{mark}[b]{label}[/b] : {text}"));
         }
     }
     parts.join("\n")
@@ -291,6 +302,7 @@ fn open_help(
     settings: Option<Res<Settings>>,
     keymap: Option<Res<crate::settings::KeyMap>>,
     modes: Option<Res<MapModeState>>,
+    sim: Res<crate::sim::Sim>,
     focus: Option<Res<TextInputFocus>>,
     mut help: ResMut<Help>,
     mut queue: ResMut<ModalQueue>,
@@ -316,14 +328,22 @@ fn open_help(
                 .and_then(|text| serde_json::from_str(&text).ok())
                 .or(Some(Value::Null));
         }
-        let mode = modes.map_or(MapMode::Political, |m| m.mode);
+        let mode = modes.as_ref().map_or(MapMode::Political, |m| m.mode);
+        let focus = modes
+            .as_ref()
+            .and_then(|m| m.focus_faction.clone())
+            .and_then(|id| data_model::FactionId::new(id).ok())
+            .zip(sim.data.as_ref())
+            .map(|(id, data)| {
+                crate::campaign::parchment::realms::short_name(&data.faction_name(&id)).to_owned()
+            });
         let tree = help.legend.clone().unwrap_or(Value::Null);
         let title = tree
             .get("title")
             .and_then(Value::as_str)
             .unwrap_or("Légende de la carte")
             .to_owned();
-        let mut spec = ModalSpec::info(&title, &legend_bbcode(&tree, mode.key()));
+        let mut spec = ModalSpec::info(&title, &legend_bbcode(&tree, mode.key(), focus.as_deref()));
         spec.width = 520.0;
         queue.request(LEGEND_KEY, PRIORITY_REPORT, spec);
         help.legend_opened += 1;
@@ -385,7 +405,7 @@ mod tests {
                 {"sample": {"type": "gradient", "from": "#00ff00", "to": "#ff0000"}, "label": "L2", "text": "t2"}]},
             {"id": "c", "title": "Toujours", "entries": [
                 {"sample": {"type": "color", "color": "#112233"}, "label": "L3", "text": "t3"}]}]});
-        let text = legend_bbcode(&tree, "unrest");
+        let text = legend_bbcode(&tree, "unrest", None);
         assert!(text.contains("Carte M") && text.contains("Troubles") && text.contains("Toujours"));
         assert!(!text.contains("Politique"));
         assert!(text.contains("[color=#00ff00]■[/color][color=#ff0000]■[/color]"));

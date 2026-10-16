@@ -5,7 +5,7 @@
 
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use data_model::SettlementId;
+use data_model::{FactionId, SettlementId};
 use serde_json::{Value, json};
 use sim_campaign::{ArmyId, MoveOrderTarget, Order, OrderOutcome};
 
@@ -53,6 +53,12 @@ pub enum ArmyCommand {
     Attack {
         army: ArmyId,
         target: ArmyId,
+    },
+    /// Attack a place of an enemy: march to it, and storm it at once if the march opens the
+    /// siege (`army_movement_controller.order_attack_settlement`).
+    AttackPlace {
+        army: ArmyId,
+        settlement: SettlementId,
     },
     /// Sail from the port the army stands in to `to_port` (ADR 0167).
     Embark {
@@ -107,6 +113,11 @@ pub struct PathPreviewState {
     target: Option<[i32; 2]>,
     tick: u32,
     pub sea: SeaHover,
+    /// The pointer is over something a right click would attack (an enemy or peace army, a place
+    /// of a faction we are at war / at peace with): the attack cursor.
+    pub attack: bool,
+    /// Stance towards the place under the pointer (only when it is attackable).
+    place_attack: Option<Stance>,
     /// Hover text of the previewed order.
     pub hint: Option<String>,
 }
@@ -255,6 +266,7 @@ pub fn hover_and_input(
                     army,
                     target_army: target,
                 }),
+                assault_after: None,
             });
             return;
         }
@@ -268,13 +280,42 @@ pub fn hover_and_input(
             let distance = camera_distance(camera_transform, Vec3::new(px.x, 0.0, px.y));
             if let (Some(data), Some(state)) = (&sim.data, &sim.state)
                 && let Some((port, point)) = settlement_at(&places, px, distance)
-                && prefers_sea(state, data, &army, &port, point)
             {
-                commands.write(ArmyCommand::Embark {
-                    army,
-                    to_port: port,
-                });
-                return;
+                let stance = place_stance(data, state, &sim.player, &places, &port);
+                if stance == Stance::Peace {
+                    // A place of a faction at peace: confirm the war first, then march and storm.
+                    if let Some(place) = places.get(port.as_str()) {
+                        let faction = FactionId::new(place.controller.clone()).ok();
+                        if let Some(faction) = faction {
+                            war_asks.write(AskWarDeclaration {
+                                target: faction.as_str().to_owned(),
+                                target_label: place.name.clone(),
+                                then: Some(Order::MoveArmy {
+                                    army: army.clone(),
+                                    target: MoveOrderTarget::Place(
+                                        sim_campaign::Place::Settlement(port.clone()),
+                                    ),
+                                }),
+                                assault_after: Some(army),
+                            });
+                            return;
+                        }
+                    }
+                }
+                if prefers_sea(state, data, &army, &port, point) {
+                    commands.write(ArmyCommand::Embark {
+                        army,
+                        to_port: port,
+                    });
+                    return;
+                }
+                if stance == Stance::War {
+                    commands.write(ArmyCommand::AttackPlace {
+                        army,
+                        settlement: port,
+                    });
+                    return;
+                }
             }
             commands.write(ArmyCommand::Move {
                 army,
@@ -469,12 +510,107 @@ pub fn execute_commands(
                 };
                 run_order(&mut sim, &mut log, "attack", army, order);
             }
+            ArmyCommand::AttackPlace { army, settlement } => {
+                attack_place(&mut sim, &mut log, army, settlement);
+                preview.view = None;
+                preview.target = None;
+            }
             ArmyCommand::Embark { army, to_port } => {
                 if embark(&mut sim, &mut log, &mut glides, &lanes, army, to_port) {
                     preview.view = None;
                     preview.target = None;
                 }
             }
+        }
+    }
+}
+
+/// How the player stands towards the holder of something it could attack
+/// (`army_movement_controller.relation_to`): war = direct attack, peace = attack after a
+/// declaration of war, friend = no attack (self, allies, unknown).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Stance {
+    War,
+    Peace,
+    Friend,
+}
+
+/// Stance towards a faction.
+pub fn faction_stance(
+    data: &data_model::GameData,
+    state: &sim_campaign::CampaignState,
+    player: &FactionId,
+    faction: &FactionId,
+) -> Stance {
+    if faction == player {
+        Stance::Friend
+    } else if state.is_at_war(faction, player) {
+        Stance::War
+    } else if needs_declaration(data, state, player, faction) {
+        Stance::Peace
+    } else {
+        Stance::Friend
+    }
+}
+
+/// Stance towards the current holder of a place.
+pub fn place_stance(
+    data: &data_model::GameData,
+    state: &sim_campaign::CampaignState,
+    player: &FactionId,
+    places: &Places,
+    place: &SettlementId,
+) -> Stance {
+    places
+        .get(place.as_str())
+        .and_then(|p| FactionId::new(p.controller.clone()).ok())
+        .map_or(Stance::Friend, |f| faction_stance(data, state, player, &f))
+}
+
+/// `AttackPlace`: the army that already holds the siege storms it; otherwise it marches, and a
+/// march that opens the siege of that very place is followed by the assault (a refused assault
+/// leaves the march result, as in Godot).
+fn attack_place(sim: &mut Sim, log: &mut OrderLog, army: &ArmyId, place: &SettlementId) {
+    let here = sim
+        .state
+        .as_ref()
+        .and_then(|s| s.army(army))
+        .and_then(|a| a.settlement().cloned());
+    if here.as_ref() == Some(place) {
+        run_order(
+            sim,
+            log,
+            "assault",
+            army,
+            Order::Assault { army: army.clone() },
+        );
+        return;
+    }
+    let march = Order::MoveArmy {
+        army: army.clone(),
+        target: MoveOrderTarget::Place(sim_campaign::Place::Settlement(place.clone())),
+    };
+    run_order(sim, log, "attack_place", army, march);
+    let sieging = log
+        .last
+        .as_ref()
+        .is_some_and(|r| r.ok && r.stop == "siege_started")
+        && sim
+            .state
+            .as_ref()
+            .and_then(|s| s.army(army))
+            .is_some_and(|a| a.is_at(place));
+    if sieging {
+        let marched = log.last.clone();
+        run_order(
+            sim,
+            log,
+            "assault",
+            army,
+            Order::Assault { army: army.clone() },
+        );
+        if !log.last.as_ref().is_some_and(|r| r.ok) {
+            log.last = marched;
         }
     }
 }
@@ -772,6 +908,8 @@ pub fn preview_under_cursor(
             preview.sea = SeaHover::None;
             preview.hint = None;
         }
+        preview.attack = false;
+        preview.place_attack = None;
         set_hint(&mut hint, None);
         return;
     }
@@ -781,14 +919,27 @@ pub fn preview_under_cursor(
             preview.sea = SeaHover::None;
             preview.hint = None;
         }
+        preview.attack = false;
+        preview.place_attack = None;
         set_hint(&mut hint, None);
         return;
     };
-    let hostile_hover = hovered
+    let army_stance = hovered
         .0
         .as_ref()
-        .is_some_and(|h| h != army && views.get(h).is_some_and(|v| v.hostile));
-    let attack_text = hostile_hover.then(|| "Armée ennemie — clic droit pour attaquer".to_owned());
+        .filter(|h| *h != army)
+        .and_then(|h| views.get(h))
+        .filter(|v| !v.player)
+        .map_or(Stance::Friend, |v| {
+            faction_stance(data, state, &sim.player, &v.faction)
+        });
+    let attack_text = match army_stance {
+        Stance::War => Some("Armée ennemie — clic droit pour attaquer".to_owned()),
+        Stance::Peace => {
+            Some("Armée en paix — clic droit pour attaquer (déclare la guerre)".to_owned())
+        }
+        Stance::Friend => None,
+    };
     let fresh = (|| {
         let cursor = cursor_position(&window)?;
         let (camera, camera_transform) = camera.iter().next()?;
@@ -801,6 +952,8 @@ pub fn preview_under_cursor(
     })();
     let Some((px, distance)) = fresh else {
         preview.sea = SeaHover::None;
+        preview.place_attack = None;
+        preview.attack = army_stance != Stance::Friend;
         set_hint(&mut hint, attack_text);
         return;
     };
@@ -836,9 +989,11 @@ pub fn preview_under_cursor(
                     preview.view = (route.len() >= 2)
                         .then(|| view_from_waypoints(&route, Vec::new(), &ground, distance));
                     preview.sea = SeaHover::Port;
+                    preview.place_attack = None;
                     preview.hint = Some(voyage_hint(data, &port, &stops));
                 }
                 SeaClick::Refused(text) => {
+                    preview.place_attack = None;
                     preview.view = None;
                     preview.sea = SeaHover::Refused;
                     preview.hint = Some(text.to_owned());
@@ -846,6 +1001,9 @@ pub fn preview_under_cursor(
             }
         } else {
             preview.sea = SeaHover::None;
+            preview.place_attack = settlement_at(&places, px, distance)
+                .map(|(id, _)| place_stance(data, state, &sim.player, &places, &id))
+                .filter(|s| *s != Stance::Friend);
             let plan = state.plan_path(data, army, [px.x, px.y]);
             preview.hint = match &plan {
                 Some(plan) => {
@@ -864,7 +1022,15 @@ pub fn preview_under_cursor(
             preview.view = plan.and_then(|plan| preview_from_plan(&plan, &ground, distance));
         }
     }
-    let shown = attack_text.or_else(|| preview.hint.clone());
+    preview.attack = army_stance != Stance::Friend || preview.place_attack.is_some();
+    let place_text = preview.place_attack.map(|s| {
+        if s == Stance::Peace {
+            "clic droit pour donner l’assaut (déclare la guerre)".to_owned()
+        } else {
+            "clic droit pour donner l’assaut".to_owned()
+        }
+    });
+    let shown = attack_text.or(place_text).or_else(|| preview.hint.clone());
     set_hint(&mut hint, shown);
 }
 

@@ -33,6 +33,9 @@ pub struct AskWarDeclaration {
     pub target: String,
     pub target_label: String,
     pub then: Option<Order>,
+    /// Army that storms the place at once if `then` (a march to it) ends in a siege
+    /// (`army_movement_controller.order_attack_settlement`).
+    pub assault_after: Option<sim_campaign::ArmyId>,
 }
 
 /// The declaration waiting for the player's answer, and what the dialog last said (dump).
@@ -240,6 +243,12 @@ fn answer_dialog(
             let followed = game_api::diplomacy::submit_order(&data, state, order);
             if !followed.ok {
                 toasts.write(ToastRequest::new(&followed.message));
+            } else if let Some(army) = ask.assault_after {
+                // A siege opened by the march: the assault follows; a refusal leaves the siege.
+                let besieging = state.army(&army).is_some_and(|a| a.settlement().is_some());
+                if besieging {
+                    let _ = state.submit_order_outcome(&data, Order::Assault { army });
+                }
             }
         }
     }
