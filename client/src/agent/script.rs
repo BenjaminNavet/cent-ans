@@ -6,6 +6,7 @@
 //! key <KeyCode>       press and release a key (Escape, Enter, Space, KeyA, Digit1, ArrowUp, F1...)
 //! type <text>        type the text (rest of the line, one character per frame) into the focused text field
 //! click <Name>        press the UI node whose `Name` is <Name> (rest of the line, spaces allowed)
+//! click_if <Name>     like `click`, but a missing node is skipped (after 10 frames of grace), never fatal
 //! dump <file>         write the --dump-state JSON now
 //! shot <file>         save a screenshot
 //! exit                wait for pending screenshots, then quit
@@ -22,6 +23,8 @@ pub enum ScriptCommand {
     Wait(u32),
     Key(String),
     Click(String),
+    /// `click` that gives up quietly when the node does not exist.
+    ClickIf(String),
     Type(String),
     Dump(PathBuf),
     Shot(PathBuf),
@@ -62,6 +65,7 @@ fn parse_line(line: &str) -> Result<ScriptCommand, String> {
             .map_err(|e| format!("wait: {e}")),
         "key" => Ok(ScriptCommand::Key(need("a key code")?.to_owned())),
         "click" => Ok(ScriptCommand::Click(need("an entity name")?.to_owned())),
+        "click_if" | "try_click" => Ok(ScriptCommand::ClickIf(need("an entity name")?.to_owned())),
         "type" => Ok(ScriptCommand::Type(need("a text")?.to_owned())),
         "dump" => Ok(ScriptCommand::Dump(absolute(need("a file")?))),
         "shot" => Ok(ScriptCommand::Shot(absolute(need("a file")?))),

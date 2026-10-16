@@ -22,7 +22,7 @@ Client Bevy 0.20 (ADR 0357), workspace Cargo séparé de `core/`. Il ne contient
 
 Fonctionnalité `remote` : Bevy Remote Protocol en HTTP local.
 
-Script, une commande par ligne (`#` = commentaire) : `state <État>`, `wait <images>`, `key <KeyCode>` (`Escape`, `Enter`, `KeyA`, `Digit1`, `ArrowUp`, `F1`…), `click <Nom>` (nœud d'interface dont le `Name` est ce texte, espaces permis ; attend jusqu'à 300 images qu'il existe), `dump <fichier>`, `shot <fichier>`, `exit`. Exemple :
+Script, une commande par ligne (`#` = commentaire) : `state <État>`, `wait <images>`, `key <KeyCode>` (`Escape`, `Enter`, `KeyA`, `Digit1`, `ArrowUp`, `F1`…), `click <Nom>` (nœud d'interface dont le `Name` est ce texte, espaces permis ; attend jusqu'à 300 images qu'il existe, fatal sinon), `click_if <Nom>` (ou `try_click`, même chose mais non fatale : saute la ligne si le nœud n'apparaît pas dans les 10 images ; pour les boutons conditionnels comme `Confirmer` ou `Fermer`), `dump <fichier>`, `shot <fichier>`, `exit`. Exemple :
 
 ```
 wait 30

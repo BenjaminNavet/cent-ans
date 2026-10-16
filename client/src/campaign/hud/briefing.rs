@@ -107,14 +107,25 @@ pub struct Briefing {
     pub shown: u32,
     pub dismissed_for_good: u32,
     pub body: String,
+    /// Battles left so far (`FlowState::stats`): a change on entering the campaign means the
+    /// player comes back from a battle, not from a new game or a load.
+    battles_left: u32,
 }
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<Briefing>()
         .register_dump(dump_briefing)
-        .add_systems(OnEnter(AppState::Campaign), |mut b: ResMut<Briefing>| {
-            b.pending = true;
-        })
+        .add_systems(
+            OnEnter(AppState::Campaign),
+            |mut b: ResMut<Briefing>, flow: Option<Res<crate::flow::FlowState>>| {
+                let left = flow
+                    .map(|f| f.stats.left_battle + f.stats.result_refused)
+                    .unwrap_or(0);
+                // Coming back from a battle fought on turn 0: the briefing was already shown.
+                b.pending = left == b.battles_left;
+                b.battles_left = left;
+            },
+        )
         .add_systems(Update, (show, answer).chain().in_set(HudSet::Ui));
 }
 

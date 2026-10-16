@@ -51,6 +51,8 @@ fn stage_on_campaign(mut sim: ResMut<Sim>, mut frames: Local<u32>, mut done: Loc
             .filter(|(_, a)| a.faction == player)
             .map(|(id, _)| id.clone())
             .collect();
+        let mut staged = false;
+        let mut hostile = 0usize;
         'search: for attacker in &mine {
             let enemies: Vec<_> = state
                 .armies
@@ -58,6 +60,7 @@ fn stage_on_campaign(mut sim: ResMut<Sim>, mut frames: Local<u32>, mut done: Loc
                 .filter(|(_, a)| a.faction != player && state.is_at_war(&player, &a.faction))
                 .map(|(id, _)| id.clone())
                 .collect();
+            hostile = hostile.max(enemies.len());
             for defender in enemies {
                 if state
                     .clone()
@@ -70,9 +73,29 @@ fn stage_on_campaign(mut sim: ResMut<Sim>, mut frames: Local<u32>, mut done: Loc
                         }
                         Err(error) => warn!("flow dev: staging failed: {error}"),
                     }
+                    staged = true;
                     break 'search;
                 }
             }
+        }
+        if !staged {
+            // The core stages a battle only between armies at war, the attacker standing in a
+            // settlement; say which condition is missing instead of staying silent.
+            let in_settlement = mine
+                .iter()
+                .filter(|id| {
+                    state
+                        .armies
+                        .get(*id)
+                        .is_some_and(|a| a.settlement().is_some())
+                })
+                .count();
+            warn!(
+                "flow dev: CENT_ANS_STAGE_BATTLE: no battle could be staged ({} player armies, {} in a settlement, {} armies at war with the player)",
+                mine.len(),
+                in_settlement,
+                hostile
+            );
         }
     }
     if std::env::var("CENT_ANS_STAGE_NAVAL").is_ok() {

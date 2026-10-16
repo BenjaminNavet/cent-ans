@@ -63,14 +63,30 @@ pub fn build_ribbons(
     (positions, colors, indices)
 }
 
+/// A mesh with no vertex makes the renderer warn every time it is uploaded, so an empty ribbon
+/// set is one degenerate triangle (three equal points: nothing is drawn).
+pub fn pad_degenerate(
+    positions: &mut Vec<[f32; 3]>,
+    colors: &mut Vec<[f32; 4]>,
+    indices: &mut Vec<u32>,
+) {
+    if positions.is_empty() {
+        positions.extend([[0.0; 3]; 3]);
+        colors.extend([[0.0; 4]; 3]);
+        indices.extend([0, 1, 2]);
+    }
+}
+
 fn ribbon_mesh() -> Mesh {
     let mut mesh = Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::default(),
     );
-    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<[f32; 3]>::new());
-    mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, Vec::<[f32; 4]>::new());
-    mesh.insert_indices(Indices::U32(Vec::new()));
+    let (mut positions, mut colors, mut indices) = (Vec::new(), Vec::new(), Vec::new());
+    pad_degenerate(&mut positions, &mut colors, &mut indices);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
+    mesh.insert_indices(Indices::U32(indices));
     mesh
 }
 
@@ -103,6 +119,7 @@ fn update_trail(
     handle: Query<&Mesh3d, With<TrailMesh>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut stats: ResMut<TrailStats>,
+    mut was_empty: Local<bool>,
 ) {
     let Some(camera) = camera.iter().next().map(|t| t.translation()) else {
         return;
@@ -110,11 +127,17 @@ fn update_trail(
     let Ok(Mesh3d(handle)) = handle.single() else {
         return;
     };
+    let tips = &volleys.trail_tips;
+    // Still empty: the placeholder triangle already in the mesh stays, no re-upload.
+    if tips.is_empty() && *was_empty {
+        return;
+    }
+    *was_empty = tips.is_empty();
     let Some(mut mesh) = meshes.get_mut(handle) else {
         return;
     };
-    let tips = &volleys.trail_tips;
-    let (positions, colors, indices) = build_ribbons(tips, camera);
+    let (mut positions, mut colors, mut indices) = build_ribbons(tips, camera);
+    pad_degenerate(&mut positions, &mut colors, &mut indices);
     stats.ribbons = tips.len();
     stats.peak = stats.peak.max(tips.len());
     stats.widest_m = tips
@@ -159,6 +182,15 @@ impl Plugin for TrailPlugin {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn no_arrow_still_leaves_one_degenerate_triangle() {
+        let (mut positions, mut colors, mut indices) = build_ribbons(&[], Vec3::ZERO);
+        assert!(positions.is_empty());
+        pad_degenerate(&mut positions, &mut colors, &mut indices);
+        assert_eq!((positions.len(), colors.len(), indices.len()), (3, 3, 3));
+        assert!(positions.iter().all(|p| *p == [0.0; 3]));
+    }
 
     #[test]
     fn a_ribbon_runs_from_the_tip_back_along_the_flight_and_fades() {

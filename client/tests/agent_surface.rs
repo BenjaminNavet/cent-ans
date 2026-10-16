@@ -133,3 +133,15 @@ fn agent_run_detection() {
             .unwrap()
     );
 }
+
+#[test]
+fn click_if_is_a_non_fatal_click() {
+    let commands = parse_script("click_if Confirmer\ntry_click Fermer").unwrap();
+    assert_eq!(
+        commands,
+        vec![
+            ScriptCommand::ClickIf("Confirmer".into()),
+            ScriptCommand::ClickIf("Fermer".into())
+        ]
+    );
+}

@@ -790,6 +790,11 @@ fn handle_clicks(
                         let (data, state) = (sim.data.as_ref()?, sim.state.as_ref()?);
                         game_api::army_sheet(data, state, id)?.location_province
                     })
+                    .or_else(|| {
+                        let state = sim.state.as_ref()?;
+                        let faction = state.factions.get(&sim.player)?;
+                        Some(faction.capital.as_str().to_owned())
+                    })
                     .unwrap_or_default();
                 panels.write(OpenPanel::Recruitment(province));
             }

@@ -514,6 +514,11 @@ pub fn dump(world: &World) -> Value {
         .count();
     json!({
         "active": queue.active_key(),
+        // Names of the active modal's buttons (a script presses them with `click <label>`).
+        "active_buttons": queue.active.as_ref().map(|e| json!({
+            "yes": e.spec.yes_label,
+            "no": (!e.spec.no_label.is_empty()).then(|| e.spec.no_label.clone()),
+        })),
         "pending": queue.pending_keys(),
         "queue_length": queue.pending.len() + usize::from(queue.active.is_some()),
         "toasts": toasts,

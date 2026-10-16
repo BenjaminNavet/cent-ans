@@ -419,6 +419,8 @@ fn dialog_buttons(
     mut toasts: MessageWriter<ToastRequest>,
     mut reopen: MessageWriter<OpenSaveDialog>,
     mut closed: MessageWriter<OverlayClosed>,
+    buttons: Query<(&Name, &Children)>,
+    mut captions: Query<&mut Text, Without<DialogStatus>>,
 ) {
     for press in pressed.read() {
         let Ok((overlay, mut dialog)) = dialogs.single_mut() else {
@@ -460,8 +462,18 @@ fn dialog_buttons(
                         dialog.overwrite_armed = Some(name.clone());
                         set_status(
                             &mut status,
-                            &format!("« {name} » existe : confirmez pour l’écraser."),
+                            &format!("« {name} » existe déjà. Écraser cette sauvegarde ?"),
                         );
+                        // The confirm button turns into « Écraser » so the second press is explicit.
+                        for (button, children) in &buttons {
+                            if button.as_str() == "dialog:confirm" {
+                                for child in children.iter() {
+                                    if let Ok(mut text) = captions.get_mut(child) {
+                                        text.0 = "Écraser".to_owned();
+                                    }
+                                }
+                            }
+                        }
                         continue;
                     }
                     match save_now(&sim, &dir.0, &name) {
@@ -526,6 +538,7 @@ pub fn dump(world: &World) -> Value {
             "mode": format!("{:?}", d.mode),
             "slots": d.slots.len(),
             "selected": d.selected.and_then(|i| d.slots.get(i)).map(|s| s.name.clone()),
+            "overwrite_armed": d.overwrite_armed,
         })
     });
     // Digest of the whole campaign state (RNG included): equal before a save and after its load.

@@ -33,6 +33,8 @@ use script::{ScriptCommand, parse_script};
 pub const VIEW_SIZE: (u32, u32) = (1280, 800);
 /// Frames a `click` waits for its target to exist before failing the run.
 const CLICK_RETRY_FRAMES: u32 = 300;
+/// `click_if` waits this long for the node before skipping it.
+const CLICK_IF_GRACE_FRAMES: u32 = 10;
 
 /// Image the cameras render to under `--offscreen` / `--shot`. Cameras of every screen must use
 /// `RenderTarget::Image(target.0.clone().into())` when this resource exists.
@@ -214,6 +216,7 @@ fn drive(world: &mut World) {
         let Some(command) = world.resource_mut::<AgentRun>().queue.pop_front() else {
             return;
         };
+        let optional = matches!(command, ScriptCommand::ClickIf(_));
         match command {
             ScriptCommand::Wait(frames) => {
                 world.resource_mut::<AgentRun>().wait = frames;
@@ -238,7 +241,7 @@ fn drive(world: &mut World) {
                 world.resource_mut::<AgentRun>().typing = text.chars().collect();
                 return;
             }
-            ScriptCommand::Click(name) => {
+            ScriptCommand::Click(name) | ScriptCommand::ClickIf(name) => {
                 let mut query = world.query::<(Entity, &Name)>();
                 let target = query
                     .iter(world)
@@ -255,10 +258,21 @@ fn drive(world: &mut World) {
                         let retries = {
                             let mut run = world.resource_mut::<AgentRun>();
                             run.click_retries += 1;
-                            run.queue.push_front(ScriptCommand::Click(name.clone()));
+                            let again = if optional {
+                                ScriptCommand::ClickIf(name.clone())
+                            } else {
+                                ScriptCommand::Click(name.clone())
+                            };
+                            run.queue.push_front(again);
                             run.click_retries
                         };
-                        if retries > CLICK_RETRY_FRAMES {
+                        if optional && retries > CLICK_IF_GRACE_FRAMES {
+                            // Optional click: drop it (the re-queued copy) and move on.
+                            let mut run = world.resource_mut::<AgentRun>();
+                            run.queue.pop_front();
+                            run.click_retries = 0;
+                            info!("click_if: no entity named `{name}`, skipped");
+                        } else if retries > CLICK_RETRY_FRAMES {
                             fatal(world, &format!("click: no entity named `{name}`"));
                         }
                     }

@@ -64,7 +64,7 @@ impl Plugin for PanelTechPlugin {
                 Update,
                 (
                     shortcut,
-                    open_close,
+                    open_close.before(crate::menu::pause::pause_escape),
                     watch_turn,
                     rebuild,
                     handle_buttons,
@@ -169,7 +169,8 @@ fn open_close(
     keys: Res<ButtonInput<KeyCode>>,
     keymap: Option<Res<crate::settings::KeyMap>>,
     focus: Option<Res<TextInputFocus>>,
-    mut held: Local<(bool, bool)>,
+    mut held: Local<bool>,
+    mut edges: ResMut<crate::menu::KeyEdges>,
 ) {
     let free = keyboard_free(focus);
     let was_open = panel.open;
@@ -186,14 +187,15 @@ fn open_close(
     // Edge detection on `pressed`: the agent's scripted keys are set in `Last`, so the next
     // frame's input clearing would erase `just_pressed` before this system sees it.
     let f4 = free && tech_key(keymap.as_deref(), &keys);
-    let escape = free && keys.pressed(KeyCode::Escape);
-    let (f4_edge, escape_edge) = (f4 && !held.0, escape && !held.1);
-    *held = (f4, escape);
+    let f4_edge = f4 && !*held;
+    *held = f4;
     // Opening goes through [`shortcut`] (message bus); only the close is handled here.
     if f4_edge && was_open && panel.open {
         panel.open = false;
     }
-    if panel.open && escape_edge {
+    // Escape goes through the shared edge so the pause menu does not open on the same press.
+    if panel.open && free && edges.escape {
+        edges.escape = false;
         panel.open = false;
     }
 }

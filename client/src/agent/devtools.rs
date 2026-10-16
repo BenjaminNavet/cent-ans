@@ -54,6 +54,9 @@ impl Plugin for DevToolsPlugin {
             None => app.add_plugins(bevy_brp_extras::BrpExtrasPlugin::default()),
         };
         register_dump_method(app);
+        if std::env::var_os("CENT_ANS_PROBE_EMPTY_MESH").is_some() {
+            app.add_systems(Update, probe_empty_meshes);
+        }
         app.add_plugins(console::DevConsolePlugin);
         if let Some(seed) = std::env::var("CENT_ANS_SHUFFLE_SEED")
             .ok()
@@ -66,6 +69,52 @@ impl Plugin for DevToolsPlugin {
             // Startup itself is already built when it runs: shuffle before the first update too.
             shuffle_all(&mut app.world_mut().resource_mut::<Schedules>(), seed);
         }
+    }
+}
+
+/// `CENT_ANS_PROBE_EMPTY_MESH=1`: warns (once per entity) about every entity drawing a mesh with
+/// no vertices, with its name, its parents' names and its component types, so the code that
+/// spawns it can be found (Bevy's own warning only gives an opaque asset id).
+#[cfg(feature = "dev")]
+fn probe_empty_meshes(world: &mut World, mut seen: Local<std::collections::HashSet<Entity>>) {
+    // Checked the frame a mesh handle appears: later the render world has taken the data.
+    let meshes = world.resource::<Assets<Mesh>>();
+    let empty: Vec<Entity> = world
+        .try_query_filtered::<(Entity, &Mesh3d), Changed<Mesh3d>>()
+        .map(|mut q| {
+            q.iter(world)
+                .filter(|(_, m)| {
+                    meshes.get(&m.0).is_some_and(|mesh| {
+                        mesh.try_attributes()
+                            .is_ok_and(|a| a.map(|(_, v)| v.len()).min().unwrap_or(0) == 0)
+                    })
+                })
+                .map(|(e, _)| e)
+                .collect()
+        })
+        .unwrap_or_default();
+    for entity in empty {
+        if !seen.insert(entity) {
+            continue;
+        }
+        let mut chain = Vec::new();
+        let mut current = Some(entity);
+        while let Some(e) = current {
+            chain.push(
+                world
+                    .get::<Name>(e)
+                    .map_or_else(|| format!("{e}"), |n| n.to_string()),
+            );
+            current = world.get::<ChildOf>(e).map(|c| c.parent());
+        }
+        let components: Vec<String> = world
+            .inspect_entity(entity)
+            .map(|infos| infos.map(|(_, i)| i.name().to_string()).collect())
+            .unwrap_or_default();
+        warn!(
+            "empty mesh on {entity}: chain {chain:?}, components {}",
+            components.join(", ")
+        );
     }
 }
 
