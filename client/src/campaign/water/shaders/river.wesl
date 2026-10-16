@@ -64,6 +64,7 @@ struct VertexOutput {
     @location(2) flow: vec2<f32>,
     @location(3) world: vec3<f32>,
     @location(4) far: f32,
+    @location(5) carved: f32,
 }
 
 fn hash21(p: vec2<f32>) -> f32 {
@@ -94,6 +95,14 @@ fn gen_width(w: f32) -> f32 {
     return w;
 }
 
+// Carved bed (river_bed.gdshaderinc, river_water.gdshader). The Godot terrain carves the fine relief
+// tiles listed in `carved_rects`; the Bevy terrain carves the close ground by camera distance
+// (`river_carve` of terrain.wesl, same two radii), so the water follows the same weight: it sinks
+// `WATER_SINK` under the bank and the ribbon overlaps the carved slope by `CARVED_OVERLAP`.
+const WATER_SINK: f32 = 0.022;
+const CARVED_OVERLAP: f32 = 1.35;
+const CARVE_NEAR: vec2<f32> = vec2<f32>(220.0, 380.0);
+
 @vertex
 fn vertex(in: VertexInput) -> VertexOutput {
     let world_from_local = get_world_from_local(in.instance_index);
@@ -108,16 +117,19 @@ fn vertex(in: VertexInput) -> VertexOutput {
         out.alpha = 1.0;
         out.far = 1.0;
         out.side = 0.0;
+        out.carved = 0.0;
         out.flow = world.xz * vec2<f32>(0.35, 0.5);
     } else {
         let world_per_px = dist * 2.0 / (abs(view.clip_from_view[1][1]) * view.viewport.w);
         let gw = gen_width(in.uv.x);
         let true_px = gw / world_per_px;
         let imp_px = params.min_px * importance_px_scale(in.uv2.y);
-        let half_w = 0.5 * max(gw, imp_px * world_per_px);
+        let carved = 1.0 - smoothstep(CARVE_NEAR.x, CARVE_NEAR.y, distance(world.xyz, view.world_position));
+        let half_w = 0.5 * max(gw * mix(1.0, CARVED_OVERLAP, carved), imp_px * world_per_px);
         let dir = (world_from_local * vec4<f32>(in.normal, 0.0)).xyz;
         world = vec4<f32>(world.xyz + dir * half_w, 1.0);
-        world.y = world.y + params.lift_base + params.lift_per_distance * dist;
+        world.y = world.y + mix(params.lift_base + params.lift_per_distance * dist, -WATER_SINK, carved);
+        out.carved = carved;
         out.alpha = mix(1.0, clamp(true_px / imp_px, 0.25, 1.0), params.thin_fade);
         out.far = 1.0;
         if params.distance_fade.y > 0.0 {
@@ -169,14 +181,14 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     col = mix(col, params.silt_color.rgb * (0.9 + 0.2 * n2), params.detail.w * mix(0.55, 1.0, deep));
     // DN: foam streaks along the bank, stretched along the current (albedo alpha).
     let streak = textureSample(detail_albedo, detail_sampler, rc_uv * vec2<f32>(0.6, 1.4) + vec2<f32>(-globals.time * params.detail.z * 1.5, 0.0)).a * d_on;
-    var bank_foam = smoothstep(0.82, 1.0, edge) * (0.5 + 0.5 * n2) * 0.25;
-    bank_foam = bank_foam + smoothstep(0.6, 1.0, edge) * streak * 0.35;
+    var bank_foam = smoothstep(0.82, 1.0, edge) * (0.5 + 0.5 * n2) * (1.0 - in.carved) * 0.25;
+    bank_foam = bank_foam + smoothstep(0.6, 1.0, edge) * streak * 0.35 * (1.0 - in.carved * 0.5);
     let foam = clamp(bank_foam, 0.0, 1.0);
     col = mix(col, params.foam_color.rgb, foam * 0.7);
 
     let half_px = select(1.0 / max(fwidth(in.side), 1e-4), 1000.0, sheet);
     let px_edge = max(1.0 - edge, 0.0) * half_px;
-    let ink = (1.0 - smoothstep(0.0, params.bank_ink_px, px_edge)) * smoothstep(1.2, 3.0, half_px) * params.bank_ink_strength;
+    let ink = (1.0 - smoothstep(0.0, params.bank_ink_px, px_edge)) * smoothstep(1.2, 3.0, half_px) * params.bank_ink_strength * (1.0 - in.carved);
 
     let fine_ripples = 1.0 - smoothstep(0.08, 0.45, fwidth(q.x));
     var n = normalize(vec3<f32>(-nx * params.ripple_strength * 10.0 * fine_ripples, 1.0, -ny * params.ripple_strength * 10.0 * fine_ripples));
@@ -201,7 +213,9 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 
     var alpha = 0.9 * in.alpha * in.far;
     if !sheet {
-        alpha = alpha * (1.0 - (1.0 - smoothstep(0.0, params.edge_soft_px, px_edge)));
+        // The water ends on the carved slope by itself (depth test): no soft border there.
+        let soft = 1.0 - (1.0 - smoothstep(0.0, params.edge_soft_px, px_edge)) * (1.0 - in.carved);
+        alpha = mix(0.9, 0.97, in.carved) * in.alpha * in.far * soft;
     } else {
         alpha = params.sheet_alpha;
         if params.has_coast_dist > 0.5 {
