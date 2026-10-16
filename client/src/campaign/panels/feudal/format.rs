@@ -354,3 +354,53 @@ mod tests {
         assert_eq!(rank_heading("duché"), "Duché");
     }
 }
+
+/// Kinds of core events that carry feudalism (`FeudalController.FEUDAL_KINDS`).
+pub const FEUDAL_KINDS: [&str; 3] = ["vassalage", "vassal_rebellion", "succession"];
+/// Words that mark a feudal news text (`FeudalController.FEUDAL_WORDS`).
+pub const FEUDAL_WORDS: [&str; 9] = [
+    "commise",
+    "félonie",
+    "suzerain",
+    "vassal",
+    "hommage",
+    "l’ost",
+    "protection",
+    "déshérence",
+    "arbitr",
+];
+/// Feudal events kept in the panel (`FeudalController.RECENT_MAX`).
+pub const RECENT_MAX: usize = 12;
+
+/// Whether an event (serialised kind, French text) is a feudal one
+/// (`FeudalController.is_feudal_event`).
+pub fn is_feudal_event(kind: &str, text: &str) -> bool {
+    if FEUDAL_KINDS.contains(&kind) {
+        return true;
+    }
+    let lower = text.to_lowercase();
+    FEUDAL_WORDS.iter().any(|word| lower.contains(word))
+}
+
+/// « 1 événement féodal » / « 3 événements féodaux » (`FrText.count`).
+pub fn event_count(n: usize) -> String {
+    if n <= 1 {
+        format!("{n} événement féodal")
+    } else {
+        format!("{n} événements féodaux")
+    }
+}
+
+#[cfg(test)]
+mod event_tests {
+    use super::*;
+
+    #[test]
+    fn feudal_events_by_kind_or_word() {
+        assert!(is_feudal_event("vassalage", "x"));
+        assert!(is_feudal_event("battle", "Le Duc prononce la Commise"));
+        assert!(!is_feudal_event("battle", "Bataille de Crécy"));
+        assert_eq!(event_count(1), "1 événement féodal");
+        assert_eq!(event_count(3), "3 événements féodaux");
+    }
+}

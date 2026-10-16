@@ -1,0 +1,11 @@
+wait 200
+wait 30
+dump out/campui7_court_a.json
+click court:tree:in
+wait 10
+click court:tree:in
+wait 10
+click court:tree:out
+wait 10
+dump out/campui7_court_b.json
+exit

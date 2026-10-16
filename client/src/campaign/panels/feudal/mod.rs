@@ -8,13 +8,15 @@
 //! `feudal_declare_commise`, `feudal_grant_title`, `feudal_arbitrate`, `answer_offer`).
 //!
 //! Opens on `OpenPanel::Feudal` (toggle) or `CENT_ANS_OPEN_FEUDAL=1` (dev hook, first campaign
-//! frame); closes on Escape, the close button, `OpenPanel::CloseAll`. Not ported: the map
-//! filter and its tutorial, the « événements féodaux » list fed by end-of-turn events (needs the
-//! turn report), the breadcrumb link from the province sheet (province lot), the Menu entry
+//! frame); closes on Escape, the close button, `OpenPanel::CloseAll`. The « Événements féodaux »
+//! list and the toasts of the end of turn come from `TurnAdvanced` (`record_events`); the
+//! three-step guide is `guide.rs`. Not ported: the map
+//! filter, the breadcrumb link from the province sheet (province lot), the Menu entry
 //! (HUD lot sends `OpenPanel::Feudal`), the possession tooltips of `holdings_controller.gd`
 //! (the Colonies list is another screen).
 
 mod format;
+mod guide;
 mod heraldry;
 mod view;
 
@@ -28,9 +30,11 @@ use serde_json::{Value, json};
 use super::OpenPanel;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
+use crate::campaign::hud::flow::TurnAdvanced;
 use crate::menu::KeyEdges;
 use crate::sim::Sim;
 use crate::ui::kit::ButtonPressed;
+use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::displaces;
 
 pub struct PanelFeudalPlugin;
@@ -39,12 +43,14 @@ impl Plugin for PanelFeudalPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<FeudalUi>()
             .register_dump(dump_feudal)
+            .add_plugins(guide::plugin)
             .add_systems(OnEnter(AppState::Campaign), reset_on_enter)
             .add_systems(
                 Update,
                 (
                     open_close.before(crate::menu::pause::pause_escape),
                     handle_presses,
+                    record_events,
                     view::rebuild,
                 )
                     .chain()
@@ -60,6 +66,13 @@ const ENV_OPEN: &str = "CENT_ANS_OPEN_FEUDAL";
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LastResult {
     pub ok: bool,
+    pub text: String,
+}
+
+/// One feudal event kept for the « Événements féodaux » list.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RecentEvent {
+    pub date: String,
     pub text: String,
 }
 
@@ -86,6 +99,8 @@ pub struct FeudalUi {
     pub homage_index: usize,
     pub grant_index: usize,
     pub result: Option<LastResult>,
+    /// Feudal events of the latest turns, newest first (`FeudalController.recent`).
+    pub recent: Vec<RecentEvent>,
     dirty: bool,
     env_checked: bool,
     arms: Option<heraldry::HouseArms>,
@@ -108,6 +123,56 @@ impl FeudalUi {
 
 fn reset_on_enter(mut ui: ResMut<FeudalUi>) {
     *ui = FeudalUi::default();
+}
+
+/// End of turn (`FeudalController.after_end_turn`): the feudal events are noted for the panel
+/// and announced when they concern the player; pending feudal calls are announced too.
+fn record_events(
+    mut advanced: MessageReader<TurnAdvanced>,
+    sim: Res<Sim>,
+    mut ui: ResMut<FeudalUi>,
+    mut toasts: MessageWriter<ToastRequest>,
+) {
+    for turn in advanced.read() {
+        let (Some(data), Some(state)) = (&sim.data, &sim.state) else {
+            continue;
+        };
+        let date = state.date_label();
+        let my_name = data.faction_name(&sim.player);
+        let mut mine = 0;
+        let mut fresh = Vec::new();
+        for event in &turn.events {
+            let kind = serde_json::to_value(event.kind)
+                .ok()
+                .and_then(|v| v.as_str().map(str::to_owned))
+                .unwrap_or_default();
+            if !format::is_feudal_event(&kind, &event.text_fr) {
+                continue;
+            }
+            fresh.push(RecentEvent {
+                date: date.clone(),
+                text: event.text_fr.clone(),
+            });
+            if event.faction.as_ref() == Some(&sim.player)
+                || (!my_name.is_empty() && event.text_fr.contains(&my_name))
+            {
+                mine += 1;
+            }
+        }
+        fresh.extend(std::mem::take(&mut ui.recent));
+        fresh.truncate(format::RECENT_MAX);
+        ui.recent = fresh;
+        let calls = feudal::calls(data, state);
+        if let Some(call) = calls.first() {
+            toasts.write(ToastRequest::new(&format!("Appel féodal : {}", call.text)));
+        } else if mine > 0 {
+            toasts.write(ToastRequest::new(&format!(
+                "{} vous concernant : voir l’arbre féodal.",
+                format::event_count(mine)
+            )));
+        }
+        ui.dirty = true;
+    }
 }
 
 fn close_on_exit(mut ui: ResMut<FeudalUi>) {
@@ -398,6 +463,7 @@ fn dump_feudal(world: &World) -> (String, Value) {
             "open": ui.open,
             "selected": ui.selected,
             "expanded": ui.expanded.len(),
+            "recent": ui.recent.iter().map(|e| json!({"date": e.date, "text": e.text})).collect::<Vec<_>>(),
             "houses_known": snap.arms.len(),
             "result": ui.result.as_ref().map(|r| json!({"ok": r.ok, "text": r.text})),
             "panel": panel,

@@ -18,8 +18,10 @@
 //! at the top of the « Charges » tab (`view.rs`), hover / click on a councillor select the office
 //! of this panel.
 //!
-//! Not ported: the `NextHint` advice, the `portrait_marks` shader (grey / pallor are a
-//! tint), the zoom and drag of the family tree.
+//! The next-step hint (`NextHint`) joins the councillors' advice (`hint_alert`, a click is relayed
+//! to the HUD card); `portrait_marks.wesl` (`PortraitMarksMaterial`) greys the dead, pales the
+//! sick, shades the captive and mirrors the picture; the family tree zooms (`+`/`−`/Ctrl + wheel,
+//! 45 % to 160 %) and scrolls by dragging (`tree_input`).
 
 mod family_layout;
 pub mod portrait;
@@ -51,6 +53,7 @@ impl Plugin for PanelCourtPlugin {
             .map(|root| portrait::PortraitBank::load(&root))
             .unwrap_or_default();
         app.init_resource::<CourtUi>()
+            .add_plugins(portrait::PortraitMarksPlugin)
             .insert_resource(bank)
             .register_dump(dump_court)
             .add_systems(
@@ -59,6 +62,8 @@ impl Plugin for PanelCourtPlugin {
                     dev_open,
                     open_close.before(crate::menu::pause::pause_escape),
                     handle_presses,
+                    forward_hint,
+                    tree_input,
                     view::rebuild,
                 )
                     .chain()
@@ -119,6 +124,10 @@ pub struct Snapshot {
     pub holder: Option<CharacterSheet>,
 }
 
+/// Zoom bounds of the family tree (`family_tree_view.gd`).
+pub const ZOOM_MIN: f32 = 0.45;
+pub const ZOOM_MAX: f32 = 1.6;
+
 #[derive(Resource)]
 pub struct CourtUi {
     pub screen: Screen,
@@ -135,6 +144,13 @@ pub struct CourtUi {
     /// The « Exécuter » button was pressed once and waits for its confirmation.
     pub armed_execution: bool,
     pub(crate) dirty: bool,
+    /// A hint advice was clicked: [`forward_hint`] relays it to the HUD card.
+    hint_go: bool,
+    /// Hint advices activated (dump).
+    pub hint_activations: u32,
+    /// Zoom of the family tree and its scroll offset (kept across rebuilds).
+    pub tree_zoom: f32,
+    pub tree_scroll: Vec2,
     pub snapshot: Snapshot,
 }
 
@@ -152,12 +168,26 @@ impl Default for CourtUi {
             result: None,
             armed_execution: false,
             dirty: false,
+            hint_go: false,
+            hint_activations: 0,
+            tree_zoom: 1.0,
+            tree_scroll: Vec2::ZERO,
             snapshot: Snapshot::default(),
         }
     }
 }
 
 impl CourtUi {
+    /// Sets the family-tree zoom (clamped); the scroll offset follows the scale.
+    pub fn set_tree_zoom(&mut self, value: f32) {
+        let zoom = value.clamp(ZOOM_MIN, ZOOM_MAX);
+        if (zoom - self.tree_zoom).abs() > f32::EPSILON {
+            self.tree_scroll *= zoom / self.tree_zoom;
+            self.tree_zoom = zoom;
+            self.dirty = true;
+        }
+    }
+
     /// Opens the sheet of `id`; `push` keeps the previous one for « Retour ».
     pub fn open_character(&mut self, id: &str, push: bool) {
         if push
@@ -193,10 +223,15 @@ impl CourtUi {
     }
 }
 
-/// Dev hook for agent scripts: `CENT_ANS_OPEN_COURT=character:<id>|character:ruler|council`
+/// Dev hook for agent scripts: `CENT_ANS_OPEN_COURT=character:<id>[@tab]|character:ruler[@tab]|council`
 /// opens the screen once the campaign runs.
-fn dev_open(mut done: Local<bool>, sim: Res<Sim>, mut ui: ResMut<CourtUi>) {
+fn dev_open(mut done: Local<bool>, mut frames: Local<u32>, sim: Res<Sim>, mut ui: ResMut<CourtUi>) {
     if *done {
+        return;
+    }
+    // After the first frames: the campaign start sends a `CloseAll` that would shut the screen.
+    *frames += 1;
+    if *frames < 30 {
         return;
     }
     *done = true;
@@ -206,6 +241,11 @@ fn dev_open(mut done: Local<bool>, sim: Res<Sim>, mut ui: ResMut<CourtUi>) {
     if request == "council" {
         ui.open_council();
     } else if let Some(id) = request.strip_prefix("character:") {
+        // `character:<id>[@<tab>]`, tab = sheet | skills | family | orders.
+        let (id, tab) = id.split_once('@').map_or((id, None), |(i, t)| (i, Some(t)));
+        if let Some(tab) = tab {
+            ui.sheet_tab = format!("court:tab:{tab}");
+        }
         let id = if id == "ruler" {
             sim.state
                 .as_ref()
@@ -282,6 +322,12 @@ fn handle_presses(
             continue;
         };
         if let Some(id) = name.strip_prefix("advice:") {
+            if id.starts_with("hint:") {
+                // `next_hint.activate(hint)`: the HUD card performs the action of its hint.
+                ui.hint_go = true;
+                ui.hint_activations += 1;
+                continue;
+            }
             if let Some(alert) = ui.snapshot.alerts.iter().find(|a| a.id == id).cloned() {
                 for panel in advice_route(&alert, &mut select) {
                     panels.write(panel);
@@ -297,6 +343,77 @@ fn handle_presses(
         ) {
             sfx.write(crate::audio::PlaySfx::new(event));
         }
+    }
+}
+
+/// Family tree input (`family_tree_view.gd::_gui_input`): Ctrl + wheel zooms by 1.1, a drag with
+/// the left or middle button scrolls; the scroll offset is kept for the next rebuild.
+fn tree_input(
+    mut ui: ResMut<CourtUi>,
+    keys: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
+    mut wheel: MessageReader<bevy::input::mouse::MouseWheel>,
+    mut motion: MessageReader<bevy::input::mouse::MouseMotion>,
+    mut scrollers: Query<
+        (&bevy::picking::hover::Hovered, &mut ScrollPosition),
+        With<view::FamilyScroller>,
+    >,
+) {
+    let Ok((hovered, mut position)) = scrollers.single_mut() else {
+        wheel.clear();
+        motion.clear();
+        return;
+    };
+    let hovered = hovered.get();
+    let ctrl = keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight);
+    for event in wheel.read() {
+        if hovered && ctrl && event.y != 0.0 {
+            let factor = if event.y > 0.0 { 1.1 } else { 1.0 / 1.1 };
+            let zoom = ui.tree_zoom * factor;
+            ui.set_tree_zoom(zoom);
+        }
+    }
+    let dragging = mouse.pressed(MouseButton::Left) || mouse.pressed(MouseButton::Middle);
+    for event in motion.read() {
+        if hovered && dragging {
+            position.0 -= event.delta;
+            position.0 = position.0.max(Vec2::ZERO);
+        }
+    }
+    if ui.tree_scroll != position.0 && !ui.dirty {
+        ui.tree_scroll = position.0;
+    }
+}
+
+/// Relays a click on the hint advice to the card of the HUD (`hud:hint_go`), which owns the
+/// action (`NextHintController.activate`).
+fn forward_hint(mut ui: ResMut<CourtUi>, mut out: MessageWriter<ButtonPressed>) {
+    if ui.hint_go {
+        ui.hint_go = false;
+        out.write(ButtonPressed {
+            entity: Entity::PLACEHOLDER,
+            name: "hud:hint_go".to_owned(),
+        });
+    }
+}
+
+/// The next-step hint as an advice item (`hint:<id>`, kind of its alert or its own id).
+pub(crate) fn hint_alert(hint: &crate::campaign::hud::hint::Hint) -> game_api::turn::Alert {
+    game_api::turn::Alert {
+        id: format!("hint:{}", hint.id),
+        kind: hint
+            .alert
+            .as_ref()
+            .map_or_else(|| hint.id.clone(), |alert| alert.kind.clone()),
+        severity: game_api::turn::Severity::Info,
+        text: if hint.text.is_empty() {
+            hint.title.clone()
+        } else {
+            hint.text.clone()
+        },
+        province: hint.alert.as_ref().and_then(|a| a.province.clone()),
+        army: hint.army.clone(),
+        blocking: false,
     }
 }
 
@@ -323,6 +440,18 @@ fn advice_route(
 
 fn press_button(name: &str, ui: &mut CourtUi, sim: &mut Sim) {
     ui.dirty = true;
+    if let Some(action) = name.strip_prefix("tree:") {
+        match action {
+            "in" => ui.set_tree_zoom(ui.tree_zoom * 1.2),
+            "out" => ui.set_tree_zoom(ui.tree_zoom / 1.2),
+            "home" => {
+                ui.set_tree_zoom(1.0);
+                ui.tree_scroll = Vec2::ZERO;
+            }
+            _ => {}
+        }
+        return;
+    }
     if name != "ransom:execute" {
         ui.armed_execution = false;
     }
@@ -451,7 +580,11 @@ fn run_council_press(name: &str, ui: &mut CourtUi, sim: &mut Sim) {
 }
 
 /// Recomputes the snapshot from the sim (called by the view just before it rebuilds).
-pub(crate) fn refresh_snapshot(ui: &mut CourtUi, sim: &Sim) {
+pub(crate) fn refresh_snapshot(
+    ui: &mut CourtUi,
+    sim: &Sim,
+    hint: Option<&crate::campaign::hud::hint::Hint>,
+) {
     ui.snapshot = Snapshot::default();
     let (Some(data), Some(state)) = (&sim.data, &sim.state) else {
         return;
@@ -479,6 +612,9 @@ pub(crate) fn refresh_snapshot(ui: &mut CourtUi, sim: &Sim) {
             ui.snapshot.chivalry = Some(api::chivalric_orders(data, state, &player));
             ui.snapshot.treasury = state.faction_summary(&player).map_or(0, |s| s.treasury);
             ui.snapshot.alerts = api::advice_alerts(data, state, &player);
+            // `council_controller.gd::_advice_items`: the « que faire maintenant » hint joins
+            // the alerts the councillors comment on.
+            ui.snapshot.alerts.extend(hint.map(hint_alert));
             let valid = |id: &str| ui.snapshot.offices.iter().any(|o| o.id == id);
             if ui.office.as_deref().is_none_or(|id| !valid(id)) {
                 ui.office = ui.snapshot.offices.first().map(|o| o.id.clone());
@@ -554,10 +690,18 @@ fn dump_court(world: &World) -> (String, Value) {
     };
     let advice = json!({
         "alerts": snap.alerts.len(),
+        "hint": snap.alerts.iter().find(|a| a.id.starts_with("hint:")).map(|a| json!({
+            "id": a.id, "kind": a.kind, "text": a.text,
+        })),
+        "hint_activations": ui.hint_activations,
         "top": view::top_advice(snap, 3).iter().map(|(office, a)| json!({
             "office": office, "kind": a.kind, "text": a.text,
         })).collect::<Vec<_>>(),
     });
+    let marks_stats = {
+        let stats = world.resource::<portrait::PortraitMarksStats>();
+        json!({"dressed": stats.dressed, "grey": stats.grey, "pallor": stats.pallor, "dim": stats.dim})
+    };
     use game_api::court::SkillState;
     let count = |state: SkillState| snap.skills.iter().filter(|n| n.state == state).count();
     (
@@ -581,6 +725,9 @@ fn dump_court(world: &World) -> (String, Value) {
             "family_layout": family_layout,
             "skill_layout": skill_layout,
             "advice": advice,
+            "tree_zoom": ui.tree_zoom,
+            "tree_scroll": [ui.tree_scroll.x, ui.tree_scroll.y],
+            "portrait_marks": marks_stats,
             "holder_portrait": snap.holder.as_ref().map(|h| {
                 let resolved = bank.resolve(&view::sheet_subject(h));
                 json!({"id": h.id, "kind": resolved.kind, "path": resolved.path})
@@ -609,6 +756,36 @@ fn dump_court(world: &World) -> (String, Value) {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn tree_zoom_is_clamped_and_scales_the_scroll() {
+        let mut ui = CourtUi {
+            tree_scroll: Vec2::new(100.0, 40.0),
+            ..CourtUi::default()
+        };
+        ui.set_tree_zoom(2.0 * ZOOM_MAX);
+        assert_eq!(ui.tree_zoom, ZOOM_MAX);
+        assert!((ui.tree_scroll.x - 100.0 * ZOOM_MAX).abs() < 1e-3);
+        ui.set_tree_zoom(0.0);
+        assert_eq!(ui.tree_zoom, ZOOM_MIN);
+    }
+
+    #[test]
+    fn hint_becomes_an_info_advice() {
+        let hint = crate::campaign::hud::hint::Hint {
+            id: "end_turn".into(),
+            title: "Fin".into(),
+            text: "Entrée".into(),
+            action: "end_turn".into(),
+            alert: None,
+            army: None,
+        };
+        let alert = hint_alert(&hint);
+        assert_eq!(alert.id, "hint:end_turn");
+        assert_eq!(alert.kind, "end_turn");
+        assert_eq!(alert.text, "Entrée");
+        assert_eq!(alert.severity, game_api::turn::Severity::Info);
+    }
+
     use super::*;
 
     #[test]

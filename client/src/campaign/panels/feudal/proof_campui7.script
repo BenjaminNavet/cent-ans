@@ -1,0 +1,11 @@
+wait 200
+dump out/campui7_feudal_a.json
+key Enter
+wait 400
+dump out/campui7_feudal_b.json
+click feudal_guide:next
+wait 20
+click feudal_guide:next
+wait 20
+dump out/campui7_feudal_c.json
+exit

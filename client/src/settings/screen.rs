@@ -427,6 +427,7 @@ pub fn handle_widgets(
                     tutorial_step: settings.tutorial_step,
                     tutorial_done: settings.tutorial_done,
                     tutorial_postponed: settings.tutorial_postponed,
+                    feudal_tutorial_done: settings.feudal_tutorial_done,
                     ..Settings::default()
                 };
                 rebuild = true;

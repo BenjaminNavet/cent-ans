@@ -96,6 +96,7 @@ pub fn rebuild(
                 possessions(body, &theme, ui);
                 tree(body, &theme, &assets, asset_root.as_deref(), ui);
                 selection(body, &theme, ui);
+                recent(body, &theme, ui);
                 objectives(body, &theme, ui);
             });
         });
@@ -637,6 +638,27 @@ fn selection(body: &mut Kids, theme: &UiTheme, ui: &FeudalUi) {
                 );
             }
         });
+    });
+}
+
+/// « Événements féodaux »: the feudal news of the latest turns.
+fn recent(body: &mut Kids, theme: &UiTheme, ui: &FeudalUi) {
+    if ui.recent.is_empty() {
+        return;
+    }
+    body.spawn(column(3.0)).with_children(|section| {
+        section.spawn(heading(theme, "Événements féodaux"));
+        for (index, event) in ui.recent.iter().enumerate() {
+            section.spawn((
+                Name::new(format!("Recent{index}")),
+                ink(
+                    theme,
+                    &format!("{} — {}", event.date, event.text),
+                    UiType::Caption,
+                    style::INK_SOFT,
+                ),
+            ));
+        }
     });
 }
 

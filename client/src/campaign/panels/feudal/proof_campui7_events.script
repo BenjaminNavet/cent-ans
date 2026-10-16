@@ -1,0 +1,22 @@
+wait 300
+click hud:end_turn
+wait 30
+click Confirmer
+wait 700
+dump out/campui7_events_a.json
+click hud:end_turn
+wait 30
+click Confirmer
+wait 700
+dump out/campui7_events_b.json
+click hud:end_turn
+wait 30
+click Confirmer
+wait 700
+dump out/campui7_events_c.json
+click hud:end_turn
+wait 30
+click Confirmer
+wait 700
+dump out/campui7_events_d.json
+exit
