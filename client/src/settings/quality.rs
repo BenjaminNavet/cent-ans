@@ -173,6 +173,19 @@ pub struct RenderQuality {
     pub view_distance: f32,
 }
 
+/// Side of one cascade's shadow map. Godot's `shadow_atlas` is ONE atlas shared by the cascades
+/// (4 splits = 4 quadrants of `atlas / 2`); Bevy allocates a full `size` x `size` map PER cascade,
+/// so passing the atlas size made 4 x 8192^2 depth maps (1 GB, ~16 ms of campaign shadow fill at
+/// d=30). Two splits keep the whole atlas side (Godot packs them as two half-height strips).
+pub fn cascade_map_size(atlas: usize, splits: usize) -> usize {
+    let atlas = atlas.next_power_of_two();
+    if splits >= 3 {
+        (atlas / 2).max(1024)
+    } else {
+        atlas
+    }
+}
+
 impl RenderQuality {
     pub fn resolve(settings: &Settings, presets: &QualityPresets, auto_level: &str) -> Self {
         let level = if LEVELS.contains(&settings.quality.as_str()) {
@@ -193,7 +206,7 @@ impl RenderQuality {
             ssao_battle,
             msaa_campaign: forced.unwrap_or(preset.map_msaa),
             shadows: settings.shadows,
-            shadow_map_size: preset.shadow_atlas.next_power_of_two(),
+            shadow_map_size: cascade_map_size(preset.shadow_atlas, preset.shadow_splits),
             shadow_cascades: preset.shadow_splits,
             shadow_distance: preset.shadow_distance,
             map_shadow_range: preset.map_shadow_range,
@@ -283,8 +296,10 @@ pub fn apply_shadows(
         Option<&mut CascadeShadowConfig>,
     )>,
 ) {
-    if map.size != quality.shadow_map_size {
-        map.size = quality.shadow_map_size;
+    let wanted_size = crate::campaign::perf_switch::value("SHADOW_SIZE")
+        .map_or(quality.shadow_map_size, |v| v as usize);
+    if map.size != wanted_size {
+        map.size = wanted_size;
     }
     let scale = match state.as_deref().map(|s| *s.get()) {
         Some(AppState::Battle) => quality.shadow_distance,
@@ -375,7 +390,7 @@ mod tests {
         // A forced MSAA level wins over SSAO.
         assert!(!ultra.ssao_battle);
         assert_eq!(ultra.msaa_battle, Msaa::Sample4);
-        assert_eq!(ultra.shadow_map_size, 8192);
+        assert_eq!(ultra.shadow_map_size, 4096);
         assert_eq!(ultra.view_distance, 0.5);
     }
 }

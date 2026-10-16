@@ -58,6 +58,9 @@ fn attach(
     mut commands: Commands,
     cameras: Query<Entity, (With<CampaignCamera>, Without<CampaignAdjust>)>,
 ) {
+    if crate::campaign::perf_switch::off("post") {
+        return;
+    }
     for camera in &cameras {
         commands
             .entity(camera)

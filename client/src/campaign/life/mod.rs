@@ -10,7 +10,7 @@
 
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
-mod anim;
+pub mod anim;
 mod birds;
 mod boats;
 mod data;

@@ -53,6 +53,22 @@ pub fn is_draped(part: WaterPart) -> bool {
     )
 }
 
+/// A re-seat pass in progress: ribbons are processed a few per frame (a whole pass over every
+/// ribbon vertex near the camera took up to 50 ms in one frame).
+pub struct ReseatJob {
+    patches: Vec<NodeSpec>,
+    lookup: PatchLookup,
+    focus: Vec2,
+    radius2: f32,
+    queue: Vec<Handle<Mesh>>,
+    next: usize,
+    max_shift: f32,
+    spent_ms: f32,
+}
+
+/// CPU time one frame may spend re-seating ribbons.
+const FRAME_BUDGET_MS: f32 = 1.5;
+
 #[allow(clippy::too_many_arguments)]
 pub fn reseat_ribbons(
     surface: Option<Res<Surface>>,
@@ -64,100 +80,139 @@ pub fn reseat_ribbons(
     mut stats: ResMut<ReseatStats>,
     time: Res<Time>,
     mut state: Local<(u64, f32, Vec2, f32, u64)>,
+    mut job: Local<Option<ReseatJob>>,
 ) {
     let (Some(surface), Some(rig)) = (surface, rig) else {
         return;
     };
-    let focus = Vec2::new(rig.focus.x, rig.focus.z);
-    let radius = rig.distance * RADIUS_PER_DISTANCE + RADIUS_BASE;
-    let (seen_version, last_run, last_focus, last_radius, seen_built) = *state;
-    let built = lod.as_ref().map_or(0, |l| l.meshes_built);
-    let now = time.elapsed_secs();
-    // Re-run when the resident pages changed, or when the view moved far enough to bring other
-    // already resident pages inside the radius.
-    let moved = focus.distance(last_focus) > last_radius * 0.25
-        || (radius - last_radius).abs() > last_radius * 0.25;
-    if (surface.version == seen_version && built == seen_built && !moved)
-        || now - last_run < MIN_INTERVAL_S
+    if job.is_none() {
+        let focus = Vec2::new(rig.focus.x, rig.focus.z);
+        let radius = rig.distance * RADIUS_PER_DISTANCE + RADIUS_BASE;
+        let (seen_version, last_run, last_focus, last_radius, seen_built) = *state;
+        let built = lod.as_ref().map_or(0, |l| l.meshes_built);
+        let now = time.elapsed_secs();
+        // Re-run when the resident pages changed, or when the view moved far enough to bring
+        // other already resident pages inside the radius.
+        let moved = focus.distance(last_focus) > last_radius * 0.25
+            || (radius - last_radius).abs() > last_radius * 0.25;
+        if (surface.version == seen_version && built == seen_built && !moved)
+            || now - last_run < MIN_INTERVAL_S
+        {
+            return;
+        }
+        let started = std::time::Instant::now();
+        *state = (surface.version, now, focus, radius, built);
+        let radius2 = radius * radius;
+        // Displayed patches around the focus: the ribbon must sit on the mesh as drawn (its
+        // triangles bridge narrow valleys between vertices), not only on the sampled altitude.
+        let patches: Vec<NodeSpec> = lod.as_ref().map_or_else(Vec::new, |l| {
+            l.built_specs()
+                .filter(|s| {
+                    let size = s.spacing * s.quads as f32;
+                    let cx = focus.x.clamp(s.origin.0, s.origin.0 + size);
+                    let cz = focus.y.clamp(s.origin.1, s.origin.1 + size);
+                    Vec2::new(cx, cz).distance_squared(focus) <= radius2
+                })
+                .collect()
+        });
+        let lookup = PatchLookup::new(&patches, focus, radius);
+        stats.patches = patches.len() as u32;
+        stats.orphan_patches = patches
+            .iter()
+            .filter(|s| {
+                s.fine >= 0
+                    && surface
+                        .page_height_m(s.fine, s.origin.0 + 0.5, s.origin.1 + 0.5)
+                        .is_none()
+            })
+            .count() as u32;
+        let queue: Vec<Handle<Mesh>> = parts
+            .iter()
+            .filter(|(part, _)| is_draped(**part))
+            .map(|(_, mesh)| mesh.0.clone())
+            .collect();
+        *job = Some(ReseatJob {
+            patches,
+            lookup,
+            focus,
+            radius2,
+            queue,
+            next: 0,
+            max_shift: 0.0,
+            spent_ms: started.elapsed().as_secs_f32() * 1000.0,
+        });
+    }
+    let Some(active) = job.as_mut() else {
+        return;
+    };
+    let started = std::time::Instant::now();
+    while active.next < active.queue.len()
+        && started.elapsed().as_secs_f32() * 1000.0 < FRAME_BUDGET_MS
     {
+        let handle = active.queue[active.next].clone();
+        active.next += 1;
+        reseat_mesh(&handle, active, &surface, &ground, &mut meshes, &mut stats);
+    }
+    active.spent_ms += started.elapsed().as_secs_f32() * 1000.0;
+    if active.next >= active.queue.len() {
+        stats.runs += 1;
+        stats.last_max_shift_m = active.max_shift;
+        stats.last_ms = active.spent_ms;
+        *job = None;
+    }
+}
+
+/// Re-seats the vertices of one ribbon mesh inside the pass disc.
+fn reseat_mesh(
+    handle: &Handle<Mesh>,
+    job: &mut ReseatJob,
+    surface: &Surface,
+    ground: &GroundHeight,
+    meshes: &mut Assets<Mesh>,
+    stats: &mut ReseatStats,
+) {
+    let Some(mesh) = meshes.get(handle) else {
+        return;
+    };
+    let Some(bevy::mesh::VertexAttributeValues::Float32x3(positions)) =
+        mesh.attribute(Mesh::ATTRIBUTE_POSITION)
+    else {
+        return;
+    };
+    let focus = job.focus;
+    let mut changes: Vec<(usize, f32)> = Vec::new();
+    for (i, p) in positions.iter().enumerate() {
+        let dx = p[0] - focus.x;
+        let dz = p[2] - focus.y;
+        if dx * dx + dz * dz > job.radius2 {
+            continue;
+        }
+        let mut y = ground.0.seat_height_m(p[0], p[2]);
+        if let Some(spec) = job.lookup.find(&job.patches, p[0], p[2]) {
+            y = y.max(mesh_height_m(surface, spec, p[0], p[2]));
+        }
+        let y = y.max(0.0);
+        let shift = (y - p[1]).abs();
+        if shift > EPSILON_M {
+            job.max_shift = job.max_shift.max(shift);
+            changes.push((i, y));
+        }
+    }
+    if changes.is_empty() {
         return;
     }
-    let started = std::time::Instant::now();
-    *state = (surface.version, now, focus, radius, built);
-    let radius2 = radius * radius;
-    // Displayed patches around the focus: the ribbon must sit on the mesh as drawn (its triangles
-    // bridge narrow valleys between vertices), not only on the sampled altitude.
-    let patches: Vec<NodeSpec> = lod.as_ref().map_or_else(Vec::new, |l| {
-        l.built_specs()
-            .filter(|s| {
-                let size = s.spacing * s.quads as f32;
-                let cx = focus.x.clamp(s.origin.0, s.origin.0 + size);
-                let cz = focus.y.clamp(s.origin.1, s.origin.1 + size);
-                Vec2::new(cx, cz).distance_squared(focus) <= radius2
-            })
-            .collect()
-    });
-    let lookup = PatchLookup::new(&patches, focus, radius);
-    stats.patches = patches.len() as u32;
-    stats.orphan_patches = patches
-        .iter()
-        .filter(|s| {
-            s.fine >= 0
-                && surface
-                    .page_height_m(s.fine, s.origin.0 + 0.5, s.origin.1 + 0.5)
-                    .is_none()
-        })
-        .count() as u32;
-    let mut max_shift = 0.0_f32;
-    for (part, mesh3d) in &parts {
-        if !is_draped(*part) {
-            continue;
+    let Some(mut mesh) = meshes.get_mut(handle) else {
+        return;
+    };
+    if let Some(bevy::mesh::VertexAttributeValues::Float32x3(positions)) =
+        mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION)
+    {
+        for (i, y) in &changes {
+            positions[*i][1] = *y;
         }
-        let Some(mesh) = meshes.get(&mesh3d.0) else {
-            continue;
-        };
-        let Some(bevy::mesh::VertexAttributeValues::Float32x3(positions)) =
-            mesh.attribute(Mesh::ATTRIBUTE_POSITION)
-        else {
-            continue;
-        };
-        let mut changes: Vec<(usize, f32)> = Vec::new();
-        for (i, p) in positions.iter().enumerate() {
-            let dx = p[0] - focus.x;
-            let dz = p[2] - focus.y;
-            if dx * dx + dz * dz > radius2 {
-                continue;
-            }
-            let mut y = ground.0.seat_height_m(p[0], p[2]);
-            if let Some(spec) = lookup.find(&patches, p[0], p[2]) {
-                y = y.max(mesh_height_m(&surface, spec, p[0], p[2]));
-            }
-            let y = y.max(0.0);
-            let shift = (y - p[1]).abs();
-            if shift > EPSILON_M {
-                max_shift = max_shift.max(shift);
-                changes.push((i, y));
-            }
-        }
-        if changes.is_empty() {
-            continue;
-        }
-        let Some(mut mesh) = meshes.get_mut(&mesh3d.0) else {
-            continue;
-        };
-        if let Some(bevy::mesh::VertexAttributeValues::Float32x3(positions)) =
-            mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION)
-        {
-            for (i, y) in &changes {
-                positions[*i][1] = *y;
-            }
-        }
-        stats.meshes_updated += 1;
-        stats.vertices_moved += changes.len() as u64;
     }
-    stats.runs += 1;
-    stats.last_max_shift_m = max_shift;
-    stats.last_ms = started.elapsed().as_secs_f32() * 1000.0;
+    stats.meshes_updated += 1;
+    stats.vertices_moved += changes.len() as u64;
 }
 
 /// Uniform grid over the re-seat disc listing the patches overlapping each cell.

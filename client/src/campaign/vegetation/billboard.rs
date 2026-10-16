@@ -316,6 +316,9 @@ fn queue_batches(
     mut reported: Local<HashSet<(Entity, &'static str)>>,
 ) {
     let draw_function = draw_functions.read().id::<DrawVeg>();
+    if crate::campaign::perf_switch::off("veg") {
+        return;
+    }
     for view in &views {
         let Some(phase) = phases.get_mut(&view.retained_view_entity) else {
             continue;
