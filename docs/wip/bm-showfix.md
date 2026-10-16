@@ -34,6 +34,17 @@
   (`campaign_grade`), la végétation ni l'un ni l'autre (Godot étalonnait toute l'image). Correctif :
   exposition + `foliage_grade` dans `billboard.wesl` (grade/lift/highlights copiés via `VegLight`).
 
+## Vérifications (16/10 fin)
+- Toits de tours de siège : dump `battle_siege.render.tower_roofs` = 9 cônes sur 29 tours (merlons sinon).
+- Ciel de bataille : `clear_midday`, skybox + nuages présents (capture battle_low) ; pas de ciel blanc,
+  seulement une bande de brume claire à l'horizon (haze). Non modifié.
+- Recaptures `--side bevy` : scratchpad `after2/bevy/*.png` (session) ; d=60 : pixels bleus 85 030 → 109 209.
+- fmt, `clippy --features dev -D warnings`, `cargo test` (1029 + annexes) verts.
+
+## Restes
+- Taches claires (arbres ou parcelles ?) encore visibles à d=60 sous le brouillard de Paris ; cadrage d=60
+  plus large que Godot (lot caméra) ; références Godot perdues (à régénérer avec accord du joueur).
+
 ## État à la pause (16/10)
 - Commits : 96a1fce94, 5c46a51f0, puis ce wip (crochet `CENT_ANS_HIDE` rendu collant, réappliqué à chaque image :
   le LOD remettait `Visibility::Visible` à chaque reconstruction, le test « masquer TerrainNode » était donc

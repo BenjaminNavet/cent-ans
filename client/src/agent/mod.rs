@@ -387,7 +387,7 @@ pub fn key_code(name: &str) -> Option<KeyCode> {
 fn hide_named(
     mut commands: Commands,
     named: Query<(Entity, &Name, Has<Mesh3d>), Without<HiddenByAgent>>,
-    unnamed: Query<Entity, (With<Mesh3d>, Without<Name>, Without<HiddenByAgent>)>,
+    unnamed: Query<Entity, UnnamedMesh>,
     mut hidden: Query<&mut Visibility, With<HiddenByAgent>>,
     mut listed: Local<u32>,
 ) {
@@ -418,7 +418,12 @@ fn hide_named(
                         .iter()
                         .filter_map(|id| world.components().get_name(*id))
                         .map(|n| n.shortname().to_string())
-                        .filter(|n| n.starts_with("MeshMaterial3d") || !n.contains("Transform") && !n.contains("Visib") && !n.contains("Aabb"))
+                        .filter(|n| {
+                            n.starts_with("MeshMaterial3d")
+                                || !n.contains("Transform")
+                                    && !n.contains("Visib")
+                                    && !n.contains("Aabb")
+                        })
                         .collect();
                     parts.sort();
                     *kinds.entry(parts.join("+")).or_default() += 1;
@@ -454,6 +459,9 @@ fn hide_named(
         }
     }
 }
+
+/// Filter of the meshes without a `Name` not hidden yet (`CENT_ANS_HIDE=#unnamed`).
+type UnnamedMesh = (With<Mesh3d>, Without<Name>, Without<HiddenByAgent>);
 
 /// Marks the entities hidden by [`hide_named`].
 #[derive(Component)]

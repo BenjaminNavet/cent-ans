@@ -101,7 +101,12 @@ pub fn reseat_ribbons(
     stats.patches = patches.len() as u32;
     stats.orphan_patches = patches
         .iter()
-        .filter(|s| s.fine >= 0 && surface.page_height_m(s.fine, s.origin.0 + 0.5, s.origin.1 + 0.5).is_none())
+        .filter(|s| {
+            s.fine >= 0
+                && surface
+                    .page_height_m(s.fine, s.origin.0 + 0.5, s.origin.1 + 0.5)
+                    .is_none()
+        })
         .count() as u32;
     let mut max_shift = 0.0_f32;
     for (part, mesh3d) in &parts {
@@ -167,18 +172,29 @@ impl PatchLookup {
         let origin = focus - Vec2::splat(radius);
         let side = ((2.0 * radius / LOOKUP_CELL).ceil() as usize).max(1);
         let mut cells = vec![Vec::new(); side * side];
-        let index = |v: f32, o: f32| (((v - o) / LOOKUP_CELL).floor().max(0.0) as usize).min(side - 1);
+        let index =
+            |v: f32, o: f32| (((v - o) / LOOKUP_CELL).floor().max(0.0) as usize).min(side - 1);
         for (n, spec) in patches.iter().enumerate() {
             let size = spec.spacing * spec.quads as f32;
-            let (i0, i1) = (index(spec.origin.0, origin.x), index(spec.origin.0 + size, origin.x));
-            let (j0, j1) = (index(spec.origin.1, origin.y), index(spec.origin.1 + size, origin.y));
+            let (i0, i1) = (
+                index(spec.origin.0, origin.x),
+                index(spec.origin.0 + size, origin.x),
+            );
+            let (j0, j1) = (
+                index(spec.origin.1, origin.y),
+                index(spec.origin.1 + size, origin.y),
+            );
             for j in j0..=j1 {
                 for i in i0..=i1 {
                     cells[j * side + i].push(n as u32);
                 }
             }
         }
-        PatchLookup { origin, side, cells }
+        PatchLookup {
+            origin,
+            side,
+            cells,
+        }
     }
 
     fn find<'a>(&self, patches: &'a [NodeSpec], x: f32, z: f32) -> Option<&'a NodeSpec> {
@@ -196,7 +212,10 @@ impl PatchLookup {
 
 fn contains(spec: &NodeSpec, x: f32, z: f32) -> bool {
     let size = spec.spacing * spec.quads as f32;
-    x >= spec.origin.0 && x <= spec.origin.0 + size && z >= spec.origin.1 && z <= spec.origin.1 + size
+    x >= spec.origin.0
+        && x <= spec.origin.0 + size
+        && z >= spec.origin.1
+        && z <= spec.origin.1 + size
 }
 
 /// Highest altitude (m) the patch can show at (x, z): its own lattice and the parent one it
