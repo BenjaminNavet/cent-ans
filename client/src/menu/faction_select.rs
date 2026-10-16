@@ -21,6 +21,7 @@ use data_model::FactionId;
 use serde_json::{Value, json};
 use sim_campaign::difficulty::Difficulty;
 
+use super::faction_map::{self, FactionMapState, StartSheets};
 use super::saves::SaveProgress;
 use super::{CoverFit, MenuData, spawn_backdrop};
 use crate::app::AppState;
@@ -35,7 +36,7 @@ use crate::ui::kit::modal::{ModalQueue, ModalResult, ModalSpec, PRIORITY_DECISIO
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::{
     ButtonPressed, ListSelected, TabSelected, Toggled, UiTheme, button_primary, button_small,
-    heading, list_item, panel_page, scroll_list, tab_bar, tab_pane, toggle_button, typed,
+    heading, panel_page, scroll_list, tab_bar, tab_pane, toggle_button, typed,
 };
 
 /// The faction and difficulty currently chosen on the screen.
@@ -109,7 +110,7 @@ impl Plugin for FactionSelectPlugin {
             .init_resource::<TutorialInvite>()
             .add_systems(
                 OnEnter(AppState::FactionSelect),
-                (clear_main_menu, spawn_screen).chain(),
+                (clear_main_menu, faction_map::prepare, spawn_screen).chain(),
             )
             .add_systems(OnEnter(AppState::Campaign), send_start_tutorial)
             .add_systems(
@@ -127,6 +128,18 @@ impl Plugin for FactionSelectPlugin {
             .add_systems(
                 Update,
                 enter_starts.run_if(in_state(AppState::FactionSelect)),
+            )
+            .add_systems(
+                Update,
+                (
+                    faction_map::map_pointer,
+                    faction_map::map_buttons,
+                    faction_map::refresh_list,
+                    faction_map::repaint,
+                    faction_map::hover_card,
+                )
+                    .chain()
+                    .run_if(in_state(AppState::FactionSelect)),
             );
     }
 }
@@ -167,6 +180,7 @@ fn primary_color(sim: &Sim, id: &str) -> Color {
         .map_or(Color::srgb(0.4, 0.4, 0.5), Color::from)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_screen(
     mut commands: Commands,
     theme: Res<UiTheme>,
@@ -174,6 +188,8 @@ fn spawn_screen(
     menu: Res<MenuData>,
     sim: Res<Sim>,
     mut choice: ResMut<FactionChoice>,
+    map_state: Res<FactionMapState>,
+    start_sheets: Res<StartSheets>,
 ) {
     let front = &menu.front;
     let all = playable(&sim);
@@ -280,6 +296,7 @@ fn spawn_screen(
         &assets,
         &sim,
         front,
+        &start_sheets,
         &front.recommended(),
         pane,
     );
@@ -293,26 +310,21 @@ fn spawn_screen(
                 ChildOf(pane),
             ));
         }
-        spawn_cards(&mut commands, &theme, &assets, &sim, front, &special, pane);
+        spawn_cards(
+            &mut commands,
+            &theme,
+            &assets,
+            &sim,
+            front,
+            &start_sheets,
+            &special,
+            pane,
+        );
     }
     let pane = commands
         .spawn((tab_pane("start", "tab:all", false), ChildOf(left)))
         .id();
-    let list = commands
-        .spawn((scroll_list(&theme, "factions:list", 500.0), ChildOf(pane)))
-        .id();
-    for (id, name) in &all {
-        commands.spawn((
-            list_item(
-                &theme,
-                "factions",
-                &format!("faction:{id}"),
-                name,
-                *id == choice.faction,
-            ),
-            ChildOf(list),
-        ));
-    }
+    faction_map::spawn_tab(&mut commands, &theme, &map_state, &start_sheets, pane, root);
 
     // Right column: pitch and difficulty.
     let side = commands
@@ -419,12 +431,14 @@ fn framed(
     panel
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_cards(
     commands: &mut Commands,
     theme: &UiTheme,
     assets: &AssetServer,
     sim: &Sim,
     front: &super::front_end::FrontEnd,
+    sheets: &StartSheets,
     ids: &[String],
     pane: Entity,
 ) {
@@ -565,6 +579,140 @@ fn spawn_cards(
                 ChildOf(body),
             ));
         }
+        if let Some(sheet) = sheets.get(id) {
+            ruler_row(commands, theme, assets, sheets, sheet, 44.0, body);
+            key_figures(commands, theme, sheet, body);
+        }
+    }
+}
+
+/// Ruler portrait (when the file exists) with his name and main title.
+fn ruler_row(
+    commands: &mut Commands,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    sheets: &StartSheets,
+    sheet: &game_api::start_sheets::StartSheet,
+    size: f32,
+    parent: Entity,
+) {
+    if sheet.ruler.is_empty() {
+        return;
+    }
+    let row = commands
+        .spawn((
+            Name::new("RulerRow"),
+            Node {
+                column_gap: Val::Px(8.0),
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            ChildOf(parent),
+        ))
+        .id();
+    if let Some(path) = sheets.portrait(&sheet.ruler_id) {
+        commands.spawn((
+            Name::new("RulerPortrait"),
+            Node {
+                width: Val::Px(size),
+                height: Val::Px(size),
+                flex_shrink: 0.0,
+                border: UiRect::all(Val::Px(2.0)),
+                ..default()
+            },
+            BorderColor::all(style::FE_GOLD_DARK),
+            ImageNode::new(assets.load(path)),
+            ChildOf(row),
+        ));
+    }
+    let texts = commands
+        .spawn((
+            Node {
+                flex_direction: FlexDirection::Column,
+                flex_shrink: 1.0,
+                ..default()
+            },
+            ChildOf(row),
+        ))
+        .id();
+    commands.spawn((
+        Text::new("Souverain"),
+        theme.text_font(false, true, UiType::Caption.size()),
+        TextColor(style::INK_FADED),
+        ChildOf(texts),
+    ));
+    commands.spawn((
+        Text::new(sheet.ruler.clone()),
+        theme.title_font(UiType::Body.size()),
+        TextColor(style::INK),
+        ChildOf(texts),
+    ));
+    if let Some(title) = sheet.titles.first() {
+        commands.spawn((
+            Text::new(title.clone()),
+            theme.text_font(false, false, UiType::Caption.size()),
+            TextColor(style::INK_FADED),
+            ChildOf(texts),
+        ));
+    }
+}
+
+/// Comparable key figures of a start (provinces, treasury, income, armies).
+fn key_figures(
+    commands: &mut Commands,
+    theme: &UiTheme,
+    sheet: &game_api::start_sheets::StartSheet,
+    parent: Entity,
+) {
+    let grid = commands
+        .spawn((
+            Name::new("KeyFigures"),
+            Node {
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(1.0),
+                ..default()
+            },
+            ChildOf(parent),
+        ))
+        .id();
+    let rows = [
+        ("Provinces", sheet.provinces.len().to_string()),
+        (
+            "Trésor",
+            format!("{} ₶", crate::ui::kit::fr::digits(sheet.treasury)),
+        ),
+        (
+            "Revenu",
+            format!(
+                "{} ₶ / saison",
+                crate::ui::kit::fr::digits(sheet.projected_income)
+            ),
+        ),
+        ("Armées", sheet.armies_count.to_string()),
+    ];
+    for (key, value) in rows {
+        let line = commands
+            .spawn((
+                Node {
+                    justify_content: JustifyContent::SpaceBetween,
+                    column_gap: Val::Px(8.0),
+                    ..default()
+                },
+                ChildOf(grid),
+            ))
+            .id();
+        commands.spawn((
+            Text::new(key),
+            theme.text_font(false, true, UiType::Caption.size()),
+            TextColor(style::INK_FADED),
+            ChildOf(line),
+        ));
+        commands.spawn((
+            Text::new(value),
+            theme.text_font(false, false, UiType::Caption.size()),
+            TextColor(style::INK),
+            ChildOf(line),
+        ));
     }
 }
 
@@ -747,6 +895,8 @@ fn refresh_choice(
     theme: Res<UiTheme>,
     sim: Res<Sim>,
     menu: Res<MenuData>,
+    start_sheets: Res<StartSheets>,
+    assets: Res<AssetServer>,
 ) {
     let key = (choice.faction.clone(), choice.difficulty.clone());
     if last.as_ref() == Some(&key) {
@@ -800,6 +950,18 @@ fn refresh_choice(
         TextColor(style::FE_GULES),
         ChildOf(detail),
     ));
+    if let Some(sheet) = start_sheets.get(&choice.faction) {
+        ruler_row(
+            &mut commands,
+            &theme,
+            &assets,
+            &start_sheets,
+            sheet,
+            64.0,
+            detail,
+        );
+        key_figures(&mut commands, &theme, sheet, detail);
+    }
     commands.spawn((typed(&theme, &pitch.intro, UiType::Body), ChildOf(detail)));
     for (title, lines) in [
         ("Forces", &pitch.strengths),

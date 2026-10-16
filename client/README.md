@@ -457,3 +457,8 @@ Onze modes (`MapMode::ALL`, menu « Filtres » de la minicarte, un bouton `hud:m
 - **Tech** : champ `tech:search` (nom + unités/bâtiments débloqués) ; retrait de file `tech:dequeue_<id>` ou second clic sur un nœud en file (`Order::DequeueResearch`). Dump `tech.filter.query`.
 - **Province** : `panels/province/mates.rs` (pastilles sur la carte + pointillés + cartouche ; dump `province_mates`) ; un clic sur une case `prov:slot:<colonie>:<racine>` ouvre l'onglet Bâtiments de la colonie et encadre le premier palier (`focus_building`).
 - **Rapport de saison** : `ModalSpec::art` (image recadrée « cover » en tête d'une fenêtre ; dump `ui_kit.modal.art`). **Didacticiel** : liens Codex (`progress_tutorial.codex_links`).
+
+## menu5 : carte des factions, aide de la pause, invite du didacticiel de bataille
+- `menu/faction_map.rs` : onglet « Toutes les factions » de la sélection de faction. Boutons de script : `fm:<faction>` (liste), `banner:<faction>` (factions sans terre), `fmk:<titre royaume>` (`fmk:` = tous), `fmr:<kingdom|duchy|county>` (`fmr:` = tous). Ressources `StartSheets` (fiches 1337, `game_api::start_sheets`) et `FactionMapState`. Dump `menu.faction_map` (provinces, pixels de terre, bannières, filtres, groupes, survol, repeints, clics).
+- `menu/pause.rs` : `pause:help` (feuille d'aide F1 en modale), infobulle de difficulté.
+- `menu/battle_prologue_invite.rs` : boutons `prologue_invite:{yes,no,never}` ; message `StartBattlePrologue` à lire par le lot du didacticiel ; dump `menu.battle_prologue_invite`. Note : `docs/wip/bm-menu5.md`.

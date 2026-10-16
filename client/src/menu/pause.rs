@@ -2,8 +2,9 @@
 //! « Reprendre ») closes it. Entries: Reprendre, Sauvegarder…, Charger…, Réglages…, Menu
 //! principal, Quitter le jeu. Leaving with unsaved turns asks for confirmation. While open,
 //! [`GamePaused`] is true and `Time<Virtual>` is paused (the Godot tree pause); both are reset
-//! when the campaign screen is left. Not ported: « Aide (F1) » (no help screen yet), the
-//! difficulty tooltip.
+//! when the campaign screen is left. « Aide (F1) » opens the shortcut sheet of the campaign HUD
+//! (`campaign::hud::help`) as a modal above the menu (Escape closes the sheet, not the pause);
+//! the difficulty line carries the `pause_difficulty_fixed` tooltip (`data/ui/tooltips.json`).
 //!
 //! Escape is read here only when no modal ([`ModalQueue`]) and no dialog is open; a campaign
 //! panel that also closes on Escape must run `.before(pause_escape)` and set `KeyEdges::escape` to false.
@@ -16,7 +17,7 @@ use super::{MenuOverlay, OpenSettings, spawn_overlay};
 use crate::app::AppState;
 use crate::sim::Sim;
 use crate::ui::fader::FadeToState;
-use crate::ui::kit::modal::ModalQueue;
+use crate::ui::kit::modal::{ModalQueue, ModalSpec, PRIORITY_REPORT};
 use crate::ui::kit::style::UiType;
 use crate::ui::kit::{ButtonPressed, UiTheme, button_small, typed};
 
@@ -39,16 +40,39 @@ struct ExitConfirm {
 #[derive(Message, Debug, Clone, Copy)]
 pub struct TogglePause;
 
+/// The help sheet opened from the pause menu is on screen: Escape closes it and leaves the pause
+/// menu open.
+#[derive(Resource, Default, Debug)]
+pub struct PauseHelp(pub bool);
+
+/// What « Aide (F1) » needs: the modal queue, the pause flag, the settings and the key map.
+type HelpContext<'w> = (
+    ResMut<'w, ModalQueue>,
+    ResMut<'w, PauseHelp>,
+    Option<Res<'w, crate::settings::Settings>>,
+    Option<Res<'w, crate::settings::KeyMap>>,
+);
+
+/// Key of the shortcut sheet in the modal queue (same as `campaign::hud::help`).
+const HELP_KEY: &str = "hud:shortcuts";
+
 pub struct PausePlugin;
 
 impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<GamePaused>()
+            .init_resource::<PauseHelp>()
             .add_message::<TogglePause>()
             .add_systems(OnExit(AppState::Campaign), force_resume)
             .add_systems(
                 Update,
-                (pause_escape, pause_buttons, after_load).run_if(in_state(AppState::Campaign)),
+                (
+                    pause_escape,
+                    track_help.after(pause_escape),
+                    pause_buttons,
+                    after_load,
+                )
+                    .run_if(in_state(AppState::Campaign)),
             );
     }
 }
@@ -70,8 +94,12 @@ pub fn pause_escape(
     theme: Res<UiTheme>,
     sim: Res<Sim>,
     mut requests: MessageReader<TogglePause>,
+    help: Res<PauseHelp>,
 ) {
     let requested = requests.read().count() > 0;
+    if help.0 {
+        return; // Escape belongs to the help sheet opened from the menu
+    }
     if !edges.escape && !requested {
         return;
     }
@@ -89,6 +117,13 @@ pub fn pause_escape(
     }
 }
 
+/// The help sheet is gone: Escape works on the pause menu again.
+fn track_help(modals: Res<ModalQueue>, mut help: ResMut<PauseHelp>) {
+    if help.0 && !modals.is_busy() {
+        help.0 = false;
+    }
+}
+
 fn spawn_pause(commands: &mut Commands, theme: &UiTheme, sim: &Sim) {
     let (root, panel) = spawn_overlay(commands, theme, "PauseMenu", "Pause", 300.0, 0);
     commands
@@ -100,6 +135,7 @@ fn spawn_pause(commands: &mut Commands, theme: &UiTheme, sim: &Sim) {
             .into_iter()
             .find(|level| level.id == key)
             .map_or_else(|| key.to_owned(), |level| level.label);
+        let texts = crate::ui::kit::tooltip_spec::TooltipTexts::load().ok();
         commands.spawn((
             Name::new("pause:difficulty"),
             typed(theme, &format!("Difficulté : {label}"), UiType::Caption),
@@ -107,6 +143,7 @@ fn spawn_pause(commands: &mut Commands, theme: &UiTheme, sim: &Sim) {
                 align_self: AlignSelf::Center,
                 ..default()
             },
+            super::custom_battle::plain_tip(texts.as_ref(), "pause_difficulty_fixed"),
             ChildOf(panel),
         ));
     }
@@ -116,6 +153,7 @@ fn spawn_pause(commands: &mut Commands, theme: &UiTheme, sim: &Sim) {
         ("pause:load", "Charger…"),
         ("pause:history", "Batailles jouées…"),
         ("pause:settings", "Réglages…"),
+        ("pause:help", "Aide (F1)"),
         ("pause:main_menu", "Menu principal"),
         ("pause:quit", "Quitter le jeu"),
     ] {
@@ -188,7 +226,9 @@ fn pause_buttons(
     mut settings: MessageWriter<OpenSettings>,
     mut dialogs: MessageWriter<OpenSaveDialog>,
     mut played: MessageWriter<crate::flow::history::OpenPlayedBattles>,
+    mut help_context: HelpContext,
 ) {
+    let (modals, help, settings_res, keymap) = &mut help_context;
     for press in pressed.read() {
         let leave = |kind_quit: bool,
                      sim: &mut Sim,
@@ -224,6 +264,18 @@ fn pause_buttons(
             }
             "pause:settings" => {
                 settings.write(OpenSettings);
+            }
+            "pause:help" => {
+                if !modals.is_busy() {
+                    let text = crate::campaign::hud::help::sheet_bbcode_with(
+                        settings_res.as_deref(),
+                        keymap.as_deref(),
+                    );
+                    let mut spec = ModalSpec::info("Aide et raccourcis", &text);
+                    spec.width = 560.0;
+                    modals.request(HELP_KEY, PRIORITY_REPORT, spec);
+                    help.0 = true;
+                }
             }
             "pause:main_menu" | "pause:quit" => {
                 let quit = press.name == "pause:quit";

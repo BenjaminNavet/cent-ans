@@ -18,9 +18,11 @@
 //! - [`saves::OpenSaveDialog`]: opens the dialog (written by the menu buttons).
 //! - [`saves::GameLoaded`]: a save has just replaced `Sim::state`.
 
+pub mod battle_prologue_invite;
 pub mod battles;
 pub mod custom_battle;
 pub mod demos;
+pub mod faction_map;
 pub mod faction_select;
 pub mod front_end;
 pub mod historical;
@@ -67,6 +69,7 @@ impl Plugin for MenuPlugin {
                 saves::SavesPlugin,
                 pause::PausePlugin,
                 battles::BattlesPlugin,
+                battle_prologue_invite::PrologueInvitePlugin,
             ))
             .add_systems(Startup, load_front_end)
             .init_resource::<KeyEdges>()
@@ -344,6 +347,8 @@ fn dump_menu(world: &World) -> (String, Value) {
         "overlays": overlays,
         "factions_pitched": front.factions.len(),
         "faction_choice": faction_select::dump(world),
+        "faction_map": faction_map::dump(world),
+        "battle_prologue_invite": battle_prologue_invite::dump(world),
         "saves": saves::dump(world),
         "paused": world.resource::<pause::GamePaused>().0,
     });

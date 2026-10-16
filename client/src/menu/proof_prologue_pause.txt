@@ -1,0 +1,14 @@
+# Menu principal -> Batailles -> bataille personnalisée -> invite du didacticiel (menu5).
+state MainMenu
+wait 60
+click Batailles
+wait 10
+click Bataille personnalisée
+wait 30
+click cb:launch
+wait 10
+dump out/menu5_invite_a.json
+click prologue_invite:no
+wait 20
+dump out/menu5_invite_b.json
+exit

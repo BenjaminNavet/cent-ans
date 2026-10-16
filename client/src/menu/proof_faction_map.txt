@@ -1,0 +1,21 @@
+# Sélection de faction -> « Toutes les factions » : carte, filtres, bannière, choix (menu5).
+state FactionSelect
+wait 90
+click tab:all
+wait 30
+dump out/menu5_map_a.json
+click fmk:tit_france
+wait 10
+click fmr:kingdom
+wait 10
+dump out/menu5_map_b.json
+click fmk:
+click fmr:
+wait 5
+click banner:fac_crusaders
+wait 10
+dump out/menu5_map_c.json
+click fm:fac_england
+wait 10
+dump out/menu5_map_d.json
+exit

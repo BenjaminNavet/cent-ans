@@ -546,7 +546,7 @@ fn cycle_row(
 
 /// `[b]title[/b]` and body of the `plain` tooltip `key` (`data/ui/tooltips.json`), empty when
 /// the file or the key is missing.
-fn plain_tip(texts: Option<&TooltipTexts>, key: &str) -> Tooltip {
+pub(super) fn plain_tip(texts: Option<&TooltipTexts>, key: &str) -> Tooltip {
     let text = texts
         .and_then(|t| t.entry("plain", key))
         .map(|e| format!("[b]{}[/b]\n{}", e.title, e.body))
