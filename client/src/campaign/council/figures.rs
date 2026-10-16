@@ -24,13 +24,75 @@ const PAINTED_HOVER: Color = Color::srgb(1.25, 1.1, 0.9);
 #[derive(Component)]
 pub struct Figure {
     pub key: String,
+    /// `painted`, `glb` or `capsule` (the fallback when the player has no image nor model).
     pub kind: &'static str,
     pub image: String,
     pub fitted: bool,
     pub texture: Handle<Image>,
     pub material: Handle<StandardMaterial>,
-    pub quad: Entity,
-    pub shadow: Entity,
+    pub quad: Option<Entity>,
+    pub shadow: Option<Entity>,
+}
+
+/// Additive glow laid over every mesh of the hovered figure (`material_overlay` of Godot).
+#[derive(Component)]
+pub struct HoverOverlay {
+    pub key: String,
+}
+
+/// Colour of the fallback figure of a seat (`ROLE_COLORS`).
+fn role_color(key: &str) -> Color {
+    match key {
+        "ruler" => Color::srgb(0.55, 0.12, 0.14),
+        "chancellor" => Color::srgb(0.25, 0.30, 0.55),
+        "constable" => Color::srgb(0.45, 0.45, 0.5),
+        "treasurer" => Color::srgb(0.55, 0.45, 0.15),
+        "chaplain" => Color::srgb(0.2, 0.2, 0.22),
+        "chamberlain" => Color::srgb(0.3, 0.5, 0.35),
+        _ => Color::srgb(0.4, 0.4, 0.4),
+    }
+}
+
+/// How a seat is drawn.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Kind {
+    Painted,
+    Glb,
+    Capsule,
+}
+
+/// Rendering of the figure of `key`: the wanted style first, then the player's other assets
+/// (image or model, whichever exists), the capsule only when he has neither.
+pub fn figure_kind(state: &CouncilState, key: &str) -> Kind {
+    let has_png = figure_file(state, key, Style::Painted);
+    let has_glb = figure_file(state, key, Style::Mesh);
+    match (state.style, has_png, has_glb) {
+        (Style::Painted, true, _) | (_, true, false) => Kind::Painted,
+        (_, _, true) => Kind::Glb,
+        _ => Kind::Capsule,
+    }
+}
+
+fn figure_file(state: &CouncilState, key: &str, style: Style) -> bool {
+    let Some(root) = &state.asset_root else {
+        return false;
+    };
+    match style {
+        Style::Painted => root
+            .join(format!("illustrations/council/council_{key}.png"))
+            .is_file(),
+        // The wanted mesh style first, then the other mesh folders.
+        _ => {
+            let wanted = if state.style == Style::Painted {
+                Style::Mesh
+            } else {
+                state.style
+            };
+            room::figure_dirs(wanted)
+                .iter()
+                .any(|dir| root.join(format!("{dir}council_{key}.glb")).is_file())
+        }
+    }
 }
 
 /// Quad of a painted figure (turned toward the camera each frame).
@@ -107,7 +169,9 @@ pub fn populate(
         let position = pick::seat_position(key);
         let occupied = key == "ruler" || signature.iter().any(|(k, o)| k == key && *o);
         let yaw = Quat::from_rotation_y(pick::facing(position, Vec3::new(position.x, 0.0, 4.0)));
-        let figure_available = occupied && figure_exists(&state, key);
+        let kind = figure_kind(&state, key);
+        // A vacant seat, or a stand-in capsule, sits on a stool.
+        let figure_available = occupied && kind != Kind::Capsule;
         // Seat furniture: the throne behind the sovereign, a stool under a vacant seat.
         if key == "ruler" {
             room::spawn_model(
@@ -149,12 +213,9 @@ pub fn populate(
         if !occupied {
             continue;
         }
-        match style {
-            Style::Painted => {
+        match kind {
+            Kind::Painted => {
                 let image = format!("illustrations/council/council_{key}.png");
-                if !figure_available {
-                    continue;
-                }
                 let texture: Handle<Image> = assets.load(image.clone());
                 let material = materials.add(StandardMaterial {
                     base_color: PAINTED_BASE,
@@ -210,11 +271,11 @@ pub fn populate(
                     fitted: false,
                     texture,
                     material,
-                    quad,
-                    shadow,
+                    quad: Some(quad),
+                    shadow: Some(shadow),
                 });
             }
-            Style::Mesh | Style::MeshMultiview => {
+            Kind::Glb => {
                 let holder = commands
                     .spawn((
                         Name::new(format!("Figure_{key}")),
@@ -227,7 +288,11 @@ pub fn populate(
                     &mut commands,
                     &assets,
                     state.asset_root.as_deref(),
-                    &room::figure_dirs(style),
+                    &room::figure_dirs(if style == Style::Painted {
+                        Style::Mesh
+                    } else {
+                        style
+                    }),
                     &format!("council_{key}.glb"),
                     holder,
                     Transform::default(),
@@ -235,24 +300,112 @@ pub fn populate(
                 );
                 if model.is_none() {
                     commands.entity(holder).despawn();
+                } else {
+                    commands.entity(holder).insert(Figure {
+                        key: key.to_owned(),
+                        kind: "glb",
+                        image: String::new(),
+                        fitted: true,
+                        texture: Handle::default(),
+                        material: Handle::default(),
+                        quad: None,
+                        shadow: None,
+                    });
                 }
+            }
+            Kind::Capsule => {
+                let holder = commands
+                    .spawn((
+                        Name::new(format!("Figure_{key}")),
+                        Transform::from_translation(position).with_rotation(yaw),
+                        Visibility::default(),
+                        Figure {
+                            key: key.to_owned(),
+                            kind: "capsule",
+                            image: String::new(),
+                            fitted: true,
+                            texture: Handle::default(),
+                            material: Handle::default(),
+                            quad: None,
+                            shadow: None,
+                        },
+                        ChildOf(root),
+                    ))
+                    .id();
+                let color = if key == "ruler" {
+                    // `faction_color.darkened(0.2)`
+                    let c = state.faction_color.to_linear();
+                    Color::linear_rgb(c.red * 0.8, c.green * 0.8, c.blue * 0.8)
+                } else {
+                    role_color(key)
+                };
+                spawn_capsule(
+                    &mut commands,
+                    &mut meshes,
+                    &mut materials,
+                    holder,
+                    color,
+                    key == "ruler",
+                );
             }
         }
     }
 }
 
-/// Whether the figure of `key` exists in the current style.
-fn figure_exists(state: &CouncilState, key: &str) -> bool {
-    let Some(root) = &state.asset_root else {
-        return false;
-    };
-    match state.style {
-        Style::Painted => root
-            .join(format!("illustrations/council/council_{key}.png"))
-            .is_file(),
-        style => room::figure_dirs(style)
-            .iter()
-            .any(|dir| root.join(format!("{dir}council_{key}.glb")).is_file()),
+/// Stand-in figure when the player has neither image nor model (`_placeholder`): a capsule body
+/// in the colour of the role, a head, a gold ring for the sovereign.
+fn spawn_capsule(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+    holder: Entity,
+    color: Color,
+    crowned: bool,
+) {
+    let mut part =
+        |commands: &mut Commands, name: &str, mesh: Mesh, material: StandardMaterial, at: Vec3| {
+            commands.spawn((
+                Name::new(name.to_owned()),
+                Mesh3d(meshes.add(mesh)),
+                MeshMaterial3d(materials.add(material)),
+                Transform::from_translation(at),
+                ChildOf(holder),
+            ));
+        };
+    part(
+        commands,
+        "Body",
+        Capsule3d::new(0.26, 0.9 - 0.52).into(),
+        StandardMaterial {
+            base_color: color,
+            perceptual_roughness: 0.8,
+            ..default()
+        },
+        Vec3::new(0.0, 0.95, 0.0),
+    );
+    part(
+        commands,
+        "Head",
+        Sphere::new(0.15).into(),
+        StandardMaterial {
+            base_color: Color::srgb(0.72, 0.58, 0.46),
+            ..default()
+        },
+        Vec3::new(0.0, 1.62, 0.0),
+    );
+    if crowned {
+        part(
+            commands,
+            "Crown",
+            Cylinder::new(0.14, 0.08).into(),
+            StandardMaterial {
+                base_color: Color::srgb(0.85, 0.68, 0.2),
+                metallic: 0.8,
+                perceptual_roughness: 0.35,
+                ..default()
+            },
+            Vec3::new(0.0, 1.8, 0.0),
+        );
     }
 }
 
@@ -267,15 +420,18 @@ pub fn fit_painted(
         if figure.fitted {
             continue;
         }
+        let (Some(quad), Some(shadow)) = (figure.quad, figure.shadow) else {
+            continue;
+        };
         let Some(image) = images.get(&figure.texture) else {
             continue;
         };
         let aspect = image.width() as f32 / image.height().max(1) as f32;
-        commands.entity(figure.quad).insert((
+        commands.entity(quad).insert((
             Mesh3d(meshes.add(Rectangle::new(PAINTED_HEIGHT * aspect, PAINTED_HEIGHT))),
             Visibility::Inherited,
         ));
-        commands.entity(figure.shadow).insert((
+        commands.entity(shadow).insert((
             Mesh3d(meshes.add(Rectangle::new(PAINTED_HEIGHT * aspect * 1.1, 0.7))),
             Visibility::Inherited,
         ));
@@ -294,7 +450,7 @@ pub fn apply_hover(
     camera: Query<&Transform, With<CouncilCamera>>,
     mut quads: Query<QuadItem, (With<PaintedQuad>, Without<CouncilCamera>)>,
 ) {
-    for (figure, _) in &figures {
+    for (figure, _) in figures.iter().filter(|(f, _)| f.kind == "painted") {
         let wanted = if state.hovered.as_deref() == Some(figure.key.as_str()) {
             PAINTED_HOVER
         } else {
@@ -317,5 +473,121 @@ pub fn apply_hover(
         };
         let to_camera = camera.translation - holder.translation();
         transform.rotation = Quat::from_rotation_y(to_camera.x.atan2(to_camera.z));
+    }
+}
+
+/// Glow of the hovered figure when it is a model or a stand-in (`_highlight_material`): every mesh
+/// of the figure gets a child copy with an additive warm material, removed when the cursor leaves.
+#[allow(clippy::too_many_arguments)]
+pub fn apply_overlay(
+    mut commands: Commands,
+    state: Res<CouncilState>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    figures: Query<(Entity, &Figure)>,
+    children: Query<&Children>,
+    meshes: Query<&Mesh3d, Without<HoverOverlay>>,
+    overlays: Query<(Entity, &HoverOverlay, &ChildOf)>,
+    mut material: Local<Option<Handle<StandardMaterial>>>,
+) {
+    let hovered = state.hovered.as_deref();
+    for (entity, overlay, _) in &overlays {
+        if Some(overlay.key.as_str()) != hovered {
+            commands.entity(entity).try_despawn();
+        }
+    }
+    let Some((holder, figure)) = figures
+        .iter()
+        .find(|(_, f)| f.kind != "painted" && Some(f.key.as_str()) == hovered)
+    else {
+        return;
+    };
+    let material = material
+        .get_or_insert_with(|| {
+            materials.add(StandardMaterial {
+                base_color: Color::srgba(0.9, 0.62, 0.25, 0.28),
+                emissive: LinearRgba::rgb(1.0, 0.7, 0.3),
+                unlit: true,
+                alpha_mode: AlphaMode::Add,
+                depth_bias: 1.0,
+                ..default()
+            })
+        })
+        .clone();
+    let covered: Vec<Entity> = overlays
+        .iter()
+        .map(|(_, _, parent)| parent.parent())
+        .collect();
+    let targets = std::iter::once(holder).chain(children.iter_descendants(holder));
+    for target in targets {
+        if covered.contains(&target) {
+            continue;
+        }
+        let Ok(mesh) = meshes.get(target) else {
+            continue;
+        };
+        commands.spawn((
+            Name::new("HoverOverlay"),
+            HoverOverlay {
+                key: figure.key.clone(),
+            },
+            Mesh3d(mesh.0.clone()),
+            MeshMaterial3d(material.clone()),
+            NotShadowCaster,
+            Transform::default(),
+            ChildOf(target),
+        ));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn state_with(files: &[&str], style: Style) -> (CouncilState, std::path::PathBuf) {
+        let dir = std::env::temp_dir().join(format!(
+            "council_figs_{}_{}",
+            std::process::id(),
+            files.join("_").replace('/', "-")
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        for file in files {
+            let path = dir.join(file);
+            std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+            std::fs::write(path, b"x").unwrap();
+        }
+        let state = CouncilState {
+            asset_root: Some(dir.clone()),
+            style,
+            ..default()
+        };
+        (state, dir)
+    }
+
+    #[test]
+    fn capsule_only_when_player_has_nothing() {
+        let (state, dir) = state_with(&[], Style::Painted);
+        assert_eq!(figure_kind(&state, "treasurer"), Kind::Capsule);
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn painted_style_uses_png_then_glb_then_capsule() {
+        let png = "illustrations/council/council_chancellor.png";
+        let (state, dir) = state_with(&[png], Style::Painted);
+        assert_eq!(figure_kind(&state, "chancellor"), Kind::Painted);
+        let _ = std::fs::remove_dir_all(dir);
+        let glb_dir = room::figure_dirs(Style::Mesh)[0];
+        let glb = format!("{glb_dir}council_chancellor.glb");
+        let (state, dir) = state_with(&[glb.as_str()], Style::Painted);
+        assert_eq!(figure_kind(&state, "chancellor"), Kind::Glb);
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn mesh_style_falls_back_to_png() {
+        let png = "illustrations/council/council_chaplain.png";
+        let (state, dir) = state_with(&[png], Style::Mesh);
+        assert_eq!(figure_kind(&state, "chaplain"), Kind::Painted);
+        let _ = std::fs::remove_dir_all(dir);
     }
 }

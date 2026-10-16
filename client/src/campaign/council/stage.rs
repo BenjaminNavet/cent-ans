@@ -30,6 +30,10 @@ pub struct StageCard;
 #[derive(Component)]
 pub struct StageCardText;
 
+/// Portrait of the holder in the hover card (`_card_portrait`, 64x80).
+#[derive(Component)]
+pub struct StageCardPortrait;
+
 /// Spawns the stage under `parent`. Called by the court panel when it builds its offices tab.
 pub fn spawn_stage(
     parent: &mut ChildSpawnerCommands,
@@ -86,6 +90,8 @@ pub fn spawn_stage(
                     Node {
                         position_type: PositionType::Absolute,
                         padding: UiRect::axes(Val::Px(8.0), Val::Px(5.0)),
+                        column_gap: Val::Px(8.0),
+                        align_items: AlignItems::Center,
                         display: Display::None,
                         ..default()
                     },
@@ -93,6 +99,17 @@ pub fn spawn_stage(
                     Pickable::IGNORE,
                 ))
                 .with_children(|card| {
+                    card.spawn((
+                        Name::new("council:card_portrait"),
+                        StageCardPortrait,
+                        ImageNode::default(),
+                        Node {
+                            width: Val::Px(64.0),
+                            height: Val::Px(80.0),
+                            display: Display::None,
+                            ..default()
+                        },
+                    ));
                     card.spawn((StageCardText, caption(theme, "")));
                 });
         });
@@ -117,12 +134,32 @@ pub fn input(
         return;
     };
     let over = cursor.cursor_over.then_some(cursor.normalized).flatten();
-    let Some(normalized) = over else {
+    // Dev hook for scripted proofs (no real cursor): `CENT_ANS_COUNCIL_AUTOHOVER=<office|ruler>`
+    // puts the virtual cursor on that seat, `CENT_ANS_COUNCIL_AUTOCLICK=1` clicks it once.
+    let scripted = std::env::var("CENT_ANS_COUNCIL_AUTOHOVER")
+        .ok()
+        .and_then(|key| {
+            let aspect = STAGE_PIXELS.x as f32 / STAGE_PIXELS.y as f32;
+            let head = pick::seat_position(&key) + Vec3::Y * 0.9;
+            pick::project(
+                head,
+                camera.translation,
+                camera.rotation,
+                pick::CAMERA_FOV_DEG,
+                aspect,
+            )
+        });
+    let Some(normalized) = over.or(scripted.map(|uv| uv - Vec2::splat(0.5))) else {
         state.hovered = None;
         state.cursor = None;
         return;
     };
     let uv = normalized + Vec2::splat(0.5);
+    let script_click = scripted.is_some()
+        && std::env::var_os("CENT_ANS_COUNCIL_AUTOCLICK").is_some()
+        && state.hovers > 0
+        && state.clicks == 0
+        && state.hovered.is_some();
     state.cursor = Some(uv * STAGE_SIZE);
     let aspect = STAGE_PIXELS.x as f32 / STAGE_PIXELS.y as f32;
     let direction = pick::ray_direction(uv, pick::CAMERA_FOV_DEG, aspect, camera.rotation);
@@ -133,7 +170,7 @@ pub fn input(
         }
         state.hovered = key.clone();
     }
-    if mouse.just_pressed(MouseButton::Left)
+    if (mouse.just_pressed(MouseButton::Left) || script_click)
         && let Some(key) = key
     {
         state.clicks += 1;
@@ -153,6 +190,42 @@ pub fn input(
             ui.dirty = true;
         }
     }
+}
+
+/// Portrait asset path of the holder of a seat (empty: vacant, or no picture).
+fn card_portrait_path(
+    key: &str,
+    ui: &CourtUi,
+    sim: &Sim,
+    bank: &crate::campaign::panels::court::portrait::PortraitBank,
+) -> String {
+    let holder = if key == "ruler" {
+        sim.state
+            .as_ref()
+            .and_then(|s| s.factions.get(&sim.player))
+            .and_then(|f| f.ruler.as_ref())
+            .map(ToString::to_string)
+    } else {
+        ui.snapshot
+            .offices
+            .iter()
+            .find(|o| o.id == key && !o.holder_id.is_empty())
+            .map(|o| o.holder_id.clone())
+    };
+    let Some(holder) = holder.filter(|id| !id.starts_with("demo_")) else {
+        return String::new();
+    };
+    let Some((data, state)) = sim.data.as_ref().zip(sim.state.as_ref()) else {
+        return String::new();
+    };
+    let Some(sheet) = data_model::CharacterId::new(&holder)
+        .ok()
+        .and_then(|id| game_api::court::character_sheet(data, state, &id))
+    else {
+        return String::new();
+    };
+    bank.resolve(&crate::campaign::panels::court::sheet_subject(&sheet))
+        .path
 }
 
 /// Card text of a seat (`show_card`): name, office, skill.
@@ -187,6 +260,13 @@ fn card_text(key: &str, ui: &CourtUi, sim: &Sim) -> String {
     }
 }
 
+type PortraitItem = (&'static mut ImageNode, &'static mut Node);
+type PortraitFilter = (
+    With<StageCardPortrait>,
+    Without<StageCard>,
+    Without<StageLabel>,
+);
+
 type LabelItem = (
     &'static StageLabel,
     &'static mut Node,
@@ -202,6 +282,9 @@ pub fn update_overlays(
     camera: Query<&Transform, With<CouncilCamera>>,
     mut cards: Query<&mut Node, With<StageCard>>,
     mut texts: Query<&mut Text, With<StageCardText>>,
+    mut portraits: Query<PortraitItem, PortraitFilter>,
+    bank: Res<crate::campaign::panels::court::portrait::PortraitBank>,
+    assets: Res<AssetServer>,
     mut labels: Query<LabelItem, (Without<StageCard>, Without<CouncilCamera>)>,
     mut shown: Local<Option<String>>,
 ) {
@@ -216,6 +299,18 @@ pub fn update_overlays(
             .unwrap_or_default();
         for mut text in &mut texts {
             text.0.clone_from(&state.card);
+        }
+        state.card_portrait = shown
+            .as_deref()
+            .map(|key| card_portrait_path(key, &ui, &sim, &bank))
+            .unwrap_or_default();
+        for (mut image, mut node) in &mut portraits {
+            if state.card_portrait.is_empty() {
+                node.display = Display::None;
+            } else {
+                image.image = assets.load(state.card_portrait.clone());
+                node.display = Display::Flex;
+            }
         }
     }
     for mut node in &mut cards {
