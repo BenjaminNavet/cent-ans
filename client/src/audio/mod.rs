@@ -26,7 +26,9 @@ pub mod bank;
 pub mod battle;
 pub mod battle_music;
 pub mod campaign;
+pub mod clip;
 pub mod cues;
+pub mod dynamics;
 pub mod farbus;
 pub mod playlist;
 pub mod speech;
@@ -212,6 +214,46 @@ mod battle_bus_tests {
         assert_eq!(channel_of_bus("Voix"), Channel::Voice);
         assert_eq!(channel_of_bus("Interface"), Channel::Sfx);
     }
+
+    #[test]
+    fn muted_pools_respect_instance_caps_and_expire() {
+        let mut director = AudioDirector::load(true);
+        director.clock = 0.0;
+        // max_instances 2: the third copy replaces the oldest instead of stacking.
+        assert!(director.claim_virtual(false, "clash", "audio/none.ogg", 3, 2));
+        assert!(director.claim_virtual(false, "clash", "audio/none.ogg", 3, 2));
+        assert_eq!(director.virtual_sfx.len(), 2);
+        assert!(director.claim_virtual(false, "clash", "audio/none.ogg", 3, 2));
+        assert_eq!(director.virtual_sfx.len(), 2);
+        assert_eq!(director.virtual_replaced, 1);
+        // Fill the capacity with high priority sounds: a low priority one is refused.
+        for index in 0..SFX_CAPACITY {
+            director.claim_virtual(false, &format!("e{index}"), "audio/none.ogg", 9, 4);
+        }
+        assert_eq!(director.virtual_sfx.len(), SFX_CAPACITY);
+        assert!(!director.claim_virtual(false, "weak", "audio/none.ogg", 1, 4));
+        assert_eq!(director.virtual_refused, 1);
+        // Unknown length = 1 s: after that the voices are gone.
+        director.clock = 5.0;
+        assert!(director.claim_virtual(false, "weak", "audio/none.ogg", 1, 4));
+        assert_eq!(director.virtual_sfx.len(), 1);
+    }
+
+    #[test]
+    fn dynamics_scale_the_channel_volume() {
+        let settings = AudioSettings::default();
+        let mut director = AudioDirector::load(true);
+        let base = director.channel_volume(&settings, Channel::Battle);
+        director.dynamics.update(
+            dynamics::BusDemand {
+                battle: 3.0,
+                ..Default::default()
+            },
+            0.5,
+        );
+        assert!(director.channel_volume(&settings, Channel::Battle) < base);
+        assert!(director.music_volume(&settings) <= base.max(1.0));
+    }
 }
 
 #[derive(Debug, Default)]
@@ -267,6 +309,16 @@ pub struct AudioDirector {
     music_speed: f32,
     /// Speech clips requested (dump).
     speech_log: Vec<String>,
+    /// Gains of the bus limiter / compressors (`dynamics`), read by the volume setters.
+    dynamics: dynamics::BusDynamics,
+    /// Muted mode: the pools are simulated (no sound, no entity) so the instance caps and the
+    /// priority replacement behave as when playing; `handle` = end time of the virtual voice.
+    virtual_sfx: Vec<PoolVoice<f32>>,
+    virtual_voice: Vec<PoolVoice<f32>>,
+    virtual_replaced: u32,
+    virtual_refused: u32,
+    /// Clip durations probed from the file headers (`clip::clip_seconds`), by asset path.
+    clip_lengths: HashMap<String, Option<f32>>,
 }
 
 fn db_to_linear(db: f32) -> f32 {
@@ -341,6 +393,12 @@ impl AudioDirector {
             music_trim_db: 0.0,
             music_speed: 1.0,
             speech_log: Vec::new(),
+            dynamics: dynamics::BusDynamics::default(),
+            virtual_sfx: Vec::new(),
+            virtual_voice: Vec::new(),
+            virtual_replaced: 0,
+            virtual_refused: 0,
+            clip_lengths: HashMap::new(),
         };
         director.index_files();
         if !muted {
@@ -472,6 +530,7 @@ impl AudioDirector {
         }
     }
 
+    /// Player volume of a channel times the bus dynamics (compressor, limiter).
     fn channel_volume(&self, settings: &AudioSettings, channel: Channel) -> f32 {
         settings.master
             * match channel {
@@ -479,10 +538,62 @@ impl AudioDirector {
                 Channel::Voice => settings.voice,
                 Channel::Battle => settings.battle_sfx,
             }
+            * self.dynamics.channel_gain(channel)
     }
 
     fn music_volume(&self, settings: &AudioSettings) -> f32 {
-        settings.master * settings.music * db_to_linear(self.duck.level_db + self.music_trim_db)
+        settings.master
+            * settings.music
+            * db_to_linear(self.duck.level_db + self.music_trim_db)
+            * self.dynamics.music_gain()
+    }
+
+    /// Real duration (s) of a clip of the assets folder, probed once from its header.
+    fn clip_length(&mut self, path: &str) -> Option<f32> {
+        if let Some(known) = self.clip_lengths.get(path) {
+            return *known;
+        }
+        let length = clip::clip_seconds(&self.assets_dir.join(path));
+        self.clip_lengths.insert(path.to_string(), length);
+        length
+    }
+
+    /// Muted mode: runs the pool policy on a virtual voice and returns whether the sound would
+    /// have played. Voices end after the real clip length (1 s if unknown).
+    fn claim_virtual(
+        &mut self,
+        voice_pool: bool,
+        event: &str,
+        path: &str,
+        priority: i32,
+        max_instances: usize,
+    ) -> bool {
+        let now = self.clock;
+        let length = self.clip_length(path).unwrap_or(1.0);
+        let (pool, capacity) = if voice_pool {
+            (&mut self.virtual_voice, VOICE_CAPACITY)
+        } else {
+            (&mut self.virtual_sfx, SFX_CAPACITY)
+        };
+        pool.retain(|voice| voice.handle > now);
+        match bank::claim(pool, capacity, event, priority, max_instances) {
+            Claim::Refuse => {
+                self.virtual_refused += 1;
+                return false;
+            }
+            Claim::Replace(index) => {
+                pool.remove(index);
+                self.virtual_replaced += 1;
+            }
+            Claim::Free => {}
+        }
+        pool.push(PoolVoice {
+            handle: now + length,
+            event: event.to_string(),
+            priority,
+            started: now,
+        });
+        true
     }
 }
 
@@ -516,6 +627,7 @@ impl Plugin for AudioPlugin {
                     speech::handle_speech,
                     handle_sfx,
                     handle_voice,
+                    update_bus_dynamics,
                     tick_music,
                     sync_voice_volumes,
                     tick_ambience,
@@ -845,6 +957,7 @@ fn handle_sfx(
             }
         };
         if director.muted {
+            director.claim_virtual(false, &name, &path, priority, max_instances);
             continue;
         }
         match bank::claim(
@@ -908,6 +1021,7 @@ fn handle_voice(
         };
         director.log(&format!("voice:{}", request.clip));
         if director.muted {
+            director.claim_virtual(true, &request.clip, &path, request.priority, 1);
             continue;
         }
         match bank::claim(
@@ -945,15 +1059,50 @@ fn handle_voice(
     }
 }
 
+/// Measures what the live sinks ask for on each bus and steps the limiter / compressors
+/// (`dynamics`). The demand is read back from the sink volumes divided by the gain applied.
+#[allow(clippy::too_many_arguments)]
+fn update_bus_dynamics(
+    time: Res<Time<Real>>,
+    mut director: ResMut<AudioDirector>,
+    sfx: Query<(&SfxVoice, &AudioSink)>,
+    spatial: Query<(&battle::Spatial3d, &AudioSink)>,
+    music: Query<&AudioSink, With<MusicVoice>>,
+    ambience: Query<&AudioSink, With<AmbienceLayer>>,
+    battle_ambience: Query<&AudioSink, With<battle::BattleAmbience>>,
+) {
+    let floor = 0.05;
+    let dynamics = &director.dynamics;
+    let mut demand = dynamics::BusDemand::default();
+    for (voice, sink) in &sfx {
+        let gain = dynamics.channel_gain(voice.channel).max(floor);
+        demand.add(voice.channel, sink.volume().to_linear() / gain);
+    }
+    for (voice, sink) in &spatial {
+        let gain = dynamics.channel_gain(voice.channel()).max(floor);
+        demand.add(voice.channel(), sink.volume().to_linear() / gain);
+    }
+    let gain = dynamics.music_gain().max(floor);
+    demand.music = music
+        .iter()
+        .map(|sink| sink.volume().to_linear() / gain)
+        .sum();
+    let gain = dynamics.ambience_gain().max(floor);
+    demand.ambience = ambience
+        .iter()
+        .chain(battle_ambience.iter())
+        .map(|sink| sink.volume().to_linear() / gain)
+        .sum();
+    director.dynamics.update(demand, time.delta_secs());
+}
+
 /// Live volume changes (settings sliders) reach the sounds already playing.
 fn sync_voice_volumes(
     settings: Res<AudioSettings>,
     director: Res<AudioDirector>,
     mut voices: Query<(&SfxVoice, &mut AudioSink)>,
 ) {
-    if !settings.is_changed() {
-        return;
-    }
+    // Every frame: the bus dynamics change the gain of the sounds already playing.
     for (voice, mut sink) in &mut voices {
         sink.set_volume(Volume::Linear(
             director.channel_volume(&settings, voice.channel) * voice.gain,
@@ -997,7 +1146,10 @@ fn tick_ambience(
                 if layer.db <= SILENT_DB + 1.0 && target_db <= SILENT_DB {
                     commands.entity(entity).despawn();
                 } else if let Some(mut sink) = sink {
-                    let volume = settings.master * settings.ambience * db_to_linear(layer.db);
+                    let volume = settings.master
+                        * settings.ambience
+                        * db_to_linear(layer.db)
+                        * director.dynamics.ambience_gain();
                     sink.set_volume(Volume::Linear(volume));
                 }
             }
@@ -1062,6 +1214,17 @@ fn dump_audio(world: &World) -> (String, Value) {
             "bank_events": director.bank.events.len(),
             "playlists": contexts.iter().map(|(name, primary, fallback)| json!({"context": name, "primary": primary, "fallback": fallback})).collect::<Vec<_>>(),
             "sfx_voices": director.sfx_pool.len(),
+            "virtual_pools": {
+                "sfx": director.virtual_sfx.len(), "voice": director.virtual_voice.len(),
+                "replaced": director.virtual_replaced, "refused": director.virtual_refused,
+            },
+            "dynamics": {
+                "limiter_gain": director.dynamics.limiter_gain(),
+                "voice": director.dynamics.channel_gain(Channel::Voice),
+                "battle": director.dynamics.channel_gain(Channel::Battle),
+                "ambience": director.dynamics.ambience_gain(),
+                "music": director.dynamics.music_gain(),
+            },
             "voice_voices": director.voice_pool.len(),
             "recent_events": director.played,
             "sfx_requested": director.sfx_requested,

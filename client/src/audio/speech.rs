@@ -124,6 +124,15 @@ pub fn spoken_seconds(text: &str) -> f32 {
     text.chars().count() as f32 / 13.0 + 0.6
 }
 
+/// How long the music duck is held for a line: the real length of the clip when it exists
+/// (probed from the file header), else the characters-per-second estimate.
+fn speech_hold(director: &mut AudioDirector, clip: &str, text: &str) -> f32 {
+    director
+        .resolve_clip("audio/voice/", clip)
+        .and_then(|path| director.clip_length(&path))
+        .unwrap_or_else(|| spoken_seconds(text))
+}
+
 const SPEECH_DUCK_DB: f32 = -9.0;
 const SPEECH_PRIORITY: i32 = 7;
 
@@ -146,13 +155,14 @@ pub fn handle_speech(
         if director.speech_log.len() > 16 {
             director.speech_log.remove(0);
         }
+        let hold = speech_hold(&mut director, &clip, &request.text);
         voices.write(PlayVoice {
             clip,
             priority: SPEECH_PRIORITY,
         });
         ducks.write(DuckMusic {
             db: SPEECH_DUCK_DB,
-            hold: spoken_seconds(&request.text),
+            hold,
         });
     }
 }

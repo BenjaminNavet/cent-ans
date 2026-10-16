@@ -21,6 +21,7 @@ use crate::app::AppState;
 use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::hud::flow::TurnAdvanced;
 use crate::campaign::panels::OpenPanel;
+use crate::campaign::panels::court::{CourtUi, Screen as CourtScreen};
 use crate::campaign::provinces::data::ProvinceMap;
 use crate::campaign::weather::WeatherView;
 
@@ -132,15 +133,19 @@ fn player_at_war(sim: &crate::sim::Sim) -> bool {
         .any(|entry| entry.relation == sim_campaign::RelationKind::War)
 }
 
+/// The court (council screen) is open: read from the court panel itself, so closing it by Escape
+/// (which sends no `OpenPanel`) or by another panel also ends the `court` music.
+pub fn court_is_open(court: Option<&CourtUi>) -> bool {
+    court.is_some_and(|court| court.screen == CourtScreen::Council)
+}
+
 fn feed_hints(
-    mut panels: MessageReader<OpenPanel>,
     sim: Option<Res<crate::sim::Sim>>,
+    court: Option<Res<CourtUi>>,
     mut hints: ResMut<MusicHints>,
     mut state: ResMut<CampaignAudioState>,
 ) {
-    for panel in panels.read() {
-        state.court_open = matches!(panel, OpenPanel::Council);
-    }
+    state.court_open = court_is_open(court.as_deref());
     let turn = sim
         .as_ref()
         .and_then(|sim| sim.state.as_ref())
@@ -275,6 +280,18 @@ mod tests {
             assert!((0.0..=1.0).contains(&forest) && (0.0..=1.0).contains(&fields));
         }
         assert!(terrain_shares("forest").0 > terrain_shares("plains").0);
+    }
+
+    #[test]
+    fn court_flag_follows_the_court_panel_not_the_messages() {
+        let mut court = CourtUi::default();
+        assert!(!court_is_open(Some(&court)));
+        court.open_council();
+        assert!(court_is_open(Some(&court)));
+        // Escape closes the screen without any OpenPanel message.
+        court.close();
+        assert!(!court_is_open(Some(&court)));
+        assert!(!court_is_open(None));
     }
 
     #[test]
