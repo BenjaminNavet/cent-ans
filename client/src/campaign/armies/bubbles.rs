@@ -1,8 +1,7 @@
 //! Rich hover bubbles of the map: the army or the colony under the pointer (the Godot
 //! `army_bubble_text` / `settlement_bubble_text` of `campaign_map.gd`, text in `hover_text.rs`).
 //! The result goes to [`RichHover`], which `feedback::update_hint` shows beside the pointer.
-//! An army lost from sight (ghost memory) is not ported: `hover_text::army_text` already takes
-//! `seen_ago`, but the client keeps no memory of enemy armies yet.
+//! An army lost from sight (ghost memory, `memory.rs`) shows its last known situation.
 
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
@@ -26,7 +25,7 @@ use crate::sim::Sim;
 #[derive(Resource, Default, Debug, Clone, PartialEq)]
 pub struct RichHover {
     pub text: Option<String>,
-    /// `army:<id>` or `settlement:<id>` the text was built for.
+    /// `army:<id>`, `settlement:<id>` or `ghost:<id>` the text was built for.
     pub target: Option<String>,
     /// Texts built since the campaign opened (dump).
     pub builds: u32,
@@ -128,12 +127,13 @@ pub fn update_rich_hover(
     glides: Res<Glides>,
     places: Res<Places>,
     pointer: Res<PointerOverUi>,
+    ghosts: Res<crate::campaign::parchment::extras::Ghosts>,
     window: Query<&Window, With<PrimaryWindow>>,
     camera: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
     ground: GroundHeight,
     mut rich: ResMut<RichHover>,
 ) {
-    let changed = sim.is_changed() || fog.is_changed();
+    let changed = sim.is_changed() || fog.is_changed() || ghosts.is_changed();
     let target: Option<String> = (|| {
         if pointer.over {
             return None;
@@ -146,13 +146,21 @@ pub fn update_rich_hover(
         let ray = camera.viewport_to_world(transform, cursor).ok()?;
         let px = ray_ground(ray, &ground)?;
         let distance = camera_distance(transform, Vec3::new(px.x, 0.0, px.y));
-        settlement_at(&places, px, distance).map(|(id, _)| format!("settlement:{}", id.as_str()))
+        if let Some((id, _)) = settlement_at(&places, px, distance) {
+            return Some(format!("settlement:{}", id.as_str()));
+        }
+        super::memory::ghost_at(&ghosts, cursor, camera, transform, &ground)
+            .map(|(id, _)| format!("ghost:{id}"))
     })();
     if target == rich.target && !changed {
         return;
     }
     let text = target.as_deref().and_then(|target| {
         let (data, state) = (sim.data.as_ref()?, sim.state.as_ref()?);
+        if let Some(id) = target.strip_prefix("ghost:") {
+            let (_, seen) = ghosts.0.iter().find(|(ghost, _)| ghost == id)?;
+            return super::memory::ghost_bubble(&sim, seen);
+        }
         if let Some(id) = target.strip_prefix("army:") {
             let id = ArmyId::parse(id)?;
             let at_sea = glides.active.contains_key(&id);

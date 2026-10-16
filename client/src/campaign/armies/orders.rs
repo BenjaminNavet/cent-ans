@@ -9,7 +9,7 @@ use data_model::{FactionId, SettlementId};
 use serde_json::{Value, json};
 use sim_campaign::{ArmyId, MoveOrderTarget, Order, OrderOutcome};
 
-use super::bubble::{BubbleHandles, BubbleMesh, build_mesh};
+use super::bubble::{self, BubbleHandles, BubbleMaterial, BubbleMesh, build_mesh};
 use super::feedback::{CursorMode, HoverHint};
 use super::landmask::{LandMask, is_water};
 use super::markers::{ArmyMarker, ArmyPlate, camera_distance, screen_rect};
@@ -125,10 +125,8 @@ pub struct PathPreviewState {
 #[derive(Resource, Default)]
 pub struct Reachable {
     pub army: Option<ArmyId>,
-    /// Centres (map pixels) of the cells reached this turn / only next turn.
-    pub this_turn: Vec<Vec2>,
-    pub next_turn: Vec<Vec2>,
-    pub cell_px: f32,
+    /// Mask of the cells reached this turn / by the end of the next one (`game_api::reach_mask`).
+    pub mask: Option<game_api::ReachMask>,
     pub count: usize,
     pub next_count: usize,
     pub budget: u32,
@@ -794,29 +792,19 @@ pub fn refresh_overlays(
         };
         return;
     }
-    let area = state.reachable_cells(data, army);
-    let grid = data.navgrid();
-    let centre = |cell: &sim_campaign::Cell| {
-        let c = cell.center(grid);
-        Vec2::new(c[0], c[1])
+    let Some(mask) = game_api::reach_mask(data, state, army) else {
+        return;
     };
-    let this_turn: Vec<Vec2> = area
-        .this_turn
-        .iter()
-        .map(|(cell, _)| centre(cell))
-        .collect();
-    let next_turn: Vec<Vec2> = area.next_turn.iter().map(centre).collect();
     reachable.army = Some(army.clone());
-    reachable.count = this_turn.len();
-    reachable.next_count = next_turn.len();
-    reachable.budget = area.budget;
-    reachable.cell_px = grid.scale as f32;
-    reachable.this_turn = this_turn;
-    reachable.next_turn = next_turn;
+    reachable.count = mask.cells;
+    reachable.next_count = mask.next_cells;
+    reachable.budget = mask.budget;
+    reachable.mask = Some(mask);
     reachable.dirty = true;
 }
 
-/// Builds / refreshes the bubble mesh (one entity, mesh replaced in place).
+/// Builds / refreshes the bubble: the mask texture when the area changed, the relief grid when
+/// the area or the displayed relief changed (one entity, mesh and mask replaced in place).
 #[allow(clippy::too_many_arguments)]
 pub fn update_bubble(
     mut commands: Commands,
@@ -825,56 +813,63 @@ pub fn update_bubble(
     mut reachable: ResMut<Reachable>,
     mut handles: ResMut<BubbleHandles>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut images: ResMut<Assets<Image>>,
+    mut materials: ResMut<Assets<BubbleMaterial>>,
     mut bubble: Query<&mut Visibility, With<BubbleMesh>>,
 ) {
     if !(reachable.dirty || reachable.tick != tick.version) {
         return;
     }
+    let new_area = reachable.dirty;
     reachable.dirty = false;
     reachable.tick = tick.version;
-    let visible = reachable.army.is_some() && reachable.count + reachable.next_count > 1;
-    if !visible {
+    let Some(mask) = reachable
+        .mask
+        .as_ref()
+        .filter(|_| reachable.army.is_some() && reachable.count + reachable.next_count > 1)
+    else {
         for mut visibility in &mut bubble {
             *visibility = Visibility::Hidden;
         }
         handles.quads = 0;
         return;
-    }
-    let (mesh, quads) = build_mesh(
-        &reachable.this_turn,
-        &reachable.next_turn,
-        reachable.cell_px.max(1.0),
-        &ground,
-    );
+    };
+    let (mesh, quads) = build_mesh(Vec2::from(mask.origin), Vec2::from(mask.size), &ground);
     handles.quads = quads;
     handles.builds += 1;
-    if let Some(handle) = &handles.mesh {
-        let _ = meshes.insert(handle.id(), mesh);
-        for mut visibility in &mut bubble {
-            *visibility = Visibility::Inherited;
-        }
+    let (image, levels) = bubble::mask_image(mask);
+    handles.mask_size = [mask.width, mask.height];
+    handles.mask_mips = levels;
+    let (Some(mesh_handle), Some(material_handle)) =
+        (handles.mesh.clone(), handles.material.clone())
+    else {
+        let mesh_handle = meshes.add(mesh);
+        let material_handle = materials.add(BubbleMaterial {
+            params: bubble::params_for(mask),
+            mask: Some(images.add(image)),
+        });
+        handles.mesh = Some(mesh_handle.clone());
+        handles.material = Some(material_handle.clone());
+        commands.spawn((
+            Name::new("ArmyMovementBubble"),
+            BubbleMesh,
+            Mesh3d(mesh_handle),
+            MeshMaterial3d(material_handle),
+            Transform::default(),
+            Visibility::Inherited,
+            bevy::light::NotShadowCaster,
+            bevy::state::state_scoped::DespawnOnExit(crate::app::AppState::Campaign),
+        ));
         return;
+    };
+    let _ = meshes.insert(mesh_handle.id(), mesh);
+    if new_area && let Some(mut material) = materials.get_mut(&material_handle) {
+        material.params = bubble::params_for(mask);
+        material.mask = Some(images.add(image));
     }
-    let handle = meshes.add(mesh);
-    handles.mesh = Some(handle.clone());
-    commands.spawn((
-        Name::new("ArmyMovementBubble"),
-        BubbleMesh,
-        Mesh3d(handle),
-        MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::WHITE,
-            unlit: true,
-            alpha_mode: AlphaMode::Blend,
-            cull_mode: None,
-            double_sided: true,
-            ..default()
-        })),
-        Transform::default(),
-        Visibility::Inherited,
-        bevy::light::NotShadowCaster,
-        bevy::state::state_scoped::DespawnOnExit(crate::app::AppState::Campaign),
-    ));
+    for mut visibility in &mut bubble {
+        *visibility = Visibility::Inherited;
+    }
 }
 
 /// Back to a fresh state when the screen closes: the bubble entity is despawned with it.
@@ -1215,6 +1210,8 @@ pub fn dump_armies(world: &World) -> (String, Value) {
     if let Some(section) = section.as_object_mut() {
         section.insert("bivouac_scenes".into(), json!(bivouacs));
         section.insert("bivouacs_shown".into(), json!(bivouacs_shown));
+        section.insert("bubble_mask".into(), json!(bubble.mask_size));
+        section.insert("bubble_mask_mips".into(), json!(bubble.mask_mips));
         section.extend(super::bubbles::dump_fields(world));
     }
     ("campaign_armies".into(), section)

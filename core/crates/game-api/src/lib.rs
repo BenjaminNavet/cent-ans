@@ -17,6 +17,7 @@ pub mod pprovince;
 pub mod progress;
 pub mod province;
 pub mod ransoms;
+pub mod reach;
 pub mod recruit;
 pub mod saves;
 pub mod siege;
@@ -36,6 +37,7 @@ pub use hud::{
 };
 pub use lens::{lens_view, LensCell, LensView, LensWanted};
 pub use province::{province_sheet, ProvinceSheet};
+pub use reach::{reach_mask, ReachMask};
 pub use siege::{siege_sheet, SiegeSheet};
 pub use tech::{tech_tree, TechTree};
 pub use turn::{turn_readiness, Alert, TurnReadiness};
