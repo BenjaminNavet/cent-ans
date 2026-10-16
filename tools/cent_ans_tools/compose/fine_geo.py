@@ -34,6 +34,7 @@ import numpy as np
 
 from cent_ans_tools.compose.contract import COMPOSE_DIR, ComposedWarp
 from cent_ans_tools.geo import fine_tiles
+from cent_ans_tools.geo.hydro_fine import normalise_name
 from cent_ans_tools.paths import DATA_DIR
 
 MAP_DIR = DATA_DIR / "map"
@@ -45,7 +46,18 @@ REAL_RULES_REV = "918b04e52"
 DENSIFY_PX = 8.0
 #: Margin kept inside the crop box (``composed_geometry``).
 CROP_MARGIN_PX = 2.0
-LAYER_DIRS = {fine_tiles.LAYER_RIVERS: "hydro_fine", fine_tiles.LAYER_ROADS: "roads_fine"}
+#: A composed hamlet takes the real anchor of the same-named hamlet warped this close.
+HAMLET_MATCH_PX = 3.0
+#: A real crossing anchor is kept when it warps this close to the composed crossing.
+CROSSING_MATCH_PX = 5.0
+#: Snap radii of the other crossings on the composed fine rivers (``fine_anchors``).
+BRIDGE_NAMED_M = 2000.0
+BRIDGE_ANY_M = 500.0
+SNAP_STEP_PX = 0.05
+LAYER_DIRS = {
+    fine_tiles.LAYER_RIVERS: "hydro_fine",
+    fine_tiles.LAYER_ROADS: "roads_fine",
+}
 
 
 @dataclass
@@ -72,6 +84,7 @@ class Result:
     hamlets_matched: int = 0
     crossings: int = 0
     crossings_missing: list[str] = field(default_factory=list)
+    crossings_snapped: int = 0
     anchor_offset_px: dict[str, float] = field(default_factory=dict)
 
 
@@ -133,7 +146,9 @@ def warp_polyline(
 
 def jacobian(warp: ComposedWarp, x: float, y: float, eps: float = 2.0) -> np.ndarray:
     """2x2 Jacobian of the forward warp at real pixel ``(x, y)`` (central differences)."""
-    fx = warp.forward_px(np.array([x + eps, x - eps, x, x]), np.array([y, y, y + eps, y - eps]))
+    fx = warp.forward_px(
+        np.array([x + eps, x - eps, x, x]), np.array([y, y, y + eps, y - eps])
+    )
     px, py = np.asarray(fx[0]), np.asarray(fx[1])
     return np.array(
         [
@@ -261,7 +276,10 @@ def warp_anchors(
             result.settlements_missing.append(sid)
             continue
         px = carry_offset(warp, rule_c, rule_r, anchor["px"])
-        entry = {"px": [round(float(px[0]), 4), round(float(px[1]), 4)], "z": anchor["z"]}
+        entry = {
+            "px": [round(float(px[0]), 4), round(float(px[1]), 4)],
+            "z": anchor["z"],
+        }
         for key in ("moved_m", "reason"):
             if key in anchor:
                 entry[key] = anchor[key]
@@ -270,17 +288,27 @@ def warp_anchors(
     out["settlements"] = settlements
 
     items_r = real_anchors["hamlets"]["items"]
-    by_key: dict[tuple[str, str], list[int]] = {}
-    for i, ham in enumerate(real_rules["hamlets"][: len(items_r)]):
-        by_key.setdefault((ham["name"], ham.get("province", "")), []).append(i)
+    rules_r = real_rules["hamlets"][: len(items_r)]
+    by_name: dict[str, list[int]] = {}
+    for i, ham in enumerate(rules_r):
+        by_name.setdefault(ham["name"], []).append(i)
+    used: set[int] = set()
     items = []
     for ham in composed["hamlets"]:
-        candidates = by_key.get((ham["name"], ham.get("province", "")))
         rule_c = np.asarray(ham["px"], dtype=np.float64)
-        if candidates:
-            i = candidates.pop(0)
-            x, y, z, moved = items_r[i]
-            px = carry_offset(warp, rule_c, real_rules["hamlets"][i]["px"], (x, y))
+        # Same hamlet = same name whose real rule position warps onto the composed one
+        # (CC regenerated most hamlets: the others have no real fine anchor).
+        best, best_d = None, HAMLET_MATCH_PX
+        for i in by_name.get(ham["name"], []):
+            if i in used:
+                continue
+            d = float(np.hypot(*(forward_point(warp, *rules_r[i]["px"]) - rule_c)))
+            if d <= best_d:
+                best, best_d = i, d
+        if best is not None:
+            used.add(best)
+            x, y, z, moved = items_r[best]
+            px = carry_offset(warp, rule_c, rules_r[best]["px"], (x, y))
             result.hamlets_matched += 1
         else:
             px = rule_c
@@ -294,21 +322,26 @@ def warp_anchors(
     crossings = []
     for rule in composed["crossings"]:
         anchor = real_crossings.get(rule["id"])
-        if anchor is None:
+        px = (
+            forward_point(warp, *anchor["px"])
+            if anchor is not None and anchor.get("snapped")
+            else np.full(2, np.nan)
+        )
+        # Generic ids (``road_<n>``) are not stable across maps: the real anchor
+        # counts only when it warps next to the composed crossing.
+        if (
+            not np.isfinite(px).all()
+            or np.hypot(*(px - np.asarray(rule["px"]))) > CROSSING_MATCH_PX
+        ):
             result.crossings_missing.append(rule["id"])
             crossings.append({"id": rule["id"], "px": rule["px"], "snapped": False})
             continue
         entry = dict(anchor)
-        if anchor.get("snapped"):
-            px = forward_point(warp, *anchor["px"])
-        else:
-            px = np.full(2, np.nan)
-        if not np.isfinite(px).all():
-            px = np.asarray(rule["px"], dtype=np.float64)
-            entry["snapped"] = False
         entry["px"] = [round(float(px[0]), 4), round(float(px[1]), 4)]
         if "dir" in anchor:
-            d = jacobian(warp, *anchor["px"]) @ np.asarray(anchor["dir"], dtype=np.float64)
+            d = jacobian(warp, *anchor["px"]) @ np.asarray(
+                anchor["dir"], dtype=np.float64
+            )
             n = float(np.hypot(*d))
             if np.isfinite(n) and n > 1e-9:
                 entry["dir"] = [round(float(d[0] / n), 4), round(float(d[1] / n), 4)]
@@ -317,7 +350,9 @@ def warp_anchors(
     out["crossings"] = crossings
 
     offsets = [
-        float(np.hypot(*(np.asarray(settlements[s]["px"]) - composed["settlements"][s])))
+        float(
+            np.hypot(*(np.asarray(settlements[s]["px"]) - composed["settlements"][s]))
+        )
         for s in settlements
     ]
     if offsets:
@@ -327,6 +362,146 @@ def warp_anchors(
             "max": round(float(np.max(offsets)), 3),
         }
     return out, result
+
+
+class RiverSnap:
+    """Nearest composed fine-river vertex (densified), tile by tile, in map units."""
+
+    def __init__(self, tiles_dir: Path, names: list[str], alias_groups: list[set]):
+        """Lazy reader of the composed ``hydro_fine/E2`` tiles."""
+        self.dir = tiles_dir
+        self.names = [normalise_name(n) for n in names]
+        self.alias_groups = alias_groups
+        self.side = fine_tiles.tile_units(fine_tiles.TILE_LEVEL)
+        self.cache: dict[tuple[int, int], dict | None] = {}
+
+    def _tile(self, col: int, row: int) -> dict | None:
+        if (col, row) in self.cache:
+            return self.cache[(col, row)]
+        path = self.dir / f"{col}_{row}.bin"
+        entry = None
+        if path.exists():
+            pts, att = [], []
+            for line in fine_tiles.decode(path.read_bytes())["lines"]:
+                attrs = np.column_stack(
+                    [line["z"], line["w"], np.full(len(line["z"]), line["feature"])]
+                )
+                xy, a = densify(line["xy"], attrs, SNAP_STEP_PX)
+                a[:, 2] = line["feature"]
+                tangent = np.gradient(xy, axis=0) if len(xy) > 1 else np.ones((1, 2))
+                norm = np.maximum(np.hypot(tangent[:, 0], tangent[:, 1]), 1e-9)
+                pts.append(xy)
+                att.append(np.column_stack([a, tangent / norm[:, None]]))
+            if pts:
+                from scipy.spatial import cKDTree
+
+                points = np.concatenate(pts)
+                entry = {
+                    "tree": cKDTree(points),
+                    "points": points,
+                    "attr": np.concatenate(att),
+                }
+        self.cache[(col, row)] = entry
+        return entry
+
+    def aliases(self, name: str) -> set[str]:
+        """Normalised names of a river with its aliases."""
+        key = normalise_name(name)
+        for group in self.alias_groups:
+            if key in group:
+                return group
+        return {key}
+
+    def nearest(self, point, radius: float, name: str | None = None) -> dict | None:
+        """Nearest vertex (optionally of a named river) within ``radius`` units."""
+        point = np.asarray(point, dtype=np.float64)
+        wanted = self.aliases(name) if name else None
+        best = None
+        c0, c1 = (
+            int((point[0] - radius) // self.side),
+            int((point[0] + radius) // self.side),
+        )
+        r0, r1 = (
+            int((point[1] - radius) // self.side),
+            int((point[1] + radius) // self.side),
+        )
+        for row in range(r0, r1 + 1):
+            for col in range(c0, c1 + 1):
+                tile = self._tile(col, row)
+                if tile is None:
+                    continue
+                idx = np.asarray(
+                    tile["tree"].query_ball_point(point, radius), dtype=int
+                )
+                if wanted and len(idx):
+                    keep = []
+                    for i in idx:
+                        n = self.names[int(tile["attr"][i, 2])]
+                        keep.append(n in wanted or any(w in n.split() for w in wanted))
+                    idx = idx[np.asarray(keep, dtype=bool)]
+                if not len(idx):
+                    continue
+                dist = np.hypot(*(tile["points"][idx] - point).T)
+                k = int(np.argmin(dist))
+                if best is None or dist[k] < best["distance"]:
+                    a = tile["attr"][idx[k]]
+                    best = {
+                        "distance": float(dist[k]),
+                        "point": tile["points"][idx[k]],
+                        "z": float(a[0]),
+                        "w": float(a[1]),
+                        "feature": int(a[2]),
+                        "tangent": a[3:5],
+                    }
+        return best
+
+
+def snap_crossings(
+    crossings: list[dict],
+    rules: list[dict],
+    snap: RiverSnap,
+    height,  # noqa: ANN001
+    mpp: float,
+) -> int:
+    """Put the crossings without a real anchor on the composed fine rivers (in place)."""
+    done = 0
+    for i, (entry, rule) in enumerate(zip(crossings, rules, strict=True)):
+        if entry.get("snapped") or "river_feature" in entry:
+            continue
+        pos = np.asarray(rule["px"], dtype=np.float64)
+        hit = None
+        if rule.get("river"):
+            hit = snap.nearest(pos, BRIDGE_NAMED_M / mpp, rule["river"])
+        if hit is None:
+            hit = snap.nearest(pos, BRIDGE_ANY_M / mpp)
+        if hit is None:
+            crossings[i] = {
+                "id": rule["id"],
+                "px": rule["px"],
+                "snapped": False,
+                "z_ground": round(height(*pos), 2),
+            }
+            continue
+        t = hit["tangent"]
+        normal = np.array([-t[1], t[0]])
+        reach = (0.5 * hit["w"] + 8.0) / mpp
+        banks = [
+            height(*(hit["point"] + normal * reach)),
+            height(*(hit["point"] - normal * reach)),
+        ]
+        crossings[i] = {
+            "id": rule["id"],
+            "px": [round(float(hit["point"][0]), 4), round(float(hit["point"][1]), 4)],
+            "snapped": True,
+            "river_feature": hit["feature"],
+            "dir": [round(float(t[0]), 4), round(float(t[1]), 4)],
+            "width_m": round(hit["w"], 1),
+            "z_water": round(hit["z"], 2),
+            "z_deck": round(max(max(banks), hit["z"] + 4.0), 2),
+            "moved_m": round(hit["distance"] * mpp, 1),
+        }
+        done += 1
+    return done
 
 
 # ------------------------------------------------------------------ build
@@ -391,8 +566,12 @@ def build(
         index_by_layer[fine_tiles.LAYER_RIVERS],
         result.layers["hydro_fine"],
     )
-    rivers["description"] = real_rivers["description"].split(" Carte composée")[0] + note
-    rivers["coordinates"] = "pixels de la carte composée (7080 x 6104), origine nord-ouest"
+    rivers["description"] = (
+        real_rivers["description"].split(" Carte composée")[0] + note
+    )
+    rivers["coordinates"] = (
+        "pixels de la carte composée (7080 x 6104), origine nord-ouest"
+    )
     rivers["generated_at"] = stamp
     (map_dir / "rivers_fine.json").write_text(
         json.dumps(rivers, ensure_ascii=False, separators=(",", ":")) + "\n",
@@ -415,7 +594,24 @@ def build(
     anchors, anchor_result = warp_anchors(
         warp, real_anchors, real_rules, composed, height_sampler(map_dir)
     )
+    names = [
+        f["name"] for f in json.loads(features.read_text(encoding="utf-8"))["features"]
+    ]
+    widths = json.loads((map_dir / "river_widths.json").read_text(encoding="utf-8"))
+    alias_groups = [
+        {normalise_name(n) for n in river["names"]} for river in widths["rivers"]
+    ]
+    snap = RiverSnap(out_root / "pyramid" / "hydro_fine" / "E2", names, alias_groups)
+    meta = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
+    anchor_result.crossings_snapped = snap_crossings(
+        anchors["crossings"],
+        composed["crossings"],
+        snap,
+        height_sampler(map_dir),
+        float(meta["meters_per_px"]),
+    )
     for key in (
+        "crossings_snapped",
         "settlements",
         "settlements_missing",
         "hamlets",
@@ -426,7 +622,9 @@ def build(
     ):
         setattr(result, key, getattr(anchor_result, key))
     payload = dict(real_anchors)
-    payload["description"] = real_anchors["description"].split(" Carte composée")[0] + note
+    payload["description"] = (
+        real_anchors["description"].split(" Carte composée")[0] + note
+    )
     payload["generated_at"] = stamp
     payload.update(anchors)
     payload["roads"] = _manifest_tiles(

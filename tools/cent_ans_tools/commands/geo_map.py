@@ -102,7 +102,8 @@ def geo_compose_fine(
             "hamlets": result.hamlets,
             "hamlets_matched": result.hamlets_matched,
             "crossings": result.crossings,
-            "crossings_missing": result.crossings_missing,
+            "crossings_without_real_anchor": len(result.crossings_missing),
+            "crossings_snapped_composed": result.crossings_snapped,
             "anchor_offset_px": result.anchor_offset_px,
         }
     )

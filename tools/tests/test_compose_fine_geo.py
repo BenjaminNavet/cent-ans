@@ -30,6 +30,7 @@ def affine_warp(scale: float = 0.75, shift=(-40.0, -20.0)) -> ComposedWarp:
 
 
 def test_densify_caps_segment_length() -> None:
+    """No segment longer than the step; attributes interpolated."""
     xy = np.array([[0.0, 0.0], [20.0, 0.0]])
     out, att = fine_geo.densify(xy, np.array([[0.0], [10.0]]), step=8.0)
     assert len(out) == 4
@@ -39,6 +40,7 @@ def test_densify_caps_segment_length() -> None:
 
 
 def test_warp_polyline_is_the_composition_transform() -> None:
+    """Vertices go through the forward warp, attributes kept."""
     warp = affine_warp()
     xy = np.array([[100.0, 100.0], [140.0, 120.0]])
     runs = fine_geo.warp_polyline(warp, xy, np.array([[5.0, 2.0], [7.0, 4.0]]))
@@ -50,6 +52,7 @@ def test_warp_polyline_is_the_composition_transform() -> None:
 
 
 def test_warp_polyline_splits_outside_the_crop() -> None:
+    """A line leaving the crop box is split in two runs."""
     warp = affine_warp()
     xy = np.array([[100.0, 100.0], [100.0, 200.0], [W + 50.0, 200.0], [100.0, 300.0]])
     runs = fine_geo.warp_polyline(warp, xy, np.zeros((4, 2)))
@@ -57,10 +60,13 @@ def test_warp_polyline_splits_outside_the_crop() -> None:
 
 
 def test_warp_layer_retiles(tmp_path) -> None:
+    """A warped tile is re-cut along the composed E2 grid."""
     warp = affine_warp(scale=1.0, shift=(70.0, 0.0))
     lines = fine_tiles.TileLines()
     xy = np.array([[10.0, 10.0], [50.0, 10.0]])
-    lines.add(7, fine_tiles.FLAG_TIDAL, xy, np.array([1.0, 2.0]), np.array([30.0, 30.0]))
+    lines.add(
+        7, fine_tiles.FLAG_TIDAL, xy, np.array([1.0, 2.0]), np.array([30.0, 30.0])
+    )
     src = tmp_path / "E2"
     src.mkdir()
     (src / "0_0.bin").write_bytes(
@@ -76,13 +82,17 @@ def test_warp_layer_retiles(tmp_path) -> None:
 
 
 def test_anchors_keep_offsets_and_follow_rules() -> None:
+    """Settlement offsets carried, crossings on the warped river, order of the composed files."""
     warp = affine_warp()
     real_anchors = {
         "settlements": {
             "set_a": {"px": [110.0, 100.0], "z": 50.0, "moved_m": 7000.0},
             "set_b": {"px": [200.0, 200.0], "z": 10.0},
         },
-        "hamlets": {"fields": ["x", "y", "z", "moved_m"], "items": [[300.0, 100.0, 5.0, 0.0]]},
+        "hamlets": {
+            "fields": ["x", "y", "z", "moved_m"],
+            "items": [[300.0, 100.0, 5.0, 0.0]],
+        },
         "crossings": [
             {"id": "br", "px": [120.0, 160.0], "snapped": True, "dir": [1.0, 0.0]},
         ],
@@ -98,7 +108,10 @@ def test_anchors_keep_offsets_and_follow_rules() -> None:
             {"name": "H", "province": "p", "px": [185.0, 55.0]},
             {"name": "New", "province": "p", "px": [10.0, 10.0]},
         ],
-        "crossings": [{"id": "br", "px": [0.0, 0.0]}, {"id": "zz", "px": [1.0, 2.0]}],
+        "crossings": [
+            {"id": "br", "px": [51.0, 101.0]},
+            {"id": "zz", "px": [1.0, 2.0]},
+        ],
     }
     out, res = fine_geo.warp_anchors(
         warp, real_anchors, real_rules, composed, height=lambda x, y: 42.0
@@ -115,3 +128,26 @@ def test_anchors_keep_offsets_and_follow_rules() -> None:
     np.testing.assert_allclose(br["dir"], [1.0, 0.0], atol=1e-4)
     assert out["crossings"][1]["snapped"] is False
     assert res.crossings_missing == ["zz"]
+
+
+def test_snap_crossings_on_composed_rivers(tmp_path) -> None:
+    """A crossing without a real anchor lands on the nearest named fine river."""
+    lines = fine_tiles.TileLines()
+    xy = np.array([[10.0, 20.0], [30.0, 20.0]])
+    lines.add(1, 0, xy, np.array([12.0, 10.0]), np.array([80.0, 80.0]))
+    src = tmp_path / "E2"
+    src.mkdir()
+    (src / "0_0.bin").write_bytes(
+        fine_tiles.encode(fine_tiles.LAYER_RIVERS, 2, 0, 0, lines)
+    )
+    snap = fine_geo.RiverSnap(src, ["Other", "la Seine"], [])
+    crossings = [{"id": "x", "px": [20.0, 21.0], "snapped": False}]
+    rules = [{"id": "x", "px": [20.0, 21.0], "river": "Seine"}]
+    done = fine_geo.snap_crossings(crossings, rules, snap, lambda x, y: 0.0, 719.0)
+    assert done == 1
+    entry = crossings[0]
+    assert entry["snapped"] and entry["river_feature"] == 1
+    np.testing.assert_allclose(entry["px"], [20.0, 20.0], atol=0.06)
+    assert entry["dir"] == [1.0, 0.0]
+    assert entry["z_water"] == pytest.approx(11.0, abs=0.1)
+    assert entry["z_deck"] == pytest.approx(15.0, abs=0.1)
