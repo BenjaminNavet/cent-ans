@@ -637,7 +637,7 @@ mod tests {
         n.name = "Arc long".into();
         f.query = " ARC ".into();
         assert!(f.active() && f.matches(&n));
-        f.query = "lance".into();
+        f.query = "lanc".into();
         assert!(!f.matches(&n));
         n.unit_unlocks.push(UnlockView {
             id: "l".into(),

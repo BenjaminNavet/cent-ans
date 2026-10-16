@@ -69,6 +69,8 @@ const REPORT_KEY: &str = "hud:season_report";
 
 #[derive(Resource, Default)]
 pub struct Tutorial {
+    /// Codex links in the shown step (text and advice), for the dump.
+    codex_links: usize,
     raw: Option<Value>,
     pub steps: Vec<TutorialStep>,
     /// Current step; `None` while the guide is not running.
@@ -566,6 +568,8 @@ fn rebuild(
         advice: crate::codex::text::format_auto(&codex, &step.advice),
         ..step
     };
+    tutorial.codex_links =
+        step.text.matches("[url=cdx:").count() + step.advice.matches("[url=cdx:").count();
     tutorial.root = Some(spawn(
         &mut commands,
         &theme,
@@ -707,6 +711,7 @@ fn dump(world: &World) -> (String, Value) {
             "skipped": tutorial.skipped,
             "started_at": tutorial.started_at,
             "toc_open": tutorial.toc_open,
+            "codex_links": tutorial.codex_links,
             "royal": tutorial.royal,
             "focuses": tutorial.focuses,
             "last_focus": tutorial.last_focus,

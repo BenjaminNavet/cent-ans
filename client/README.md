@@ -440,3 +440,8 @@ Rien de tout cela n'est dans le binaire joueur. `dev` = liaison dynamique + `bev
 
 ## Accessibilité (lot access)
 `ui/kit/contrast.rs` : cadre contraste (Outline sombre + vélin éclairci sur panneaux / cartes du kit, selon `Palette::high_contrast`) et redimensionnement en direct des textes déjà affichés quand `text_size` change. Hachures du lavis de faction en daltonien : `provinces/shaders/fill.wesl` (`OverlayParams.hatch`, rayures en pixels écran, direction choisie par hachage de la couleur). Symboles ▲■▼ du moral sur les cartes de régiment (`battle/hud/cards.rs`). Dumps : `ui_kit.access`, `campaign_provinces.fill.hatch`, `battle_hud` cartes `morale_symbols`.
+
+## campui6 : Tech, colonies de la province, rapport, Codex
+- **Tech** : champ `tech:search` (nom + unités/bâtiments débloqués) ; retrait de file `tech:dequeue_<id>` ou second clic sur un nœud en file (`Order::DequeueResearch`). Dump `tech.filter.query`.
+- **Province** : `panels/province/mates.rs` (pastilles sur la carte + pointillés + cartouche ; dump `province_mates`) ; un clic sur une case `prov:slot:<colonie>:<racine>` ouvre l'onglet Bâtiments de la colonie et encadre le premier palier (`focus_building`).
+- **Rapport de saison** : `ModalSpec::art` (image recadrée « cover » en tête d'une fenêtre ; dump `ui_kit.modal.art`). **Didacticiel** : liens Codex (`progress_tutorial.codex_links`).

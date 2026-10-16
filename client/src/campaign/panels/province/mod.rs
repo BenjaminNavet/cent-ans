@@ -659,6 +659,7 @@ fn dump_panel(world: &World) -> (String, Value) {
             "slot_bars": s.bars.iter().map(|b| json!({
                 "settlement": b.settlement, "cells": b.slots.len(), "used": b.used, "max": b.max,
                 "states": b.slots.iter().map(|c| c.state.as_str()).collect::<Vec<_>>(),
+                "roots": b.slots.iter().map(|c| c.root.as_str()).collect::<Vec<_>>(),
             })).collect::<Vec<_>>(),
             "lent_text": s.lent_text,
             "focus_building": s.focus_building,

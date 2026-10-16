@@ -503,6 +503,14 @@ pub fn dump(world: &World) -> Value {
         "pending": queue.pending_keys(),
         "queue_length": queue.pending.len() + usize::from(queue.active.is_some()),
         "toasts": toasts,
+        "art": queue.active.as_ref().and_then(|e| e.spec.art.as_ref()).map(|art| json!({
+            "path": art.path, "aspect": art.aspect, "caption": art.caption,
+            // `CoverFit` has cropped the source rectangle once the image is loaded.
+            "cropped": world.iter_entities().any(|entity| {
+                entity.get::<Name>().is_some_and(|n| n.as_str() == "modal:art")
+                    && entity.get::<ImageNode>().is_some_and(|image| image.rect.is_some())
+            }),
+        })),
     })
 }
 
