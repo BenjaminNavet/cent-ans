@@ -73,3 +73,31 @@
 15:11 bdecor5 3195cdb85 OK clippy/tests(1092 full --features dev, batch bdecor5+parch2+portaudit, merge8)/smoke battle crecy campaign (muted); no conflicts, no fixes
 15:11 parch2 c7aa30628 OK clippy/tests(1092 full --features dev, batch bdecor5+parch2+portaudit, merge8)/smoke battle crecy campaign (muted); no conflicts, no fixes
 15:11 portaudit d9d05f64a OK clippy/tests(1092 full --features dev, batch bdecor5+parch2+portaudit, merge8)/smoke battle crecy campaign (muted); no conflicts, no fixes
+- access2 prêt (9c9324727)
+- lifeanim2 prêt (3ab18d8fa)
+- dataassets2 prêt (88235803a) — piège: adopter en OnEnter(Ready), pas LoadedWithDependencies
+- FOURNÉE SUIVANTE: coastterr prêt (d5875e1bb). Reste: water/ pourrait réutiliser CoastTextures (coast_dist.png chargé 2x, 43 Mo GPU)
+- FOURNÉE SUIVANTE: batmo prêt (559cc60aa) — touche data/fx/battle_lighting.json + schéma, tools/tests/test_schemas.py ; lancer pytest schémas
+- FOURNÉE SUIVANTE: bwater prêt (b606f83af) — conflit probable scene/setup.rs avec batmo (deux hooks CENT_ANS_BATTLE_*), garder les deux
+- FOURNÉE SUIVANTE: siegeland prêt (df91e175e) — touche units/skinned.wesl mode 3 (volley_time empaqueté) : vérifier avec perf3/bunits6/lifeanim2. Décision : battle_capture_stage.gd (outil de capture CLI) NON porté, remplacé par --script/dumps de run_bg.
+- FOURNÉE SUIVANTE: armies6 prêt (76642b44a) — touche core game-api (reach.rs), camera/focus.rs, parchment/extras.rs
+16:00 merge8 965a00664 OK into bevy-migration (wave 8 + bdecor5/parch2/portaudit), clean merge over showfix; clippy/tests(1108 after towns4+access2+lifeanim2+dataassets2)/core sim-campaign+game-api(1145)/smoke campaign campaign_turns campaign_descent battle crecy siege main_menu (muted)
+16:00 towns4 af53ad8b8 OK clean merge; checks in the batch pass above
+16:00 access2 5d5b404ee OK clean merge (carries access); smoke main_menu+campaign in the batch pass
+16:00 lifeanim2 56aac8c3e OK conflict camp_horse.rs/.wesl vs bdecor5 (two ports of the same horses): kept lifeanim2's (adds shadow prepass, pose module), site.rs kept bdecor5 kit_plan.horse_pieces, dropped the duplicated camp_horses dump entry
+16:00 dataassets2 c5365f619 OK clean merge
+16:20 setwire3 fc1fcbd45 OK clean; clippy/tests(1113)/smoke main_menu faction_select campaign battle (muted)
+16:20 aflags2 3304ff870 OK clean; same pass; agent/mod.rs fmt noise was only in the worktree (base already formatted, no fmt commit needed)
+16:45 weather5 f88d4dfc2 OK clean; clippy/tests(1144)/smoke crecy siege battle campaign campaign_turns campaign_descent main_menu (muted)
+16:45 bunits6 7a24d4f98 OK clean (no skinned conflict with lifeanim2); same pass
+16:45 uiinfra3 2a7e3ec8f OK clean; c687ffb40 drops obsolete uiinfra line from bm-restes.md; same pass
+16:45 audio4 8c970daeb OK clean; same pass; orphan fire_flipbooks diff saved to scratchpad/orphan_audio4_fire.patch
+16:45 gore 7ec9a21cf OK conflict blood.rs vs setbattle: gore's data-driven `stains`, falling back to setbattle's pool_scale(level); same pass
+17:10 mapmodes 15721d724 OK conflict provinces/mod.rs (relation_markers + shields); clippy/tests(1161)/game-api/smoke crecy siege battle campaign campaign_turns main_menu faction_select (muted)
+17:10 campui7 0186e8e3b OK clean; fix 7bd7d46f8 migrate feudal_tutorial/done -> feudal_tutorial_done (+test)
+17:10 border2 ad75b84f8 OK clean; same pass
+17:10 perf3 fff33cca8 OK clean; stride = RECORD_BYTES everywhere (param block 131 vec4 is the uniform); same pass
+17:30 finegeo 513ce853b OK clean; clippy/tests(1175)/core fmt+clippy+test full(1956)/smoke campaign campaign_turns campaign_descent main_menu (muted)
+17:30 campui6 d12b446f3 OK clean; same pass
+fire_flipbooks drift: bm_wt2.sh copied data/ from gp-bevy's tree before merge8 (pre-a4d95924d text); not real work, restored in each worktree before removal
+17:50 menu5 40511a750 OK clean; clippy/tests(1182)/game-api clippy+tests/smoke main_menu faction_select campaign battle crecy siege campaign_turns (muted); fix: core fmt of start_sheets.rs (import order)
