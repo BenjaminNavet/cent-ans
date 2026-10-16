@@ -19,8 +19,10 @@ Branche `bm/coastterr` (worktree gp-bm-coastterr). Spécification : `docs/wip/bm
 ## Écarts à Godot
 - La sonde de falaise (altitude à 1,6 px vers l'intérieur) est cuite une fois sur le CPU au lieu
   d'être lue dans le MNT par pixel : pas de MNT pleine résolution sur le GPU.
-- Le contraste/saturation Godot s'applique après le tonemapper ; ici avant AgX, sur une copie gamma
-  (le pipeline caméra n'est pas à ce lot).
+- (coastfix 16/10) Le contraste/saturation Godot (1,06 / 1,08) est désormais une passe plein écran
+  après le tonemapper AgX (`terrain/post.rs` + `post.wesl`, même patron que `BattleGrade`), donc
+  fidèle à l'ordre Godot et appliquée aussi à l'eau, aux armées et aux marqueurs (comme
+  l'environnement Godot). Elle a quitté `terrain.wesl`.
 - La diffusion solaire du brouillard reprend le terme exact des maillages PBR de Bevy (lumière
   `CampaignSun` × exposition × `DistanceFog.directional_light_color`), atténué par l'ombre portée.
 - Pas de rugosité (le terrain Bevy est lambertien) : la rugosité de la plage mouillée est ignorée.
@@ -41,3 +43,21 @@ Branche `bm/coastterr` (worktree gp-bm-coastterr). Spécification : `docs/wip/bm
 ## Points ouverts
 - Le lot water (finegeo) peut réutiliser `CoastTextures` (geology, dist) pour le ressac côté mer au
   lieu de recharger `coast_dist.png`.
+
+## coastfix (16/10)
+- Douvres : la côte raster est ~3 px en mer du pied de la falaise (altitude 0 à 1,6 px, 46-150 m à
+  3-5 px) ; la règle de Godot (sonde 1,6 px) donnait galets. Nouveau champ de région optionnel
+  `cliff_probe_px` (schéma + `coast_types.json`) : 5 px pour `chalk_south_england` ; Douvres passe à
+  `chalk_cliff` (39 px de côte contre 5 de galets). Étretat, Raz, Cabourg, Berck inchangés.
+- Baie du Mont-Saint-Michel : la carte composée n'a pas de baie (coin de côte rectiligne, point
+  géographique à 31 px à l'intérieur des terres, aucun rivage dans 30 px) ; nouvelle région
+  `msm_bay` (sable, plage 2,0 = estran le plus large) sur le coin Cancale-Cotentin ; la sonde de
+  référence élargit son rayon (30/60/90 px) jusqu'à trouver un rivage. Pas de type « vase » : sable
+  large seulement. Le vrai creux de la baie relève de la carte composée (hors lot).
+- `coast_dist.png` : une seule image GPU (`coast::SharedCoastDist`, créée par le premier arrivé :
+  eau ou cuisson de côte), 43 Mo de moins.
+- Brouillard : `wx_aerial_fog_color` branché dans `camera_distance_fog` (couleur de saison et ciel
+  en sRGB dans `LookParams.aerial_base/aerial_sky`, nourris par `Atmosphere` via
+  `look::sync_aerial`) ; le rayon de chaque pixel remplace le rayon central.
+- Preuve : tests terrain::coast (Douvres chalk_cliff, MSM sand_beach/msm_bay), vidage
+  `terrain_coast` (shared_dist.same_as_terrain true, post_pass_cameras 1, aerial lié, 0 erreur).
