@@ -12,6 +12,7 @@ pub mod faction_panel;
 pub mod feudal;
 pub mod flow;
 pub mod hud;
+pub mod lens;
 pub mod pprovince;
 pub mod progress;
 pub mod province;
@@ -32,6 +33,7 @@ pub use hud::{
     current_difficulty, difficulty_levels, economy, forecast, income_top_provinces, top_bar,
     EconomyView, ForecastView, TopBar,
 };
+pub use lens::{lens_view, LensCell, LensView, LensWanted};
 pub use province::{province_sheet, ProvinceSheet};
 pub use siege::{siege_sheet, SiegeSheet};
 pub use tech::{tech_tree, TechTree};
