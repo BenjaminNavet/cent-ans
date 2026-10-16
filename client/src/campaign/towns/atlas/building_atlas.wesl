@@ -8,7 +8,7 @@
 import bevy_pbr::render::{
     forward_io::{VertexOutput, FragmentOutput},
     pbr_fragment::pbr_input_from_standard_material,
-    pbr_functions::{apply_pbr_lighting, main_pass_post_lighting_processing},
+    pbr_functions::{apply_pbr_lighting, main_pass_post_lighting_processing, visibility_range_dither},
     mesh_view_bindings::view,
     mesh_functions,
 };
@@ -95,6 +95,9 @@ fn layer_tile(layer: i32) -> f32 {
 
 @fragment
 fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> FragmentOutput {
+    // Crossfade of a visibility range (maquette range fade): dithered discard.
+@if(VISIBILITY_RANGE_DITHER)
+    visibility_range_dither(in.position, in.visibility_range_dither);
     var pbr_input = pbr_input_from_standard_material(in, is_front);
     var vcol = vec3<f32>(1.0);
     // Forced layer (named glTF matters, plain meshes), or -1: the vertex alpha codes it.

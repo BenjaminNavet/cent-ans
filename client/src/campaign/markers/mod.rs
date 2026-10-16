@@ -17,6 +17,7 @@ pub mod banner;
 pub mod catalog;
 pub mod declutter;
 pub mod dn;
+pub mod lod;
 pub mod placement;
 pub mod places;
 pub mod signs;
@@ -45,11 +46,14 @@ pub struct CampaignMarkersPlugin;
 impl Plugin for CampaignMarkersPlugin {
     fn build(&self, app: &mut App) {
         banner::add(app);
+        lod::add(app);
         app.init_resource::<Places>()
             .init_resource::<ShieldCache>()
             .init_resource::<MarkerStats>()
             .init_resource::<MarkersBuilt>()
             .init_resource::<Pins>()
+            .init_resource::<lod::KitBanners>()
+            .init_resource::<lod::LodStats>()
             .register_dump(dump_markers)
             .add_systems(OnExit(AppState::Campaign), reset_markers)
             .add_systems(
@@ -59,11 +63,15 @@ impl Plugin for CampaignMarkersPlugin {
                     (
                         refresh_controllers,
                         recolour_dn_banners,
+                        lod::recolour_kit_banners,
                         update_pins,
                         sink_maquettes,
                         refresh_signs,
                         settle_ground,
                         update_range,
+                        lod::fade_maquettes,
+                        lod::update_shadows,
+                        lod::batch_stats,
                         update_shields,
                         update_labels,
                         signs::rescale_signs,
@@ -147,6 +155,12 @@ struct Maquette {
     /// Fully sunk under its 1:1 town (set by `sink_maquettes`).
     sunk: bool,
     range: f32,
+    /// Rig distance beyond which the kind casts no shadow (`shadow_range`).
+    shadow_range: f32,
+    /// Shadow state applied to `meshes` (`None`: not yet).
+    casting: Option<bool>,
+    /// Meshes of the scene (filled by `lod::prepare_maquette`).
+    meshes: Vec<Entity>,
     handle: Handle<WorldAsset>,
 }
 
@@ -246,6 +260,16 @@ fn dump_markers(world: &World) -> (String, Value) {
             "worksite_signs": s.worksites,
             "controller_changes": s.controller_changes,
             "dn": {"places": s.dn_places, "brightened": s.dn_brightened, "banners_recoloured": s.dn_banners_recoloured, "banner_materials": world.get_resource::<banner::BannerMaterials>().map(|b| b.count()), "banner_wave": world.get_resource::<banner::BannerMaterials>().and_then(|b| b.params).map(|p| p.wave.to_array())},
+            "lod": world.get_resource::<lod::LodStats>().map(|l| json!({
+                "range_meshes": l.range_meshes,
+                "fading_now": l.fading,
+                "shadowless_maquettes": l.shadowless,
+                "kit_banners": l.kit_banners,
+                "kit_faces": l.kit_faces,
+                "kit_banners_recoloured": l.kit_banners_recoloured,
+                "scene_meshes": l.scene_meshes,
+                "draw_batches": l.batches,
+            })),
             "rendered_meshes": s.rendered_meshes,
             "live_probe": s.live_probe,
             "nearby": s.nearby,
@@ -258,10 +282,12 @@ fn reset_markers(
     mut built: ResMut<MarkersBuilt>,
     mut places: ResMut<Places>,
     mut stats: ResMut<MarkerStats>,
+    mut lod_stats: ResMut<lod::LodStats>,
 ) {
     built.0 = false;
     *places = Places::default();
     *stats = MarkerStats::default();
+    *lod_stats = lod::LodStats::default();
 }
 
 /// Builds the places once the campaign state exists, then spawns maquettes, landmarks, labels.
@@ -280,6 +306,7 @@ fn build_markers(
         ResMut<banner::BannerMaterials>,
         ResMut<Assets<banner::BannerMaterial>>,
     ),
+    mut kit_banners: ResMut<lod::KitBanners>,
 ) {
     if built.0 || sim.state.is_none() {
         return;
@@ -313,6 +340,8 @@ fn build_markers(
     let heraldic = crate::campaign::provinces::modes::heraldic_colors(data);
     let banner_mesh = meshes.add(banner::banner_mesh());
     banners.0.clear();
+    kit_banners.clear();
+    kit_banners.colours = heraldic.iter().map(|(k, v)| (k.clone(), *v)).collect();
 
     let root_entity = commands
         .spawn((
@@ -397,6 +426,9 @@ fn build_markers(
                     base_scale: scale,
                     sunk: false,
                     range: places.maquettes.range(p.shown_kind),
+                    shadow_range: places.maquettes.shadow_range(p.shown_kind),
+                    casting: None,
+                    meshes: Vec::new(),
                     handle,
                 },
                 GroundAnchor {
@@ -406,6 +438,7 @@ fn build_markers(
                 },
                 ChildOf(root_entity),
             ));
+            entity.observe(lod::prepare_maquette);
             if let Some(d) = &p.dn {
                 entity.insert(DnScene { gain: d.gain }).observe(brighten_dn);
                 if d.banner {
@@ -425,6 +458,7 @@ fn build_markers(
                             controller: p.controller.clone(),
                         },
                         bevy::light::NotShadowCaster,
+                        bevy::camera::visibility::VisibilityRange::abrupt(0.0, f32::MAX),
                     ));
                 }
             }
@@ -827,7 +861,8 @@ fn refresh_signs(
 
 /// Hides maquettes beyond the range of their kind, on the rig distance like Godot
 /// (`TownMaquetteLayer._update_fades`: `visibility` of `town_maquettes.json`, the same for every
-/// place of a kind; the fade over `fade_margin` is a hard cut here).
+/// place of a kind). Only the hard cut lives here (root hidden once fully faded or sunk); the
+/// dithered fade over `fade_margin` is `lod::fade_maquettes`.
 fn update_range(
     view: Res<crate::campaign::camera::zoom::ZoomView>,
     mut maquettes: Query<(&Maquette, &mut Visibility)>,
