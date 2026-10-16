@@ -47,6 +47,7 @@ pub mod hover;
 pub mod integ;
 pub mod journal;
 pub mod keys;
+pub mod layers;
 pub mod minimap;
 pub mod missions;
 pub mod ransom;
@@ -219,6 +220,7 @@ impl Plugin for CampaignHudPlugin {
                 buttons::plugin,
                 wait::plugin,
             ))
+            .add_plugins(layers::plugin)
             .register_dump(dump_hud)
             .register_dump(dump_layout)
             .add_systems(OnEnter(AppState::Campaign), spawn_hud)
