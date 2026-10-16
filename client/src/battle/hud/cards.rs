@@ -84,6 +84,21 @@ struct CardBadgeGlyph {
 const BADGE_SIZE: f32 = 16.0;
 const BADGE_STEP: f32 = 18.0;
 
+/// Tooltip (BBCode) of a badge kind: the rule text of a mode, else the label of the state.
+pub fn badge_tip(kind: &str) -> String {
+    match kind.strip_prefix("mode_") {
+        Some(mode) => {
+            let tip = super::mode_icons::tip_of(mode);
+            if tip.is_empty() {
+                super::view::badge_label(kind).to_owned()
+            } else {
+                format!("[b]{}[/b]\n{tip}", super::mode_icons::label_of(mode))
+            }
+        }
+        None => super::view::badge_label(kind).to_owned(),
+    }
+}
+
 /// Icon id of a badge kind.
 pub fn badge_icon_id(kind: &str) -> String {
     match kind.strip_prefix("mode_") {
@@ -447,7 +462,8 @@ fn spawn_card(
                 },
                 BackgroundColor(style::PARCHMENT_LIGHT),
                 BorderColor::all(style::INK),
-                Pickable::IGNORE,
+                Hovered::default(),
+                Tooltip::new(""),
                 ChildOf(card),
             ))
             .id();
@@ -635,6 +651,7 @@ struct BadgeQueries<'w, 's> {
             &'static CardBadge,
             &'static mut Node,
             &'static mut BackgroundColor,
+            &'static mut Tooltip,
         ),
         (Without<CardBadgeIcon>, Without<CardBadgeGlyph>),
     >,
@@ -657,8 +674,15 @@ fn update_badges(
             .map(super::view::state_badges)
             .unwrap_or_default()
     };
-    for (pill, mut node, mut background) in &mut slots.pills {
+    for (pill, mut node, mut background, mut tooltip) in &mut slots.pills {
         let badges = badges_of(pill.id);
+        let tip = badges
+            .get(pill.index)
+            .map(|k| badge_tip(k))
+            .unwrap_or_default();
+        if tooltip.bbcode != tip {
+            tooltip.bbcode = tip;
+        }
         let (display, colour) = match badges.get(pill.index) {
             Some(kind) => {
                 let [r, g, b] = super::view::badge_color(kind, blink);
@@ -834,6 +858,12 @@ mod tests {
             formation_key: "line".into(),
             reform_progress: None,
         }
+    }
+
+    #[test]
+    fn badge_tips_use_mode_rules() {
+        assert!(badge_tip("mode_skirmish").contains(" m "));
+        assert_eq!(badge_tip("rout"), "En déroute");
     }
 
     #[test]

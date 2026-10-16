@@ -390,7 +390,13 @@ fn tooltip_driver(
 
     if state.chain.is_empty() {
         // Time the hovered host, open its bubble after DELAY.
-        match hosts.iter().find(|(_, _, hovered)| hovered.get()) {
+        // The innermost host wins (children are spawned after their parent: highest entity);
+        // a host with an empty text shows nothing.
+        let hovered_host = hosts
+            .iter()
+            .filter(|(_, tooltip, hovered)| hovered.get() && !tooltip.bbcode.is_empty())
+            .max_by_key(|(entity, _, _)| *entity);
+        match hovered_host {
             Some((entity, tooltip, _)) => {
                 let elapsed = match state.pending_host {
                     Some((host, elapsed)) if host == entity => elapsed + dt,
