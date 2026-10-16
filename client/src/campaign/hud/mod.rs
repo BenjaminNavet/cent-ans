@@ -46,6 +46,7 @@ pub mod hover;
 pub mod integ;
 pub mod journal;
 pub mod keys;
+pub mod layers;
 pub mod minimap;
 pub mod missions;
 pub mod ransom;
@@ -207,6 +208,7 @@ impl Plugin for CampaignHudPlugin {
                 capture::plugin,
                 replay::plugin,
                 minimap::plugin,
+                layers::plugin,
                 missions::plugin,
                 journal::plugin,
                 ransom::plugin,

@@ -674,6 +674,41 @@ fn spawn_minimap(
                             ));
                         });
                     }
+                    // Optional layers (`MapModeController._build_menu`): trade routes, signs.
+                    menu.spawn((
+                        Node {
+                            height: Val::Px(1.0),
+                            margin: UiRect::vertical(Val::Px(3.0)),
+                            ..default()
+                        },
+                        BackgroundColor(crate::ui::kit::style::GOLD),
+                        Pickable::IGNORE,
+                    ));
+                    let trade_key =
+                        KeyHints::new(keymap.as_deref(), settings.as_deref()).label("map_toggle_trade");
+                    let trade_caption = if trade_key.is_empty() {
+                        "Routes commerciales".to_owned()
+                    } else {
+                        format!("Routes commerciales   ({trade_key})")
+                    };
+                    for (name, caption, tip) in [
+                        (
+                            super::layers::TRADE_CHECK,
+                            trade_caption.as_str(),
+                            "[b]Routes commerciales[/b]\nTrace sur la carte les routes de commerce : encre pour celles qui rapportent, grises quand elles sont coupées.",
+                        ),
+                        (
+                            super::layers::SIGNS_CHECK,
+                            "Signes : chantiers, incidents, rencontres",
+                            "[b]Signes[/b]\nMontre aussi les marteaux de chantier, les sceaux d’incident et les sites de rencontre ; sinon la carte ne garde qu’un signe par ville.",
+                        ),
+                    ] {
+                        menu.spawn((
+                            crate::ui::kit::widgets::checkbox(&theme, name, caption, false),
+                            HudWidget,
+                            Tooltip::new(tip),
+                        ));
+                    }
                 });
         });
     commands.insert_resource(Minimap {
