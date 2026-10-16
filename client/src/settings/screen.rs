@@ -9,7 +9,7 @@ use bevy::ui_widgets::SliderValue;
 
 use super::keymap::{self, ACTIONS, KeyMap};
 use super::model::Settings;
-use super::rows::{Kind, ROWS, Row, Tab, row};
+use super::rows::{Kind, NO_EFFECT, ROWS, Row, Tab, row};
 use super::{OpenSettings, SettingsFile};
 use crate::menu::KeyEdges;
 use crate::ui::kit::tooltip::Tooltip;
@@ -156,7 +156,9 @@ pub fn spawn(commands: &mut Commands, theme: &UiTheme, settings: &Settings, tab:
                                 pane_tab == tab,
                             ))
                             .with_children(|pane| {
-                                for row in ROWS.iter().filter(|row| row.tab == pane_tab) {
+                                for row in ROWS.iter().filter(|row| {
+                                    row.tab == pane_tab && !NO_EFFECT.contains(&row.key)
+                                }) {
                                     spawn_row(pane, theme, row, &mut current);
                                 }
                                 if pane_tab == Tab::Controls {
