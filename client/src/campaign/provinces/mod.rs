@@ -24,6 +24,7 @@ pub mod modes;
 pub mod overlay;
 pub mod picker;
 pub mod projection;
+pub mod relation_markers;
 
 pub struct CampaignProvincesPlugin;
 
@@ -31,6 +32,7 @@ impl Plugin for CampaignProvincesPlugin {
     fn build(&self, app: &mut App) {
         picker::build(app);
         labels::build(app);
+        relation_markers::build(app);
         overlay::build(app);
         drape::register_shaders(app);
         if app.world().contains_resource::<Assets<Mesh>>() {
@@ -111,6 +113,8 @@ fn dump_provinces(world: &World) -> (String, Value) {
         "label_count": labels.names.len(),
         "label_names": labels.names,
         "label_weight": labels.weight,
+        "relation_markers": world.get_resource::<relation_markers::RelationMarkerStats>()
+            .map(|m| json!({ "shown": m.shown, "symbols": m.symbols })),
     });
     if let Some(overlay) = world.get_resource::<overlay::OverlayState>() {
         let tinted = overlay.colors.iter().filter(|c| c.alpha > 0.0).count();

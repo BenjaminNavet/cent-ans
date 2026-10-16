@@ -62,16 +62,7 @@ struct CardState(u32);
 #[derive(Component)]
 struct CardMoraleSymbol(u32);
 
-/// Symbol of a 0..1 level (morale): ▲ good, ■ medium, ▼ low (`Accessibility.level_symbol`).
-pub fn level_symbol(ratio: f32) -> &'static str {
-    if ratio >= 0.6 {
-        "▲"
-    } else if ratio >= 0.3 {
-        "■"
-    } else {
-        "▼"
-    }
-}
+pub use crate::ui::kit::contrast::level_symbol;
 
 /// One state badge slot (round pill at the right of the card, from the top), filled by
 /// [`update_cards`] from [`super::view::state_badges`].
