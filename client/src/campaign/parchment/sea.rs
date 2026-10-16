@@ -123,6 +123,11 @@ pub fn coast_image(coast: &CoastRaster) -> Image {
     image
 }
 
+/// Size of the sea plane: the map plus `MARGIN_FACTOR` maps on each side.
+pub fn plane_extent(map_size: Vec2) -> Vec2 {
+    map_size * (1.0 + MARGIN_FACTOR * 2.0)
+}
+
 /// The sea plane entity.
 #[derive(Component)]
 pub struct ParchmentSea;
@@ -135,7 +140,7 @@ pub fn spawn_plane(
     map_size: Vec2,
     material: ParchmentSeaMaterial,
 ) -> Handle<ParchmentSeaMaterial> {
-    let extent = map_size * (1.0 + MARGIN_FACTOR * 2.0);
+    let extent = plane_extent(map_size);
     let mesh = meshes.add(Mesh::from(
         Plane3d::default().mesh().size(extent.x, extent.y),
     ));
@@ -156,6 +161,30 @@ pub fn spawn_plane(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Regression (beige band on the left of the highest view): the wash must also cover the margin
+    /// beyond the map (Godot paints the open sea there), not only the paper.
+    #[test]
+    fn shader_washes_the_margin_beyond_the_map() {
+        let source = include_str!("sea.wesl");
+        assert!(
+            !source.contains("if (inside) {"),
+            "wash gated by the map rectangle"
+        );
+        assert!(source.contains("let wash = mix(0.55, 0.9"));
+    }
+
+    /// The plane reaches farther than the camera can see at the highest zoom (far plane 6000).
+    #[test]
+    fn plane_covers_the_view_at_max_zoom() {
+        let map = Vec2::new(1500.0, 1100.0);
+        let extent = plane_extent(map);
+        let margin = (extent - map) * 0.5;
+        assert!(
+            margin.x >= 2600.0 && margin.y >= 2600.0,
+            "margin {margin:?}"
+        );
+    }
 
     #[test]
     fn params_pack_roses_and_weight() {

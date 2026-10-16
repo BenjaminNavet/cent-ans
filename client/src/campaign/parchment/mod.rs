@@ -479,6 +479,8 @@ fn dump_parchment(world: &World) -> (String, Value) {
             "painted_rose": load.painted_rose,
             "coast_raster": load.coast.is_some(),
             "sea_plane": load.material.is_some(),
+            "sea_plane_extent": [sea::plane_extent(load.map_size).x, sea::plane_extent(load.map_size).y],
+            "sea_plane_margin": [sea::plane_extent(load.map_size).x * 0.5 - load.map_size.x * 0.5, sea::plane_extent(load.map_size).y * 0.5 - load.map_size.y * 0.5],
             "sea_items": items,
             "glyphs": assets.map(|a| a.glyphs.len()).unwrap_or(0),
             "painted_monsters": assets.map(|a| a.monsters.len()).unwrap_or(0),
