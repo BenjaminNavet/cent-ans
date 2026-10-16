@@ -108,6 +108,33 @@ pub struct ChroniclePanel {
     last_order: String,
 }
 
+impl ChroniclePanel {
+    /// Genre filter shared with the HUD journal (Godot `JournalView.remembered_genre`).
+    pub fn genre(&self) -> &str {
+        if self.genre.is_empty() {
+            "all"
+        } else {
+            &self.genre
+        }
+    }
+
+    pub fn world_open(&self) -> bool {
+        self.world_open
+    }
+
+    /// Sets the shared genre filter; the open window follows.
+    pub fn set_genre(&mut self, genre: &str) {
+        self.genre = genre.to_owned();
+        self.dirty = true;
+    }
+
+    /// Folds or unfolds the « Monde » block shared with the HUD journal.
+    pub fn toggle_world(&mut self) {
+        self.world_open = !self.world_open;
+        self.dirty = true;
+    }
+}
+
 #[derive(Component)]
 struct ChronicleRoot;
 

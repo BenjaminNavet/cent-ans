@@ -66,6 +66,13 @@ fn script_parses_every_command() {
 }
 
 #[test]
+fn script_type_command() {
+    let commands = parse_script("type Été à Orléans\n").unwrap();
+    assert_eq!(commands, vec![ScriptCommand::Type("Été à Orléans".into())]);
+    assert!(parse_script("type").is_err());
+}
+
+#[test]
 fn script_errors_name_the_line() {
     let error = parse_script("wait 1\nfly away\n").unwrap_err();
     assert!(error.contains("line 2"), "{error}");
