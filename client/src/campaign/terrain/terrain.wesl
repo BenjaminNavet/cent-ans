@@ -11,6 +11,8 @@ import bevy_pbr::render::{
     fog as bevy_fog,
     shadows,
 };
+// Per-province weather (lot weather5, wired by coastterr).
+import cent_ans_client::campaign::weather::ground::{wx_field, wx_selection_clear, wx_scatter};
 
 struct TerrainParams {
     // xyz: direction towards the sun.
@@ -170,6 +172,51 @@ struct FieldParams {
 @group(constants::MATERIAL_BIND_GROUP) @binding(25) var terroir_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(26) var occlusion_tex: texture_2d<f32>;
 
+// Coast band, glaciers, post adjustment, weather flags (coast.rs, material.rs `TerrainExtras`).
+struct CoastParams {
+    // 1 when bound, probe px, cliff min m, cliff max m.
+    cliff: vec4<f32>,
+    // cliff px, cliff widen, sea reach px, beach px.
+    band_a: vec4<f32>,
+    // wet px, strength, relief, far keep.
+    band_b: vec4<f32>,
+    // swash amount, period s, out px, in px / edge px, film px, cliff share.
+    swash_a: vec4<f32>,
+    swash_b: vec4<f32>,
+    foam: vec4<f32>,
+    // rock, chalk, granite, sand, shingle: rgb colour, a streak / rgb shade.
+    color: array<vec4<f32>, 5>,
+    shade: array<vec4<f32>, 5>,
+    // coast_dist size (px), stored distance scale.
+    texel: vec4<f32>,
+};
+
+struct GlacierParams {
+    // low limit (m), full cover (m), max slope (m/m), strength.
+    line: vec4<f32>,
+    ice: vec4<f32>,
+    crevasse: vec4<f32>,
+    neve: vec4<f32>,
+};
+
+struct TerrainExtras {
+    coast: CoastParams,
+    glacier: GlacierParams,
+    // Godot environment adjustment: contrast, saturation, on.
+    post: vec4<f32>,
+    // weather field bound and some weather, selection bound.
+    wx: vec4<f32>,
+};
+
+@group(constants::MATERIAL_BIND_GROUP) @binding(27) var<uniform> extras: TerrainExtras;
+@group(constants::MATERIAL_BIND_GROUP) @binding(28) var coast_dist_tex: texture_2d<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(29) var coast_sampler: sampler;
+@group(constants::MATERIAL_BIND_GROUP) @binding(30) var coast_probe_tex: texture_2d<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(31) var coast_types_tex: texture_2d<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(32) var wx_field_tex: texture_2d<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(33) var wx_sampler: sampler;
+@group(constants::MATERIAL_BIND_GROUP) @binding(34) var wx_clear_tex: texture_2d<f32>;
+
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
     // x, altitude (m), z
@@ -273,8 +320,17 @@ fn season_ground(albedo: vec3<f32>, n: vec3<f32>, altitude: f32, xz: vec2<f32>) 
     col = col * mix(vec3<f32>(1.0), season.winter_ground.rgb, w.w);
     let luma = dot(col, vec3<f32>(0.299, 0.587, 0.114));
     col = mix(vec3<f32>(luma), col, saturation * (1.0 - season.winter_ground.a * w.w));
-    // Snow: above the seasonal snow line, plus a share of the plains of the north in winter; it
-    // slides off steep slopes.
+    let snow = season_snow(n, altitude, xz);
+    // Plain winter snow is light (data `snow.plain_color`); the snow of the heights stays cooler.
+    let plain_snow = vec3<f32>(0.78, 0.80, 0.84);
+    let snow_tint = mix(season.snow_color.rgb, plain_snow, smoothstep(300.0, 1500.0, altitude));
+    return mix(col, snow_tint, snow);
+}
+
+// Seasonal snow cover: above the seasonal snow line, plus a share of the plains of the north in
+// winter; it slides off steep slopes.
+fn season_snow(n: vec3<f32>, altitude: f32, xz: vec2<f32>) -> f32 {
+    let w = season.weights;
     let line = dot(w, season.snow_lines);
     var snow = 0.0;
     if (line > 0.0) {
@@ -282,11 +338,7 @@ fn season_ground(albedo: vec3<f32>, n: vec3<f32>, altitude: f32, xz: vec2<f32>) 
     }
     let north = 1.0 - smoothstep(season.snow_plain.x * params.map.y, season.snow_plain.y * params.map.y, xz.y);
     snow = max(snow, w.w * north * season.snow_plain.z);
-    snow = snow * smoothstep(0.55, 0.85, n.y);
-    // Plain winter snow is light (data `snow.plain_color`); the snow of the heights stays cooler.
-    let plain_snow = vec3<f32>(0.78, 0.80, 0.84);
-    let snow_tint = mix(season.snow_color.rgb, plain_snow, smoothstep(300.0, 1500.0, altitude));
-    return mix(col, snow_tint, snow);
+    return snow * smoothstep(0.55, 0.85, n.y);
 }
 
 // Colour grade of the campaign environment (`campaign.seasons.<season>.grade`): contrast about the
@@ -393,10 +445,12 @@ fn wx_height_wide(p: vec2<f32>) -> f32 {
 // capped at 7 % in the lowlands, then TB6 wide banks in the large valleys and low plains, both
 // thinned near the camera and lifted over the turn.
 fn weather_mist(col: vec3<f32>, p: vec2<f32>, hc: f32, footprint: f32, grazing: f32) -> vec3<f32> {
-    let wb = look.mist.x;
+    let wb = wx_at(p).b;
     if (wb <= 0.001) {
         return col;
     }
+    // TB2: nothing veils the selected province.
+    let clear = wx_clear_at(p);
     let morning = look.mist.y;
     let t = globals.time;
     let near_k = smoothstep(WX_MIST_NEAR_FOOTPRINT * 0.5, WX_MIST_NEAR_FOOTPRINT * 2.0, footprint);
@@ -405,7 +459,7 @@ fn weather_mist(col: vec3<f32>, p: vec2<f32>, hc: f32, footprint: f32, grazing: 
     var mist = wb * mix(0.3, 0.75, low) * mix(0.35, 1.0, morning) * (0.35 + 0.65 * patches);
     mist = mist * mix(WX_MIST_NEAR, 1.0, near_k);
     let veil = mix(vec3<f32>(0.62, 0.64, 0.66), col * 1.6, 0.35);
-    var out = mix(col, veil, clamp(mist, 0.0, WX_MIST_MAX));
+    var out = mix(col, veil, clamp(mist, 0.0, WX_MIST_MAX) * clear);
     let opacity = look.mist.w;
     if (opacity > 0.0 && hc >= 1.0) {
         let h_mid = pm_height(p);
@@ -418,23 +472,219 @@ fn weather_mist(col: vec3<f32>, p: vec2<f32>, hc: f32, footprint: f32, grazing: 
         let optical = max(basin, plain) * crest * banks * (1.0 + look.valley_c.y * grazing);
         let lifted = mix(look.valley_c.z, 1.0, morning);
         let near = mix(look.valley_c.w, 1.0, near_k);
-        let valley = clamp(wb * optical * lifted, 0.0, 1.0) * opacity * near;
+        let valley = clamp(wb * optical * lifted, 0.0, 1.0) * opacity * near * clear;
         out = mix(out, look.valley_color.rgb, valley);
     }
     return out;
 }
 
-// Wet ground (slightly darker, TB6 `weather_wet_dim`) and fresh snow of the current weather.
-fn weather_ground(col: vec3<f32>, n: vec3<f32>, altitude: f32, p: vec2<f32>) -> vec3<f32> {
-    var out = col;
+// Weather at the map point `p` (Godot `wx_sample`): R rain, G snow, B fog, A storm, with the
+// noisy fringe between provinces baked in `WeatherGround::field`. Zero without weather.
+fn wx_at(p: vec2<f32>) -> vec4<f32> {
+    if (extras.wx.x < 0.5) {
+        return vec4<f32>(0.0);
+    }
+    return wx_field(wx_field_tex, wx_sampler, p, params.map.xy);
+}
+
+// 1 outside the selected province, 0 inside (feathered); 1 without a selection.
+fn wx_clear_at(p: vec2<f32>) -> f32 {
+    if (extras.wx.y < 0.5) {
+        return 1.0;
+    }
+    return wx_selection_clear(wx_clear_tex, wx_sampler, p, params.map.xy);
+}
+
+// Wet ground (slightly darker, TB6 `weather_wet_dim`) and fresh snow where it rains / snows
+// (`weather_ground` of campaign_weather.gdshaderinc, per province).
+fn weather_ground(col: vec3<f32>, altitude: f32, p: vec2<f32>, slope: f32) -> vec3<f32> {
+    let w = wx_at(p);
+    if (dot(w, vec4<f32>(1.0)) <= 0.0) {
+        return col;
+    }
     let land = smoothstep(0.0, 4.0, altitude);
-    let wet = look.weather.x;
-    out = out * (1.0 - look.mist.z * wet * land);
-    // Fresh snow: patchy at its start, flat ground first, slides off steep slopes.
-    let fresh = look.weather.y;
-    let patches = smoothstep(0.30, 0.62, fbm(p * 0.05) + fresh * 0.45);
-    let cover = clamp(fresh * 1.15, 0.0, 1.0) * patches * smoothstep(0.55, 0.85, n.y) * land;
-    return mix(out, season.snow_color.rgb, cover);
+    let rain = max(w.r, w.a);
+    var out = col * (1.0 - look.mist.z * rain * land);
+    // Fresh snow: on the flat mostly, in patches at its edge.
+    if (w.g > 0.0) {
+        let flakes = smoothstep(0.45, 0.85, fbm(p * 0.09) * 0.7 + w.g * 0.6);
+        let snow = w.g * flakes * (1.0 - smoothstep(0.35, 0.8, slope));
+        out = mix(out, vec3<f32>(0.80, 0.82, 0.86), snow * 0.7 * land);
+    }
+    return out;
+}
+
+// --- DN-ME4 névés and glaciers (freshwater_ground.gdshaderinc), permanent, all seasons ---
+fn fw_glacier_apply(col: vec3<f32>, p: vec2<f32>, hc: f32, slope: f32, footprint: f32, land: f32) -> vec3<f32> {
+    let g = extras.glacier.line;
+    if (g.w <= 0.0 || hc < g.x - 600.0) {
+        return col;
+    }
+    let alt = hc + (fbm(p * 0.035) - 0.5) * 420.0;
+    let flat_k = 1.0 - smoothstep(g.z - 0.12, g.z + 0.25, slope);
+    // Névé: white patches below the glacier line, cut by the noise.
+    let patch_n = vnoise(p * 0.35) * 0.6 + vnoise(p * 1.3) * 0.4;
+    let neve = smoothstep(g.x - 500.0, g.x + 150.0, alt) * smoothstep(0.35, 0.6, patch_n + 0.12) * flat_k;
+    var out = mix(col, extras.glacier.neve.rgb * (0.92 + 0.1 * patch_n), neve * 0.8 * g.w * land);
+    // Glacier: blue-white tongue with crevasses, on gentle slopes above the line.
+    let ice = smoothstep(g.x, g.y, alt) * flat_k;
+    if (ice > 0.01) {
+        let fade_detail = 1.0 - smoothstep(0.5, 2.5, footprint);
+        let seams = abs(vnoise(p * vec2<f32>(2.2, 0.7)) - 0.5) * 2.0;
+        let crevasse = (1.0 - smoothstep(0.0, 0.1, seams)) * fade_detail;
+        let ice_col = mix(extras.glacier.ice.rgb * (0.9 + 0.15 * patch_n), extras.glacier.crevasse.rgb, crevasse * 0.7);
+        out = mix(out, ice_col, ice * 0.85 * g.w * land);
+    }
+    return out;
+}
+
+// --- TB5 coast (coast_common.gdshaderinc + coast_band.gdshaderinc) ---
+
+// Signed distance to the coast (map px, > 0 on land) at `uv`.
+fn coast_px(uv: vec2<f32>) -> f32 {
+    return (textureSampleLevel(coast_dist_tex, coast_sampler, uv, 0.0).r * 255.0 - 128.0) / extras.coast.texel.z;
+}
+
+// Direction of the land (gradient of the coast distance), unit, in map px.
+fn coast_to_land(uv: vec2<f32>) -> vec2<f32> {
+    let ex = vec2<f32>(1.0 / extras.coast.texel.x, 0.0);
+    let ey = vec2<f32>(0.0, 1.0 / extras.coast.texel.y);
+    let cg = vec2<f32>(
+        textureSampleLevel(coast_dist_tex, coast_sampler, uv + ex, 0.0).r - textureSampleLevel(coast_dist_tex, coast_sampler, uv - ex, 0.0).r,
+        textureSampleLevel(coast_dist_tex, coast_sampler, uv + ey, 0.0).r - textureSampleLevel(coast_dist_tex, coast_sampler, uv - ey, 0.0).r);
+    return cg / max(length(cg), 1e-5);
+}
+
+// Geology at p (map px): x chalk, y granite, z shingle, w beach width; region edges warped by a
+// slow noise (no straight limit along the shore).
+fn coast_geology(p: vec2<f32>) -> vec4<f32> {
+    let warp = (vec2<f32>(vnoise(p * 0.21), vnoise(p * 0.21 + vec2<f32>(37.0, 11.0))) - 0.5) * 10.0;
+    let g = textureSampleLevel(coast_types_tex, coast_sampler, (p + warp) / params.map.xy, 0.0);
+    return vec4<f32>(smoothstep(vec3<f32>(0.3), vec3<f32>(0.7), g.rgb), g.a);
+}
+
+// Swash: a foam blade climbs the shore and withdraws, the same as the sea's (continuous at the
+// coastline). x foam, y water of the blade; frozen into a fringe when zoomed out.
+fn coast_swash(p: vec2<f32>, coast: f32, cliff_f: f32, footprint: f32) -> vec2<f32> {
+    let c = extras.coast;
+    let amount = c.swash_a.x;
+    if (amount <= 0.0) {
+        return vec2<f32>(0.0);
+    }
+    let out_px = c.swash_a.z;
+    let edge_px = c.swash_b.x;
+    let film_px = c.swash_b.y;
+    let reach_in = c.swash_a.w * mix(1.0, c.swash_b.z, cliff_f);
+    if (coast > reach_in + edge_px + 0.1 || coast < -out_px - film_px - edge_px - 0.1) {
+        return vec2<f32>(0.0);
+    }
+    let t = globals.time;
+    let far = smoothstep(0.3, 1.1, footprint);
+    let cyc = fract(t / c.swash_a.y + vnoise(p * 0.45) + vnoise(p * 0.11) * 2.0);
+    let up = smoothstep(0.0, 0.3, cyc);
+    let down = 1.0 - smoothstep(0.3, 1.0, cyc);
+    let adv = mix(up * down, 0.5, far);
+    let front = mix(-out_px, reach_in, adv) + (vnoise(p * 3.1) - 0.5) * 0.08 * (1.0 - far);
+    let behind = front - coast;
+    let edge = 1.0 - smoothstep(0.0, edge_px, abs(behind));
+    let lace = smoothstep(0.35, 0.75, vnoise(p * 6.0 + vec2<f32>(t * 0.07, 0.0)));
+    let film = step(0.0, behind) * (1.0 - smoothstep(0.0, film_px, behind)) * lace * mix(0.35, 0.8, down);
+    let foam = max(edge * mix(0.55, 1.0, down), film) * mix(1.0, 0.6, far);
+    return vec2<f32>(foam * amount, smoothstep(-0.02, 0.02, behind) * amount);
+}
+
+struct CoastOut {
+    color: vec3<f32>,
+    n: vec3<f32>,
+};
+
+// Coast band of the ground (`coast_band`): cliffs (chalk, granite, rock) where the relief
+// dominates the shore, beaches (sand, shingle) elsewhere; the relief emerging on the sea side of
+// the raster coast is painted rock or sand. The slope-rule probe altitude and the lake-shore
+// flag are baked in `coast_probe` (coast.rs) instead of reading the heightmap here.
+fn coast_band(p: vec2<f32>, footprint: f32, hc: f32, world_y: f32, snow: f32, col: vec3<f32>, n: vec3<f32>) -> CoastOut {
+    var out: CoastOut;
+    out.color = col;
+    out.n = n;
+    let c = extras.coast;
+    if (c.cliff.x < 0.5) {
+        return out;
+    }
+    let uv = p / params.map.xy;
+    let coast = coast_px(uv);
+    let cliff_px = c.band_a.x;
+    let widen = c.band_a.y;
+    let beach_px = c.band_a.w;
+    let reach = max(cliff_px * widen * 1.2, beach_px * 3.2);
+    if (coast > reach) {
+        return out;
+    }
+    let emerged = select(0.0, smoothstep(0.0, 2.0, hc), coast > -c.band_a.z && world_y >= 0.0);
+    if (coast < -0.3 && emerged <= 0.0) {
+        return out;
+    }
+    let probe = textureSampleLevel(coast_probe_tex, coast_sampler, uv, 0.0);
+    if (probe.g > 0.5) {
+        return out;
+    }
+    let h = probe.r * 255.0;
+    let to_land = coast_to_land(uv);
+    let cliff_f = max(smoothstep(c.cliff.z, c.cliff.w, h), emerged * smoothstep(6.0, 15.0, hc));
+    let geo = coast_geology(p);
+    let w_rock = max(1.0 - geo.r - geo.g, 0.0);
+    let fine = 1.0 - smoothstep(0.15, 0.7, footprint);
+    let shore = max(smoothstep(-0.25, 0.05, coast), emerged);
+    let k = c.band_b.y * mix(1.0, c.band_b.w, smoothstep(1.5, 5.0, footprint));
+
+    // Beach: irregular width, grain, wet foreshore at the water's edge.
+    let beach_c = mix(c.color[3].rgb, c.color[4].rgb, geo.b);
+    let beach_s = mix(c.shade[3].rgb, c.shade[4].rgb, geo.b);
+    let beach_k = mix(c.color[3].a, c.color[4].a, geo.b);
+    let bw = beach_px * mix(0.5, 2.0, geo.a) * (0.55 + 0.9 * vnoise(p * 0.9 + vec2<f32>(11.0, 3.0)));
+    let speck = mix(0.5, vnoise(p * 17.0) * 0.6 + vnoise(p * 41.0) * 0.4, fine);
+    var beach_col = mix(beach_s, beach_c, clamp(1.0 - beach_k + beach_k * speck * 1.6, 0.0, 1.0));
+    let wet = 1.0 - smoothstep(0.0, c.band_b.x, coast);
+    beach_col = beach_col * mix(1.0, 0.7, wet);
+    let swash = coast_swash(p, coast, cliff_f, footprint) * shore;
+    beach_col = mix(beach_col, beach_col * vec3<f32>(0.55, 0.7, 0.72), swash.y * 0.5);
+    beach_col = mix(beach_col, c.foam.rgb, swash.x * 0.8);
+    let beach = shore * (1.0 - smoothstep(bw * 0.6, bw, coast)) * (1.0 - cliff_f) * (1.0 - 0.7 * snow);
+    let color = mix(col, beach_col, beach * k);
+
+    // Cliff: light or dark face by the rock, foot in the shade and the shingle, strata and grain;
+    // the normal leans towards the sea (the face takes the light by its exposure).
+    let rock_c = c.color[0].rgb * w_rock + c.color[1].rgb * geo.r + c.color[2].rgb * geo.g;
+    let rock_s = c.shade[0].rgb * w_rock + c.shade[1].rgb * geo.r + c.shade[2].rgb * geo.g;
+    let rock_k = c.color[0].a * w_rock + c.color[1].a * geo.r + c.color[2].a * geo.g;
+    let steep = smoothstep(c.cliff.w, c.cliff.w * 2.5, h);
+    let cw = cliff_px * (0.75 + 0.4 * vnoise(p * 1.7)) * mix(1.0, widen, steep);
+    let t = max(clamp(coast / max(cw, 1e-3), 0.0, 1.0), emerged * smoothstep(5.0, 40.0, hc));
+    let grain = vnoise(p * 5.0) * 0.6 + vnoise(p * 11.0) * 0.4;
+    let strata = vnoise(vec2<f32>(t * 6.0, vnoise(p * 0.9) * 3.0));
+    let mottle = mix(0.5, grain * 0.65 + strata * 0.35, fine);
+    let light = clamp((1.0 - rock_k + rock_k * mottle * 1.7) * (0.7 + 0.3 * smoothstep(0.0, 0.3, t)), 0.0, 1.0);
+    var cliff_col = mix(rock_s, rock_c, light);
+    let foot = (1.0 - smoothstep(0.05, 0.22, coast)) * 0.7 * (1.0 - emerged);
+    cliff_col = mix(cliff_col, mix(beach_col, rock_s, 0.5), foot);
+    cliff_col = mix(cliff_col, c.foam.rgb, swash.x * 0.8);
+    let face = shore * (1.0 - smoothstep(cw * 0.7, cw, coast)) * cliff_f;
+    out.color = mix(color, cliff_col, face * k);
+    out.n = normalize(n + vec3<f32>(-to_land.x, 0.0, -to_land.y) * c.band_b.z * face * k);
+    return out;
+}
+
+// Post-tonemap adjustment of the Godot campaign environment (`adjustment_contrast` 1.06,
+// `adjustment_saturation` 1.08, Godot `apply_bcs` on display values). Bevy tonemaps after this
+// shader: the adjustment is applied on a gamma-encoded copy of the colour, which approximates
+// display values for the mid tones where the ground lives.
+fn godot_adjustment(c: vec3<f32>) -> vec3<f32> {
+    if (extras.post.z < 0.5) {
+        return c;
+    }
+    var s = pow(max(c, vec3<f32>(0.0)), vec3<f32>(1.0 / 2.2));
+    s = mix(vec3<f32>(0.5), s, extras.post.x);
+    s = mix(vec3<f32>(dot(s, vec3<f32>(1.0 / 3.0))), s, extras.post.y);
+    return pow(max(s, vec3<f32>(0.0)), vec3<f32>(2.2));
 }
 
 // Fog-of-war veil: sepia ground under a wash, with a drifting remnant of mist (TB2, BR).
@@ -545,13 +795,20 @@ fn rvd_apply(uv: vec2<f32>, footprint: f32, land: f32, col: vec3<f32>) -> Rvd {
 }
 
 // Bevy `DistanceFog` of the camera (weather haze), which the custom shader must honour.
-fn camera_distance_fog(color: vec3<f32>, world: vec3<f32>) -> vec3<f32> {
+// The fog brightens towards the sun (Godot `fog_sun_scatter`, set by `weather::atmosphere` as the
+// `DistanceFog` directional light colour): same term as the PBR meshes, through `wx_scatter`.
+fn camera_distance_fog(color: vec3<f32>, world: vec3<f32>, sun_vis: f32) -> vec3<f32> {
     if (fog.mode == mesh_view_types::FOG_MODE_OFF) {
         return color;
     }
     let distance = length(world - view.world_position);
     let c = vec4<f32>(color, 1.0);
-    let none = vec3<f32>(0.0);
+    var none = vec3<f32>(0.0);
+    if (fog.directional_light_color.a > 0.0 && lights.n_directional_lights > 0u) {
+        let light = lights.directional_lights[0];
+        none = wx_scatter(world - view.world_position, light.direction_to_light,
+            light.color.rgb * view.exposure, 1.0, fog.directional_light_exponent) * sun_vis;
+    }
     if (fog.mode == mesh_view_types::FOG_MODE_LINEAR) {
         return bevy_fog::linear_fog(fog, c, distance, none).rgb;
     } else if (fog.mode == mesh_view_types::FOG_MODE_EXPONENTIAL) {
@@ -1926,7 +2183,15 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         }
     }
     albedo = season_ground(albedo, n, in.altitude, in.world.xz);
-    albedo = weather_ground(albedo, n, in.altitude, in.world.xz);
+    // DN-ME4 névés and glaciers, then the TB5 coast band (cliffs, beaches, swash).
+    let slope_g = length(in.slope_xz) / max(ground.micro.w, 1.0);
+    let land_g = smoothstep(0.0, 2.0, in.altitude);
+    albedo = fw_glacier_apply(albedo, in.world.xz, in.altitude, slope_g, ground_footprint, land_g);
+    let coast_out = coast_band(in.world.xz, ground_footprint, in.altitude, in.world.y,
+        season_snow(n, in.altitude, in.world.xz), albedo, n);
+    albedo = coast_out.color;
+    n = coast_out.n;
+    albedo = weather_ground(albedo, in.altitude, in.world.xz, slope_g);
     let to_eye = normalize(view.world_position - in.world);
     albedo = weather_mist(albedo, in.world.xz, in.altitude, ground_footprint, 1.0 - abs(to_eye.y));
     albedo = fog_of_war_veil(albedo, in.world.xz);
@@ -1961,7 +2226,7 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     let fog_t = clamp((d - begin) / max(params.edge.a - begin, 1.0), 0.0, 1.0);
     color = mix(color, params.fog.rgb, pow(fog_t, 1.6) * params.fog.a * (1.0 - parchment));
     // Weather haze of the camera (`DistanceFog`).
-    color = camera_distance_fog(color, in.world);
+    color = camera_distance_fog(color, in.world, sun_vis);
     // Map edge drowned in haze.
     let edge_px = params.scale.w;
     if (edge_px > 0.0) {
@@ -1969,5 +2234,6 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         let haze = 1.0 - smoothstep(0.0, edge_px, min(q.x, q.y));
         color = mix(color, params.edge.rgb, haze);
     }
+    color = godot_adjustment(color);
     return vec4<f32>(color, 1.0);
 }
