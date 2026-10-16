@@ -129,3 +129,8 @@ contrôlés par Opus, **ni fusion dans `main` ni push**. Verdict : ADR 0347 ; ar
   marqués `.bm-ready`. Vague 7 (9 lots, scripts Godot jamais repris) : Opus townfar ; Sonnet diplo4,
   econ, folk2, veg4, mapui, uiinfra, naval, settings4. En cours : campvis, bvis, perf (Opus),
   kbfree, bhud4, menu4 ; bspeech prêt à fusionner.
+
+## État 16/10 soir (après after4)
+- Tête 60b30bc6e, tout vert. Captures after4 envoyées au joueur ; écarts notés dans bm-restes.md § « Captures after4 ».
+- En cours : stab1 (stabilité) + vague 9 (parchedge, bground2, coastfix, batmo2, bfx2, small2, campwater3), base 60b30bc6e, brief scratchpad wave9.md (copie bm-outils/).
+- Ensuite : fusion par fournées (merge_brief.md), captures after5, banc de perf machine calme, partie pilote par agent, ff-only dans main (sans push), lot degodot.

@@ -67,3 +67,8 @@
 - 1 caméra de départ : déjà sur la capitale (`frame_player_capital`), vérifié par vidage (`last_focus province:prov_ile_de_france`).
 - 2 premier Échap : cause = le cadrage de départ envoyait `FocusCamera::Province`, qui sélectionne et OUVRE le panneau province (`hud/integ.rs`) ; Échap le fermait. Nouvelle variante `FocusCamera::FrameProvince` (cadre sans ouvrir). Le briefing (modal) laisse aussi passer Échap (`ModalSpec::escape_passes` : ferme en « À la guerre », n'éteint plus le réglage, ne bloque pas la pause).
 - 3 `NextState` direct, 4 PlayedBattles (sidecar `.played` + overlay pause), 5 bouton × de la bulle : déjà faits (f8b8585b8, 727b368af), rien à changer.
+
+## Captures after4 (16/10, 60b30bc6e)
+- camp_2600 (parchemin) : bande beige à gauche avec un bord en diagonale qui coupe l'Atlantique à l'ouest de l'Irlande → bord du plan parchemin/fond vu en biais (étendue ou fond de mer à corriger).
+- battle_default : plaques de sol piétiné rectangulaires à bords francs (claires, très visibles) → fondre les bords (bruit + dégradé) comme Godot.
+- camp_0060, siege_paris : rien de flagrant ; anneaux de sélection bleus visibles sur le siège (normal).
