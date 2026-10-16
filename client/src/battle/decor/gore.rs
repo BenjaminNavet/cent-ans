@@ -440,7 +440,7 @@ fn piece_mesh(kind: usize) -> Mesh {
             Capsule3d::new(radius, total - 2.0 * radius)
                 .mesh()
                 .rings(2)
-                .latitudes(3)
+                .latitudes(8)
                 .longitudes(8),
         )
     };
