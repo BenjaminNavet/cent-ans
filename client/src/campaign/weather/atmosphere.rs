@@ -20,6 +20,7 @@ use super::WeatherView;
 use crate::app::AppState;
 use crate::campaign::camera::CampaignCamera;
 use crate::campaign::camera::rig::CampaignRig;
+use crate::campaign::terrain::lighting::CampaignLight;
 use crate::campaign::terrain::material::TerrainMaterial;
 use crate::campaign::terrain::season::{SEASONS, SeasonWeights};
 
@@ -45,6 +46,14 @@ pub struct FogLook {
     pub close_begin: f32,
     pub close_fog_begin: f32,
     pub close_fog_end: f32,
+    /// `aerial.aerial_perspective` `[low view, top view]`: share of the sky tint in the fog.
+    pub aerial: [f32; 2],
+    /// Sky tint of the aerial perspective (`ambient.color` of the lighting data: the cold sky).
+    pub sky: Vec3,
+    /// Season `fog_sun_scatter`, spring..winter.
+    pub sun_scatter: [f32; 4],
+    /// Sharpness of the sun lobe in the fog (Bevy `directional_light_exponent`).
+    pub scatter_exponent: f32,
 }
 
 impl Default for FogLook {
@@ -63,6 +72,10 @@ impl Default for FogLook {
             close_begin: 30.0,
             close_fog_begin: 18.0,
             close_fog_end: 240.0,
+            aerial: [0.6, 0.12],
+            sky: Vec3::new(0.54, 0.65, 0.92),
+            sun_scatter: [0.3, 0.36, 0.34, 0.2],
+            scatter_exponent: 8.0,
         }
     }
 }
@@ -97,7 +110,14 @@ impl FogLook {
                 out.season_color[i],
             );
         }
+        for (i, name) in SEASONS.iter().enumerate() {
+            if let Some(v) = atmosphere["campaign"]["seasons"][*name]["fog_sun_scatter"].as_f64() {
+                out.sun_scatter[i] = v as f32;
+            }
+        }
+        out.sky = vec3(&lighting["ambient"]["color"], out.sky);
         let a = &lighting["aerial"];
+        out.aerial = pair(&a["aerial_perspective"], out.aerial);
         out.blue = vec3(&a["blue"], out.blue);
         let num = |v: &Value, d: f32| v.as_f64().map_or(d, |x| x as f32);
         out.blue_mix = num(&a["blue_mix"], out.blue_mix).clamp(0.0, 1.0);
@@ -122,6 +142,22 @@ impl FogLook {
         )
     }
 
+    /// Season `fog_sun_scatter` for the season weights.
+    pub fn scatter(&self, weights: Vec4) -> f32 {
+        let w = weights.to_array();
+        let total: f32 = w.iter().sum::<f32>().max(1e-4);
+        w.iter()
+            .zip(self.sun_scatter)
+            .map(|(wi, s)| wi / total * s)
+            .sum()
+    }
+
+    /// Aerial perspective share (`CampaignLighting.aerial`) at a camera pitch.
+    pub fn aerial_at(&self, pitch_deg: f32) -> f32 {
+        let low = 1.0 - smoothstep(self.low_pitch, self.top_pitch, pitch_deg);
+        self.aerial[1] + (self.aerial[0] - self.aerial[1]) * low
+    }
+
     /// Fog colour for season weights: season `fog_color` blended towards the aerial blue.
     pub fn color(&self, weights: Vec4) -> Vec3 {
         let w = weights.to_array();
@@ -132,6 +168,13 @@ impl FogLook {
         }
         season.lerp(self.blue, self.blue_mix)
     }
+}
+
+/// Weight of the sky tint in the fog for a view direction of vertical component `dir_y`
+/// (Godot `fog_aerial_perspective` samples the sky along the view ray: full towards the
+/// horizon, nil straight down). Mirrors `wx_aerial_weight` of `ground.wesl`.
+pub fn aerial_weight(aerial: f32, dir_y: f32) -> f32 {
+    aerial * (1.0 - smoothstep(0.0, 0.8, -dir_y))
 }
 
 /// Effective Godot depth-fog parameters for a camera at `distance` with `pitch_deg`.
@@ -218,6 +261,10 @@ pub struct Atmosphere {
     pub color: [f32; 3],
     pub fog: Option<DepthFogSnapshot>,
     pub applied: bool,
+    /// Aerial perspective share applied to the camera fog colour (centre ray).
+    pub aerial: f32,
+    /// Sun scatter amount (`fog_sun_scatter`) applied.
+    pub scatter: f32,
 }
 
 fn load_look(mut commands: Commands) {
@@ -235,6 +282,7 @@ fn update_atmosphere(
     view: Res<WeatherView>,
     rig: Option<Res<CampaignRig>>,
     weights: Option<Res<SeasonWeights>>,
+    light: Option<Res<CampaignLight>>,
     mut state: ResMut<Atmosphere>,
     mut materials: ResMut<Assets<TerrainMaterial>>,
     cameras: Query<(Entity, Option<&DistanceFog>), With<CampaignCamera>>,
@@ -244,7 +292,14 @@ fn update_atmosphere(
         return;
     }
     let pitch = rig.as_ref().map_or(60.0, |r| r.pitch_deg());
-    let target = look.color(weights.map_or(Vec4::new(1.0, 0.0, 0.0, 0.0), |w| w.weights));
+    let season_weights = weights.map_or(Vec4::new(1.0, 0.0, 0.0, 0.0), |w| w.weights);
+    // Aerial perspective: the fog takes the sky tint along the camera's centre ray (the terrain
+    // shader re-evaluates it per pixel with `wx_aerial_fog_color`).
+    let aerial = look.aerial_at(pitch);
+    let weight = aerial_weight(aerial, -pitch.to_radians().sin());
+    let target = look.color(season_weights).lerp(look.sky, weight);
+    let scatter = look.scatter(season_weights);
+    let sun_color = light.map_or(Vec3::ONE, |l| l.color);
     let t = if state.fog.is_none() {
         1.0
     } else {
@@ -253,6 +308,8 @@ fn update_atmosphere(
     for (i, c) in target.to_array().iter().enumerate() {
         state.color[i] += (c - state.color[i]) * t;
     }
+    state.aerial = weight;
+    state.scatter = scatter;
     let depth = DepthFog::at(&look, distance, pitch);
     let (start, end) = depth.fit_linear();
     state.fog = Some(DepthFogSnapshot { depth, start, end });
@@ -263,14 +320,20 @@ fn update_atmosphere(
             state.color[2],
             depth.density,
         ),
-        directional_light_color: Color::NONE,
-        directional_light_exponent: 30.0,
+        directional_light_color: Color::linear_rgba(
+            sun_color.x * scatter,
+            sun_color.y * scatter,
+            sun_color.z * scatter,
+            1.0,
+        ),
+        directional_light_exponent: look.scatter_exponent,
         falloff: FogFalloff::Linear { start, end },
     };
     state.applied = false;
     for (entity, current) in &cameras {
         let same = current.is_some_and(|c| {
             c.color == fog.color
+                && c.directional_light_color == fog.directional_light_color
                 && matches!(c.falloff, FogFalloff::Linear { start: s, end: e }
                     if (s - start).abs() < 1e-3 && (e - end).abs() < 1e-3)
         });
@@ -340,6 +403,8 @@ pub fn dump(world: &World) -> Value {
             "curve": f.depth.curve, "bevy_start": f.start, "bevy_end": f.end,
         })),
         "applied_to_camera": a.applied,
+        "aerial_weight": a.aerial,
+        "sun_scatter": a.scatter,
         "table": table(world),
     })
 }
@@ -391,6 +456,28 @@ mod tests {
             }
             assert!(worst < 0.2 * f.density + 1e-3, "fit error {worst}");
         }
+    }
+
+    #[test]
+    fn aerial_perspective_follows_pitch_and_view_direction() {
+        let look = FogLook::default();
+        assert!((look.aerial_at(30.0) - 0.6).abs() < 1e-5);
+        assert!((look.aerial_at(70.0) - 0.12).abs() < 1e-5);
+        // Looking along the horizon the sky tint is full, straight down it is nil.
+        assert!((aerial_weight(0.6, 0.0) - 0.6).abs() < 1e-6);
+        assert_eq!(aerial_weight(0.6, -1.0), 0.0);
+        assert!(aerial_weight(0.6, -0.5) < aerial_weight(0.6, -0.2));
+    }
+
+    #[test]
+    fn sun_scatter_is_the_season_value() {
+        let look = FogLook::default();
+        assert!((look.scatter(Vec4::new(0.0, 1.0, 0.0, 0.0)) - 0.36).abs() < 1e-6);
+        assert!((look.scatter(Vec4::new(0.5, 0.0, 0.0, 0.5)) - 0.25).abs() < 1e-6);
+        let text = include_str!("../../../../data/fx/atmosphere.json");
+        let atmosphere: Value = serde_json::from_str(text).unwrap();
+        let look = FogLook::from_json(&atmosphere, &Value::Null);
+        assert!((look.sun_scatter[3] - 0.2).abs() < 1e-6);
     }
 
     #[test]
