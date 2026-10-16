@@ -11,7 +11,12 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
+use bevy::asset::{Asset, embedded_asset};
 use bevy::prelude::*;
+use bevy::reflect::TypePath;
+use bevy::render::render_resource::AsBindGroup;
+use bevy::shader::ShaderRef;
+use bevy::ui_render::prelude::{UiMaterial, UiMaterialPlugin};
 use game_api::court::PortraitContext;
 use serde::Deserialize;
 
@@ -176,6 +181,86 @@ pub struct Marks {
     pub mourning: bool,
     pub crown: bool,
     pub mitre: bool,
+}
+
+impl Marks {
+    /// Shader parameters of `portrait_frame.gd::_marks_material`: `(grey, pallor, dim)`, all zero
+    /// when the picture needs no shader.
+    pub fn shader_params(&self) -> Vec3 {
+        Vec3::new(
+            if self.dead { 1.0 } else { 0.0 },
+            if self.sick { 0.8 } else { 0.0 },
+            if self.captive { 1.0 } else { 0.0 },
+        )
+    }
+}
+
+/// Material of `portrait_marks.gdshader` for a UI picture (grey of the dead, pallor of the sick,
+/// shade of the captive, optional horizontal mirror).
+#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
+pub struct PortraitMarksMaterial {
+    /// `(grey, pallor, dim, flip)`.
+    #[uniform(0)]
+    pub marks: Vec4,
+    #[texture(1)]
+    #[sampler(2)]
+    pub picture: Handle<Image>,
+}
+
+impl UiMaterial for PortraitMarksMaterial {
+    fn fragment_shader() -> ShaderRef {
+        "embedded://cent_ans_client/campaign/panels/court/portrait_marks.wesl".into()
+    }
+}
+
+/// Picture node that wants the marks shader: [`dress_marked_pictures`] swaps its `ImageNode` for
+/// a [`PortraitMarksMaterial`] node.
+#[derive(Component, Debug, Clone, Copy, PartialEq)]
+pub struct PortraitMarked {
+    pub params: Vec3,
+    pub flip: bool,
+}
+
+/// Number of pictures drawn with the shader (dump).
+#[derive(Resource, Default, Debug)]
+pub struct PortraitMarksStats {
+    pub dressed: usize,
+    pub grey: usize,
+    pub pallor: usize,
+    pub dim: usize,
+}
+
+pub struct PortraitMarksPlugin;
+
+impl Plugin for PortraitMarksPlugin {
+    fn build(&self, app: &mut App) {
+        embedded_asset!(app, "portrait_marks.wesl");
+        app.add_plugins(UiMaterialPlugin::<PortraitMarksMaterial>::default())
+            .init_resource::<PortraitMarksStats>()
+            .add_systems(Update, dress_marked_pictures);
+    }
+}
+
+fn dress_marked_pictures(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<PortraitMarksMaterial>>,
+    mut stats: ResMut<PortraitMarksStats>,
+    pictures: Query<(Entity, &PortraitMarked, &ImageNode), Added<PortraitMarked>>,
+) {
+    for (entity, marked, image) in &pictures {
+        let material = materials.add(PortraitMarksMaterial {
+            marks: marked.params.extend(if marked.flip { 1.0 } else { 0.0 }),
+            picture: image.image.clone(),
+        });
+        commands
+            .entity(entity)
+            .remove::<ImageNode>()
+            .insert(MaterialNode(material));
+        stats.dressed += 1;
+        stats.grey += usize::from(marked.params.x > 0.0);
+        stats.pallor += usize::from(marked.params.y > 0.0);
+        stats.dim += usize::from(marked.params.z > 0.0);
+    }
 }
 
 /// FNV-1a 32 bits over the UTF-8 of `text` (stable across versions and saves).
@@ -567,15 +652,6 @@ pub fn spawn_portrait(
     let female = subject.sex == "female";
     let tooltip = marks_text(&marks, female);
     let arms = format!("heraldry/{}.png", subject.faction);
-    let tint = if marks.dead {
-        Color::srgb(0.55, 0.55, 0.55)
-    } else if marks.sick {
-        Color::srgb(0.86, 0.9, 0.86)
-    } else if marks.captive {
-        Color::srgb(0.7, 0.7, 0.72)
-    } else {
-        Color::WHITE
-    };
     let mut frame = parent.spawn((
         Name::new(format!("court:portrait:{}", subject.id)),
         Node {
@@ -611,7 +687,10 @@ pub fn spawn_portrait(
             ))
             .with_children(|picture| {
                 if !resolved.path.is_empty() {
-                    picture.spawn((
+                    // Marks of the picture alone (`portrait_marks.gdshader`); an unmarked picture
+                    // stays a plain image.
+                    let params = marks.shader_params();
+                    let mut node = picture.spawn((
                         Node {
                             width: Val::Percent(100.0),
                             height: Val::Percent(100.0),
@@ -619,10 +698,15 @@ pub fn spawn_portrait(
                         },
                         ImageNode {
                             flip_x: resolved.mirrored,
-                            color: tint,
                             ..ImageNode::new(assets.load(resolved.path.clone()))
                         },
                     ));
+                    if params != Vec3::ZERO {
+                        node.insert(PortraitMarked {
+                            params,
+                            flip: resolved.mirrored,
+                        });
+                    }
                 } else if bank.exists(&arms) {
                     picture.spawn((
                         Node {
@@ -743,6 +827,22 @@ fn spawn_marks(picture: &mut Kids, theme: &UiTheme, marks: &Marks, size: f32) {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn marks_shader_params_follow_portrait_frame() {
+        assert_eq!(Marks::default().shader_params(), Vec3::ZERO);
+        let dead = Marks {
+            dead: true,
+            ..Marks::default()
+        };
+        assert_eq!(dead.shader_params(), Vec3::new(1.0, 0.0, 0.0));
+        let sick_captive = Marks {
+            sick: true,
+            captive: true,
+            ..Marks::default()
+        };
+        assert_eq!(sick_captive.shader_params(), Vec3::new(0.0, 0.8, 1.0));
+    }
+
     use super::*;
 
     fn bank() -> PortraitBank {

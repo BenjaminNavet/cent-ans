@@ -15,23 +15,30 @@
 //! Dev hook: `CENT_ANS_OPEN_CHRONICLE=decisions|journal|letters` opens the panel on entering the
 //! campaign.
 //!
-//! Not ported: wax seals with heraldry (a coloured disc stands for them), Codex links in the
-//! text, the click-to-focus-camera of a letter, the
-//! window queue through `ModalQueue` (the decisions are listed in one tab instead).
+//! Wax seals bear the arms of the faction (`heraldry/<faction>.png`, `wax_seal`); the Codex words
+//! of a decision text are links (hover bubble, click = `OpenCodex`); unfolding a letter moves the
+//! camera to its province, or opens the diplomacy sheet of its faction (`letter_action`, port of
+//! `hud_controller.gd::_on_news_activated`); answering a decision plays `ui_order`.
+//!
+//! Not ported: the window queue through `ModalQueue` (the decisions are listed in one tab
+//! instead).
 
 pub mod art;
 pub mod log;
 
 use bevy::prelude::*;
 use bevy::ui::InteractionDisabled;
-use game_api::chronicle::{ChronicleView, NewsMode, genre_choices};
+use game_api::chronicle::{ChronicleView, NewsLetter, NewsMode, genre_choices};
 use serde_json::{Value, json};
 use sim_campaign::Order;
 
 use super::OpenPanel;
+use super::diplomacy::DiplomacyUi;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
+use crate::campaign::camera::FocusCamera;
 use crate::campaign::hud::flow::TurnAdvanced;
+use crate::codex::{OpenCodex, store::CodexStore, text as codex_text};
 use crate::menu::KeyEdges;
 use crate::settings::Settings;
 use crate::sim::Sim;
@@ -49,6 +56,8 @@ use log::ChronicleLog;
 
 const PANEL_WIDTH: f32 = 720.0;
 const LIST_HEIGHT: f32 = 360.0;
+/// `NewsLetters.SEAL_RADIUS` × 2 is 42 in Godot; the list rows are narrower.
+const SEAL_SIZE: f32 = 36.0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Tab {
@@ -82,6 +91,7 @@ impl Plugin for PanelChroniclePlugin {
                     record_turns,
                     watch_state,
                     handle_buttons,
+                    codex_link_clicks,
                     rebuild,
                 )
                     .chain()
@@ -106,6 +116,8 @@ pub struct ChroniclePanel {
     /// Turn and pending-decision count the screen was built for.
     built_for: (u32, usize),
     last_order: String,
+    /// What the last unfolded letter did (`province`, `faction`, `none`; dump).
+    last_letter: String,
 }
 
 impl ChroniclePanel {
@@ -247,12 +259,17 @@ fn watch_state(mut panel: ResMut<ChroniclePanel>, sim: Res<Sim>) {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_buttons(
     mut pressed: MessageReader<ButtonPressed>,
     mut panel: ResMut<ChroniclePanel>,
     mut log: ResMut<ChronicleLog>,
     mut sim: ResMut<Sim>,
     mut toasts: MessageWriter<ToastRequest>,
+    mut focus: MessageWriter<FocusCamera>,
+    mut open_panel: MessageWriter<OpenPanel>,
+    mut diplomacy: ResMut<DiplomacyUi>,
+    mut sfx: MessageWriter<crate::audio::PlaySfx>,
 ) {
     for press in pressed.read() {
         let Some(name) = press.name.strip_prefix("chronicle:") else {
@@ -277,6 +294,24 @@ fn handle_buttons(
                     } else {
                         index
                     };
+                    // `HudController._on_news_activated`: a letter with a province moves the
+                    // camera there, otherwise a letter about another faction opens its sheet.
+                    if let Some(letter) = panel.letter_open.and_then(|i| log.letters.get(i)) {
+                        match letter_action(letter, sim.player.as_str()) {
+                            LetterAction::Province(id) => {
+                                focus.write(FocusCamera::Province(id));
+                                panel.last_letter = "province".to_owned();
+                            }
+                            LetterAction::Faction(id) => {
+                                diplomacy.show(&id);
+                                if !diplomacy.open {
+                                    open_panel.write(OpenPanel::Diplomacy);
+                                }
+                                panel.last_letter = "faction".to_owned();
+                            }
+                            LetterAction::None => panel.last_letter = "none".to_owned(),
+                        }
+                    }
                 } else if let Some(index) = name.strip_prefix("dismiss:") {
                     if let Ok(index) = index.parse::<usize>() {
                         log.dismiss(index);
@@ -301,10 +336,12 @@ fn handle_buttons(
                     {
                         Ok(_) => {
                             panel.last_order = format!("ok:{decision}:{option}");
+                            sfx.write(crate::audio::PlaySfx::new("ui_order"));
                             toasts.write(ToastRequest::new("Décision prise."));
                         }
                         Err(error) => {
                             panel.last_order = format!("error:{error}");
+                            sfx.write(crate::audio::PlaySfx::new("ui_order_refused"));
                             toasts.write(ToastRequest::new(&error.to_string()));
                         }
                     }
@@ -326,6 +363,7 @@ fn rebuild(
     assets: Res<AssetServer>,
     settings: Option<Res<Settings>>,
     plates: Option<Res<crate::ui::art_plates::ArtPlates>>,
+    store: Option<Res<CodexStore>>,
 ) {
     if !panel.open {
         if let Some(root) = panel.root.take() {
@@ -357,6 +395,7 @@ fn rebuild(
         &panel,
         mode,
         plates.as_deref(),
+        store.as_deref(),
     );
     panel.root = Some(root);
 }
@@ -371,6 +410,7 @@ fn spawn_screen(
     panel: &ChroniclePanel,
     mode: NewsMode,
     plates: Option<&crate::ui::art_plates::ArtPlates>,
+    store: Option<&CodexStore>,
 ) -> Entity {
     let theme = theme.clone();
     let body = RichStyle::body(&theme);
@@ -427,9 +467,11 @@ fn spawn_screen(
                     });
                     page.spawn(separator(&theme));
                     match panel.tab {
-                        Tab::Decisions => decisions_tab(page, &theme, assets, &body, view, plates),
+                        Tab::Decisions => {
+                            decisions_tab(page, &theme, assets, &body, view, plates, store)
+                        }
                         Tab::Journal => journal_tab(page, &theme, assets, &body, log, panel),
-                        Tab::Letters => letters_tab(page, &theme, log, panel, mode),
+                        Tab::Letters => letters_tab(page, &theme, assets, log, panel, mode),
                     }
                 });
         })
@@ -446,6 +488,7 @@ fn decisions_tab(
     body: &RichStyle,
     view: &ChronicleView,
     plates: Option<&crate::ui::art_plates::ArtPlates>,
+    store: Option<&CodexStore>,
 ) {
     page.spawn(caption(theme, &view.tooltip));
     page.spawn(scroll_list(theme, "chronicle:decisions", LIST_HEIGHT))
@@ -510,12 +553,12 @@ fn decisions_tab(
                         format!("à décider sous {} tours", decision.expires_in)
                     });
                     card.spawn(caption(theme, &meta.join(" — ")));
-                    card.spawn(rich_text(
-                        theme,
-                        assets,
-                        &format!("[i]{}[/i]", decision.text),
-                        body,
-                    ));
+                    // Codex words are links (`CodexText.format(text, true)` + `CodexBubbles`).
+                    let text = store.map_or_else(
+                        || decision.text.clone(),
+                        |store| codex_text::format_auto(store, &decision.text),
+                    );
+                    card.spawn(rich_text(theme, assets, &format!("[i]{text}[/i]"), body));
                     for option in &decision.options {
                         let name = format!("chronicle:option:{}:{}", decision.id, option.index);
                         let mut button = card.spawn(button_small(theme, &name, &option.text));
@@ -601,6 +644,7 @@ fn journal_tab(
 fn letters_tab(
     page: &mut ChildSpawnerCommands,
     theme: &UiTheme,
+    assets: &AssetServer,
     log: &ChronicleLog,
     panel: &ChroniclePanel,
     mode: NewsMode,
@@ -626,17 +670,7 @@ fn letters_tab(
                     ..default()
                 })
                 .with_children(|row| {
-                    row.spawn((
-                        Name::new(format!("Seal {index}")),
-                        Node {
-                            width: Val::Px(30.0),
-                            height: Val::Px(30.0),
-                            flex_shrink: 0.0,
-                            border_radius: BorderRadius::MAX,
-                            ..default()
-                        },
-                        BackgroundColor(wax_color(&letter.wax)),
-                    ));
+                    wax_seal(row, assets, letter, index);
                     row.spawn(Node {
                         flex_direction: FlexDirection::Column,
                         flex_grow: 1.0,
@@ -662,6 +696,111 @@ fn letters_tab(
                 });
             }
         });
+}
+
+/// What opening a letter does (`hud_controller.gd::_on_news_activated`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum LetterAction {
+    Province(String),
+    Faction(String),
+    None,
+}
+
+pub fn letter_action(letter: &NewsLetter, player: &str) -> LetterAction {
+    match (&letter.province, &letter.faction) {
+        (Some(province), _) if !province.is_empty() => LetterAction::Province(province.clone()),
+        (_, Some(faction)) if !faction.is_empty() && faction != player => {
+            LetterAction::Faction(faction.clone())
+        }
+        _ => LetterAction::None,
+    }
+}
+
+/// Wax seal of a letter (`NewsLetters.Letter._draw`): a disc of wax with its darker rim, the
+/// arms of the faction on a parchment inner disc when `heraldry/<faction>.png` exists.
+fn wax_seal(
+    row: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    letter: &NewsLetter,
+    index: usize,
+) {
+    let wax = wax_color(&letter.wax);
+    let rim = wax.darker(0.35);
+    let arms = letter
+        .faction
+        .as_deref()
+        .filter(|f| arms_exist(f))
+        .map(|f| format!("heraldry/{f}.png"));
+    row.spawn((
+        Name::new(format!("Seal {index}")),
+        Node {
+            width: Val::Px(SEAL_SIZE),
+            height: Val::Px(SEAL_SIZE),
+            flex_shrink: 0.0,
+            border: UiRect::all(Val::Px(2.0)),
+            border_radius: BorderRadius::MAX,
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        BackgroundColor(wax),
+        BorderColor::all(rim),
+    ))
+    .with_children(|seal| {
+        if let Some(path) = arms {
+            seal.spawn((
+                Name::new(format!("SealArms {index}")),
+                Node {
+                    width: Val::Px(SEAL_SIZE * 0.72),
+                    height: Val::Px(SEAL_SIZE * 0.72),
+                    border_radius: BorderRadius::MAX,
+                    padding: UiRect::all(Val::Px(3.0)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                BackgroundColor(style::PARCHMENT_LIGHT),
+            ))
+            .with_children(|inner| {
+                inner.spawn((
+                    Node {
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
+                        ..default()
+                    },
+                    ImageNode::new(assets.load(path))
+                        .with_mode(bevy::ui::widget::NodeImageMode::Auto),
+                ));
+            });
+        }
+    });
+}
+
+fn arms_exist(faction: &str) -> bool {
+    crate::paths::find_root().ok().is_some_and(|root| {
+        crate::paths::asset_root(&root)
+            .join(format!("heraldry/{faction}.png"))
+            .exists()
+    })
+}
+
+/// A click on a `cdx:` link of a decision text opens that Codex sheet.
+fn codex_link_clicks(
+    mouse: Res<ButtonInput<MouseButton>>,
+    links: Query<(&crate::ui::kit::RichLink, &bevy::picking::hover::Hovered)>,
+    panel: Res<ChroniclePanel>,
+    mut opens: MessageWriter<OpenCodex>,
+) {
+    if !panel.open || !mouse.just_pressed(MouseButton::Left) {
+        return;
+    }
+    let target = links
+        .iter()
+        .find(|(_, hovered)| hovered.get())
+        .and_then(|(link, _)| codex_text::target_id(&link.0).map(str::to_owned));
+    if let Some(entry) = target {
+        opens.write(OpenCodex { entry: Some(entry) });
+    }
 }
 
 /// Wax colours of `HudStyle` (`WAX`, `WAX_GREEN`, `WAX_LIGHT`) and the dark brown of a death.
@@ -691,6 +830,7 @@ fn dump_chronicle(world: &World) -> (String, Value) {
             "open": panel.open,
             "built": panel.root.is_some(),
             "tab": panel.tab.name(),
+            "last_letter": panel.last_letter,
             "genre": panel.genre,
             "news_mode": mode,
             "pending_decisions": view.as_ref().map_or(0, |v| v.count),
@@ -718,6 +858,42 @@ fn dump_chronicle(world: &World) -> (String, Value) {
 
 #[cfg(test)]
 mod tests {
+    fn letter(faction: Option<&str>, province: Option<&str>) -> NewsLetter {
+        NewsLetter {
+            kind: "peace_signed".into(),
+            rubric: "Paix".into(),
+            title: "t".into(),
+            text: "t".into(),
+            faction: faction.map(str::to_owned),
+            province: province.map(str::to_owned),
+            interest: String::new(),
+            wax: "light".into(),
+        }
+    }
+
+    #[test]
+    fn letter_leads_to_its_province_then_to_another_faction() {
+        assert_eq!(
+            letter_action(
+                &letter(Some("fac_england"), Some("prov_paris")),
+                "fac_france"
+            ),
+            LetterAction::Province("prov_paris".into())
+        );
+        assert_eq!(
+            letter_action(&letter(Some("fac_england"), None), "fac_france"),
+            LetterAction::Faction("fac_england".into())
+        );
+        assert_eq!(
+            letter_action(&letter(Some("fac_france"), None), "fac_france"),
+            LetterAction::None
+        );
+        assert_eq!(
+            letter_action(&letter(None, None), "fac_france"),
+            LetterAction::None
+        );
+    }
+
     use super::*;
     use crate::ui::kit::text_field::TextInputFocus;
 

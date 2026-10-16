@@ -1,0 +1,14 @@
+wait 300
+click hud:end_turn
+wait 30
+click Confirmer
+wait 700
+key F5
+wait 30
+click chronicle:tab_letters
+wait 30
+dump out/campui7_chron_a.json
+click chronicle:letter:0
+wait 60
+dump out/campui7_chron_b.json
+exit

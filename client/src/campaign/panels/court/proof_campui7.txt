@@ -1,0 +1,7 @@
+campui7 proofs (client/run_bg.sh --offscreen, dumps):
+court  OPEN_COURT=character:ruler@family, proof_campui7.script: court.tree_zoom 1.0 -> 1.2 after +,+,- (x1.2 each); layout 5 cards.
+marks  OPEN_COURT=character:chr_azzone_visconti: court.portrait_marks = {dressed 2, pallor 2} (trait_sickly), no shader error in the log.
+council OPEN_COURT=council: court.advice.hint = {id hint:research_idle, kind research_idle}.
+feudal OPEN_FEUDAL=1 FEUDAL_GUIDE=1, proof_campui7.script: feudal_guide step 0 met by the open tree -> step 1 feudal_lands; two Continuer -> done.
+events proof_campui7_events.script (4 turns via hud:end_turn + Confirmer): feudal.recent filled ("Félonie de Angleterre envers France...", "Despotat d'Épire passe à Byzance."), guide autostarts after turn 1.
+chronicle proof_campui7.script (chronicle dir): letters tab, click letter 0 -> panel_chronicle.last_letter=province, campaign_camera.last_focus=province:prov_tripoli.

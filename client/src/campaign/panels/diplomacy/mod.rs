@@ -226,6 +226,13 @@ impl Default for DiplomacyUi {
 }
 
 impl DiplomacyUi {
+    /// Shows the sheet of `id` (a letter of the chronicle, `diplomacy.call("open_panel", id)`):
+    /// the caller sends `OpenPanel::Diplomacy` when the screen is closed.
+    pub fn show(&mut self, id: &str) {
+        self.select(id);
+        self.dirty = true;
+    }
+
     fn select(&mut self, id: &str) {
         if self.selected.as_deref() != Some(id) {
             self.selected = Some(id.to_owned());

@@ -154,9 +154,13 @@ pub fn rebuild(
     bank: Res<PortraitBank>,
     sim: Res<Sim>,
     council_room: Res<crate::campaign::council::CouncilState>,
+    next_hint: Res<crate::campaign::hud::hint::NextHint>,
     mut ui: ResMut<CourtUi>,
     roots: Query<Entity, With<CourtRoot>>,
 ) {
+    if next_hint.is_changed() && ui.screen == Screen::Council {
+        ui.dirty = true;
+    }
     if !ui.dirty {
         return;
     }
@@ -167,7 +171,7 @@ pub fn rebuild(
     if ui.screen == Screen::None {
         return;
     }
-    refresh_snapshot(&mut ui, &sim);
+    refresh_snapshot(&mut ui, &sim, next_hint.current.as_ref());
     let ui = &*ui;
     commands
         .spawn((
@@ -941,37 +945,103 @@ fn family_tab(
         pane.spawn(caption(theme, "Aucune généalogie connue."));
         return;
     };
-    pane.spawn(caption(
-        theme,
-        "♛ souverain · ◆ héritier · ⚭ conjoint ; un clic ouvre la fiche. Traits : filiation et mariage.",
-    ));
-    let layout = family_layout::layout(tree);
+    let zoom = ui.tree_zoom.clamp(super::ZOOM_MIN, super::ZOOM_MAX);
+    // Toolbar (`court_panel.gd`): legend, then « ⌂ », « − », « + ».
     pane.spawn(Node {
-        overflow: Overflow::scroll_x(),
-        flex_shrink: 0.0,
+        align_items: AlignItems::Center,
+        column_gap: Val::Px(6.0),
         ..default()
     })
+    .with_children(|bar| {
+        bar.spawn(Node {
+            flex_grow: 1.0,
+            flex_basis: Val::Px(0.0),
+            ..default()
+        })
+        .with_children(|slot| {
+            slot.spawn(caption(
+                theme,
+                &format!(
+                    "♛ souverain · ◆ héritier · ⚭ conjoint — {} personnages — clic : fiche ; Ctrl + molette : zoom ; glisser : défiler",
+                    tree.nodes.len()
+                ),
+            ));
+        });
+        for (name, glyph, tip) in [
+            ("court:tree:home", "⌂", "Recentrer (zoom 100 %, début de l’arbre)"),
+            ("court:tree:out", "−", "Dézoomer"),
+            ("court:tree:in", "+", "Zoomer"),
+        ] {
+            bar.spawn((button_small(theme, name, glyph), Tooltip::new(tip)));
+        }
+        bar.spawn(caption(theme, &format!("{} %", (zoom * 100.0).round())));
+    });
+    let layout = family_layout::layout(tree);
+    // The layout is drawn at zoom 1 and scaled by a UI transform; the wrapper takes the scaled
+    // size so the scroll area follows, and the canvas is pushed back to the top-left corner.
+    let (width, height) = (layout.width, layout.height);
+    pane.spawn((
+        Name::new("court:family:scroller"),
+        FamilyScroller,
+        Hovered::default(),
+        Node {
+            height: Val::Px(TREE_HEIGHT),
+            overflow: Overflow::scroll(),
+            flex_shrink: 0.0,
+            ..default()
+        },
+        ScrollPosition(ui.tree_scroll),
+    ))
     .insert(ScrollArea)
     .with_children(|scroller| {
         scroller
-            .spawn(canvas(layout.width, layout.height))
-            .with_children(|canvas_node| {
-                for seg in &layout.segments {
-                    canvas_node.spawn((
-                        Name::new("court:family:link"),
-                        absolute(seg.x, seg.y, seg.w, seg.h),
-                        BackgroundColor(style::INK.with_alpha(0.85)),
-                    ));
-                }
-                for node in &tree.nodes {
-                    let Some(&(x, y)) = layout.positions.get(&node.id) else {
-                        continue;
-                    };
-                    family_card(canvas_node, theme, assets, bank, tree, node, (x, y));
-                }
+            .spawn(canvas(width * zoom, height * zoom))
+            .with_children(|wrapper| {
+                wrapper
+                    .spawn((
+                        Name::new("court:family:canvas"),
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(0.0),
+                            top: Val::Px(0.0),
+                            width: Val::Px(width),
+                            height: Val::Px(height),
+                            ..default()
+                        },
+                        UiTransform {
+                            translation: Val2::px(
+                                (zoom - 1.0) * width / 2.0,
+                                (zoom - 1.0) * height / 2.0,
+                            ),
+                            scale: Vec2::splat(zoom),
+                            ..default()
+                        },
+                    ))
+                    .with_children(|canvas_node| {
+                        for seg in &layout.segments {
+                            canvas_node.spawn((
+                                Name::new("court:family:link"),
+                                absolute(seg.x, seg.y, seg.w, seg.h),
+                                BackgroundColor(style::INK.with_alpha(0.85)),
+                            ));
+                        }
+                        for node in &tree.nodes {
+                            let Some(&(x, y)) = layout.positions.get(&node.id) else {
+                                continue;
+                            };
+                            family_card(canvas_node, theme, assets, bank, tree, node, (x, y));
+                        }
+                    });
             });
     });
 }
+
+/// Scrolling area of the family tree (zoom and drag act on it).
+#[derive(Component)]
+pub struct FamilyScroller;
+
+/// Height of the tree area (`court_panel.gd`: 480 px).
+const TREE_HEIGHT: f32 = 480.0;
 
 fn family_card(
     line: &mut Kids,

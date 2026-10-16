@@ -89,6 +89,8 @@ pub struct Settings {
     pub tutorial_done: bool,
     /// `tutorial/postponed`: put aside by « Plus tard ».
     pub tutorial_postponed: bool,
+    /// `feudal_tutorial/done`: the three-step feudal guide was finished or skipped.
+    pub feudal_tutorial_done: bool,
     /// `battle/blood`: 0 off, 1 moderate, 2 full.
     pub blood: u32,
     /// `battle/unit_size`: figures per simulated man.
@@ -153,6 +155,7 @@ impl Default for Settings {
             tutorial_step: 0,
             tutorial_done: false,
             tutorial_postponed: false,
+            feudal_tutorial_done: false,
             blood: 1,
             unit_size: 1.0,
             max_figures: 15000,
