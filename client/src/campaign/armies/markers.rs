@@ -212,6 +212,12 @@ fn spawn_figures(
                 scale: Vec3::splat(spec.scale),
             },
         ));
+        // Fire of the camp: a thin smoke column over the hearth.
+        if let Some(smoke) =
+            super::camp_smoke::camp_smoke_bundle(spec.path, spec.offset, spec.scale)
+        {
+            root.spawn(smoke);
+        }
     }
 }
 

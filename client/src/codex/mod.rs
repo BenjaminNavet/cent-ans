@@ -311,7 +311,7 @@ fn open_requests(
     mut view: ResMut<CodexView>,
     mut store: ResMut<CodexStore>,
     book: Res<RulesBookRes>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<crate::ui::fader::FadeToState>,
 ) {
     for request in requests.read() {
         match state.get() {
@@ -327,7 +327,7 @@ fn open_requests(
             }
             _ => {
                 pending.0.clone_from(&request.entry);
-                next.set(AppState::Codex);
+                next.write(crate::ui::fader::FadeToState(AppState::Codex));
             }
         }
     }
@@ -655,7 +655,7 @@ fn leave(
     overlay: &mut CodexOverlay,
     roots: &Query<Entity, With<CodexRoot>>,
     back: &CodexReturn,
-    next: &mut NextState<AppState>,
+    next: &mut MessageWriter<crate::ui::fader::FadeToState>,
 ) {
     if overlay.open {
         overlay.open = false;
@@ -663,7 +663,7 @@ fn leave(
             commands.entity(root).despawn();
         }
     } else {
-        next.set(back.0);
+        next.write(crate::ui::fader::FadeToState(back.0));
     }
 }
 
@@ -675,7 +675,7 @@ fn handle_escape(
     roots: Query<Entity, With<CodexRoot>>,
     state: Res<State<AppState>>,
     back: Res<CodexReturn>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<crate::ui::fader::FadeToState>,
     typing: Res<TextInputFocus>,
 ) {
     let shown = *state.get() == AppState::Codex || overlay.open;
@@ -695,7 +695,7 @@ fn handle_buttons(
     mut store: ResMut<CodexStore>,
     book: Res<RulesBookRes>,
     back: Res<CodexReturn>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<crate::ui::fader::FadeToState>,
 ) {
     for press in pressed.read() {
         let name = press.name.as_str();

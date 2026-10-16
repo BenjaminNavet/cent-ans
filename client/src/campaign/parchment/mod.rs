@@ -15,6 +15,7 @@
 //! `data/map/stance_cues.json` (pennant outlines, army rings), `game/assets/textures/parchment/`.
 
 pub mod decor;
+pub mod extras;
 pub mod glyphs;
 pub mod overlay;
 pub mod realms;
@@ -63,6 +64,7 @@ impl Plugin for CampaignParchmentPlugin {
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
             );
+        extras::register(app);
         app.register_dump(dump_parchment);
     }
 }
@@ -82,6 +84,13 @@ pub struct Loaded {
     pub pennant_units: f32,
     pub cue_border: HashMap<String, Color>,
     pub cue_ring: HashMap<String, Color>,
+    /// Weather icon cell on the parchment (`clouds.parchment_icon_cell_px`; 0 = none).
+    pub weather_cell: f32,
+    /// Mark of enemy armies (`army.enemy_glyph`).
+    pub enemy_glyph: String,
+    /// Seasons an enemy army lost from sight stays on the map as a ghost, and its opacity.
+    pub memory_turns: u32,
+    pub ghost_alpha: f32,
     pub errors: Vec<String>,
 }
 
@@ -138,6 +147,10 @@ impl Loaded {
             pennant_units: 0.55,
             cue_border: HashMap::new(),
             cue_ring: HashMap::new(),
+            weather_cell: 64.0,
+            enemy_glyph: String::new(),
+            memory_turns: 0,
+            ghost_alpha: 0.6,
             errors,
         }
     }
@@ -260,6 +273,10 @@ pub fn load_all(root: &Path) -> Loaded {
         "whale",
         "pennant",
         "pennant_edge",
+        "rain",
+        "snow",
+        "storm",
+        "fog",
     ] {
         if let Some((spec, image)) = glyphs::paint(name) {
             loaded.glyphs.push((name, spec, image));
@@ -270,7 +287,18 @@ pub fn load_all(root: &Path) -> Loaded {
     {
         loaded.pennant_units = units as f32;
     }
+    if let Some(cell) = read_json(&data.join("ui/campaign_map.json"))
+        .and_then(|m| m["clouds"]["parchment_icon_cell_px"].as_f64())
+    {
+        loaded.weather_cell = cell as f32;
+    }
     if let Some(cues) = read_json(&data.join("map/stance_cues.json")) {
+        loaded.enemy_glyph = cues["army"]["enemy_glyph"]
+            .as_str()
+            .unwrap_or_default()
+            .to_owned();
+        loaded.memory_turns = cues["fog_memory"]["turns"].as_u64().unwrap_or(0) as u32;
+        loaded.ghost_alpha = cues["fog_memory"]["ghost_alpha"].as_f64().unwrap_or(0.6) as f32;
         for cue in ["self", "enemy", "friend"] {
             if let Some(c) = cues["border"][cue].as_str().and_then(|t| hex_color(t, 1.0)) {
                 loaded.cue_border.insert(cue.into(), c);
@@ -347,6 +375,10 @@ fn finish_load(
         pennant_units: loaded.pennant_units,
         cue_border: loaded.cue_border,
         cue_ring: loaded.cue_ring,
+        weather_cell: loaded.weather_cell,
+        enemy_glyph: loaded.enemy_glyph,
+        memory_turns: loaded.memory_turns,
+        ghost_alpha: loaded.ghost_alpha,
     });
 }
 
@@ -413,6 +445,18 @@ fn dump_parchment(world: &World) -> (String, Value) {
     let load = world.resource::<ParchmentLoad>();
     let stats = world.resource::<OverlayStats>();
     let assets = world.get_resource::<OverlayAssets>();
+    let extras = world.resource::<extras::ExtrasStats>();
+    let cues = world.get_resource::<extras::TokenCues>();
+    let ghosts: Vec<Value> = world
+        .get_resource::<extras::Ghosts>()
+        .map(|g| {
+            g.0.iter()
+                .map(
+                    |(id, s)| json!({"id": id, "faction": s.faction, "men": s.men, "turn": s.turn}),
+                )
+                .collect()
+        })
+        .unwrap_or_default();
     let items: Vec<Value> = assets
         .map(|a| {
             a.decor
@@ -438,6 +482,13 @@ fn dump_parchment(world: &World) -> (String, Value) {
             "sea_items": items,
             "glyphs": assets.map(|a| a.glyphs.len()).unwrap_or(0),
             "painted_monsters": assets.map(|a| a.monsters.len()).unwrap_or(0),
+            "extras": {
+                "weather_shown": extras.weather_shown,
+                "weather_kinds": extras.weather_kinds,
+                "ghosts": ghosts,
+                "remembered_stances": cues.map(|c| c.stance.len()).unwrap_or(0),
+                "stance_icons": cues.map(|c| c.icons.len()).unwrap_or(0),
+            },
             "overlay": {
                 "weight": stats.weight,
                 "scale": stats.scale,

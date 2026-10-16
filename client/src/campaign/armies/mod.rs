@@ -10,6 +10,7 @@
 
 mod bubble;
 pub mod bubbles;
+pub mod camp_smoke;
 pub mod cloth;
 mod feedback;
 pub mod figures;
@@ -28,6 +29,7 @@ pub mod sea;
 pub mod skinned;
 pub mod standard;
 mod views;
+pub mod zoc;
 
 use bevy::prelude::*;
 use sim_campaign::ArmyId;
@@ -64,6 +66,8 @@ impl Plugin for CampaignArmiesPlugin {
             .init_resource::<OrderLog>()
             .init_resource::<orders::PathPreviewState>()
             .init_resource::<orders::Reachable>()
+            .insert_resource(zoc::ZocTuning::load())
+            .init_resource::<zoc::ZocRings>()
             .init_resource::<orders::Ripples>()
             .init_resource::<orders::ReliefTick>()
             .init_resource::<bubble::BubbleHandles>()
@@ -77,6 +81,13 @@ impl Plugin for CampaignArmiesPlugin {
             .init_resource::<bubbles::RichHover>()
             .add_message::<ArmyCommand>()
             .register_dump(orders::dump_armies)
+            .register_dump(camp_smoke::dump_camp_smoke)
+            .add_systems(
+                Update,
+                camp_smoke::update_camp_smoke
+                    .after(markers::place_markers)
+                    .run_if(in_state(AppState::Campaign)),
+            )
             .add_systems(
                 OnEnter(AppState::Campaign),
                 (
@@ -118,6 +129,12 @@ impl Plugin for CampaignArmiesPlugin {
                         .chain(),
                 )
                     .chain()
+                    .run_if(in_state(AppState::Campaign)),
+            )
+            .add_systems(
+                Update,
+                zoc::draw_zoc
+                    .after(orders::draw_overlays)
                     .run_if(in_state(AppState::Campaign)),
             )
             .add_systems(

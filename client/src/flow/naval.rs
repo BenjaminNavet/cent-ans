@@ -7,7 +7,8 @@
 //! same presentation as the ground one (`dialog`): « Flotte ennemie en vue », chances (five
 //! automatic resolutions), ships and crews of both fleets, season and rain.
 //!
-//! Not ported: the illustrated banner and heraldry (the ground dialog lacks them too).
+//! Illustrated banner ("naval" plate, Sluys miniature fallback) and the arms of both fleets come
+//! from `dialog::{banner, side_header}`, shared with the ground dialog.
 
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;

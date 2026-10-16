@@ -62,6 +62,22 @@ pub struct DialogArt<'a> {
     pub window_height: f32,
 }
 
+/// Picture of a banner: a loading plate of the context picked by `seed`, else the old miniature
+/// (Godot `BANNER_FIELD` / `BANNER_SIEGE`: Crécy for a battle, Sluys for a siege or a sea fight).
+pub fn banner_image(plates: &ArtPlates, context: &str, seed: u64) -> (String, String) {
+    match plates.loading_screen(context, seed as usize) {
+        Some(plate) => (plate.id.clone(), plate.image.clone()),
+        None => {
+            let id = if context == "battle" {
+                "evt_crecy"
+            } else {
+                "evt_sluys"
+            };
+            (id.to_string(), format!("events/{id}.jpg"))
+        }
+    }
+}
+
 /// Illustrated banner: a plate of `context` (`battle`, `siege`, `naval`) picked by `seed`,
 /// cover-cropped (centred), veiled towards the bottom, gold rule, title and subtitle at the bottom
 /// left. Brown without a plate.
@@ -74,7 +90,7 @@ pub fn banner(
     title: &str,
     subtitle: &str,
 ) {
-    let plate = art.plates.loading_screen(context, seed as usize);
+    let (plate_id, plate_image) = banner_image(art.plates, context, seed);
     let height = if art.window_height >= 760.0 {
         BANNER_HEIGHT
     } else {
@@ -97,17 +113,17 @@ pub fn banner(
             BackgroundColor(BANNER_FALLBACK),
         ))
         .with_children(|banner| {
-            if let Some(plate) = plate {
+            {
                 // Wider than tall: the full-width picture overflows and is centred (cover).
                 banner.spawn((
-                    Name::new(format!("flow:banner_art:{}", plate.id)),
+                    Name::new(format!("flow:banner_art:{plate_id}")),
                     Node {
                         width: Val::Percent(100.0),
                         aspect_ratio: Some(16.0 / 9.0),
                         flex_shrink: 0.0,
                         ..default()
                     },
-                    ImageNode::new(art.assets.load(plate.image.clone())),
+                    ImageNode::new(art.assets.load(plate_image)),
                 ));
             }
             banner
@@ -498,4 +514,17 @@ fn side_column(
                 },
             ));
         });
+}
+
+#[cfg(test)]
+mod banner_tests {
+    use super::*;
+
+    #[test]
+    fn banner_falls_back_to_event_miniature() {
+        let plates = ArtPlates::default();
+        assert_eq!(banner_image(&plates, "battle", 3).1, "events/evt_crecy.jpg");
+        assert_eq!(banner_image(&plates, "siege", 3).1, "events/evt_sluys.jpg");
+        assert_eq!(banner_image(&plates, "naval", 0).1, "events/evt_sluys.jpg");
+    }
 }

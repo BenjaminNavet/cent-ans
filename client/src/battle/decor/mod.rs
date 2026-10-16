@@ -10,11 +10,13 @@
 
 pub mod atmosphere;
 pub mod blood;
+pub mod camp_horse;
 pub mod camp_loot;
 pub mod far_woods;
 pub mod features;
 pub mod flatten;
 pub mod grass;
+pub mod grass_atlas;
 pub mod ground;
 pub mod horizon;
 pub mod kit_site;
@@ -49,6 +51,7 @@ impl Plugin for BattleDecorPlugin {
                 blood::BloodPlugin,
                 site::SitePlugin,
                 camp_loot::CampLootPlugin,
+                camp_horse::CampHorsePlugin,
             ))
             .register_dump(dump_decor);
     }
@@ -83,7 +86,7 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
             })),
             "grass": world.get_resource::<grass::GrassStats>().map(|s| serde_json::json!({
                 "tufts": s.tufts, "chunks": s.chunks, "group": s.group, "biome": s.biome,
-                "tufts_by_card": s.tufts_by_card,
+                "tufts_by_card": s.tufts_by_card, "fa_atlas": s.atlas, "tufts_by_cell": s.tufts_by_cell,
             })),
             "flatten": world.get_resource::<flatten::FlattenMap>().map(|m| serde_json::json!({
                 "size": [m.width, m.height], "texel": m.texel, "corpse_marks": m.corpse_marks,
@@ -107,7 +110,11 @@ fn dump_decor(world: &World) -> (String, serde_json::Value) {
             "site": world.get_resource::<site::SiteStats>().map(|s| serde_json::json!({
                 "vine_rows": s.vine_rows, "vineyards": s.vineyards, "houses": s.houses, "props": s.props, "bridges": s.bridges, "bridge_bays": s.bridge_bays, "bridge_ends": s.bridge_ends, "site_layered_vertices": s.layered_vertices, "site_plain_vertices": s.plain_vertices, "hedges": s.hedges,
                 "camps": s.camps, "kit_houses": s.kit_houses, "kit_props": s.kit_props,
-                "wall_runs": s.wall_runs, "lychgates": s.lychgates, "horses": s.horses, "kit_models": s.kit_models, "camp_tents": s.camp_tents,
+                "wall_runs": s.wall_runs, "lychgates": s.lychgates, "horses": s.horses, "kit_models": s.kit_models, "camp_tents": s.camp_tents, "snow_kit": s.snow_kit,
+            })),
+            "camp_horses": world.get_resource::<camp_horse::CampHorseStats>().map(|s| serde_json::json!({
+                "enabled": world.get_resource::<camp_horse::CampHorseSettings>().is_some_and(|c| c.enabled),
+                "animated_horses": s.horses, "materials": s.materials, "hair_materials": s.hair_materials,
             })),
             "camp_loot": world.get_resource::<camp_loot::CampLootStats>().map(|s| serde_json::json!({
                 "looted_camps": s.looted_camps, "tents_down": s.tents_down, "smoke_columns": s.smoke_columns,

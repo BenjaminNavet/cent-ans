@@ -238,31 +238,14 @@ pub fn far01(camera_height: f32) -> f32 {
 }
 
 /// Settings of the far battle bus for a camera height (`AudioBuses.set_battle_distance`): the
-/// higher the camera, the more filtered and reverberated the field. `bevy_audio` has neither
-/// effect: only `dry` is applied (as a gain on the spatial battle sounds), the rest is dumped.
+/// higher the camera, the more filtered and reverberated the field. Cutoff, wet and room size drive the real
+/// filter of [`super::farbus`]; `dry` is applied as a gain on the spatial battle sounds.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FarBus {
     pub cutoff_hz: f32,
     pub wet: f32,
     pub dry: f32,
     pub room_size: f32,
-}
-
-impl FarBus {
-    /// Stand-in for the low-pass of the Godot bus (`bevy_audio` cannot filter a playing sound):
-    /// the bright part of a close sound is lost, so its level falls by up to 30 % as the cutoff
-    /// goes from 7 kHz to 1.8 kHz. Applied on top of `dry` to the spatial battle sounds.
-    pub fn muffle_gain(&self) -> f32 {
-        let loss = ((7000.0 - self.cutoff_hz) / (7000.0 - 1800.0)).clamp(0.0, 1.0);
-        1.0 - 0.3 * loss
-    }
-
-    /// Stand-in for the reverb send: the diffuse tail of a far field is the distant-battle bed
-    /// (`battle_distant`), raised by twice the extra wet level over the near setting (0.12), up
-    /// to +52 %.
-    pub fn distant_bed_gain(&self) -> f32 {
-        1.0 + 2.0 * (self.wet - 0.12).max(0.0)
-    }
 }
 
 pub fn far_bus(far01: f32) -> FarBus {
@@ -1155,10 +1138,6 @@ mod tests {
         assert_eq!(far_bus(1.0).cutoff_hz, 1800.0);
         assert!((far_bus(0.5).wet - 0.25).abs() < 1e-6);
         assert_eq!(far_bus(7.0), far_bus(1.0));
-        assert_eq!(far_bus(0.0).muffle_gain(), 1.0);
-        assert!((far_bus(1.0).muffle_gain() - 0.7).abs() < 1e-6);
-        assert_eq!(far_bus(0.0).distant_bed_gain(), 1.0);
-        assert!((far_bus(1.0).distant_bed_gain() - 1.52).abs() < 1e-5);
     }
 
     #[test]

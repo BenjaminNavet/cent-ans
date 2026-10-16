@@ -1,0 +1,15 @@
+# econ2 : couches de la carte. client/run_bg.sh --offscreen --state Campaign --faction fac_france --script client/src/campaign/hud/proof_layers.txt
+wait 240
+dump out/econ2_before.json
+click hud:map_filters
+wait 10
+click hud:layer:trade
+wait 90
+dump out/econ2_trade.json
+click hud:layer:signs
+wait 20
+dump out/econ2_signs.json
+click hud:treasury
+wait 20
+dump out/econ2_economy.json
+exit

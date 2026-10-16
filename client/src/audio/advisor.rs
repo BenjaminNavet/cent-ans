@@ -23,11 +23,12 @@ use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::hud::flow::TurnAdvanced;
 use crate::settings::Settings;
-use crate::ui::kit::UiTheme;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::PanelStack;
 use crate::ui::kit::style::{self, UiType};
+use crate::ui::kit::widgets::button_small;
 use crate::ui::kit::widgets::panel_note;
+use crate::ui::kit::{ButtonPressed, UiTheme};
 
 const DUCK_DB: f32 = -9.0;
 const READ_CHARS_PER_SECOND: f32 = 14.0;
@@ -247,7 +248,7 @@ impl Plugin for AdvisorPlugin {
             .add_message::<AdvisorBubble>()
             .add_systems(
                 Update,
-                (show_bubble, expire_bubble).run_if(in_state(AppState::Battle)),
+                (show_bubble, expire_bubble, close_bubble).run_if(in_state(AppState::Battle)),
             )
             .add_systems(
                 Startup,
@@ -339,8 +340,10 @@ pub struct AdvisorBubble {
 #[derive(Component)]
 struct BubbleLife(Timer);
 
-/// Shows the bubble right under the battle journal (slot `Journal`, after the journal panel;
-/// the slot is the top of the left column, the alerts follow it). One bubble at a time.
+/// Shows the bubble at the top of the `Journal` slot, ABOVE the journal panel (never under it:
+/// the journal grows downwards and would push the bubble out of sight). One bubble at a time;
+/// the « × » button dismisses it (Godot `dismiss`; the voice line itself is not interrupted,
+/// the audio director has no stop message).
 fn show_bubble(
     mut commands: Commands,
     mut requests: MessageReader<AdvisorBubble>,
@@ -364,7 +367,7 @@ fn show_bubble(
     for entity in &old {
         commands.entity(entity).despawn();
     }
-    commands
+    let bubble = commands
         .spawn((
             Name::new("AdvisorBubble"),
             BubbleLife(Timer::from_seconds(
@@ -373,7 +376,6 @@ fn show_bubble(
             )),
             panel_note(&theme),
             Pickable::IGNORE,
-            ChildOf(slot),
         ))
         .insert(Node {
             width: Val::Percent(100.0),
@@ -382,12 +384,47 @@ fn show_bubble(
             padding: UiRect::all(Val::Px(8.0)),
             ..default()
         })
-        .with_child((
-            Text::new(request.text),
-            theme.text_font(false, true, UiType::Caption.size()),
-            TextColor(style::INK),
-            Pickable::IGNORE,
-        ));
+        .with_children(|bubble| {
+            bubble
+                .spawn(Node {
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::SpaceBetween,
+                    align_items: AlignItems::FlexStart,
+                    column_gap: Val::Px(6.0),
+                    ..default()
+                })
+                .with_children(|row| {
+                    row.spawn((
+                        Text::new(request.text),
+                        theme.text_font(false, true, UiType::Caption.size()),
+                        TextColor(style::INK),
+                        Node {
+                            flex_shrink: 1.0,
+                            ..default()
+                        },
+                        Pickable::IGNORE,
+                    ));
+                    row.spawn(button_small(&theme, BUBBLE_CLOSE, "×"));
+                });
+        })
+        .id();
+    // First child of the slot: above the journal.
+    commands.entity(slot).insert_children(0, &[bubble]);
+}
+
+const BUBBLE_CLOSE: &str = "advisor:close";
+
+/// « × » of the bubble: dismisses it.
+fn close_bubble(
+    mut commands: Commands,
+    mut pressed: MessageReader<ButtonPressed>,
+    bubbles: Query<Entity, With<BubbleLife>>,
+) {
+    if pressed.read().any(|press| press.name == BUBBLE_CLOSE) {
+        for entity in &bubbles {
+            commands.entity(entity).despawn();
+        }
+    }
 }
 
 fn expire_bubble(
@@ -407,9 +444,12 @@ fn blocked(stack: Option<&PanelStack>) -> bool {
 }
 
 fn enabled(settings: &Option<Res<Settings>>) -> bool {
-    settings
-        .as_ref()
-        .is_none_or(|settings| settings.voice_advisor)
+    advisor_voice_on(settings.as_deref())
+}
+
+/// `voice_advisor` (Godot `voice/advisor`): the advisor speaks; on when no settings exist.
+pub fn advisor_voice_on(settings: Option<&Settings>) -> bool {
+    settings.is_none_or(|settings| settings.voice_advisor)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -656,6 +696,15 @@ fn dump_advisor(world: &World) -> (String, Value) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn voice_advisor_setting_gates_the_advisor() {
+        let mut settings = Settings::default();
+        assert!(advisor_voice_on(Some(&settings)));
+        assert!(advisor_voice_on(None));
+        settings.voice_advisor = false;
+        assert!(!advisor_voice_on(Some(&settings)));
+    }
 
     fn data() -> VoiceData {
         VoiceData {

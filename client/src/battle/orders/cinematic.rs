@@ -222,6 +222,16 @@ pub fn pose(
     )
 }
 
+/// `cinematic` (Godot `battle/cinematic`): the first-clash and victory shots; on without settings.
+pub fn cinematic_on(settings: Option<&Settings>) -> bool {
+    settings.is_none_or(|s| s.cinematic)
+}
+
+/// `cinematic_slowmo`: the slow motion during the first-clash shot.
+pub fn slowmo_on(settings: Option<&Settings>) -> bool {
+    settings.is_none_or(|s| s.cinematic_slowmo)
+}
+
 /// Looks for the first real clash and starts the shot; runs it; ends it.
 #[allow(clippy::too_many_arguments)]
 pub fn run_cinematic(
@@ -295,7 +305,7 @@ pub fn run_cinematic(
         let wanted = state.victory_enabled
             && player.is_some()
             && !session.replaying
-            && settings.as_ref().is_none_or(|s| s.cinematic);
+            && cinematic_on(settings.as_deref());
         let Some(player) = player.filter(|_| wanted) else {
             state.victory_done = true;
             return;
@@ -327,7 +337,7 @@ pub fn run_cinematic(
         spawn_bars(&mut commands);
         return;
     }
-    if state.done || deployment.active || !settings.as_ref().is_none_or(|s| s.cinematic) {
+    if state.done || deployment.active || !cinematic_on(settings.as_deref()) {
         return;
     }
     let Some(player) = session.player else { return };
@@ -370,7 +380,7 @@ pub fn run_cinematic(
     state.focus = focus;
     state.yaw = yaw;
     state.saved_speed = session.speed;
-    if settings.as_ref().is_none_or(|s| s.cinematic_slowmo) {
+    if slowmo_on(settings.as_deref()) {
         session.speed = f64::from(config.slowmo_scale);
     }
     if let Ok((Projection::Perspective(p), _)) = cameras.single() {
@@ -419,6 +429,17 @@ pub fn drive_camera(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn cinematic_settings_gate_the_shot_and_the_slowmo() {
+        let mut settings = Settings::default();
+        assert!(cinematic_on(Some(&settings)) && slowmo_on(Some(&settings)));
+        assert!(cinematic_on(None) && slowmo_on(None));
+        settings.cinematic_slowmo = false;
+        assert!(cinematic_on(Some(&settings)) && !slowmo_on(Some(&settings)));
+        settings.cinematic = false;
+        assert!(!cinematic_on(Some(&settings)));
+    }
 
     #[test]
     fn config_reads_the_data_file_and_keeps_defaults() {

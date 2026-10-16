@@ -511,4 +511,15 @@ mod tests {
         assert!(replay.phase.is_none());
         assert!(guard > 15, "pan + march + hold last about 2.2 s");
     }
+
+    #[test]
+    fn ai_moves_speed_zero_plays_no_replay() {
+        let root = crate::paths::find_root().expect("root");
+        let (data, _) =
+            data_model::GameData::load(&crate::paths::data_dir(&root)).expect("game data");
+        let moves = vec![record(0, Some(AiMoveNotability::Battle), true)];
+        let mut off = AiReplay::default();
+        assert!(!off.begin(&moves, &data, None, 0.0));
+        assert!(off.phase.is_none() && off.stops.is_empty());
+    }
 }

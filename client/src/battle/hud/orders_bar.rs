@@ -305,6 +305,81 @@ fn portrait_exists(id: &str) -> bool {
             .unwrap_or(false)
 }
 
+/// Inside diameter (px) of the seal node (the 5 px moral ring excluded).
+const SEAL_INNER: f32 = SEAL_SIZE - 10.0;
+/// Biggest wobble factor of the wax outline (`HudStyle.wax_points`: 1 + 0.045 + 0.03 at most).
+const WAX_WOBBLE_MAX: f32 = 1.075;
+/// Radius (px) of the wax before its wobble.
+const WAX_RADIUS: f32 = SEAL_INNER * 0.5 / WAX_WOBBLE_MAX - 3.0;
+/// Diameter of the portrait medallion: Godot puts the inner field at 0.8 of the wax radius.
+const MEDALLION: f32 = WAX_RADIUS * 1.6 - 4.0;
+
+/// Wax radius factor at `angle` (Godot `HudStyle.wax_points`, seed 7).
+fn wax_wobble(angle: f32) -> f32 {
+    let seed = 7.0;
+    1.0 + 0.045 * (angle * 5.0 + seed).sin() + 0.03 * (angle * 11.0 + seed * 1.7).sin()
+}
+
+/// The wax disc of `HudStyle.draw_wax_seal` as an image (irregular outline, soft shadow,
+/// stamped ring and inner ring), twice the size of the node for sharp edges.
+fn wax_image(wax: Color) -> Image {
+    const SCALE: f32 = 2.0;
+    let side = (SEAL_INNER * SCALE) as u32;
+    let centre = side as f32 * 0.5;
+    let radius = WAX_RADIUS * SCALE;
+    let coverage = |edge: f32| (edge + 0.5).clamp(0.0, 1.0);
+    let ring = |dist: f32, at: f32, width: f32| coverage(width * 0.5 - (dist - at).abs());
+    let dark = wax.darker(0.35).to_srgba();
+    let light = wax.lighter(0.18).to_srgba();
+    let base = wax.to_srgba();
+    let mut data = Vec::with_capacity((side * side * 4) as usize);
+    for y in 0..side {
+        for x in 0..side {
+            let (px, py) = (x as f32 + 0.5 - centre, y as f32 + 0.5 - centre);
+            let outline = |dx: f32, dy: f32| {
+                let (qx, qy) = (px - dx, py - dy);
+                let reach = radius * wax_wobble(qy.atan2(qx));
+                coverage(reach - qx.hypot(qy))
+            };
+            let dist = px.hypot(py);
+            let body = outline(0.0, 0.0);
+            let shade = outline(1.5 * SCALE, 2.5 * SCALE) * 0.30;
+            let stamp = ring(dist, radius * 0.90, (radius * 0.05).max(1.0)).min(body);
+            let inner = ring(dist, radius * 0.80, (radius * 0.03).max(1.0)).min(body);
+            let mut colour = [base.red, base.green, base.blue];
+            for (tint, amount) in [(&dark, stamp), (&light, inner)] {
+                colour[0] += (tint.red - colour[0]) * amount;
+                colour[1] += (tint.green - colour[1]) * amount;
+                colour[2] += (tint.blue - colour[2]) * amount;
+            }
+            // Wax over its shadow.
+            let alpha = body + shade * (1.0 - body);
+            let rgb = if alpha > 0.0 {
+                colour.map(|c| c * body / alpha)
+            } else {
+                [0.0; 3]
+            };
+            data.extend_from_slice(&[
+                (rgb[0].clamp(0.0, 1.0) * 255.0) as u8,
+                (rgb[1].clamp(0.0, 1.0) * 255.0) as u8,
+                (rgb[2].clamp(0.0, 1.0) * 255.0) as u8,
+                (alpha.clamp(0.0, 1.0) * 255.0) as u8,
+            ]);
+        }
+    }
+    Image::new(
+        bevy::render::render_resource::Extent3d {
+            width: side,
+            height: side,
+            depth_or_array_layers: 1,
+        },
+        bevy::render::render_resource::TextureDimension::D2,
+        data,
+        bevy::render::render_resource::TextureFormat::Rgba8UnormSrgb,
+        bevy::asset::RenderAssetUsages::default(),
+    )
+}
+
 /// Spawns the seal and the (empty) bar once the HUD root exists.
 #[allow(clippy::too_many_arguments)]
 fn spawn(
@@ -317,6 +392,7 @@ fn spawn(
     data: Res<HudData>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
+    mut images: ResMut<Assets<Image>>,
 ) {
     let Ok(root) = roots.single() else { return };
     if !existing.is_empty() {
@@ -347,7 +423,7 @@ fn spawn(
                 border_radius: BorderRadius::MAX,
                 ..default()
             },
-            BackgroundColor(wax),
+            BackgroundColor(Color::NONE),
             BorderColor::all(Color::srgb(0.2, 0.6, 0.2)),
             ChildOf(super::slot_or_root(
                 &slots,
@@ -356,12 +432,25 @@ fn spawn(
             )),
         ))
         .id();
+    // The wax with its irregular edge, under the medallion.
+    commands.spawn((
+        Name::new("SealWax"),
+        Node {
+            position_type: PositionType::Absolute,
+            width: Val::Px(SEAL_INNER),
+            height: Val::Px(SEAL_INNER),
+            ..default()
+        },
+        ImageNode::new(images.add(wax_image(wax))),
+        Pickable::IGNORE,
+        ChildOf(seal_node),
+    ));
     let inner = commands
         .spawn((
             Name::new("SealMedallion"),
             Node {
-                width: Val::Px(SEAL_SIZE - 22.0),
-                height: Val::Px(SEAL_SIZE - 22.0),
+                width: Val::Px(MEDALLION),
+                height: Val::Px(MEDALLION),
                 border: UiRect::all(Val::Px(2.0)),
                 overflow: Overflow::clip(),
                 justify_content: JustifyContent::Center,
@@ -941,6 +1030,34 @@ pub fn dump(world: &World) -> Value {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn wax_image_has_irregular_opaque_edge() {
+        let image = super::wax_image(Color::srgb(0.5, 0.1, 0.07));
+        let side = image.width() as usize;
+        let data = image.data.as_ref().unwrap();
+        let alpha = |x: usize, y: usize| data[(y * side + x) * 4 + 3];
+        assert_eq!(alpha(side / 2, side / 2), 255);
+        assert_eq!(alpha(0, 0), 0);
+        // Outline radius varies with the angle.
+        let reach = |dx: i32, dy: i32| {
+            (0..side as i32 / 2)
+                .rev()
+                .find(|r| {
+                    let (x, y) = (
+                        side as i32 / 2 + dx * r / 100,
+                        side as i32 / 2 + dy * r / 100,
+                    );
+                    alpha(x as usize, y as usize) > 128
+                })
+                .unwrap()
+        };
+        let radii: Vec<i32> = [(100, 0), (0, 100), (-100, 0), (0, -100)]
+            .iter()
+            .map(|&(dx, dy)| reach(dx, dy))
+            .collect();
+        assert!(radii.iter().max() != radii.iter().min(), "{radii:?}");
+    }
+
     use super::*;
 
     #[test]

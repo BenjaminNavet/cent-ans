@@ -72,6 +72,7 @@ impl Plugin for CouncilRoomPlugin {
                     figures::fit_painted,
                     stage::input,
                     figures::apply_hover,
+                    figures::apply_overlay,
                     animate,
                     stage::update_overlays,
                     dev_probe,
@@ -117,6 +118,7 @@ pub struct CouncilProps {
     pub lights: usize,
     pub candles: usize,
     pub tapestries: usize,
+    pub halos: usize,
     pub emblem: bool,
 }
 
@@ -181,6 +183,10 @@ pub struct CouncilState {
     /// Cursor over the stage image, in displayed pixels.
     pub cursor: Option<Vec2>,
     pub card: String,
+    /// Asset path of the portrait shown in the card (empty: none).
+    pub card_portrait: String,
+    /// Colour of the player's faction (the sovereign's stand-in figure).
+    pub faction_color: Color,
 }
 
 impl Default for CouncilState {
@@ -199,6 +205,8 @@ impl Default for CouncilState {
             asset_root: root.map(|r| crate::paths::asset_root(&r)),
             cursor: None,
             card: String::new(),
+            card_portrait: String::new(),
+            faction_color: Color::srgb(0.6, 0.15, 0.15),
         }
     }
 }
@@ -311,7 +319,7 @@ fn ensure_room(
     mut commands: Commands,
     ui: Res<CourtUi>,
     sim: Res<Sim>,
-    state: Res<CouncilState>,
+    mut state: ResMut<CouncilState>,
     assets: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -346,6 +354,7 @@ fn ensure_room(
             let c = hex_color(&f.heraldry.primary_color);
             Color::srgb(c[0], c[1], c[2])
         });
+    state.faction_color = faction_color;
     *props = CouncilProps::default();
     let root = commands
         .spawn((
@@ -508,6 +517,9 @@ fn dump_council(world: &World) -> (String, Value) {
     let vacant_labels = world
         .try_query::<&stage::StageLabel>()
         .map_or(0, |mut q| q.iter(world).count());
+    let overlays = world
+        .try_query::<&figures::HoverOverlay>()
+        .map_or(0, |mut q| q.iter(world).count());
     (
         "council".to_owned(),
         json!({
@@ -518,11 +530,13 @@ fn dump_council(world: &World) -> (String, Value) {
             "figures": painted,
             "decor": {
                 "meshes": props.meshes, "lights_decor": props.lights, "candles": props.candles,
-                "tapestries": props.tapestries, "heraldry_emblem": props.emblem,
+                "tapestries": props.tapestries, "flame_halos": props.halos, "heraldry_emblem": props.emblem,
                 "point_and_spot_lights_in_world": lights,
             },
             "seats": signature.iter().map(|(k, occupied)| json!({"office": k, "occupied": occupied})).collect::<Vec<_>>(),
             "stage_vacant_labels": vacant_labels,
+            "highlight_overlays": overlays,
+            "card": {"text": state.card, "portrait": state.card_portrait},
             "hovered": hovered, "hovers": hovers, "clicks": clicks, "last_click": last_click,
             "populated": populated,
             "pixel_probe": world.resource::<ProbeResult>().0.lock().ok().and_then(|g| g.clone()),

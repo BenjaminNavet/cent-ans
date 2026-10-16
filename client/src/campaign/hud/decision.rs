@@ -54,6 +54,7 @@ fn open_window(
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
     existing: Query<Entity, With<DecisionWindow>>,
+    plates: Option<Res<crate::ui::art_plates::ArtPlates>>,
 ) {
     let Some(request) = requests.read().last().cloned() else {
         return;
@@ -89,21 +90,19 @@ fn open_window(
         .with_children(|root| {
             root.spawn((panel_sized(&theme, 560.0), Pickable::default()))
                 .with_children(|card| {
-                    if let Some(path) = crate::campaign::panels::chronicle::art::decision_art(
-                        crate::campaign::panels::chronicle::art::assets_root().as_deref(),
+                    let root = crate::campaign::panels::chronicle::art::assets_root();
+                    if let Some(path) = super::cover::decision_picture(
+                        plates.as_deref(),
+                        root.as_deref(),
                         view.event.as_str(),
+                        &view.kind,
                     ) {
-                        card.spawn((
-                            Name::new("hud:decision_art"),
-                            Node {
-                                height: Val::Px(
-                                    crate::campaign::panels::chronicle::art::ART_HEIGHT,
-                                ),
-                                aspect_ratio: Some(16.0 / 9.0),
-                                align_self: AlignSelf::Center,
-                                ..default()
-                            },
-                            ImageNode::new(assets.load(path)),
+                        card.spawn(super::cover::cover_image(
+                            &assets,
+                            &path,
+                            "hud:decision_art".to_owned(),
+                            crate::campaign::panels::chronicle::art::ART_HEIGHT * 16.0 / 9.0,
+                            crate::campaign::panels::chronicle::art::ART_HEIGHT,
                         ));
                     }
                     card.spawn(typed(&theme, &view.title, UiType::Heading));

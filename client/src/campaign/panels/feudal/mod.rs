@@ -155,6 +155,7 @@ fn handle_presses(
     mut pressed: MessageReader<ButtonPressed>,
     mut ui: ResMut<FeudalUi>,
     mut sim: ResMut<Sim>,
+    mut sfx: MessageWriter<crate::audio::PlaySfx>,
 ) {
     if !ui.open {
         return;
@@ -163,7 +164,14 @@ fn handle_presses(
         let Some(name) = press.name.strip_prefix("feudal:") else {
             continue;
         };
-        press_button(name, &mut ui, &mut sim);
+        if let Some(event) = crate::audio::uisound::panel_sound(
+            &mut ui,
+            |ui| &mut ui.result,
+            |result| result.ok,
+            |ui| press_button(name, ui, &mut sim),
+        ) {
+            sfx.write(crate::audio::PlaySfx::new(event));
+        }
         ui.dirty = true;
     }
 }

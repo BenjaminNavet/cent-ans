@@ -12,3 +12,11 @@ Branche `bm/uileft` (fusionne `bm/hudfix`).
 ## Restes
 - Journal de campagne : pas de filtre de genre ni d'onglet « Monde » dans le widget (dans la fenêtre Chronique).
 - Bulle du chroniqueur sans bouton « fermer ».
+
+## uileft2
+- Journal du HUD : filtre par genre (`hud:journal_genre:<id>`) et bloc « Monde » (`hud:journal_world`), état partagé avec la fenêtre Chronique (`ChroniclePanel::{genre,set_genre,toggle_world}`), comme le `remembered_genre` statique de Godot. Dump `journal.{genre,world_open,world_lines,shown}`. Preuve : `client/src/campaign/hud/proof_journal.txt`.
+- Commande agent `type <texte>` (un caractère par image, vers le champ focalisé) ; test `script_type_command`.
+- Audit `keyboard_free` : raccourcis de campagne sans garde corrigés : économie (M / I) et menu des filtres de la minicarte (F). Les touches de développement d'`armies/orders.rs` et la bataille (sans champ de texte) restent telles quelles.
+- Surcouches fixes (tutoriel, traditions, montre) déjà en `FitZone` depuis uileft.
+- Écart : le bouton « Menu » reste sur le message `TogglePause` (déjà en place, un panneau ouvert reste ouvert) au lieu de réutiliser l'arête Échap de `KeyEdges`.
+- Reste : bulle du chroniqueur sans bouton « fermer ».

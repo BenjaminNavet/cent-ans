@@ -173,6 +173,14 @@ fn header(root: &mut Kids, theme: &UiTheme, ui: &DiplomacyUi) {
                 ),
             ));
         }
+        // RG12: link to the Economy window on its Commerce tab.
+        row.spawn((
+            Name::new("dip:trade_tip"),
+            Tooltip::new("Ouvre la fenêtre Économie sur l’onglet Commerce (routes commerciales)."),
+            Hovered::default(),
+            Node::default(),
+            children![button_small(theme, "dip:trade", "Commerce → Économie")],
+        ));
         row.spawn(button_small(theme, "dip:close", "×"));
     });
 }

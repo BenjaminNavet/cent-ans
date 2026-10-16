@@ -6,9 +6,8 @@ use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
 use bevy::window::{CursorIcon, CustomCursor, CustomCursorImage, PrimaryWindow, SystemCursorIcon};
 
+use super::SelectedArmy;
 use super::orders::{PathPreviewState, SeaHover};
-use super::views::ArmyViews;
-use super::{HoveredArmy, SelectedArmy};
 use crate::app::AppState;
 use crate::ui::kit::UiTheme;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
@@ -129,18 +128,15 @@ pub fn update_hint(
 pub fn update_cursor(
     mut commands: Commands,
     assets: Res<AssetServer>,
-    hovered: Res<HoveredArmy>,
     selected: Res<SelectedArmy>,
-    views: Res<ArmyViews>,
     preview: Res<PathPreviewState>,
     mut mode: ResMut<CursorMode>,
     pointer: Res<super::pointer::PointerOverUi>,
     window: Query<Entity, With<PrimaryWindow>>,
 ) {
-    let hostile = match (&selected.0, &hovered.0) {
-        (Some(own), Some(other)) => own != other && views.get(other).is_some_and(|v| v.hostile),
-        _ => false,
-    };
+    // The attack cursor also covers armies and places of a faction at peace (declaration of war
+    // asked first), as computed by `preview_under_cursor`.
+    let hostile = preview.attack;
     // Over a panel the cursor is the plain arrow.
     let wanted = if pointer.over {
         CursorMode::Normal

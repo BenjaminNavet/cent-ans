@@ -12,7 +12,9 @@
 //! `grass_tufts_<group>`, `grass_clump_<group>`): the tufts mix the three cards (60 / 25 / 15 %)
 //! and each card's tint is corrected by its mean luminance so the groups keep the ground's
 //! brightness. Without the pack the single `grass_blades.png` card stays.
-//! Not ported: snow tint shader parameters, FA7 atlas of photographed tufts, near / far layers.
+//! FA7 (`grass_atlas.rs`): for the green group (and without the pack) the tufts are made of cards
+//! drawing the cells of the atlas of photographed blades, picked by clump and baked in the UVs.
+//! Not ported: snow tint shader parameters, FA7 wheat / stubble cells, near / far layers.
 
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::primitives::Aabb;
@@ -38,6 +40,10 @@ pub struct GrassStats {
     pub group: String,
     pub biome: u32,
     pub tufts_by_card: Vec<usize>,
+    /// FA7 atlas in use (cells drawn per card, see `grass_atlas`).
+    pub atlas: bool,
+    /// Tufts per cell of the atlas.
+    pub tufts_by_cell: Vec<usize>,
 }
 
 pub struct GrassPlugin;
@@ -163,6 +169,47 @@ impl ChunkBuffers {
         }
     }
 
+    /// FA7 tuft: two crossed cards of the atlas, each with its own cell (`cells`) and flip, the
+    /// card as wide as `width` at the top and `foot_ratio` times that at the foot.
+    #[allow(clippy::too_many_arguments)]
+    fn fa_tuft(
+        &mut self,
+        foot: Vec3,
+        yaw: f32,
+        width: f32,
+        foot_ratio: f32,
+        heights: [f32; 2],
+        cells: [([f32; 4], bool); 2],
+        foot_shade: f32,
+        shade: [f32; 3],
+    ) {
+        for (card, (height, (uv, flip))) in heights.iter().zip(cells).enumerate() {
+            let a = yaw + std::f32::consts::FRAC_PI_2 * card as f32 + 0.2;
+            let along = Vec3::new(a.cos(), 0.0, a.sin());
+            let normal = Vec3::new(-a.sin(), 0.0, a.cos());
+            let base = self.positions.len() as u32;
+            let (u_left, u_right) = if flip { (uv[2], uv[0]) } else { (uv[0], uv[2]) };
+            for (side, u, half, lift, v) in [
+                (-1.0, u_left, width * 0.5 * foot_ratio, 0.0, uv[3]),
+                (1.0, u_right, width * 0.5 * foot_ratio, 0.0, uv[3]),
+                (1.0, u_right, width * 0.5, *height, uv[1]),
+                (-1.0, u_left, width * 0.5, *height, uv[1]),
+            ] {
+                self.positions
+                    .push((foot + along * side * half + Vec3::Y * lift).to_array());
+                // Normals pulled towards the vertical (`fa_up_normal`).
+                self.normals
+                    .push((Vec3::Y * 0.9 + normal * 0.1).normalize().to_array());
+                self.uvs.push([u, v]);
+                let dark = if lift == 0.0 { foot_shade } else { 1.0 };
+                self.colors
+                    .push([shade[0] * dark, shade[1] * dark, shade[2] * dark, 1.0]);
+            }
+            self.indices
+                .extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
+        }
+    }
+
     fn into_mesh(self) -> Mesh {
         Mesh::new(
             PrimitiveTopology::TriangleList,
@@ -233,6 +280,29 @@ fn scatter(
             }],
         )
     });
+    // FA7: the atlas of photographed blades for the green group / without the pack, unless
+    // `CENT_ANS_NO_FA_GRASS` (Godot `--no-fa-grass`) or the files are missing.
+    let atlas_cat = (group.is_empty() || group == "green")
+        .then(|| {
+            crate::paths::find_root().ok().and_then(|root| {
+                let found = super::grass_atlas::GrassAtlas::load(&crate::paths::data_dir(&root))?;
+                crate::paths::asset_root(&root)
+                    .join(super::grass_atlas::ATLAS_PATH)
+                    .exists()
+                    .then_some(found)
+            })
+        })
+        .flatten()
+        .filter(|_| std::env::var_os("CENT_ANS_NO_FA_GRASS").is_none());
+    let cards: Vec<GrassCard> = match &atlas_cat {
+        Some(a) => vec![GrassCard {
+            role: "fa_atlas".to_owned(),
+            path: super::grass_atlas::ATLAS_PATH.to_owned(),
+            luma: a.tex_lum,
+            aspect: 1.0,
+        }],
+        None => cards,
+    };
     let card_materials: Vec<Handle<WindMaterial>> = cards
         .iter()
         .map(|card| {
@@ -268,6 +338,7 @@ fn scatter(
         .map(|_| (0..cards.len()).map(|_| ChunkBuffers::default()).collect())
         .collect();
     let mut tufts_by_card = vec![0usize; cards.len()];
+    let mut tufts_by_cell = vec![0usize; atlas_cat.as_ref().map_or(0, |a| a.variants.len())];
     let mut tufts = 0usize;
     let nx = (field.width as f32 / spacing) as usize;
     let nz = (field.depth as f32 / spacing) as usize;
@@ -277,6 +348,14 @@ fn scatter(
             let z = (iz as f32 + hash01(ix as f32, iz as f32, 2.0)) * spacing;
             let splat = splat_at(field, f64::from(x), f64::from(z));
             if splat.grass < 0.55 || hash01(x, z, 3.0) > splat.grass {
+                continue;
+            }
+            let fa_density = atlas_cat
+                .as_ref()
+                .map(|a| super::grass_atlas::density_at(a, x, z));
+            if let Some((density, _)) = fa_density
+                && hash01(x, z, 9.0) >= density
+            {
                 continue;
             }
             let height = field.height(f64::from(x), f64::from(z)) as f32;
@@ -289,6 +368,35 @@ fn scatter(
             };
             let chunk = ((z / chunk_size) as usize).min(rows - 1) * columns
                 + ((x / chunk_size) as usize).min(columns - 1);
+            if let (Some(a), Some((_, in_clump))) = (atlas_cat.as_ref(), fa_density) {
+                // FA7: each card draws its cell (more tall grass at the heart of the clumps),
+                // flipped one time in two; the height is that of the cell.
+                let size = a.size[0] + (a.size[1] - a.size[0]) * hash01(x, z, 8.0);
+                let h_var = 0.8 + 0.4 * in_clump;
+                let height_mul = 1.0 + (h_var - 1.0) * a.height_var;
+                let mut heights = [0.0f32; 2];
+                let mut cells = [([0.0f32; 4], false); 2];
+                for card in 0..2 {
+                    let salt = 17.3 * card as f32;
+                    let cell = a.pick(hash01(x, z, 91.7 + salt), in_clump);
+                    heights[card] = a.variants[cell].height_m * size * height_mul;
+                    cells[card] = (a.cell_uv(cell), hash01(x, z, 47.9 + salt) < 0.5);
+                    tufts_by_cell[cell] += 1;
+                }
+                chunks[chunk][0].fa_tuft(
+                    Vec3::new(x, height - 0.03, z),
+                    hash01(x, z, 6.0) * std::f32::consts::TAU,
+                    a.width_m * size,
+                    a.foot_ratio,
+                    heights,
+                    cells,
+                    a.foot_shade,
+                    shade,
+                );
+                tufts_by_card[0] += 1;
+                tufts += 1;
+                continue;
+            }
             // Blades 60 %, tufts 25 %, clump 15 % (the single card when the pack is absent).
             let pick = hash01(x, z, 7.0);
             let card_index = if cards.len() < 3 || pick < 0.6 {
@@ -359,6 +467,8 @@ fn scatter(
         group,
         biome,
         tufts_by_card,
+        atlas: atlas_cat.is_some(),
+        tufts_by_cell,
     });
 }
 

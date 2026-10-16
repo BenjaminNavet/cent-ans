@@ -58,6 +58,21 @@ struct CardCount(u32);
 #[derive(Component)]
 struct CardState(u32);
 
+/// Colour-blind morale symbol (top-left of the card), empty while the mode is off.
+#[derive(Component)]
+struct CardMoraleSymbol(u32);
+
+/// Symbol of a 0..1 level (morale): ▲ good, ■ medium, ▼ low (`Accessibility.level_symbol`).
+pub fn level_symbol(ratio: f32) -> &'static str {
+    if ratio >= 0.6 {
+        "▲"
+    } else if ratio >= 0.3 {
+        "■"
+    } else {
+        "▼"
+    }
+}
+
 /// One state badge slot (round pill at the right of the card, from the top), filled by
 /// [`update_cards`] from [`super::view::state_badges`].
 #[derive(Component)]
@@ -83,6 +98,21 @@ struct CardBadgeGlyph {
 /// Size (px) of a badge pill and the step between two of them.
 const BADGE_SIZE: f32 = 16.0;
 const BADGE_STEP: f32 = 18.0;
+
+/// Tooltip (BBCode) of a badge kind: the rule text of a mode, else the label of the state.
+pub fn badge_tip(kind: &str) -> String {
+    match kind.strip_prefix("mode_") {
+        Some(mode) => {
+            let tip = super::mode_icons::tip_of(mode);
+            if tip.is_empty() {
+                super::view::badge_label(kind).to_owned()
+            } else {
+                format!("[b]{}[/b]\n{tip}", super::mode_icons::label_of(mode))
+            }
+        }
+        None => super::view::badge_label(kind).to_owned(),
+    }
+}
 
 /// Icon id of a badge kind.
 pub fn badge_icon_id(kind: &str) -> String {
@@ -447,7 +477,8 @@ fn spawn_card(
                 },
                 BackgroundColor(style::PARCHMENT_LIGHT),
                 BorderColor::all(style::INK),
-                Pickable::IGNORE,
+                Hovered::default(),
+                Tooltip::new(""),
                 ChildOf(card),
             ))
             .id();
@@ -472,6 +503,21 @@ fn spawn_card(
             ChildOf(badge),
         ));
     }
+    commands.spawn((
+        CardMoraleSymbol(id),
+        Text::new(""),
+        ctx.theme.text_font(true, false, 13.0),
+        TextColor(COUNT_INK),
+        TextShadow::default(),
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(3.0),
+            top: Val::Px(0.0),
+            ..default()
+        },
+        Pickable::IGNORE,
+        ChildOf(card),
+    ));
     // Shade, count and bars.
     let shade = commands
         .spawn((
@@ -574,7 +620,7 @@ pub fn highlighted(selection: &BattleSelection, data: &HudData) -> Vec<u32> {
         .collect()
 }
 
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
 fn card_clicks(
     mut pressed: MessageReader<ButtonPressed>,
     keys: Res<ButtonInput<KeyCode>>,
@@ -635,6 +681,7 @@ struct BadgeQueries<'w, 's> {
             &'static CardBadge,
             &'static mut Node,
             &'static mut BackgroundColor,
+            &'static mut Tooltip,
         ),
         (Without<CardBadgeIcon>, Without<CardBadgeGlyph>),
     >,
@@ -657,8 +704,15 @@ fn update_badges(
             .map(super::view::state_badges)
             .unwrap_or_default()
     };
-    for (pill, mut node, mut background) in &mut slots.pills {
+    for (pill, mut node, mut background, mut tooltip) in &mut slots.pills {
         let badges = badges_of(pill.id);
+        let tip = badges
+            .get(pill.index)
+            .map(|k| badge_tip(k))
+            .unwrap_or_default();
+        if tooltip.bbcode != tip {
+            tooltip.bbcode = tip;
+        }
         let (display, colour) = match badges.get(pill.index) {
             Some(kind) => {
                 let [r, g, b] = super::view::badge_color(kind, blink);
@@ -703,15 +757,17 @@ fn update_badges(
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
 fn update_cards(
     data: Res<HudData>,
     selection: Res<BattleSelection>,
     time: Res<Time<Real>>,
     texts: Res<HudTexts>,
+    palette: Option<Res<crate::settings::palette::Palette>>,
+    mut symbols: Query<(&CardMoraleSymbol, &mut Text), (Without<CardCount>, Without<CardState>)>,
     mut roots: Query<(&UnitCard, &mut BorderColor, &mut Tooltip)>,
-    mut counts: Query<(&CardCount, &mut Text), Without<CardState>>,
-    mut states: Query<(&CardState, &mut Text), Without<CardCount>>,
+    mut counts: Query<(&CardCount, &mut Text), (Without<CardState>, Without<CardMoraleSymbol>)>,
+    mut states: Query<(&CardState, &mut Text), (Without<CardCount>, Without<CardMoraleSymbol>)>,
     mut bars: Query<(&CardBar, &mut Node, &mut BackgroundColor), Without<CardVeil>>,
     mut veils: Query<(&CardVeil, &mut BackgroundColor), Without<CardBar>>,
 ) {
@@ -735,6 +791,16 @@ fn update_cards(
             if tooltip.bbcode != bbcode {
                 tooltip.bbcode = bbcode;
             }
+        }
+    }
+    let colorblind = palette.is_some_and(|p| p.colorblind);
+    for (symbol, mut text) in &mut symbols {
+        let shown = match data.own.iter().find(|u| u.id == symbol.0) {
+            Some(unit) if colorblind => level_symbol((unit.morale / 100.0).clamp(0.0, 1.0)),
+            _ => "",
+        };
+        if text.0 != shown {
+            text.0 = shown.to_owned();
         }
     }
     for (count, mut text) in &mut counts {
@@ -775,6 +841,21 @@ fn update_cards(
     }
 }
 
+/// Morale symbols currently shown on the cards (colour-blind mode), for the dump.
+fn morale_symbols(world: &World) -> Value {
+    let shown: Vec<String> = world
+        .try_query_filtered::<&Text, With<CardMoraleSymbol>>()
+        .map(|mut query| {
+            query
+                .iter(world)
+                .filter(|text| !text.0.is_empty())
+                .map(|text| text.0.clone())
+                .collect()
+        })
+        .unwrap_or_default();
+    json!(shown)
+}
+
 pub fn dump(world: &World) -> Value {
     let data = world.resource::<HudData>();
     let selection = world.resource::<BattleSelection>();
@@ -789,6 +870,7 @@ pub fn dump(world: &World) -> Value {
         "selection": selection.units,
         "requests_sent": log.sent.iter().map(|r| json!({"units": r.units, "additive": r.additive})).collect::<Vec<_>>(),
         "camera_centred": log.centred,
+        "morale_symbols": morale_symbols(world),
         "first": data.own.first().map(|u| json!({
             "id": u.id, "name": data.name_of(u.id), "soldiers": u.soldiers, "state": state_text(u), "badges": super::view::state_badges(u),
         })),
@@ -798,6 +880,14 @@ pub fn dump(world: &World) -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn morale_symbols_follow_the_thresholds() {
+        assert_eq!(level_symbol(0.9), "▲");
+        assert_eq!(level_symbol(0.6), "▲");
+        assert_eq!(level_symbol(0.45), "■");
+        assert_eq!(level_symbol(0.1), "▼");
+    }
     use crate::battle::hud::view::UnitView;
     use data_model::UnitCategory;
     use sim_battle::UnitFate;
@@ -834,6 +924,12 @@ mod tests {
             formation_key: "line".into(),
             reform_progress: None,
         }
+    }
+
+    #[test]
+    fn badge_tips_use_mode_rules() {
+        assert!(badge_tip("mode_skirmish").contains(" m "));
+        assert_eq!(badge_tip("rout"), "En déroute");
     }
 
     #[test]

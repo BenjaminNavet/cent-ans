@@ -28,6 +28,7 @@ pub mod encounters;
 pub mod history;
 pub mod launch;
 pub mod loading;
+pub mod loading_veil;
 pub mod naval;
 pub mod notice;
 pub mod replays;
@@ -169,11 +170,26 @@ pub struct FlowPlugin;
 impl Plugin for FlowPlugin {
     fn build(&self, app: &mut App) {
         naval::enable_dialog();
-        app.add_message::<LeaveBattle>()
+        app.add_plugins(loading_veil::plugin)
+            .add_message::<LeaveBattle>()
             .add_message::<FlowCommand>()
             .add_message::<BattleResolved>()
             .init_resource::<FlowState>()
             .init_resource::<history::PlayedBattles>()
+            .add_message::<history::OpenPlayedBattles>()
+            .init_resource::<history::OverlayStats>()
+            .add_systems(
+                OnEnter(AppState::FactionSelect),
+                history::clear_for_new_game,
+            )
+            .add_systems(
+                Update,
+                (
+                    history::sync_after_load,
+                    history::open_overlay,
+                    history::close_overlay,
+                ),
+            )
             .register_dump(dump_flow)
             .add_systems(
                 OnEnter(AppState::Campaign),
@@ -383,6 +399,9 @@ fn dump_flow(world: &World) -> (String, Value) {
             "outcome_band": band,
             "last_result_title": flow.last_result_title,
             "last_aftermath": aftermath,
+            "played_battles_overlays_opened": world
+                .get_resource::<history::OverlayStats>()
+                .map(|stats| stats.opened),
             "played_battles": world
                 .get_resource::<history::PlayedBattles>()
                 .map(|log| serde_json::to_value(&log.0).unwrap_or(Value::Null)),

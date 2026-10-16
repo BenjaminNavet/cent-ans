@@ -11,6 +11,7 @@
 //! | `ui_recruit`     | `_submit` of a `recruit` order               | army panel `PanelState.last`        |
 //! | `ui_build`       | `_submit` of a `build` order                 | province panel (hook, `build:`)     |
 //! | `ui_letter`      | `push_news_batch` at the end of a turn       | `ChronicleLog.letters`              |
+//! | `ui_order` (panels) | diplomacy / feudal / court / tech screens | `panel_sound` at each press |
 //! | `ui_card`        | unit card / ability click                    | `button_event` (mod.rs)             |
 //!
 //! Dump `ui_sounds`: how many times each event was asked for by this module.
@@ -60,6 +61,32 @@ pub fn order_events(accepted: u32, refused: u32) -> Vec<&'static str> {
         out.push("ui_order_refused");
     }
     out
+}
+
+/// Runs `act` on a panel state and tells whether it produced a fresh order outcome: the result
+/// slot is emptied first, so an identical outcome (same text twice) still counts, and the
+/// previous outcome is put back when `act` set none. Returns the sound to play: `ui_order` for an
+/// accepted order, `ui_order_refused` otherwise, nothing when no order was run (diplomacy,
+/// feudal, court screens: Godot plays nothing there, the Bevy port adds one line per screen).
+pub fn panel_sound<U, R: Clone>(
+    ui: &mut U,
+    slot: fn(&mut U) -> &mut Option<R>,
+    ok: fn(&R) -> bool,
+    act: impl FnOnce(&mut U),
+) -> Option<&'static str> {
+    let previous = slot(ui).take();
+    act(ui);
+    match slot(ui) {
+        Some(result) => Some(if ok(result) {
+            "ui_order"
+        } else {
+            "ui_order_refused"
+        }),
+        empty => {
+            *empty = previous;
+            None
+        }
+    }
 }
 
 /// Counters of the last values seen (a watcher fires on the difference only).
@@ -222,6 +249,23 @@ mod tests {
             province_action_event("build:mill", false),
             "ui_order_refused"
         );
+    }
+
+    #[test]
+    fn panel_sound_reports_fresh_outcomes_only() {
+        struct Ui {
+            result: Option<bool>,
+        }
+        let slot: fn(&mut Ui) -> &mut Option<bool> = |ui| &mut ui.result;
+        let mut ui = Ui { result: Some(true) };
+        // No order run: nothing played, the old outcome stays on screen.
+        assert_eq!(panel_sound(&mut ui, slot, |r| *r, |_| {}), None);
+        assert_eq!(ui.result, Some(true));
+        // Same outcome again still plays.
+        let again = panel_sound(&mut ui, slot, |r| *r, |ui| ui.result = Some(true));
+        assert_eq!(again, Some("ui_order"));
+        let refused = panel_sound(&mut ui, slot, |r| *r, |ui| ui.result = Some(false));
+        assert_eq!(refused, Some("ui_order_refused"));
     }
 
     #[test]
