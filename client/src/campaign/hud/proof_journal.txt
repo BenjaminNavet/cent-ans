@@ -1,10 +1,8 @@
-# Journal HUD : déplier, filtre Guerre, bloc Monde, puis dump (section "journal").
+# Journal HUD : déplier, filtre Guerre, (le bloc Monde n'existe qu'après des nouvelles lointaines ; couvert par test) puis dump (section "journal").
 wait 60
 click hud:journal_toggle
 wait 5
 click hud:journal_genre:war
-wait 5
-click hud:journal_world
 wait 5
 dump out/uileft2_journal.json
 exit

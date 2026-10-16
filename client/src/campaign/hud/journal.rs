@@ -31,6 +31,9 @@ pub struct JournalState {
     pub expanded: bool,
 }
 
+/// What the card was built for: unfolded, turns, lines, genre, « Monde » open.
+type BuiltKey = (bool, u32, usize, String, bool);
+
 #[derive(Component)]
 struct JournalCard;
 
@@ -82,7 +85,7 @@ fn rebuild(
     assets: Res<AssetServer>,
     column: Query<Entity, With<AdvisorColumn>>,
     card: Query<Entity, With<JournalCard>>,
-    mut built: Local<Option<(bool, u32, usize, String, bool)>>,
+    mut built: Local<Option<BuiltKey>>,
 ) {
     let Ok(column) = column.single() else { return };
     let genre = panel.genre().to_owned();
