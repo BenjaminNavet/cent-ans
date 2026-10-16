@@ -11,18 +11,24 @@
 //! The sea is at `y = 0`; lakes at their level; rivers, roads and coast hug the ground given by
 //! [`GroundHeight`] (flat by default: another lot plugs the terrain sampler).
 //!
-//! Not ported yet (see the lot report): `freshwater_layer.gd` rendering (ponds, reeds, torrents,
-//! waterfalls: only counted), `sea_lane_layer.gd`, carved river bed and fords, Nano Banana water
-//! detail textures, parchment-view blends, 3D text of river names, `coast_look` swash/geology.
+//! `freshwater` (ponds, salt pans, torrents, waterfalls, fords: `fresh.rs`) and the sea lanes
+//! (`lanes.rs`) are separate plugins registered here (lot campwater2). The river water sinks into
+//! the bed that the close terrain carves (`river.wesl`), and the sea carries the sun glints.
+//!
+//! Not ported yet (see the lot report): reed clumps, the depth-buffer thickness of the carved bed,
+//! fords on the river shader, parchment-view blends, 3D text of river names, `coast_look`
+//! swash/geology.
 
 pub mod basins;
 pub mod data;
 pub mod detail;
 pub mod drape;
 pub mod fine;
+pub mod fresh;
 pub mod height;
 pub mod label_ui;
 pub mod labels;
+pub mod lanes;
 pub mod materials;
 pub mod polygon;
 pub mod reseat;
@@ -148,6 +154,9 @@ pub struct WaterStats {
     pub sea_life: bool,
     /// Time spent decoding the detail textures and building their mip chains.
     pub detail_load_ms: u128,
+    /// Camera distance (world units) beyond which the minor rivers hide
+    /// (`river_display.json` `minor_max_distance` x map extent, `RiversRenderer.update_visibility`).
+    pub minor_max_distance: f32,
 }
 
 pub struct CampaignWaterPlugin;
@@ -156,7 +165,11 @@ impl Plugin for CampaignWaterPlugin {
     fn build(&self, app: &mut App) {
         materials::register_shaders(app);
         label_ui::build(app);
-        app.add_plugins(fine::FineGeoPlugin);
+        app.add_plugins((
+            fine::FineGeoPlugin,
+            fresh::FreshwaterPlugin,
+            lanes::SeaLanesPlugin,
+        ));
         app.init_resource::<GroundHeight>()
             .init_resource::<WaterView>()
             .init_resource::<WaterStats>()
@@ -303,6 +316,7 @@ fn build_water(
     let mut out = WaterStats {
         built: true,
         map_size: data.map_size,
+        minor_max_distance: data.display.minor_max_distance * data.map_size.max_element(),
         ..default()
     };
     let mut detail = detail::DetailLoader::new(&root);
@@ -375,7 +389,7 @@ fn apply_view(
     mut ribbon_materials: ResMut<Assets<RoadRibbonMaterial>>,
     mut parts: PartQuery,
 ) {
-    if !view.is_changed() || !stats.built {
+    if !(view.is_changed() || stats.is_changed()) || !stats.built {
         return;
     }
     for (part, mut visibility, line, ribbon) in &mut parts {
@@ -383,6 +397,9 @@ fn apply_view(
             WaterPart::MainRoads | WaterPart::MinorRoads => view.medium > 0.01,
             WaterPart::RoadRibbons => view.near > 0.01,
             WaterPart::Lakes => view.strategic_weight < 0.5,
+            WaterPart::MinorRivers => {
+                stats.minor_max_distance <= 0.0 || view.camera_distance < stats.minor_max_distance
+            }
             _ => true,
         };
         *visibility = if show {
