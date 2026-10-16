@@ -465,6 +465,7 @@ fn dump_anim(world: &World, stats: &LifeStats) -> Value {
         "binder": anim_stats.map(|s| json!({
             "bound_props": s.bound_props,
             "bound_herds": s.bound_herds,
+            "bound_birds": s.bound_birds,
             "rigid_models": s.rigid,
             "materials": s.materials,
             "samples": s.samples.iter().map(|(k, m, a, b)| json!({"kind": k, "model": m, "a": a, "b": b})).collect::<Vec<_>>(),

@@ -14,3 +14,8 @@ Branche `bm/lifeanim2`. Suite de `bm-lifeanim.md`.
 - Oiseaux : triangles d'ailes de repli (espèces sans glb) toujours animés par rotation CPU ; couleur unie / `unshaded` de Godot non reproduite pour les glb (matériau du glb conservé).
 - Fondu tramé : seulement les figurines skinnées de la carte ; les props non skinnés gardent le fondu par échelle (ADR 0354). Les ombres des figurines ne sont pas tramées.
 - Yeux : non revérifié visuellement (pas de capture dans ce lot).
+
+## Preuve (vidage, hors écran, muet)
+- Bataille (`--state Battle`, `CENT_ANS_NO_DEPLOY=1`) : `battle_decor.camp_horses` = 26 chevaux liés, 208 maillages (8 matières par cheval), 26 maillages `Hair`, 24 matériaux ; aucune erreur de validation (les passes d'ombre `camp_horse_shadow.wesl` et `anim_shadow.wesl` lisent `globals` en groupe 0 binding 1 : celui du prépassage, pas le 11 de la passe principale).
+- Campagne (`CENT_ANS_CAMERA=0.3,49.0,60`) : `campaign_life.anim.binder` = 144 props + 469 bêtes de troupeau + 9 oiseaux glb liés au shader ; aucun ERROR.
+- `cargo test --features dev` : 1035 + intégration verts ; clippy `-D warnings` propre.

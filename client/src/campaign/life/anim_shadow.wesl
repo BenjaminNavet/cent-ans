@@ -2,14 +2,17 @@
 // `AnimMaterial`). Same pose as `anim.wesl` (module `anim_pose`), so the shadows follow the legs,
 // the head, the wheels and the jolt of the box instead of the rigid mesh. Time is `globals.time`.
 import cent_ans_client::campaign::life::anim_pose::{AnimParams, pose_local};
+import bevy_render::globals::Globals;
 import bevy_pbr::{
     prepass::io::{Vertex, VertexOutput, decompress_vertex},
     render::{
         mesh_functions,
         view_transformations::position_world_to_clip,
-        mesh_view_bindings::globals,
     },
 };
+
+// The prepass view layout has the globals at binding 1 (the main pass has them at 11).
+@group(0) @binding(1) var<uniform> globals: Globals;
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(100) var<uniform> anim: AnimParams;
 
