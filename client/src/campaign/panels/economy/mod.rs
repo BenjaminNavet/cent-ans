@@ -52,7 +52,9 @@ impl Plugin for PanelEconomyPlugin {
                 Update,
                 (
                     dev_open,
-                    shortcuts.run_if(crate::campaign::hud::flow::orders_open),
+                    shortcuts
+                        .run_if(crate::campaign::hud::flow::orders_open)
+                        .run_if(crate::ui::kit::text_field::keyboard_free),
                     open_close,
                     handle_input,
                     watch_turn,

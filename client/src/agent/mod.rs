@@ -47,6 +47,8 @@ struct AgentRun {
     exit_after: Option<u32>,
     release: Vec<KeyCode>,
     click_retries: u32,
+    /// Characters of a `type` command still to send, one per frame.
+    typing: VecDeque<char>,
     pending_shots: Arc<AtomicUsize>,
 }
 
@@ -98,6 +100,7 @@ impl Plugin for AgentPlugin {
             exit_after: cli.exit_after,
             release: Vec::new(),
             click_retries: 0,
+            typing: VecDeque::new(),
             pending_shots: Arc::new(AtomicUsize::new(0)),
         })
         .register_dump(dump_state)
@@ -161,6 +164,20 @@ fn send_key(world: &mut World, key_code: KeyCode, state: ButtonState) {
     });
 }
 
+/// One typed character, as the keyboard would send it (read by the kit text fields).
+fn send_char(world: &mut World, c: char) {
+    let mut windows = world.query_filtered::<Entity, With<bevy::window::PrimaryWindow>>();
+    let window = windows.iter(world).next().unwrap_or(Entity::PLACEHOLDER);
+    world.write_message(KeyboardInput {
+        key_code: KeyCode::Unidentified(bevy::input::keyboard::NativeKeyCode::Unidentified),
+        logical_key: Key::Character(c.to_string().into()),
+        state: ButtonState::Pressed,
+        text: Some(c.to_string().into()),
+        repeat: false,
+        window,
+    });
+}
+
 /// Runs the next script commands of this frame.
 fn drive(world: &mut World) {
     let frame = {
@@ -180,6 +197,11 @@ fn drive(world: &mut World) {
     let release = std::mem::take(&mut world.resource_mut::<AgentRun>().release);
     for key in release {
         send_key(world, key, ButtonState::Released);
+    }
+    let next_char = world.resource_mut::<AgentRun>().typing.pop_front();
+    if let Some(c) = next_char {
+        send_char(world, c);
+        return;
     }
     {
         let mut run = world.resource_mut::<AgentRun>();
@@ -210,6 +232,10 @@ fn drive(world: &mut World) {
                 };
                 send_key(world, key, ButtonState::Pressed);
                 world.resource_mut::<AgentRun>().release.push(key);
+                return;
+            }
+            ScriptCommand::Type(text) => {
+                world.resource_mut::<AgentRun>().typing = text.chars().collect();
                 return;
             }
             ScriptCommand::Click(name) => {

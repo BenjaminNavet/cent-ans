@@ -437,7 +437,8 @@ pub fn plugin(app: &mut App) {
             filters_keys
                 .before(crate::menu::pause::pause_escape)
                 .run_if(in_state(AppState::Campaign))
-                .run_if(super::flow::orders_open),
+                .run_if(super::flow::orders_open)
+                .run_if(crate::ui::kit::text_field::keyboard_free),
         );
 }
 

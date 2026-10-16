@@ -4,6 +4,7 @@
 //! state <Name>        change screen (Boot, MainMenu, FactionSelect, Campaign, Battle, Codex)
 //! wait <frames>       let the app run
 //! key <KeyCode>       press and release a key (Escape, Enter, Space, KeyA, Digit1, ArrowUp, F1...)
+//! type <text>        type the text (rest of the line, one character per frame) into the focused text field
 //! click <Name>        press the UI node whose `Name` is <Name> (rest of the line, spaces allowed)
 //! dump <file>         write the --dump-state JSON now
 //! shot <file>         save a screenshot
@@ -21,6 +22,7 @@ pub enum ScriptCommand {
     Wait(u32),
     Key(String),
     Click(String),
+    Type(String),
     Dump(PathBuf),
     Shot(PathBuf),
     Exit,
@@ -60,6 +62,7 @@ fn parse_line(line: &str) -> Result<ScriptCommand, String> {
             .map_err(|e| format!("wait: {e}")),
         "key" => Ok(ScriptCommand::Key(need("a key code")?.to_owned())),
         "click" => Ok(ScriptCommand::Click(need("an entity name")?.to_owned())),
+        "type" => Ok(ScriptCommand::Type(need("a text")?.to_owned())),
         "dump" => Ok(ScriptCommand::Dump(absolute(need("a file")?))),
         "shot" => Ok(ScriptCommand::Shot(absolute(need("a file")?))),
         "exit" => Ok(ScriptCommand::Exit),

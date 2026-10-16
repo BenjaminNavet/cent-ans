@@ -2,7 +2,9 @@
 //! title / toggle of `journal_view.gd`): « Journal (n) » with a Replier / Déplier button, folded at
 //! the start of a campaign, the lines of [`ChronicleLog`] (newest turn first) when unfolded. It is
 //! the first child of the advisor column, so the hint card and the missions stack under it.
-//! The genre filter and the « Monde » tab stay in the Chronicle window (F-key panel).
+//! The genre filter (`journal_genres.json`) and the « Monde » block (far news, folded) are the
+//! same state as in the Chronicle window ([`ChroniclePanel`]), like Godot's static
+//! `remembered_genre`; the buttons are `hud:journal_genre:<id>` and `hud:journal_world`.
 
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
@@ -10,20 +12,27 @@ use serde_json::{Value, json};
 
 use super::{AdvisorColumn, HudSet, HudWidget};
 use crate::agent::dump::DumpAppExt;
+use crate::campaign::panels::chronicle::ChroniclePanel;
 use crate::campaign::panels::chronicle::log::ChronicleLog;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
-use crate::ui::kit::widgets::{button_small, caption, panel_note, scroll_list};
+use crate::ui::kit::widgets::{button_small, caption, panel_note, scroll_list, toggle_button};
 use crate::ui::kit::{ButtonPressed, UiTheme};
+use game_api::chronicle::genre_choices;
 
 const WIDTH: f32 = 280.0;
 const LIST_HEIGHT: f32 = 150.0;
 const TOGGLE: &str = "hud:journal_toggle";
+const GENRE_PREFIX: &str = "hud:journal_genre:";
+const WORLD: &str = "hud:journal_world";
 
 /// Folded at the start (Godot `set_log_expanded(false)`).
 #[derive(Resource, Debug, Default)]
 pub struct JournalState {
     pub expanded: bool,
 }
+
+/// What the card was built for: unfolded, turns, lines, genre, « Monde » open.
+type BuiltKey = (bool, u32, usize, String, bool);
 
 #[derive(Component)]
 struct JournalCard;
@@ -50,9 +59,19 @@ pub fn plugin(app: &mut App) {
         .add_systems(Update, (toggle, rebuild).chain().in_set(HudSet::Ui));
 }
 
-fn toggle(mut pressed: MessageReader<ButtonPressed>, mut state: ResMut<JournalState>) {
-    if pressed.read().any(|p| p.name == TOGGLE) {
-        state.expanded = !state.expanded;
+fn toggle(
+    mut pressed: MessageReader<ButtonPressed>,
+    mut state: ResMut<JournalState>,
+    mut panel: ResMut<ChroniclePanel>,
+) {
+    for press in pressed.read() {
+        if press.name == TOGGLE {
+            state.expanded = !state.expanded;
+        } else if press.name == WORLD {
+            panel.toggle_world();
+        } else if let Some(genre) = press.name.strip_prefix(GENRE_PREFIX) {
+            panel.set_genre(genre);
+        }
     }
 }
 
@@ -61,22 +80,31 @@ fn rebuild(
     mut commands: Commands,
     state: Res<JournalState>,
     log: Res<ChronicleLog>,
+    panel: Res<ChroniclePanel>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
     column: Query<Entity, With<AdvisorColumn>>,
     card: Query<Entity, With<JournalCard>>,
-    mut built: Local<Option<(bool, u32, usize)>>,
+    mut built: Local<Option<BuiltKey>>,
 ) {
     let Ok(column) = column.single() else { return };
-    let key = (state.expanded, log.turns, log.lines.len());
+    let genre = panel.genre().to_owned();
+    let key = (
+        state.expanded,
+        log.turns,
+        log.lines.len(),
+        genre.clone(),
+        panel.world_open(),
+    );
     let existing = card.single().ok();
-    if existing.is_some() && *built == Some(key) {
+    if existing.is_some() && built.as_ref() == Some(&key) {
         return;
     }
     if let Some(entity) = existing {
         commands.entity(entity).despawn();
     }
     *built = Some(key);
+    let world_open = panel.world_open();
     let body = RichStyle::caption(&theme);
     let arrow = if state.expanded {
         "▾ Replier"
@@ -111,13 +139,46 @@ fn rebuild(
             if !state.expanded {
                 return;
             }
+            box_.spawn(Node {
+                flex_wrap: FlexWrap::Wrap,
+                column_gap: Val::Px(3.0),
+                row_gap: Val::Px(3.0),
+                ..default()
+            })
+            .with_children(|bar| {
+                for choice in genre_choices() {
+                    let name = format!("{GENRE_PREFIX}{}", choice.id);
+                    bar.spawn(toggle_button(
+                        &theme,
+                        &name,
+                        &choice.label,
+                        genre == choice.id,
+                    ));
+                }
+            });
             box_.spawn(scroll_list(&theme, "hud:journal_list", LIST_HEIGHT))
                 .with_children(|list| {
+                    let shown = log.shown_lines(&genre);
                     if log.lines.is_empty() {
                         list.spawn(caption(&theme, "Aucun événement pour l’instant."));
+                    } else if shown.is_empty() {
+                        list.spawn(caption(&theme, "Rien de ce genre."));
                     }
-                    for (_, text) in &log.lines {
+                    for (_, text) in &shown {
                         list.spawn(rich_text(&theme, &assets, text, &body));
+                    }
+                    if log.world_count() > 0 {
+                        let label = format!(
+                            "{} Monde ({})",
+                            if world_open { "▾" } else { "▸" },
+                            log.world_count()
+                        );
+                        list.spawn(toggle_button(&theme, WORLD, &label, world_open));
+                        if world_open {
+                            for (_, text) in log.shown_world(&genre) {
+                                list.spawn(rich_text(&theme, &assets, &text, &body));
+                            }
+                        }
                     }
                 });
         })
@@ -129,6 +190,7 @@ fn rebuild(
 fn dump_journal(world: &World) -> (String, Value) {
     let state = world.resource::<JournalState>();
     let log = world.resource::<ChronicleLog>();
+    let panel = world.resource::<ChroniclePanel>();
     let mut cards = world.try_query_filtered::<(), With<JournalCard>>();
     (
         "journal".to_owned(),
@@ -136,6 +198,10 @@ fn dump_journal(world: &World) -> (String, Value) {
             "expanded": state.expanded,
             "title": title(log),
             "lines": log.lines.len(),
+            "genre": panel.genre(),
+            "world_open": panel.world_open(),
+            "world_lines": log.world_count(),
+            "shown": log.shown_lines(panel.genre()).len(),
             "built": cards.as_mut().map_or(0, |q| q.iter(world).count()),
         }),
     )
@@ -157,6 +223,27 @@ mod tests {
             ("war".into(), "z".into()),
         ];
         assert_eq!(title(&log), "Journal (2)");
+    }
+
+    #[test]
+    fn genre_and_world_buttons_share_the_chronicle_state() {
+        let mut app = App::new();
+        app.init_resource::<JournalState>()
+            .init_resource::<ChroniclePanel>()
+            .add_message::<ButtonPressed>()
+            .add_systems(Update, toggle);
+        assert_eq!(app.world().resource::<ChroniclePanel>().genre(), "all");
+        for name in ["hud:journal_genre:war", "hud:journal_world"] {
+            app.world_mut().write_message(ButtonPressed {
+                entity: Entity::PLACEHOLDER,
+                name: name.to_owned(),
+            });
+            app.update();
+        }
+        let panel = app.world().resource::<ChroniclePanel>();
+        assert_eq!(panel.genre(), "war");
+        assert!(panel.world_open());
+        assert!(!app.world().resource::<JournalState>().expanded);
     }
 
     #[test]
