@@ -14,31 +14,43 @@
 //! light a white Lambert surface to 1.0, as in Godot (which scales light energy by pi). The sky
 //! light intensities are therefore multiplied by `1.2 * 2^ev100` (the inverse of the exposure).
 //!
-//! Grading: Godot baked a 3D LUT (season, weather and hour grades, `GradeLut` in core). Bevy's
-//! `ColorGrading` takes the product of their contrast and saturation and the summed temperature
-//! and tint; per-channel lift / gain / shadow and highlight toning are not ported.
+//! Sun disc: hdri_sky.gdshader added a disc on the light (`smoothstep(0.99965, 0.99985, d) x
+//! sun_disc x 6`, sunny skies only, not in the radiance pass); here it is baked into the
+//! background cube only (`battle_lighting.json` `sun_disc`), the light cube stays without it.
+//!
+//! Grading: Godot baked a 3D LUT (season, weather and hour grades, `GradeLut` in core) applied in
+//! sRGB after tonemapping. With `grade.mode = "lut"` the same per-texel formula (white balance,
+//! lift / gain / gamma per channel, shadow and highlight toning, S contrast, saturation, shadow
+//! saturation) runs per pixel in a `FullscreenMaterial` pass after tonemapping (`grade.wesl`,
+//! `BattleGrade` on the camera) and Bevy's `ColorGrading` stays neutral. `mode = "bevy"` keeps the
+//! old approximation (contrast and saturation multiplied, temperature summed, in `ColorGrading`).
 //!
 //! SSAO needs `Msaa::Off` in Bevy: a quality preset with `ssao` (medium and above) turns the
 //! battle MSAA off and SMAA on, unless the player forced an MSAA level. The instanced soldiers and plants are drawn after the prepass, so
 //! they neither occlude nor receive it.
 
 use bevy::anti_alias::smaa::Smaa;
-use bevy::asset::RenderAssetUsages;
+use bevy::asset::{RenderAssetUsages, embedded_asset};
 use bevy::camera::{Exposure, Hdr};
+use bevy::core_pipeline::fullscreen_material::{FullscreenMaterial, FullscreenMaterialPlugin};
 use bevy::light::{AmbientLight, GeneratedEnvironmentMapLight, Skybox};
 use bevy::pbr::{ScreenSpaceAmbientOcclusion, ScreenSpaceAmbientOcclusionQualityLevel};
 use bevy::post_process::bloom::{Bloom, BloomPrefilter};
 use bevy::prelude::*;
+use bevy::render::RenderApp;
+use bevy::render::extract_component::ExtractComponent;
 use bevy::render::render_resource::{
-    Extent3d, TextureDimension, TextureFormat, TextureViewDescriptor, TextureViewDimension,
+    Extent3d, ShaderType, TextureDimension, TextureFormat, TextureViewDescriptor,
+    TextureViewDimension,
 };
 use bevy::render::view::{ColorGrading, ColorGradingGlobal, ColorGradingSection, Tonemapping};
+use bevy::shader::ShaderRef;
 use serde::Deserialize;
 use sim_battle::{BattleSeason, Weather};
 
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
-use crate::battle::decor::atmosphere::AtmosphereState;
+use crate::battle::decor::atmosphere::{AtmosphereState, BattleSun};
 use crate::battle::decor::look::DecorLook;
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::BattleCamera;
@@ -89,8 +101,126 @@ fn skybox_face_px() -> u32 {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct GradeLook {
+    /// `lut` (post-tonemap pass, Godot's LUT formula) or `bevy` (`ColorGrading` approximation).
+    #[serde(default = "lut_mode")]
+    pub mode: String,
     pub temperature_scale: f32,
     pub strength: f32,
+}
+
+fn lut_mode() -> String {
+    "lut".to_owned()
+}
+
+/// Sun disc of the HDRI background (hdri_sky.gdshader).
+#[derive(Debug, Clone, Deserialize)]
+pub struct SunDiscLook {
+    pub inner_cos: f32,
+    pub outer_cos: f32,
+    pub strength: f32,
+}
+
+impl Default for SunDiscLook {
+    fn default() -> Self {
+        SunDiscLook {
+            inner_cos: 0.99965,
+            outer_cos: 0.99985,
+            strength: 6.0,
+        }
+    }
+}
+
+/// One grade of the LUT (`prepare` of grade_lut.rs), as the shader reads it.
+#[derive(Clone, Copy, Debug, Default, PartialEq, ShaderType)]
+pub struct GradeUniform {
+    pub balance: Vec4,
+    pub lift: Vec4,
+    pub gamma: Vec4,
+    pub gain: Vec4,
+    pub shadows: Vec4,
+    pub highlights: Vec4,
+    /// x: contrast, y: saturation, z: shadow saturation, w: 1 when used.
+    pub scalars: Vec4,
+}
+
+/// Post-tonemap grading pass of the battle camera (season, weather, hour grades; `grade.wesl`).
+#[derive(Component, ExtractComponent, Clone, Copy, Debug, Default, PartialEq, ShaderType)]
+#[extract_app(RenderApp)]
+pub struct BattleGrade {
+    pub a: GradeUniform,
+    pub b: GradeUniform,
+    pub c: GradeUniform,
+    /// x: strength.
+    pub global: Vec4,
+}
+
+impl FullscreenMaterial for BattleGrade {
+    fn fragment_shader() -> ShaderRef {
+        "embedded://cent_ans_client/battle/scene/grade.wesl".into()
+    }
+    fn schedule_configs(
+        system: bevy::ecs::schedule::ScheduleConfigs<bevy::ecs::system::BoxedSystem>,
+    ) -> bevy::ecs::schedule::ScheduleConfigs<bevy::ecs::system::BoxedSystem> {
+        // Godot applied its LUT after tonemapping, in sRGB.
+        system
+            .in_set(bevy::core_pipeline::Core3dSystems::PostProcess)
+            .after(bevy::core_pipeline::tonemapping::tonemapping)
+    }
+}
+
+fn vec3_of(value: &serde_json::Value, fallback: f32) -> Vec4 {
+    match value.as_array() {
+        Some(list) if list.len() >= 3 => Vec4::new(
+            num(&list[0], 0.0),
+            num(&list[1], 0.0),
+            num(&list[2], 0.0),
+            0.0,
+        ),
+        _ => Vec4::new(fallback, fallback, fallback, 0.0),
+    }
+}
+
+/// A grade object of `atmosphere.json` as the shader reads it (unused when empty).
+pub fn grade_uniform(grade: &serde_json::Value) -> GradeUniform {
+    if grade.as_object().is_none_or(|o| o.is_empty()) {
+        return GradeUniform::default();
+    }
+    let temperature = num(&grade["temperature"], 0.0);
+    let tint = num(&grade["tint"], 0.0);
+    GradeUniform {
+        balance: Vec4::new(
+            1.0 + 0.1 * temperature,
+            1.0 - 0.06 * tint,
+            1.0 - 0.12 * temperature,
+            0.0,
+        ),
+        lift: vec3_of(&grade["lift"], 0.0),
+        gamma: vec3_of(&grade["gamma"], 1.0),
+        gain: vec3_of(&grade["gain"], 1.0),
+        shadows: vec3_of(&grade["shadows"], 1.0),
+        highlights: vec3_of(&grade["highlights"], 1.0),
+        scalars: Vec4::new(
+            num(&grade["contrast"], 1.0),
+            num(&grade["saturation"], 1.0),
+            num(&grade["shadow_saturation"], 1.0),
+            1.0,
+        ),
+    }
+}
+
+/// The grading pass of `grades` (season, weather, hour) blended by `strength`.
+pub fn battle_grade(grades: &[&serde_json::Value], strength: f32) -> BattleGrade {
+    let at = |i: usize| {
+        grades
+            .get(i)
+            .map_or_else(GradeUniform::default, |g| grade_uniform(g))
+    };
+    BattleGrade {
+        a: at(0),
+        b: at(1),
+        c: at(2),
+        global: Vec4::new(strength, 0.0, 0.0, 0.0),
+    }
 }
 
 /// `data/fx/battle_lighting.json`.
@@ -102,6 +232,8 @@ pub struct LightingLook {
     pub ssao: SsaoLook,
     pub sky_light: SkyLightLook,
     pub grade: GradeLook,
+    #[serde(default)]
+    pub sun_disc: SunDiscLook,
 }
 
 impl LightingLook {
@@ -154,12 +286,18 @@ pub struct SkyLightState {
     pub temperature: f32,
     pub ssao: bool,
     pub missing: bool,
+    /// Post-tonemap grading (mode `lut`).
+    pub lut: Option<BattleGrade>,
+    /// Sun disc strength baked into the background (0: none).
+    pub sun_disc: f32,
 }
 
 pub struct BattleLightingPlugin;
 
 impl Plugin for BattleLightingPlugin {
     fn build(&self, app: &mut App) {
+        embedded_asset!(app, "grade.wesl");
+        app.add_plugins(FullscreenMaterialPlugin::<BattleGrade>::default());
         app.register_dump(dump)
             .add_systems(OnEnter(AppState::Battle), init_lighting)
             .add_systems(
@@ -333,12 +471,13 @@ fn ssao_follows_msaa(
 
 /// Picks the panorama of the weather / season / hour and starts loading it; sets the grading.
 fn choose_sky(
+    mut commands: Commands,
     asset_server: Res<AssetServer>,
     look: Res<LightingLook>,
     atmosphere: Option<Res<AtmosphereState>>,
     mut session: ResMut<BattleSession>,
     mut state: ResMut<SkyLightState>,
-    mut gradings: Query<&mut ColorGrading, With<Lit>>,
+    mut gradings: Query<(Entity, &mut ColorGrading, Option<&BattleGrade>), With<Lit>>,
 ) {
     let Some(atmosphere) = atmosphere else {
         return;
@@ -346,20 +485,21 @@ fn choose_sky(
     let key = (atmosphere.time_key.clone(), atmosphere.weather.clone());
     if state.built_for.as_ref() == Some(&key) && state.panorama.is_some() || state.missing {
         // Grading may still need applying to a camera spawned later.
-        apply_grade(&look, &state, &mut gradings);
+        apply_grade(&mut commands, &look, &state, &mut gradings);
         return;
     }
     let season = season_key(session.sim_mut().field().season);
     let rules = &atmosphere.rules;
     let id = sky_id(rules, &key.1, season, &key.0);
-    let (contrast, saturation, temperature, tint) =
-        combined_grade(&grades(rules, &key.1, season, &key.0));
+    let all = grades(rules, &key.1, season, &key.0);
+    let (contrast, saturation, temperature, tint) = combined_grade(&all);
     let s = look.grade.strength;
+    state.lut = (look.grade.mode == "lut").then(|| battle_grade(&all, s));
     state.contrast = 1.0 + (contrast - 1.0) * s;
     state.saturation = 1.0 + (saturation - 1.0) * s;
     state.temperature = temperature * look.grade.temperature_scale * s;
     let _ = tint;
-    apply_grade(&look, &state, &mut gradings);
+    apply_grade(&mut commands, &look, &state, &mut gradings);
     if id == state.sky_id && state.panorama.is_some() {
         // Same panorama, new light (hour or weather): rebuild the cube only.
         state.built_for = None;
@@ -381,12 +521,26 @@ fn choose_sky(
 }
 
 fn apply_grade(
+    commands: &mut Commands,
     look: &LightingLook,
     state: &SkyLightState,
-    gradings: &mut Query<&mut ColorGrading, With<Lit>>,
+    gradings: &mut Query<(Entity, &mut ColorGrading, Option<&BattleGrade>), With<Lit>>,
 ) {
     let _ = look;
-    for mut grading in gradings.iter_mut() {
+    for (camera, mut grading, pass) in gradings.iter_mut() {
+        if let Some(lut) = state.lut {
+            // The pass does the whole grade; Bevy's grading stays neutral.
+            if pass != Some(&lut) {
+                commands.entity(camera).try_insert(lut);
+            }
+            if *grading != ColorGrading::default() {
+                *grading = ColorGrading::default();
+            }
+            continue;
+        }
+        if pass.is_some() {
+            commands.entity(camera).try_remove::<BattleGrade>();
+        }
         let wanted = ColorGrading::with_identical_sections(
             ColorGradingGlobal {
                 temperature: state.temperature,
@@ -417,6 +571,7 @@ fn build_sky_light(
     mut images: ResMut<Assets<Image>>,
     mut state: ResMut<SkyLightState>,
     cameras: Query<Entity, With<Lit>>,
+    suns: Query<&DirectionalLight, With<BattleSun>>,
 ) {
     let (Some(atmosphere), Some(decor)) = (atmosphere, decor) else {
         return;
@@ -452,13 +607,34 @@ fn build_sky_light(
         max_luminance: sl.max_luminance,
         horizon_floor: sl.horizon_floor,
         yaw: to_sun.x.atan2(-to_sun.z) - num(&sky["sun_azimuth_deg"], 0.0).to_radians(),
+        disc: SunDisc::default(),
+    };
+    // Disc on sunny skies only (`sun_disc` of the weather), background only.
+    let disc_strength = if sky["sunny"].as_bool().unwrap_or(false) {
+        num(&wx["sun_disc"], 0.0) * look.sun_disc.strength
+    } else {
+        0.0
+    };
+    let sun_color = suns.iter().next().map_or(Vec3::ONE, |sun| {
+        let c = sun.color.to_linear();
+        Vec3::new(c.red, c.green, c.blue)
+    });
+    let background_params = SkyParams {
+        disc: SunDisc {
+            strength: disc_strength,
+            to_sun: to_sun.normalize_or_zero(),
+            color: sun_color,
+            inner_cos: look.sun_disc.inner_cos,
+            outer_cos: look.sun_disc.outer_cos,
+        },
+        ..params
     };
     let size = sl.face_px.max(16);
     let (cube, mean) = cube_image(&pano, &params, size);
     // The background needs more texels than the light (filtered, 128 px is enough there).
     let background = sl
         .skybox
-        .then(|| images.add(cube_image(&pano, &params, sl.skybox_face_px.max(size)).0));
+        .then(|| images.add(cube_image(&pano, &background_params, sl.skybox_face_px.max(size)).0));
     let handle = images.add(cube);
     let energy = fog.ambient * sl.ambient_boost;
     let env_intensity = look.unit() * energy * sl.sky_contribution;
@@ -496,6 +672,11 @@ fn build_sky_light(
         return;
     }
     state.cube = Some(handle);
+    state.sun_disc = if background.is_some() {
+        disc_strength
+    } else {
+        0.0
+    };
     state.env_intensity = env_intensity;
     state.ambient_brightness = ambient.brightness;
     state.mean_radiance = mean.to_array();
@@ -529,6 +710,18 @@ pub struct SkyParams {
     pub horizon_floor: f32,
     /// Panorama turn (radians) so that its painted sun falls on the light.
     pub yaw: f32,
+    /// Added sun disc (strength 0 in the light cube).
+    pub disc: SunDisc,
+}
+
+/// Sun disc of the background (`col += color * smoothstep(inner, outer, dot(dir, to_sun)) * strength`).
+#[derive(Debug, Clone, Copy, Default)]
+pub struct SunDisc {
+    pub strength: f32,
+    pub to_sun: Vec3,
+    pub color: Vec3,
+    pub inner_cos: f32,
+    pub outer_cos: f32,
 }
 
 /// An equirectangular RGB panorama in linear floats.
@@ -576,8 +769,8 @@ fn smoothstep(e0: f32, e1: f32, x: f32) -> f32 {
     t * t * (3.0 - 2.0 * t)
 }
 
-/// Radiance of the sky in world direction `dir` (port of `sky()` in hdri_sky.gdshader, cubemap
-/// pass: no sun disc).
+/// Radiance of the sky in world direction `dir` (port of `sky()` in hdri_sky.gdshader; the sun
+/// disc only when `p.disc.strength > 0`, i.e. for the background).
 pub fn sky_radiance(pano: &Panorama, p: &SkyParams, dir: Vec3) -> Vec3 {
     let h = dir.y;
     let sky_dir = Vec3::new(dir.x, h.max(p.horizon_floor), dir.z).normalize();
@@ -596,6 +789,13 @@ pub fn sky_radiance(pano: &Panorama, p: &SkyParams, dir: Vec3) -> Vec3 {
     col = col.lerp(haze, band * p.haze_amount);
     if h < 0.0 {
         col = col.lerp(p.ground_color * grey.max(0.3), smoothstep(0.0, -0.12, h));
+    }
+    if p.disc.strength > 0.0 {
+        let d = dir.dot(p.disc.to_sun);
+        if d > p.disc.inner_cos {
+            col +=
+                p.disc.color * smoothstep(p.disc.inner_cos, p.disc.outer_cos, d) * p.disc.strength;
+        }
     }
     col * p.exposure
 }
@@ -721,8 +921,10 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
     let mut env = 0;
     let mut ssao = 0;
     let mut skybox = 0;
+    let mut grade_pass = 0;
     for entity in world.iter_entities() {
         if entity.contains::<Lit>() {
+            grade_pass += usize::from(entity.contains::<BattleGrade>());
             cameras += 1;
             env += usize::from(entity.contains::<GeneratedEnvironmentMapLight>());
             ssao += usize::from(entity.contains::<ScreenSpaceAmbientOcclusion>());
@@ -750,6 +952,15 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
             "ambient_brightness": state.map(|s| s.ambient_brightness),
             "mean_radiance": state.map(|s| s.mean_radiance),
             "grade": state.map(|s| serde_json::json!({ "contrast": s.contrast, "saturation": s.saturation, "temperature": s.temperature })),
+            "grade_mode": look.map(|l| l.grade.mode.clone()),
+            "grade_pass": state.and_then(|s| s.lut).map(|g| serde_json::json!({
+                "strength": g.global.x,
+                "grades_used": ([g.a, g.b, g.c].iter().filter(|u| u.scalars.w > 0.5).count()),
+                "lift": [g.a.lift.to_array(), g.b.lift.to_array(), g.c.lift.to_array()],
+                "gain": [g.a.gain.to_array(), g.b.gain.to_array(), g.c.gain.to_array()],
+            })),
+            "cameras_with_grade_pass": grade_pass,
+            "sun_disc": state.map(|s| s.sun_disc),
         }),
     )
 }
@@ -829,6 +1040,7 @@ mod tests {
             max_luminance: 2.5,
             horizon_floor: 0.015,
             yaw: 0.0,
+            disc: SunDisc::default(),
         };
         let up = sky_radiance(&pano, &p, Vec3::Y);
         assert!(up.max_element() <= 2.5 + 1e-3, "{up}");
@@ -837,5 +1049,56 @@ mod tests {
             down.z < down.x * 1.01,
             "ground colour below the horizon: {down}"
         );
+    }
+
+    #[test]
+    fn grade_pass_keeps_per_channel_lift_and_gain() {
+        let rules = rules();
+        let all = grades(&rules, "snow", "winter", "evening");
+        let g = battle_grade(&all, 1.0);
+        assert_eq!(g.global.x, 1.0);
+        let used = [g.a, g.b, g.c].iter().filter(|u| u.scalars.w > 0.5).count();
+        assert!(used >= 2, "{used}");
+        // Winter season lift is bluish (r < b).
+        assert!(g.a.lift.x < g.a.lift.z, "{:?}", g.a.lift);
+        // An empty grade is skipped.
+        assert_eq!(grade_uniform(&serde_json::json!({})).scalars.w, 0.0);
+        let warm = grade_uniform(&serde_json::json!({"temperature": 1.0, "gain": [1.1, 1.0, 0.9]}));
+        assert!(warm.balance.x > 1.0 && warm.balance.z < 1.0);
+        assert!((warm.gain.x - 1.1).abs() < 1e-6 && (warm.gamma.y - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn sun_disc_only_in_the_background() {
+        let pano = Panorama {
+            width: 4,
+            height: 2,
+            rgb: vec![[0.2, 0.3, 0.5]; 8],
+        };
+        let to_sun = Vec3::new(0.0, 0.6, -0.8);
+        let mut p = SkyParams {
+            exposure: 1.0,
+            saturation: 1.0,
+            tint: Vec3::ONE,
+            haze_amount: 0.0,
+            haze_color: Vec3::ONE,
+            ground_color: Vec3::splat(0.1),
+            max_luminance: 2.5,
+            horizon_floor: 0.015,
+            yaw: 0.0,
+            disc: SunDisc::default(),
+        };
+        let without = sky_radiance(&pano, &p, to_sun);
+        p.disc = SunDisc {
+            strength: 6.0,
+            to_sun,
+            color: Vec3::ONE,
+            inner_cos: 0.99965,
+            outer_cos: 0.99985,
+        };
+        let with = sky_radiance(&pano, &p, to_sun);
+        assert!(with.x > without.x + 5.0, "{with} vs {without}");
+        let away = sky_radiance(&pano, &p, Vec3::new(0.0, 0.6, 0.8));
+        assert!((away - without).length() < 1e-4);
     }
 }

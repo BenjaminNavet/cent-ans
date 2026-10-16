@@ -104,6 +104,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "fx_atmosphere.schema.json": ("fx/atmosphere.json",),
     "fx_battle_decor_look.schema.json": ("fx/battle_decor_look.json",),
     "fx_battle_lighting.schema.json": ("fx/battle_lighting.json",),
+    "fx_battle_weather_fx.schema.json": ("fx/battle_weather_fx.json",),
     "fx_trebuchet_swing_curve.schema.json": ("fx/trebuchet_swing_curve.json",),
     "fx_battle_animation.schema.json": ("fx/battle_animation.json",),
     "fx_battle_ground.schema.json": ("fx/battle_ground.json",),

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_battle_weather_fx.schema.json",
+  "title": "Effets de météo des batailles (client Bevy)",
+  "description": "Fichier data/fx/battle_weather_fx.json (lot batmo) : pluie et neige, brouillard volumétrique, fumées d'horizon. Purement visuel.",
+  "type": "object",
+  "required": ["precipitation", "volumetric", "horizon_smoke"],
+  "additionalProperties": false,
+  "$defs": {
+    "vec3": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
+    "vec2": { "type": "array", "items": { "type": "number", "minimum": 0 }, "minItems": 2, "maxItems": 2 },
+    "fall": {
+      "type": "object",
+      "required": ["count", "box_m", "ahead_m", "above_m", "velocity", "speed_jitter", "size_m", "color", "fade_m", "sway_m", "sway_hz"],
+      "additionalProperties": false,
+      "properties": {
+        "count": { "type": "integer", "minimum": 0, "maximum": 60000, "description": "Gouttes ou flocons (amount de GPUParticles3D)." },
+        "box_m": { "$ref": "#/$defs/vec3", "description": "Boîte (m) où les particules bouclent, autour de la caméra." },
+        "ahead_m": { "type": "number", "description": "Centre de la boîte devant la caméra (m)." },
+        "above_m": { "type": "number", "description": "Centre de la boîte au-dessus de la caméra (m)." },
+        "velocity": { "$ref": "#/$defs/vec3", "description": "Vitesse moyenne de chute (m/s)." },
+        "speed_jitter": { "type": "number", "minimum": 0, "maximum": 1 },
+        "size_m": { "$ref": "#/$defs/vec2", "description": "Largeur et longueur d'une goutte ou d'un flocon (m)." },
+        "color": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 4, "maxItems": 4, "description": "sRGB et opacité." },
+        "fade_m": { "$ref": "#/$defs/vec2", "description": "Effacement près de l'objectif : invisible avant la première distance, plein après la seconde." },
+        "sway_m": { "type": "number", "minimum": 0, "description": "Dérive latérale (turbulence de la neige)." },
+        "sway_hz": { "type": "number", "minimum": 0 }
+      }
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "precipitation": {
+      "type": "object",
+      "required": ["rain", "snow"],
+      "additionalProperties": false,
+      "properties": { "rain": { "$ref": "#/$defs/fall" }, "snow": { "$ref": "#/$defs/fall" } }
+    },
+    "volumetric": {
+      "type": "object",
+      "required": ["density", "anisotropy", "absorption", "scattering", "length_m", "height_m", "step_count", "ambient_intensity", "ground_mist"],
+      "additionalProperties": false,
+      "properties": {
+        "density": {
+          "type": "object",
+          "required": ["clear", "fog", "rain", "snow"],
+          "additionalProperties": false,
+          "properties": {
+            "clear": { "type": "number", "minimum": 0 }, "fog": { "type": "number", "minimum": 0 },
+            "rain": { "type": "number", "minimum": 0 }, "snow": { "type": "number", "minimum": 0 }
+          },
+          "description": "VOLUMETRIC_DENSITY de battle_atmosphere.gd (extinction par mètre)."
+        },
+        "anisotropy": {
+          "type": "object",
+          "required": ["clear", "other"],
+          "additionalProperties": false,
+          "properties": { "clear": { "type": "number", "minimum": -1, "maximum": 1 }, "other": { "type": "number", "minimum": -1, "maximum": 1 } }
+        },
+        "absorption": { "type": "number", "minimum": 0 },
+        "scattering": { "type": "number", "minimum": 0 },
+        "length_m": { "type": "number", "minimum": 10, "description": "Portée autour de la caméra (volumetric_fog_length)." },
+        "height_m": { "type": "number", "minimum": 1, "description": "Hauteur du voile au-dessus du sol moyen du champ." },
+        "step_count": { "type": "integer", "minimum": 8, "maximum": 256 },
+        "ambient_intensity": { "type": "number", "minimum": 0, "description": "Ambiance injectée (Bevy l'ajoute sans tenir compte de la densité : 0 conseillé)." },
+        "ground_mist": {
+          "type": "object",
+          "required": ["density", "height_m", "lift_m", "height_falloff", "edge_fade", "lighten"],
+          "additionalProperties": false,
+          "properties": {
+            "density": { "type": "number", "minimum": 0 },
+            "height_m": { "type": "number", "minimum": 0 },
+            "lift_m": { "type": "number" },
+            "height_falloff": { "type": "number", "minimum": 0 },
+            "edge_fade": { "type": "number", "minimum": 0, "maximum": 0.5 },
+            "lighten": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "horizon_smoke": {
+      "type": "object",
+      "required": ["size_m", "scatter_m", "base_lift_m", "opacity"],
+      "additionalProperties": false,
+      "properties": {
+        "size_m": { "$ref": "#/$defs/vec2" },
+        "scatter_m": { "type": "number", "minimum": 0 },
+        "base_lift_m": { "type": "number" },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

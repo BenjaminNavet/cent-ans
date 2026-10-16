@@ -6,14 +6,16 @@
 //! azimuth, colour and energy; the weather block (`battle.<weather>`) scales energy and elevation
 //! and tints the light. Fog density and colour per weather are the `PRESETS` of the GDScript.
 //! Fog, ambient and sky values come from `data/fx/battle_decor_look.json` (`look`); the sky dome
-//! itself is in `horizon`. Not ported: HDRI sky, LUT colour grading, SSAO, volumetric fog, rain and snow
-//! particles.
+//! itself is in `horizon`. The HDRI sky, sun disc, SSAO and LUT grading are in
+//! `battle/scene/lighting.rs`; rain and snow in `precipitation`, volumetric fog in `volumetric`,
+//! horizon smoke in `horizon_smoke` (plugins added here, data `battle_weather_fx.json`).
 
 use bevy::light::{DirectionalLightShadowMap, GlobalAmbientLight};
 use bevy::pbr::{DistanceFog, FogFalloff};
 use bevy::prelude::*;
 use sim_battle::Weather;
 
+use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::BattleCamera;
@@ -22,7 +24,17 @@ use crate::paths;
 use super::look::DecorLook;
 
 /// Lux per unit of Godot light energy (clear midday: 1.75 -> 14 000 lux, the previous value).
-const LUX_PER_ENERGY: f32 = 8000.0;
+pub const LUX_PER_ENERGY: f32 = 8000.0;
+
+/// Weather of a key of `AtmosphereState::weather` (`clear` when unknown).
+pub fn weather_from_key(key: &str) -> Weather {
+    match key {
+        "rain" => Weather::Rain,
+        "fog" => Weather::Fog,
+        "snow" => Weather::Snow,
+        _ => Weather::Clear,
+    }
+}
 
 fn weather_key(weather: Weather) -> &'static str {
     match weather {
@@ -113,6 +125,15 @@ pub struct AtmospherePlugin;
 
 impl Plugin for AtmospherePlugin {
     fn build(&self, app: &mut App) {
+        if let Some(fx) = super::weather_fx::WeatherFxLook::load() {
+            app.insert_resource(fx);
+        }
+        app.add_plugins((
+            super::precipitation::PrecipitationPlugin,
+            super::volumetric::VolumetricPlugin,
+            super::horizon_smoke::HorizonSmokePlugin,
+        ))
+        .register_dump(dump_weather);
         app.insert_resource(DirectionalLightShadowMap { size: 4096 })
             .add_systems(
                 Update,
@@ -223,12 +244,7 @@ fn fog_on_camera(
     horizon: Option<Res<super::horizon::HorizonStats>>,
     cameras: Query<Entity, (With<BattleCamera>, Without<DistanceFog>)>,
 ) {
-    let weather = match state.weather.as_str() {
-        "rain" => Weather::Rain,
-        "fog" => Weather::Fog,
-        "snow" => Weather::Snow,
-        _ => Weather::Clear,
-    };
+    let weather = weather_from_key(&state.weather);
     let fog = look.fog_of(weather);
     let density = if horizon.is_some_and(|h| h.active) {
         fog.horizon_density
@@ -278,6 +294,48 @@ fn follow_day(
         apply_sun(&mut state, sun, &mut light, &mut transform);
     }
     commands.insert_resource(ambient_for(&look, weather, sun.elevation_deg));
+}
+
+/// Dump section `battle_weather`: precipitation, volumetric fog, horizon smoke.
+fn dump_weather(world: &World) -> (String, serde_json::Value) {
+    let rain = world.get_resource::<super::precipitation::PrecipitationStats>();
+    let vol = world.get_resource::<super::volumetric::VolumetricStats>();
+    let smoke = world.get_resource::<super::horizon_smoke::HorizonSmokeStats>();
+    let mut fog_cameras = 0;
+    let mut volumetric_suns = 0;
+    let mut fog_volumes = 0;
+    let mut precipitation_entities = 0;
+    for entity in world.iter_entities() {
+        fog_cameras += usize::from(
+            entity.contains::<BattleCamera>() && entity.contains::<bevy::light::VolumetricFog>(),
+        );
+        volumetric_suns += usize::from(
+            entity.contains::<BattleSun>() && entity.contains::<bevy::light::VolumetricLight>(),
+        );
+        fog_volumes += usize::from(entity.contains::<bevy::light::FogVolume>());
+        precipitation_entities +=
+            usize::from(entity.contains::<super::precipitation::Precipitation>());
+    }
+    (
+        "battle_weather".to_owned(),
+        serde_json::json!({
+            "data_loaded": world.contains_resource::<super::weather_fx::WeatherFxLook>(),
+            "weather": world.get_resource::<AtmosphereState>().map(|a| a.weather.clone()),
+            "precipitation": rain.map(|r| serde_json::json!({
+                "kind": r.kind, "drops": r.drops, "centre": r.centre,
+                "entities": precipitation_entities,
+            })),
+            "volumetric": vol.map(|v| serde_json::json!({
+                "mode": v.mode, "enabled": v.enabled, "density": v.density,
+                "anisotropy": v.anisotropy, "volumes": v.volumes, "ground_mist": v.ground_mist,
+                "cameras_with_fog": fog_cameras, "volumetric_suns": volumetric_suns,
+                "fog_volume_entities": fog_volumes,
+            })),
+            "horizon_smoke": smoke.map(|s| serde_json::json!({
+                "columns": s.columns, "distances_m": s.distances, "light_tint": s.light_tint,
+            })),
+        }),
+    )
 }
 
 #[cfg(test)]

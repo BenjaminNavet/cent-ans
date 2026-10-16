@@ -1,0 +1,48 @@
+{
+  "description": "Effets de météo des batailles du client Bevy (lot batmo) : pluie et neige autour de la caméra, brouillard volumétrique, fumées des villages de l'horizon. Port de game/scripts/battle/battle_atmosphere.gd (_add_precipitation, _setup_volumetric_fog, add_ground_mist) et de game/shaders/battle_horizon_smoke.gdshader. Lu par client/src/battle/decor/{precipitation,volumetric,horizon_smoke}.rs. Aucune règle de jeu.",
+  "precipitation": {
+    "rain": {
+      "count": 9000,
+      "box_m": [140.0, 60.0, 140.0],
+      "ahead_m": 45.0,
+      "above_m": 30.0,
+      "velocity": [4.5, -30.0, 1.5],
+      "speed_jitter": 0.1,
+      "size_m": [0.012, 0.7],
+      "color": [0.75, 0.8, 0.88, 0.16],
+      "fade_m": [4.0, 14.0],
+      "sway_m": 0.0,
+      "sway_hz": 0.0
+    },
+    "snow": {
+      "count": 7000,
+      "box_m": [140.0, 40.0, 140.0],
+      "ahead_m": 45.0,
+      "above_m": 30.0,
+      "velocity": [0.9, -3.4, 0.4],
+      "speed_jitter": 0.3,
+      "size_m": [0.08, 0.08],
+      "color": [1.0, 1.0, 1.0, 0.85],
+      "fade_m": [2.5, 8.0],
+      "sway_m": 1.2,
+      "sway_hz": 0.18
+    }
+  },
+  "volumetric": {
+    "density": {"clear": 0.0012, "fog": 0.0026, "rain": 0.0035, "snow": 0.0022},
+    "anisotropy": {"clear": 0.6, "other": 0.25},
+    "absorption": 0.05,
+    "scattering": 0.95,
+    "length_m": 320.0,
+    "height_m": 140.0,
+    "step_count": 64,
+    "ambient_intensity": 0.0,
+    "ground_mist": {"density": 0.01, "height_m": 12.0, "lift_m": 1.0, "height_falloff": 0.35, "edge_fade": 0.3, "lighten": 0.1}
+  },
+  "horizon_smoke": {
+    "size_m": [70.0, 420.0],
+    "scatter_m": 40.0,
+    "base_lift_m": 5.0,
+    "opacity": 0.55
+  }
+}
