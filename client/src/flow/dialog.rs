@@ -22,6 +22,8 @@ use crate::battle::scene::setup::side_color;
 use crate::paths;
 use crate::ui::art_plates::ArtPlates;
 use crate::ui::kit::style::{self, UiTier, UiType};
+use crate::ui::kit::tooltip::Tooltip;
+use crate::ui::kit::tooltip_spec::TooltipTexts;
 use crate::ui::kit::widgets::{button_primary, button_small, caption, panel_sized, separator};
 use crate::ui::kit::{UiTheme, fr, typed};
 use data_model::GameData;
@@ -633,6 +635,24 @@ pub fn spawn(
         });
 }
 
+/// Highest command level (`max_skill_level`, the stars row).
+const MAX_COMMAND: u8 = 10;
+
+/// Bubble of the command stars (`leader_command_level`: title of `tooltips.json`, then
+/// "level / max").
+fn command_tip(level: u8, max: u8) -> String {
+    let title = TooltipTexts::load()
+        .ok()
+        .and_then(|texts| {
+            texts
+                .entry("plain", "leader_command_level")
+                .map(|entry| entry.title.clone())
+        })
+        .filter(|title| !title.is_empty())
+        .unwrap_or_else(|| "Commandement".to_owned());
+    format!("[b]{title}[/b]\n{level} / {max}")
+}
+
 /// General of a side: medallion (portrait, else arms), name and command stars
 /// (Godot `_general_row`); the player's medallion is on the left, the enemy's on the right.
 fn general_row(
@@ -678,11 +698,14 @@ fn general_row(
                             theme,
                             &format!(
                                 "{}{}",
-                                "★".repeat(usize::from(g.command.min(10))),
-                                "☆".repeat(usize::from(10 - g.command.min(10)))
+                                "★".repeat(usize::from(g.command.min(MAX_COMMAND))),
+                                "☆".repeat(usize::from(MAX_COMMAND - g.command.min(MAX_COMMAND)))
                             ),
                         ))
-                        .insert(TextColor(style::GOLD));
+                        .insert((
+                            TextColor(style::GOLD),
+                            Tooltip::new(&command_tip(g.command, MAX_COMMAND)),
+                        ));
                 }
                 None => {
                     texts.spawn(typed(theme, "Sans chef", UiType::Heading));
@@ -822,6 +845,17 @@ mod banner_tests {
         assert_eq!(banner_image(&plates, "battle", 3).1, "events/evt_crecy.jpg");
         assert_eq!(banner_image(&plates, "siege", 3).1, "events/evt_sluys.jpg");
         assert_eq!(banner_image(&plates, "naval", 0).1, "events/evt_sluys.jpg");
+    }
+}
+
+#[cfg(test)]
+mod command_tip_tests {
+    use super::*;
+
+    #[test]
+    fn stars_bubble_gives_level_over_max() {
+        assert_eq!(command_tip(3, 10), "[b]Commandement[/b]\n3 / 10");
+        assert_eq!(command_tip(0, MAX_COMMAND), "[b]Commandement[/b]\n0 / 10");
     }
 }
 
