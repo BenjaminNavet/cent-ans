@@ -87,7 +87,42 @@ pub struct Ford {
     pub puffs: usize,
     pub bursts: usize,
     pub wet_regiments: usize,
+    /// Most wet regiments at once, and moving regiments within range (for the dump).
+    pub peak_wet: usize,
+    pub moving_near: usize,
     pub widest_span_m: f32,
+}
+
+/// Dev hook (proofs): `CENT_ANS_FORD_DEMO=1` sends every regiment to the middle of the river, once,
+/// a few seconds into the battle, so that the splashes can be dumped without playing.
+fn ford_demo(session: &mut BattleSession, issued: &mut bool) {
+    if *issued || std::env::var_os("CENT_ANS_FORD_DEMO").is_none() {
+        return;
+    }
+    let sim = session.sim_mut();
+    let Some(river) = sim.field().river.clone() else {
+        return;
+    };
+    let units: Vec<(u32, f64)> = sim
+        .units()
+        .iter()
+        .filter(|u| u.present())
+        .map(|u| (u.id, u.x))
+        .collect();
+    *issued = true;
+    for (id, x) in units {
+        let _ = sim.issue_command(sim_battle::Command::Move {
+            units: vec![id],
+            x,
+            z: river.center_z(x),
+            run: true,
+            facing: None,
+            queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
+        });
+    }
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -99,7 +134,9 @@ fn update_ford(
     looks: Option<ResMut<FlipbookLooks>>,
     mut materials: ResMut<Assets<FlipbookMaterial>>,
     camera: Query<&GlobalTransform, With<BattleCamera>>,
+    mut demo_issued: Local<bool>,
 ) {
+    ford_demo(&mut session, &mut demo_issued);
     let Some(mut looks) = looks else { return };
     let dt = if session.paused {
         0.0
@@ -114,6 +151,7 @@ fn update_ford(
     let field = sim.field().clone();
     let mut wet: Vec<Wet> = Vec::new();
     let mut seen: HashMap<u32, bool> = HashMap::new();
+    let mut moving_near = 0;
     for unit in sim.units() {
         seen.insert(unit.id, false);
         if !unit.present()
@@ -130,6 +168,7 @@ fn update_ford(
         if distance >= EFFECT_DISTANCE {
             continue;
         }
+        moving_near += 1;
         let facing = unit.facing as f32;
         let forward = Vec3::new(facing.sin(), 0.0, facing.cos());
         let (width, depth) = unit.extent();
@@ -165,6 +204,8 @@ fn update_ford(
     ford.was_wet = seen;
     wet.sort_by(|a, b| b.score.total_cmp(&a.score));
     ford.wet_regiments = wet.len();
+    ford.peak_wet = ford.peak_wet.max(wet.len());
+    ford.moving_near = moving_near;
     ford.splashing = wet.len().min(SPLASH_EMITTERS);
     ford.widest_span_m = wet
         .iter()
@@ -316,7 +357,7 @@ fn dump_ford(world: &World) -> (String, serde_json::Value) {
     (
         "battle_ford_fx".into(),
         serde_json::json!({
-            "wet_regiments": f.wet_regiments, "splashing": f.splashing, "wakes": f.wakes,
+            "wet_regiments": f.wet_regiments, "peak_wet": f.peak_wet, "moving_near": f.moving_near, "splashing": f.splashing, "wakes": f.wakes,
             "puffs": f.puffs, "entry_bursts": f.bursts, "widest_span_m": f.widest_span_m,
         }),
     )
@@ -360,5 +401,32 @@ mod tests {
     fn a_regiment_wholly_in_the_water_is_wet_all_along() {
         let (lo, hi) = wet_span(10.0, |_| true).unwrap();
         assert_eq!((lo, hi), (-6.0, 6.0));
+    }
+}
+
+#[cfg(test)]
+mod field_tests {
+    use super::*;
+    use data_model::Terrain;
+    use sim_battle::{BattleRng, Battlefield, Weather};
+
+    #[test]
+    fn the_core_water_query_wets_a_regiment_standing_in_the_river() {
+        let mut rng = BattleRng::from_seed(7);
+        let field = Battlefield::generate(Terrain::Plains, true, Weather::Clear, &mut rng);
+        let river = field.river.clone().expect("a river");
+        let x = field.width * 0.37;
+        let z = river.center_z(x);
+        let in_water = |dz: f32| field.water_at(x, z + f64::from(dz)).is_some();
+        // A regiment 12 m deep facing +z, its centre in the middle of the river.
+        let span = wet_span(12.0, in_water).expect("wet");
+        assert!(span.1 > span.0, "{span:?}");
+        // Far from the river bank: dry.
+        assert_eq!(
+            wet_span(12.0, |dz| field
+                .water_at(x, z + 300.0 + f64::from(dz))
+                .is_some()),
+            None
+        );
     }
 }

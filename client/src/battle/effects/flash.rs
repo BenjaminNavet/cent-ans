@@ -85,7 +85,7 @@ fn spawn_light(mut commands: Commands, mut state: ResMut<FlashState>) {
 #[allow(clippy::too_many_arguments)]
 fn update_flash(
     mut commands: Commands,
-    session: Res<BattleSession>,
+    mut session: ResMut<BattleSession>,
     time: Res<Time>,
     look: Option<Res<LightingLook>>,
     mut volleys: ResMut<Volleys>,
@@ -93,7 +93,22 @@ fn update_flash(
     mut state: ResMut<FlashState>,
     looks: Option<ResMut<FlipbookLooks>>,
     mut light: Query<(&mut PointLight, &mut Transform, &mut Visibility), With<FlashLight>>,
+    mut demo_frames: Local<u32>,
 ) {
+    // Dev hook (proofs): `CENT_ANS_FLASH_DEMO=1` fires a flash from the first regiment every
+    // 100 frames, for battles without a bombard to dump.
+    if std::env::var_os("CENT_ANS_FLASH_DEMO").is_some() {
+        *demo_frames += 1;
+        if (*demo_frames).is_multiple_of(100) {
+            let sim = session.sim_mut();
+            if let Some(unit) = sim.units().iter().find(|u| u.present()) {
+                let y = sim.field().height(unit.x, unit.z) as f32 + 0.85;
+                siege
+                    .0
+                    .push((Vec3::new(unit.x as f32, y, unit.z as f32), Vec3::Z));
+            }
+        }
+    }
     let dt = if session.paused {
         0.0
     } else {

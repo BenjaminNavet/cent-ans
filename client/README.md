@@ -496,3 +496,6 @@ Port de `battle_effects.gd` (poussière), `siege_assault_fx.gd` (projectiles de 
 - **Onglets de l'encyclopédie** : icône 18 px devant chaque catégorie des règles (`encyclopedia::tab_icon`, mêmes icônes que `encyclopedia.gd`). Dump `codex.tab_icons`.
 - **Chronique** : `ChronicleLog::record_with(&journal, Some(&store))` passe les lignes par `codex::text::format_auto` (alias auto-liés, `[[id|libellé]]`) ; sans fiches, texte échappé comme avant.
 - Non porté : roches et arbres de bataille pour la bulle du décor, fil d'Ariane / réduction des ancêtres, parenté entre bulles épinglées, fiche Codex d'une règle `ib:rule:*` au clic, état « lu » des liens `ib:`.
+
+## Effets de bataille (bfx2)
+`battle/effects/` : `trail` (ruban des flèches, dump `battle_arrow_trails`), `ford` (éclaboussures, sillages, gerbe d'entrée ; dump `battle_ford_fx`, `CENT_ANS_BATTLE_FIELD=river` pour une rivière), `flash` (éclair de bombarde ; dump `battle_bombard_flash`), `siege_lights` (lumières des feux de siège ; dump `siege_fire_lights`). Détails : `docs/wip/bm-bfx.md`.
