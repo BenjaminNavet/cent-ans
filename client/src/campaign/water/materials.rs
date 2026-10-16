@@ -415,7 +415,11 @@ impl RiverParams {
             bank_ink_px: display.bank_ink_px,
             edge_soft_px: display.edge_soft_px,
             sky_reflect: display.sky_reflect,
-            lift_base: 0.012,
+            lift_base: 0.012
+                + std::env::var("CENT_ANS_RIVER_LIFT_DEBUG")
+                    .ok()
+                    .and_then(|v| v.parse::<f32>().ok())
+                    .unwrap_or(0.0),
             lift_per_distance: 0.0009,
             flow_speed: 0.35,
             ripple_scale: 3.2,

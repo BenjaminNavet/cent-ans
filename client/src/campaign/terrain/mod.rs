@@ -648,6 +648,35 @@ fn dump_terrain(world: &World) -> (String, Value) {
             "center_display": sampler.display_height(4096.0, 3072.0),
         });
     }
+    // Dev probe `CENT_ANS_SEAT_PROBE=x,z`: finest resident page vs world heightmap around (x, z).
+    if let (Ok(spec), Some(surface)) = (
+        std::env::var("CENT_ANS_SEAT_PROBE"),
+        world.get_resource::<surface::Surface>(),
+    ) {
+        let v: Vec<f32> = spec
+            .split(',')
+            .filter_map(|p| p.trim().parse().ok())
+            .collect();
+        if let [x0, z0] = v[..] {
+            let (mut n, mut sum, mut lo, mut hi, mut missing) = (0, 0.0_f32, f32::MAX, f32::MIN, 0);
+            for i in -40..=40 {
+                for j in -40..=40 {
+                    let (x, z) = (x0 + i as f32 * 0.5, z0 + j as f32 * 0.5);
+                    match surface.finest_page_height_m(x, z) {
+                        Some(page) => {
+                            let d = page - surface.heights.height_m_at(x, z);
+                            n += 1;
+                            sum += d;
+                            lo = lo.min(d);
+                            hi = hi.max(d);
+                        }
+                        None => missing += 1,
+                    }
+                }
+            }
+            value["seat_probe"] = json!({"n": n, "missing": missing, "mean_page_minus_map_m": sum / n.max(1) as f32, "min": lo, "max": hi, "pages": surface.page_count()});
+        }
+    }
     if let Some(gpu) = world.get_resource::<relief_gpu::ReliefGpu>() {
         value["relief_gpu"] = json!({
             "scale": gpu.params.scale.to_array(),
