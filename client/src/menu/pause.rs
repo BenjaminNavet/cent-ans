@@ -114,6 +114,7 @@ fn spawn_pause(commands: &mut Commands, theme: &UiTheme, sim: &Sim) {
         ("pause:resume", "Reprendre"),
         ("pause:save", "Sauvegarder…"),
         ("pause:load", "Charger…"),
+        ("pause:history", "Batailles jouées…"),
         ("pause:settings", "Réglages…"),
         ("pause:main_menu", "Menu principal"),
         ("pause:quit", "Quitter le jeu"),
@@ -186,6 +187,7 @@ fn pause_buttons(
     mut exit: MessageWriter<AppExit>,
     mut settings: MessageWriter<OpenSettings>,
     mut dialogs: MessageWriter<OpenSaveDialog>,
+    mut played: MessageWriter<crate::flow::history::OpenPlayedBattles>,
 ) {
     for press in pressed.read() {
         let leave = |kind_quit: bool,
@@ -216,6 +218,9 @@ fn pause_buttons(
                 dialogs.write(OpenSaveDialog {
                     mode: SaveMode::Load,
                 });
+            }
+            "pause:history" => {
+                played.write(crate::flow::history::OpenPlayedBattles);
             }
             "pause:settings" => {
                 settings.write(OpenSettings);
@@ -255,13 +260,13 @@ fn pause_buttons(
 /// lot rebuilds from `Sim::state`.
 fn after_load(
     mut loaded: MessageReader<GameLoaded>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<crate::ui::fader::FadeToState>,
     mut paused: ResMut<GamePaused>,
     mut time: ResMut<Time<Virtual>>,
 ) {
     if loaded.read().last().is_some() {
         paused.0 = false;
         time.unpause();
-        next.set(AppState::Campaign);
+        next.write(crate::ui::fader::FadeToState(AppState::Campaign));
     }
 }

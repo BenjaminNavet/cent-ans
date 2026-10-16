@@ -192,7 +192,7 @@ fn start_battle(
     historical: Option<Res<crate::menu::battles::PendingHistorical>>,
     replay_request: Option<Res<replay::PendingReplay>>,
     mut extras: ResMut<ResultExtras>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<crate::ui::fader::FadeToState>,
 ) {
     let Some(game) = sim.data.as_deref() else {
         error!("battle: game data not loaded");
@@ -216,7 +216,7 @@ fn start_battle(
             Err(message) => {
                 error!("battle: replay: {message}");
                 commands.insert_resource(replay_bar::ReplayFailure(message));
-                next.set(AppState::MainMenu);
+                next.write(crate::ui::fader::FadeToState(AppState::MainMenu));
             }
         }
         return;

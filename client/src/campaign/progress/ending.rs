@@ -204,7 +204,7 @@ fn handle_buttons(
     mut commands: Commands,
     mut screen: ResMut<EndScreen>,
     mut sim: ResMut<Sim>,
-    mut next: ResMut<NextState<AppState>>,
+    mut next: MessageWriter<crate::ui::fader::FadeToState>,
 ) {
     for press in pressed.read() {
         match press.name.as_str() {
@@ -219,7 +219,7 @@ fn handle_buttons(
                     commands.entity(root).despawn();
                 }
                 sim.state = None;
-                next.set(AppState::MainMenu);
+                next.write(crate::ui::fader::FadeToState(AppState::MainMenu));
             }
             _ => {}
         }
