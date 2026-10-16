@@ -224,17 +224,15 @@ impl AbilityState {
         if (1..=MAX_SLOTS).contains(&slot) {
             title += &format!(" (Alt+{slot})");
         }
-        let mut timing = format!("Recharge : {} s", self.cooldown.round() as i64);
+        let number = |value: f64| crate::codex::rules::number(value, None);
+        let mut timing = format!("Recharge : {} s", number(self.cooldown));
         if self.duration > 0.0 {
-            timing += &format!(" · durée : {} s", self.duration.round() as i64);
+            timing += &format!(" · durée : {} s", number(self.duration));
         } else {
             timing += " · tant que l’unité s’y tient";
         }
         if self.setup_time > 0.0 {
-            timing += &format!(
-                " · mise en place : {} s",
-                crate::codex::rules::number(self.setup_time, None)
-            );
+            timing += &format!(" · mise en place : {} s", number(self.setup_time));
         }
         let mut lines = vec![title, self.description.clone(), timing];
         if !self.effects.is_empty() {

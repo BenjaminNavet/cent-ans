@@ -385,14 +385,30 @@ fn speed_keys(
     if keymap.just_pressed("battle_pause", &keys) {
         session.paused = !session.paused;
     }
-    if keymap.just_pressed("battle_speed_up", &keys) {
+    // In a replay the + / - keys step through the speeds of the replay bar (x1..x8), as the
+    // buttons of the bar do (`_on_speed_step` of Godot).
+    let steps = [("battle_speed_up", 1), ("battle_speed_down", -1)];
+    for (action, delta) in steps {
+        if !keymap.just_pressed(action, &keys) {
+            continue;
+        }
         session.paused = false;
-        session.speed = step_speed(session.speed, 1);
+        session.speed = if session.replaying {
+            step_replay_speed(session.speed, delta)
+        } else {
+            step_speed(session.speed, delta)
+        };
     }
-    if keymap.just_pressed("battle_speed_down", &keys) {
-        session.paused = false;
-        session.speed = step_speed(session.speed, -1);
-    }
+}
+
+/// Next speed of the replay bar after `delta` steps (clamped).
+pub fn step_replay_speed(speed: f64, delta: i32) -> f64 {
+    use crate::battle::scene::replay_bar::SPEEDS as REPLAY;
+    let current = REPLAY
+        .iter()
+        .position(|s| (s - speed).abs() < 1e-9)
+        .unwrap_or(0) as i32;
+    REPLAY[(current + delta).clamp(0, REPLAY.len() as i32 - 1) as usize]
 }
 
 fn quit_flow(mut results: MessageReader<ModalResult>, mut leave: MessageWriter<LeaveBattle>) {
@@ -460,6 +476,14 @@ pub fn dump(world: &World) -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn replay_keys_step_through_the_bar_speeds() {
+        assert_eq!(step_replay_speed(1.0, 1), 2.0);
+        assert_eq!(step_replay_speed(8.0, 1), 8.0);
+        assert_eq!(step_replay_speed(1.0, -1), 1.0);
+        assert_eq!(step_replay_speed(4.0, -1), 2.0);
+    }
 
     #[test]
     fn clock_and_time_left() {

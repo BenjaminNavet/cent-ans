@@ -86,11 +86,8 @@ pub fn draw_route(
     points: &[Vec2],
     tint: Color,
 ) {
-    let mut line: Vec<Vec3> = Vec::new();
-    for pair in points.windows(2) {
-        line.extend(ground_line(field, pair[0], pair[1], LIFT));
-    }
-    gizmos.linestrip(line, tint);
+    // Dashes (3 m, gap 2 m) continuing from one segment to the next, as the Godot ribbons.
+    super::overlay::dashed_line(gizmos, field, points, 3.0, 2.0, LIFT, tint);
     if let [.., before, last] = points {
         arrow_head(gizmos, field, *before, *last, tint);
     }
