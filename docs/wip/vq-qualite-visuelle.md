@@ -1,0 +1,26 @@
+# VQ — qualité visuelle sans passer sous 40 i/s (17/10)
+
+Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer sous 40 fps » ; plan accepté puis « tu es en autonomie, feu vert pour tout ». Pas de push (règle Bevy), pas de dépense cloud prévue. Seuil : ADR 0404 (p95 ≤ 25 ms, A/B alterné par lot).
+
+## Reprise
+- Intégration : branche `vq/integ`, worktree `../gp-vq-integ` (depuis main 9395b327a). Lots : `vq/<lot>`, worktrees `../gp-vq-<lot>` depuis `vq/integ`.
+- Fusion : agent Opus de fusion par fournée (`cargo test --features dev` dans `client/`, smoke), puis `vq/integ` → main en `--ff-only` depuis un worktree, jamais de conflit dans le checkout principal.
+- Session voisine : chantier BL (`game-project-eb`, `docs/wip/bl-backlog.md` sur `bl/integ`) ; ne pas toucher à ses items : I009 (ombres imposteurs, bunits), I188/I006/I013 (sol/herbe de bataille, bdecor), forêts de campagne I096/I163/I088 (campveg), villes I168/I170 (towns). Une autre session fait `bm/degodot` : ne pas toucher `game/`.
+- ADR réservés : 0404 (seuil), 0405-0409 (lots).
+
+## État de départ (captures after5 du 16/10 22 h, Bevy seul)
+- Bataille : soldats ombrés (ombres présentes), mais lumière plate, voile laiteux, contraste faible, herbe monotone, nuée de plaques.
+- Campagne d=25-60 : villes et maquettes bonnes ; sol vert foncé uniforme sans parcelles ni matières ; rivières cyan plates sans berges ; forêts clairsemées (BL campveg).
+
+## Lots
+
+| Lot | Modèle | Vague | Objet | État |
+|---|---|---|---|---|
+| bench | sonnet | 1 | banc bataille `--bench-battle` (calme + mêlée), script A/B alterné | lancé |
+| cperf | opus | 1 | campagne : `fade_maquettes`/VisibilityRange 3,8 ms, rafale de spawns en descente, marge p95 | lancé |
+| blight | opus | 1 | bataille : lumière, contraste, voile, perspective aérienne, mise à l'échelle 3D si marge | lancé |
+| rivers | opus | 1 | campagne : rivières réalistes (couleur, berges, reflets, lisibles à toute distance) | lancé |
+| cground | opus | 1 | campagne : sol de près (parcelles, matières, colormap, variation) | lancé |
+
+## Journal
+- 17/10 0 h 45 : état de départ, ADR 0404, vague 1 (5 lots).
