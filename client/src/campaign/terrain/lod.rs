@@ -59,6 +59,17 @@ pub struct TerrainLod {
 }
 
 impl TerrainLod {
+    /// Displayed patches: the spec of each built node mesh, with the page it was built on.
+    pub fn built_specs(&self) -> impl Iterator<Item = NodeSpec> + '_ {
+        self.nodes
+            .values()
+            .filter(|n| n.built_fine != i64::MIN)
+            .map(|n| NodeSpec {
+                fine: n.built_fine,
+                ..n.spec
+            })
+    }
+
     pub fn new(
         pyramid: &ReliefPyramid,
         heights: &HeightGrid,

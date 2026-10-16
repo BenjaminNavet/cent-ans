@@ -96,6 +96,23 @@ fn push_quads(indices: &mut Vec<u32>, base: u32, count: usize) {
     }
 }
 
+/// Steepest bound of the bank slope: world units per map px (the displayed relief is steep: a
+/// river 4 px wide at close range is ~0.3 px wide on the map and its edges climb ~0.15 units).
+const MAX_BANK_SLOPE: f32 = 2.0;
+
+/// Rise of the displayed ground (world units per map px) from the centre line towards `side`,
+/// never negative. Stored in `normal.y`: the screen-width shaders push each edge by
+/// `normal * half_width`, so the edge climbs the bank instead of passing under it (a river a few
+/// pixels wide at close range spans the valley sides, showfix 16/10).
+pub fn bank_slope(ground: &dyn HeightSampler, x: f32, z: f32, side: Vec2) -> f32 {
+    let centre = ground.surface_world(x, z);
+    [0.25_f32, 0.5, 1.0, 2.0]
+        .into_iter()
+        .map(|d| (ground.surface_world(x + side.x * d, z + side.y * d) - centre) / d)
+        .fold(0.0_f32, f32::max)
+        .min(MAX_BANK_SLOPE)
+}
+
 /// Centre-line ribbons for the screen-width vertex shaders. `position.y` is the ground altitude in
 /// METRES (>= 0): the vertex shader drapes it on the relief (`drape.rs`) and adds the lift.
 pub fn screen_ribbon(lines: &[RibbonLine], ground: &dyn HeightSampler) -> RibbonBuffers {
@@ -129,7 +146,8 @@ pub fn screen_ribbon_dense(
             let width = widths.get(i).copied().unwrap_or(0.0);
             for side in [1.0_f32, -1.0] {
                 out.positions.push([p.x, y, p.y]);
-                out.normals.push([n.x * side, 0.0, n.y * side]);
+                let rise = bank_slope(ground, p.x, p.y, n * side);
+                out.normals.push([n.x * side, rise, n.y * side]);
                 out.uvs.push([width, side]);
                 out.uvs2.push([along, line.importance]);
             }

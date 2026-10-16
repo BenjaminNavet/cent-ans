@@ -16,21 +16,13 @@ pub trait Drape: Asset {
     fn relief(&self) -> (ReliefParams, &Handle<Image>);
 }
 
-/// Copies [`ReliefGpu`] into the materials of type `M` when it changed or when materials were
-/// added since the last run.
-pub fn sync_drape<M: Drape>(
-    gpu: Option<Res<ReliefGpu>>,
-    mut materials: ResMut<Assets<M>>,
-    mut known: Local<usize>,
-) {
+/// Copies [`ReliefGpu`] into the materials of type `M` whose copy is stale. Checked every frame:
+/// a material replaced in place (same asset count, `ReliefGpu` unchanged) kept the default zero
+/// uniform, which drew every river and road at sea level, buried under the land (showfix, 16/10).
+pub fn sync_drape<M: Drape>(gpu: Option<Res<ReliefGpu>>, mut materials: ResMut<Assets<M>>) {
     let Some(gpu) = gpu else {
         return;
     };
-    let count = materials.len();
-    if !gpu.is_changed() && count == *known {
-        return;
-    }
-    *known = count;
     let ids: Vec<AssetId<M>> = materials.ids().collect();
     for id in ids {
         let stale = materials.get(id).is_some_and(|m| {

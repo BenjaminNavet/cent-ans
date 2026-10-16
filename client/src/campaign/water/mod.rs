@@ -62,7 +62,7 @@ const MAJOR_IMPORTANCE: i64 = 3;
 /// Sample step (map px) of the dirt-road ribbons; the ground is smooth enough at this step.
 const RIBBON_STEP: f32 = 1.0;
 /// Sample step (map px) of the river ribbons (see `ribbon::screen_ribbon_dense`).
-const RIVER_STEP: f32 = 0.5;
+const RIVER_STEP: f32 = 2.0;
 const RIBBON_MAIN_WIDTH: f32 = 0.55;
 const RIBBON_WIDTH: f32 = 0.38;
 const MAIN_ROAD_WIDTH: f32 = 0.5;
@@ -846,7 +846,8 @@ fn dump_water(world: &World) -> (String, Value) {
             "entities": per_part,
             "reseat": world.get_resource::<reseat::ReseatStats>().map(|r| json!({
                 "runs": r.runs, "meshes_updated": r.meshes_updated, "vertices_moved": r.vertices_moved,
-                "last_max_shift_m": r.last_max_shift_m, "last_ms": r.last_ms})),
+                "last_max_shift_m": r.last_max_shift_m, "last_ms": r.last_ms,
+                "patches": r.patches, "orphan_patches": r.orphan_patches})),
             "view": {"medium": view.medium, "near": view.near,
                      "strategic_weight": view.strategic_weight, "camera_distance": view.camera_distance},
             "sea": {"vertices": stats.sea_vertices, "extent": [stats.sea_extent.x, stats.sea_extent.y],
@@ -963,6 +964,7 @@ fn river_bands(world: &World) -> Value {
                 .collect();
             json!({"minor": p.distance_fade.y > 0.0, "min_px": p.min_px, "gen_width_scale": p.gen_width_scale,
                    "gen_width_ref": p.gen_width_ref, "distance_fade": [p.distance_fade.x, p.distance_fade.y],
+                   "relief_scale": m.relief.scale.to_array(), "relief_info": m.relief.info.to_array(),
                    "bands": bands})
         })
         .collect();

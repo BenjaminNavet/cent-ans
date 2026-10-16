@@ -387,6 +387,7 @@ pub fn key_code(name: &str) -> Option<KeyCode> {
 fn hide_named(
     mut commands: Commands,
     named: Query<(Entity, &Name, Has<Mesh3d>), Without<HiddenByAgent>>,
+    unnamed: Query<Entity, (With<Mesh3d>, Without<Name>, Without<HiddenByAgent>)>,
     mut hidden: Query<&mut Visibility, With<HiddenByAgent>>,
     mut listed: Local<u32>,
 ) {
@@ -436,6 +437,13 @@ fn hide_named(
     for mut visibility in &mut hidden {
         if *visibility != Visibility::Hidden {
             *visibility = Visibility::Hidden;
+        }
+    }
+    if parts.contains(&"#unnamed") {
+        for entity in &unnamed {
+            commands
+                .entity(entity)
+                .try_insert((Visibility::Hidden, HiddenByAgent));
         }
     }
     for (entity, name, _) in &named {
