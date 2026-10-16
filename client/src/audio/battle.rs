@@ -103,11 +103,20 @@ enum Item {
 
 /// Spatial sound with distance fade, refreshed every frame.
 #[derive(Component)]
-struct Spatial3d {
+pub(super) struct Spatial3d {
     gain: f32,
     unit_size: f32,
     max_distance: f32,
     channel: Channel,
+    /// Routed through the far bus (low-pass, reverb, `dry` gain): only `Bataille` events
+    /// started beyond `near_distance_m`, like `battle_audio.gd` (decided once, at the start).
+    far: bool,
+}
+
+impl Spatial3d {
+    pub(super) fn channel(&self) -> Channel {
+        self.channel
+    }
 }
 
 /// Looping spatial bed (`beds`) or melee front emitter.
@@ -116,7 +125,7 @@ struct BedSound;
 
 /// 2D loop of the battle weather (`ambience`).
 #[derive(Component)]
-struct BattleAmbience {
+pub(super) struct BattleAmbience {
     db: f32,
     target_db: f32,
 }
@@ -799,7 +808,7 @@ fn drive_bed(
             let entity = commands
                 .spawn((
                     Name::new(format!("Bed {bed_name}")),
-                    AudioPlayer(asset_server.load::<FarSource>(path)),
+                    AudioPlayer::new(asset_server.load::<AudioSource>(path)),
                     PlaybackSettings::LOOP
                         .with_volume(Volume::Linear(volume))
                         .with_spatial(true)
@@ -810,6 +819,7 @@ fn drive_bed(
                         unit_size,
                         max_distance,
                         channel: Channel::Sfx,
+                        far: false,
                     },
                     BedSound,
                     DespawnOnExit(AppState::Battle),
@@ -1027,6 +1037,7 @@ fn play_clip(
                 unit_size: clip.unit_size,
                 max_distance: clip.max_distance,
                 channel: Channel::Voice,
+                far: false,
             },
             DespawnOnExit(AppState::Battle),
         ))
@@ -1137,26 +1148,31 @@ fn handle_sfx_at(
             let volume = director.channel_volume(&settings, channel)
                 * gain
                 * attenuation(distance, entry.unit_size_m, entry.max_distance_m);
-            let entity = commands
-                .spawn((
-                    Name::new(format!("Sfx {name}")),
-                    AudioPlayer(asset_server.load::<FarSource>(path)),
-                    PlaybackSettings::DESPAWN
-                        .with_volume(Volume::Linear(volume))
-                        .with_speed(pitch)
-                        .with_spatial(true)
-                        .with_spatial_scale(SpatialScale::new(SPATIAL_SCALE)),
-                    Transform::from_translation(request.position),
-                    Spatial3d {
-                        gain,
-                        unit_size: entry.unit_size_m,
-                        max_distance: entry.max_distance_m,
-                        channel,
-                    },
-                    SfxVoice { gain, channel },
-                    DespawnOnExit(AppState::Battle),
-                ))
-                .id();
+            let far = routes_to_far_bus(&entry.bus, distance, audio.detector.tuning.near_distance);
+            let mut sound = commands.spawn((
+                Name::new(format!("Sfx {name}")),
+                PlaybackSettings::DESPAWN
+                    .with_volume(Volume::Linear(volume))
+                    .with_speed(pitch)
+                    .with_spatial(true)
+                    .with_spatial_scale(SpatialScale::new(SPATIAL_SCALE)),
+                Transform::from_translation(request.position),
+                Spatial3d {
+                    gain,
+                    unit_size: entry.unit_size_m,
+                    max_distance: entry.max_distance_m,
+                    channel,
+                    far,
+                },
+                SfxVoice { gain, channel },
+                DespawnOnExit(AppState::Battle),
+            ));
+            if far {
+                sound.insert(AudioPlayer(asset_server.load::<FarSource>(path)));
+            } else {
+                sound.insert(AudioPlayer::new(asset_server.load::<AudioSource>(path)));
+            }
+            let entity = sound.id();
             audio.pool.push(PoolVoice {
                 handle: entity,
                 event: name,
@@ -1165,6 +1181,12 @@ fn handle_sfx_at(
             });
         }
     }
+}
+
+/// `battle_audio.gd`: a `Bataille` event heard from beyond `near_distance_m` goes through the
+/// far bus (`BatailleLointain`); every other sound, and every near one, stays dry.
+pub fn routes_to_far_bus(bus: &str, distance: f32, near_distance: f32) -> bool {
+    bus == "Bataille" && distance > near_distance
 }
 
 /// Camera height to the shared low-pass / reverb settings of the far bus.
@@ -1191,7 +1213,7 @@ fn attenuate_spatial(
         let distance = listener.map_or(0.0, |ear| ear.distance(transform.translation()));
         let volume = director.channel_volume(&settings, spatial.channel)
             * spatial.gain
-            * dry
+            * if spatial.far { dry } else { 1.0 }
             * attenuation(distance, spatial.unit_size, spatial.max_distance);
         sink.set_volume(Volume::Linear(volume));
     }
@@ -1256,7 +1278,10 @@ fn drive_ambience(
             state.target_db = target;
             state.db += (state.target_db - state.db).clamp(-step, step);
             sink.set_volume(Volume::Linear(
-                settings.master * settings.ambience * db_to_linear(state.db),
+                settings.master
+                    * settings.ambience
+                    * db_to_linear(state.db)
+                    * director.dynamics.ambience_gain(),
             ));
             continue;
         }
@@ -1369,6 +1394,15 @@ pub fn unit_barks_on(settings: Option<&crate::settings::Settings>) -> bool {
 #[cfg(test)]
 mod voice_barks_tests {
     use super::*;
+
+    #[test]
+    fn far_bus_only_for_distant_battle_events() {
+        assert!(!routes_to_far_bus("Bataille", 30.0, 70.0));
+        assert!(!routes_to_far_bus("Bataille", 70.0, 70.0));
+        assert!(routes_to_far_bus("Bataille", 71.0, 70.0));
+        assert!(!routes_to_far_bus("Voix", 500.0, 70.0));
+        assert!(!routes_to_far_bus("Interface", 500.0, 70.0));
+    }
 
     #[test]
     fn voice_barks_setting_gates_the_unit_lines() {
