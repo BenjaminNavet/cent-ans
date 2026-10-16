@@ -155,6 +155,22 @@ fn bt_decor_field(df: vec4<f32>, p: vec2<f32>) -> vec3<f32> {
     return vec3<f32>(kind, dot(p, vec2<f32>(-sin(yaw), cos(yaw))), df.b);
 }
 
+// Bilinear "clear" coverage (Godot `splat_b.g`, a linear-filtered 4 m map): the decor map is
+// sampled nearest, so its alpha is filtered by hand to give soft edges instead of 4 m blocks.
+fn decor_clear_soft(uv: vec2<f32>) -> f32 {
+    let dims = vec2<f32>(textureDimensions(decor_fields));
+    let q = uv * dims - 0.5;
+    let base = floor(q);
+    let f = q - base;
+    let c = (base + 0.5) / dims;
+    let texel = 1.0 / dims;
+    let a00 = step(0.25, textureSampleLevel(decor_fields, decor_sampler, c, 0.0).a);
+    let a10 = step(0.25, textureSampleLevel(decor_fields, decor_sampler, c + vec2<f32>(texel.x, 0.0), 0.0).a);
+    let a01 = step(0.25, textureSampleLevel(decor_fields, decor_sampler, c + vec2<f32>(0.0, texel.y), 0.0).a);
+    let a11 = step(0.25, textureSampleLevel(decor_fields, decor_sampler, c + texel, 0.0).a);
+    return mix(mix(a00, a10, f.x), mix(a01, a11, f.x), f.y);
+}
+
 fn bt_decor_edge_soft(z: f32, p: vec2<f32>) -> f32 {
     return clamp(z + (bt_value_noise(p * 0.3 + 3.7) - 0.5) * 0.35, 0.0, 1.0);
 }
@@ -235,7 +251,9 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     let inside = all(suv >= vec2<f32>(0.0)) && all(suv <= vec2<f32>(1.0));
     let duv = (p + bt_edge_warp(p) - ground.rect.xy) / ground.rect.zw;
     let df = textureSampleLevel(decor_fields, decor_sampler, duv, 0.0);
-    let clear_zone = select(0.0, step(0.25, df.a), inside);
+    // Noise-jittered (like the splat read of Godot) and bilinear: no 4 m blocks.
+    let clear_jitter = (vec2<f32>(fine, bt_value_noise(p * 0.21 + 7.3)) - 0.5) * 6.0 / ground.rect.zw;
+    let clear_zone = select(0.0, decor_clear_soft(suv + clear_jitter), inside);
 
     // Procedural fields outside the calm centre.
     let calm_d = max(ground.calm.xy - p, p - ground.calm.zw);

@@ -14,7 +14,9 @@
 //! brightness. Without the pack the single `grass_blades.png` card stays.
 //! FA7 (`grass_atlas.rs`): for the green group (and without the pack) the tufts are made of cards
 //! drawing the cells of the atlas of photographed blades, picked by clump and baked in the UVs.
-//! Not ported: snow tint shader parameters, FA7 wheat / stubble cells, near / far layers.
+//! FA7 fields: in corn, stubble and sown decor fields (`DecorFields::field_at`) the tufts are the
+//! wheat / stubble cells of the atlas at the field's height, with the wheat's golden tint.
+//! Not ported: snow tint shader parameters, near / far layers.
 
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::primitives::Aabb;
@@ -24,7 +26,7 @@ use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 use sim_battle::{BattleSeason, Weather};
 
-use super::ground::splat_at;
+use super::ground::{bake_decor_fields, splat_at};
 use super::hash01;
 use super::look::DecorLook;
 use super::wind::{WindExtension, WindMaterial, WindParams};
@@ -44,6 +46,8 @@ pub struct GrassStats {
     pub atlas: bool,
     /// Tufts per cell of the atlas.
     pub tufts_by_cell: Vec<usize>,
+    /// FA7 tufts in corn / stubble / sown fields.
+    pub field_tufts: [usize; 3],
 }
 
 pub struct GrassPlugin;
@@ -340,6 +344,13 @@ fn scatter(
     let mut tufts_by_card = vec![0usize; cards.len()];
     let mut tufts_by_cell = vec![0usize; atlas_cat.as_ref().map_or(0, |a| a.variants.len())];
     let mut tufts = 0usize;
+    let mut field_tufts = [0usize; 3];
+    let decor = atlas_cat.as_ref().map(|_| bake_decor_fields(field));
+    // Material tint of the atlas card (grass colour x luminance compensation).
+    let atlas_base: [f32; 3] = atlas_cat.as_ref().map_or([1.0; 3], |a| {
+        let k = (REFERENCE_LUMA / a.tex_lum.max(0.05)).clamp(0.5, 1.6);
+        [0, 1, 2].map(|i| (tint[i] * k).clamp(0.05, 1.0))
+    });
     let nx = (field.width as f32 / spacing) as usize;
     let nz = (field.depth as f32 / spacing) as usize;
     for iz in 0..nz {
@@ -347,16 +358,33 @@ fn scatter(
             let x = (ix as f32 + hash01(ix as f32, iz as f32, 1.0)) * spacing;
             let z = (iz as f32 + hash01(ix as f32, iz as f32, 2.0)) * spacing;
             let splat = splat_at(field, f64::from(x), f64::from(z));
-            if splat.grass < 0.55 || hash01(x, z, 3.0) > splat.grass {
+            // FA7 fields: corn (2), sown (4) and stubble (6) decor fields grow their own grass.
+            let crop = decor
+                .as_ref()
+                .and_then(|d| d.field_at(x, z))
+                .filter(|(code, _)| matches!(code, 2 | 4 | 6));
+            let open_ground = splat.dirt < 0.2 && splat.mud < 0.2 && splat.stone < 0.2;
+            let in_crop = crop.is_some() && open_ground && splat.forest < 0.4;
+            if !in_crop && (splat.grass < 0.55 || hash01(x, z, 3.0) > splat.grass) {
                 continue;
             }
             let fa_density = atlas_cat
                 .as_ref()
                 .map(|a| super::grass_atlas::density_at(a, x, z));
-            if let Some((density, _)) = fa_density
-                && hash01(x, z, 9.0) >= density
-            {
-                continue;
+            if let Some((density, _)) = fa_density {
+                let mut density = density;
+                if let Some((code, edge)) = crop.filter(|_| in_crop) {
+                    if matches!(code, 2 | 6) {
+                        // Dense stems everywhere in the field (VN: else oval patches).
+                        density += (0.92 - density).max(0.0)
+                            * super::grass_atlas::smoothstep(0.0, 0.5, edge);
+                    } else {
+                        density *= 0.55;
+                    }
+                }
+                if hash01(x, z, 9.0) >= density {
+                    continue;
+                }
             }
             let height = field.height(f64::from(x), f64::from(z)) as f32;
             let scale = 0.8 + 0.6 * hash01(x, z, 4.0);
@@ -373,15 +401,79 @@ fn scatter(
                 // flipped one time in two; the height is that of the cell.
                 let size = a.size[0] + (a.size[1] - a.size[0]) * hash01(x, z, 8.0);
                 let h_var = 0.8 + 0.4 * in_clump;
-                let height_mul = 1.0 + (h_var - 1.0) * a.height_var;
+                // Field kind of this tuft: 1 wheat, 2 stubble, 3 seedlings (`fa_kind`); each tuft
+                // switches at its own threshold so both sides of an edge mix over a few metres.
+                let fa_kind = crop.filter(|_| in_crop).map_or(0, |(code, edge)| {
+                    let soft = (edge
+                        + (super::grass_atlas::value_noise(x * 0.3 + 3.7, z * 0.3 + 3.7, 14.0)
+                            - 0.5)
+                            * 0.35)
+                        .clamp(0.0, 1.0);
+                    let r_edge = hash01(x, z, 71.3) * 0.8 + 0.1;
+                    let in_field = soft
+                        + (super::grass_atlas::smoothstep(r_edge - 0.18, r_edge + 0.18, soft)
+                            - soft)
+                            * 0.8;
+                    match code {
+                        4 => 3,
+                        6 if in_field > 0.5 => 2,
+                        2 if in_field > 0.5 => 1,
+                        _ => 0,
+                    }
+                });
+                let field_height = match fa_kind {
+                    1 => a.fields.height[0],
+                    2 => a.fields.height[2],
+                    3 => a.fields.height[3],
+                    _ => 1.0,
+                };
+                let height_mul = field_height * (1.0 + (h_var - 1.0) * a.height_var);
                 let mut heights = [0.0f32; 2];
                 let mut cells = [([0.0f32; 4], false); 2];
                 for card in 0..2 {
                     let salt = 17.3 * card as f32;
-                    let cell = a.pick(hash01(x, z, 91.7 + salt), in_clump);
+                    let flip = hash01(x, z, 47.9 + salt);
+                    let cell = match fa_kind {
+                        1 => a.fields.wheat[usize::from(flip >= 0.5)],
+                        2 | 3 => a.fields.stubble[usize::from(flip >= 0.5)],
+                        _ => a.pick(hash01(x, z, 91.7 + salt), in_clump),
+                    };
                     heights[card] = a.variants[cell].height_m * size * height_mul;
-                    cells[card] = (a.cell_uv(cell), hash01(x, z, 47.9 + salt) < 0.5);
+                    cells[card] = (a.cell_uv(cell), flip < 0.5);
                     tufts_by_cell[cell] += 1;
+                }
+                // Tint: the golden wheat / stubble replace the grass colour, seedlings tint it.
+                let gain = a.tint_gain;
+                let relative = |target: [f32; 3], mix: f32| {
+                    [0, 1, 2].map(|i| {
+                        1.0 + ((target[i] * gain[i] / atlas_base[i]).clamp(0.3, 3.0) - 1.0) * mix
+                    })
+                };
+                let field_tint = match fa_kind {
+                    1 => relative(
+                        [
+                            0.4 * a.fields.wheat_gain[0],
+                            0.33 * a.fields.wheat_gain[1],
+                            0.17 * a.fields.wheat_gain[2],
+                        ],
+                        1.0,
+                    ),
+                    2 => relative([0.6, 0.5, 0.3], 0.8),
+                    3 => a.fields.seedling_gain,
+                    _ => [1.0; 3],
+                };
+                let shade = [
+                    shade[0] * field_tint[0],
+                    shade[1] * field_tint[1],
+                    shade[2] * field_tint[2],
+                ];
+                let foot_shade = if fa_kind == 1 {
+                    a.fields.wheat_foot_shade
+                } else {
+                    a.foot_shade
+                };
+                if fa_kind > 0 {
+                    field_tufts[fa_kind - 1] += 1;
                 }
                 chunks[chunk][0].fa_tuft(
                     Vec3::new(x, height - 0.03, z),
@@ -390,7 +482,7 @@ fn scatter(
                     a.foot_ratio,
                     heights,
                     cells,
-                    a.foot_shade,
+                    foot_shade,
                     shade,
                 );
                 tufts_by_card[0] += 1;
@@ -469,6 +561,7 @@ fn scatter(
         tufts_by_card,
         atlas: atlas_cat.is_some(),
         tufts_by_cell,
+        field_tufts,
     });
 }
 

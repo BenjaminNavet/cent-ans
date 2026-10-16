@@ -570,6 +570,48 @@ pub struct PendingTreeTexture {
     pub grid: (u32, u32),
     pub layer: u32,
     pub prep: TexturePrep,
+    /// Micro-bark grain (`tx_micro_bark.jpg`) baked into the albedo of a regional bark.
+    pub micro: Option<Handle<Image>>,
+}
+
+/// Strength of the micro-bark grain (`MICRO_FADE.x` of tree_textures.gd).
+pub const MICRO_BARK_STRENGTH: f32 = 0.7;
+/// Repeats of the micro grain over a bark cell (Godot `UV * 3.7`; a whole number here so the
+/// baked cell still tiles without a seam).
+pub const MICRO_BARK_REPEAT: f32 = 4.0;
+
+/// Multiplies the bark `pixels` (RGBA8 sRGB, `size` square) by the micro grain `grain` (its
+/// 8-bit luminance, `grain_size` square, bilinear): `1 + (g - 0.5) * 1.6 * strength` in linear
+/// light, as `battle_tree_bark.gdshader` does near the camera. The mip chain fades the grain with
+/// the distance (the shader fades it between 3 and 14 m).
+pub fn bake_micro_bark(pixels: &mut [u8], size: u32, grain: &[u8], grain_size: u32) {
+    let (n, m) = (size as usize, grain_size as usize);
+    if m == 0 || grain.len() < m * m {
+        return;
+    }
+    for y in 0..n {
+        for x in 0..n {
+            let fx = ((x as f32 + 0.5) / n as f32 * MICRO_BARK_REPEAT).fract() * m as f32 - 0.5;
+            let fy = ((y as f32 + 0.5) / n as f32 * MICRO_BARK_REPEAT).fract() * m as f32 - 0.5;
+            let (x0, y0) = (fx.floor(), fy.floor());
+            let (tx, ty) = (fx - x0, fy - y0);
+            let at = |ix: f32, iy: f32| {
+                let (ix, iy) = (
+                    ix.rem_euclid(m as f32) as usize,
+                    iy.rem_euclid(m as f32) as usize,
+                );
+                f32::from(grain[iy * m + ix]) / 255.0
+            };
+            let top = at(x0, y0) + (at(x0 + 1.0, y0) - at(x0, y0)) * tx;
+            let bottom = at(x0, y0 + 1.0) + (at(x0 + 1.0, y0 + 1.0) - at(x0, y0 + 1.0)) * tx;
+            let g = top + (bottom - top) * ty;
+            let gain = (1.0 + (g - 0.5) * 1.6 * MICRO_BARK_STRENGTH).max(0.0);
+            let px = &mut pixels[(y * n + x) * 4..(y * n + x) * 4 + 3];
+            for c in px.iter_mut() {
+                *c = linear_to_srgb(srgb_to_linear(*c) * gain);
+            }
+        }
+    }
 }
 
 #[derive(Resource, Default, Debug)]
@@ -710,6 +752,22 @@ pub fn prepare_tree_textures(
         let Some(source) = images.get(&job.source) else {
             return true;
         };
+        // The micro grain must be loaded too (its luminance, one byte per texel).
+        let grain: Option<(Vec<u8>, u32)> = match &job.micro {
+            Some(handle) => match images.get(handle) {
+                None => return true,
+                Some(micro) => micro.data.as_ref().and_then(|data| {
+                    let stride = micro.texture_descriptor.format.block_copy_size(None)? as usize;
+                    (micro.width() == micro.height() && stride > 0).then(|| {
+                        (
+                            data.iter().step_by(stride).copied().collect::<Vec<u8>>(),
+                            micro.width(),
+                        )
+                    })
+                }),
+            },
+            None => None,
+        };
         let srgb = source.texture_descriptor.format.is_srgb();
         let cut = source.data.as_ref().and_then(|data| {
             if source.texture_descriptor.format.block_copy_size(None) != Some(4) {
@@ -723,6 +781,11 @@ pub fn prepare_tree_textures(
             return false;
         };
         prepare_pixels(&mut pixels, job.prep);
+        if let Some((grain, grain_size)) = &grain
+            && matches!(job.prep, TexturePrep::Bark { .. })
+        {
+            bake_micro_bark(&mut pixels, size, grain, *grain_size);
+        }
         let (data, levels) = tree_mips(&pixels, size, job.prep == TexturePrep::Leaves);
         let mut image = Image::new(
             Extent3d {
@@ -848,5 +911,17 @@ mod tests {
         let mut n = [255u8, 0, 255, 255];
         prepare_pixels(&mut n, TexturePrep::BarkNormal { smooth: 1.0 });
         assert!(n[0] < 200 && n[1] > 50);
+    }
+
+    #[test]
+    fn micro_bark_grain_modulates_the_albedo_around_its_mean() {
+        let base = vec![128u8; 4 * 4 * 4];
+        let bake = |grain: u8| {
+            let mut px = base.clone();
+            bake_micro_bark(&mut px, 4, &[grain; 4], 2);
+            px[0]
+        };
+        assert!(bake(255) > 128 && bake(0) < 128);
+        assert!((i32::from(bake(128)) - 128).abs() <= 1);
     }
 }

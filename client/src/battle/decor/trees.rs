@@ -549,6 +549,13 @@ fn make_kits(
         (pack.grid.0.max(1), pack.grid.1.max(1))
     };
     let mut jobs = Vec::new();
+    let micro_bark: Option<Handle<Image>> = crate::paths::find_root().ok().and_then(|root| {
+        let path = "textures/vegetation/tx_micro_bark.jpg";
+        crate::paths::asset_root(&root)
+            .join(path)
+            .exists()
+            .then(|| assets.load(path))
+    });
     let mut job = |source: Handle<Image>, grid: (u32, u32), layer: u32, prep: TexturePrep| {
         let srgb = !matches!(prep, TexturePrep::BarkNormal { .. });
         let target = images.add(placeholder(srgb));
@@ -558,6 +565,10 @@ fn make_kits(
             grid,
             layer,
             prep,
+            // Only the regional bark packs get the micro grain (`TreeTextures.apply_bark`).
+            micro: (matches!(prep, TexturePrep::Bark { .. }) && grid != (1, 1))
+                .then(|| micro_bark.clone())
+                .flatten(),
         });
         target
     };

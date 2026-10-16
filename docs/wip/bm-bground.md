@@ -41,3 +41,22 @@ Hors dossier, modification minimale : `battle/scene/terrain.rs` (appel de
 - Micro-écorce (`tx_micro_bark.jpg`, MICRO_FADE) et flou mip de l'écorce lisse non portés.
 - Herbe FA7 blé / chaume (`grass.rs` inchangé).
 - Variantes 2048 des paquets (qualité Haute).
+
+## bground2 (16/10) : rectangles de sol et restes
+- Rectangles clairs du sol : deux causes. (1) `splat_at` posait `dirt = 0.45` plein sur tout rectangle
+  hameau / ferme (Godot : 0.25 hameau-église, 0.35 autres sites, bord brisé par le jitter de 3 m) ;
+  désormais `site_dirt` (0.25 / 0.35, lisière fondue sur 7 m) + cours de maisons (disque doux
+  `largeur/2 + 3`, 0.7) + camps (disque doux, 0.55), comme `_stamp_decor`. (2) `clear_zone` du shader
+  (halo d'herbe foulée) lisait l'alpha de `decor_fields` en voisin le plus proche : blocs de 4 m ;
+  maintenant filtré en bilinéaire à la main (`decor_clear_soft`) avec le jitter de bruit de Godot
+  sur la lecture de `splat_b`. Preuve : test `site_dirt_has_no_sharp_rectangle_edge` (pas > 0.05 par
+  0,5 m en travers de chaque site), `ground_shader_validates`.
+- Herbe FA7 des champs : `DecorFields::field_at` + `GrassAtlas.fields` ; blé (cases wheat_a/b, hauteur
+  1.0, pied 0.5, teinte dorée), chaume (short_a/b, 0.8 vers le doré) et semis (short, 0.6, gain
+  `seedling_gain`, densité x0.55) ; seuil de lisière par touffe, densité 0.92 dans le blé/chaume.
+  Dump `battle_decor.grass.field_tufts` = [10440, 1568, 5318] sur la bataille par défaut.
+- Micro-écorce : `tx_micro_bark.jpg` cuite dans les planches d'écorce régionales (`bake_micro_bark`,
+  force 0.7, 4 répétitions par case au lieu de 3,7 pour que la case reste sans couture). Le fondu
+  3-14 m est assuré par les mips (pas de fondu explicite). 21 textures préparées, 0 échec.
+- Écarts : teintes de champ approchées par un rapport à la teinte de matériau (le sol dessous n'est pas
+  échantillonné) ; flou mip de l'écorce lisse et variantes 2048 toujours non portés.
