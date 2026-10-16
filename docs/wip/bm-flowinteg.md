@@ -1,0 +1,4 @@
+# bm-flowinteg
+Fait : tous les `NextState` directs de flow/menu/campagne/bataille/codex remplacés par `FadeToState` (pause::after_load, ending.rs, battle/scene start_battle, codex open_requests/leave) ; `PlayedBattles` sauvegardé en fichier annexe `<partie>.played` (écrit par `menu::saves::save_now`, relu par `load_into` via un miroir statique de `flow/history.rs`, vidé à l'entrée de FactionSelect) et affiché dans la fenêtre « Batailles jouées… » (bouton du menu pause, `flow::history::OpenPlayedBattles`) avec les suites (`ResultExtras`) et l'Histoire répétée/renversée.
+Déjà fait avant ce lot (notes périmées) : codex/bubbles.rs appelle `place_beside` (dump `codex.last_keyword_y`), flow/loading.rs et aftermath.rs lisent `ArtPlates`.
+Restes : `window_resize_grip`, `build_companion`/`build_hammer` (Colonies) ; fichier `.played` orphelin si l'emplacement est supprimé ; pas de bouton d'historique au menu principal ; pas de preuve live de l'alignement des bulles.

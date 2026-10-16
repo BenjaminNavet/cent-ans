@@ -499,6 +499,7 @@ fn dialog_buttons(
 pub fn save_now(sim: &Sim, dir: &std::path::Path, name: &str) -> Result<u32, String> {
     let state = sim.state.as_ref().ok_or("Aucune campagne en cours.")?;
     saves::write_save(dir, name, state, &saves::timestamp_now())?;
+    crate::flow::history::write_sidecar(&saves::save_path(dir, name));
     Ok(state.turn())
 }
 
@@ -510,6 +511,7 @@ pub fn load_into(sim: &mut Sim, path: &std::path::Path) -> Result<u32, String> {
     sim.player = state.player_faction().clone();
     let turn = state.turn();
     sim.state = Some(state);
+    crate::flow::history::read_sidecar(path);
     Ok(turn)
 }
 
