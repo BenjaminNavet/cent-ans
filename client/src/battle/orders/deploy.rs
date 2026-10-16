@@ -18,7 +18,7 @@ use super::BattleSelection;
 use super::drag::DRAG_PX;
 use super::formations::GroupFormations;
 use super::input::Gesture;
-use super::overlay::{OrdersGizmos, ground_line, outline_rect};
+use super::overlay::{OrdersGizmos, outline_rect};
 use super::picking;
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::{BattleCamera, BattleCameraState};
@@ -26,9 +26,6 @@ use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::style::UiTier;
 use crate::ui::kit::widgets::{button_primary, caption, panel_page};
 use crate::ui::kit::{ButtonPressed, UiTheme};
-
-/// Lift of the zone outline above the ground (m).
-const LIFT: f32 = 0.5;
 
 /// State of the phase.
 #[derive(Resource, Debug, Default)]
@@ -40,6 +37,8 @@ pub struct Deployment {
     pub active: bool,
     /// Zones of the player `[x0, z0, x1, z1]` (several for an ambusher's flanks).
     pub zones: Vec<[f32; 4]>,
+    /// Zone meshes (shader of `zone.rs`) alive right now.
+    pub zone_meshes: usize,
 }
 
 #[derive(Component)]
@@ -235,7 +234,7 @@ pub fn banner_buttons(
     }
 }
 
-/// Outline of the zone(s) of the player and the ghosts of the right button held.
+/// Ghosts of the right button held (the zone itself is the mesh of `zone.rs`).
 #[allow(clippy::too_many_arguments)]
 pub fn draw_deployment(
     mut gizmos: Gizmos<OrdersGizmos>,
@@ -254,20 +253,6 @@ pub fn draw_deployment(
     let tint = Color::srgb(rgb[0], rgb[1], rgb[2]).mix(&Color::WHITE, 0.3);
     let sim = session.sim_mut();
     let field = sim.field();
-    for zone in &deployment.zones {
-        let corners = [
-            Vec2::new(zone[0], zone[1]),
-            Vec2::new(zone[2], zone[1]),
-            Vec2::new(zone[2], zone[3]),
-            Vec2::new(zone[0], zone[3]),
-        ];
-        for i in 0..4 {
-            gizmos.linestrip(
-                ground_line(field, corners[i], corners[(i + 1) % 4], LIFT),
-                tint.with_alpha(0.9),
-            );
-        }
-    }
     // Ghosts of the drag in progress (a preset proposal draws its own, in `formations`).
     if formations.active.is_some() || selection.units.is_empty() {
         return;

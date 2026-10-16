@@ -27,11 +27,13 @@ pub mod groups;
 pub mod hotkeys;
 pub mod input;
 pub mod marks;
+pub mod outline;
 pub mod overlay;
 pub mod picking;
 pub mod proof;
 pub mod select;
 pub mod speech;
+pub mod zone;
 
 use bevy::gizmos::config::{GizmoConfig, GizmoLineConfig};
 use bevy::prelude::*;
@@ -62,7 +64,8 @@ pub struct BattleOrdersPlugin;
 
 impl Plugin for BattleOrdersPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<BattleSelection>()
+        app.add_plugins(zone::ZonePlugin)
+            .init_resource::<BattleSelection>()
             .add_message::<SelectBattleUnits>()
             .add_message::<input::PointerEvent>()
             .add_message::<input::IssueBattleCommand>()
@@ -158,6 +161,7 @@ impl Plugin for BattleOrdersPlugin {
                     overlay::update_drag_rect,
                     crate::ui::cursor::update_battle_cursor,
                     deploy::draw_deployment,
+                    zone::sync_zone,
                     formations::draw_ghosts,
                     marks::draw_marks,
                     marks::update_labels,
@@ -235,7 +239,7 @@ fn dump_orders(world: &World) -> (String, serde_json::Value) {
             "sim_orders": world.get_resource::<input::SimOrders>().map(|s| s.0.clone()),
             "hover": { "own": gesture.hover_own, "enemy": gesture.hover_enemy, "context": format!("{:?}", gesture.context) },
             "overlay": {
-                "outlines": stats.outlines, "order_paths": stats.order_paths, "arrows": stats.arrows,
+                "outlines": stats.outlines, "outline_dashed": stats.dashed, "outline_pulsing": stats.pulsing, "outline_engaged": stats.engaged, "order_paths": stats.order_paths, "arrows": stats.arrows,
                 "arcs": stats.arcs, "arc_units": stats.arc_units,
                 "live_active": live.active, "live_computed": live.computed,
             },
@@ -244,6 +248,7 @@ fn dump_orders(world: &World) -> (String, serde_json::Value) {
                 "opened": world.resource::<deploy::Deployment>().opened,
                 "active": world.resource::<deploy::Deployment>().active,
                 "zones": world.resource::<deploy::Deployment>().zones,
+                "zone_meshes": world.resource::<deploy::Deployment>().zone_meshes,
             },
             "formations": {
                 "presets": sim_battle::group_formation::presets().iter().map(|p| p.id.as_str()).collect::<Vec<_>>(),

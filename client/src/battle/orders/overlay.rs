@@ -14,7 +14,7 @@ use sim_battle::{Battlefield, HoverRules, SideId};
 use super::BattleSelection;
 use super::drag::{self, DRAG_PX};
 use super::input::{BattleViews, Gesture};
-use super::picking::UnitView;
+use super::outline;
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::{BattleCamera, BattleCameraState};
 use crate::ui::kit::style::UiTier;
@@ -60,6 +60,10 @@ pub struct OverlayStats {
     pub arrows: usize,
     pub arcs: usize,
     pub arc_units: Vec<u32>,
+    /// Outlines by state: dashed (hovered enemy), pulsing (targeted), in melee.
+    pub dashed: usize,
+    pub pulsing: usize,
+    pub engaged: usize,
 }
 
 #[derive(Component)]
@@ -117,22 +121,50 @@ pub fn ground_line(field: &Battlefield, a: Vec2, b: Vec2, lift: f32) -> Vec<Vec3
         .collect()
 }
 
-fn side_color(session: &BattleSession, side: SideId) -> Color {
-    let rgb = session.colors[usize::from(side == SideId::Defender)];
-    let base = Color::srgb(rgb[0], rgb[1], rgb[2]);
-    base.mix(&Color::WHITE, 0.3)
+/// Dashed line along `points` (x, z), draped; the dash pattern continues from one segment to the
+/// next (Godot `_dashes`).
+pub fn dashed_line(
+    gizmos: &mut Gizmos<OrdersGizmos>,
+    field: &Battlefield,
+    points: &[Vec2],
+    dash: f32,
+    gap: f32,
+    lift: f32,
+    color: Color,
+) {
+    let period = dash + gap;
+    let mut carry = 0.0_f32;
+    for pair in points.windows(2) {
+        let (a, b) = (pair[0], pair[1]);
+        let length = a.distance(b);
+        if length < 0.01 {
+            continue;
+        }
+        let mut s = -carry;
+        while s < length {
+            let from = s.max(0.0);
+            let to = (s + dash).min(length);
+            if to > from {
+                gizmos.linestrip(
+                    ground_line(
+                        field,
+                        a.lerp(b, from / length),
+                        a.lerp(b, to / length),
+                        lift,
+                    ),
+                    color,
+                );
+            }
+            s += period;
+        }
+        carry = (length + carry) % period;
+    }
 }
 
-fn outline(gizmos: &mut Gizmos<OrdersGizmos>, field: &Battlefield, unit: &UnitView, color: Color) {
-    outline_rect(
-        gizmos,
-        field,
-        Vec2::new(unit.pos.x, unit.pos.z),
-        unit.facing,
-        unit.width,
-        unit.depth,
-        color,
-    );
+fn side_color(colors: &[[f32; 3]; 2], side: SideId) -> Color {
+    let rgb = colors[usize::from(side == SideId::Defender)];
+    let base = Color::srgb(rgb[0], rgb[1], rgb[2]);
+    base.mix(&Color::WHITE, 0.3)
 }
 
 /// Rectangle `width` x `depth` (m) centred on `centre` (x, z), facing `facing`, draped on the
@@ -207,9 +239,10 @@ pub fn draw_overlay(
 ) {
     *stats = OverlayStats::default();
     let Some(player) = session.player else { return };
-    let color = side_color(&session, player);
+    let session_colors = session.colors;
+    let color = side_color(&session_colors, player);
     let enemy_color =
-        crate::settings::palette::enemy_red(&palette, side_color(&session, player.other()));
+        crate::settings::palette::enemy_red(&palette, side_color(&session_colors, player.other()));
     let near = camera_state
         .as_ref()
         .is_some_and(|c| c.distance < ORDERS_NEAR_HIDE_M);
@@ -228,31 +261,53 @@ pub fn draw_overlay(
     let now = time.elapsed_secs();
     let sim = session.sim_mut();
 
-    // Selection and hover outlines.
-    for unit in views
-        .0
+    // Formation outlines with states (selected, hovered, targeted, in melee).
+    let targeted: Vec<u32> = selection
+        .units
         .iter()
-        .filter(|u| selection.units.contains(&u.id) && u.present)
-    {
-        outline(&mut gizmos, sim.field(), unit, color);
-        stats.outlines += 1;
-    }
-    for id in [gesture.hover_own, gesture.hover_enemy]
-        .into_iter()
-        .flatten()
-    {
-        if let Some(unit) = views
-            .0
-            .iter()
-            .find(|u| u.id == id && u.present && !selection.units.contains(&id))
-        {
-            let hover = if unit.side == player {
-                color.with_alpha(0.55)
-            } else {
-                enemy_color.with_alpha(0.7)
-            };
-            outline(&mut gizmos, sim.field(), unit, hover);
+        .filter_map(|id| sim.unit(*id).and_then(|u| u.target))
+        .collect();
+    let pulse = outline::pulse_alpha(now);
+    for unit in views.0.iter().filter(|u| u.present) {
+        let own = unit.side == player;
+        let melee = sim
+            .unit(unit.id)
+            .is_some_and(|u| u.state == sim_battle::UnitState::Melee);
+        let state = outline::outline_state(
+            unit.present,
+            unit.routing,
+            own,
+            selection.units.contains(&unit.id),
+            gesture.hover_own == Some(unit.id) || gesture.hover_enemy == Some(unit.id),
+            targeted.contains(&unit.id),
+            melee,
+        );
+        if state == outline::OutlineState::None {
+            continue;
         }
+        let livery = side_color(&session_colors, unit.side);
+        let red = crate::settings::palette::enemy_red(&palette, outline::ENEMY_RED);
+        let mut tint = outline::state_color(state, livery, red, own);
+        if state == outline::OutlineState::EnemyTargeted {
+            tint = tint.with_alpha(pulse);
+            stats.pulsing += 1;
+        }
+        match state {
+            outline::OutlineState::EnemyHovered => stats.dashed += 1,
+            outline::OutlineState::Engaged => stats.engaged += 1,
+            _ => {}
+        }
+        outline::draw_outline(
+            &mut gizmos,
+            sim.field(),
+            Vec2::new(unit.pos.x, unit.pos.z),
+            unit.facing,
+            unit.width,
+            unit.depth,
+            state,
+            tint,
+        );
+        stats.outlines += 1;
     }
 
     // Orders already given: path to the destination, arrow to the target.
