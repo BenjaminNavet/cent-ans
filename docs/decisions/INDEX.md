@@ -294,3 +294,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0364 | [Outils de développement essayés (BRP extras, MCP, mélange des schedules, console)](0364-outils-dev-essayes.md) | accepté |
 | 0365 | [Outils de productivité du client Bevy (nextest, insta, sccache optionnel)](0365-outils-productivite-bevy.md) | accepté |
 | 0404 | [Seuil de perf des lots de qualité visuelle](0404-seuil-perf-qualite-visuelle.md) | accepté |
+| 0405 | [Fondu des maquettes par bande et budget de spawn partagé](0405-fondu-par-bande-et-budget-de-spawn.md) | accepté |
