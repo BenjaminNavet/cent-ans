@@ -235,9 +235,13 @@ fn rebuild(
     settings_screen: Option<Res<SettingsScreen>>,
     modals: Option<Res<crate::ui::kit::modal::ModalQueue>>,
     tutorial: Option<Res<crate::campaign::progress::tutorial::Tutorial>>,
+    missions: Option<Res<crate::campaign::hud::missions::Missions>>,
 ) {
-    // One narrator at a time: the feudal guide waits for the open modal and for the tutorial.
+    // One narrator at a time: the feudal guide waits for the open modal, the tutorial and the
+    // council's mission offer (a decision goes first).
+    let offer_up = missions.is_some_and(|m| m.offer.is_some() && !m.offer_dismissed);
     let covered = paused.is_some_and(|p| p.0)
+        || offer_up
         || settings_screen.is_some_and(|s| s.root.is_some())
         || modals.is_some_and(|m| m.is_busy())
         || tutorial.is_some_and(|t| t.index.is_some());
