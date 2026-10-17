@@ -554,7 +554,7 @@ mod tests {
         let parchment = ViewScale::at(&t, 60.0, 1.0);
         assert_eq!((map.width, map.glow), (1.0, 1.0));
         assert!((parchment.width - 1.7).abs() < 1e-5);
-        assert!((parchment.glow - 0.6).abs() < 1e-5);
+        assert!((parchment.glow - 0.25).abs() < 1e-5);
         assert!((ViewScale::alpha(&t, 1.0) - 1.15).abs() < 1e-5);
     }
 

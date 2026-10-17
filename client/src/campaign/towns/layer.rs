@@ -450,6 +450,33 @@ fn style_of_town(sim: &Sim, world: &TownsWorld, id: &str) -> Option<RegionStyle>
         .style_for(settlement.province.as_str(), &province.region)
 }
 
+/// True for a town of a pagan province (`rel_pagan`: Lithuania in 1340).
+fn is_pagan_town(sim: &Sim, id: &str) -> bool {
+    let Some(data) = sim.data.as_ref() else {
+        return false;
+    };
+    let Some(settlement) = data_model::SettlementId::new(id)
+        .ok()
+        .and_then(|id| data.settlements.get(&id))
+    else {
+        return false;
+    };
+    data.provinces
+        .get(&settlement.province)
+        .is_some_and(|p| p.religion.as_str() == "rel_pagan")
+}
+
+/// A pagan town of 1340 is of timber: no parish church, no cathedral, a palisade instead of a
+/// stone wall (the castle and the hall stay, the plan draws the castle in planks).
+fn paganise(town: &mut Town) {
+    town.parishes = 0;
+    town.monuments
+        .retain(|m| !matches!(m.kind.as_str(), "cathedral" | "church" | "abbey"));
+    if town.walls == "stone" {
+        town.walls = "palisade".to_string();
+    }
+}
+
 fn local_height(ground: &GroundHeight, anchor: Vec2, scale: f32, l: Vec2) -> f32 {
     ground
         .at(anchor.x + l.x * scale, anchor.y + l.y * scale)
@@ -686,7 +713,10 @@ pub(super) fn stream_towns(
             if state.plan_jobs.len() < budget && !state.plan_jobs.contains_key(&town.id) {
                 let slot: Job<Plan> = Arc::default();
                 state.plan_jobs.insert(town.id.clone(), slot.clone());
-                let (town, db, surface) = (town.clone(), world.db.clone(), (*surface).clone());
+                let (mut town, db, surface) = (town.clone(), world.db.clone(), (*surface).clone());
+                if is_pagan_town(&sim, &town.id) {
+                    paganise(&mut town);
+                }
                 std::thread::Builder::new()
                     .name("town-plan".into())
                     .spawn(move || {
@@ -1172,7 +1202,11 @@ fn spawn_town(
         match m.kind.as_str() {
             "castle" => {
                 let k = &look.keep;
-                let mat = sp.masonry();
+                let mat = if plan.walls == "palisade" {
+                    sp.planks()
+                } else {
+                    sp.masonry()
+                };
                 sp.block(
                     false,
                     mat.clone(),
@@ -1457,6 +1491,21 @@ mod tests {
             })
         );
         assert_eq!(parse_growth_env("x"), None);
+    }
+
+    #[test]
+    fn a_pagan_town_has_no_church_and_a_palisade() {
+        let root = crate::paths::find_root().unwrap();
+        let db = TownDb::load(&crate::paths::data_dir(&root));
+        let mut town = db.towns["set_vilnius"].clone();
+        let flat = |_: Vec2| 0.0;
+        let before = plan::generate(&town, &db, &flat);
+        assert!(before.monuments.iter().any(|m| m.kind == "church"));
+        paganise(&mut town);
+        let after = plan::generate(&town, &db, &flat);
+        assert!(after.monuments.iter().all(|m| m.kind != "church"));
+        assert!(after.monuments.iter().any(|m| m.kind == "castle"));
+        assert_eq!(after.walls, "palisade");
     }
 
     #[test]

@@ -194,6 +194,46 @@ def carve_straits(land: np.ndarray, cw: ComposedWarp, straits: list[dict]) -> No
     land[np.asarray(img) > 0] = False
 
 
+def tapered_shape_mask(
+    shape_px: tuple[int, int], cw: ComposedWarp, shapes: list[dict]
+) -> np.ndarray:
+    """Masque d'un ensemble de formes d'auteur à largeur variable.
+
+    Chaque forme est une ligne brisée lon/lat (``path``) et une largeur en km nominaux par sommet
+    (``widths_km``, interpolée le long de la ligne) : un estuaire s'évase vers l'embouchure, une
+    presqu'île s'amincit vers sa pointe. Le tracé est une suite de disques de pas 1 px.
+    """
+    from PIL import ImageDraw
+
+    img = Image.new("L", (shape_px[1], shape_px[0]), 0)
+    draw = ImageDraw.Draw(img)
+    for item in shapes:
+        lon, lat = np.array(item["path"], dtype=float).T
+        x, y = cw.forward(lon, lat)
+        widths = np.asarray(item["widths_km"], dtype=float) / KM_PER_PX
+        steps = np.hypot(np.diff(x), np.diff(y))
+        along = np.concatenate([[0.0], np.cumsum(steps)])
+        samples = np.arange(0.0, along[-1] + 1.0, 1.0)
+        sx, sy = np.interp(samples, along, x), np.interp(samples, along, y)
+        sw = np.interp(samples, along, widths)
+        for cx, cy, w in zip(sx, sy, sw, strict=True):
+            r = max(w / 2.0, 0.5)
+            draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=255)
+    return np.asarray(img) > 0
+
+
+def add_headlands(land: np.ndarray, cw: ComposedWarp, headlands: list[dict]) -> None:
+    """Ajoute de la terre (presqu'îles que le lissage de la côte a écrasées : Cotentin)."""
+    if headlands:
+        land |= tapered_shape_mask(land.shape, cw, headlands)
+
+
+def carve_inlets(land: np.ndarray, cw: ComposedWarp, inlets: list[dict]) -> None:
+    """Rend de l'eau le long des estuaires et baies d'auteur (Gironde, Seine, Mont-Saint-Michel)."""
+    if inlets:
+        land[tapered_shape_mask(land.shape, cw, inlets)] = False
+
+
 def _polygonize(mask: np.ndarray) -> list[Polygon]:
     from rasterio import features
 
@@ -249,7 +289,9 @@ def build_land(
     sigma = land_cfg["smooth_km"] / KM_PER_PX * frame.scale
     mask = ndimage.gaussian_filter(land, sigma) > 0.5
     del land
+    add_headlands(mask, cw, cfg.get("headlands", []))
     carve_straits(mask, cw, cfg["straits"])
+    carve_inlets(mask, cw, cfg.get("inlets", []))
 
     keep = cfg["islands"]["keep"]
     keep_xy = [tuple(float(v) for v in cw.forward(*item["lonlat"])) for item in keep]

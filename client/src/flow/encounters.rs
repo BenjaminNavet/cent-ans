@@ -13,8 +13,10 @@
 
 use std::collections::HashSet;
 
+use crate::ui::kit::viewport_to_ui;
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
+use bevy::ui::UiScale;
 use game_api::flow::{EncounterSiteView, PendingEncounterView};
 
 use super::{FlowCommand, FlowState, Stage};
@@ -131,6 +133,7 @@ pub fn place_markers(
     camera: Query<(&Camera, &GlobalTransform), With<CampaignCamera>>,
     ground: GroundHeight,
     mut markers: Query<(&SiteMarker, &mut Node, &mut Visibility)>,
+    ui_scale: Res<UiScale>,
 ) {
     let Some((camera, transform)) = camera.iter().next() else {
         return;
@@ -140,6 +143,7 @@ pub fn place_markers(
         let world = Vec3::new(marker.point.x, y, marker.point.y);
         match camera.world_to_viewport(transform, world) {
             Ok(screen) => {
+                let screen = viewport_to_ui(screen, &ui_scale);
                 node.left = Val::Px(screen.x - 14.0);
                 node.top = Val::Px(screen.y - 34.0);
                 *visibility = Visibility::Inherited;
