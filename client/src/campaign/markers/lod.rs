@@ -378,10 +378,8 @@ pub(super) fn fade_maquettes(
     let mut apply = |entity: Entity, limit: f32, banded: &mut bool| {
         let band = legacy || in_fade_band(limit, margin, rig);
         if !band {
-            if *banded {
-                if let Ok((_, mut range)) = ranges.get_mut(entity) {
-                    *range = solid_range();
-                }
+            if *banded && let Ok((_, mut range)) = ranges.get_mut(entity) {
+                *range = solid_range();
             }
             return;
         }
