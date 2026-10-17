@@ -18,7 +18,7 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 |---|---|---|---|---|
 | bench | sonnet | 1 | banc bataille `--bench-battle` (calme + mêlée), script A/B alterné | fusionné (eb3f8e4fb) ; tests non lancés (machine chargée) → fournée de fusion |
 | cperf | opus | 1 | campagne : `fade_maquettes`/VisibilityRange 3,8 ms, rafale de spawns en descente, marge p95 | lancé |
-| blight | opus | 1 | bataille : lumière, contraste, voile, perspective aérienne, mise à l'échelle 3D si marge | lancé |
+| blight | opus | 1 | bataille : lumière, contraste, voile, perspective aérienne, mise à l'échelle 3D si marge | fusionné ; voile remplacé par perspective aérienne (`fog.clear.aerial`), soleil 30°/2,2, ambiante réduite, `ssao_quality` lu ; reste : banc calme, SSAO ultra, tonemapping, aerial pluie/neige |
 | rivers | opus | 1 | campagne : rivières réalistes (couleur, berges, reflets, lisibles à toute distance) | fusionné (0366d89f4) ; reste : liseré clair des bords trop « trait de carte », bande de sol mouillé hors ruban, river_fine.wesl, brume sur l'eau |
 | cground | opus | 1 | campagne : sol de près (parcelles, matières, colormap, variation) | fusionné ; `ground_detail.wesl` + `data/fx/ground_detail.json`, réglage `ground_detail` 0/1/2 ; écart-type +16 % (Godot ×1,6 non atteint) ; reste : relief/haies, contraste après regard du joueur |
 | rivers2 | opus | 2 | rivières : liseré clair, bande de sol mouillé, brume sur l'eau, river_fine | lancé |
@@ -30,3 +30,4 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 - 17/10 : vq-rivers fusionné (bleu-gris sombre, hauts-fonds boueux, reflet rasant, éclat ; coût nul au bruit près ; `river_display.json > look`). Disque 13 Go libres.
 - 17/10 : vq-cground fusionné (parcelles contrastées par saison, dérive de sol, bandes au plancher caméra ; coût ≤ bruit, à remesurer au calme).
 - 17/10 : disque revenu à 122 Go libres ; vague 2 lancée (rivers2, cgrade).
+- 17/10 : vq-blight fusionné (pas de MetalFX côté Bevy : bataille déjà en natif).
