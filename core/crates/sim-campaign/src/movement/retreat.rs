@@ -110,12 +110,29 @@ pub fn retreat_target_after(
         .rev()
         .collect();
     let budget = km_to_grid_points(data, rules.friendly_radius_steps * points_per_step(data));
-    if let Some((cell, _)) =
-        navigation::bounded_dijkstra(grid, start, budget, blocker, |cell, _| {
-            friendly.contains_key(&cell)
+    // A beaten army leaves the province of the battle (Total War style): a friendly place a few
+    // kilometres away in the same province would leave both armies side by side. It falls back
+    // there only when no friendly place of another province is in reach.
+    let battle_province = data.province_at_point(battlefield[0], battlefield[1]);
+    let outside: std::collections::BTreeSet<Cell> = friendly
+        .iter()
+        .filter(|(_, id)| {
+            battle_province.is_none_or(|province| {
+                state
+                    .settlement_province(id)
+                    .is_some_and(|other| other != province)
+            })
         })
-    {
-        return Some(Retreat::Friendly(friendly[&cell].clone()));
+        .map(|(cell, _)| *cell)
+        .collect();
+    for candidates in [&outside, &friendly.keys().copied().collect()] {
+        if let Some((cell, _)) =
+            navigation::bounded_dijkstra(grid, start, budget, blocker, |cell, _| {
+                candidates.contains(&cell)
+            })
+        {
+            return Some(Retreat::Friendly(friendly[&cell].clone()));
+        }
     }
     // A crushed army, or one with no refuge left in reach (deep in
     // enemy land, or hemmed in by enemy zones of control), routs.
@@ -191,6 +208,17 @@ pub(crate) fn retreat_beaten_army(
     let rules = data.retreat_rules();
     match retreat {
         Retreat::Friendly(target) => {
+            push_retreat_event(
+                state,
+                data,
+                army_id,
+                format!(
+                    "{}, battu, se replie sur {}.",
+                    crate::events::capitalize(&state.army_name(data, army_id)),
+                    data.settlement_name(&target)
+                ),
+                events,
+            );
             move_beaten_army(state, data, army_id, ArmyPosition::Settlement(target))
         }
         Retreat::Fallback(point) => {

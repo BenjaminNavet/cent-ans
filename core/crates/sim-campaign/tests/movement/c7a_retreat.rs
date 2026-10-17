@@ -93,15 +93,25 @@ fn an_allied_or_own_place_next_door_is_the_refuge() {
     let data = game_data();
     let (mut state, english) = english_at_saint_denis(data);
     let start = data.settlement_point(&set("set_saint_denis")).unwrap();
+    let battle_province = state
+        .settlement_province(&set("set_paris"))
+        .unwrap()
+        .clone();
+    // The nearest place of the battle province itself is skipped (camprules): the beaten
+    // army leaves the province, to the nearest friendly place of another one.
     let neighbour = sim_campaign::march::nearest_settlement_where(data, start, |id| {
-        id != &set("set_saint_denis") && id != &set("set_paris")
+        id != &set("set_saint_denis") && state.settlement_province(id) == Some(&battle_province)
     })
     .unwrap();
     state.settlements.get_mut(&neighbour).unwrap().controller = fac("fac_england");
-    assert_eq!(
-        retreat_target(&state, data, &english, paris(data)),
-        Some(Retreat::Friendly(neighbour))
-    );
+    match retreat_target(&state, data, &english, paris(data)) {
+        Some(Retreat::Friendly(target)) => {
+            assert_ne!(target, neighbour);
+            assert_ne!(state.settlement_province(&target), Some(&battle_province));
+            assert!(state.is_friendly_settlement(&fac("fac_england"), &target));
+        }
+        other => panic!("expected a friendly retreat, got {other:?}"),
+    }
 }
 
 #[test]

@@ -5,6 +5,7 @@ mod c7_retinue;
 mod cv3_encounters;
 mod cv3_outcomes;
 mod cv3_postures;
+mod fix_camprules;
 mod nt5_cap_engines;
 mod rg7_recruit_field;
 mod tw2_t2_replenish;

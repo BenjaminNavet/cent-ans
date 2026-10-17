@@ -201,7 +201,7 @@ pub fn turn_readiness(
             "free_slot".to_owned(),
             "free_slot",
             Severity::Info,
-            format!("{free_slots} emplacement(s) de construction libre(s)"),
+            format!("{free_slots} colonie(s) sans chantier en cours"),
         );
         a.province = first_province;
         alerts.push(a);
