@@ -113,6 +113,7 @@ impl Plugin for CampaignTerrainPlugin {
                     coast::bind_coast,
                     look::sync_cumulus,
                     ensure_lod,
+                    lod::sync_relief_quality,
                     update_lod
                         .after(CameraSet)
                         .run_if(resource_exists::<TerrainLod>)

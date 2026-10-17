@@ -54,3 +54,10 @@ tour 4, 1 730 au tour 8 (+4,4 k entités en 4 tours, caméra suivant le rejeu). 
 `update_targets`. Après : entités 49,1 k -> 49,0 k du tour 4 au tour 8 (avant 50,3 k -> 54,7 k).
 Les 8 059 murets / 4 194 cabanes de vigne apparaissent d'un coup entre les tours 3 et 4 puis restent stables
 (file de création budgétée, pas une fuite).
+
+## Densité du relief : le préréglage n'était pas appliqué (ADR 0706)
+
+Bissection à d=150 (p50) : sans terrain 22 contre 41 ms ; MSAA ultra (2x carte) +7,6 ms ; `veg` -11 ms ; ombres -7 ms.
+Le client Bevy ignorait `relief_vertex_px` / `relief_items` du préréglage (4 px / 700 nœuds partout, ultra
+prévu à 6 px / 900). Corrigé (`terrain/lod.rs::sync_relief_quality`, `settings/quality.rs`). A/B alterné :
+d=150 30,5 -> 23,2 ms, d=60 45,8 -> 41,2 ms. Écart d'image 4 px contre 6 px : 1,2/255 en moyenne, invisible.

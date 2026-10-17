@@ -70,7 +70,8 @@ impl Default for LookParams {
             fog_mist: Vec4::new(mist.red, mist.green, mist.blue, 0.10),
             fog_map: Vec4::new(1.0, 1.0, 0.0, 0.030),
             weather: Vec4::ZERO,
-            // `relief_lod::Config::default()`: max_vertex_px 4, morph_ratio 0.7.
+            // `relief_lod::Config::default()`: max_vertex_px 4, morph_ratio 0.7; the vertex px is then
+            // replaced by the preset's `relief_vertex_px` (`lod::sync_relief_quality`).
             morph: Vec4::new(1.0, 4.0, 0.7, 0.0),
             cumulus_a: Vec4::new(0.0, 0.032, 0.10, 0.3),
             cumulus_b: Vec4::new(0.22, 0.5, 34.0, 12.0),

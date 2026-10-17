@@ -432,6 +432,34 @@ pub fn update_lod(
     lod.build_ms_last = started.elapsed().as_secs_f32() * 1000.0;
 }
 
+/// Applies the relief density of the quality preset (`relief_vertex_px`, `relief_items`) to the
+/// quadtree selector and to the geomorph of the terrain shader (which must know the same vertex
+/// pixel size). `CENT_ANS_RELIEF_PX` overrides it for experiments.
+pub fn sync_relief_quality(
+    quality: Option<Res<crate::settings::RenderQuality>>,
+    lod: Option<ResMut<TerrainLod>>,
+    mut materials: ResMut<Assets<TerrainMaterial>>,
+    mut applied: Local<Option<(f32, u32)>>,
+) {
+    let (Some(quality), Some(mut lod)) = (quality, lod) else {
+        return;
+    };
+    if quality.relief_vertex_px <= 0.0 || quality.relief_items == 0 {
+        return;
+    }
+    let px = crate::campaign::perf_switch::value("RELIEF_PX").unwrap_or(quality.relief_vertex_px);
+    let wanted = (px, quality.relief_items);
+    if *applied == Some(wanted) {
+        return;
+    }
+    *applied = Some(wanted);
+    lod.config.max_vertex_px = f64::from(px);
+    lod.config.max_items = i64::from(quality.relief_items);
+    if let Some(mut material) = materials.get_mut(&lod.material) {
+        material.look.morph.y = px;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
