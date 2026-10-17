@@ -1,5 +1,7 @@
 # Carte et interface de campagne Godot (M1 + M2 + M3)
 
+> Historique : client Godot retiré le 17/10/2026 (ADR 0366). Les chemins `game/scripts`, `game/scenes`, `game/shaders` et les scripts `godot_*` cités ici n'existent plus (voir l'historique git).
+
 Rendu et interaction de la carte de campagne dans `game/` (GDScript). Aucune règle de jeu
 ici : la scène lit `data/map/` (images + GeoJSON), affiche, remonte des identifiants et soumet
 des ordres à la simulation Rust (`CampaignSim`) via l'autoload `SimFacade`.

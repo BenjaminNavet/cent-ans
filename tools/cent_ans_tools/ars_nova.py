@@ -24,8 +24,6 @@ folder is rewritten from the manifest below. Downloads are cached under
 
 from __future__ import annotations
 
-import hashlib
-import secrets
 import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
@@ -297,52 +295,6 @@ def write_source_md() -> None:
     (ARS_NOVA_DIR / "SOURCE.md").write_text("\n".join(lines), encoding="utf-8")
 
 
-GODOT_UID_ALPHABET = (
-    "abcdefghijklmnopqrstuvwxyz012345678"  # ResourceUID::id_to_text (base 35)
-)
-
-
-def godot_uid(rng: secrets.SystemRandom | None = None) -> str:
-    """A fresh ``uid://...`` string in Godot's text format (random positive 63-bit id)."""
-    value = (rng or secrets.SystemRandom()).getrandbits(63) or 1
-    text = ""
-    while value:
-        value, digit = divmod(value, len(GODOT_UID_ALPHABET))
-        text = GODOT_UID_ALPHABET[digit] + text
-    return "uid://" + text
-
-
-def write_import_file(ogg: Path) -> None:
-    """Write the Godot ``.import`` sidecar of a music ``.ogg`` (same params as the DA4 bank).
-
-    Godot names the imported file ``<name>-<md5 of the res:// path>``; an existing sidecar is
-    kept so its uid stays stable.
-    """
-    sidecar = ogg.with_name(ogg.name + ".import")
-    if sidecar.exists():
-        return
-    res_path = "res://" + ogg.relative_to(REPO_DIR / "game").as_posix()
-    digest = hashlib.md5(res_path.encode("utf-8")).hexdigest()  # noqa: S324 - Godot's naming
-    imported = f"res://.godot/imported/{ogg.name}-{digest}.oggvorbisstr"
-    sidecar.write_text(
-        "[remap]\n\n"
-        'importer="oggvorbisstr"\n'
-        'type="AudioStreamOggVorbis"\n'
-        f'uid="{godot_uid()}"\n'
-        f'path="{imported}"\n\n'
-        "[deps]\n\n"
-        f'source_file="{res_path}"\n'
-        f'dest_files=["{imported}"]\n\n'
-        "[params]\n\n"
-        "loop=false\n"
-        "loop_offset=0\n"
-        "bpm=0\n"
-        "beat_count=0\n"
-        "bar_beats=4\n",
-        encoding="utf-8",
-    )
-
-
 def main() -> None:
     """Download, cut, convert and credit every DA7a track (idempotent)."""
     failures: list[str] = []
@@ -359,10 +311,6 @@ def main() -> None:
         except Exception as exc:  # noqa: BLE001 - reported, not fatal for the whole run
             failures.append(f"{track.out_name}: {exc}")
             print(f"  echec: {exc}")
-    for track in ARS_NOVA_TRACKS:
-        ogg = ARS_NOVA_DIR / f"{track.out_name}.ogg"
-        if ogg.exists():
-            write_import_file(ogg)
     write_source_md()
     if failures:
         print("\nEchecs (relancer pour reessayer) :")

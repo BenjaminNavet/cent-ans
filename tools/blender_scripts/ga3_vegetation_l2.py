@@ -819,45 +819,8 @@ def grass_tuft(dilate: int = 1) -> np.ndarray:
     return arr
 
 
-IMPORT_PARAMS = """[params]
-
-compress/mode=2
-compress/high_quality=true
-compress/lossy_quality=0.7
-compress/uastc_level=0
-compress/rdo_quality_loss=0.0
-compress/hdr_compression=1
-compress/normal_map=2
-compress/channel_pack=0
-mipmaps/generate=true
-mipmaps/limit=-1
-roughness/mode=0
-roughness/src_normal=""
-process/channel_remap/red=0
-process/channel_remap/green=1
-process/channel_remap/blue=2
-process/channel_remap/alpha=3
-process/fix_alpha_border={border}
-process/premult_alpha=false
-process/normal_map_invert_y=false
-process/hdr_as_srgb=false
-process/hdr_clamp_exposure=false
-process/size_limit=0
-detect_3d/compress_to=0
-"""
-
-
-def _write_import(png: Path, fix_border: bool) -> None:
-    """Godot import settings of the FC textures (VRAM, mipmaps), filled in by ``--import``."""
-    target = png.with_suffix(".png.import")
-    if target.exists():
-        return
-    body = '[remap]\n\nimporter="texture"\ntype="CompressedTexture2D"\n\n'
-    target.write_text(body + IMPORT_PARAMS.format(border=str(fix_border).lower()))
-
-
 def atlas_step() -> None:
-    """Write the four GA3 textures (and their import settings) and the species table."""
+    """Write the four GA3 textures and the species table."""
     species_step()
     gains: dict[str, list[float]] = {}
     albedo, normal = impostor_atlases(gains=gains)
@@ -889,9 +852,8 @@ def atlas_step() -> None:
         "ga3_leaf_cards.png": (leaf_cards(), True),
         "ga3_grass_tuft.png": (grass_tuft(), True),
     }
-    for name, (arr, border) in outputs.items():
+    for name, (arr, _border) in outputs.items():
         _save(arr, OUT_TEX / name)
-        _write_import(OUT_TEX / name, border)
     tuft = outputs["ga3_grass_tuft.png"][0]
     old = _load(VEG / "campaign_grass_tuft.png")
     print(

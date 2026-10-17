@@ -1,5 +1,7 @@
 # Villes emblématiques à l'échelle 1:1 — format `landmark` v2 (ADR 0078)
 
+> Historique : client Godot retiré le 17/10/2026 (ADR 0366). Les chemins `game/scripts`, `game/scenes`, `game/shaders` et les scripts `godot_*` cités ici n'existent plus (voir l'historique git).
+
 Lots VH0 et VH4 (chantier VH, `docs/archive/chantiers.md`). Ce document décrit le format
 et le moteur pour les lots qui ajoutent des villes : **VH5 Paris, VH6 Londres, VH7 Orléans**, puis
 VH8 (Bordeaux, Avignon, Calais, Bruges). Rouen vers 1340 (`data/landmarks_v2/rouen.json`) sert

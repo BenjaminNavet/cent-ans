@@ -28,12 +28,6 @@ def _shader_tile_sizes() -> list[float]:
     return values
 
 
-def test_shader_tile_sizes_match_yaml():
-    """The shader projects each layer with the tile side of its yaml entry."""
-    entries = material_gen.load_materials()["materials"]
-    assert _shader_tile_sizes() == pytest.approx([float(e["tile_m"]) for e in entries])
-
-
 def test_scanned_layers_are_the_sr1_assets():
     """SR1 table: 8 ambientCG scans in layer order, 4 generated layers kept."""
     entries = material_gen.load_materials()["materials"]

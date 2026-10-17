@@ -34,9 +34,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
 from scipy import ndimage
 
-from cent_ans_tools.ink_icons import ensure_import_settings
-from cent_ans_tools.portraits import PortraitJob
 from cent_ans_tools.paths import REPO_DIR
+from cent_ans_tools.portraits import PortraitJob
 
 CATALOG_PATH = REPO_DIR / "data" / "ui" / "entity_icons.json"
 RAW_DIR = REPO_DIR / "tools" / "da5b_raw"
@@ -355,7 +354,6 @@ def build(catalog: dict | None = None) -> dict[str, list[str]]:
             continue
         picture, crop = found
         compose(picture, catalog).save(entry.out_path, optimize=True)
-        ensure_import_settings(entry.out_path)
         report["generated" if entry.generated else "derived"].append(entry.id)
         crops[entry.id] = [crop.x, crop.y, crop.scale]
         for target in entry.targets:

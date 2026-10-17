@@ -1,5 +1,7 @@
 # Outils Python (`tools/`)
 
+> Historique : client Godot retiré le 17/10/2026 (ADR 0366). Les chemins `game/scripts`, `game/scenes`, `game/shaders` et les scripts `godot_*` cités ici n'existent plus (voir l'historique git).
+
 Projet `cent-ans-tools`, géré avec `uv` (Python 3.12+). Toutes les commandes se lancent
 depuis la racine du dépôt avec `uv run --project tools ...`.
 

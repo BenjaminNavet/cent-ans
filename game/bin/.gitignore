@@ -1,6 +1,0 @@
-# Built by core/build.sh (macOS, Linux) and core/build-windows.sh (Windows)
-*.dylib
-*.so
-*.dll
-*.pdb
-*.so
