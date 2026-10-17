@@ -16,7 +16,7 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 
 | Lot | Modèle | Vague | Objet | État |
 |---|---|---|---|---|
-| bench | sonnet | 1 | banc bataille `--bench-battle` (calme + mêlée), script A/B alterné | lancé |
+| bench | sonnet | 1 | banc bataille `--bench-battle` (calme + mêlée), script A/B alterné | fusionné (eb3f8e4fb) ; tests non lancés (machine chargée) → fournée de fusion |
 | cperf | opus | 1 | campagne : `fade_maquettes`/VisibilityRange 3,8 ms, rafale de spawns en descente, marge p95 | lancé |
 | blight | opus | 1 | bataille : lumière, contraste, voile, perspective aérienne, mise à l'échelle 3D si marge | lancé |
 | rivers | opus | 1 | campagne : rivières réalistes (couleur, berges, reflets, lisibles à toute distance) | lancé |
@@ -24,3 +24,4 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 
 ## Journal
 - 17/10 0 h 45 : état de départ, ADR 0404, vague 1 (5 lots).
+- 17/10 : vq-bench fusionné dans vq/integ (`tools/bevy_bench/ab.sh`, `--bench-battle`). Disque à 22 Go libres : garde-disque VQ (scratchpad vq_disk_guard.sh), tests reportés à la fusion.
