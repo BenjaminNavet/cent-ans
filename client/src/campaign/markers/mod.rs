@@ -69,6 +69,7 @@ impl Plugin for CampaignMarkersPlugin {
                         update_pins,
                         sink_maquettes,
                         refresh_signs,
+                        fit_shore,
                         settle_ground,
                         update_range,
                         lod::fade_maquettes,
@@ -400,7 +401,9 @@ fn build_markers(
                         lift: 0.0,
                         footprint: 0.0,
                     },
-                    ShoreFit { radius: width * 0.5 },
+                    ShoreFit {
+                        radius: width * 0.5,
+                    },
                     ChildOf(root_entity),
                 ))
                 .with_children(|parent| {
@@ -904,11 +907,10 @@ fn update_range(
 /// Re-applies the displayed ground height to every anchored object: once the terrain exists, for
 /// new anchors, and whenever the relief exaggeration (camera zoom) changes.
 fn settle_ground(
-    mut commands: Commands,
     ground: GroundHeight,
     relief: Option<Res<crate::campaign::countryside::ReliefVersion>>,
-    fresh: Query<(), Added<GroundAnchor>>,
-    mut anchored: Query<(Entity, &mut GroundAnchor, &mut Transform, Option<&ShoreFit>)>,
+    fresh: Query<(), Changed<GroundAnchor>>,
+    mut anchored: Query<(&GroundAnchor, &mut Transform)>,
     mut stats: ResMut<MarkerStats>,
     mut was_ready: Local<bool>,
 ) {
@@ -920,21 +922,9 @@ fn settle_ground(
     if !changed {
         return;
     }
-    // Coastal maquettes are first pulled inland so the block no longer hangs over the sea.
-    let is_water = |p: Vec2| ground.at(p.x, p.y).is_some_and(|h| h <= 0.0);
     let (mut count, mut lo, mut hi) = (0usize, f32::MAX, f32::MIN);
-    for (entity, mut anchor, mut t, fit) in &mut anchored {
-        if let Some(fit) = fit {
-            let at = placement::shore_fit(anchor.px, fit.radius, &is_water);
-            if at != anchor.px {
-                anchor.px = at;
-                t.translation.x = at.x;
-                t.translation.z = at.y;
-                stats.shore_moved += 1;
-            }
-            commands.entity(entity).remove::<ShoreFit>();
-        }
-        let y = anchored_y(&ground, &anchor);
+    for (anchor, mut t) in &mut anchored {
+        let y = anchored_y(&ground, anchor);
         if (t.translation.y - y).abs() > 1e-4 {
             t.translation.y = y;
         }
@@ -946,6 +936,30 @@ fn settle_ground(
     if count > 0 {
         stats.ground_min = lo;
         stats.ground_max = hi;
+    }
+}
+
+/// Pulls coastal maquettes inland (`placement::shore_fit`) once the terrain exists, before
+/// `settle_ground` seats them: the block no longer hangs over the sea.
+fn fit_shore(
+    mut commands: Commands,
+    ground: GroundHeight,
+    mut pending: Query<(Entity, &mut GroundAnchor, &mut Transform, &ShoreFit)>,
+    mut stats: ResMut<MarkerStats>,
+) {
+    if !ground.is_ready() || pending.is_empty() {
+        return;
+    }
+    let is_water = |p: Vec2| ground.at(p.x, p.y).is_some_and(|h| h <= 0.0);
+    for (entity, mut anchor, mut t, fit) in &mut pending {
+        let at = placement::shore_fit(anchor.px, fit.radius, &is_water);
+        if at != anchor.px {
+            anchor.px = at;
+            t.translation.x = at.x;
+            t.translation.z = at.y;
+            stats.shore_moved += 1;
+        }
+        commands.entity(entity).remove::<ShoreFit>();
     }
 }
 
