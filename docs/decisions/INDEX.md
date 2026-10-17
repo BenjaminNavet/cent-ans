@@ -297,5 +297,6 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0404 | [Seuil de perf des lots de qualité visuelle](0404-seuil-perf-qualite-visuelle.md) | accepté |
 | 0405 | [Fondu des maquettes par bande et budget de spawn partagé](0405-fondu-par-bande-et-budget-de-spawn.md) | accepté |
 | 0406 | [Lumière de bataille : perspective aérienne et rapport soleil/ciel](0406-lumiere-bataille-perspective-aerienne.md) | accepté |
+| 0456 | [Historique client dans la sauvegarde](0456-historique-client-dans-la-sauvegarde.md) | accepté |
 | 0476 | [Le vaincu se replie hors de la province de la bataille](0476-repli-hors-de-la-province.md) | accepté |
 | 0496 | [Géographie de la carte : lacs au vrai niveau, côte lissée, maquettes hors de la mer](0496-geographie-carte-lacs-cotes-maquettes.md) | accepté |

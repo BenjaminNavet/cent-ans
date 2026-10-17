@@ -475,6 +475,11 @@ fn campaign_start(
     if !enabled(&settings) {
         return;
     }
+    // The opening speech belongs to the first turn: a loaded game or a return from a battle
+    // re-enters the campaign screen without hearing it again.
+    if sim.state.as_ref().is_some_and(|state| state.turn() > 0) {
+        return;
+    }
     let faction = sim.player.as_str().to_string();
     if let Some(line) = state
         .advisor

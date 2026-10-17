@@ -33,6 +33,10 @@ pub struct SaveWrapper {
     #[serde(default)]
     pub timestamp: String,
     pub state: String,
+    /// Opaque history kept by the client (journal, chronicle, feudal events…): the core's state
+    /// does not hold it. Absent in older saves (ADR 0456).
+    #[serde(default, skip_serializing_if = "serde_json::Value::is_null")]
+    pub client: serde_json::Value,
 }
 
 fn default_difficulty() -> String {
@@ -116,6 +120,17 @@ pub fn write_save(
     state: &CampaignState,
     timestamp: &str,
 ) -> Result<PathBuf, String> {
+    write_save_with_client(dir, save_name, state, timestamp, serde_json::Value::Null)
+}
+
+/// [`write_save`] plus the client's own history (`client`, `Null` for none).
+pub fn write_save_with_client(
+    dir: &Path,
+    save_name: &str,
+    state: &CampaignState,
+    timestamp: &str,
+    client: serde_json::Value,
+) -> Result<PathBuf, String> {
     std::fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
     let wrapper = SaveWrapper {
         version: SAVE_VERSION,
@@ -125,6 +140,7 @@ pub fn write_save(
         difficulty: state.difficulty().key().to_owned(),
         timestamp: timestamp.to_owned(),
         state: state.save_json(),
+        client,
     };
     let path = save_path(dir, save_name);
     let text = serde_json::to_string(&wrapper).map_err(|e| e.to_string())?;
@@ -152,7 +168,11 @@ pub fn read_save(path: &Path) -> Result<SaveWrapper, String> {
 
 /// Restores the campaign of a save file, with the same post-load fixes as `load_from_string`.
 pub fn load_save(data: &GameData, path: &Path) -> Result<CampaignState, String> {
-    let wrapper = read_save(path)?;
+    load_state(data, &read_save(path)?)
+}
+
+/// The campaign of an already read wrapper, with the post-load fixes.
+pub fn load_state(data: &GameData, wrapper: &SaveWrapper) -> Result<CampaignState, String> {
     let mut state = CampaignState::load_json(&wrapper.state).map_err(|e| e.to_string())?;
     sim_campaign::council::ensure_councils(&mut state, data);
     sim_campaign::march::unstick_field_armies(&mut state, data);
@@ -233,6 +253,33 @@ mod tests {
         assert_eq!(loaded.save_json(), state.save_json());
         delete_save(&dir, "ma partie:1");
         assert_eq!(list_saves(&dir).len(), 1);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn client_history_round_trips_and_old_saves_load_without_it() {
+        let data = data_model::test_support::game_data();
+        let state = sim_campaign::test_support::start_quiet(data, "fac_england", 1337);
+        let dir =
+            std::env::temp_dir().join(format!("cent-ans-saves-client-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let history = serde_json::json!({
+            "chronicle": {"lines": [["war", "Bataille"]], "world": [], "letters": [], "turns": 3},
+            "feudal_recent": [{"date": "Printemps 1337", "text": "Hommage"}],
+        });
+        let path =
+            write_save_with_client(&dir, "a", &state, "2026-10-15T10:00:00", history.clone())
+                .unwrap();
+        assert_eq!(read_save(&path).unwrap().client, history);
+        // A save without the field (older, or written by `write_save`) reads back as Null.
+        let plain = write_save(&dir, "b", &state, "2026-10-15T10:00:01").unwrap();
+        assert!(read_save(&plain).unwrap().client.is_null());
+        let text = std::fs::read_to_string(&plain).unwrap();
+        assert!(!text.contains("\"client\""));
+        assert_eq!(
+            load_save(data, &path).unwrap().save_json(),
+            state.save_json()
+        );
         let _ = std::fs::remove_dir_all(&dir);
     }
 
