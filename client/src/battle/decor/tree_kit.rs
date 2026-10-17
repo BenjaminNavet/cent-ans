@@ -18,6 +18,8 @@
 //! `decor_saturation` and with the alpha raised in the small mips so the crowns do not empty out
 //! at a distance), so Bevy's standard pipeline (shadows, prepass, alpha mask) draws them.
 
+#![allow(clippy::chunks_exact_to_as_chunks, clippy::too_many_arguments)]
+
 use std::f32::consts::TAU;
 
 use bevy::asset::RenderAssetUsages;
