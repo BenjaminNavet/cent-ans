@@ -211,7 +211,7 @@ pub(super) fn prepare_maquette(
         maquette.meshes.push(entity);
         commands
             .entity(entity)
-            .try_insert(VisibilityRange::abrupt(0.0, f32::MAX));
+            .try_insert(solid_range());
         stats.range_meshes += 1;
         let is_banner = names
             .get(entity)
@@ -328,7 +328,16 @@ pub fn in_fade_band(limit: f32, margin: f32, rig: f32) -> bool {
 
 /// The constant range of a mesh outside the fade band.
 pub fn solid_range() -> VisibilityRange {
-    VisibilityRange::abrupt(0.0, f32::MAX)
+    if crate::campaign::perf_switch::off("fadesoftsolid") {
+        // Dev experiment: a constant but crossfading range (dither pipeline variant kept).
+        VisibilityRange {
+            start_margin: 0.0..0.0,
+            end_margin: 1.0e8..1.0e8 + 1.0e4,
+            use_aabb: false,
+        }
+    } else {
+        VisibilityRange::abrupt(0.0, f32::MAX)
+    }
 }
 
 /// Dithered fade of every maquette mesh at the end of its kind's range, on the rig distance.

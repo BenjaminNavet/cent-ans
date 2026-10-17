@@ -461,7 +461,7 @@ fn build_markers(
                             controller: p.controller.clone(),
                         },
                         bevy::light::NotShadowCaster,
-                        bevy::camera::visibility::VisibilityRange::abrupt(0.0, f32::MAX),
+                        lod::solid_range(),
                     ));
                 }
             }
