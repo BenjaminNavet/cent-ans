@@ -11,4 +11,7 @@
 - Données : `edges`, `inner` dans `data/fx/ground_detail.json` + schéma.
 
 ## Reste / mesures
-Voir bas de fichier une fois mesuré.
+- Captures (6 sur 6 non dépassé, hors dépôt) : Paris d=60 avant/après : les facettes se lisent maintenant comme des parcelles douces aux bords courbes, lignes sombres discrètes ; d=100 idem (reste un peu polygonal, bruns encore marqués). d=25 / d=200 non jugés sur du labour (cadrage tombé en forêt).
+- A/B alterné 3 paires, banc carte, ground_detail 0 vs 2 (machine à charge ~125) : p50 31,75 -> 33,52 (+1,8 ms), p95 72,8 -> 69,9 (bruit). Le surcoût de ce lot seul (2 bruits de warp + 2 de variation interne + lignes) est une fraction de cela.
+- Tests : `cargo test --release --lib ground_detail`, clippy release, schémas verts.
+- Reste : bruns / ploughed encore contrastés (baisser `tints.brown`), lanières visibles seulement au plancher caméra, vérif visuelle d=25 / d=200 sur zone de labour (Beauce), poids de bocage par région dépend de `hedge_k` de la rangée (pas de masque dédié).

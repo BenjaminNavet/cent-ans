@@ -78,9 +78,9 @@
   },
   "edges": {
     "soft_m": 35.0,
-    "line_amp": 0.14,
+    "line_amp": 0.2,
     "line_width_m": 5.0,
-    "warp_amp_cells": 0.7,
+    "warp_amp_cells": 0.9,
     "warp_period_cells": 3.0,
     "bocage_gain": 1.2
   }
