@@ -17,7 +17,7 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 | Lot | Modèle | Vague | Objet | État |
 |---|---|---|---|---|
 | bench | sonnet | 1 | banc bataille `--bench-battle` (calme + mêlée), script A/B alterné | fusionné (eb3f8e4fb) ; tests non lancés (machine chargée) → fournée de fusion |
-| cperf | opus | 1 | campagne : `fade_maquettes`/VisibilityRange 3,8 ms, rafale de spawns en descente, marge p95 | lancé |
+| cperf | opus | 1 | campagne : `fade_maquettes`/VisibilityRange 3,8 ms, rafale de spawns en descente, marge p95 | fusionné (ADR 0405) ; −3,3 ms CPU/image, pire image de descente 250 → 140 ms ; reste : rafale de départ (pluie/neige/bannières/nuages/villes, plancher 130 ms), énigme GPU à vérifier au calme |
 | blight | opus | 1 | bataille : lumière, contraste, voile, perspective aérienne, mise à l'échelle 3D si marge | fusionné ; voile remplacé par perspective aérienne (`fog.clear.aerial`), soleil 30°/2,2, ambiante réduite, `ssao_quality` lu ; reste : banc calme, SSAO ultra, tonemapping, aerial pluie/neige |
 | rivers | opus | 1 | campagne : rivières réalistes (couleur, berges, reflets, lisibles à toute distance) | fusionné (0366d89f4) ; reste : liseré clair des bords trop « trait de carte », bande de sol mouillé hors ruban, river_fine.wesl, brume sur l'eau |
 | cground | opus | 1 | campagne : sol de près (parcelles, matières, colormap, variation) | fusionné ; `ground_detail.wesl` + `data/fx/ground_detail.json`, réglage `ground_detail` 0/1/2 ; écart-type +16 % (Godot ×1,6 non atteint) ; reste : relief/haies, contraste après regard du joueur |
@@ -34,3 +34,4 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 - 17/10 : vq-blight fusionné (pas de MetalFX côté Bevy : bataille déjà en natif).
 - 17/10 : vq-rivers2 fusionné (berges sombres, bande mouillée 3 px, DistanceFog sur l'eau ; coût nul).
 - 17/10 : vq-cgrade fusionné ; capture d=60 : parcelles cground en facettes polygonales → lot cground2.
+- 17/10 : vq-cperf fusionné (fondu par bande + plages quantifiées : la table RenderVisibilityRanges de Bevy saturait ; budget de spawn partagé).
