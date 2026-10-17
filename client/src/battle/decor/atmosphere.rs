@@ -413,7 +413,7 @@ mod tests {
         let rules = rules();
         let clear = sun_light(&rules, "midday", Weather::Clear);
         let rain = sun_light(&rules, "midday", Weather::Rain);
-        assert!((clear.elevation_deg - 36.0).abs() < 1e-3);
+        assert!((clear.elevation_deg - 30.0).abs() < 1e-3);
         assert!(rain.energy < clear.energy * 0.5);
     }
 

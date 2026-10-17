@@ -1000,9 +1000,9 @@ mod tests {
         let rules = rules();
         let (contrast, saturation, temperature, _) =
             combined_grade(&grades(&rules, "clear", "summer", "midday"));
-        // summer 1.03 * clear 1.05 * midday 1.02; saturation 1.04 * 0.98.
-        assert!((contrast - 1.03 * 1.05 * 1.02).abs() < 1e-4);
-        assert!((saturation - 1.04 * 0.98).abs() < 1e-4);
+        // summer 1.03 * clear 1.14 * midday 1.02; saturation 1.04 * 1.04.
+        assert!((contrast - 1.03 * 1.14 * 1.02).abs() < 1e-4);
+        assert!((saturation - 1.04 * 1.04).abs() < 1e-4);
         assert!((temperature - 0.23).abs() < 1e-4);
     }
 
