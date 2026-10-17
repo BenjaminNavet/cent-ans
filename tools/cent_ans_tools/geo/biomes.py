@@ -318,8 +318,20 @@ def classify_koppen(inputs: BiomeInputs, legend: dict) -> np.ndarray:
 
     atlantic = atlantic_distance_km(inputs, rules["atlantic_boxes"])
     far = atlantic > rules["oceanic_max_km"]
-    biome = np.where((biome == ids["oceanic"]) & far, ids["continental"], biome)
-    del atlantic, far
+    # Island of Britain (lot england): its Cfb is oceanic wherever it lies (the North Sea south of
+    # 53.3 N is not "Atlantic", which made London and the south-east continental open field).
+    island = np.zeros(inputs.shape, dtype=bool)
+    for lon0, lat0, lon1, lat1 in rules.get("oceanic_land_boxes", []):
+        island |= (
+            (inputs.lon >= lon0)
+            & (inputs.lon <= lon1)
+            & (inputs.lat >= lat0)
+            & (inputs.lat <= lat1)
+        )
+    biome = np.where(
+        (biome == ids["oceanic"]) & far & ~island, ids["continental"], biome
+    )
+    del atlantic, far, island
 
     cold_b = _code_mask(koppen, legend, ["Dfb", "Dsb", "Dwb"])
     boreal = cold_b & (inputs.lat >= rules["boreal_min_lat"])
@@ -789,3 +801,30 @@ def build(map_dir: Path = MAP_DIR, legend_path: Path = LEGEND_PATH) -> list[Path
         write_parents(map_dir, legend),
         map_dir / "map.json",
     ]
+
+
+def patch_island(map_dir: Path = MAP_DIR, legend_path: Path = LEGEND_PATH) -> list[Path]:
+    """Re-label continental land of ``rules.oceanic_land_boxes`` as oceanic, in place.
+
+    Lot england: the baked ``biomes.png`` of the repo is kept as it is (a full ``geo biomes`` bake
+    differs from it on millions of pixels, which would move every other region), only the island
+    of Britain is corrected, the way :func:`classify_koppen` now does on a full bake. Also
+    rewrites ``biomes_base.png``; run ``geo biome-blend`` afterwards.
+    """
+    from PIL import Image
+
+    legend = load_legend(legend_path)
+    ids = indices(legend)
+    biome = read_biomes(map_dir)
+    if biome is None:
+        raise FileNotFoundError("biomes.png absent : lancer `cent-ans geo biomes`")
+    inputs = load_inputs(map_dir, legend, use_koppen=False)
+    island = _box_mask(inputs, legend["rules"].get("oceanic_land_boxes", []))
+    patched = island & (biome == ids["continental"])
+    biome = np.where(patched, np.uint8(ids["oceanic"]), biome).astype(np.uint8)
+    Image.fromarray(biome, mode="L").save(map_dir / BIOMES_NAME, optimize=True)
+    Image.fromarray(collapse_to_base(biome, legend), mode="L").save(
+        map_dir / BASE_NAME, optimize=True
+    )
+    print(f"biomes (île de Bretagne) : {int(patched.sum())} pixels continental -> océanique")
+    return [map_dir / BIOMES_NAME, map_dir / BASE_NAME]

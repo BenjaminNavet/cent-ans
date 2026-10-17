@@ -345,6 +345,9 @@ fn dump_life(world: &World) -> (String, Value) {
             "load_ms": stats.load_ms,
             "places": places.places.len(),
             "sites": { "plumes": kinds[0], "mills": kinds[1], "fires": kinds[2] },
+            "scene_ambient_cd": world
+                .get_resource::<bevy::light::GlobalAmbientLight>()
+                .map(|a| a.brightness),
             "live": stats.live,
             "visible": stats.visible,
             "draught_beasts": stats.beasts,
