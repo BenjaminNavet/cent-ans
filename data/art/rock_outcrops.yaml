@@ -27,7 +27,7 @@
     "cluster_bias": 0.15,
     "near_distance": 10.0,
     "far_distance": 70.0,
-    "far_scale": 2.6,
+    "far_scale": 1.7,
     "vertical_follow": 0.3,
     "lod_distances": [
       30.0,

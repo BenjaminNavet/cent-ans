@@ -9,7 +9,7 @@
    "behavior": "orbit",
    "flocks": 3,
    "per_flock": 9,
-   "scale": 0.5,
+   "scale": 0.175,
    "color": [
     0.1,
     0.09,
@@ -57,7 +57,7 @@
    "behavior": "transit",
    "flocks": 2,
    "per_flock": 9,
-   "scale": 0.75,
+   "scale": 0.262,
    "color": [
     0.3,
     0.29,
@@ -107,7 +107,7 @@
    "behavior": "orbit",
    "flocks": 2,
    "per_flock": 40,
-   "scale": 0.22,
+   "scale": 0.077,
    "color": [
     0.06,
     0.06,
@@ -155,7 +155,7 @@
    "behavior": "orbit",
    "flocks": 3,
    "per_flock": 6,
-   "scale": 0.55,
+   "scale": 0.193,
    "color": [
     0.92,
     0.92,
@@ -197,7 +197,7 @@
    "behavior": "wade",
    "flocks": 2,
    "per_flock": 10,
-   "scale": 0.55,
+   "scale": 0.193,
    "color": [
     0.93,
     0.52,
@@ -250,7 +250,7 @@
    "behavior": "wade",
    "flocks": 2,
    "per_flock": 6,
-   "scale": 0.7,
+   "scale": 0.245,
    "color": [
     0.45,
     0.46,
@@ -307,7 +307,7 @@
    "behavior": "perch",
    "flocks": 6,
    "per_flock": 1,
-   "scale": 0.6,
+   "scale": 0.21,
    "color": [
     0.93,
     0.93,
@@ -354,7 +354,7 @@
    "behavior": "orbit",
    "flocks": 3,
    "per_flock": 2,
-   "scale": 0.9,
+   "scale": 0.315,
    "color": [
     0.16,
     0.12,
@@ -395,7 +395,7 @@
    "behavior": "wade",
    "flocks": 2,
    "per_flock": 3,
-   "scale": 0.7,
+   "scale": 0.245,
    "color": [
     0.45,
     0.46,
@@ -452,7 +452,7 @@
    "behavior": "wade",
    "flocks": 2,
    "per_flock": 3,
-   "scale": 0.8,
+   "scale": 0.28,
    "color": [
     0.45,
     0.46,

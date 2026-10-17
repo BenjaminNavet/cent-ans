@@ -168,6 +168,29 @@ pub fn fit_scale(m: Metrics, axis: FitAxis, target: f32) -> f32 {
     if native > 1e-4 { target / native } else { 1.0 }
 }
 
+/// Meshes of the living map's models never receive shadows: their triangles are sub-pixel from
+/// the campaign cameras and flicker in and out of the cascaded shadow (black and white static on
+/// carts, oxen and herds).
+pub fn unshadow_model_meshes(
+    mut commands: Commands,
+    added: Query<Entity, (Added<Mesh3d>, Without<bevy::light::NotShadowReceiver>)>,
+    parents: Query<&ChildOf>,
+    models: Query<(), With<FitModel>>,
+) {
+    for entity in &added {
+        let mut at = entity;
+        while let Ok(parent) = parents.get(at) {
+            at = parent.parent();
+            if models.contains(at) {
+                commands
+                    .entity(entity)
+                    .try_insert(bevy::light::NotShadowReceiver);
+                break;
+            }
+        }
+    }
+}
+
 /// Measures models whose meshes are ready and gives them their final scale.
 pub fn fit_models(
     mut commands: Commands,

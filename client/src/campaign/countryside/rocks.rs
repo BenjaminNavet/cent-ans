@@ -17,7 +17,8 @@
 //!
 //! Coast rocks (`coast` entries): `coast_rocks.rs` (shore distance raster, coast geology).
 //!
-//! Not ported: the shader albedo gain and pixel fade, the vertical-follow shear, the visible-triangle cap, the
+//! The albedo gain of the catalogue (`color` over `albedo_mean`) is applied to a per-outcrop copy of
+//! the model's materials; not ported: the pixel fade, the vertical-follow shear, the visible-triangle cap, the
 //! pre-examination of flat tiles (the seeding is cheap enough on a thread), simplex noise (a
 //! smooth value noise stands in).
 
@@ -31,7 +32,7 @@ use serde_json::{Value, json};
 use super::LoadedCountryside;
 use super::coast_rocks::{CoastData, CoastRule};
 use super::placement::{Rng, Terrain};
-use super::proto::{Lookup, Prototypes, spawn_prims};
+use super::proto::{Lookup, Proto, ProtoPrim, Prototypes, spawn_prims};
 use crate::app::AppState;
 use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::terrain::surface::GroundHeight;
@@ -57,6 +58,9 @@ pub struct Outcrop {
     pub along_contour: bool,
     /// Coast rock (`coast` block): only the shore counts (no slope, ridge nor heath).
     pub coast: Option<CoastRule>,
+    /// Per-channel albedo gain of the model (`color` target over `albedo_mean` of the texture):
+    /// the generated rock textures are very dark (mean 0.05-0.1 linear) and rendered black.
+    pub albedo_gain: [f32; 3],
 }
 
 #[derive(Debug, Clone)]
@@ -172,6 +176,7 @@ pub fn parse(
             },
             along_contour: e["along_contour"].as_bool().unwrap_or(false),
             coast: e.get("coast").and_then(CoastRule::parse),
+            albedo_gain: albedo_gain(e),
         })
         .collect();
     RockConfig {
@@ -182,6 +187,26 @@ pub fn parse(
         road_cell_px,
         coast: None,
     }
+}
+
+/// Largest albedo gain (the textures are high contrast: the bright grains clip long before the mean reaches its target).
+const MAX_ALBEDO_GAIN: f32 = 2.6;
+
+/// `color / albedo_mean` per channel of a catalogue entry, 1 when either is missing.
+fn albedo_gain(e: &Value) -> [f32; 3] {
+    let color = triple(&e["color"]);
+    let mean = triple(&e["albedo_mean"]);
+    match (color, mean) {
+        (Some(c), Some(m)) => {
+            std::array::from_fn(|i| (c[i] / m[i].max(1e-3)).clamp(1.0, MAX_ALBEDO_GAIN))
+        }
+        _ => [1.0; 3],
+    }
+}
+
+fn triple(v: &Value) -> Option<[f32; 3]> {
+    let a = v.as_array()?;
+    (a.len() == 3).then(|| std::array::from_fn(|i| a[i].as_f64().unwrap_or(0.0) as f32))
 }
 
 // --- Math ---------------------------------------------------------------------------------
@@ -581,6 +606,10 @@ pub struct RockView {
     pub despawned: usize,
     pub visible: usize,
     pub by_outcrop: HashMap<String, usize>,
+    /// Material of a model per outcrop, base colour multiplied by the outcrop's albedo gain.
+    pub tinted: HashMap<(usize, AssetId<StandardMaterial>), Handle<StandardMaterial>>,
+    /// Mesh with its normals smoothed, per source mesh.
+    pub smoothed: HashMap<AssetId<Mesh>, Handle<Mesh>>,
 }
 
 pub fn build_plan(
@@ -652,6 +681,9 @@ pub fn stream_rocks(
     time: Res<Time>,
     mut budget: ResMut<super::budget::SpawnBudget>,
     frame_count: Res<bevy::diagnostic::FrameCount>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut images: ResMut<Assets<Image>>,
 ) {
     let Some(rig) = rig else {
         return;
@@ -814,7 +846,26 @@ pub fn stream_rocks(
         let Lookup::Ready(proto) = protos.request(&path, &mut commands, &server) else {
             continue;
         };
-        let prims = spawn_prims(&mut commands, &proto, Vec3::ZERO, RockModel);
+        let view = &mut *view;
+        let proto = tinted_proto(
+            &proto,
+            rock.outcrop,
+            o.albedo_gain,
+            &mut view.tinted,
+            &mut materials,
+            &mut view.smoothed,
+            &mut meshes,
+            &mut images,
+            lod,
+        );
+        // Never a shadow receiver: the sub-pixel triangles of a far heap flicker in and out of the
+        // terrain's cascaded shadow (the black and white static of the old render).
+        let prims = spawn_prims(
+            &mut commands,
+            &proto,
+            Vec3::ZERO,
+            (RockModel, bevy::light::NotShadowReceiver),
+        );
         let root = commands
             .spawn((
                 Name::new(format!("rock:{}", o.id)),
@@ -843,6 +894,152 @@ pub fn stream_rocks(
         }
     }
     view.by_outcrop = counts;
+}
+
+/// The model with its materials replaced by gain-adjusted copies, one per outcrop (shared by
+/// every rock of the outcrop, so the GPU still batches them).
+fn tinted_proto(
+    proto: &Proto,
+    outcrop: usize,
+    gain: [f32; 3],
+    cache: &mut HashMap<(usize, AssetId<StandardMaterial>), Handle<StandardMaterial>>,
+    materials: &mut Assets<StandardMaterial>,
+    smoothed: &mut HashMap<AssetId<Mesh>, Handle<Mesh>>,
+    meshes: &mut Assets<Mesh>,
+    images: &mut Assets<Image>,
+    lod: usize,
+) -> Proto {
+    let prims = proto
+        .prims
+        .iter()
+        .map(|p| {
+            let material = cache
+                .entry((outcrop, p.material.id()))
+                .or_insert_with(|| match materials.get(&p.material) {
+                    Some(m) => {
+                        let mut m = m.clone();
+                        let c = m.base_color.to_linear();
+                        m.base_color = Color::linear_rgba(
+                            c.red * gain[0],
+                            c.green * gain[1],
+                            c.blue * gain[2],
+                            1.0,
+                        );
+                        m.alpha_mode = AlphaMode::Opaque;
+                        materials.add(m)
+                    }
+                    None => p.material.clone(),
+                })
+                .clone();
+            let mesh = smoothed
+                .entry(p.mesh.id())
+                .or_insert_with(|| match meshes.get(&p.mesh).and_then(smoothed_normals) {
+                    Some(m) => meshes.add(m),
+                    None => p.mesh.clone(),
+                })
+                .clone();
+            if let Some(clamp) = LOD_MIN_MIP.get(lod).copied().filter(|c| *c > 0.0)
+                && let Some(Some(texture)) = materials
+                    .get(&material)
+                    .map(|m| m.base_color_texture.as_ref().map(Handle::id))
+            {
+                limit_texture_detail(images, texture, clamp);
+            }
+            ProtoPrim {
+                mesh,
+                material,
+                ..p.clone()
+            }
+        })
+        .collect();
+    Proto {
+        prims,
+        lo: proto.lo,
+        hi: proto.hi,
+    }
+}
+
+/// Finest mip level allowed per level of detail. A far rock is a few dozen pixels wide while its
+/// mesh has thousands of triangles and its texture is a patchwork of light grain and dark
+/// cavities: each sub-pixel triangle then picks one patch and the heap shimmers as black and
+/// white noise. Capping the detail makes every triangle read the average of its patch.
+const LOD_MIN_MIP: [f32; 3] = [0.0, 4.0, 5.0];
+
+fn limit_texture_detail(images: &mut Assets<Image>, id: AssetId<Image>, min_mip: f32) {
+    use bevy::image::{ImageSampler, ImageSamplerDescriptor};
+    let current = match images.get(id).map(|i| &i.sampler) {
+        Some(ImageSampler::Descriptor(d)) => d.lod_min_clamp,
+        Some(ImageSampler::Default) => 0.0,
+        None => return,
+    };
+    if current >= min_mip {
+        return;
+    }
+    if let Some(mut image) = images.get_mut(id) {
+        let mut descriptor = match &image.sampler {
+            ImageSampler::Descriptor(d) => d.clone(),
+            ImageSampler::Default => ImageSamplerDescriptor::linear(),
+        };
+        descriptor.lod_min_clamp = min_mip;
+        image.sampler = ImageSampler::Descriptor(descriptor);
+    }
+}
+
+/// Share of the model's largest extent over which normals are averaged.
+const NORMAL_SMOOTHING: f32 = 0.06;
+
+/// Copy of `mesh` whose normals are averaged over the neighbouring vertices. The generated rocks
+/// are scanned heaps whose triangles are smaller than a pixel from the campaign cameras: their
+/// raw normals turn the lighting into salt-and-pepper noise, the averaged ones give the heap a
+/// readable volume (the texture keeps the grain).
+fn smoothed_normals(mesh: &Mesh) -> Option<Mesh> {
+    use bevy::mesh::VertexAttributeValues as V;
+    let positions = match mesh.attribute(Mesh::ATTRIBUTE_POSITION)? {
+        V::Float32x3(p) => p.clone(),
+        _ => return None,
+    };
+    let normals = match mesh.attribute(Mesh::ATTRIBUTE_NORMAL)? {
+        V::Float32x3(n) => n.clone(),
+        _ => return None,
+    };
+    if positions.is_empty() || positions.len() != normals.len() {
+        return None;
+    }
+    let (lo, hi) = positions
+        .iter()
+        .fold((Vec3::MAX, Vec3::MIN), |(lo, hi), p| {
+            (lo.min(Vec3::from(*p)), hi.max(Vec3::from(*p)))
+        });
+    let cell = ((hi - lo).max_element() * NORMAL_SMOOTHING).max(1e-4);
+    let key = |p: &[f32; 3]| (Vec3::from(*p) / cell).floor().as_ivec3();
+    let mut sums: HashMap<IVec3, Vec3> = HashMap::new();
+    for (p, n) in positions.iter().zip(&normals) {
+        *sums.entry(key(p)).or_default() += Vec3::from(*n);
+    }
+    let out: Vec<[f32; 3]> = positions
+        .iter()
+        .zip(&normals)
+        .map(|(p, n)| {
+            let k = key(p);
+            let mut sum = Vec3::ZERO;
+            for dx in -1..=1 {
+                for dy in -1..=1 {
+                    for dz in -1..=1 {
+                        if let Some(s) = sums.get(&(k + IVec3::new(dx, dy, dz))) {
+                            sum += *s;
+                        }
+                    }
+                }
+            }
+            let raw = Vec3::from(*n);
+            // Mostly the neighbourhood, a little of the vertex's own direction.
+            let blended = sum.normalize_or_zero() * 0.85 + raw * 0.15;
+            blended.try_normalize().unwrap_or(raw).to_array()
+        })
+        .collect();
+    let mut smooth = mesh.clone();
+    smooth.insert_attribute(Mesh::ATTRIBUTE_NORMAL, out);
+    Some(smooth)
 }
 
 /// Height on the displayed surface, growth and visibility of the live rocks.
