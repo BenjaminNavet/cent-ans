@@ -15,8 +15,8 @@ L'orchestrateur relit, fusionne dans un worktree d'intégration puis `--ff-only`
 | 7 camprules | retraite après défaite, emplacements 9/6, entretien, 213 provinces, eau ×2 | Opus | fusionné |
 | 8 mapfx | rochers noirs, charrette, mât, échelles, chevaux, pavois | Opus | fusionné |
 | 9 mapgeo | baie du Mont-Saint-Michel, Léman, villes sur l'eau, rivières, côtes, étiquettes | Opus | fusionné |
-| 10 fog | météo brouillard → brume visible (décision joueur 17/10) | Sonnet | en cours, branche depuis fix/integ |
-| 11 perf | campagne < 40 i/s, dérive du temps d'image | Opus | après fog (machine calme) |
+| 10 fog | météo brouillard → brume visible (décision joueur 17/10) | Sonnet | fusionné (ADR 0596) |
+| 11 perf | campagne < 40 i/s, dérive du temps d'image | Opus | fusionné (ADR 0706, mesures `docs/wip/fix-perf.md`) |
 
 Reprise : `git worktree list | grep gp-fix`, lire `docs/wip/fix-<lot>.md` sur chaque branche.
 
@@ -26,3 +26,11 @@ Restes par lot : `docs/wip/fix-<lot>.md`. Notables : terrain noir ultra plein é
 Londres (Tamise cuite dans le glb Meshy), Mont non visible, charrette poreuse au loin, morts clairs, forêts d'hiver, Pétra,
 attaquant IA lent face à un défenseur passif (ADR 0184), pas d'ADR pour la sortie du défenseur.
 Pyramide partagée `~/dev/cent-ans-raw/compose/pyramid` retouchée par mapgeo (coast-patch, lake-patch) : cohérente avec main.
+
+## Clôture 17/10 après-midi
+Les 11 lots sont dans main (5d9832b86, non poussé) ; worktrees `gp-fix-*` et branches `fix/*` supprimés.
+Validation finale : core fmt/clippy/test, client fmt/clippy/test, smoke 10/10, pytest 2850, seed bots 0 constat.
+Perf : p50 ultra d=60 62 → 42 ms, d=150 41 → 23,5 ms ; dérive (Conseil, vols d'oiseaux) corrigée.
+Restes perf : 40 i/s non atteint en ultra d=30-90 (GPU : terrain, ombres solaires, végétation, MSAA carte) ;
+Conseil ouvert dessine la campagne derrière ; clés de préréglage peut-être ignorées par le client (`docs/wip/fix-perf.md` § Restants).
+Prochaine étape : partie d'essai du joueur (terrain noir en ultra plein écran : procédure `docs/wip/fix-render.md`).
