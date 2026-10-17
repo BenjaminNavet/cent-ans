@@ -36,7 +36,7 @@ use crate::ui::kit::style::UiTier;
 const CAMERA_DISTANCE: f32 = 34.0;
 const CRY_DISTANCE: f32 = 95.0;
 /// Top offset (px) of the band, under the balance bar.
-const SUBTITLE_TOP: f32 = 118.0;
+const SUBTITLE_TOP: f32 = 136.0;
 
 /// A composed speech (text only).
 #[derive(Debug, Clone, PartialEq)]

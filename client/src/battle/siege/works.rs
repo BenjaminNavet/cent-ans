@@ -50,6 +50,10 @@ pub enum PieceLife {
     Fallen,
 }
 
+/// Share of the sim radius of a tower that is drawn, and metres added to its height.
+const TOWER_DRAWN_RADIUS: f32 = 0.62;
+const TOWER_EXTRA_HEIGHT: f32 = 3.0;
+
 /// Root of one wall piece.
 #[derive(Component)]
 pub struct WallView {
@@ -544,8 +548,11 @@ fn build_works(
     let merlon_mesh = meshes.add(Cuboid::new(0.9, 1.3, 0.7));
     for tower in &works.towers {
         let base = ground(tower.x, tower.z) - 1.4;
-        let top = ground(tower.x, tower.z) + tower.height as f32;
-        let radius = tower.radius as f32;
+        // The sim radius is a footprint for collisions and engines (5 to 10 m: stubby barrels as
+        // wide as the wall is high); the drawn tower is slimmer and rises above the wall walk, as
+        // the flanking towers of a real enceinte (about 4 to 6 m of radius, 3 m over the curtain).
+        let top = ground(tower.x, tower.z) + tower.height as f32 + TOWER_EXTRA_HEIGHT;
+        let radius = (tower.radius as f32 * TOWER_DRAWN_RADIUS).max(3.2);
         let mut tower_entity = commands.spawn((
             Name::new("SiegeTower"),
             Mesh3d(meshes.add(Cylinder::new(radius, top - base).mesh().resolution(12))),
@@ -578,10 +585,10 @@ fn build_works(
         };
         let roofed = ((tower.x * 7.0 + tower.z * 13.0).abs() as i64) % 2 == 0;
         if roofed {
-            let cone_h = radius * 1.55;
+            let cone_h = radius * 2.1;
             commands.spawn((
                 Name::new("SiegeTowerRoof"),
-                Mesh3d(meshes.add(Cone::new(radius * 1.12, cone_h).mesh().resolution(14))),
+                Mesh3d(meshes.add(Cone::new(radius * 1.1, cone_h).mesh().resolution(14))),
                 MeshMaterial3d(roof_mat.clone()),
                 Transform::from_xyz(tx, top + 1.5 + cone_h * 0.5, tz),
                 scope.clone(),
