@@ -18,6 +18,7 @@
 //! - [`saves::OpenSaveDialog`]: opens the dialog (written by the menu buttons).
 //! - [`saves::GameLoaded`]: a save has just replaced `Sim::state`.
 
+pub mod battle_pause;
 pub mod battle_prologue_invite;
 pub mod battles;
 pub mod custom_battle;
@@ -68,6 +69,7 @@ impl Plugin for MenuPlugin {
                 faction_select::FactionSelectPlugin,
                 saves::SavesPlugin,
                 pause::PausePlugin,
+                battle_pause::BattlePausePlugin,
                 battles::BattlesPlugin,
                 battle_prologue_invite::PrologueInvitePlugin,
                 crate::battle::tutorial::BattleTutorialPlugin,

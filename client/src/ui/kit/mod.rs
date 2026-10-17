@@ -449,11 +449,17 @@ pub(super) fn apply_text_scale(
     }
 }
 
+/// Render layer of [`UiCamera`] (nothing else is drawn on it).
+pub const UI_CAMERA_LAYER: usize = 31;
+
 fn spawn_ui_camera(mut commands: Commands, target: Option<Res<OffscreenTarget>>) {
     let mut camera = commands.spawn((
         Name::new("UiCamera"),
         UiCamera,
         Camera2d,
+        // Own layer: the world gizmos (capture rings, outlines, paths) live on layer 0 and would
+        // otherwise be drawn again, flattened, by this 2D camera (stray horizontal lines).
+        bevy::camera::visibility::RenderLayers::layer(UI_CAMERA_LAYER),
         IsDefaultUiCamera,
         Camera {
             clear_color: ClearColorConfig::Custom(Color::srgb(0.13, 0.10, 0.07)),

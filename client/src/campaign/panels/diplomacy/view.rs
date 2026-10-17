@@ -552,7 +552,8 @@ fn detail_column(
             .spawn(Node {
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(4.0),
-                max_height: Val::Percent(45.0),
+                max_height: Val::Percent(55.0),
+                flex_shrink: 0.0,
                 overflow: Overflow::scroll_y(),
                 ..default()
             })
@@ -594,6 +595,9 @@ fn detail_column(
         }
     });
 }
+
+/// Opinion reasons listed in the head; the rest is in the tooltip of the total.
+const OPINION_SHOWN: usize = 5;
 
 fn head_section(
     head: &mut Kids,
@@ -672,6 +676,7 @@ fn head_section(
         .with_children(|box_| {
             box_.spawn((
                 Name::new("dip:opinion_total"),
+                Tooltip::new(&format::opinion_tooltip(row)),
                 ink(
                     theme,
                     &format::opinion_total(&row.attitude_band, row.attitude),
@@ -679,7 +684,7 @@ fn head_section(
                     style::INK,
                 ),
             ));
-            for (index, reason) in row.reasons.iter().enumerate() {
+            for (index, reason) in row.reasons.iter().enumerate().take(OPINION_SHOWN) {
                 box_.spawn((
                     Name::new(format!("dip:opinion_reason:{index}")),
                     Tooltip::new(&format::reason_tooltip(reason)),
@@ -692,6 +697,20 @@ fn head_section(
                         } else {
                             style::INK
                         },
+                    ),
+                ));
+            }
+            if row.reasons.len() > OPINION_SHOWN {
+                box_.spawn((
+                    Name::new("dip:opinion_more"),
+                    ink(
+                        theme,
+                        &format!(
+                            "… et {} autres raisons (survolez l’opinion)",
+                            row.reasons.len() - OPINION_SHOWN
+                        ),
+                        UiType::Caption,
+                        style::INK_FADED,
                     ),
                 ));
             }

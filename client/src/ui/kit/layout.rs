@@ -21,6 +21,8 @@ pub const PANEL_TOP: f32 = TOP_BAR_HEIGHT + GAP;
 pub const MIN_SIDE_HEIGHT: f32 = 260.0;
 /// Bottom panels (army sheet) take at most this share of the window height.
 pub const BOTTOM_MAX_SHARE: f32 = 0.46;
+/// Height of the army strip (« l'ost de … ») at the bottom left, kept visible under bottom panels.
+pub const ARMY_STRIP_HEIGHT: f32 = 34.0;
 
 /// Size (logical px) of the HUD blocks panels must keep clear of, published by the HUD.
 #[derive(Resource, Default, Debug, Clone, Copy, PartialEq)]
@@ -90,7 +92,7 @@ pub fn zone_box(zone: FitZone, screen: Vec2, reserve: HudReserve) -> ZoneBox {
             left: Some(EDGE),
             right: Some(EDGE + reserve.bottom_right.x + GAP),
             top: None,
-            bottom: Some(EDGE),
+            bottom: Some(EDGE + ARMY_STRIP_HEIGHT + GAP),
             max_height: Some((screen.y * BOTTOM_MAX_SHARE).max(200.0)),
         },
         FitZone::Full => ZoneBox {
@@ -193,6 +195,8 @@ mod tests {
             let b = zone_box(FitZone::Bottom, screen, reserve());
             assert!(b.right.unwrap() >= reserve().bottom_right.x + EDGE);
             assert!(b.max_height.unwrap() < screen.y - PANEL_TOP);
+            // The army strip stays visible under the panel.
+            assert!(b.bottom.unwrap() >= EDGE + ARMY_STRIP_HEIGHT);
         }
     }
 

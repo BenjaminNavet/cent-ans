@@ -35,8 +35,8 @@ const ORBIT_MOUSE_SPEED: f32 = 0.006;
 const MANUAL_PITCH_MIN_DEG: f32 = 5.0;
 const MANUAL_PITCH_MAX_DEG: f32 = 85.0;
 const MANUAL_PITCH_DRAG_SPEED: f32 = 0.15;
-/// Opening shot (`camera_feel.json` `battle.opening_distance_m`, a little wider to see both lines).
-const OPENING_DISTANCE: f32 = 180.0;
+/// Opening shot (`camera_feel.json` `battle.opening_distance_m`, closer: the figures stay readable).
+pub const OPENING_DISTANCE: f32 = 100.0;
 
 #[derive(Component)]
 pub struct BattleCamera;
