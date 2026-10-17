@@ -2307,6 +2307,21 @@
    ]
   },
   {
+   "id": "mont_saint_michel",
+   "name": "Mont-Saint-Michel",
+   "type": "monastery_cliff",
+   "lonlat": [
+    -1.5115,
+    48.636
+   ],
+   "coastal": true,
+   "note": "Abbaye bénédictine sur son rocher au fond de la baie, fortifiée pendant la guerre de Cent Ans ; le siège anglais de 1423-1434 ne la prend jamais",
+   "px": [
+    947.0,
+    2598.1
+   ]
+  },
+  {
    "id": "sumela",
    "name": "Sumela",
    "type": "monastery_cliff",

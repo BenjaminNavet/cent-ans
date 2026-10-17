@@ -57,6 +57,13 @@
     {"name": "Corfou", "width_km": 10, "path": [[19.8, 39.8], [20.1, 39.5]]},
     {"name": "Solent", "width_km": 8, "path": [[-1.7, 50.76], [-1.05, 50.78]]}
   ],
+  "headlands": [],
+  "inlets": [
+    {"name": "Gironde", "widths_km": [20, 14, 10, 7], "path": [[-1.22, 45.62], [-1.0, 45.5], [-0.8, 45.3], [-0.56, 45.04]]},
+    {"name": "Seine (estuaire)", "widths_km": [16, 9, 5], "path": [[0.0, 49.5], [0.25, 49.46], [0.55, 49.44]]},
+    {"name": "Baie du Mont-Saint-Michel", "widths_km": [34, 26, 16], "path": [[-1.95, 48.80], [-1.72, 48.70], [-1.52, 48.64]]},
+    {"name": "Loire (estuaire)", "widths_km": [14, 8, 5], "path": [[-2.3, 47.27], [-2.0, 47.28], [-1.7, 47.24]]}
+  ],
   "rivers": {
     "count": 45,
     "min_length_km": 150,

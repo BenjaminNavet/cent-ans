@@ -106,6 +106,50 @@ def compose_paint(
     console.print_json(data=paint.write_derived())
 
 
+@compose_app.command("coast-splice")
+def compose_coast_splice(
+    old_land: Path = typer.Argument(..., help="Ancien land_mask.png"),
+    old_coastline: Path = typer.Argument(..., help="Ancien coastline.geojson"),
+) -> None:
+    """Après `geo compose` : ne garde de la nouvelle côte que les fenêtres des estuaires d'auteur (lot mapgeo11)."""
+    import json
+
+    from cent_ans_tools.compose import coast_patch
+    from cent_ans_tools.paths import DATA_DIR
+
+    cfg = json.loads(
+        (DATA_DIR / "map" / "compose" / "generalise.json").read_text(encoding="utf-8")
+    )
+    report = coast_patch.splice(
+        old_land,
+        old_coastline,
+        DATA_DIR / "map",
+        cfg.get("inlets", []) + cfg.get("headlands", []),
+    )
+    console.print_json(data=report)
+
+
+@compose_app.command("coast-patch")
+def compose_coast_patch(
+    old_land: Path = typer.Argument(
+        ..., help="Ancien land_mask.png (ex. `git show HEAD:data/map/land_mask.png > ancien.png`)"
+    ),
+    pyramid: Path = typer.Option(
+        None, help="Dossier de la pyramide E1-E3 à retoucher aussi (hors git)"
+    ),
+    dry_run: bool = typer.Option(False, help="Compte les tuiles sans les écrire"),
+) -> None:
+    """Reporte une retouche de côte (inlets/headlands) sur le relief E0 et la pyramide, sans tout refaire (lot mapgeo11)."""
+    from cent_ans_tools.compose import coast_patch
+    from cent_ans_tools.paths import DATA_DIR
+
+    map_dir = DATA_DIR / "map"
+    report = coast_patch.apply(
+        old_land, map_dir / "land_mask.png", map_dir, pyramid, dry_run=dry_run
+    )
+    console.print_json(data=report)
+
+
 @compose_app.command("valley-rivers")
 def compose_valley_rivers() -> None:
     """Ajoute le Nil, l'Euphrate et le Tigre (`valley_courses.json`) à rivers.geojson (lot CS2, rejouable)."""
