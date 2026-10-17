@@ -94,6 +94,8 @@ pub fn update_hint(
     mut commands: Commands,
     hint: Res<HoverHint>,
     rich: Res<super::bubbles::RichHover>,
+    pointer: Res<super::pointer::PointerOverUi>,
+    tooltips: Option<Res<crate::ui::kit::tooltip::TooltipState>>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
     window: Query<&Window, With<PrimaryWindow>>,
@@ -104,7 +106,13 @@ pub fn update_hint(
         return;
     };
     let cursor = window.iter().next().and_then(|w| w.cursor_position());
-    let wanted = compose_hint(rich.text.as_deref(), hint.0.as_deref());
+    // One bubble at a time: a kit tooltip (decor, panel) or the interface under the pointer wins.
+    let suppressed = pointer.over || tooltips.is_some_and(|t| !t.chain.is_empty());
+    let wanted = if suppressed {
+        None
+    } else {
+        compose_hint(rich.text.as_deref(), hint.0.as_deref())
+    };
     match (&wanted, cursor) {
         (Some(text), Some(at)) => {
             if shown.as_ref() != Some(text) {

@@ -239,6 +239,7 @@ impl Plugin for ModalPlugin {
                     sync_modal,
                     handle_modal_buttons,
                     modal_escape,
+                    modal_enter,
                     spawn_toasts,
                     expire_toasts,
                     slide_in,
@@ -411,6 +412,31 @@ fn modal_escape(
         if let Some(key) = queue.finish() {
             results.write(ModalResult { key, confirmed });
         }
+    }
+}
+
+/// Enter answers the open dialog as confirmed (the second Enter of « Entrée, Entrée » ends the
+/// season). A dialog opened this very frame (by the same key press) is left alone, and so is a
+/// focused text field.
+fn modal_enter(
+    edges: Res<crate::menu::KeyEdges>,
+    typing: Option<Res<super::text_field::TextInputFocus>>,
+    mut queue: ResMut<ModalQueue>,
+    mut results: MessageWriter<ModalResult>,
+    mut seen: Local<Option<String>>,
+) {
+    let active = queue.active.as_ref().map(|_| queue.active_key().to_owned());
+    let ready = active.is_some() && *seen == active;
+    *seen = active;
+    if edges.enter
+        && ready
+        && !typing.is_some_and(|t| t.is_active())
+        && let Some(key) = queue.finish()
+    {
+        results.write(ModalResult {
+            key,
+            confirmed: true,
+        });
     }
 }
 
@@ -592,5 +618,37 @@ mod tests {
         assert_eq!(queue.pending_keys(), vec!["c"]);
         queue.clear();
         assert!(!queue.is_busy());
+    }
+
+    #[test]
+    fn enter_confirms_only_a_dialog_that_was_already_open() {
+        let mut app = App::new();
+        app.init_resource::<ModalQueue>()
+            .init_resource::<crate::menu::KeyEdges>()
+            .add_message::<ModalResult>()
+            .add_systems(Update, modal_enter);
+        let results = |app: &App| {
+            app.world()
+                .resource::<Messages<ModalResult>>()
+                .iter_current_update_messages()
+                .count()
+        };
+        // The Enter that opens the dialog (same frame) must not answer it.
+        app.world_mut()
+            .resource_mut::<ModalQueue>()
+            .request("end_turn", PRIORITY_DECISION, spec());
+        app.world_mut()
+            .resource_mut::<crate::menu::KeyEdges>()
+            .enter = true;
+        app.update();
+        assert_eq!(results(&app), 0);
+        assert!(app.world().resource::<ModalQueue>().is_busy());
+        // The second Enter confirms it.
+        app.world_mut()
+            .resource_mut::<crate::menu::KeyEdges>()
+            .enter = true;
+        app.update();
+        assert_eq!(results(&app), 1);
+        assert!(!app.world().resource::<ModalQueue>().is_busy());
     }
 }
