@@ -142,17 +142,18 @@ pub fn prop_frame(cfg: &super::config::Config, prop: usize, real_units: f32, d: 
     let (mult, spread) = if p.fixed_size && cfg.fixed_mult > 0.0 {
         let m = cfg.fixed_mult * p.size_scale;
         (m, m)
+    } else if p.stretched {
+        // Enclosures (fences, hedges, walls) keep their authored ceiling: the maquette
+        // enlargement of accessories would turn them into kilometre-long black walls.
+        let m = (target * p.size_scale / real_units.max(1e-9)).clamp(1.0, p.max_mult);
+        (m, m.powf(r.spread_exponent))
     } else {
         let m = (target * cfg.maquette_size * p.size_scale / real_units.max(1e-9))
             .clamp(1.0, p.max_mult * cfg.maquette_size * cfg.maquette_range);
         (m, m.powf(r.spread_exponent))
     };
-    let fade = 1.0
-        - smoothstep(
-            p.fade_from * cfg.maquette_range,
-            p.max_distance * cfg.maquette_range,
-            d,
-        );
+    let range = if p.stretched { 1.0 } else { cfg.maquette_range };
+    let fade = 1.0 - smoothstep(p.fade_from * range, p.max_distance * range, d);
     PropFrame {
         mult,
         spread,
@@ -210,6 +211,43 @@ pub fn update_view(
         })
         .collect();
     view.frames = frames;
+}
+
+/// Applies the `albedo_gain` of each prop to the (shared) materials of its loaded models, once
+/// (`albedo_gain` uniform of `countryside.gdshader`; the DN wattle fence texture is very dark).
+pub fn tint_props(
+    cfg: Option<Res<LoadedCountryside>>,
+    protos: Res<Prototypes>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut done: Local<std::collections::HashSet<AssetId<StandardMaterial>>>,
+) {
+    let Some(cfg) = cfg else {
+        return;
+    };
+    for (i, prop) in cfg.config.props.iter().enumerate() {
+        if (prop.albedo_gain - 1.0).abs() < 1e-3 {
+            continue;
+        }
+        for path in cfg.paths[i].iter().flatten() {
+            let Some(proto) = protos.ready(path) else {
+                continue;
+            };
+            for prim in &proto.prims {
+                if !done.insert(prim.material.id()) {
+                    continue;
+                }
+                if let Some(mut m) = materials.get_mut(&prim.material) {
+                    let c = m.base_color.to_linear();
+                    m.base_color = Color::linear_rgba(
+                        c.red * prop.albedo_gain,
+                        c.green * prop.albedo_gain,
+                        c.blue * prop.albedo_gain,
+                        c.alpha,
+                    );
+                }
+            }
+        }
+    }
 }
 
 /// Measure of a model from its prototype bounds (`mesh_origin` of the Godot shader).
@@ -664,4 +702,46 @@ pub fn apply_view(
         }
     }
     cells.visible = visible;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::campaign::countryside::config::parse;
+
+    /// Player defect "ushape": at distance 60 the bocage enclosures were 900 m tall and 1.7 km
+    /// long black blocks (maquette size 2, range 4, no cap). They are now capped at the authored
+    /// `max_mult` and hidden beyond their authored `max_distance`.
+    #[test]
+    fn enclosures_are_capped_and_hidden_from_afar() {
+        let root = crate::paths::find_root().expect("root");
+        let text = std::fs::read_to_string(root.join("data/map/map_countryside.json")).unwrap();
+        let doc: serde_json::Value = serde_json::from_str(&text).unwrap();
+        let projection =
+            crate::campaign::provinces::projection::MapProjection::load(&root.join("data/map"))
+                .unwrap();
+        let cfg = parse(&doc, &root.join("data"), &projection).with_maquette(&serde_json::json!({
+            "countryside_size": 2.0,
+            "countryside_range": 4.0,
+        }));
+        let mut seen = 0;
+        for (i, p) in cfg.props.iter().enumerate().filter(|(_, p)| p.stretched) {
+            seen += 1;
+            let near = prop_frame(&cfg, i, 0.003, 20.0);
+            assert!(near.mult <= p.max_mult + 1e-3, "{}: {}", p.id, near.mult);
+            assert!(near.fade > 0.0, "{} visible at 20", p.id);
+            let far = prop_frame(&cfg, i, 0.003, 60.0);
+            assert!(far.mult <= p.max_mult + 1e-3);
+            assert_eq!(far.fade, 0.0, "{} hidden at 60", p.id);
+        }
+        assert!(seen >= 3);
+        // Other accessories keep the maquette enlargement (mills stay readable).
+        let (i, _) = cfg
+            .props
+            .iter()
+            .enumerate()
+            .find(|(_, p)| p.id == "windmill_post")
+            .unwrap();
+        assert!(prop_frame(&cfg, i, 0.01, 60.0).fade > 0.99);
+    }
 }

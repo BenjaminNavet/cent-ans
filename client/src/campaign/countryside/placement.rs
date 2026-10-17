@@ -603,6 +603,7 @@ pub mod tests {
                 stretched: false,
                 fixed_size: false,
                 max_instances: 100,
+                albedo_gain: 1.0,
             }],
             rules: vec![Rule {
                 id: "r".into(),
