@@ -297,6 +297,8 @@ fn rebuild_card(
     theme: Res<UiTheme>,
     column: Query<Entity, With<AdvisorColumn>>,
     card: Query<Entity, With<HintCard>>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    settings: Option<Res<crate::settings::Settings>>,
 ) {
     let Ok(column) = column.single() else { return };
     let existing = card.single().ok();
@@ -310,9 +312,13 @@ fn rebuild_card(
     if let Some(entity) = existing {
         commands.entity(entity).despawn();
     }
-    let Some(current) = hint.current.clone() else {
+    let Some(mut current) = hint.current.clone() else {
         return;
     };
+    // `{key:ACTION}` reads the key actually bound (never a letter written in the data).
+    let keys = super::bar::KeyHints::new(keymap.as_deref(), settings.as_deref());
+    current.title = keys.expand(&current.title);
+    current.text = keys.expand(&current.text);
     commands
         .spawn((
             Name::new("hud:hint"),

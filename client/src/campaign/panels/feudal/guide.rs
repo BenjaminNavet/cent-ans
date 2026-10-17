@@ -225,6 +225,7 @@ fn check_objective(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn rebuild(
     mut commands: Commands,
     mut guide: ResMut<FeudalGuide>,
@@ -232,8 +233,18 @@ fn rebuild(
     assets: Res<AssetServer>,
     paused: Option<Res<GamePaused>>,
     settings_screen: Option<Res<SettingsScreen>>,
+    modals: Option<Res<crate::ui::kit::modal::ModalQueue>>,
+    tutorial: Option<Res<crate::campaign::progress::tutorial::Tutorial>>,
+    missions: Option<Res<crate::campaign::hud::missions::Missions>>,
 ) {
-    let covered = paused.is_some_and(|p| p.0) || settings_screen.is_some_and(|s| s.root.is_some());
+    // One narrator at a time: the feudal guide waits for the open modal, the tutorial and the
+    // council's mission offer (a decision goes first).
+    let offer_up = missions.is_some_and(|m| m.offer.is_some() && !m.offer_dismissed);
+    let covered = paused.is_some_and(|p| p.0)
+        || offer_up
+        || settings_screen.is_some_and(|s| s.root.is_some())
+        || modals.is_some_and(|m| m.is_busy())
+        || tutorial.is_some_and(|t| t.index.is_some());
     let want = guide.index.filter(|_| !covered);
     let key = want.map(|i| (i, false));
     if key == guide.built_for && guide.root.is_some() == key.is_some() {

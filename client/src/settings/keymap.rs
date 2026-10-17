@@ -706,10 +706,16 @@ fn default_chords(def: &ActionDef) -> Vec<Chord> {
         .collect()
 }
 
+/// Actions that keep working while the key map is suspended (the pause menu's own keys).
+pub const PAUSE_ACTIONS: [&str; 2] = ["campaign_pause", "battle_pause"];
+
 /// Resolved chords of every action (defaults overlaid by the stored bindings).
 #[derive(Resource, Debug, Clone, PartialEq, Default)]
 pub struct KeyMap {
     chords: BTreeMap<&'static str, Vec<Chord>>,
+    /// A pause menu (or any screen that owns the keyboard) is up: every action but the pause
+    /// ones reads as not pressed, so no panel shortcut opens under it.
+    suspended: bool,
 }
 
 impl KeyMap {
@@ -731,11 +737,29 @@ impl KeyMap {
                 },
             );
         }
-        Self { chords }
+        Self {
+            chords,
+            suspended: false,
+        }
     }
 
     pub fn defaults() -> Self {
         Self::from_bindings(&BTreeMap::new())
+    }
+
+    /// Suspends (or resumes) every action but [`PAUSE_ACTIONS`].
+    pub fn set_suspended(&mut self, suspended: bool) {
+        if self.suspended != suspended {
+            self.suspended = suspended;
+        }
+    }
+
+    pub fn is_suspended(&self) -> bool {
+        self.suspended
+    }
+
+    fn silenced(&self, action: &str) -> bool {
+        self.suspended && !PAUSE_ACTIONS.contains(&action)
     }
 
     pub fn chords(&self, action: &str) -> &[Chord] {
@@ -744,12 +768,12 @@ impl KeyMap {
 
     /// Any chord of `action` is held.
     pub fn pressed(&self, action: &str, keys: &ButtonInput<KeyCode>) -> bool {
-        self.chords(action).iter().any(|c| c.pressed(keys))
+        !self.silenced(action) && self.chords(action).iter().any(|c| c.pressed(keys))
     }
 
     /// Any chord of `action` went down this frame.
     pub fn just_pressed(&self, action: &str, keys: &ButtonInput<KeyCode>) -> bool {
-        self.chords(action).iter().any(|c| c.just_pressed(keys))
+        !self.silenced(action) && self.chords(action).iter().any(|c| c.just_pressed(keys))
     }
 
     /// Labels of the chords (`W / ↑`) for the layout (`azerty` swaps A/Q, Z/W, M).
@@ -1013,5 +1037,20 @@ mod tests {
                 assert_eq!(map.action_using(chord, def.id), None, "{}", def.id);
             }
         }
+    }
+
+    #[test]
+    fn suspended_map_silences_panel_shortcuts_but_not_pause() {
+        let mut map = KeyMap::defaults();
+        let mut keys = ButtonInput::<KeyCode>::default();
+        keys.press(KeyCode::F4);
+        keys.press(KeyCode::Escape);
+        assert!(map.just_pressed("map_toggle_tech", &keys));
+        map.set_suspended(true);
+        assert!(!map.just_pressed("map_toggle_tech", &keys));
+        assert!(!map.pressed("map_toggle_tech", &keys));
+        assert!(map.just_pressed("campaign_pause", &keys));
+        map.set_suspended(false);
+        assert!(map.pressed("map_toggle_tech", &keys));
     }
 }

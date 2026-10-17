@@ -60,6 +60,7 @@ impl Plugin for PanelCourtPlugin {
                 Update,
                 (
                     dev_open,
+                    shortcuts,
                     open_close.before(crate::menu::pause::pause_escape),
                     handle_presses,
                     forward_hint,
@@ -256,6 +257,36 @@ fn dev_open(mut done: Local<bool>, mut frames: Local<u32>, sim: Res<Sim>, mut ui
             id.to_owned()
         };
         ui.open_character(&id, false);
+    }
+}
+
+/// J (`map_toggle_council`) toggles the council hall; C (`map_toggle_court`) toggles the ruler's
+/// character sheet (the court and its characters). Both through the message bus, so the other
+/// central panels close (`displaces`); no key while a text field has the focus.
+fn shortcuts(
+    keymap: Res<crate::settings::KeyMap>,
+    keys: Res<ButtonInput<KeyCode>>,
+    typing: Res<crate::ui::kit::text_field::TextInputFocus>,
+    sim: Res<Sim>,
+    ui: Res<CourtUi>,
+    mut outgoing: MessageWriter<OpenPanel>,
+) {
+    if typing.is_active() {
+        return;
+    }
+    if keymap.just_pressed("map_toggle_council", &keys) {
+        outgoing.write(OpenPanel::Council);
+    } else if keymap.just_pressed("map_toggle_court", &keys) {
+        if ui.screen == Screen::Sheet {
+            outgoing.write(OpenPanel::CloseAll);
+        } else if let Some(ruler) = sim
+            .state
+            .as_ref()
+            .and_then(|s| s.factions.get(&sim.player))
+            .and_then(|f| f.ruler.as_ref())
+        {
+            outgoing.write(OpenPanel::Character(ruler.to_string()));
+        }
     }
 }
 

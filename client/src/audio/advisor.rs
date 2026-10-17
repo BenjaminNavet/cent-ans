@@ -200,6 +200,9 @@ pub struct AdvisorState {
     seen_path: Option<std::path::PathBuf>,
     /// Interventions started (dump).
     spoken: Vec<String>,
+    /// A modal, the pause menu or the tutorial card is up: the advisor keeps quiet (the line
+    /// waits in its queue) so that one narrator speaks at a time and no subtitle covers a window.
+    covered: bool,
 }
 
 fn seen_file() -> Option<std::path::PathBuf> {
@@ -224,6 +227,7 @@ impl AdvisorState {
             tuning: AdvisorTuning::from_json(&director.voices.advisor),
             seen_path,
             spoken: Vec::new(),
+            covered: false,
         }
     }
 
@@ -260,6 +264,7 @@ impl Plugin for AdvisorPlugin {
             .add_systems(
                 Update,
                 (
+                    sync_cover,
                     turn_alerts,
                     battle_start,
                     battle_end,
@@ -283,7 +288,8 @@ fn speak(
     toasts: &mut Subtitles,
 ) {
     let tuning = state.tuning;
-    if let Some(intervention) = state.advisor.say(line, blocked(stack), &tuning) {
+    let blocked = blocked(stack) || state.covered;
+    if let Some(intervention) = state.advisor.say(line, blocked, &tuning) {
         emit(state, intervention, voices, ducks, toasts);
     }
 }
@@ -648,6 +654,22 @@ fn external_triggers(
     }
 }
 
+/// What keeps the advisor quiet: an open modal, the pause menu, the tutorial card.
+fn sync_cover(
+    state: Option<ResMut<AdvisorState>>,
+    modals: Option<Res<crate::ui::kit::modal::ModalQueue>>,
+    paused: Option<Res<crate::menu::pause::GamePaused>>,
+    tutorial: Option<Res<crate::campaign::progress::tutorial::Tutorial>>,
+) {
+    let Some(mut state) = state else { return };
+    let covered = modals.is_some_and(|m| m.is_busy())
+        || paused.is_some_and(|p| p.0)
+        || tutorial.is_some_and(|t| t.index.is_some());
+    if state.covered != covered {
+        state.covered = covered;
+    }
+}
+
 fn advisor_tick(
     time: Res<Time<Real>>,
     state: Option<ResMut<AdvisorState>>,
@@ -658,11 +680,8 @@ fn advisor_tick(
 ) {
     let Some(mut state) = state else { return };
     let tuning = state.tuning;
-    if let Some(intervention) =
-        state
-            .advisor
-            .tick(time.delta_secs(), blocked(stack.as_deref()), &tuning)
-    {
+    let blocked = blocked(stack.as_deref()) || state.covered;
+    if let Some(intervention) = state.advisor.tick(time.delta_secs(), blocked, &tuning) {
         emit(
             &mut state,
             intervention,

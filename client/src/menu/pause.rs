@@ -65,15 +65,37 @@ impl Plugin for PausePlugin {
             .add_message::<TogglePause>()
             .add_systems(OnExit(AppState::Campaign), force_resume)
             .add_systems(
+                PreUpdate,
+                suspend_shortcuts.run_if(in_state(AppState::Campaign)),
+            )
+            .add_systems(
+                OnExit(AppState::Campaign),
+                |keymap: Option<ResMut<crate::settings::KeyMap>>| {
+                    if let Some(mut keymap) = keymap {
+                        keymap.set_suspended(false);
+                    }
+                },
+            )
+            .add_systems(
                 Update,
                 (
-                    pause_escape,
+                    pause_escape.after(crate::ui::kit::modal::modal_escape),
                     track_help.after(pause_escape),
                     pause_buttons,
                     after_load,
                 )
                     .run_if(in_state(AppState::Campaign)),
             );
+    }
+}
+
+/// While the pause menu is open no panel shortcut (F3, F4, J, C…) reads as pressed: only the
+/// pause keys stay live (`KeyMap::set_suspended`).
+fn suspend_shortcuts(paused: Res<GamePaused>, keymap: Option<ResMut<crate::settings::KeyMap>>) {
+    if let Some(mut keymap) = keymap
+        && keymap.is_suspended() != paused.0
+    {
+        keymap.set_suspended(paused.0);
     }
 }
 

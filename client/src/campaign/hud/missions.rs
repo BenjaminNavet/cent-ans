@@ -209,11 +209,13 @@ fn rebuild_offer(
     missions: Res<Missions>,
     theme: Res<UiTheme>,
     window: Query<Entity, With<OfferWindow>>,
+    modals: Res<crate::ui::kit::modal::ModalQueue>,
     mut local: Local<Option<(Option<MissionOfferView>, bool)>>,
 ) {
+    // The offer waits for the modal in progress (season report, decision): one window at a time.
     let want = (
         missions.offer.clone(),
-        missions.offer_dismissed || missions.offer.is_none(),
+        missions.offer_dismissed || missions.offer.is_none() || modals.is_busy(),
     );
     let existing = window.single().ok();
     if existing.is_some() && local.as_ref() == Some(&want) {
