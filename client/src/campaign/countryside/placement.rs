@@ -584,6 +584,7 @@ pub mod tests {
                 max_radius_px: 200.0,
                 max_cached_cells: 64,
                 cells_per_frame: 1,
+                spawn_roots_per_frame: 150,
                 size_k: 0.0045,
                 size_exponent: 0.85,
                 spread_exponent: 0.5,

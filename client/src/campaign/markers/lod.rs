@@ -209,9 +209,7 @@ pub(super) fn prepare_maquette(
             continue;
         }
         maquette.meshes.push(entity);
-        commands
-            .entity(entity)
-            .try_insert(solid_range());
+        commands.entity(entity).try_insert(solid_range());
         stats.range_meshes += 1;
         let is_banner = names
             .get(entity)

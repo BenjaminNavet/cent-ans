@@ -246,6 +246,8 @@ pub fn stream_cells(
     mut protos: ResMut<Prototypes>,
     mut measures: ResMut<Measures>,
     mut cells: ResMut<Cells>,
+    mut budget: ResMut<super::budget::SpawnBudget>,
+    frame_count: Res<bevy::diagnostic::FrameCount>,
 ) {
     let Some(cfg) = cfg else {
         return;
@@ -318,6 +320,8 @@ pub fn stream_cells(
                 &view,
                 &mut cells,
                 key,
+                &mut budget,
+                frame_count.0,
             );
         }
     }
@@ -376,6 +380,8 @@ fn install_cell(
     view: &PropView,
     cells: &mut Cells,
     key: IVec2,
+    budget: &mut super::budget::SpawnBudget,
+    frame: u32,
 ) {
     let started = std::time::Instant::now();
     let c = &cfg.config;
@@ -470,7 +476,14 @@ fn install_cell(
     }
     // A slice of the cell per call: spawning thousands of roots in one frame is a visible hitch.
     let staged = cells.staged.get_mut(&key).expect("staged cell");
-    let take = staged.len().min(SPAWN_SLICE);
+    let take = budget.take(
+        frame,
+        super::budget::per_frame(c.render.spawn_roots_per_frame),
+        staged.len().min(SPAWN_SLICE),
+    );
+    if take == 0 {
+        return;
+    }
     let batch = staged.split_off(staged.len() - take);
     if staged.is_empty() {
         cells.staged.remove(&key);
