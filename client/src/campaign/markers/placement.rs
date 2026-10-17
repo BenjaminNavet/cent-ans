@@ -12,6 +12,52 @@ pub fn px_to_world(px: Vec2, height: f32) -> Vec3 {
     Vec3::new(px.x, height, px.y)
 }
 
+/// Share of the footprint (a disc of `radius` map units around `centre`) that lies on water.
+pub fn water_share(centre: Vec2, radius: f32, is_water: &dyn Fn(Vec2) -> bool) -> f32 {
+    let mut total = 0.0_f32;
+    let mut wet = 0.0_f32;
+    let mut sample = |p: Vec2, weight: f32| {
+        total += weight;
+        if is_water(p) {
+            wet += weight;
+        }
+    };
+    sample(centre, 1.0);
+    for (ring, count) in [(0.4_f32, 6_u32), (0.8, 12)] {
+        for k in 0..count {
+            let angle = std::f32::consts::TAU * (k as f32 + 0.5) / count as f32;
+            sample(centre + Vec2::from_angle(angle) * radius * ring, 1.0);
+        }
+    }
+    wet / total
+}
+
+/// Moves a coastal place's maquette inland so its footprint does not hang over the sea
+/// (mapgeo: the stylised block of Constantinople stuck out over the Bosphorus). The smallest
+/// shift (at most `MAX_SHORE_SHIFT` x `radius`) that lowers the water share is chosen; a
+/// footprint already dry (<= `DRY_SHARE`) stays where the simulation puts the place.
+pub fn shore_fit(centre: Vec2, radius: f32, is_water: &dyn Fn(Vec2) -> bool) -> Vec2 {
+    const DRY_SHARE: f32 = 0.04;
+    const MAX_SHORE_SHIFT: f32 = 1.25;
+    let here = water_share(centre, radius, is_water);
+    if here <= DRY_SHARE || radius <= 0.0 {
+        return centre;
+    }
+    let mut best = (here, 0.0_f32, centre);
+    for step in 1..=5 {
+        let distance = radius * MAX_SHORE_SHIFT * step as f32 / 5.0;
+        for k in 0..24 {
+            let p = centre + Vec2::from_angle(std::f32::consts::TAU * k as f32 / 24.0) * distance;
+            let share = water_share(p, radius, is_water);
+            // A clearly drier spot wins; among equally dry ones the nearest.
+            if share < best.0 - 0.02 {
+                best = (share, distance, p);
+            }
+        }
+    }
+    best.2
+}
+
 /// Stable 32-bit hash of a place id: Godot 4's `String.hash()` (djb2 over the Unicode code
 /// points, `h = h * 33 + c` from 5381, wrapping), so variants and yaws match Godot.
 pub fn stable_hash(text: &str) -> u32 {
@@ -156,5 +202,18 @@ mod tests {
         let centers = [Vec2::new(0.0, 0.0), Vec2::new(7.0, 0.0)];
         let s = solve_collisions(&centers, &[4.0, 4.0], &[false; 2], 0.1, 0.0);
         assert!((s[1] - 0.75).abs() < 1e-6);
+    }
+
+    #[test]
+    fn shore_fit_pulls_a_coastal_footprint_inland() {
+        // Sea for x > 0: a place on the shore moves west, a dry one stays, a drowned one too.
+        let sea = |p: Vec2| p.x > 0.0;
+        let on_shore = shore_fit(Vec2::new(0.5, 3.0), 4.0, &sea);
+        assert!(on_shore.x < -1.5, "{on_shore}");
+        assert!(water_share(on_shore, 4.0, &sea) < 0.05);
+        let inland = Vec2::new(-20.0, 0.0);
+        assert_eq!(shore_fit(inland, 4.0, &sea), inland);
+        let open_sea = Vec2::new(500.0, 0.0);
+        assert_eq!(shore_fit(open_sea, 4.0, &sea), open_sea);
     }
 }

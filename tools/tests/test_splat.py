@@ -1,6 +1,7 @@
 """Tests for the terrain shader rasters (splatmap, border and coast distances)."""
 
 import numpy as np
+from scipy import ndimage
 
 from cent_ans_tools.geo import splat
 
@@ -128,3 +129,18 @@ def test_banded_distances_equal_whole_map() -> None:
         np.testing.assert_array_equal(
             banded_coast, splat.encode_coast_dist(splat.compute_coast_dist(~land))
         )
+
+
+def test_coast_distance_has_no_pixel_staircase() -> None:
+    """A diagonal shore gives a field whose zero line is straight to a fraction of a pixel."""
+    size = 96
+    yy, xx = np.mgrid[0:size, 0:size]
+    land = (xx + yy) > size  # 45 degree coast
+    signed = splat.compute_coast_dist(~land)
+    # Distance to the true line x + y = size, at every pixel centre within 6 px of the shore.
+    true = ((xx + 0.5) + (yy + 0.5) - (size + 1.5)) / np.sqrt(2.0)
+    near = (np.abs(true) < 6.0) & (xx > 12) & (xx < size - 12) & (yy > 12) & (yy < size - 12)
+    assert np.abs(signed[near] - true[near]).max() < 0.35
+    # The old whole-pixel field was off by up to ~0.7 px on this diagonal.
+    legacy = ndimage.distance_transform_edt(land) - ndimage.distance_transform_edt(~land)
+    assert np.abs(legacy[near] - true[near]).max() > 0.5
