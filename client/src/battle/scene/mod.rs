@@ -489,12 +489,23 @@ fn save_replay(mut session: ResMut<BattleSession>) {
 
 /// Fixed-tick stepping of the simulation (`BattleSim::step`, 0.1 s; the AI runs inside it); in a
 /// replay, the re-simulation advances instead.
-pub fn step_session(time: Res<Time>, mut session: ResMut<BattleSession>) {
+pub fn step_session(
+    time: Res<Time>,
+    mut session: ResMut<BattleSession>,
+    deployment: Option<Res<crate::battle::orders::deploy::Deployment>>,
+) {
     if session.replaying {
         replay::step_playback(&time, &mut session);
         return;
     }
     if session.paused || session.snapshot.finished {
+        return;
+    }
+    // The battle never advances before the deployment phase had its chance to open (whatever
+    // the entry point: menu, `--state Battle`, campaign), only then may the first tick run.
+    if let Some(deployment) = deployment
+        && crate::battle::orders::deploy::awaiting_deployment(&mut session, &deployment)
+    {
         return;
     }
     session.accumulator += f64::from(time.delta_secs()) * session.speed;

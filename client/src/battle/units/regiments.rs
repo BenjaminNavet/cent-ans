@@ -316,12 +316,15 @@ fn shown_state(sim: &BattleSim, unit: &Unit, styles: &HashMap<u32, String>) -> &
         UnitState::Routing => "routing",
         UnitState::Climbing => "climbing",
     };
-    if let Some(winner) = sim.winner().filter(|_| sim.is_finished())
-        && unit.side == winner
-        && state != "routing"
-        && state != "climbing"
-    {
-        return "victory";
+    if sim.is_finished() {
+        // The simulation stops at the end of the battle: nobody keeps running, marching or
+        // climbing on the spot. The winners stand in the victory pose, the others at rest.
+        let winner = sim.winner() == Some(unit.side);
+        return if winner && state != "routing" && state != "climbing" {
+            "victory"
+        } else {
+            "idle"
+        };
     }
     if unit.mounted
         && state == "melee"
