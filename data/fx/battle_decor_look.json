@@ -1,12 +1,13 @@
 {
   "description": "Aspect du décor de bataille du client Bevy (lot bdecor2) : brouillard, lumière ambiante, ciel en dégradé, horizon en relief réel, herbe et vent, arbres et anneau de bois, sol. Purement visuel, aucune règle de jeu. Les couleurs sont en sRGB 0-1.",
   "fog": {
-    "clear": {"density": 0.00032, "horizon_density": 0.0002, "color": [0.7, 0.76, 0.84], "ambient": 1.0},
+    "clear": {"density": 0.00032, "horizon_density": 0.0002, "color": [0.7, 0.76, 0.84], "ambient": 1.0,
+      "aerial": {"visibility_m": 9000.0, "horizon_visibility_m": 16000.0, "extinction": [0.55, 0.65, 0.8], "inscattering": [0.8, 0.84, 1.0], "sun_color": [1.0, 0.86, 0.62], "sun_exponent": 30.0}},
     "fog": {"density": 0.0017, "horizon_density": 0.0017, "color": [0.74, 0.76, 0.77], "ambient": 1.1},
     "rain": {"density": 0.0014, "horizon_density": 0.0012, "color": [0.52, 0.55, 0.59], "ambient": 1.15},
     "snow": {"density": 0.0009, "horizon_density": 0.0009, "color": [0.78, 0.81, 0.86], "ambient": 1.0}
   },
-  "ambient": {"color": [0.75, 0.82, 0.95], "lux": 350.0, "low_sun_floor": 0.55, "low_sun_span_deg": 40.0},
+  "ambient": {"color": [0.75, 0.82, 0.95], "lux": 150.0, "low_sun_floor": 0.55, "low_sun_span_deg": 40.0},
   "sky": {
     "clear": {"zenith": [0.2, 0.42, 0.78], "horizon": [0.7, 0.78, 0.88], "glow": [1.0, 0.86, 0.62]},
     "fog": {"zenith": [0.62, 0.65, 0.68], "horizon": [0.74, 0.76, 0.77], "glow": [0.9, 0.88, 0.8]},

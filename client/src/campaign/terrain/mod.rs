@@ -22,6 +22,7 @@ pub mod cpu_sampler;
 pub mod decode;
 pub mod fields;
 pub mod ground;
+pub mod ground_detail;
 pub mod lighting;
 pub mod lod;
 pub mod look;
@@ -67,6 +68,7 @@ impl Plugin for CampaignTerrainPlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "terrain.wesl");
         post::add_plugin(app);
+        ground_detail::add_plugin(app);
         embedded_asset!(app, "terrain_shadow.wesl");
         // Shared relief module: `import cent_ans_client::campaign::terrain::relief::{...}`.
         bevy::shader::load_shader_library!(app, "relief.wesl");
@@ -492,6 +494,7 @@ fn create_material(
         terroir: None,
         occlusion: None,
         extras: material::TerrainExtras::default(),
+        gd: ground_detail::GdParams::default(),
         coast_dist: None,
         coast_probe: None,
         coast_types: None,

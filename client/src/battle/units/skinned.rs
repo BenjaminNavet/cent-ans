@@ -96,8 +96,10 @@ const P_BADGE_PATCH: usize = 116;
 const P_FINE: usize = 120;
 /// Rider's lance: (bone, pennon share, steel occlusion unused), grip, axis, side (4 `vec4`).
 const P_PROP: usize = 124;
-const P_CLIPS: usize = 140;
-/// Floats of the parameter block (131 `vec4`).
+/// Finish of the materials (`looks::SoldierLook::block`, 3 `vec4`).
+const P_LOOK: usize = 140;
+const P_CLIPS: usize = 152;
+/// Floats of the parameter block (134 `vec4`).
 pub const PARAM_FLOATS: usize = P_CLIPS + MAX_CLIPS * 4;
 const PARAM_BYTES: u64 = (PARAM_FLOATS * 4) as u64;
 
@@ -129,6 +131,7 @@ impl Default for SkinParams {
         data[P_FINE] = -1.0;
         data[P_FINE + 1] = super::fine_maps::FINE_DISTANCE;
         data[P_FINE + 2] = STEEL_OCCLUSION;
+        data[P_LOOK..P_LOOK + 12].copy_from_slice(&super::looks::SoldierLook::bundled().block());
         // No rider's lance (bone -1), Godot's defaults for the rest.
         data[P_PROP] = -1.0;
         data[P_PROP + 1] = PENNON_SHARE;
@@ -1465,8 +1468,8 @@ mod tests {
     }
 
     #[test]
-    fn param_block_is_131_vec4() {
-        assert_eq!(PARAM_FLOATS, 131 * 4);
+    fn param_block_is_134_vec4() {
+        assert_eq!(PARAM_FLOATS, 134 * 4);
         assert_eq!(SkinParams::default().data.len(), PARAM_FLOATS);
     }
 

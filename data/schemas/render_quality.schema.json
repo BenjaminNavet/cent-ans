@@ -148,6 +148,12 @@
             "4x"
           ]
         },
+        "ground_detail": {
+          "description": "VQ cground : niveau du détail du sol de campagne de près (0 coupé, 1 tons de parcelle et dérive macro, 2 + lanières, balks, mouchetures).",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
         "shadow_atlas": {
           "type": "integer",
           "minimum": 1024,

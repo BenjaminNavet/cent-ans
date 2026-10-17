@@ -89,7 +89,7 @@ pub fn percentile(sorted: &[f32], q: f32) -> f32 {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-struct Stats {
+pub(super) struct Stats {
     frames: usize,
     mean_fps: f32,
     p50: f32,
@@ -103,7 +103,7 @@ struct Stats {
 }
 
 impl Stats {
-    fn of(frame_ms: &[f32], visible: &[u32]) -> Stats {
+    pub(super) fn of(frame_ms: &[f32], visible: &[u32]) -> Stats {
         let mut sorted = frame_ms.to_vec();
         sorted.sort_by(|a, b| a.total_cmp(b));
         let n = sorted.len();
@@ -134,7 +134,7 @@ impl Stats {
         }
     }
 
-    fn json(&self) -> Value {
+    pub(super) fn json(&self) -> Value {
         let r = |v: f32| (v * 100.0).round() / 100.0;
         json!({
             "frames": self.frames,
@@ -169,6 +169,10 @@ pub fn add(app: &mut App, cli: &Cli) {
     let Some(config) = cli.bench.clone() else {
         return;
     };
+    if config.battle {
+        super::bench_battle::add(app, config);
+        return;
+    }
     app.insert_resource(BenchRun {
         config,
         started: Instant::now(),
@@ -342,6 +346,32 @@ fn bench_step(
     }
 }
 
+/// Writes `report` (pretty JSON) to `out`, logs it, and exits: shared with the battle bench.
+pub(super) fn write_report(
+    report: &Value,
+    out: Option<&PathBuf>,
+    exit: &mut MessageWriter<AppExit>,
+) {
+    let text = serde_json::to_string_pretty(report).unwrap_or_default();
+    info!(
+        "CampaignMap: bench_{} {}",
+        report["bench"].as_str().unwrap_or("map"),
+        report
+    );
+    if let Some(path) = out {
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        if let Err(error) = std::fs::write::<&PathBuf, _>(path, text) {
+            error!("AGENT_FATAL: {}: {error}", path.display());
+            exit.write(AppExit::error());
+            return;
+        }
+    }
+    info!("AGENT_EXIT bench");
+    exit.write(AppExit::Success);
+}
+
 fn finish(run: &mut BenchRun, exit: &mut MessageWriter<AppExit>) {
     run.phase = Phase::Done;
     let descent = (!run.descent.is_empty()).then(|| Stats::of(&run.descent, &run.descent_visible));
@@ -358,20 +388,7 @@ fn finish(run: &mut BenchRun, exit: &mut MessageWriter<AppExit>) {
         "systems": super::profile::report(&run.spikes),
         "note": "frame_ms = real time between frames, vsync off; visible_meshes replaces draw calls",
     });
-    let text = serde_json::to_string_pretty(&report).unwrap_or_default();
-    info!("CampaignMap: bench_map {}", report);
-    if let Some(path) = &run.config.out {
-        if let Some(parent) = path.parent() {
-            let _ = std::fs::create_dir_all(parent);
-        }
-        if let Err(error) = std::fs::write::<&PathBuf, _>(path, text) {
-            error!("AGENT_FATAL: {}: {error}", path.display());
-            exit.write(AppExit::error());
-            return;
-        }
-    }
-    info!("AGENT_EXIT bench");
-    exit.write(AppExit::Success);
+    write_report(&report, run.config.out.as_ref(), exit);
 }
 
 #[cfg(test)]

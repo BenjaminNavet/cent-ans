@@ -5,6 +5,7 @@
 //! Scripts and CLI shot/dump share one driver, `drive`, an exclusive system run every frame.
 
 pub mod bench;
+pub mod bench_battle;
 pub mod cli;
 pub mod devtools;
 pub mod dump;

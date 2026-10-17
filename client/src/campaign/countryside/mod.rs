@@ -9,6 +9,7 @@
 
 pub mod bridge_meshes;
 pub mod bridges;
+pub mod budget;
 pub mod clutter;
 pub mod coast_rocks;
 pub mod config;
@@ -92,6 +93,7 @@ impl Plugin for CampaignCountrysidePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<layer::PropView>()
             .init_resource::<layer::Cells>()
+            .init_resource::<budget::SpawnBudget>()
             .init_resource::<layer::Measures>()
             .init_resource::<proto::Prototypes>()
             .init_resource::<ReliefVersion>()

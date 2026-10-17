@@ -128,6 +128,9 @@ pub struct TerrainMaterial {
     /// Coast band, glaciers, post adjustment, per-province weather flags (lot coastterr).
     #[uniform(27)]
     pub extras: TerrainExtras,
+    /// Close-range ground detail (lot VQ cground, `ground_detail.wesl`).
+    #[uniform(40)]
+    pub gd: super::ground_detail::GdParams,
     /// Signed distance to the coast (R8, `coast_dist.png`, `(v - 128) / 2` px, > 0 on land).
     #[texture(28)]
     #[sampler(29)]

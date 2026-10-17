@@ -24,6 +24,32 @@
     "edge_soft_px": { "type": "number", "minimum": 0, "maximum": 10, "description": "HB7 : fondu du bord du ruban en pixels écran." },
     "sky_color": { "$ref": "#/$defs/rgb" },
     "sky_reflect": { "type": "number", "minimum": 0, "maximum": 1 },
+    "look": {
+      "type": "object",
+      "description": "VQ rivières : étalonnage naturel de l'eau (saturation, luminosité), teinte lointaine lisible, limon des bas-fonds, berge humide, reflet du soleil, couleurs des lacs.",
+      "additionalProperties": false,
+      "properties": {
+        "saturation": { "type": "number", "minimum": 0, "maximum": 2 },
+        "brightness": { "type": "number", "minimum": 0, "maximum": 2 },
+        "base_reflect": { "type": "number", "minimum": 0, "maximum": 1 },
+        "far_color": { "$ref": "#/$defs/rgb" },
+        "far_blend": { "type": "array", "items": { "type": "number", "minimum": 0 }, "minItems": 2, "maxItems": 2, "description": "Distance caméra (unités carte) où la couleur passe à far_color : début, fin." },
+        "mud_color": { "$ref": "#/$defs/rgb" },
+        "mud_strength": { "type": "number", "minimum": 0, "maximum": 1 },
+        "bank_wet_start": { "type": "number", "minimum": 0, "maximum": 1 },
+        "bank_dark": { "type": "number", "minimum": 0, "maximum": 1, "description": "Assombrissement du bord de l'eau vers wet_color (berges mouillées, pas de liseré clair)." },
+        "bank_foam": { "type": "number", "minimum": 0, "maximum": 2, "description": "Part de l'écume de berge conservée (elle est décalée vers l'intérieur)." },
+        "wet_band_px": { "type": "number", "minimum": 0, "maximum": 12, "description": "Largeur (px écran) de la bande de sol mouillé hors du ruban ; 0 = aucune." },
+        "wet_band_alpha": { "type": "number", "minimum": 0, "maximum": 1, "description": "Opacité maximale de la bande de sol mouillé." },
+        "wet_color": { "$ref": "#/$defs/rgb" },
+        "fog_strength": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part du brouillard de distance de la caméra appliquée à l'eau (1 = comme le sol)." },
+        "glint_color": { "$ref": "#/$defs/rgb" },
+        "glint_strength": { "type": "number", "minimum": 0, "maximum": 3 },
+        "glint_power": { "type": "number", "minimum": 1, "maximum": 1000 },
+        "lake_shallow_color": { "$ref": "#/$defs/rgb" },
+        "lake_deep_color": { "$ref": "#/$defs/rgb" }
+      }
+    },
     "fine": {
       "type": "object",
       "description": "HB7 : rubans fins de près (réseau fin, river_fine.gdshader) ; les couleurs absentes reprennent celles du palier moyen.",

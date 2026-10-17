@@ -111,6 +111,18 @@ fn cli_bench_flags() {
     assert!(bench.pan_only && !bench.descent_only);
     assert_eq!(bench.out.unwrap().to_str(), Some("/tmp/b.json"));
     assert!(Cli::parse(&[]).unwrap().bench.is_none());
+    let battle = Cli::parse(&args(&[
+        "--bench-battle",
+        "--bench-calm-seconds",
+        "3",
+        "--bench-melee-seconds",
+        "4",
+    ]))
+    .unwrap()
+    .bench
+    .unwrap();
+    assert!(battle.battle);
+    assert_eq!((battle.calm_seconds, battle.melee_seconds), (3.0, 4.0));
     assert!(Cli::parse(&args(&["--bench-seconds", "x"])).is_err());
 }
 
