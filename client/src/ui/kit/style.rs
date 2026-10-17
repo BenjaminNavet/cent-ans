@@ -32,6 +32,8 @@ pub const FE_GOLD_DARK: Color = Color::srgb(0.62, 0.46, 0.18);
 pub const FE_AZURE: Color = Color::srgb(0.10, 0.17, 0.42);
 pub const FE_GULES: Color = Color::srgb(0.58, 0.10, 0.08);
 pub const FE_VELLUM: Color = Color::srgb(0.95, 0.90, 0.78);
+/// Dark warm leather behind the Codex (lighter than `FE_NIGHT`, which is almost black).
+pub const FE_LEATHER: Color = Color::srgb(0.20, 0.14, 0.09);
 pub const FE_NIGHT: Color = Color::srgb(0.05, 0.04, 0.035);
 
 // Button text per state (parchment_theme.tres).

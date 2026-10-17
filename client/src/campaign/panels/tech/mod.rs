@@ -692,7 +692,7 @@ fn spawn_node(
                     text.spawn(dim_text(
                         theme,
                         &node.id,
-                        &layout::short(&title, 24),
+                        &layout::short(&title, 33),
                         ink,
                         true,
                     ));
@@ -735,7 +735,7 @@ fn spawn_node(
                         )
                         .collect();
                     for (id, name, is_unit) in all.iter().take(2) {
-                        let mut label = layout::short(name, 13);
+                        let mut label = layout::short(name, 17);
                         if let Some(path) = icons.path(id) {
                             pills.spawn((
                                 Node {
@@ -777,7 +777,7 @@ fn spawn_node(
                 foot.spawn(dim_text(
                     theme,
                     &node.id,
-                    &layout::short(&effect, 28),
+                    &layout::short(&effect, 36),
                     effect_ink,
                     false,
                 ));

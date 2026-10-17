@@ -525,10 +525,13 @@ pub fn checkbox(theme: &UiTheme, name: &str, caption: &str, checked: bool) -> im
                 Node {
                     width: Val::Px(22.0),
                     height: Val::Px(22.0),
+                    border: UiRect::all(Val::Px(1.5)),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()
                 },
+                // An empty box must read as a box: dark outline over the inset texture.
+                BorderColor::all(style::INK_SOFT),
                 theme.sliced("inset"),
                 children![(
                     CheckMark,

@@ -437,6 +437,16 @@ fn prepare(
             view.hub = Hub::Rules;
             view.push(Sheet::Rule(id));
         }
+    } else if view.current.is_none()
+        && let Some(first) = store
+            .ids_in_family(None)
+            .into_iter()
+            .find(|id| store.is_discovered(id))
+            .map(str::to_owned)
+    {
+        // Nothing asked for: open on the first sheet already read, not on an empty page.
+        view.hub = Hub::History;
+        view.push(Sheet::Entry(first));
     }
     // A sheet opened from outside counts as read.
     if let Some(Sheet::Entry(id)) = view.current.clone() {
@@ -475,7 +485,7 @@ fn spawn_screen(mut commands: Commands, theme: Res<UiTheme>, state: Res<State<Ap
                 row_gap: Val::Px(8.0),
                 ..default()
             },
-            BackgroundColor(style::FE_NIGHT),
+            BackgroundColor(style::FE_LEATHER),
         ))
         .id();
 

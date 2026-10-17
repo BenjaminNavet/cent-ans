@@ -6,9 +6,9 @@ use std::collections::{HashMap, HashSet};
 
 use game_api::tech::{EffectView, TechNode};
 
-pub const NODE_W: f32 = 212.0;
+pub const NODE_W: f32 = 252.0;
 pub const NODE_H: f32 = 92.0;
-pub const COLUMN_STEP: f32 = 252.0;
+pub const COLUMN_STEP: f32 = 288.0;
 pub const ROW_STEP: f32 = 106.0;
 pub const MARGIN_X: f32 = 12.0;
 pub const MARGIN_Y: f32 = 34.0;
