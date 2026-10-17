@@ -233,8 +233,14 @@ fn start_battle(
             let setup = battle.setup();
             let title = match (&campaign.site, setup.siege.is_some()) {
                 (Some(map), _) => map.name.clone(),
-                (None, true) => format!("Siège de {}", setup.province_name),
-                (None, false) => format!("Bataille de {}", setup.province_name),
+                (None, true) => format!(
+                    "Siège {}",
+                    crate::ui::kit::fr::de_place(&setup.province_name)
+                ),
+                (None, false) => format!(
+                    "Bataille {}",
+                    crate::ui::kit::fr::de_place(&setup.province_name)
+                ),
             };
             Opened {
                 sim: battle,
@@ -292,7 +298,7 @@ fn open_session(game: &GameData, config: CustomBattle, seed: u64) -> Result<Open
     } else if province.starts_with("Bataille") {
         province
     } else {
-        format!("Bataille de {province}")
+        format!("Bataille {}", crate::ui::kit::fr::de_place(&province))
     };
     Ok(Opened {
         sim,

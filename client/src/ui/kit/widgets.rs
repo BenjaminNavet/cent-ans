@@ -752,6 +752,28 @@ pub fn scroll_list(theme: &UiTheme, name: &str, height: f32) -> impl Bundle {
     )
 }
 
+/// Scrollable body of a dialog: takes the height the frame leaves (`flex_grow`, `min_height: 0`),
+/// no inset background, the same wheel and scrollbar as [`scroll_list`]. Put the dialog's fixed
+/// foot (buttons) after it, outside, so it never scrolls away.
+pub fn scroll_body(name: &str) -> impl Bundle {
+    (
+        Name::new(name.to_owned()),
+        KitWidget("scroll_body"),
+        KitScrollList,
+        ScrollArea,
+        Node {
+            flex_grow: 1.0,
+            flex_shrink: 1.0,
+            min_height: Val::Px(0.0),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(8.0),
+            padding: UiRect::right(Val::Px(SCROLLBAR_WIDTH + 8.0)),
+            overflow: Overflow::scroll_y(),
+            ..default()
+        },
+    )
+}
+
 /// Thin parchment scrollbar for every new [`KitScrollList`]: a track pinned to the right edge of
 /// the list (it ignores the list's own scroll) with a draggable thumb. Bevy's `Scrollbar` moves
 /// the thumb with the scroll position and scrolls the list when the thumb is dragged; the wheel
@@ -920,6 +942,24 @@ pub fn unaccent(letter: char) -> char {
 
 /// Front-end illuminated title: gold lettrine on azure, rest in vellum, italic subtitle.
 pub fn illuminated_title(theme: &UiTheme, content: &str, subtitle: &str) -> impl Bundle {
+    illuminated_title_colored(
+        theme,
+        content,
+        subtitle,
+        Color::srgb(0.97, 0.92, 0.80),
+        Color::srgb(0.93, 0.86, 0.70),
+    )
+}
+
+/// [`illuminated_title`] with its own text colours: the cream defaults are made for a dark
+/// painted background, on parchment pass ink colours.
+pub fn illuminated_title_colored(
+    theme: &UiTheme,
+    content: &str,
+    subtitle: &str,
+    title_color: Color,
+    subtitle_color: Color,
+) -> impl Bundle {
     let mut chars = content.chars();
     let initial: String = chars.next().map(unaccent).unwrap_or(' ').to_string();
     let rest: String = chars.collect();
@@ -959,7 +999,7 @@ pub fn illuminated_title(theme: &UiTheme, content: &str, subtitle: &str) -> impl
                     (
                         Text::new(rest),
                         theme.title_font(92.0),
-                        TextColor(Color::srgb(0.97, 0.92, 0.80)),
+                        TextColor(title_color),
                     ),
                 ],
             ),
@@ -978,7 +1018,7 @@ pub fn illuminated_title(theme: &UiTheme, content: &str, subtitle: &str) -> impl
                     font_size: 24.0.into(),
                     ..default()
                 },
-                TextColor(Color::srgb(0.93, 0.86, 0.70)),
+                TextColor(subtitle_color),
             ),
         ],
     )

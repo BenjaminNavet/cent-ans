@@ -17,8 +17,8 @@ use crate::settings::KeyMap;
 use crate::settings::keymap::layout_label;
 use crate::ui::kit::UiTheme;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
-use crate::ui::kit::style::{self, UiType};
-use crate::ui::kit::widgets::{panel_note, panel_sized};
+use crate::ui::kit::style::{self, UiTier, UiType};
+use crate::ui::kit::widgets::{panel_note, panel_sized, scroll_body};
 
 /// The help template (`HELP_TEXT`), BBCode. `{action}` is replaced by the keys of that key-map
 /// action for the layout (`{action:1}`: its first key only), so a rebound key shows up here.
@@ -199,7 +199,15 @@ fn spawn(
         .spawn((
             Name::new("BattleHelp"),
             HelpPanel,
-            wrapper(110.0, 0.0),
+            Node {
+                // Stops above the card band: the text scrolls instead of running under it.
+                bottom: Val::Px(super::geometry::BAND_HEIGHT + super::geometry::BAND_BOTTOM + 16.0),
+                align_items: AlignItems::FlexStart,
+                ..wrapper(110.0, 0.0)
+            },
+            // Above the deployment bar, the speech and the tutorial frame, which it used to hide
+            // behind or run through.
+            GlobalZIndex(UiTier::Tutorial.z() + 1),
             Pickable::IGNORE,
             ChildOf(root),
         ))
@@ -207,6 +215,14 @@ fn spawn(
     let panel = commands
         .spawn((panel_sized(&theme, 760.0), ChildOf(help)))
         .id();
+    commands
+        .entity(panel)
+        .entry::<Node>()
+        .and_modify(|mut node| node.max_height = Val::Percent(100.0));
+    let scroll = commands
+        .spawn((scroll_body("BattleHelpScroll"), ChildOf(panel)))
+        .id();
+    let panel = scroll;
     let mut body = RichStyle::body(&theme);
     body.size = UiType::Body.size();
     commands.spawn((

@@ -29,7 +29,8 @@ use crate::ui::kit::icons::icon;
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{
-    button_primary, button_small, illuminated_title, panel_illuminated, separator,
+    button_primary, button_small, illuminated_title_colored, panel_illuminated, scroll_body,
+    separator,
 };
 use crate::ui::kit::{ButtonPressed, UiTheme};
 
@@ -53,28 +54,29 @@ pub fn banner_title(won: bool, own_ratio: f32, enemy_ratio: f32) -> &'static str
 
 /// « de France », « d’Angleterre » (`BattleScene.de`).
 pub fn de(name: &str) -> String {
-    let vowel = name
-        .chars()
-        .next()
-        .is_some_and(|c| "aeiouyhAEIOUYHÀÂÉÈÊÎÔÛ".contains(c));
-    if vowel {
-        format!("d’{name}")
-    } else {
-        format!("de {name}")
-    }
+    crate::ui::kit::fr::de_place(name)
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SideSummary {
     pub name: String,
     pub engaged: u32,
+    /// All the dead of the side, the pursuit after a rout included (`BattleOutcome`).
     pub losses: u32,
     pub ratio: f32,
+    /// Part of `losses` struck down after the rout, not visible on the regiment cards (they
+    /// show the field at the moment the fight ended).
+    pub pursuit: u32,
 }
 
 impl SideSummary {
     pub fn survivors(&self) -> u32 {
         self.engaged.saturating_sub(self.losses)
+    }
+
+    /// Men still standing on the cards, before the pursuit.
+    pub fn survivors_on_cards(&self) -> u32 {
+        self.survivors() + self.pursuit
     }
 }
 
@@ -97,6 +99,8 @@ pub struct RegimentRow {
 pub struct ResultView {
     pub title: &'static str,
     pub won: bool,
+    /// Watching two AIs (no player side): neutral title, no « Défaite ».
+    pub spectator: bool,
     pub subtitle: String,
     pub sides: [SideSummary; 2],
     pub facts: Vec<String>,
@@ -225,7 +229,12 @@ pub fn facts(
 }
 
 /// Builds the view from the outcome and the final regiments.
-pub fn build_view(outcome: &BattleOutcome, player: SideId, data: &HudData) -> ResultView {
+pub fn build_view(
+    outcome: &BattleOutcome,
+    player: SideId,
+    spectator: bool,
+    data: &HudData,
+) -> ResultView {
     let enemy = match player {
         SideId::Attacker => SideId::Defender,
         SideId::Defender => SideId::Attacker,
@@ -235,18 +244,24 @@ pub fn build_view(outcome: &BattleOutcome, player: SideId, data: &HudData) -> Re
     let summary = sides.map(|(side, index)| {
         let engaged: u32 = rows[index].iter().map(|r| r.initial).sum();
         let losses = outcome.side(side).total_losses;
+        let on_cards: u32 = rows[index].iter().map(|r| r.lost).sum();
         SideSummary {
             name: data.faction_names[index].clone(),
             engaged,
             losses,
             ratio: losses as f32 / engaged.max(1) as f32,
+            pursuit: losses.saturating_sub(on_cards),
         }
     });
-    let won = outcome.winner == player;
-    let title = banner_title(won, summary[0].ratio, summary[1].ratio);
+    let won = spectator || outcome.winner == player;
+    let title = if spectator {
+        "Fin de la bataille"
+    } else {
+        banner_title(won, summary[0].ratio, summary[1].ratio)
+    };
     let minutes = outcome.duration as u64 / 60;
     let seconds = outcome.duration as u64 % 60;
-    let winner_name = &summary[usize::from(!won)].name;
+    let winner_name = &summary[usize::from(outcome.winner != player)].name;
     let names = [summary[0].name.clone(), summary[1].name.clone()];
     let nuance = if outcome.end == BattleEnd::Refused {
         "Bataille refusée · "
@@ -256,6 +271,7 @@ pub fn build_view(outcome: &BattleOutcome, player: SideId, data: &HudData) -> Re
     ResultView {
         title,
         won,
+        spectator,
         subtitle: format!("{nuance}{minutes} min {seconds:02} s · vainqueur : {winner_name}"),
         facts: facts(outcome, player, &names, &rows),
         sides: summary,
@@ -320,7 +336,7 @@ fn show_result(
     let Some(outcome) = session.sim_mut().outcome() else {
         return;
     };
-    let view = build_view(&outcome, player, &data);
+    let view = build_view(&outcome, player, session.player.is_none(), &data);
     let ctx = BuildCtx {
         theme: &theme,
         assets: &assets,
@@ -526,6 +542,17 @@ fn roster_card(
     }
 }
 
+/// Title and subtitle colours on the parchment page (the cream of the kit title is for dark
+/// backgrounds): ink, rubric red for a defeat.
+fn title_colors(view: &ResultView) -> (Color, Color) {
+    let title = if view.spectator || view.won {
+        style::INK_TITLE
+    } else {
+        style::RUBRIC
+    };
+    (title, style::INK_SOFT)
+}
+
 fn spawn_screen(
     commands: &mut Commands,
     ctx: &BuildCtx,
@@ -563,32 +590,56 @@ fn spawn_screen(
                 max_width: Val::Percent(100.0),
                 max_height: Val::Percent(100.0),
                 flex_direction: FlexDirection::Column,
-                overflow: Overflow::scroll_y(),
                 ..default()
             },
             ChildOf(overlay),
         ))
         .id();
+    // The frame never exceeds the window: the body of the page scrolls (with a scrollbar), the
+    // foot with « Retour à la campagne » stays on screen.
     let framed = commands
         .spawn((panel_illuminated(theme), ChildOf(holder)))
         .id();
+    commands
+        .entity(framed)
+        .entry::<Node>()
+        .and_modify(|mut node| {
+            node.min_height = Val::Px(0.0);
+            node.max_height = Val::Percent(100.0);
+            node.flex_shrink = 1.0;
+        });
     let page = commands
         .spawn((
             Name::new("ResultPage"),
             Node {
                 flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
                 row_gap: Val::Px(8.0),
                 padding: UiRect::all(Val::Px(20.0)),
+                min_height: Val::Px(0.0),
+                flex_shrink: 1.0,
                 ..default()
             },
             ChildOf(framed),
         ))
         .id();
+    let body = commands
+        .spawn((scroll_body("ResultBody"), ChildOf(page)))
+        .id();
+    commands
+        .entity(body)
+        .entry::<Node>()
+        .and_modify(|mut node| node.align_items = AlignItems::Center);
+    let (title_color, subtitle_color) = title_colors(view);
     // `illuminated_title` carries its own `Name` (a second one panics at spawn).
     commands.spawn((
-        illuminated_title(theme, view.title, &view.subtitle),
-        ChildOf(page),
+        illuminated_title_colored(
+            theme,
+            view.title,
+            &view.subtitle,
+            title_color,
+            subtitle_color,
+        ),
+        ChildOf(body),
     ));
     // Balance grid.
     let balance = commands
@@ -599,7 +650,7 @@ fn spawn_screen(
                 row_gap: Val::Px(2.0),
                 ..default()
             },
-            ChildOf(page),
+            ChildOf(body),
         ))
         .id();
     let head = commands
@@ -669,8 +720,23 @@ fn spawn_screen(
             style::GOOD,
             Some(110.0),
         );
+        if summary.pursuit > 0 {
+            text_node(
+                commands,
+                theme,
+                balance,
+                &format!(
+                    "{} : dont {} perdus dans la poursuite (non comptés sur les cartes)",
+                    summary.name,
+                    number(f64::from(summary.pursuit)),
+                ),
+                13.0,
+                style::INK_SOFT,
+                None,
+            );
+        }
     }
-    commands.spawn((separator(theme), ChildOf(page)));
+    commands.spawn((separator(theme), ChildOf(body)));
     // Notable facts.
     let facts = commands
         .spawn((
@@ -681,7 +747,7 @@ fn spawn_screen(
                 align_self: AlignSelf::Stretch,
                 ..default()
             },
-            ChildOf(page),
+            ChildOf(body),
         ))
         .id();
     text_node(
@@ -704,7 +770,7 @@ fn spawn_screen(
             None,
         );
     }
-    commands.spawn((separator(theme), ChildOf(page)));
+    commands.spawn((separator(theme), ChildOf(body)));
     // One column per side.
     let columns = commands
         .spawn((
@@ -714,7 +780,7 @@ fn spawn_screen(
                 align_self: AlignSelf::Stretch,
                 ..default()
             },
-            ChildOf(page),
+            ChildOf(body),
         ))
         .id();
     for (index, summary) in view.sides.iter().enumerate() {
@@ -850,7 +916,7 @@ fn spawn_screen(
         }
     }
     if !cards.is_empty() {
-        commands.spawn((separator(theme), ChildOf(page)));
+        commands.spawn((separator(theme), ChildOf(body)));
         let row = commands
             .spawn((
                 Name::new("Aftermath"),
@@ -862,23 +928,37 @@ fn spawn_screen(
                     align_self: AlignSelf::Stretch,
                     ..default()
                 },
-                ChildOf(page),
+                ChildOf(body),
             ))
             .id();
         for card in cards {
             spawn_card(commands, theme, row, card);
         }
     }
-    // « Revoir la bataille »: only when the fight was recorded (a replay being watched is not).
+    // Fixed foot. « Revoir la bataille »: only when the fight was recorded (a replay being
+    // watched is not).
+    let foot = commands
+        .spawn((
+            Name::new("ResultFoot"),
+            Node {
+                flex_shrink: 0.0,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                column_gap: Val::Px(16.0),
+                ..default()
+            },
+            ChildOf(page),
+        ))
+        .id();
     if crate::battle::scene::replay::is_recording() {
         commands.spawn((
             button_small(theme, WATCH_BUTTON, "Revoir la bataille"),
-            ChildOf(page),
+            ChildOf(foot),
         ));
     }
     commands.spawn((
         button_primary(theme, RETURN_BUTTON, "Retour à la campagne"),
-        ChildOf(page),
+        ChildOf(foot),
     ));
 }
 
@@ -981,8 +1061,9 @@ pub fn dump(world: &World) -> Value {
         "shown": true,
         "title": view.title,
         "won": view.won,
+        "spectator": view.spectator,
         "subtitle": view.subtitle,
-        "sides": view.sides.iter().map(|s| json!({"name": s.name, "engaged": s.engaged, "losses": s.losses, "survivors": s.survivors()})).collect::<Vec<_>>(),
+        "sides": view.sides.iter().map(|s| json!({"name": s.name, "engaged": s.engaged, "losses": s.losses, "survivors": s.survivors(), "pursuit": s.pursuit, "on_cards": s.survivors_on_cards()})).collect::<Vec<_>>(),
         "facts": view.facts,
         "cards": state.cards,
         "backdrop": state.backdrop,
@@ -1017,6 +1098,7 @@ mod tests {
             engaged: 10,
             losses: 12,
             ratio: 1.2,
+            pursuit: 0,
         };
         assert_eq!(side.survivors(), 0);
     }
@@ -1077,7 +1159,7 @@ mod tests {
         outcome.attacker.total_losses = 160;
         outcome.defender.total_losses = 60;
         outcome.defender.routed = true;
-        let view = build_view(&outcome, SideId::Attacker, &data);
+        let view = build_view(&outcome, SideId::Attacker, false, &data);
         assert_eq!(view.title, "Victoire à la Pyrrhus");
         assert!(view.subtitle.contains("12 min 34 s"));
         assert!(view.subtitle.contains("France"));

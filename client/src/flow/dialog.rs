@@ -24,7 +24,9 @@ use crate::ui::art_plates::ArtPlates;
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::tooltip_spec::TooltipTexts;
-use crate::ui::kit::widgets::{button_primary, button_small, caption, panel_sized, separator};
+use crate::ui::kit::widgets::{
+    button_primary, button_small, caption, panel_sized, scroll_body, separator,
+};
 use crate::ui::kit::{UiTheme, fr, typed};
 use data_model::GameData;
 use sim_battle::SideId;
@@ -486,152 +488,162 @@ pub fn spawn(
             Pickable::default(),
         ))
         .with_children(|root| {
-            root.spawn(panel_sized(theme, 1080.0))
-                .with_children(|panel| {
-                    banner(
-                        panel,
-                        theme,
-                        art,
-                        if siege { "siege" } else { "battle" },
-                        seed,
-                        &brief.title,
-                        &brief.subtitle,
-                    );
-                    // Verdict and balance bar.
-                    panel
-                        .spawn((
-                            Name::new("flow:verdict"),
-                            typed(theme, &brief.verdict, UiType::Heading),
-                        ))
-                        .insert(TextColor(tone_color(&brief.verdict_tone)));
-                    panel
-                        .spawn((
-                            Name::new("flow:balance"),
-                            Node {
-                                width: Val::Px(620.0),
-                                height: Val::Px(18.0),
-                                border: UiRect::all(Val::Px(2.0)),
-                                ..default()
-                            },
-                            BorderColor::all(style::INK),
-                        ))
-                        .with_children(|bar| {
-                            bar.spawn((
+            let mut frame = root.spawn(panel_sized(theme, 1080.0));
+            // Never taller than the window: the body scrolls, the banner and the buttons stay.
+            frame.entry::<Node>().and_modify(|mut node| {
+                node.max_height = Val::Percent(96.0);
+            });
+            frame.with_children(|panel| {
+                banner(
+                    panel,
+                    theme,
+                    art,
+                    if siege { "siege" } else { "battle" },
+                    seed,
+                    &brief.title,
+                    &brief.subtitle,
+                );
+                panel
+                    .spawn(scroll_body("flow:body"))
+                    .with_children(|panel| {
+                        // Verdict and balance bar.
+                        panel
+                            .spawn((
+                                Name::new("flow:verdict"),
+                                typed(theme, &brief.verdict, UiType::Heading),
+                            ))
+                            .insert(TextColor(tone_color(&brief.verdict_tone)));
+                        panel
+                            .spawn((
+                                Name::new("flow:balance"),
                                 Node {
-                                    width: Val::Percent(
-                                        (brief.share.clamp(0.0, 1.0) * 100.0) as f32,
-                                    ),
-                                    height: Val::Percent(100.0),
+                                    width: Val::Px(620.0),
+                                    height: Val::Px(18.0),
+                                    border: UiRect::all(Val::Px(2.0)),
                                     ..default()
                                 },
-                                BackgroundColor(colors[0]),
-                            ));
-                            bar.spawn((
-                                Node {
-                                    flex_grow: 1.0,
-                                    height: Val::Percent(100.0),
-                                    ..default()
-                                },
-                                BackgroundColor(colors[1]),
-                            ));
-                        });
-                    panel.spawn((
-                        caption(theme, &brief.chance_text),
-                        Node {
-                            max_width: Val::Px(1000.0),
-                            ..default()
-                        },
-                    ));
-                    panel.spawn(separator(theme));
-                    panel
-                        .spawn(Node {
-                            width: Val::Percent(100.0),
-                            column_gap: Val::Px(24.0),
-                            align_items: AlignItems::FlexStart,
-                            ..default()
-                        })
-                        .with_children(|columns| {
-                            for (slot, side) in brief.sides.iter().enumerate() {
-                                side_column(
-                                    columns,
-                                    theme,
-                                    art.assets,
-                                    side,
-                                    slot,
-                                    colors[slot],
-                                    preview.and_then(|p| p.generals[slot].as_deref()),
-                                );
-                            }
-                        });
-                    panel.spawn(separator(theme));
-                    if let Some(preview) = preview {
-                        let raster = preview.raster(colors);
-                        let image = Image::new(
-                            bevy::render::render_resource::Extent3d {
-                                width: raster.width,
-                                height: raster.height,
-                                depth_or_array_layers: 1,
-                            },
-                            bevy::render::render_resource::TextureDimension::D2,
-                            raster.data,
-                            bevy::render::render_resource::TextureFormat::Rgba8UnormSrgb,
-                            bevy::asset::RenderAssetUsages::default(),
-                        );
+                                BorderColor::all(style::INK),
+                            ))
+                            .with_children(|bar| {
+                                bar.spawn((
+                                    Node {
+                                        width: Val::Percent(
+                                            (brief.share.clamp(0.0, 1.0) * 100.0) as f32,
+                                        ),
+                                        height: Val::Percent(100.0),
+                                        ..default()
+                                    },
+                                    BackgroundColor(colors[0]),
+                                ));
+                                bar.spawn((
+                                    Node {
+                                        flex_grow: 1.0,
+                                        height: Val::Percent(100.0),
+                                        ..default()
+                                    },
+                                    BackgroundColor(colors[1]),
+                                ));
+                            });
                         panel.spawn((
-                            Name::new("flow:site_map"),
-                            Node {
-                                width: Val::Px(SITE_MAP_SIZE.x),
-                                height: Val::Px(SITE_MAP_SIZE.y),
-                                flex_shrink: 0.0,
-                                ..default()
-                            },
-                            ImageNode::new(images.add(image)),
-                        ));
-                    }
-                    panel.spawn(caption(theme, &brief.conditions));
-                    if let Some(preview) = preview {
-                        let mut line = format!("Météo prévue\u{a0}: {}", preview.weather_label);
-                        if !preview.site_label.is_empty() {
-                            line += &format!("   ·   Site\u{a0}: {}", preview.site_label);
-                        }
-                        panel.spawn((Name::new("flow:weather"), caption(theme, &line)));
-                    }
-                    if !brief.modifiers.is_empty() {
-                        panel.spawn((
-                            Name::new("flow:modifiers"),
-                            caption(theme, &brief.modifiers.join(" · ")),
+                            caption(theme, &brief.chance_text),
                             Node {
                                 max_width: Val::Px(1000.0),
                                 ..default()
                             },
                         ));
-                    }
-                    panel
-                        .spawn(Node {
-                            width: Val::Percent(100.0),
-                            column_gap: Val::Px(18.0),
-                            justify_content: JustifyContent::SpaceBetween,
-                            align_items: AlignItems::Center,
-                            margin: UiRect::top(Val::Px(8.0)),
-                            ..default()
-                        })
-                        .with_children(|row| {
-                            let mut withdraw =
-                                row.spawn(button_small(theme, WITHDRAW, &brief.withdraw_label));
-                            if !brief.can_withdraw {
-                                withdraw.insert(bevy::ui::InteractionDisabled);
+                        panel.spawn(separator(theme));
+                        panel
+                            .spawn(Node {
+                                width: Val::Percent(100.0),
+                                column_gap: Val::Px(24.0),
+                                align_items: AlignItems::FlexStart,
+                                ..default()
+                            })
+                            .with_children(|columns| {
+                                for (slot, side) in brief.sides.iter().enumerate() {
+                                    side_column(
+                                        columns,
+                                        theme,
+                                        art.assets,
+                                        side,
+                                        slot,
+                                        colors[slot],
+                                        preview.and_then(|p| p.generals[slot].as_deref()),
+                                    );
+                                }
+                            });
+                        panel.spawn(separator(theme));
+                        if let Some(preview) = preview {
+                            let raster = preview.raster(colors);
+                            let image = Image::new(
+                                bevy::render::render_resource::Extent3d {
+                                    width: raster.width,
+                                    height: raster.height,
+                                    depth_or_array_layers: 1,
+                                },
+                                bevy::render::render_resource::TextureDimension::D2,
+                                raster.data,
+                                bevy::render::render_resource::TextureFormat::Rgba8UnormSrgb,
+                                bevy::asset::RenderAssetUsages::default(),
+                            );
+                            panel.spawn((
+                                Name::new("flow:site_map"),
+                                Node {
+                                    width: Val::Px(SITE_MAP_SIZE.x),
+                                    height: Val::Px(SITE_MAP_SIZE.y),
+                                    flex_shrink: 0.0,
+                                    ..default()
+                                },
+                                ImageNode::new(images.add(image)),
+                            ));
+                        }
+                        panel.spawn(caption(theme, &brief.conditions));
+                        if let Some(preview) = preview {
+                            let mut line = format!("Météo prévue\u{a0}: {}", preview.weather_label);
+                            if !preview.site_label.is_empty() {
+                                line += &format!("   ·   Site\u{a0}: {}", preview.site_label);
                             }
-                            if !brief.auto_risk.is_empty() {
-                                row.spawn((
-                                    Name::new("flow:auto_risk"),
-                                    caption(theme, &brief.auto_risk),
-                                ))
-                                .insert(TextColor(style::RUBRIC));
-                            }
-                            row.spawn(button_small(theme, AUTO, "Résolution automatique"));
-                            row.spawn(button_primary(theme, FIGHT, &brief.fight_label));
-                        });
-                });
+                            panel.spawn((Name::new("flow:weather"), caption(theme, &line)));
+                        }
+                        if !brief.modifiers.is_empty() {
+                            panel.spawn((
+                                Name::new("flow:modifiers"),
+                                caption(theme, &brief.modifiers.join(" · ")),
+                                Node {
+                                    max_width: Val::Px(1000.0),
+                                    ..default()
+                                },
+                            ));
+                        }
+                    });
+                // Fixed foot: the three choices are always on screen.
+                panel
+                    .spawn(Node {
+                        width: Val::Percent(100.0),
+                        flex_shrink: 0.0,
+                        column_gap: Val::Px(18.0),
+                        justify_content: JustifyContent::SpaceBetween,
+                        align_items: AlignItems::Center,
+                        margin: UiRect::top(Val::Px(8.0)),
+                        ..default()
+                    })
+                    .with_children(|row| {
+                        let mut withdraw =
+                            row.spawn(button_small(theme, WITHDRAW, &brief.withdraw_label));
+                        if !brief.can_withdraw {
+                            withdraw.insert(bevy::ui::InteractionDisabled);
+                        }
+                        if !brief.auto_risk.is_empty() {
+                            row.spawn((
+                                Name::new("flow:auto_risk"),
+                                caption(theme, &brief.auto_risk),
+                            ))
+                            .insert(TextColor(style::RUBRIC));
+                        }
+                        row.spawn(button_small(theme, AUTO, "Résolution automatique"));
+                        row.spawn(button_primary(theme, FIGHT, &brief.fight_label));
+                    });
+            });
         });
 }
 
@@ -778,6 +790,9 @@ fn side_column(
             // Regiment cards.
             column
                 .spawn(Node {
+                    // A definite width, else the wrapped rows are measured as one line and the
+                    // next caption lands on top of the cards.
+                    width: Val::Percent(100.0),
                     flex_wrap: FlexWrap::Wrap,
                     column_gap: Val::Px(4.0),
                     row_gap: Val::Px(4.0),

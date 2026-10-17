@@ -183,6 +183,7 @@ pub fn spawn_top_bar(
         Text::new("00:00"),
         ctx.theme.text_font(false, false, UiType::Body.size()),
         TextColor(style::INK),
+        TextLayout::new(Justify::Left, LineBreak::NoWrap),
         ChildOf(bar),
     ));
     commands.spawn((
@@ -191,6 +192,7 @@ pub fn spawn_top_bar(
         Text::new(""),
         ctx.theme.text_font(false, true, UiType::Caption.size()),
         TextColor(style::INK_SOFT),
+        TextLayout::new(Justify::Left, LineBreak::NoWrap),
         ChildOf(bar),
     ));
     let sky = commands

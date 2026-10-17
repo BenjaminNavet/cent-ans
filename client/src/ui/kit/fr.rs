@@ -26,6 +26,32 @@ pub const MONTHS_SHORT: [&str; 12] = [
     "déc.",
 ];
 
+/// Place or faction name introduced by « de » with the right elision and article contraction:
+/// « France » -> « de France », « Île-de-France » -> « d’Île-de-France », « Le Caire » ->
+/// « du Caire », « Les Landes » -> « des Landes », « L’Aigle » -> « de l’Aigle ». An initial h is
+/// taken as aspirated (« de Hongrie », « de Hainaut »).
+pub fn de_place(name: &str) -> String {
+    let name = name.trim();
+    if let Some(rest) = name.strip_prefix("Le ") {
+        return format!("du {rest}");
+    }
+    if let Some(rest) = name.strip_prefix("Les ") {
+        return format!("des {rest}");
+    }
+    if let Some(rest) = name.strip_prefix("L’").or_else(|| name.strip_prefix("L'")) {
+        return format!("de l’{rest}");
+    }
+    let vowel = name
+        .chars()
+        .next()
+        .is_some_and(|c| "AEIOUYÀÂÄÉÈÊËÎÏÔÖÛÜŒaeiouyàâäéèêëîïôöûüœ".contains(c));
+    if vowel {
+        format!("d’{name}")
+    } else {
+        format!("de {name}")
+    }
+}
+
 /// `60000` -> « 60 000 » (no symbol; negative with the real minus sign).
 pub fn digits(value: i64) -> String {
     let raw = value.unsigned_abs().to_string();
@@ -175,6 +201,20 @@ mod tests {
         assert_eq!(count(1, "tour", None), "1 tour");
         assert_eq!(count(0, "tour", None), "0 tour");
         assert_eq!(count(2, "cheval", Some("chevaux")), "2 chevaux");
+    }
+
+    #[test]
+    fn place_elision() {
+        assert_eq!(de_place("Île-de-France"), "d’Île-de-France");
+        assert_eq!(de_place("Île de Man"), "d’Île de Man");
+        assert_eq!(de_place("Angleterre"), "d’Angleterre");
+        assert_eq!(de_place("Évêché de Dorpat"), "d’Évêché de Dorpat");
+        assert_eq!(de_place("Guyenne"), "de Guyenne");
+        assert_eq!(de_place("Hongrie centrale"), "de Hongrie centrale");
+        assert_eq!(de_place("Le Caire"), "du Caire");
+        assert_eq!(de_place("Les Landes"), "des Landes");
+        assert_eq!(de_place("L’Aigle"), "de l’Aigle");
+        assert_eq!(de_place("La Rochelle"), "de La Rochelle");
     }
 
     #[test]
