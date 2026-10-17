@@ -24,6 +24,8 @@ pub struct Render {
     pub max_radius_px: f32,
     pub max_cached_cells: usize,
     pub cells_per_frame: usize,
+    /// Roots (props, outcrops) spawned per frame, all spawners together (`budget`).
+    pub spawn_roots_per_frame: usize,
     pub size_k: f32,
     pub size_exponent: f32,
     pub spread_exponent: f32,
@@ -170,6 +172,7 @@ fn parse_render(r: &Value) -> Render {
         max_radius_px: num(r, "max_radius_px", 200.0),
         max_cached_cells: num(r, "max_cached_cells", 64.0) as usize,
         cells_per_frame: num(r, "cells_per_frame", 1.0) as usize,
+        spawn_roots_per_frame: num(r, "spawn_roots_per_frame", 150.0) as usize,
         size_k: num(r, "size_k", 0.0045),
         size_exponent: num(r, "size_exponent", 0.85),
         spread_exponent: num(r, "spread_exponent", 0.5),

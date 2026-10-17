@@ -576,6 +576,8 @@ pub struct RockView {
     pub sown_rocks: usize,
     pub candidates: usize,
     pub spawned: usize,
+    /// Outcrops left unspawned by the frame budget (the next frame continues without the timer).
+    pub backlog: bool,
     pub despawned: usize,
     pub visible: usize,
     pub by_outcrop: HashMap<String, usize>,
@@ -648,6 +650,8 @@ pub fn stream_rocks(
     mut view: ResMut<RockView>,
     mut timer: Local<f32>,
     time: Res<Time>,
+    mut budget: ResMut<super::budget::SpawnBudget>,
+    frame_count: Res<bevy::diagnostic::FrameCount>,
 ) {
     let Some(rig) = rig else {
         return;
@@ -674,7 +678,7 @@ pub fn stream_rocks(
     view.sown_tiles += finished;
     view.sown_rocks += sown;
     *timer -= time.delta_secs();
-    if *timer > 0.0 {
+    if *timer > 0.0 && !view.backlog {
         return;
     }
     *timer = 0.25;
@@ -788,9 +792,15 @@ pub fn stream_rocks(
             view.despawned += 1;
         }
     }
+    view.backlog = false;
+    let per_frame = super::budget::per_frame(loaded.config.render.spawn_roots_per_frame);
     for (_, key) in found {
         if view.live.contains_key(&key) {
             continue;
+        }
+        if budget.take(frame_count.0, per_frame, 1) == 0 {
+            view.backlog = true;
+            break;
         }
         let Some(TileState::Ready(rocks)) = view.tiles.get(&key.0) else {
             continue;

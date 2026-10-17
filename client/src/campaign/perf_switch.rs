@@ -41,6 +41,12 @@ pub struct PerfSwitchPlugin;
 
 impl Plugin for PerfSwitchPlugin {
     fn build(&self, app: &mut App) {
+        if std::env::var_os("CENT_ANS_SPAWN_LOG").is_some() {
+            app.add_systems(
+                PostUpdate,
+                spawn_log.before(bevy::camera::visibility::VisibilitySystems::CalculateBounds),
+            );
+        }
         if std::env::var_os("CENT_ANS_PERF_OFF").is_none() {
             return;
         }
@@ -97,4 +103,44 @@ fn hide<M: Material>(
             }
         }
     }
+}
+
+/// Dev tool (`CENT_ANS_SPAWN_LOG=1`): logs the frames that add 100+ meshes at once, with the
+/// nearest named ancestor of each, to find the spawn bursts that stall `calculate_bounds`.
+fn spawn_log(
+    added: Query<Entity, Added<Mesh3d>>,
+    parents: Query<(Option<&Name>, Option<&ChildOf>)>,
+    mut frame: Local<u64>,
+) {
+    *frame += 1;
+    let count = added.iter().count();
+    if count < 100 {
+        return;
+    }
+    let mut by_name: std::collections::BTreeMap<String, usize> = Default::default();
+    for entity in &added {
+        let mut cursor = entity;
+        let mut label = String::from("?");
+        for _ in 0..8 {
+            let Ok((name, parent)) = parents.get(cursor) else {
+                break;
+            };
+            if let Some(name) = name {
+                label = name.as_str().chars().take(24).collect();
+                break;
+            }
+            match parent {
+                Some(p) => cursor = p.parent(),
+                None => break,
+            }
+        }
+        *by_name.entry(label).or_default() += 1;
+    }
+    let mut top: Vec<_> = by_name.into_iter().collect();
+    top.sort_by_key(|(_, n)| std::cmp::Reverse(*n));
+    top.truncate(6);
+    info!(
+        "SPAWN_BURST frame {} meshes {} top {:?}",
+        *frame, count, top
+    );
 }

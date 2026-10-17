@@ -209,9 +209,7 @@ pub(super) fn prepare_maquette(
             continue;
         }
         maquette.meshes.push(entity);
-        commands
-            .entity(entity)
-            .try_insert(VisibilityRange::abrupt(0.0, f32::MAX));
+        commands.entity(entity).try_insert(solid_range());
         stats.range_meshes += 1;
         let is_banner = names
             .get(entity)
@@ -306,15 +304,50 @@ pub fn recolour_kit_banners(
     }
 }
 
+/// Quantum (world units) of the per-mesh range offsets. Bevy keeps every distinct
+/// [`VisibilityRange`] ever seen in a table that is never purged (`RenderVisibilityRanges::
+/// range_to_index`, 65 535 slots, then every new range silently shares slot 0), so the ranges
+/// written each frame must come from a small set.
+pub const RANGE_QUANTUM: f32 = 1.0;
+
+/// Rounds an eye/rig distance offset to [`RANGE_QUANTUM`].
+pub fn quantise_offset(offset: f32) -> f32 {
+    (offset / RANGE_QUANTUM).round() * RANGE_QUANTUM
+}
+
+/// True when the maquettes of a kind (limit `limit`, fade `margin`) need a per-mesh dithered
+/// range at rig distance `rig`: only inside the fade band. Outside it the fade is constant
+/// (fully visible below, root hidden by `update_range` above) and the meshes keep the shared
+/// abrupt range, which avoids rewriting 1000+ ranges (and re-extracting as many meshes) every
+/// frame and keeps them off the dither pipeline variant.
+pub fn in_fade_band(limit: f32, margin: f32, rig: f32) -> bool {
+    rig > limit - margin && rig < limit
+}
+
+/// The constant range of a mesh outside the fade band.
+pub fn solid_range() -> VisibilityRange {
+    if crate::campaign::perf_switch::off("fadesoftsolid") {
+        // Dev experiment: a constant but crossfading range (dither pipeline variant kept).
+        VisibilityRange {
+            start_margin: 0.0..0.0,
+            end_margin: 1.0e8..1.0e8 + 1.0e4,
+            use_aabb: false,
+        }
+    } else {
+        VisibilityRange::abrupt(0.0, f32::MAX)
+    }
+}
+
 /// Dithered fade of every maquette mesh at the end of its kind's range, on the rig distance.
 #[allow(clippy::too_many_arguments)]
 pub(super) fn fade_maquettes(
     view: Res<ZoomView>,
     places: Res<Places>,
     cameras: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
-    maquettes: Query<&Maquette>,
+    mut maquettes: Query<&mut Maquette>,
     mut ranges: Query<(&GlobalTransform, &mut VisibilityRange)>,
     banners: Query<(Entity, &DnBanner)>,
+    mut banded_banners: Local<HashSet<Entity>>,
     mut stats: ResMut<LodStats>,
 ) {
     let Some((_, camera)) = cameras.iter().find(|(c, _)| c.is_active) else {
@@ -323,12 +356,26 @@ pub(super) fn fade_maquettes(
     let eye = camera.translation();
     let margin = places.maquettes.fade_margin();
     let rig = view.distance;
+    let legacy = crate::campaign::perf_switch::off("fadeband");
     let mut fading = 0;
-    let mut apply = |entity: Entity, limit: f32| {
+    let mut apply = |entity: Entity, limit: f32, banded: &mut bool| {
+        let band = legacy || in_fade_band(limit, margin, rig);
+        if !band {
+            if *banded {
+                if let Ok((_, mut range)) = ranges.get_mut(entity) {
+                    *range = solid_range();
+                }
+            }
+            return;
+        }
         let Ok((t, mut range)) = ranges.get_mut(entity) else {
             return;
         };
-        let offset = (eye - t.translation()).length() - rig;
+        let offset = if legacy {
+            (eye - t.translation()).length() - rig
+        } else {
+            quantise_offset((eye - t.translation()).length() - rig)
+        };
         let want = end_margin(limit, margin, offset);
         if (range.end_margin.start - want.start).abs() > 0.25
             || (range.end_margin.end - want.end).abs() > 0.25
@@ -337,14 +384,33 @@ pub(super) fn fade_maquettes(
         }
         fading += usize::from(rig > limit - margin && rig < limit);
     };
-    for m in &maquettes {
-        for &entity in &m.meshes {
-            apply(entity, m.range);
+    for mut m in &mut maquettes {
+        let band = legacy || in_fade_band(m.range, margin, rig);
+        // A maquette outside the band whose meshes are already solid costs nothing.
+        if !band && !m.banded {
+            continue;
         }
+        let range = m.range;
+        let mut banded = m.banded;
+        for &entity in &m.meshes {
+            apply(entity, range, &mut banded);
+        }
+        m.banded = band;
     }
     for (entity, b) in &banners {
         if let Some(p) = places.places.get(b.place) {
-            apply(entity, places.maquettes.range(p.shown_kind));
+            let limit = places.maquettes.range(p.shown_kind);
+            let band = legacy || in_fade_band(limit, margin, rig);
+            if !band && !banded_banners.contains(&entity) {
+                continue;
+            }
+            let mut banded = banded_banners.contains(&entity);
+            apply(entity, limit, &mut banded);
+            if band {
+                banded_banners.insert(entity);
+            } else {
+                banded_banners.remove(&entity);
+            }
         }
     }
     stats.fading = fading;
@@ -431,6 +497,24 @@ mod tests {
         // A zero margin is a hard cut, not a division by zero.
         assert_eq!(fade_alpha(900.0, 0.0, 899.0), 1.0);
         assert_eq!(fade_alpha(900.0, 0.0, 901.0), 0.0);
+    }
+
+    #[test]
+    fn band_is_open_below_the_limit_only() {
+        assert!(!in_fade_band(900.0, 60.0, 840.0));
+        assert!(in_fade_band(900.0, 60.0, 841.0));
+        assert!(in_fade_band(900.0, 60.0, 899.9));
+        assert!(!in_fade_band(900.0, 60.0, 900.0));
+    }
+
+    #[test]
+    fn offsets_are_quantised_to_a_small_set() {
+        use std::collections::HashSet;
+        let distinct: HashSet<i32> = (0..10_000)
+            .map(|i| quantise_offset(i as f32 * 0.037 - 100.0) as i32)
+            .collect();
+        // 370 units of span -> at most ~371 distinct ranges instead of 10 000.
+        assert!(distinct.len() <= 372, "{}", distinct.len());
     }
 
     #[test]

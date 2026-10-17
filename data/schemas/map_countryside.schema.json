@@ -26,6 +26,7 @@
         "max_radius_px": {"type": "number", "exclusiveMinimum": 0},
         "max_cached_cells": {"type": "integer", "minimum": 1},
         "cells_per_frame": {"type": "integer", "minimum": 1},
+        "spawn_roots_per_frame": {"type": "integer", "minimum": 10, "description": "Racines (modeles, affleurements) creees par image, tous generateurs confondus : etale les rafales de spawn de la descente (calculate_bounds, specialisation)."},
         "size_k": {"type": "number", "exclusiveMinimum": 0, "description": "Taille tenue a l'ecran : k x distance^exposant (unites monde), jamais sous la taille reelle."},
         "size_exponent": {"type": "number", "exclusiveMinimum": 0, "maximum": 1.5},
         "spread_exponent": {"type": "number", "minimum": 0, "maximum": 1, "description": "L'ecart entre pieces d'un enclos grossit comme (grossissement)^exposant."},
