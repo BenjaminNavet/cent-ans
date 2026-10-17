@@ -65,6 +65,8 @@ pub struct Prop {
     pub stretched: bool,
     pub fixed_size: bool,
     pub max_instances: usize,
+    /// Albedo multiplier of the model (`albedo_gain` uniform of `countryside.gdshader`).
+    pub albedo_gain: f32,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -327,6 +329,7 @@ pub fn parse(doc: &Value, data_dir: &Path, projection: &MapProjection) -> Config
                     .unwrap_or(false),
                 max_instances: num(p, "max_instances", render.max_instances_per_prop as f32)
                     as usize,
+                albedo_gain: num(p, "albedo_gain", 1.0),
             });
         }
     }
