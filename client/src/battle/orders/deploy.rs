@@ -188,7 +188,7 @@ pub fn sync_banner(
             DeploymentBanner,
             Node {
                 position_type: PositionType::Absolute,
-                top: Val::Px(104.0),
+                top: Val::Px(58.0),
                 width: Val::Percent(100.0),
                 justify_content: JustifyContent::Center,
                 ..default()

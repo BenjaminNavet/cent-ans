@@ -463,6 +463,7 @@ impl Plugin for TreesPlugin {
                 commands.remove_resource::<TreeStats>();
                 commands.remove_resource::<PlantedTrees>();
                 commands.remove_resource::<super::tree_kit::PendingTreeTextures>();
+                commands.remove_resource::<super::tree_kit::TreeMaterials>();
                 commands.insert_resource(super::tree_kit::TreeTextureStats::default());
             });
         crate::agent::dump::DumpAppExt::register_dump(app, dump_trees);
@@ -743,6 +744,13 @@ fn plant(
         &mut stats,
     );
     commands.insert_resource(super::tree_kit::PendingTreeTextures(jobs));
+    commands.insert_resource(super::tree_kit::TreeMaterials {
+        wind: kits
+            .iter()
+            .flat_map(|kit| kit.leaf_materials.iter().cloned())
+            .collect(),
+        standard: kits.iter().map(|kit| kit.bark_material.clone()).collect(),
+    });
     let mut counts = vec![0usize; SPECIES.len()];
     // Three levels: full mesh, light mesh, then the atlas impostors of `far_woods` from
     // `impostor_from_m` on (dithered cross-fades of `LOD_BAND` metres).

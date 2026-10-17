@@ -36,7 +36,7 @@ use crate::ui::kit::style::UiTier;
 const CAMERA_DISTANCE: f32 = 34.0;
 const CRY_DISTANCE: f32 = 95.0;
 /// Top offset (px) of the band, under the balance bar.
-const SUBTITLE_TOP: f32 = 76.0;
+const SUBTITLE_TOP: f32 = 136.0;
 
 /// A composed speech (text only).
 #[derive(Debug, Clone, PartialEq)]
@@ -613,8 +613,8 @@ fn spawn_subtitles(commands: &mut Commands, theme: &UiTheme) {
             SpeechBand,
             Node {
                 position_type: PositionType::Absolute,
-                left: Val::Percent(20.0),
-                width: Val::Percent(60.0),
+                left: Val::Percent(25.0),
+                width: Val::Percent(50.0),
                 top: Val::Px(SUBTITLE_TOP),
                 border_radius: BorderRadius::all(Val::Px(4.0)),
                 flex_direction: FlexDirection::Column,
