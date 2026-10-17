@@ -1,7 +1,7 @@
 // VQ cground: close-range ground detail of the campaign terrain, in its own module so that
 // `terrain.wesl` only carries two call sites.
 //
-//     import cent_ans_client::campaign::terrain::ground_detail::{GdParams, gd_macro, gd_parcel};
+//     
 //
 // At the campaign close views (camera distance 25..200) one screen pixel covers 15..300 m, so what
 // reads as a landscape is the structure of 50 m .. 3 km: strips of the open fields, the tone of
@@ -20,6 +20,13 @@ struct GdParams {
     d: vec4<f32>,
     // macro periods (map px, xyz), plough colour share of the dark strips.
     e: vec4<f32>,
+    // Crop stage of a parcel: amp (arable), amp (meadow / vine), -, -.
+    f: vec4<f32>,
+    // Per season (spring, summer, autumn, winter): share of the parcels in the fresh green, pale
+    // gold and turned brown stage.
+    stage: array<vec4<f32>, 4>,
+    // Colour factors of the three stages.
+    tint: array<vec4<f32>, 3>,
 };
 
 fn gd_hash(p: vec2<f32>) -> f32 {
@@ -55,13 +62,17 @@ fn gd_macro(g: GdParams, col: vec3<f32>, p: vec2<f32>, footprint: f32, land: f32
     return mix(col, col * warm * (1.0 + tone * g.a.y), k);
 }
 
-// One cultivated parcel: stronger tone and saturation, strips (lanieres) with their balks, soil
+fn gd_ratio(col: vec3<f32>, base: vec3<f32>) -> vec3<f32> {
+    return clamp(col / max(base, vec3<f32>(1e-3)), vec3<f32>(0.4), vec3<f32>(2.5));
+}
+
+// One cultivated parcel (as a colour factor, applied after the band of `hb_relative`): stronger tone and saturation, strips (lanieres) with their balks, soil
 // mottling. `id` the parcel draw, `ang` its field angle (rad), `cls` the season class of the crop
 // (0 wheat, 1 green crop, 2 ploughed, 3 fallow, 4 meadow, 5 hay, 6 vine), `mpp` metres per map px.
-fn gd_parcel(g: GdParams, col_in: vec3<f32>, p: vec2<f32>, id: vec2<f32>, ang: f32, cls: i32,
-        footprint: f32, mpp: f32) -> vec3<f32> {
+fn gd_parcel_k(g: GdParams, col_in: vec3<f32>, p: vec2<f32>, id: vec2<f32>, ang: f32, cls: i32,
+        footprint: f32, mpp: f32, sw: vec4<f32>) -> vec3<f32> {
     if (g.a.x < 0.5) {
-        return col_in;
+        return vec3<f32>(1.0);
     }
     var col = col_in;
     let px_m = max(footprint * mpp, 0.01);
@@ -73,8 +84,22 @@ fn gd_parcel(g: GdParams, col_in: vec3<f32>, p: vec2<f32>, id: vec2<f32>, ang: f
     col = col * pow(lum / ref_l, g.b.x * fade) * (1.0 + own * fade);
     let l2 = gd_luma(col);
     col = mix(vec3<f32>(l2), col, 1.0 + g.b.y * fade);
+    // Crop stage: fresh green, pale gold or turned brown, by the season (ploughed / meadow /
+    // fallow contrast of an aerial view).
+    let share = g.stage[0].xyz * sw.x + g.stage[1].xyz * sw.y + g.stage[2].xyz * sw.z + g.stage[3].xyz * sw.w;
+    let hh = gd_hash(id + vec2<f32>(4.4, 6.2));
+    var tint = vec3<f32>(1.0);
+    let wild = cls >= 4;
+    if (hh < share.x) {
+        tint = g.tint[0].xyz;
+    } else if (hh < share.x + share.y) {
+        tint = g.tint[1].xyz;
+    } else if (hh < share.x + share.y + share.z && !wild) {
+        tint = g.tint[2].xyz;
+    }
+    col = col * mix(vec3<f32>(1.0), tint, select(g.f.x, g.f.y, wild) * fade);
     if (g.a.x < 1.5 || fade <= 0.0) {
-        return col;
+        return gd_ratio(col, col_in);
     }
     // Strips: bands across the parcel, tone of their own (maturity, sowing date), dark balks.
     let width = mix(g.c.z, g.c.w, gd_hash(id + vec2<f32>(2.9, 8.1)));
@@ -96,5 +121,5 @@ fn gd_parcel(g: GdParams, col_in: vec3<f32>, p: vec2<f32>, id: vec2<f32>, ang: f
     // Soil and crop mottling at 20 to 200 m.
     let mott = (gd_noise(p * mpp / g.d.y + id) * 0.65 + gd_noise(p * mpp / (g.d.y * 0.27) + id * 1.7) * 0.35 - 0.5) * 2.0;
     col = col * (1.0 + mott * g.d.x * (1.0 - smoothstep(g.d.z, g.d.w, footprint)));
-    return col;
+    return gd_ratio(col, col_in);
 }

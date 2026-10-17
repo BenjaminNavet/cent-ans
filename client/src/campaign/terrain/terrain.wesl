@@ -12,7 +12,7 @@ import bevy_pbr::render::{
     shadows,
 };
 // Per-province weather (lot weather5, wired by coastterr).
-import cent_ans_client::campaign::terrain::ground_detail::{GdParams, gd_macro, gd_parcel};
+import cent_ans_client::campaign::terrain::ground_detail::{GdParams, gd_macro, gd_parcel_k};
 import cent_ans_client::campaign::weather::ground::{wx_field, wx_selection_clear, wx_scatter, wx_aerial_fog_color};
 
 struct TerrainParams {
@@ -2014,6 +2014,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
     open_col = open_col * pow(k_wild, vec3<f32>(HB_SEASON_STRENGTH));  // TB1
     var hedge_mask = 0.0;
     var nrm = vec2<f32>(0.0);
+    var gd_k = vec3<f32>(1.0);
     let farmed = hb_hash(parcel.id + 71.7) < max(farm_share, fields.v4.w) * presence;
     if (farmed) {
         var key = parcel.id;
@@ -2075,7 +2076,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
                 let grain_l = clamp(luma(open_col) / max(luma(mean), 1e-3), 0.7, 1.35);
                 open_col = mix(open_col, far_col * grain_l, patch_k);
             }
-            open_col = gd_parcel(gd, open_col, p, parcel.id, field_ang, cls, footprint, mpp);
+            gd_k = gd_parcel_k(gd, open_col, p, parcel.id, field_ang, cls, footprint, mpp, season.weights);
             // Hedges and banks on the edges of the cultivated parcels.
             let edge_m = parcel.edge * cell_px * mpp;
             let px_m = footprint * mpp;
@@ -2113,6 +2114,8 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
     let lum_c = max(luma(col), 1e-3);
     hb_col = mix(hb_col, col * (lum_hb / lum_c), fields.v5.z);
     hb_col = hb_relative(col, hb_col);
+    // VQ cground: parcel tone, crop stage and strips, outside the luminance band of `hb_relative`.
+    hb_col = hb_col * mix(vec3<f32>(1.0), gd_k, open_w / total);
     out.color = mix(col, hb_col, w_bare);
     out.dn = nrm * w_bare * open_w / total * ground.tiling.w * 0.6;
     return out;

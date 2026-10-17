@@ -26,6 +26,12 @@ pub struct GdParams {
     pub d: Vec4,
     /// Macro periods (map px), plough share of the dark strips.
     pub e: Vec4,
+    /// Crop stage amplitude (arable, meadow and vine).
+    pub f: Vec4,
+    /// Per season, share of the parcels in the green, gold and brown stage.
+    pub stage: [Vec4; 4],
+    /// Colour factors of the three stages.
+    pub tint: [Vec4; 3],
 }
 
 impl Default for GdParams {
@@ -40,6 +46,19 @@ fn number(block: &Value, key: &str, fallback: f32) -> f32 {
         .get(key)
         .and_then(Value::as_f64)
         .map_or(fallback, |v| v as f32)
+}
+
+const SEASONS: [&str; 4] = ["spring", "summer", "autumn", "winter"];
+const STAGES: [&str; 3] = ["green", "gold", "brown"];
+
+fn triple(value: &Value, fallback: [f32; 3]) -> Vec4 {
+    let at = |i: usize| {
+        value
+            .get(i)
+            .and_then(Value::as_f64)
+            .map_or(fallback[i], |v| v as f32)
+    };
+    Vec4::new(at(0), at(1), at(2), 0.0)
 }
 
 impl GdParams {
@@ -89,6 +108,16 @@ impl GdParams {
                 period(2, 29.0),
                 number(s, "plough_share", 0.8),
             ),
+            f: Vec4::new(
+                number(&spec["stage"], "amp", 0.7),
+                number(&spec["stage"], "amp_wild", 0.3),
+                0.0,
+                0.0,
+            ),
+            stage: std::array::from_fn(|i| {
+                triple(&spec["stage"]["shares"][SEASONS[i]], [0.3, 0.2, 0.2])
+            }),
+            tint: std::array::from_fn(|i| triple(&spec["stage"]["tints"][STAGES[i]], [1.0; 3])),
         }
     }
 }

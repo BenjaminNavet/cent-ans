@@ -4,7 +4,7 @@
   "title": "Détail du sol de campagne de près (ground_detail.wesl)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["macro", "parcel", "strips", "mottle"],
+  "required": ["macro", "parcel", "strips", "stage", "mottle"],
   "properties": {
     "description": {"type": "string"},
     "macro": {
@@ -42,6 +42,27 @@
         "plough_share": {"type": "number", "minimum": 0, "maximum": 1}
       }
     },
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amp", "amp_wild", "shares", "tints"],
+      "properties": {
+        "amp": {"type": "number", "minimum": 0, "maximum": 1},
+        "amp_wild": {"type": "number", "minimum": 0, "maximum": 1},
+        "shares": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["spring", "summer", "autumn", "winter"],
+          "patternProperties": {"^(spring|summer|autumn|winter)$": {"$ref": "#/$defs/triple"}}
+        },
+        "tints": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["green", "gold", "brown"],
+          "patternProperties": {"^(green|gold|brown)$": {"$ref": "#/$defs/triple"}}
+        }
+      }
+    },
     "mottle": {
       "type": "object",
       "additionalProperties": false,
@@ -52,5 +73,6 @@
         "fade_end_footprint": {"type": "number", "exclusiveMinimum": 0}
       }
     }
-  }
+  },
+  "$defs": {"triple": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 2}}}
 }
