@@ -139,6 +139,7 @@ impl Plugin for CampaignLifePlugin {
                     ),
                     (
                         models::fit_models,
+                        models::unshadow_model_meshes,
                         anim::bind_models,
                         anim::write_herd_tags,
                         skin::update_skin,
