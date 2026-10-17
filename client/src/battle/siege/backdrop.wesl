@@ -11,7 +11,7 @@
 // foot of the walls, rain streaks, moss on the upward faces), flat normals from derivatives.
 import bevy_pbr::render::{
     mesh_functions,
-    mesh_view_bindings::view,
+    mesh_view_bindings::{view, globals},
     view_transformations::position_world_to_clip,
     forward_io::{Vertex, VertexOutput, FragmentOutput, decompress_vertex},
     pbr_fragment::pbr_input_from_standard_material,
@@ -25,6 +25,8 @@ struct BackdropParams {
     root: vec4<f32>,
     // x water (1 = water), y ground height (m), z metres per unit, w ageing.
     look: vec4<f32>,
+    // rgb sky colour reflected by the water.
+    sky: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(100) var<uniform> params: BackdropParams;
@@ -120,6 +122,33 @@ fn tri_normal(p: vec3<f32>, w: vec3<f32>, layer: i32) -> vec3<f32> {
     return (x * w.x + y * w.y + z * w.z) * 2.0 - vec3<f32>(1.0);
 }
 
+fn w_hash(p: vec2<f32>) -> f32 {
+    return fract(sin(dot(p, vec2<f32>(127.1, 311.7))) * 43758.5453);
+}
+
+fn w_noise(p: vec2<f32>) -> f32 {
+    let i = floor(p);
+    let f = fract(p);
+    let u = f * f * (3.0 - 2.0 * f);
+    return mix(
+        mix(w_hash(i), w_hash(i + vec2<f32>(1.0, 0.0)), u.x),
+        mix(w_hash(i + vec2<f32>(0.0, 1.0)), w_hash(i + vec2<f32>(1.0, 1.0)), u.x),
+        u.y,
+    );
+}
+
+fn wave_h(p: vec2<f32>) -> f32 {
+    return w_noise(p) * 0.65 + w_noise(p * 2.3 + vec2<f32>(9.0, 4.0)) * 0.35;
+}
+
+// Slope of the river waves at the world point `p` (same two octaves as the battle river).
+fn wave_slope(p: vec2<f32>) -> vec2<f32> {
+    let e = 0.12;
+    let dx = wave_h(p + vec2<f32>(e, 0.0)) - wave_h(p - vec2<f32>(e, 0.0));
+    let dz = wave_h(p + vec2<f32>(0.0, e)) - wave_h(p - vec2<f32>(0.0, e));
+    return vec2<f32>(dx, dz) / (2.0 * e);
+}
+
 @fragment
 fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> FragmentOutput {
     var pbr_input = pbr_input_from_standard_material(in, is_front);
@@ -211,6 +240,19 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
         normal_world = normalize(rot_y(n_local, yaw));
     }
     if water {
+        // Far water of the backdrop (the river behind the town): a calm swell perturbs the
+        // normal and a Schlick share of the sky colours the surface, so that it reads as water
+        // rather than as a flat grey plate (the Godot sphere-reflection probe did the same).
+        let wp = in.world_position.xz;
+        let t = globals.time;
+        var slope = wave_slope(wp * vec2<f32>(0.35, 0.2) + vec2<f32>(0.0, -t * 0.25));
+        slope = slope + wave_slope(wp * 0.12 + vec2<f32>(t * 0.05, -t * 0.08)) * 1.4;
+        let up = vec3<f32>(0.0, 1.0, 0.0);
+        normal_world = normalize(up + vec3<f32>(-slope.x, 0.0, -slope.y) * 0.1);
+        let cos_v = clamp(dot(normal_world, to_view), 0.0, 1.0);
+        let fresnel = 0.03 + 0.97 * pow(1.0 - cos_v, 5.0);
+        let deep = mix(base, vec3<f32>(0.05, 0.1, 0.1), 0.5) * (0.85 + 0.3 * w_noise(wp * 0.02));
+        base = mix(deep, params.sky.rgb * 0.7, clamp(fresnel * 1.1, 0.0, 0.45));
         rough = 0.08;
         pbr_input.material.reflectance = vec3<f32>(0.6);
         pbr_input.material.metallic = 0.0;

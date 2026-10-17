@@ -1029,4 +1029,55 @@ mod tests {
         assert!(kind("cabourg").ends_with("_beach"), "{kinds:?}");
         assert!(kind("berck").ends_with("_beach"), "{kinds:?}");
     }
+
+    #[test]
+    fn dover_cliff_foot_reads_the_chalk_wall() {
+        // Camera of the gaps10 check (1.31 E, 51.12 N): the 5 px probe of the chalk region must
+        // read the wall (>= `cliff.max_m`) on most of the shore band, so that `coast_band` paints
+        // the cliff there instead of shingle.
+        let Ok(root) = crate::paths::find_root() else {
+            return;
+        };
+        let map_dir = root.join("data/map");
+        let (Some(json), Ok(coast), Ok(image)) = (
+            real_json(),
+            decode_gray8(&map_dir.join("coast_dist.png")),
+            crate::campaign::terrain::decode::decode_gray16(&map_dir.join("heightmap_render.png")),
+        ) else {
+            return;
+        };
+        let heights = HeightGrid {
+            width: image.width,
+            height: image.height,
+            data: image.data,
+            h_min_m: -200.0,
+            h_range_m: 5000.0,
+        };
+        let data = CoastData::from_json(&json).unwrap();
+        let Ok(projection) = crate::campaign::provinces::projection::MapProjection::load(&map_dir)
+        else {
+            return;
+        };
+        let c = projection.lonlat_to_px(1.31, 51.12).unwrap();
+        let (mut band, mut wall) = (0, 0);
+        for dy in -12..=12 {
+            for dx in -12..=12 {
+                let p = c + Vec2::new(dx as f32, dy as f32);
+                let cd = coast.at(p.x, p.y);
+                if !(0.0..=3.0).contains(&cd) {
+                    continue;
+                }
+                let region = data.region_at(p);
+                assert_eq!(region.id, "chalk_south_england");
+                let probe = region.cliff_probe_px.unwrap_or(data.params.cliff.y);
+                if let Some((h, _)) = probe_at(&coast, &heights, probe, p) {
+                    band += 1;
+                    wall +=
+                        usize::from(smoothstep(data.params.cliff.z, data.params.cliff.w, h) > 0.5);
+                }
+            }
+        }
+        assert!(band > 20, "{band}");
+        assert!(wall * 2 > band, "{wall}/{band}");
+    }
 }
