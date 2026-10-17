@@ -111,7 +111,10 @@ pub fn ground_under(
 /// True while the first tick must wait: a player battle at tick 0 whose deployment phase has not
 /// been tried yet (the camera it needs may not exist for a few frames).
 pub fn awaiting_deployment(session: &mut BattleSession, deployment: &Deployment) -> bool {
-    !deployment.tried && session.player.is_some() && !dev_skipped() && session.sim_mut().ticks() == 0
+    !deployment.tried
+        && session.player.is_some()
+        && !dev_skipped()
+        && session.sim_mut().ticks() == 0
 }
 
 fn dev_skipped() -> bool {
