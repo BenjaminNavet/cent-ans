@@ -446,7 +446,11 @@ fn ssao_follows_msaa(
     for (camera, msaa, has_ssao) in &cameras {
         let want = look.ssao.enabled && preset && *msaa == Msaa::Off;
         if want && !has_ssao {
-            let quality_level = match look.ssao.quality.as_str() {
+            // The preset's level when there is one ("high"/"ultra" cost more), else the data file's.
+            let level = quality
+                .as_ref()
+                .map_or(look.ssao.quality.as_str(), |q| q.ssao_quality.as_str());
+            let quality_level = match level {
                 "low" => ScreenSpaceAmbientOcclusionQualityLevel::Low,
                 "high" => ScreenSpaceAmbientOcclusionQualityLevel::High,
                 "ultra" => ScreenSpaceAmbientOcclusionQualityLevel::Ultra,

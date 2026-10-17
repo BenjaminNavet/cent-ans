@@ -248,6 +248,37 @@ fn spawn_atmosphere(
     commands.insert_resource(state);
 }
 
+/// The camera fog: exponential veil, or the distance-based aerial perspective when the weather
+/// has an `aerial` look (`FogFalloff::Atmospheric`, sun-side glow through the directional colour).
+pub fn distance_fog(fog: &super::look::FogLook, density: f32, horizon: bool) -> DistanceFog {
+    let color = Color::srgb(fog.color[0], fog.color[1], fog.color[2]);
+    match &fog.aerial {
+        Some(a) => DistanceFog {
+            color,
+            directional_light_color: if a.sun_exponent > 0.0 {
+                Color::srgb(a.sun_color[0], a.sun_color[1], a.sun_color[2])
+            } else {
+                Color::NONE
+            },
+            directional_light_exponent: a.sun_exponent.max(1.0),
+            falloff: FogFalloff::from_visibility_colors(
+                if horizon {
+                    a.horizon_visibility_m
+                } else {
+                    a.visibility_m
+                },
+                Color::srgb(a.extinction[0], a.extinction[1], a.extinction[2]),
+                Color::srgb(a.inscattering[0], a.inscattering[1], a.inscattering[2]),
+            ),
+        },
+        None => DistanceFog {
+            color,
+            falloff: FogFalloff::Exponential { density },
+            ..default()
+        },
+    }
+}
+
 /// Distance fog on the battle camera (spawned by the scene lot).
 fn fog_on_camera(
     mut commands: Commands,
@@ -258,18 +289,17 @@ fn fog_on_camera(
 ) {
     let weather = weather_from_key(&state.weather);
     let fog = look.fog_of(weather);
-    let density = if horizon.is_some_and(|h| h.active) {
+    let horizon_active = horizon.is_some_and(|h| h.active);
+    let density = if horizon_active {
         fog.horizon_density
     } else {
         fog.density
     };
     state.fog_density = density;
     for camera in &cameras {
-        commands.entity(camera).insert(DistanceFog {
-            color: Color::srgb(fog.color[0], fog.color[1], fog.color[2]),
-            falloff: FogFalloff::Exponential { density },
-            ..default()
-        });
+        commands
+            .entity(camera)
+            .insert(distance_fog(fog, density, horizon_active));
         state.fog_on_camera = true;
     }
 }
