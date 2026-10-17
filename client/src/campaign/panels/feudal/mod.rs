@@ -101,7 +101,7 @@ pub struct FeudalUi {
     pub result: Option<LastResult>,
     /// Feudal events of the latest turns, newest first (`FeudalController.recent`).
     pub recent: Vec<RecentEvent>,
-    dirty: bool,
+    pub(crate) dirty: bool,
     env_checked: bool,
     arms: Option<heraldry::HouseArms>,
     pub snapshot: Snapshot,
@@ -122,7 +122,7 @@ impl FeudalUi {
 }
 
 fn reset_on_enter(mut ui: ResMut<FeudalUi>) {
-    *ui = FeudalUi::default();
+    crate::menu::save_extras::restore_feudal(&mut ui);
 }
 
 /// End of turn (`FeudalController.after_end_turn`): the feudal events are noted for the panel

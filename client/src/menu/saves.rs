@@ -510,7 +510,13 @@ fn dialog_buttons(
 /// Writes slot `name` from the running campaign; returns the saved turn.
 pub fn save_now(sim: &Sim, dir: &std::path::Path, name: &str) -> Result<u32, String> {
     let state = sim.state.as_ref().ok_or("Aucune campagne en cours.")?;
-    saves::write_save(dir, name, state, &saves::timestamp_now())?;
+    saves::write_save_with_client(
+        dir,
+        name,
+        state,
+        &saves::timestamp_now(),
+        super::save_extras::snapshot(),
+    )?;
     crate::flow::history::write_sidecar(&saves::save_path(dir, name));
     Ok(state.turn())
 }
@@ -519,10 +525,12 @@ pub fn save_now(sim: &Sim, dir: &std::path::Path, name: &str) -> Result<u32, Str
 /// is kept when the save is refused (as `SimFacade.load_game`).
 pub fn load_into(sim: &mut Sim, path: &std::path::Path) -> Result<u32, String> {
     let data = sim.data.clone().ok_or("Données de jeu absentes.")?;
-    let state = saves::load_save(&data, path)?;
+    let wrapper = saves::read_save(path)?;
+    let state = saves::load_state(&data, &wrapper)?;
     sim.player = state.player_faction().clone();
     let turn = state.turn();
     sim.state = Some(state);
+    super::save_extras::stash_loaded(&wrapper.client);
     crate::flow::history::read_sidecar(path);
     Ok(turn)
 }

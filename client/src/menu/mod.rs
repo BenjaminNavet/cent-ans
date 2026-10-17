@@ -30,6 +30,7 @@ pub mod historical;
 pub mod main_menu;
 pub mod pause;
 pub mod presets;
+pub mod save_extras;
 pub mod saves;
 pub mod unit_tips;
 
@@ -68,6 +69,7 @@ impl Plugin for MenuPlugin {
                 main_menu::MainMenuPlugin,
                 faction_select::FactionSelectPlugin,
                 saves::SavesPlugin,
+                save_extras::SaveExtrasPlugin,
                 pause::PausePlugin,
                 battle_pause::BattlePausePlugin,
                 battles::BattlesPlugin,

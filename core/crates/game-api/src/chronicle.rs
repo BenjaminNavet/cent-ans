@@ -7,7 +7,7 @@
 //! turns it has seen and draws it.
 
 use data_model::{FactionId, GameData};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sim_campaign::chronicle::DecisionView;
 use sim_campaign::news_relevance::{NewsRelevance, Relevance};
 use sim_campaign::{CampaignState, GameEvent};
@@ -285,7 +285,7 @@ pub struct JournalEntry {
 }
 
 /// A sealed letter (`NewsLetters.news_from_event`).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct NewsLetter {
     pub kind: String,
     pub rubric: String,

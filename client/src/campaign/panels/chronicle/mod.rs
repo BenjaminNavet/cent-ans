@@ -151,7 +151,7 @@ impl ChroniclePanel {
 struct ChronicleRoot;
 
 fn reset_on_enter(mut log: ResMut<ChronicleLog>, mut panel: ResMut<ChroniclePanel>) {
-    *log = ChronicleLog::default();
+    crate::menu::save_extras::restore_chronicle(&mut log);
     panel.genre = "all".into();
     panel.world_open = false;
     panel.letter_open = None;
