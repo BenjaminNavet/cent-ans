@@ -742,12 +742,26 @@ pub struct TreeTextureStats {
     pub failed: usize,
 }
 
+/// Materials whose textures are filled in later by [`prepare_tree_textures`]. Bevy does not rebuild
+/// a material's bind group when a texture it points to is replaced in place (the 1 x 1 white
+/// placeholder stays bound: pale solid cards), so the materials are touched once textures land.
+#[derive(Resource, Default)]
+pub struct TreeMaterials {
+    pub wind: Vec<Handle<super::wind::WindMaterial>>,
+    pub standard: Vec<Handle<StandardMaterial>>,
+}
+
 pub fn prepare_tree_textures(
     mut commands: Commands,
     mut pending: ResMut<PendingTreeTextures>,
     mut images: ResMut<Assets<Image>>,
     mut stats: ResMut<TreeTextureStats>,
+    tree_materials: Option<Res<TreeMaterials>>,
+    mut wind_materials: ResMut<Assets<super::wind::WindMaterial>>,
+    mut standard_materials: ResMut<Assets<StandardMaterial>>,
+    mut touch: Local<u8>,
 ) {
+    let prepared_before = stats.prepared;
     pending.0.retain(|job| {
         let Some(source) = images.get(&job.source) else {
             return true;
@@ -829,7 +843,22 @@ pub fn prepare_tree_textures(
         }
         false
     });
-    if pending.0.is_empty() {
+    if stats.prepared != prepared_before {
+        *touch = 4;
+    }
+    // Touched on a few frames: the render world uploads the new images a frame or two later.
+    if *touch > 0 {
+        *touch -= 1;
+        if let Some(handles) = tree_materials {
+            for handle in &handles.wind {
+                let _ = wind_materials.get_mut(handle);
+            }
+            for handle in &handles.standard {
+                let _ = standard_materials.get_mut(handle);
+            }
+        }
+    }
+    if pending.0.is_empty() && *touch == 0 {
         commands.remove_resource::<PendingTreeTextures>();
     }
 }
