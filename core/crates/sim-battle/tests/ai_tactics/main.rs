@@ -6,6 +6,7 @@ mod common;
 mod ai;
 mod ai_relief;
 mod b6;
+mod contact;
 mod ep9_decisive;
 mod ep9b_duel;
 mod eq7_cavalry;

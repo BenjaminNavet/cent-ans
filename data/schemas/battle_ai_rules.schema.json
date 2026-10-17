@@ -166,6 +166,14 @@
       "type": "number",
       "description": "... unless nobody has fought for this long: the attacker does not come, the defender keeps its ground and lets the battle be refused (EP9, ADR 0056)."
     },
+    "defender_sally_time": {
+      "type": "number",
+      "description": "Playtest 17/10 : un défenseur au moins aussi fort que l’ennemi, qui tient son terrain sans que personne vienne, contre-attaque après ce délai (horloge de patience) au lieu d’attendre le refus de la bataille ..."
+    },
+    "defender_sally_reach": {
+      "type": "number",
+      "description": "... sauf si un régiment ennemi marche sur lui à cette distance au plus (il reçoit alors l’attaque sur son terrain)."
+    },
     "engine_patience": {
       "type": "number",
       "description": "Besiegers wait for their engines at most this long before escalading."
@@ -411,6 +419,8 @@
     "attacker_wait",
     "defender_patience",
     "defender_quiet",
+    "defender_sally_time",
+    "defender_sally_reach",
     "engine_patience",
     "ram_relief_crew",
     "ram_relief_stand",

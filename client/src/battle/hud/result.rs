@@ -157,6 +157,16 @@ pub fn facts(
             de(&names[loser_index]),
             de(&names[winner_index])
         )),
+        BattleEnd::SquareHeld => lines.push(format!(
+            "La place est prise : l’ost {} tient le cœur de la ville, l’ost {} a perdu la cité sans être mis en déroute.",
+            de(&names[winner_index]),
+            de(&names[loser_index])
+        )),
+        BattleEnd::Nightfall => lines.push(format!(
+            "La nuit tombe : l’ost {} garde le terrain, l’ost {} se retire sans déroute.",
+            de(&names[winner_index]),
+            de(&names[loser_index])
+        )),
         BattleEnd::Lull => lines.push(format!(
             "Le combat est retombé : l’ost {} a cédé le terrain à l’ost {}.",
             de(&names[loser_index]),
@@ -203,7 +213,11 @@ pub fn facts(
         }
         let ended_quietly = matches!(
             outcome.end,
-            BattleEnd::Refused | BattleEnd::Lull | BattleEnd::Withdrawal
+            BattleEnd::Refused
+                | BattleEnd::Lull
+                | BattleEnd::Withdrawal
+                | BattleEnd::SquareHeld
+                | BattleEnd::Nightfall
         );
         if !ended_quietly {
             if result.withdrew {

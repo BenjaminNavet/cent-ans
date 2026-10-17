@@ -104,6 +104,8 @@ fn holding_the_square_takes_the_town_and_warns_the_garrison() {
     assert!(sim.is_finished());
     assert_eq!(sim.winner(), Some(SideId::Attacker));
     assert_eq!(sim.outcome().unwrap().end, BattleEnd::SquareHeld);
+    // Playtest 17/10: the garrison that lost the square was not routed.
+    assert!(!sim.outcome().unwrap().defender.routed);
 }
 
 #[test]

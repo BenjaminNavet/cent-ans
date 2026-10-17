@@ -149,8 +149,9 @@ fn q3_demo_battle_without_orders_ends() {
         let (t, w, last) = play(&mut sim);
         println!("demo seed {seed}: {t:.0} s {w:?} « {last} »");
         assert!(sim.is_finished(), "seed {seed}: still running at {t:.0} s");
-        // L13b (ADR 0184): longer battles (approach x0.45), 20 minutes at most.
-        assert!(t <= 1200.0, "seed {seed}: {t:.0} s");
+        // L13b (ADR 0184): longer battles (approach x0.45). Playtest 17/10: the defender no
+        // longer waits for the lull (it sallies, so the fight itself happens): 22 minutes.
+        assert!(t <= 1350.0, "seed {seed}: {t:.0} s");
     }
 }
 
@@ -217,12 +218,19 @@ fn the_ai_attacker_always_engages() {
     }
 }
 
-/// Nobody engages (the player attacks on paper and stays put, the AI
-/// defender holds its heights): after five minutes the attacker withdraws,
-/// the defender keeps the field. No rout, no loss, a small blow to morale.
+/// Nobody engages (the player attacks on paper and stays put, the AI defender is clearly
+/// outmatched and holds its heights): after five minutes the attacker withdraws, the defender
+/// keeps the field. No rout, no loss, a small blow to morale.
 #[test]
 fn an_unfought_battle_is_refused() {
-    let mut sim = sim(Tier::Standard, Terrain::Hills, false, Mode::IdleAttacker, 0);
+    let mut setup = battle(Tier::Standard, Terrain::Hills, false, Mode::IdleAttacker);
+    // Playtest 17/10: a defender at least as strong as its enemy sallies instead (see
+    // `a_defender_not_outmatched_counter_attacks`); this one holds at 60 % of the strength.
+    for unit in &mut setup.defender.units {
+        unit.soldiers = unit.soldiers * 6 / 10;
+    }
+    let scale = BattleScale::named(Tier::Standard.key()).unwrap();
+    let mut sim = BattleSim::new_scaled(setup, 0, scale).unwrap();
     let (t, winner, last) = play(&mut sim);
     let rules = sim.decision_rules().clone();
     assert_eq!(sim.end_kind(), Some(BattleEnd::Refused), "« {last} »");
