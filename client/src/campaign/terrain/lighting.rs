@@ -365,7 +365,9 @@ fn apply_light(
             light.saturation,
             light.contrast,
             light.shadow_saturation,
-            light.strength,
+            // The grade runs once for the whole frame in the post pass (`post.rs`): the ground and
+            // the foliage shaders skip theirs (strength 0).
+            0.0,
         );
         p.lift = light.lift.extend(0.0);
         p.highlights = light.highlights.extend(0.0);
