@@ -15,7 +15,9 @@ pub const MAX_LETTERS: usize = 40;
 /// One journal line: `genre` is `""` for a date header.
 pub type Line = (String, String);
 
-#[derive(bevy::prelude::Resource, Debug, Default, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(
+    bevy::prelude::Resource, Debug, Default, Clone, PartialEq, serde::Serialize, serde::Deserialize,
+)]
 pub struct ChronicleLog {
     /// Journal, most recent first.
     pub lines: Vec<Line>,
