@@ -205,7 +205,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let fresnel = pow(1.0 - clamp(dot(n, to_eye), 0.0, 1.0), 4.0);
     // Sun-less shading of the Godot spatial shader: a soft lambert term on the ripples.
     col = col * (0.9 + 0.1 * n.y);
-    col = mix(col, params.sky_color.rgb, clamp(fresnel * params.sky_reflect + 0.12, 0.0, 0.8) * water);
+    col = mix(col, params.sky_color.rgb, clamp(fresnel * params.sky_reflect + 0.04, 0.0, 0.8) * water);
     let water_alpha = mix(params.shallow_alpha, 0.97, smoothstep(0.0, 0.35, depth_t));
     let alpha = max(water * water_alpha, bank_alpha * (1.0 - water));
     if params.debug_flat > 0.5 {

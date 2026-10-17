@@ -296,6 +296,10 @@ pub struct RiverParams {
     pub look: Vec4,
     /// x = far blend start, y = far blend end (eye distance, map units), z = bank wet start (0-1 across), w unused.
     pub look2: Vec4,
+    /// x = bank darkening, y = bank foam share, z = wet strip width (px), w = wet strip opacity.
+    pub look3: Vec4,
+    /// x = share of the camera distance fog, yzw = wet colour (linear).
+    pub look4: Vec4,
     /// Fine hydrography disc (`fine_zone`: centre xz, radius, weight): the ribbon fades out inside.
     pub fine_zone: Vec4,
     /// Fords and ferries (`river_crossings.gd` `ford_uniforms`): x, z, radius, 1 ford / 0.25 ferry.
@@ -459,6 +463,16 @@ impl RiverParams {
                 display.look.bank_wet_start,
                 0.0,
             ),
+            look3: Vec4::new(
+                display.look.bank_dark,
+                display.look.bank_foam,
+                display.look.wet_band_px,
+                display.look.wet_band_alpha,
+            ),
+            look4: {
+                let w = linear(display.look.wet_color, 1.0);
+                Vec4::new(display.look.fog_strength, w.x, w.y, w.z)
+            },
             fine_zone: Vec4::new(0.0, 0.0, -1.0, 0.0),
             fords: [Vec4::ZERO; 32],
             ford_count: 0.0,
@@ -498,6 +512,8 @@ impl RiverParams {
         if neutral {
             p.look = Vec4::new(1.0, 1.0, 0.0, 0.12);
             p.look2 = Vec4::new(0.0, 0.0, 2.0, 0.0);
+            p.look3 = Vec4::new(0.0, 1.0, 0.0, 0.0);
+            p.look4.x = 0.0;
             p.mud_color.w = 0.0;
             p.bank_ink_strength = 0.0;
         }
