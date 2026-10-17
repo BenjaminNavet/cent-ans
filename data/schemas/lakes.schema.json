@@ -42,6 +42,7 @@
           "center_px": {"$ref": "#/$defs/point"},
           "islands": {"type": "integer", "minimum": 0, "description": "Contours intérieurs (îles) non découpés."},
           "polygon_px": {"type": "array", "items": {"$ref": "#/$defs/point"}, "minItems": 3, "description": "Contour extérieur simplifié, non fermé."},
+          "level_patched_from": {"type": "number", "description": "Ancien niveau aplati (m) quand `compose lake-patch` a remis la nappe à son vrai niveau (lot mapgeo)."},
           "historical": {"type": "string", "description": "Identifiant dans historical_lakes.json (nappe de lac historique, LR-10) ; absent pour un lac extrait du masque."}
         }
       }
