@@ -22,7 +22,8 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 | rivers | opus | 1 | campagne : rivières réalistes (couleur, berges, reflets, lisibles à toute distance) | fusionné (0366d89f4) ; reste : liseré clair des bords trop « trait de carte », bande de sol mouillé hors ruban, river_fine.wesl, brume sur l'eau |
 | cground | opus | 1 | campagne : sol de près (parcelles, matières, colormap, variation) | fusionné ; `ground_detail.wesl` + `data/fx/ground_detail.json`, réglage `ground_detail` 0/1/2 ; écart-type +16 % (Godot ×1,6 non atteint) ; reste : relief/haies, contraste après regard du joueur |
 | rivers2 | opus | 2 | rivières : liseré clair, bande de sol mouillé, brume sur l'eau, river_fine | fusionné ; reste : teinte aérienne par pixel sur l'eau, bande mouillée des lacs, palier fin sans brume |
-| cgrade | opus | 2 | campagne : étalonnage commun à toute la 3D, perspective aérienne par distance/inclinaison, équilibre soleil/ambiance | lancé |
+| cgrade | opus | 2 | campagne : étalonnage commun à toute la 3D, perspective aérienne par distance/inclinaison, équilibre soleil/ambiance | fusionné ; grade de saison dans la passe post (une seule fois pour toute l'image) ; brume déjà correcte ; reste : caméra non HDR, ombres de nuages très sombres |
+| cground2 | opus | 3 | sol : parcelles en polygones anguleux trop contrastés (effet cristal) à d=60 → bords doux, haies/talus, contraste par parcelle réduit | lancé |
 
 ## Journal
 - 17/10 0 h 45 : état de départ, ADR 0404, vague 1 (5 lots).
@@ -32,3 +33,4 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 - 17/10 : disque revenu à 122 Go libres ; vague 2 lancée (rivers2, cgrade).
 - 17/10 : vq-blight fusionné (pas de MetalFX côté Bevy : bataille déjà en natif).
 - 17/10 : vq-rivers2 fusionné (berges sombres, bande mouillée 3 px, DistanceFog sur l'eau ; coût nul).
+- 17/10 : vq-cgrade fusionné ; capture d=60 : parcelles cground en facettes polygonales → lot cground2.
