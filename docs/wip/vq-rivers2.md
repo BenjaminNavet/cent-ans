@@ -13,3 +13,6 @@
 ## Reste
 - Brume : pas de teinte aérienne par pixel (le sol l'a via `aerial_base`), seulement la couleur du `DistanceFog` centrale.
 - Lacs : pas de bande mouillée (feuille sans bord de ruban), brume appliquée.
+
+## Mesures (banc carte, release, 3 paires ABABAB, A = `CENT_ANS_RIVER_LOOK_OFF=1`, machine chargée)
+p50 28,86 -> 28,24 ms (delta -0,63), p95 60,51 -> 61,12 ms (delta +0,62) : bruit, coût nul.
