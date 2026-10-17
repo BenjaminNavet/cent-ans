@@ -12,6 +12,8 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 - Bataille : soldats ombrés (ombres présentes), mais lumière plate, voile laiteux, contraste faible, herbe monotone, nuée de plaques.
 - Campagne d=25-60 : villes et maquettes bonnes ; sol vert foncé uniforme sans parcelles ni matières ; rivières cyan plates sans berges ; forêts clairsemées (BL campveg).
 
+**17/10 7 h : vague 1-3 fusionnée dans main (d3fd8d935, non poussé).** En cours (interrompu) : cperf2 (worktree ../gp-vq-cperf2, modifs non commitées clouds.rs/precip.rs). À faire : banc sur machine calme (ADR 0404), regard du joueur.
+
 ## Lots
 
 | Lot | Modèle | Vague | Objet | État |
@@ -37,3 +39,4 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 - 17/10 : vq-cgrade fusionné ; capture d=60 : parcelles cground en facettes polygonales → lot cground2.
 - 17/10 : vq-cperf fusionné (fondu par bande + plages quantifiées : la table RenderVisibilityRanges de Bevy saturait ; budget de spawn partagé).
 - 17/10 : main fusionné dans vq/integ (bb832458b VERT : 1306 tests, 10 smoke) ; puis main (+5), cground2, bsoldiers fusionnés → revérification.
+- 17/10 7 h : vérification complète verte (fmt, clippy, 1308 tests lib + binaires, smoke 10/10, schémas 1690) ; main avancé en ff sur vq/integ (d3fd8d935).
