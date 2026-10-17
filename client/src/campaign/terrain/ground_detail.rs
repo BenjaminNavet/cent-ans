@@ -28,6 +28,10 @@ pub struct GdParams {
     pub e: Vec4,
     /// Crop stage amplitude (arable, meadow and vine).
     pub f: Vec4,
+    /// In-parcel variation amp, period (m), soft edge width (m), boundary line amp.
+    pub g: Vec4,
+    /// Boundary line width (m), lookup warp amp (cells), warp period (cells), bocage gain.
+    pub h: Vec4,
     /// Per season, share of the parcels in the green, gold and brown stage.
     pub stage: [Vec4; 4],
     /// Colour factors of the three stages.
@@ -113,6 +117,18 @@ impl GdParams {
                 number(&spec["stage"], "amp_wild", 0.3),
                 0.0,
                 0.0,
+            ),
+            g: Vec4::new(
+                number(&spec["inner"], "amp", 0.05),
+                number(&spec["inner"], "period_m", 700.0),
+                number(&spec["edges"], "soft_m", 30.0),
+                number(&spec["edges"], "line_amp", 0.12),
+            ),
+            h: Vec4::new(
+                number(&spec["edges"], "line_width_m", 4.0),
+                number(&spec["edges"], "warp_amp_cells", 0.6),
+                number(&spec["edges"], "warp_period_cells", 3.0),
+                number(&spec["edges"], "bocage_gain", 1.0),
             ),
             stage: std::array::from_fn(|i| {
                 triple(&spec["stage"]["shares"][SEASONS[i]], [0.3, 0.2, 0.2])

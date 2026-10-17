@@ -22,6 +22,10 @@ struct GdParams {
     e: vec4<f32>,
     // Crop stage of a parcel: amp (arable), amp (meadow / vine), -, -.
     f: vec4<f32>,
+    // In-parcel variation amp, in-parcel period (m), soft edge width (m), boundary line amp.
+    g: vec4<f32>,
+    // Boundary line width (m), lookup warp amp (cells), lookup warp period (cells), bocage gain.
+    h: vec4<f32>,
     // Per season (spring, summer, autumn, winter): share of the parcels in the fresh green, pale
     // gold and turned brown stage.
     stage: array<vec4<f32>, 4>,
@@ -62,15 +66,41 @@ fn gd_macro(g: GdParams, col: vec3<f32>, p: vec2<f32>, footprint: f32, land: f32
     return mix(col, col * warm * (1.0 + tone * g.a.y), k);
 }
 
+// Extra domain warp of the parcel lookup (cell units, added to `uu` before the Voronoi): breaks the
+// straight facets into long curved boundaries. Zero at level 0.
+fn gd_warp(g: GdParams, uu: vec2<f32>) -> vec2<f32> {
+    if (g.a.x < 0.5 || g.h.y <= 0.0) {
+        return vec2<f32>(0.0);
+    }
+    let f = 1.0 / max(g.h.z, 0.05);
+    let w1 = vec2<f32>(gd_noise(uu * f + vec2<f32>(3.1, 7.7)), gd_noise(uu * f + vec2<f32>(21.3, 5.9))) - 0.5;
+    let w2 = vec2<f32>(gd_noise(uu * f * 2.7 + vec2<f32>(13.7, 1.1)), gd_noise(uu * f * 2.7 + vec2<f32>(8.8, 27.5))) - 0.5;
+    return (w1 + w2 * 0.35) * 2.0 * g.h.y;
+}
+
 fn gd_ratio(col: vec3<f32>, base: vec3<f32>) -> vec3<f32> {
     return clamp(col / max(base, vec3<f32>(1e-3)), vec3<f32>(0.4), vec3<f32>(2.5));
+}
+
+// Soft transition of the parcel factor towards neutral near the boundary (width never below two
+// pixels, so it is band-limited), then a thin dark line (balk, hedge, tree line) on the boundary,
+// heavier in the bocage rows; its energy is kept when sub-pixel (amp scaled by width / pixel) and it
+// vanishes with `fade`.
+fn gd_edges(g: GdParams, k: vec3<f32>, edge_m: f32, px_m: f32, fade: f32, bocage: f32) -> vec3<f32> {
+    let soft = max(g.g.z, px_m * 2.0);
+    var out = mix(vec3<f32>(1.0), k, smoothstep(0.0, soft, edge_m));
+    let lw = max(g.h.x, 0.1);
+    let cover = 1.0 - smoothstep(0.0, max(lw, px_m * 1.5), edge_m);
+    let amp = g.g.w * (1.0 + g.h.w * clamp(bocage, 0.0, 1.0)) * clamp(lw / px_m, 0.0, 1.0) * fade;
+    out = out * (1.0 - amp * cover);
+    return out;
 }
 
 // One cultivated parcel (as a colour factor, applied after the band of `hb_relative`): stronger tone and saturation, strips (lanieres) with their balks, soil
 // mottling. `id` the parcel draw, `ang` its field angle (rad), `cls` the season class of the crop
 // (0 wheat, 1 green crop, 2 ploughed, 3 fallow, 4 meadow, 5 hay, 6 vine), `mpp` metres per map px.
 fn gd_parcel_k(g: GdParams, col_in: vec3<f32>, p: vec2<f32>, id: vec2<f32>, ang: f32, cls: i32,
-        footprint: f32, mpp: f32, sw: vec4<f32>) -> vec3<f32> {
+        footprint: f32, mpp: f32, sw: vec4<f32>, edge_m: f32, bocage: f32) -> vec3<f32> {
     if (g.a.x < 0.5) {
         return vec3<f32>(1.0);
     }
@@ -98,8 +128,11 @@ fn gd_parcel_k(g: GdParams, col_in: vec3<f32>, p: vec2<f32>, id: vec2<f32>, ang:
         tint = g.tint[2].xyz;
     }
     col = col * mix(vec3<f32>(1.0), tint, select(g.f.x, g.f.y, wild) * fade);
+    // Slow variation inside the parcel (moisture, soil depth) so the cell is never flat.
+    let inner = (gd_noise(p * mpp / g.g.y + id * 3.1) * 0.7 + gd_noise(p * mpp / (g.g.y * 0.33) + id * 1.3) * 0.3 - 0.5) * 2.0;
+    col = col * (1.0 + inner * g.g.x * fade);
     if (g.a.x < 1.5 || fade <= 0.0) {
-        return gd_ratio(col, col_in);
+        return gd_edges(g, gd_ratio(col, col_in), edge_m, px_m, fade, bocage);
     }
     // Strips: bands across the parcel, tone of their own (maturity, sowing date), dark balks.
     let width = mix(g.c.z, g.c.w, gd_hash(id + vec2<f32>(2.9, 8.1)));
@@ -121,5 +154,5 @@ fn gd_parcel_k(g: GdParams, col_in: vec3<f32>, p: vec2<f32>, id: vec2<f32>, ang:
     // Soil and crop mottling at 20 to 200 m.
     let mott = (gd_noise(p * mpp / g.d.y + id) * 0.65 + gd_noise(p * mpp / (g.d.y * 0.27) + id * 1.7) * 0.35 - 0.5) * 2.0;
     col = col * (1.0 + mott * g.d.x * (1.0 - smoothstep(g.d.z, g.d.w, footprint)));
-    return gd_ratio(col, col_in);
+    return gd_edges(g, gd_ratio(col, col_in), edge_m, px_m, fade, bocage);
 }

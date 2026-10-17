@@ -4,7 +4,7 @@
   "title": "Détail du sol de campagne de près (ground_detail.wesl)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["macro", "parcel", "strips", "stage", "mottle"],
+  "required": ["macro", "parcel", "strips", "stage", "mottle", "inner", "edges"],
   "properties": {
     "description": {"type": "string"},
     "macro": {
@@ -61,6 +61,28 @@
           "required": ["green", "gold", "brown"],
           "patternProperties": {"^(green|gold|brown)$": {"$ref": "#/$defs/triple"}}
         }
+      }
+    },
+    "inner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amp", "period_m"],
+      "properties": {
+        "amp": {"type": "number", "minimum": 0, "maximum": 0.3},
+        "period_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "edges": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["soft_m", "line_amp", "line_width_m", "warp_amp_cells", "warp_period_cells", "bocage_gain"],
+      "properties": {
+        "soft_m": {"type": "number", "minimum": 0},
+        "line_amp": {"type": "number", "minimum": 0, "maximum": 0.6},
+        "line_width_m": {"type": "number", "exclusiveMinimum": 0},
+        "warp_amp_cells": {"type": "number", "minimum": 0, "maximum": 2},
+        "warp_period_cells": {"type": "number", "exclusiveMinimum": 0},
+        "bocage_gain": {"type": "number", "minimum": 0, "maximum": 4}
       }
     },
     "mottle": {
