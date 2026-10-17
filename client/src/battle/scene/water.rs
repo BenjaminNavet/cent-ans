@@ -457,7 +457,7 @@ pub fn river_params(weather: Weather, sky: Vec3, flow: f32, width: f32) -> Water
     params
 }
 
-fn sky_tint(look: Option<&DecorLook>, weather: Weather) -> Vec3 {
+pub(crate) fn sky_tint(look: Option<&DecorLook>, weather: Weather) -> Vec3 {
     let Some(look) = look else {
         return Vec3::new(0.62, 0.72, 0.82);
     };

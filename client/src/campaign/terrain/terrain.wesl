@@ -605,7 +605,7 @@ struct CoastOut {
 // dominates the shore, beaches (sand, shingle) elsewhere; the relief emerging on the sea side of
 // the raster coast is painted rock or sand. The slope-rule probe altitude and the lake-shore
 // flag are baked in `coast_probe` (coast.rs) instead of reading the heightmap here.
-fn coast_band(p: vec2<f32>, footprint: f32, hc: f32, world_y: f32, snow: f32, col: vec3<f32>, n: vec3<f32>) -> CoastOut {
+fn coast_band(p: vec2<f32>, footprint: f32, hc: f32, world_y: f32, slope: f32, snow: f32, col: vec3<f32>, n: vec3<f32>) -> CoastOut {
     var out: CoastOut;
     out.color = col;
     out.n = n;
@@ -618,7 +618,7 @@ fn coast_band(p: vec2<f32>, footprint: f32, hc: f32, world_y: f32, snow: f32, co
     let cliff_px = c.band_a.x;
     let widen = c.band_a.y;
     let beach_px = c.band_a.w;
-    let reach = max(cliff_px * widen * 1.2, beach_px * 3.2);
+    let reach = max(cliff_px * widen * 2.2, beach_px * 3.2);
     if (coast > reach) {
         return out;
     }
@@ -670,7 +670,11 @@ fn coast_band(p: vec2<f32>, footprint: f32, hc: f32, world_y: f32, snow: f32, co
     let foot = (1.0 - smoothstep(0.05, 0.22, coast)) * 0.7 * (1.0 - emerged);
     cliff_col = mix(cliff_col, mix(beach_col, rock_s, 0.5), foot);
     cliff_col = mix(cliff_col, c.foam.rgb, swash.x * 0.8);
-    let face = shore * (1.0 - smoothstep(cw * 0.7, cw, coast)) * cliff_f;
+    // Bevy addition: on a real cliff the bare rock follows the steep wall, not only the thin band
+    // of the raster coast (Dover: the wall stands 3-4 px inland of the raster shore), so the white
+    // chalk reads from the camera; fades with the slope and with the distance from the shore.
+    let wall = shore * cliff_f * smoothstep(0.45, 1.1, slope) * (1.0 - smoothstep(cw * 1.2, cw * 2.6, coast));
+    let face = max(shore * (1.0 - smoothstep(cw * 0.7, cw, coast)) * cliff_f, wall);
     out.color = mix(color, cliff_col, face * k);
     out.n = normalize(n + vec3<f32>(-to_land.x, 0.0, -to_land.y) * c.band_b.z * face * k);
     return out;
@@ -2187,7 +2191,7 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     let slope_g = length(in.slope_xz) / max(ground.micro.w, 1.0);
     let land_g = smoothstep(0.0, 2.0, in.altitude);
     albedo = fw_glacier_apply(albedo, in.world.xz, in.altitude, slope_g, ground_footprint, land_g);
-    let coast_out = coast_band(in.world.xz, ground_footprint, in.altitude, in.world.y,
+    let coast_out = coast_band(in.world.xz, ground_footprint, in.altitude, in.world.y, slope_g,
         season_snow(n, in.altitude, in.world.xz), albedo, n);
     albedo = coast_out.color;
     n = coast_out.n;
