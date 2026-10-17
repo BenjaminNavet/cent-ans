@@ -584,6 +584,11 @@ fn apply_records(
             .unwrap_or(0);
         if model {
             let count = (records.len() / billboard::RECORD_BYTES) as u32;
+            let shadow_mesh = render
+                .assets
+                .models
+                .get(&row)
+                .and_then(|m| m.shadow_ready.clone());
             let Some((mesh, texture)) =
                 render.assets.models.get(&row).and_then(|m| m.ready.clone())
             else {
@@ -598,6 +603,7 @@ fn apply_records(
                 Some(mut batch) => {
                     batch.records = records;
                     batch.count = count;
+                    batch.shadow_mesh = shadow_mesh;
                     batch.version = version;
                 }
                 None => {
@@ -614,6 +620,7 @@ fn apply_records(
                                 mesh_handle: mesh,
                                 records,
                                 count,
+                                shadow_mesh,
                                 albedo: texture,
                                 normal: None,
                                 params,
@@ -661,6 +668,7 @@ fn apply_records(
                             mesh_handle: mesh,
                             records,
                             count,
+                            shadow_mesh: None,
                             albedo: atlas.clone(),
                             normal: render.assets.normal.clone(),
                             params,
@@ -906,6 +914,7 @@ fn update_wetlands(
                                 mesh_handle: mesh,
                                 records,
                                 count,
+                                shadow_mesh: None,
                                 albedo: card.clone(),
                                 normal: None,
                                 params,

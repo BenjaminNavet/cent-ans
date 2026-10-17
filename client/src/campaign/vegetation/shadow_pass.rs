@@ -36,7 +36,9 @@ use bevy::{
     },
 };
 
-use super::billboard::{DrawBatch, RECORD_BYTES, SetMaterialBindGroup, VegBatch, VegPipeline};
+use super::billboard::{
+    DrawShadowBatch, RECORD_BYTES, SetMaterialBindGroup, VegBatch, VegPipeline,
+};
 
 const SHADER_PATH: &str = "embedded://cent_ans_client/campaign/vegetation/shadow_cast.wesl";
 
@@ -256,7 +258,10 @@ fn queue_shadow_batches(
             if batch.count == 0 {
                 continue;
             }
-            let mesh_id = batch.mesh_handle.id();
+            let mesh_id = batch
+                .shadow_mesh
+                .as_ref()
+                .map_or(batch.mesh_handle.id(), |handle| handle.id());
             let (Some(mesh), Some(slabs)) = (meshes.get(mesh_id), allocator.mesh_slabs(&mesh_id))
             else {
                 continue;
@@ -303,7 +308,7 @@ type DrawVegShadow = (
     SetPrepassViewBindGroup<0>,
     SetPrepassViewEmptyBindGroup<1>,
     SetMaterialBindGroup<2>,
-    DrawBatch,
+    DrawShadowBatch,
 );
 
 #[cfg(test)]

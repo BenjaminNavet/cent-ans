@@ -41,6 +41,10 @@ pub struct Preset {
     pub ssao_quality: String,
     /// Battle: multiplier of the distance at which regiments become impostors (`battle_lod`).
     pub battle_lod: f32,
+    /// Campaign relief: pixels per terrain vertex at which the quadtree stops subdividing.
+    pub relief_vertex_px: f32,
+    /// Campaign relief: node budget before the quadtree coarsens (`relief_items`).
+    pub relief_items: u32,
 }
 
 fn msaa_from(name: &str) -> Option<Msaa> {
@@ -67,6 +71,8 @@ impl Preset {
             ssao: true,
             ssao_quality: "high".to_owned(),
             battle_lod: 1.0,
+            relief_vertex_px: 7.5,
+            relief_items: 700,
         }
     }
 
@@ -85,6 +91,8 @@ impl Preset {
             ssao: value.get("ssao").and_then(Value::as_bool).unwrap_or(false),
             ssao_quality: text("ssao_quality").unwrap_or("medium").to_owned(),
             battle_lod: number("battle_lod").unwrap_or(1.0) as f32,
+            relief_vertex_px: number("relief_vertex_px").unwrap_or(7.5).clamp(1.0, 32.0) as f32,
+            relief_items: number("relief_items").unwrap_or(700.0).clamp(50.0, 4000.0) as u32,
         })
     }
 }
@@ -172,6 +180,9 @@ pub struct RenderQuality {
     /// Multiplier of the regiments' impostor distance (`battle_lod` of the preset).
     pub battle_lod: f32,
     pub msaa_campaign: Msaa,
+    /// Campaign relief density of the preset (`relief_vertex_px`, `relief_items`).
+    pub relief_vertex_px: f32,
+    pub relief_items: u32,
     pub shadows: bool,
     pub shadow_map_size: usize,
     pub shadow_cascades: usize,
@@ -219,6 +230,8 @@ impl RenderQuality {
             ssao_quality: preset.ssao_quality.clone(),
             battle_lod: preset.battle_lod,
             msaa_campaign: forced.unwrap_or(preset.map_msaa),
+            relief_vertex_px: preset.relief_vertex_px,
+            relief_items: preset.relief_items,
             shadows: settings.shadows,
             shadow_map_size: cascade_map_size(preset.shadow_atlas, preset.shadow_splits),
             shadow_cascades: preset.shadow_splits,
@@ -429,6 +442,22 @@ mod tests {
             .msaa_campaign = Msaa::Off;
         app.update();
         assert_eq!(app.world().get::<Msaa>(ui_camera), Some(&Msaa::Off));
+    }
+
+    #[test]
+    fn relief_density_comes_from_the_preset() {
+        let presets = QualityPresets::load();
+        let ultra = RenderQuality::resolve(
+            &Settings {
+                quality: "ultra".into(),
+                ..Settings::default()
+            },
+            &presets,
+            "high",
+        );
+        assert_eq!((ultra.relief_vertex_px, ultra.relief_items), (6.0, 900));
+        let low = presets.get("low");
+        assert_eq!((low.relief_vertex_px, low.relief_items), (12.0, 350));
     }
 
     #[test]

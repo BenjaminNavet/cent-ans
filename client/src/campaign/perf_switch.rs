@@ -1,5 +1,6 @@
 //! Dev-only GPU bisection switches: `CENT_ANS_PERF_OFF=shadows,post,veg,vegshadow,terrain,water,
-//! provinces,towns,life,armies,markers,psea` (comma list) turns the named passes / material
+//! provinces,towns,life,armies,markers,psea,vslod1` (comma list; `vslod1`: tree models cast
+//! shadows with their lod1 mesh instead of lod2) turns the named passes / material
 //! families off so a bench shows what each one costs. Does nothing when the variable is unset.
 
 use std::sync::OnceLock;
