@@ -410,12 +410,15 @@ fn update_atmosphere(
     for (i, c) in target.to_array().iter().enumerate() {
         state.color[i] += (c - state.color[i]) * t;
     }
-    let base = look.color(season_weights);
+    let base = look.color(season_weights).lerp(wf.color, mist);
     for (i, c) in base.to_array().iter().enumerate() {
         state.base[i] += (c - state.base[i]) * t;
     }
     state.aerial_share = aerial;
-    state.sky = look.sky.to_array();
+    state.sky = look
+        .sky
+        .lerp(wf.color.lerp(look.sky, wf.aerial_keep), mist)
+        .to_array();
     state.aerial = weight;
     state.scatter = scatter;
     let depth = DepthFog::at_weather(&look, distance, pitch, mist);
