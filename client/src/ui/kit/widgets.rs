@@ -202,7 +202,7 @@ pub const MIN_FRAME_HEIGHT: f32 = 40.0;
 /// Inner padding of the flat card (`card_box` has 4 px; more air reads better in Bevy text).
 const CARD_PADDING: f32 = 6.0;
 /// Width of the scrollbar track of a scroll list.
-const SCROLLBAR_WIDTH: f32 = 8.0;
+pub const SCROLLBAR_WIDTH: f32 = 8.0;
 
 // ---- bundles -----------------------------------------------------------------------------
 
@@ -420,6 +420,14 @@ pub fn button_small(theme: &UiTheme, name: &str, caption: &str) -> impl Bundle {
         kit_button(theme, name, ButtonKind::Normal, 0.0),
         children![button_text(theme, caption, ButtonKind::Normal)],
     )
+}
+
+/// Caption of every panel close button (one wording across the campaign panels).
+pub const CLOSE_CAPTION: &str = "Fermer";
+
+/// Close button of a panel header: same caption and size everywhere.
+pub fn close_button(theme: &UiTheme, name: &str) -> impl Bundle {
+    button_small(theme, name, CLOSE_CAPTION)
 }
 
 /// Primary action button (`PrimaryButton`: « Confirmer », « Nouvelle partie »).
@@ -731,13 +739,64 @@ pub fn gauge(theme: &UiTheme, name: &str, ratio: f32, width: f32) -> impl Bundle
 
 /// Scrollable column of `height` px (mouse wheel / trackpad), inset background.
 pub fn scroll_list(theme: &UiTheme, name: &str, height: f32) -> impl Bundle {
+    scroll_list_with_height(theme, name, Val::Px(height))
+}
+
+/// [`tab_pane`] of `height` px that gives way down to `min_height` when its panel is capped by a
+/// zone's `max_height`; its [`scroll_list_fill`] fills it and scrolls.
+pub fn tab_pane_fit(
+    group: &str,
+    name: &str,
+    visible: bool,
+    height: f32,
+    min_height: f32,
+) -> impl Bundle {
+    (
+        Name::new(format!("Pane {name}")),
+        KitWidget("tab_pane"),
+        TabPane {
+            group: group.to_owned(),
+            name: name.to_owned(),
+        },
+        Node {
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(6.0),
+            height: Val::Px(height),
+            min_height: Val::Px(min_height),
+            display: if visible {
+                Display::Flex
+            } else {
+                Display::None
+            },
+            ..default()
+        },
+    )
+}
+
+/// Entity command letting a flex child shrink down to `min` px (a scroll list that gives way when
+/// its panel is capped by a zone's `max_height`): `entity.queue(shrinkable(120.0))`.
+pub fn shrinkable(min: f32) -> impl FnOnce(EntityWorldMut) {
+    move |mut entity: EntityWorldMut| {
+        if let Some(mut node) = entity.get_mut::<Node>() {
+            node.min_height = Val::Px(min);
+            node.flex_shrink = 1.0;
+        }
+    }
+}
+
+/// [`scroll_list`] that fills its parent's height (the parent has a definite, shrinkable height).
+pub fn scroll_list_fill(theme: &UiTheme, name: &str) -> impl Bundle {
+    scroll_list_with_height(theme, name, Val::Percent(100.0))
+}
+
+fn scroll_list_with_height(theme: &UiTheme, name: &str, height: Val) -> impl Bundle {
     (
         Name::new(name.to_owned()),
         KitWidget("scroll_list"),
         KitScrollList,
         ScrollArea,
         Node {
-            height: Val::Px(height),
+            height,
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(2.0),
             padding: {

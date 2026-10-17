@@ -17,9 +17,10 @@ use serde::Serialize;
 use super::images::BuildingImages;
 use super::labels::UiLabels;
 use super::view::{Kids, Snapshot};
+use crate::ui::kit::close_button;
 use crate::ui::kit::style::UiType;
 use crate::ui::kit::tooltip::Tooltip;
-use crate::ui::kit::widgets::{button_glyph, button_small, caption, heading, list_item, separator};
+use crate::ui::kit::widgets::{button_glyph, caption, heading, list_item, separator};
 use crate::ui::kit::{UiTheme, typed};
 
 /// List group of the companion's colony selector.
@@ -112,7 +113,7 @@ pub fn section(
                     },
                     heading(theme, "Bâtir à"),
                 ));
-                head.spawn(button_small(theme, "prov:companion_close", "×"));
+                head.spawn(close_button(theme, "prov:companion_close"));
             });
         companion
             .spawn(Node {

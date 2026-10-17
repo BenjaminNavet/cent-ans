@@ -23,7 +23,7 @@ use sim_campaign::difficulty::Difficulty;
 
 use super::faction_map::{self, FactionMapState, StartSheets};
 use super::saves::SaveProgress;
-use super::{CoverFit, MenuData, spawn_backdrop};
+use super::{CoverFit, MenuData, spawn_backdrop_plain};
 use crate::app::AppState;
 use crate::campaign::progress::StartTutorial;
 use crate::campaign::progress::tutorial::Tutorial;
@@ -129,7 +129,7 @@ impl Plugin for FactionSelectPlugin {
             )
             .add_systems(
                 Update,
-                enter_starts.run_if(in_state(AppState::FactionSelect)),
+                (enter_starts, escape_back).run_if(in_state(AppState::FactionSelect)),
             )
             .add_systems(
                 Update,
@@ -222,16 +222,20 @@ fn spawn_screen(
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
+                // The window is the limit: the body shrinks, the root never grows with it.
+                min_height: Val::Px(0.0),
                 ..default()
             },
         ))
         .id();
-    spawn_backdrop(&mut commands, &assets, root);
+    spawn_backdrop_plain(&mut commands, &assets, root);
     let column = commands
         .spawn((
+            Name::new("FsColumn"),
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
+                min_height: Val::Px(0.0),
                 flex_direction: FlexDirection::Column,
                 padding: UiRect {
                     left: Val::Px(24.0),
@@ -248,9 +252,11 @@ fn spawn_screen(
     // Header: title and start date.
     let header = commands
         .spawn((
+            Name::new("FsHeader"),
             Node {
                 justify_content: JustifyContent::SpaceBetween,
                 align_items: AlignItems::Center,
+                flex_shrink: 0.0,
                 ..default()
             },
             ChildOf(column),
@@ -272,6 +278,7 @@ fn spawn_screen(
     // Body.
     let body = commands
         .spawn((
+            Name::new("FsBody"),
             Node {
                 flex_grow: 1.0,
                 min_height: Val::Px(0.0),
@@ -404,8 +411,11 @@ fn spawn_screen(
     // Actions.
     let actions = commands
         .spawn((
+            Name::new("FsActions"),
             Node {
                 justify_content: JustifyContent::SpaceBetween,
+                // The body gives way, never the buttons.
+                flex_shrink: 0.0,
                 ..default()
             },
             ChildOf(column),
@@ -863,6 +873,19 @@ fn enter_starts(
     }
 }
 
+/// Escape goes back to the main menu (like « Retour »), unless a dialog or a text field holds it.
+fn escape_back(
+    edges: Res<super::KeyEdges>,
+    modals: Res<ModalQueue>,
+    invite: Res<TutorialInvite>,
+    typing: Res<crate::ui::kit::text_field::TextInputFocus>,
+    mut next: MessageWriter<FadeToState>,
+) {
+    if edges.escape && !invite.asking && !modals.blocks_escape() && !typing.is_active() {
+        next.write(FadeToState(AppState::MainMenu));
+    }
+}
+
 /// The answer to the invitation: starts the campaign, with the guide asked for or put aside.
 #[allow(clippy::too_many_arguments)]
 fn answer_invite(
@@ -1033,6 +1056,39 @@ fn card_visuals(
     }
 }
 
+/// Rects (logical px) of the screen's skeleton and of its two buttons, and whether the action
+/// buttons lie inside the screen (`actions_visible`).
+fn layout_dump(world: &World) -> Value {
+    use crate::ui::kit::layout_probe::rect;
+    use bevy::ui::{ComputedNode, UiGlobalTransform};
+    let mut query = world
+        .try_query::<(&Name, &ComputedNode, &UiGlobalTransform)>()
+        .unwrap();
+    let mut rects = serde_json::Map::new();
+    for (name, node, transform) in query.iter(world) {
+        if matches!(
+            name.as_str(),
+            "FactionSelect"
+                | "FsColumn"
+                | "FsHeader"
+                | "FsBody"
+                | "FsActions"
+                | "Retour"
+                | "Commencer"
+        ) {
+            rects.insert(name.to_string(), json!(rect(node, transform)));
+        }
+    }
+    let visible = match (rects.get("FactionSelect"), rects.get("FsActions")) {
+        (Some(root), Some(actions)) => {
+            let (root, actions) = (root.as_array().unwrap(), actions.as_array().unwrap());
+            actions[3].as_f64() <= root[3].as_f64() && actions[1].as_f64() >= root[1].as_f64()
+        }
+        _ => false,
+    };
+    json!({ "rects": rects, "actions_visible": visible })
+}
+
 /// Section `menu.faction_choice`.
 pub fn dump(world: &World) -> Value {
     let choice = world.resource::<FactionChoice>();
@@ -1040,6 +1096,7 @@ pub fn dump(world: &World) -> Value {
     let mut cards = world.try_query::<&FactionCard>().unwrap();
     let cards: Vec<String> = cards.iter(world).map(|c| c.0.clone()).collect();
     json!({
+        "layout": layout_dump(world),
         "faction": choice.faction,
         "difficulty": choice.difficulty,
         "cards": cards,

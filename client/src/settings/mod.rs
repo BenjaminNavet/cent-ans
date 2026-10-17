@@ -281,8 +281,10 @@ fn apply_ui_scale(
     windows: Query<&Window, With<PrimaryWindow>>,
     mut ui_scale: ResMut<UiScale>,
 ) {
-    let height = windows.single().map_or(900.0, Window::height);
-    let wanted = settings.effective_ui_scale(height);
+    let (width, height) = windows
+        .single()
+        .map_or((1600.0, 900.0), |window| (window.width(), window.height()));
+    let wanted = settings.fitted_ui_scale(width, height);
     if (ui_scale.0 - wanted).abs() > 1e-4 {
         ui_scale.0 = wanted;
     }

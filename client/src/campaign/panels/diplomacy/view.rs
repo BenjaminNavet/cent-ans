@@ -12,6 +12,7 @@ use super::{
     refresh_snapshot,
 };
 use crate::paths;
+use crate::ui::kit::close_button;
 use crate::ui::kit::fa::FaUi;
 /// Seal size of the treaty button and history (`DiplomacyView.TREATY_SEAL_SIZE`).
 const TREATY_SEAL_SIZE: f32 = 28.0;
@@ -69,7 +70,7 @@ pub fn rebuild(
             UiTier::Panel.index(),
             Node {
                 position_type: PositionType::Absolute,
-                padding: theme.padding("panel"),
+                padding: theme.inner_padding("panel", 6.0),
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(6.0),
                 ..default()
@@ -183,7 +184,7 @@ fn header(root: &mut Kids, theme: &UiTheme, ui: &DiplomacyUi) {
             Node::default(),
             children![button_small(theme, "dip:trade", "Commerce → Économie")],
         ));
-        row.spawn(button_small(theme, "dip:close", "×"));
+        row.spawn(close_button(theme, "dip:close"));
     });
 }
 
@@ -380,7 +381,7 @@ fn faction_column(
                     min_height: Val::Px(0.0),
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Px(3.0),
-                    padding: theme.padding("inset"),
+                    padding: theme.inner_padding("inset", 4.0),
                     overflow: Overflow::scroll_y(),
                     ..default()
                 },

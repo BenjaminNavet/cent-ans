@@ -26,7 +26,7 @@ pub fn frame_texture(kind: &str) -> Option<&'static str> {
 }
 
 /// Rect `(left, top, right, bottom)` of a UI node in logical pixels.
-fn rect(node: &ComputedNode, transform: &UiGlobalTransform) -> [f32; 4] {
+pub fn rect(node: &ComputedNode, transform: &UiGlobalTransform) -> [f32; 4] {
     let center = transform.translation * node.inverse_scale_factor;
     let half = node.size() * node.inverse_scale_factor * 0.5;
     [
@@ -78,7 +78,9 @@ pub fn dump(world: &World) -> Value {
                 if cn.size() == Vec2::ZERO || cn.is_empty() && cn.size().x < 1.0 {
                     continue; // hidden tab pane / display:none
                 }
-                if child_entity.contains::<Scrollbar>() {
+                if child_entity.contains::<Scrollbar>()
+                    || child_entity.contains::<super::resize_grip::ResizeGrip>()
+                {
                     continue; // absolute overlay
                 }
                 let r = rect(cn, ct);
@@ -95,8 +97,12 @@ pub fn dump(world: &World) -> Value {
                 ]));
             }
         }
-        // A scroll list's content overflows by design: only the left/top/right sides count.
-        let sides = if kind.0 == "scroll_list" { 3 } else { 4 };
+        // A scrolling frame's content overflows by design: only the left/top/right sides count.
+        let scrolls = kind.0 == "scroll_list"
+            || entity
+                .get::<Node>()
+                .is_some_and(|n| n.overflow.y == OverflowAxis::Scroll);
+        let sides = if scrolls { 3 } else { 4 };
         let ok = children == 0 || (0..sides).all(|side| inner[side] >= required[side] - 0.5);
         if !ok {
             failures += 1;

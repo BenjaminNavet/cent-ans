@@ -16,6 +16,7 @@ use super::detail::RegimentCard;
 use super::{ArmyPanelRoot, PanelState, RecruitPanelRoot};
 use crate::app::AppState;
 use crate::paths;
+use crate::ui::kit::close_button;
 use crate::ui::kit::panel_stack::{PanelTier, StackedPanel};
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::tooltip::Tooltip;
@@ -153,6 +154,8 @@ fn root_node(kind: &'static str) -> impl Bundle {
 /// Information the army panel shows (all from `game-api`).
 pub struct ArmyPanelData<'a> {
     pub sheet: &'a ArmySheet,
+    /// Display name of `sheet.location` (never the raw id).
+    pub location_name: Option<String>,
     pub extras: &'a [RegimentExtra],
     /// Per regiment: (hover bubble, pinned detailed bubble), roster order.
     pub bubbles: &'a [(String, String)],
@@ -190,7 +193,7 @@ pub fn spawn_army_panel(
         .spawn((Name::new("army:panel"), panel_page(theme)))
         .insert(Node {
             max_width: Val::Px(940.0),
-            padding: theme.padding("panel"),
+            padding: theme.inner_padding("panel", 2.0),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(6.0),
             ..default()
@@ -224,16 +227,16 @@ pub fn spawn_army_panel(
                 format!("chef : {}", sheet.general_name)
             };
             h.spawn(text(theme, &general, UiType::Caption, style::INK_SOFT));
-            let place = sheet.location.as_deref().map_or_else(
-                || "en campagne".to_owned(),
-                |s| format!("à {}", s.replace("set_", "").replace('_', " ")),
-            );
+            let place = data
+                .location_name
+                .as_deref()
+                .map_or_else(|| "en campagne".to_owned(), |name| format!("à {name}"));
             h.spawn(text(theme, &place, UiType::Caption, style::INK_SOFT));
             h.spawn(Node {
                 flex_grow: 1.0,
                 ..default()
             });
-            h.spawn(button_small(theme, "army:close", "Fermer"));
+            h.spawn(close_button(theme, "army:close"));
         });
         // Figures: units, men, upkeep, movement, supply.
         let cap = sheet.units.len();
@@ -658,6 +661,10 @@ fn offer_tooltip(card: &RecruitCard) -> String {
     lines.join("\n")
 }
 
+/// Height of the « Bientôt » list (three lines) and smallest height of the card grid.
+const SOON_HEIGHT: f32 = 52.0;
+const CARDS_MIN_HEIGHT: f32 = 120.0;
+
 /// Recruitment screen, docked at the right.
 pub fn spawn_recruit_panel(
     commands: &mut Commands,
@@ -681,13 +688,20 @@ pub fn spawn_recruit_panel(
         ))
         .id();
     let panel = commands
-        .spawn((Name::new("rec:panel"), panel_page(theme)))
+        .spawn((
+            Name::new("rec:panel"),
+            panel_page(theme),
+            // Last resort in a very short zone (big text on a small window): the page scrolls
+            // instead of letting the basket spill out of its frame.
+            bevy::ui_widgets::ScrollArea,
+        ))
         .insert(Node {
             width: Val::Px(620.0),
             max_height: Val::Percent(88.0),
-            padding: theme.padding("panel"),
+            padding: theme.inner_padding("panel", 2.0),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(6.0),
+            overflow: Overflow::scroll_y(),
             ..default()
         })
         .id();
@@ -708,7 +722,7 @@ pub fn spawn_recruit_panel(
                 flex_grow: 1.0,
                 ..default()
             });
-            h.spawn(button_small(theme, "rec:close", "Fermer"));
+            h.spawn(close_button(theme, "rec:close"));
         });
         // Queue and slots.
         let queue_line = format!(
@@ -842,12 +856,19 @@ pub fn spawn_recruit_panel(
         p.spawn(scroll_list(theme, "rec:cards", 330.0))
             .insert(Node {
                 height: Val::Px(330.0),
+                // Shrinks first when the panel is short, but never below two card rows.
+                min_height: Val::Px(CARDS_MIN_HEIGHT),
+                flex_shrink: 1.0,
                 flex_direction: FlexDirection::Row,
                 flex_wrap: FlexWrap::Wrap,
                 align_content: AlignContent::FlexStart,
                 column_gap: Val::Px(4.0),
                 row_gap: Val::Px(4.0),
-                padding: theme.padding("inset"),
+                padding: {
+                    let mut padding = theme.inner_padding("inset", 4.0);
+                    padding.right = Val::Px(crate::ui::kit::widgets::SCROLLBAR_WIDTH + 8.0);
+                    padding
+                },
                 overflow: Overflow::scroll_y(),
                 ..default()
             })
@@ -882,21 +903,36 @@ pub fn spawn_recruit_panel(
                     );
                 }
             });
-        // Soon.
+        // Soon (own short scrolling list, so it never pushes the basket out of the panel).
         let soon = basket::visible_rows(&view.options, &["soon"], &state.category, state.sort);
         if !soon.is_empty() {
             p.spawn((Name::new("rec:soon"), heading(theme, "Bientôt")));
-            for card in soon {
-                p.spawn((
-                    Name::new(format!("rec:soon:{}", card.unit_type)),
-                    text(
-                        theme,
-                        &format!("{} — {}", card.name, card.reason),
-                        UiType::Caption,
-                        style::INK_SOFT,
-                    ),
-                ));
-            }
+            p.spawn(scroll_list(theme, "rec:soon_list", SOON_HEIGHT))
+                .insert(Node {
+                    height: Val::Px(SOON_HEIGHT),
+                    flex_direction: FlexDirection::Column,
+                    row_gap: Val::Px(2.0),
+                    padding: {
+                        let mut padding = theme.inner_padding("inset", 4.0);
+                        padding.right = Val::Px(crate::ui::kit::widgets::SCROLLBAR_WIDTH + 8.0);
+                        padding
+                    },
+                    overflow: Overflow::scroll_y(),
+                    ..default()
+                })
+                .with_children(|list| {
+                    for card in soon {
+                        list.spawn((
+                            Name::new(format!("rec:soon:{}", card.unit_type)),
+                            text(
+                                theme,
+                                &format!("{} — {}", card.name, card.reason),
+                                UiType::Caption,
+                                style::INK_SOFT,
+                            ),
+                        ));
+                    }
+                });
         }
         // Footer.
         let after = view.treasury - basket.total_cost(view);
@@ -940,6 +976,24 @@ pub fn spawn_recruit_panel(
                     &format!("rec:minus:{unit}"),
                     &format!("− {label} ({n})"),
                 ));
+            }
+        });
+    });
+    // Only the card grid may shrink (down to its minimum height); header, queue, tabs, soon list,
+    // footer and buttons keep their content height so nothing is squashed or pushed out.
+    commands.entity(panel).queue(|mut panel: EntityWorldMut| {
+        let children: Vec<Entity> = panel
+            .get::<Children>()
+            .map(|c| c.iter().collect())
+            .unwrap_or_default();
+        panel.world_scope(|world| {
+            for child in children {
+                let is_cards = world
+                    .get::<Name>(child)
+                    .is_some_and(|n| n.as_str() == "rec:cards");
+                if !is_cards && let Some(mut node) = world.get_mut::<Node>(child) {
+                    node.flex_shrink = 0.0;
+                }
             }
         });
     });

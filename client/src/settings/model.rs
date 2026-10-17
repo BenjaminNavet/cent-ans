@@ -185,7 +185,23 @@ pub fn auto_ui_scale(height: f32) -> f32 {
     (height / AUTO_REFERENCE_HEIGHT).clamp(AUTO_MIN, AUTO_MAX)
 }
 
+/// Smallest logical window the HUD is laid out for: the UI scale never grows so far that the
+/// window, once divided by it, gets smaller (top bar, minimap and panels no longer fit below).
+pub const MIN_LOGICAL_WIDTH: f32 = 1150.0;
+pub const MIN_LOGICAL_HEIGHT: f32 = 640.0;
+
 impl Settings {
+    /// [`Self::effective_ui_scale`] capped so the logical window stays at least
+    /// `MIN_LOGICAL_WIDTH` x `MIN_LOGICAL_HEIGHT` (« Très grande » on a 1280x800 window).
+    pub fn fitted_ui_scale(&self, window_width: f32, window_height: f32) -> f32 {
+        let wanted = self.effective_ui_scale(window_height);
+        if window_width < 1.0 || window_height < 1.0 {
+            return wanted;
+        }
+        let cap = (window_width / MIN_LOGICAL_WIDTH).min(window_height / MIN_LOGICAL_HEIGHT);
+        wanted.min(cap.max(SCALE_MIN))
+    }
+
     /// Final UI scale: automatic scale x « Taille de l'interface », clamped 0.7..2.0.
     pub fn effective_ui_scale(&self, window_height: f32) -> f32 {
         (auto_ui_scale(window_height) * self.ui_size).clamp(SCALE_MIN, SCALE_MAX)
@@ -269,6 +285,14 @@ mod tests {
         assert_eq!(settings.effective_ui_scale(900.0), 1.0);
         assert_eq!(settings.effective_ui_scale(64.0), 1.0);
         assert_eq!(settings.effective_ui_scale(2000.0), 1.6);
+        // A big interface size on a small window is capped to keep the HUD laid out.
+        let big = Settings {
+            ui_size: 1.6,
+            ..Settings::default()
+        };
+        let fitted = big.fitted_ui_scale(1280.0, 800.0);
+        assert!(1280.0 / fitted >= MIN_LOGICAL_WIDTH - 0.5, "{fitted}");
+        assert_eq!(settings.fitted_ui_scale(2560.0, 1440.0), 1.6);
         let big = Settings {
             ui_size: 1.25,
             ..Settings::default()
