@@ -695,23 +695,73 @@ pub fn prepare_pixels(pixels: &mut [u8], prep: TexturePrep) {
     }
 }
 
-/// Mip chain of a square RGBA8 layer; for the leaves the alpha of level `l` is raised by
-/// `1 + 0.35 l` (`ALPHA = tex.a * (1 + lod * 0.35)` of the foliage shader).
+/// Mip chain of a square RGBA8 layer. For the leaves (Mask(0.5) cards), two corrections against
+/// the pale solid cards seen from afar:
+/// - the colour of each level is averaged weighted by alpha (the colour of the transparent texels
+///   must not bleed into the leaves);
+/// - the alpha of each level is scaled so that the share of texels above the 0.5 threshold stays
+///   the one of level 0 (a fixed boost per level, as in the old foliage shader, made every card
+///   solid from level 3 on: 36 % coverage x 1.35^l > 50 %).
 pub fn tree_mips(layer: &[u8], size: u32, leaves: bool) -> (Vec<u8>, u32) {
-    let mut out = super::ground::mip_chain(layer, size as usize);
     let levels = super::ground::mip_count(size);
-    if leaves {
-        let mut offset = 0usize;
-        let mut dim = size as usize;
-        for level in 0..levels {
-            let bytes = dim * dim * 4;
-            let boost = 1.0 + 0.35 * level as f32;
-            for px in out[offset..offset + bytes].as_chunks_mut::<4>().0 {
-                px[3] = (f32::from(px[3]) * boost).min(255.0) as u8;
+    if !leaves {
+        return (super::ground::mip_chain(layer, size as usize), levels);
+    }
+    let covered = |alpha: &[u8], scale: f32| {
+        alpha
+            .iter()
+            .filter(|a| f32::from(**a) * scale >= 127.5)
+            .count() as f32
+            / alpha.len().max(1) as f32
+    };
+    let base_alpha: Vec<u8> = layer.chunks_exact(4).map(|px| px[3]).collect();
+    let target = covered(&base_alpha, 1.0);
+    let mut out = layer.to_vec();
+    let mut previous = layer.to_vec();
+    let mut dim = size as usize;
+    while dim > 1 {
+        let next_dim = dim / 2;
+        let mut next = vec![0u8; next_dim * next_dim * 4];
+        for y in 0..next_dim {
+            for x in 0..next_dim {
+                let mut sum = [0.0f32; 3];
+                let mut weight = 0.0f32;
+                let mut alpha = 0.0f32;
+                for (dx, dy) in [(0, 0), (1, 0), (0, 1), (1, 1)] {
+                    let at = ((y * 2 + dy) * dim + x * 2 + dx) * 4;
+                    let a = f32::from(previous[at + 3]);
+                    for c in 0..3 {
+                        sum[c] += f32::from(previous[at + c]) * (a + 1.0);
+                    }
+                    weight += a + 1.0;
+                    alpha += a;
+                }
+                let o = (y * next_dim + x) * 4;
+                for c in 0..3 {
+                    next[o + c] = (sum[c] / weight).round().min(255.0) as u8;
+                }
+                next[o + 3] = (alpha / 4.0).round() as u8;
             }
-            offset += bytes;
-            dim = (dim / 2).max(1);
         }
+        // Scale this level's alpha to the base coverage (bisection on the factor, 1 to 16).
+        let alphas: Vec<u8> = next.chunks_exact(4).map(|px| px[3]).collect();
+        let (mut lo, mut hi) = (1.0f32, 16.0f32);
+        for _ in 0..12 {
+            let mid = (lo + hi) * 0.5;
+            if covered(&alphas, mid) < target {
+                lo = mid;
+            } else {
+                hi = mid;
+            }
+        }
+        let mut shown = next.clone();
+        for px in shown.chunks_exact_mut(4) {
+            px[3] = (f32::from(px[3]) * hi).min(255.0) as u8;
+        }
+        // The next level is built from the unscaled alpha (no compounding).
+        out.extend_from_slice(&shown);
+        previous = next;
+        dim = next_dim;
     }
     (out, levels)
 }
@@ -851,10 +901,15 @@ pub fn prepare_tree_textures(
         *touch -= 1;
         if let Some(handles) = tree_materials {
             for handle in &handles.wind {
-                let _ = wind_materials.get_mut(handle);
+                if let Some(material) = wind_materials.get_mut(handle) {
+                    // `AssetMut` only queues `Modified` once dereferenced mutably.
+                    material.into_inner();
+                }
             }
             for handle in &handles.standard {
-                let _ = standard_materials.get_mut(handle);
+                if let Some(material) = standard_materials.get_mut(handle) {
+                    material.into_inner();
+                }
             }
         }
     }
@@ -925,11 +980,25 @@ mod tests {
 
     #[test]
     fn leaf_mips_keep_their_coverage() {
-        let layer = vec![100u8; 4 * 4 * 4];
-        let (mips, levels) = tree_mips(&layer, 4, true);
-        assert_eq!(levels, 3);
-        // Level 2 (last texel): alpha 100 * 1.7.
-        assert_eq!(mips[mips.len() - 1], 170);
+        // 8 x 8, one texel in three opaque: coverage stays near a third at every level, it never
+        // goes solid; the colour of the transparent texels does not bleed in.
+        let size = 8usize;
+        let mut layer = vec![0u8; size * size * 4];
+        for (i, px) in layer.chunks_exact_mut(4).enumerate() {
+            if i % 3 == 0 {
+                px.copy_from_slice(&[10, 120, 10, 255]);
+            } else {
+                px.copy_from_slice(&[255, 255, 255, 0]);
+            }
+        }
+        let (mips, levels) = tree_mips(&layer, size as u32, true);
+        assert_eq!(levels, 4);
+        // Level 2 (2 x 2) starts after 64 + 16 texels.
+        let level2 = &mips[(64 + 16) * 4..(64 + 16 + 4) * 4];
+        assert!(level2.chunks_exact(4).any(|px| px[3] < 255), "not solid");
+        for px in level2.chunks_exact(4) {
+            assert!(px[0] < 200, "no white bleed: {px:?}");
+        }
     }
 
     #[test]
