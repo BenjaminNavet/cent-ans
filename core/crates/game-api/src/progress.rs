@@ -701,9 +701,20 @@ mod tests {
         assert!(steps
             .iter()
             .all(|s| !s.title.is_empty() && !s.text.is_empty()));
+        // `{key:ACTION}` stays for the client, which writes the bound key (KeyHints::expand).
+        let unresolved = |text: &str| {
+            let mut rest = text;
+            while let Some(start) = rest.find('{') {
+                if !rest[start..].starts_with("{key:") {
+                    return true;
+                }
+                rest = &rest[start + 1..];
+            }
+            false
+        };
         assert!(steps
             .iter()
-            .all(|s| !s.text.contains('{') && !s.title.contains('{')));
+            .all(|s| !unresolved(&s.text) && !unresolved(&s.title)));
         assert!(steps[0].title.starts_with("Bienvenue"));
         assert!(!steps[1].advice.is_empty());
     }
