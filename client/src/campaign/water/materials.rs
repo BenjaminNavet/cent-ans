@@ -429,9 +429,11 @@ impl RiverParams {
         minor: bool,
         meters_per_px: f32,
     ) -> Self {
+        // Bench A/B switch: neutral look (no grade, glint, mud, far blend, wet bank).
+        let neutral = std::env::var_os("CENT_ANS_RIVER_LOOK_OFF").is_some();
         let scale = &display.importance_min_px_scale;
         let at = |i: usize| scale.get(i).copied().unwrap_or(1.0);
-        Self {
+        let mut p = Self {
             shallow_color: linear(display.shallow_color, 1.0),
             deep_color: linear(display.deep_color, 1.0),
             sky_color: linear(display.sky_color, 1.0),
@@ -492,7 +494,14 @@ impl RiverParams {
             },
             has_coast_dist: 0.0,
             coast_dist_scale: 2.0,
+        };
+        if neutral {
+            p.look = Vec4::new(1.0, 1.0, 0.0, 0.12);
+            p.look2 = Vec4::new(0.0, 0.0, 2.0, 0.0);
+            p.mud_color.w = 0.0;
+            p.bank_ink_strength = 0.0;
         }
+        p
     }
 
     /// Lake sheets (`LakesRenderer._water_material`, colours in sRGB there).
@@ -502,14 +511,7 @@ impl RiverParams {
 
     /// Lake sheets with the display file (`look` block shared with the rivers).
     pub fn lake_with(display: &super::data::RiverDisplay, map_size: Vec2) -> Self {
-        let mut p = Self::river(
-            display,
-            1.0,
-            map_size,
-            1.0,
-            false,
-            719.0,
-        );
+        let mut p = Self::river(display, 1.0, map_size, 1.0, false, 719.0);
         p.gen_width_scale = 0.0;
         p.shallow_color = linear(display.look.lake_shallow_color, 1.0);
         p.deep_color = linear(display.look.lake_deep_color, 1.0);
