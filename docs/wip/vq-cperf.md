@@ -24,7 +24,7 @@ CPU (profil, panoramique d=30) : `extract_visibility_ranges` 1,49 + `write_rende
 du classement (>= -3,3 ms). Image (3 lots de paires alternées, p50 / p95 panoramique) : nouveau 40,4/88,9 (froid), 39,3/74,2,
 38,0/65,4 contre ancien 34,9/78,2, 35,4/76,2, 39,4/79,2 : pas de régression GPU mesurable (bruit +-5 ms), p95 plutôt meilleur.
 Rafales de spawn (descente seule, 3 paires) : plus gros pic après démarrage 4 000-4 200 meshes -> 267-356 ; image max
-223-272 ms -> 130-149 ms ; p50/p95 descente 36,2/72,3 (budget) contre 36,2/69,6... (bruit) ; images > 50 ms 203-279 contre 126-341.
+223-272 ms -> 130-149 ms ; p50/p95 descente moyens 33,6/72,3 (budget) contre 36,2/69,6 (ancien), p95 dans le bruit ; images > 50 ms 203-279 contre 126-341.
 
 ## Reste
 - Images 2-4 de la scène (démarrage) : 4 573 meshes (pluie 1800, neige 1100, bannières, nuages), bâtiments de villes 1 400 :
