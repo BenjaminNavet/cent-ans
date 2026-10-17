@@ -78,7 +78,9 @@ pub fn dump(world: &World) -> Value {
                 if cn.size() == Vec2::ZERO || cn.is_empty() && cn.size().x < 1.0 {
                     continue; // hidden tab pane / display:none
                 }
-                if child_entity.contains::<Scrollbar>() {
+                if child_entity.contains::<Scrollbar>()
+                    || child_entity.contains::<super::resize_grip::ResizeGrip>()
+                {
                     continue; // absolute overlay
                 }
                 let r = rect(cn, ct);

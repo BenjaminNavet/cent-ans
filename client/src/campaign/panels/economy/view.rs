@@ -10,13 +10,14 @@ use crate::campaign::panels::faction::view::{
     budget_table, forecast_section, income_label, ink, route_text, wrapped,
 };
 use crate::sim::Sim;
+use crate::ui::kit::close_button;
 use crate::ui::kit::icons::icon;
 use crate::ui::kit::panel_stack::{PanelTier, StackedPanel};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::KitWidget;
 use crate::ui::kit::{
-    UiTheme, UiTier, UiType, button_small, caption, fr, heading, scroll_list, separator, style,
-    tab_bar, tab_pane,
+    UiTheme, UiTier, UiType, button_small, caption, fr, heading, scroll_list_fill, separator,
+    style, tab_bar, tab_pane_fit,
 };
 
 #[derive(Component)]
@@ -30,6 +31,8 @@ type Kids<'a> = ChildSpawnerCommands<'a>;
 
 const PANEL_WIDTH: f32 = 640.0;
 const TAB_HEIGHT: f32 = 460.0;
+/// Smallest tab height when the zone is short.
+const MIN_TAB_HEIGHT: f32 = 120.0;
 const HISTORY_SHOWN: usize = 8;
 const MAX_ROUTES: usize = 14;
 const MAX_PARTNERS: usize = 12;
@@ -123,19 +126,23 @@ pub fn rebuild(
                 .unwrap_or(0);
             root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));
             for (index, (key, _)) in TABS.iter().enumerate() {
-                root.spawn(tab_pane(TAB_GROUP, &names[index], index == selected))
-                    .with_children(|pane| {
-                        pane.spawn(scroll_list(
-                            &theme,
-                            &format!("economy:scroll:{key}"),
-                            TAB_HEIGHT,
-                        ))
+                // The pane keeps TAB_HEIGHT when the zone is tall enough and shrinks (never below
+                // MIN_TAB_HEIGHT) when it is not; the list fills it and scrolls.
+                root.spawn(tab_pane_fit(
+                    TAB_GROUP,
+                    &names[index],
+                    index == selected,
+                    TAB_HEIGHT,
+                    MIN_TAB_HEIGHT,
+                ))
+                .with_children(|pane| {
+                    pane.spawn(scroll_list_fill(&theme, &format!("economy:scroll:{key}")))
                         .with_children(|list| match *key {
                             "overview" => overview_tab(list, &theme, &assets, view),
                             "trade" => trade_tab(list, &theme, &assets, panel, view),
                             _ => currency_tab(list, &theme, view),
                         });
-                    });
+                });
             }
         });
 }
@@ -171,7 +178,7 @@ fn header(root: &mut Kids, theme: &UiTheme, panel: &EconomyPanel) {
                 ),
             ));
         }
-        row.spawn(button_small(theme, "economy:close", "×"));
+        row.spawn(close_button(theme, "economy:close"));
     });
 }
 

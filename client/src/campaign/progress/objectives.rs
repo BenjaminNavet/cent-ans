@@ -18,12 +18,11 @@ use crate::campaign::hud::missions::{Missions, left_text};
 use crate::campaign::panels::OpenPanel;
 use crate::menu::KeyEdges;
 use crate::sim::Sim;
+use crate::ui::kit::close_button;
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::text_field::{TextInputFocus, keyboard_free};
 use crate::ui::kit::tooltip::Tooltip;
-use crate::ui::kit::widgets::{
-    button_small, caption, gauge, panel_sized, scroll_list, separator, toggle_button,
-};
+use crate::ui::kit::widgets::{caption, gauge, panel_sized, scroll_list, separator, toggle_button};
 use crate::ui::kit::{ButtonPressed, UiTheme, typed};
 
 const PANEL_WIDTH: f32 = 640.0;
@@ -222,7 +221,7 @@ fn spawn(
                     })
                     .with_children(|bar| {
                         bar.spawn(typed(&theme, "Objectifs de campagne", UiType::Title));
-                        bar.spawn(button_small(&theme, "objectives:close", "Fermer"));
+                        bar.spawn(close_button(&theme, "objectives:close"));
                     });
                     // The deadline and score line explains the score on hover (`campaign_score`).
                     page.spawn((

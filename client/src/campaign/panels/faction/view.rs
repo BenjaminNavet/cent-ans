@@ -9,14 +9,15 @@ use super::{FactionPanel, PANEL_ID, TAB_GROUP, TABS, refresh, sections};
 use crate::campaign::hud::text;
 use crate::codex::store::CodexStore;
 use crate::sim::Sim;
+use crate::ui::kit::close_button;
 use crate::ui::kit::icons::icon;
 use crate::ui::kit::panel_stack::{PanelTier, StackedPanel};
 use crate::ui::kit::richtext::{RichStyle, rich_text};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::KitWidget;
 use crate::ui::kit::{
-    UiTheme, UiTier, UiType, button_small, caption, fr, heading, scroll_list, separator, style,
-    tab_bar, tab_pane, toggle_button,
+    UiTheme, UiTier, UiType, button_small, caption, fr, heading, scroll_list, scroll_list_fill,
+    separator, style, tab_bar, tab_pane_fit, toggle_button,
 };
 
 #[derive(Component)]
@@ -39,6 +40,8 @@ pub(super) type Kids<'a> = ChildSpawnerCommands<'a>;
 const PANEL_WIDTH: f32 = 580.0;
 const CHART_HEIGHT: f32 = 100.0;
 const TAB_HEIGHT: f32 = 440.0;
+/// Smallest tab height when the zone is short.
+const MIN_TAB_HEIGHT: f32 = 120.0;
 const AXIS_WIDTH: f32 = 58.0;
 const NUMBER_WIDTH: f32 = 92.0;
 const TABLE_ROWS: usize = 12;
@@ -159,7 +162,7 @@ pub fn rebuild(
         .with_children(|root| {
             let Some(view) = &panel.view else {
                 root.spawn(heading(&theme, "Faction inconnue"));
-                root.spawn(button_small(&theme, "faction:close", "×"));
+                root.spawn(close_button(&theme, "faction:close"));
                 return;
             };
             header(root, &theme, panel, view);
@@ -174,29 +177,53 @@ pub fn rebuild(
             }
             let selected = selected.min(tabs.len() - 1);
             root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));
-            root.spawn(tab_pane(TAB_GROUP, TABS[0], selected == 0))
-                .with_children(|pane| {
-                    pane.spawn(scroll_list(&theme, "faction:scroll:sheet", TAB_HEIGHT))
-                        .with_children(|list| sheet_tab(list, &theme, &assets, view));
-                });
-            root.spawn(tab_pane(TAB_GROUP, TABS[1], selected == 1))
-                .with_children(|pane| {
-                    pane.spawn(scroll_list(&theme, "faction:scroll:budget", TAB_HEIGHT))
-                        .with_children(|list| budget_tab(list, &theme, &assets, view));
-                });
-            root.spawn(tab_pane(TAB_GROUP, TABS[2], selected == 2))
-                .with_children(|pane| {
-                    pane.spawn(scroll_list(&theme, "faction:scroll:trade", TAB_HEIGHT))
-                        .with_children(|list| trade_tab(list, &theme, &assets, panel, view));
-                });
+            root.spawn(tab_pane_fit(
+                TAB_GROUP,
+                TABS[0],
+                selected == 0,
+                TAB_HEIGHT,
+                MIN_TAB_HEIGHT,
+            ))
+            .with_children(|pane| {
+                pane.spawn(scroll_list_fill(&theme, "faction:scroll:sheet"))
+                    .with_children(|list| sheet_tab(list, &theme, &assets, view));
+            });
+            root.spawn(tab_pane_fit(
+                TAB_GROUP,
+                TABS[1],
+                selected == 1,
+                TAB_HEIGHT,
+                MIN_TAB_HEIGHT,
+            ))
+            .with_children(|pane| {
+                pane.spawn(scroll_list_fill(&theme, "faction:scroll:budget"))
+                    .with_children(|list| budget_tab(list, &theme, &assets, view));
+            });
+            root.spawn(tab_pane_fit(
+                TAB_GROUP,
+                TABS[2],
+                selected == 2,
+                TAB_HEIGHT,
+                MIN_TAB_HEIGHT,
+            ))
+            .with_children(|pane| {
+                pane.spawn(scroll_list_fill(&theme, "faction:scroll:trade"))
+                    .with_children(|list| trade_tab(list, &theme, &assets, panel, view));
+            });
             if view.is_player {
-                root.spawn(tab_pane(TAB_GROUP, TABS[3], selected == 3))
-                    .with_children(|pane| {
-                        pane.spawn(scroll_list(&theme, "faction:scroll:court", TAB_HEIGHT))
-                            .with_children(|list| {
-                                court_tab(list, &theme, &assets, &codex, panel, view)
-                            });
-                    });
+                root.spawn(tab_pane_fit(
+                    TAB_GROUP,
+                    TABS[3],
+                    selected == 3,
+                    TAB_HEIGHT,
+                    MIN_TAB_HEIGHT,
+                ))
+                .with_children(|pane| {
+                    pane.spawn(scroll_list_fill(&theme, "faction:scroll:court"))
+                        .with_children(|list| {
+                            court_tab(list, &theme, &assets, &codex, panel, view)
+                        });
+                });
             }
         });
 }
@@ -255,7 +282,7 @@ fn header(root: &mut Kids, theme: &UiTheme, panel: &FactionPanel, view: &Faction
                 ),
             ));
         }
-        row.spawn(button_small(theme, "faction:close", "×"));
+        row.spawn(close_button(theme, "faction:close"));
     });
 }
 

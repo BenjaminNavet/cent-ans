@@ -33,6 +33,7 @@ use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::paths;
 use crate::sim::Sim;
+use crate::ui::kit::close_button;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::style::{self, UiTier, UiType};
@@ -338,7 +339,7 @@ fn spawn_screen(
                             theme.title_font(UiType::Title.size()),
                             TextColor(style::INK_TITLE),
                         ));
-                        bar.spawn(button_small(&theme, "tech:close", "Fermer"));
+                        bar.spawn(close_button(&theme, "tech:close"));
                     });
                     // Research status: current research with its gauge, or the idle line.
                     page.spawn(Node {

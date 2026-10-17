@@ -13,6 +13,7 @@ use serde::Serialize;
 use super::choices;
 use super::images::{self, BuildingImages};
 use super::labels::{self, UiLabels};
+use crate::ui::kit::close_button;
 use crate::ui::kit::icons::icon;
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::tooltip::Tooltip;
@@ -181,7 +182,7 @@ fn header(root: &mut Kids, theme: &UiTheme, snap: &Snapshot) {
             },
             heading(theme, &sheet.name),
         ));
-        line.spawn(button_small(theme, "prov:close", "×"));
+        line.spawn(close_button(theme, "prov:close"));
     });
     if !sheet.breadcrumb.is_empty() {
         root.spawn((Name::new("prov:breadcrumb"), wrap_row()))

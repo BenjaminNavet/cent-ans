@@ -42,6 +42,7 @@ use crate::codex::{OpenCodex, store::CodexStore, text as codex_text};
 use crate::menu::KeyEdges;
 use crate::settings::Settings;
 use crate::sim::Sim;
+use crate::ui::kit::close_button;
 use crate::ui::kit::fa::FaUi;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::displaces;
@@ -446,7 +447,7 @@ fn spawn_screen(
                             theme.title_font(UiType::Title.size()),
                             TextColor(style::INK_TITLE),
                         ));
-                        bar.spawn(button_small(&theme, "chronicle:close", "Fermer"));
+                        bar.spawn(close_button(&theme, "chronicle:close"));
                     });
                     page.spawn(Node {
                         column_gap: Val::Px(6.0),

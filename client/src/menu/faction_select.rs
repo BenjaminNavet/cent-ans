@@ -23,7 +23,7 @@ use sim_campaign::difficulty::Difficulty;
 
 use super::faction_map::{self, FactionMapState, StartSheets};
 use super::saves::SaveProgress;
-use super::{CoverFit, MenuData, spawn_backdrop};
+use super::{CoverFit, MenuData, spawn_backdrop_plain};
 use crate::app::AppState;
 use crate::campaign::progress::StartTutorial;
 use crate::campaign::progress::tutorial::Tutorial;
@@ -129,7 +129,7 @@ impl Plugin for FactionSelectPlugin {
             )
             .add_systems(
                 Update,
-                enter_starts.run_if(in_state(AppState::FactionSelect)),
+                (enter_starts, escape_back).run_if(in_state(AppState::FactionSelect)),
             )
             .add_systems(
                 Update,
@@ -226,7 +226,7 @@ fn spawn_screen(
             },
         ))
         .id();
-    spawn_backdrop(&mut commands, &assets, root);
+    spawn_backdrop_plain(&mut commands, &assets, root);
     let column = commands
         .spawn((
             Node {
@@ -251,6 +251,7 @@ fn spawn_screen(
             Node {
                 justify_content: JustifyContent::SpaceBetween,
                 align_items: AlignItems::Center,
+                flex_shrink: 0.0,
                 ..default()
             },
             ChildOf(column),
@@ -406,6 +407,8 @@ fn spawn_screen(
         .spawn((
             Node {
                 justify_content: JustifyContent::SpaceBetween,
+                // The body gives way, never the buttons.
+                flex_shrink: 0.0,
                 ..default()
             },
             ChildOf(column),
@@ -860,6 +863,19 @@ fn enter_starts(
 ) {
     if edges.enter && request_start(settings.as_deref(), &tutorial, &mut invite, &mut modals) {
         begin_campaign(&mut sim, &choice, &mut progress, &mut next, &mut toasts);
+    }
+}
+
+/// Escape goes back to the main menu (like « Retour »), unless a dialog or a text field holds it.
+fn escape_back(
+    edges: Res<super::KeyEdges>,
+    modals: Res<ModalQueue>,
+    invite: Res<TutorialInvite>,
+    typing: Res<crate::ui::kit::text_field::TextInputFocus>,
+    mut next: MessageWriter<FadeToState>,
+) {
+    if edges.escape && !invite.asking && !modals.blocks_escape() && !typing.is_active() {
+        next.write(FadeToState(AppState::MainMenu));
     }
 }
 

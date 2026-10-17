@@ -6,6 +6,7 @@ use game_api::siege::{BesiegerView, EngineView, SiegeRole, SiegeSheet};
 
 use super::SiegePanelRoot;
 use crate::app::AppState;
+use crate::ui::kit::close_button;
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::{UiTheme, fr, widgets::*};
@@ -155,7 +156,7 @@ pub fn spawn_siege_panel(
                 flex_grow: 1.0,
                 ..default()
             });
-            h.spawn(button_small(theme, "siege:close", "Fermer"));
+            h.spawn(close_button(theme, "siege:close"));
         });
         p.spawn(text(theme, &role_line(sheet), UiType::Caption, style::INK));
         p.spawn(text(
@@ -305,6 +306,6 @@ pub fn spawn_ended_panel(commands: &mut Commands, theme: &UiTheme, place: &str) 
             UiType::Caption,
             style::INK_SOFT,
         ));
-        p.spawn(button_small(theme, "siege:close", "Fermer"));
+        p.spawn(close_button(theme, "siege:close"));
     });
 }

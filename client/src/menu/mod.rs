@@ -203,6 +203,16 @@ pub fn menu_button_visuals(
 /// The illustrated menu map, covering the screen from the top right (`MenuBackground`), under a
 /// dark veil, plus the left shading that keeps the column readable.
 pub fn spawn_backdrop(commands: &mut Commands, assets: &AssetServer, root: Entity) {
+    spawn_backdrop_image(commands, assets, root, "ui/menu_map.jpg");
+}
+
+/// [`spawn_backdrop`] without the title cartouche painted in `menu_map.jpg` (its zone is filled
+/// with map): screens that are not the title menu must not show « Cent Ans » behind their panels.
+pub fn spawn_backdrop_plain(commands: &mut Commands, assets: &AssetServer, root: Entity) {
+    spawn_backdrop_image(commands, assets, root, "ui/menu_map_plain.jpg");
+}
+
+fn spawn_backdrop_image(commands: &mut Commands, assets: &AssetServer, root: Entity, path: &str) {
     commands.entity(root).with_children(|parent| {
         parent.spawn((
             Name::new("Backdrop"),
@@ -212,7 +222,7 @@ pub fn spawn_backdrop(commands: &mut Commands, assets: &AssetServer, root: Entit
                 height: Val::Percent(100.0),
                 ..default()
             },
-            ImageNode::new(assets.load("ui/menu_map.jpg")),
+            ImageNode::new(assets.load(path.to_owned())),
             CoverFit::new(Vec2::new(1.0, 0.0)),
             ZIndex(-3),
         ));

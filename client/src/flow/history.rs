@@ -242,7 +242,7 @@ pub fn open_overlay(
     mut stats: ResMut<OverlayStats>,
 ) {
     use crate::ui::kit::style::UiType;
-    use crate::ui::kit::{button_small, scroll_list, typed};
+    use crate::ui::kit::{close_button, scroll_list, typed};
     if requests.read().count() == 0 || !open.is_empty() {
         return;
     }
@@ -280,7 +280,7 @@ pub fn open_overlay(
         }
     }
     commands.spawn((
-        button_small(&theme, "played:close", "Fermer"),
+        close_button(&theme, "played:close"),
         Node {
             align_self: AlignSelf::End,
             ..default()

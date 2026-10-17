@@ -32,6 +32,7 @@ use crate::campaign::camera::FocusCamera;
 use crate::menu::KeyEdges;
 use crate::settings::KeyMap;
 use crate::sim::Sim;
+use crate::ui::kit::close_button;
 use crate::ui::kit::style::UiType;
 use crate::ui::kit::text_field::{TextInputFocus, keyboard_free};
 use crate::ui::kit::tooltip::Tooltip;
@@ -1067,7 +1068,7 @@ fn rebuild(
             root.spawn(panel_sized(&theme, PANEL_WIDTH))
                 .with_children(|panel| {
                     panel.spawn(typed(&theme, "Montre des hommes d’armes", UiType::Title));
-                    panel.spawn(button_small(&theme, "roster:close", "Fermer"));
+                    panel.spawn(close_button(&theme, "roster:close"));
                     panel
                         .spawn(Node {
                             flex_direction: FlexDirection::Row,

@@ -14,6 +14,7 @@ use super::skill_layout::{self, LinkKind};
 use super::{COUNCIL_TABS, CourtUi, OrderMenu, SHEET_TABS, Screen, refresh_snapshot};
 use crate::campaign::panels::tech::layout::effect_label;
 use crate::sim::Sim;
+use crate::ui::kit::close_button;
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{KitWidget, ListItem, Toggled};
 use crate::ui::kit::{
@@ -182,7 +183,7 @@ pub fn rebuild(
             UiTier::Panel.index(),
             Node {
                 position_type: PositionType::Absolute,
-                padding: theme.padding("panel"),
+                padding: theme.inner_padding("panel", 6.0),
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(6.0),
                 ..default()
@@ -228,7 +229,7 @@ fn sheet_screen(
 ) {
     let Some(sheet) = &ui.snapshot.sheet else {
         root.spawn(ink(theme, "Personnage inconnu.", UiType::Body, style::INK));
-        root.spawn(button_small(theme, "court:close", "Fermer"));
+        root.spawn(close_button(theme, "court:close"));
         return;
     };
     root.spawn(Node {
@@ -254,7 +255,7 @@ fn sheet_screen(
             header.spawn(button_small(theme, "court:back", "Retour"));
         }
         header.spawn(button_small(theme, "court:council", "Conseil"));
-        header.spawn(button_small(theme, "court:close", "×"));
+        header.spawn(close_button(theme, "court:close"));
     });
     root.spawn(separator(theme));
     root.spawn(Node {
@@ -1290,7 +1291,7 @@ fn council_screen(
             children![title_text(theme, "Conseil du royaume")],
         ));
         result_line(header, theme, ui);
-        header.spawn(button_small(theme, "court:close", "×"));
+        header.spawn(close_button(theme, "court:close"));
     });
     let selected = COUNCIL_TABS
         .iter()

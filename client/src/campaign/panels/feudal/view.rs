@@ -10,6 +10,7 @@ use super::format::{self, Line};
 use super::{FeudalUi, pick, refresh_snapshot};
 use crate::paths;
 use crate::sim::Sim;
+use crate::ui::kit::close_button;
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::KitWidget;
 use crate::ui::kit::{
@@ -68,7 +69,7 @@ pub fn rebuild(
             root.spawn(separator(&theme));
             root.spawn((
                 Name::new("feudal:scroll"),
-                KitWidget("scroll_list"),
+                KitWidget("scroll_area"),
                 bevy::ui_widgets::ScrollArea,
                 Node {
                     flex_grow: 1.0,
@@ -160,7 +161,7 @@ fn header(root: &mut Kids, theme: &UiTheme, ui: &FeudalUi) {
                 ));
             }
         });
-        head.spawn(button_small(theme, "feudal:close", "×"));
+        head.spawn(close_button(theme, "feudal:close"));
     });
     if let Some(result) = &ui.result {
         root.spawn((

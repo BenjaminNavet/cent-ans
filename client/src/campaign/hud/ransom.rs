@@ -16,6 +16,7 @@ use super::{HudSet, HudWidget, TurnFlow};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::sim::Sim;
+use crate::ui::kit::close_button;
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{button_small, caption, heading, panel_page, scroll_list, separator};
@@ -245,7 +246,7 @@ fn rebuild_window(
             })
             .with_children(|head| {
                 head.spawn(heading(&theme, "Captifs et rançons"));
-                head.spawn(button_small(&theme, "ransom:close", "×"));
+                head.spawn(close_button(&theme, "ransom:close"));
             });
             if !error.is_empty() {
                 win.spawn((

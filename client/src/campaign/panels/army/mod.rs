@@ -834,6 +834,11 @@ fn build_army(
         icons,
         &ArmyPanelData {
             sheet: &sheet,
+            location_name: sheet
+                .location
+                .as_deref()
+                .and_then(|id| data_model::SettlementId::new(id).ok())
+                .map(|id| data.settlement_name(&id)),
             extras: &extras,
             bubbles: &bubbles,
             upkeep,

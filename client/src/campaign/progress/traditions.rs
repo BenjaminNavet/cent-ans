@@ -30,14 +30,22 @@ use crate::campaign::hud::flow::orders_open;
 use crate::campaign::panels::OpenPanel;
 use crate::menu::KeyEdges;
 use crate::sim::Sim;
+use crate::ui::kit::close_button;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::tooltip_spec::{Effect, TooltipSpec, TooltipTexts};
-use crate::ui::kit::widgets::{button_small, caption, gauge, panel_sized, separator};
+use crate::ui::kit::widgets::{
+    button_small, caption, gauge, panel_sized, scroll_list, separator, shrinkable,
+};
 use crate::ui::kit::{ButtonPressed, UiTheme, typed};
 
 const PANEL_WIDTH: f32 = 400.0;
+/// Height of the scrolling options list; it shrinks to `MIN_OPTIONS_HEIGHT` in a short zone.
+const OPTIONS_HEIGHT: f32 = 300.0;
+const MIN_OPTIONS_HEIGHT: f32 = 90.0;
+/// The page itself may shrink below its content (the options list scrolls).
+const MIN_PAGE_HEIGHT: f32 = 160.0;
 
 #[derive(Resource, Default)]
 pub struct TraditionsPanel {
@@ -385,6 +393,7 @@ fn spawn(
         ))
         .with_children(|slot| {
             slot.spawn(panel_sized(&theme, PANEL_WIDTH))
+                .queue(shrinkable(MIN_PAGE_HEIGHT))
                 .with_children(|page| {
                     page.spawn(Node {
                         justify_content: JustifyContent::SpaceBetween,
@@ -421,7 +430,7 @@ fn spawn(
                                 TextColor(style::RUBRIC),
                             ));
                         });
-                        bar.spawn(button_small(&theme, "traditions:close", "Fermer"));
+                        bar.spawn(close_button(&theme, "traditions:close"));
                     });
                     page.spawn((
                         Name::new("RankLine"),
@@ -463,6 +472,9 @@ fn spawn(
                             style::INK_SOFT
                         }),
                     ));
+                    page.spawn(scroll_list(&theme, "traditions:options", OPTIONS_HEIGHT))
+                        .queue(shrinkable(MIN_OPTIONS_HEIGHT))
+                        .with_children(|page| {
                     for option in view.next_by_branch() {
                         page.spawn((
                             Name::new(format!("option:{}", option.id)),
@@ -501,6 +513,7 @@ fn spawn(
                             }
                         });
                     }
+                        });
                 });
         })
         .id()
