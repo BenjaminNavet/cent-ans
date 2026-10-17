@@ -534,12 +534,19 @@ fn load_relief(
     forced: Option<String>,
     terrain_key: &str,
     seed: u64,
+    own_province: &str,
 ) -> Option<(String, RealRelief)> {
     let dir = paths::asset_root(root).join("horizon/relief");
     let index: serde_json::Value =
         serde_json::from_slice(&std::fs::read(dir.join("index.json")).ok()?).ok()?;
     let province = forced
         .or_else(|| std::env::var("CENT_ANS_HORIZON_PROVINCE").ok())
+        // The battle's own province when its tile exists (else a plain one drawn by the seed).
+        .or_else(|| {
+            index["provinces"]
+                .get(own_province)
+                .map(|_| own_province.to_owned())
+        })
         .or_else(|| choose_province(&index, terrain_key, seed))?;
     let file = index["provinces"][&province]["file"].as_str()?;
     let relief = RealRelief::parse(&std::fs::read(dir.join(file)).ok()?)?;
@@ -560,6 +567,7 @@ pub(super) fn build_horizon(
 ) {
     let seed = session.seed;
     let sim = session.sim_mut();
+    let own_province = sim.setup().province.clone();
     let field = sim.field();
     if !look.horizon.enabled {
         return;
@@ -568,9 +576,15 @@ pub(super) fn build_horizon(
     let data_dir = root.as_deref().map(paths::data_dir).unwrap_or_default();
     let colors = HorizonColors::load(&data_dir, field.season);
     let mean = field.heights.iter().sum::<f64>() as f32 / field.heights.len().max(1) as f32;
-    let mut loaded = root
-        .as_deref()
-        .and_then(|r| load_relief(r, forced.0.clone(), field.terrain.key(), seed));
+    let mut loaded = root.as_deref().and_then(|r| {
+        load_relief(
+            r,
+            forced.0.clone(),
+            field.terrain.key(),
+            seed,
+            &own_province,
+        )
+    });
     let rotation = (super::hash01(seed as f32, 3.0, 5.0)) * TAU;
     if let Some((_, relief)) = loaded.as_mut() {
         relief.centre = Vec2::new(field.width as f32 * 0.5, field.depth as f32 * 0.5);
