@@ -230,6 +230,10 @@ fn update_stats(
         }
     }
     stats.beasts = beasts.iter().count();
+    // The beasts of a team ride on their cart's `LifeItem`: count them in the category too.
+    let beast_count = stats.beasts;
+    stats.live.insert(Cat::Beast.name(), beast_count);
+    stats.visible.insert(Cat::Beast.name(), beast_count);
     stats.bird_individuals = individuals.iter().count();
     stats.bird_glb = glb_birds.iter().count();
     stats.figures = figures.iter().count();
