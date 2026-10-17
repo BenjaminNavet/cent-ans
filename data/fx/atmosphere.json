@@ -107,6 +107,16 @@
   },
   "campaign": {
     "grade_strength": 0.85,
+    "weather_fog": {
+      "begin_scale": 0.5,
+      "end_scale": 0.3,
+      "density": 0.95,
+      "curve": 1.0,
+      "color": [0.78, 0.8, 0.82],
+      "aerial_keep": 0.25,
+      "min_strength": 0.7,
+      "ease_seconds": 2.5
+    },
     "seasons": {
       "spring": {"sky": "clear_midday", "sky_luminance": 0.7, "haze": 0.45, "fog_color": [0.74, 0.79, 0.86], "fog_sun_scatter": 0.3,
         "sun_elevation": 20, "sun_azimuth": 245, "sun_color": [1.0, 0.86, 0.66], "sun_energy": 1.5,

@@ -104,6 +104,21 @@
       "type": "object",
       "properties": {
         "grade_strength": { "type": "number", "minimum": 0, "maximum": 1 },
+        "weather_fog": {
+          "type": "object",
+          "description": "ADR 0596 : la météo brouillard de campagne rapproche le brouillard de distance (retour à zéro hors brouillard).",
+          "additionalProperties": false,
+          "properties": {
+            "begin_scale": { "type": "number", "minimum": 0.05, "maximum": 1, "description": "Multiplicateur du début du brouillard." },
+            "end_scale": { "type": "number", "minimum": 0.05, "maximum": 1, "description": "Multiplicateur de la fin du brouillard." },
+            "density": { "type": "number", "minimum": 0, "maximum": 1, "description": "Densité atteinte." },
+            "curve": { "type": "number", "minimum": 0.2, "maximum": 3, "description": "Courbe de profondeur atteinte." },
+            "color": { "$ref": "#/$defs/rgb" },
+            "aerial_keep": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de la teinte du ciel conservée." },
+            "min_strength": { "type": "number", "minimum": 0, "maximum": 1, "description": "Force à l'intensité 0." },
+            "ease_seconds": { "type": "number", "minimum": 0, "maximum": 30, "description": "Durée de la transition (s)." }
+          }
+        },
         "seasons": {
           "type": "object",
           "propertyNames": { "enum": ["spring", "summer", "autumn", "winter"] },

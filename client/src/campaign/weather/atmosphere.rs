@@ -4,6 +4,9 @@
 //! `data/fx/atmosphere.json`). Godot's weather adds NO distance fog (only a ground veil capped at
 //! `weather_mist_max` = 0.07 in the terrain shader, ADR 0142: the mist cap was the real cause of
 //! the washed-out look), so rain / snow / storm / morning fog no longer touch this layer.
+//! One exception (ADR 0596, amends 0142): the "fog" weather at the camera focus pulls the depth
+//! fog in (`weather_fog` of `data/fx/atmosphere.json`), eased in and out; every other weather and
+//! clear skies keep the layer untouched.
 //!
 //! Godot amount: `pow(smoothstep(begin, end, d), curve) * density`, `begin`/`end` = camera
 //! distance x factors (pitch-dependent pairs), relaxed towards `close_fog_begin/end` in the close
@@ -54,6 +57,43 @@ pub struct FogLook {
     pub sun_scatter: [f32; 4],
     /// Sharpness of the sun lobe in the fog (Bevy `directional_light_exponent`).
     pub scatter_exponent: f32,
+    /// "Fog" weather overrides (`campaign.weather_fog`).
+    pub weather_fog: WeatherFog,
+}
+
+/// How the "fog" weather reshapes the distance fog at full strength (`campaign.weather_fog`).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct WeatherFog {
+    /// Multipliers of the fog begin / end distances.
+    pub begin_scale: f32,
+    pub end_scale: f32,
+    /// Density reached (the larger of this and the clear density applies).
+    pub density: f32,
+    /// Depth curve reached (< clear curve: the veil thickens sooner).
+    pub curve: f32,
+    /// Grey-white fog colour (sRGB).
+    pub color: Vec3,
+    /// Share of the sky tint kept in the fog colour (aerial perspective).
+    pub aerial_keep: f32,
+    /// Strength at weather intensity 0 (intensity 1 gives full strength).
+    pub min_strength: f32,
+    /// Seconds to ease in / out when the weather under the camera changes.
+    pub ease_seconds: f32,
+}
+
+impl Default for WeatherFog {
+    fn default() -> Self {
+        WeatherFog {
+            begin_scale: 0.5,
+            end_scale: 0.3,
+            density: 0.95,
+            curve: 1.0,
+            color: Vec3::new(0.78, 0.8, 0.82),
+            aerial_keep: 0.25,
+            min_strength: 0.7,
+            ease_seconds: 2.5,
+        }
+    }
 }
 
 impl Default for FogLook {
@@ -76,6 +116,7 @@ impl Default for FogLook {
             sky: Vec3::new(0.54, 0.65, 0.92),
             sun_scatter: [0.3, 0.36, 0.34, 0.2],
             scatter_exponent: 8.0,
+            weather_fog: WeatherFog::default(),
         }
     }
 }
@@ -126,6 +167,16 @@ impl FogLook {
         out.density = pair(&a["density"], out.density);
         out.begin_factor = pair(&a["begin_factor"], out.begin_factor);
         out.end_factor = pair(&a["end_factor"], out.end_factor);
+        let w = &atmosphere["campaign"]["weather_fog"];
+        let wf = &mut out.weather_fog;
+        wf.begin_scale = num(&w["begin_scale"], wf.begin_scale).max(0.05);
+        wf.end_scale = num(&w["end_scale"], wf.end_scale).max(0.05);
+        wf.density = num(&w["density"], wf.density).clamp(0.0, 1.0);
+        wf.curve = num(&w["curve"], wf.curve).max(0.2);
+        wf.color = vec3(&w["color"], wf.color);
+        wf.aerial_keep = num(&w["aerial_keep"], wf.aerial_keep).clamp(0.0, 1.0);
+        wf.min_strength = num(&w["min_strength"], wf.min_strength).clamp(0.0, 1.0);
+        wf.ease_seconds = num(&w["ease_seconds"], wf.ease_seconds).max(0.0);
         out
     }
 
@@ -192,14 +243,19 @@ fn smoothstep(a: f32, b: f32, x: f32) -> f32 {
 }
 
 impl DepthFog {
-    /// `campaign_atmosphere.gd::apply_distance` + `CampaignLighting.aerial`.
+    /// `campaign_atmosphere.gd::apply_distance` + `CampaignLighting.aerial` (clear weather).
     pub fn at(look: &FogLook, distance: f32, pitch_deg: f32) -> DepthFog {
+        DepthFog::at_weather(look, distance, pitch_deg, 0.0)
+    }
+
+    /// Same with the "fog" weather at strength `mist` (0 = exactly [`DepthFog::at`]).
+    pub fn at_weather(look: &FogLook, distance: f32, pitch_deg: f32, mist: f32) -> DepthFog {
         let close = 1.0 - smoothstep(look.close_full, look.close_begin, distance);
         let low = 1.0 - smoothstep(look.low_pitch, look.top_pitch, pitch_deg);
         let mix = |p: [f32; 2]| p[1] + (p[0] - p[1]) * low;
         let (bf, ef) = (mix(look.begin_factor), mix(look.end_factor));
         let lerp = |a: f32, b: f32, t: f32| a + (b - a) * t;
-        DepthFog {
+        let clear = DepthFog {
             begin: lerp(
                 distance * bf,
                 look.close_fog_begin.max(distance * bf),
@@ -208,6 +264,19 @@ impl DepthFog {
             end: lerp(distance * ef, look.close_fog_end.max(distance * ef), close),
             density: mix(look.density),
             curve: look.curve,
+        };
+        let m = mist.clamp(0.0, 1.0);
+        if m <= 0.0 {
+            return clear;
+        }
+        let wf = &look.weather_fog;
+        let begin = lerp(clear.begin, clear.begin * wf.begin_scale, m);
+        let end = lerp(clear.end, clear.end * wf.end_scale, m);
+        DepthFog {
+            begin: begin.min(end * 0.9),
+            end,
+            density: lerp(clear.density, clear.density.max(wf.density), m),
+            curve: lerp(clear.curve, wf.curve, m),
         }
     }
 
@@ -272,6 +341,18 @@ pub struct Atmosphere {
     pub sky: [f32; 3],
     /// Sun scatter amount (`fog_sun_scatter`) applied.
     pub scatter: f32,
+    /// Eased strength (0..1) of the "fog" weather under the camera.
+    pub mist: f32,
+}
+
+/// Target strength of the "fog" weather for the weather at the camera focus.
+pub fn mist_target(look: &FogLook, entry: &super::model::Entry) -> f32 {
+    if entry.kind == super::model::Kind::Fog {
+        let min = look.weather_fog.min_strength;
+        min + (1.0 - min) * entry.intensity.clamp(0.0, 1.0)
+    } else {
+        0.0
+    }
 }
 
 fn load_look(mut commands: Commands) {
@@ -304,8 +385,22 @@ fn update_atmosphere(
     // shader re-evaluates it per pixel with `wx_aerial_fog_color`).
     let aerial = look.aerial_at(pitch);
     let weight = aerial_weight(aerial, -pitch.to_radians().sin());
-    let target = look.color(season_weights).lerp(look.sky, weight);
-    let scatter = look.scatter(season_weights);
+    let wf = look.weather_fog;
+    let mist_goal = mist_target(&look, &view.focus_entry);
+    let mist_rate = if state.fog.is_none() || wf.ease_seconds <= 0.0 {
+        1.0
+    } else {
+        (time.delta_secs() / wf.ease_seconds).clamp(0.0, 1.0)
+    };
+    state.mist += (mist_goal - state.mist) * mist_rate;
+    if (state.mist - mist_goal).abs() < 1e-3 {
+        state.mist = mist_goal;
+    }
+    let mist = state.mist;
+    let clear_color = look.color(season_weights).lerp(look.sky, weight);
+    let veil = wf.color.lerp(look.sky, wf.aerial_keep * weight);
+    let target = clear_color.lerp(veil, mist);
+    let scatter = look.scatter(season_weights) * (1.0 - mist);
     let sun_color = light.map_or(Vec3::ONE, |l| l.color);
     let t = if state.fog.is_none() {
         1.0
@@ -315,15 +410,18 @@ fn update_atmosphere(
     for (i, c) in target.to_array().iter().enumerate() {
         state.color[i] += (c - state.color[i]) * t;
     }
-    let base = look.color(season_weights);
+    let base = look.color(season_weights).lerp(wf.color, mist);
     for (i, c) in base.to_array().iter().enumerate() {
         state.base[i] += (c - state.base[i]) * t;
     }
     state.aerial_share = aerial;
-    state.sky = look.sky.to_array();
+    state.sky = look
+        .sky
+        .lerp(wf.color.lerp(look.sky, wf.aerial_keep), mist)
+        .to_array();
     state.aerial = weight;
     state.scatter = scatter;
-    let depth = DepthFog::at(&look, distance, pitch);
+    let depth = DepthFog::at_weather(&look, distance, pitch, mist);
     let (start, end) = depth.fit_linear();
     state.fog = Some(DepthFogSnapshot { depth, start, end });
     let fog = DistanceFog {
@@ -418,6 +516,7 @@ pub fn dump(world: &World) -> Value {
         "applied_to_camera": a.applied,
         "aerial_weight": a.aerial,
         "sun_scatter": a.scatter,
+        "weather_mist": a.mist,
         "table": table(world),
     })
 }
@@ -447,6 +546,27 @@ mod tests {
         // Low view (pitch <= 32): the low pair.
         let low = DepthFog::at(&look, 200.0, 30.0);
         assert_eq!((low.begin, low.end, low.density), (250.0, 1100.0, 0.85));
+    }
+
+    #[test]
+    fn fog_weather_pulls_the_fog_in_and_clear_is_unchanged() {
+        let look = FogLook::default();
+        for (d, pitch) in [(150.0, 45.0), (40.0, 35.0), (600.0, 40.0)] {
+            let clear = DepthFog::at(&look, d, pitch);
+            assert_eq!(clear, DepthFog::at_weather(&look, d, pitch, 0.0));
+            let fog = DepthFog::at_weather(&look, d, pitch, 1.0);
+            assert!(fog.end < clear.end && fog.begin < clear.begin);
+            let probe = d * 3.0;
+            assert!(fog.linear_amount(probe) > clear.linear_amount(probe) + 0.1);
+        }
+        use super::super::model::{Entry, Kind};
+        let entry = |kind| Entry {
+            kind,
+            intensity: 0.5,
+        };
+        assert_eq!(mist_target(&look, &entry(Kind::Clear)), 0.0);
+        assert_eq!(mist_target(&look, &entry(Kind::Rain)), 0.0);
+        assert!(mist_target(&look, &entry(Kind::Fog)) > 0.7);
     }
 
     #[test]
