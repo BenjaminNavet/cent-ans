@@ -9,6 +9,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
 use super::data::ProvinceMap;
+use crate::campaign::armies::pointer::PointerOverUi;
 
 /// Same constants as the Godot picker.
 const REFINE_ITERATIONS: usize = 8;
@@ -112,6 +113,7 @@ pub(super) fn build(app: &mut App) {
             (update_hover, handle_clicks, apply_select_requests)
                 .chain()
                 .in_set(ProvincePickSet)
+                .after(crate::campaign::armies::pointer::track_pointer_over_ui)
                 .run_if(resource_exists::<ProvinceMap>),
         );
 }
@@ -120,6 +122,13 @@ pub(super) fn build(app: &mut App) {
 struct PressState {
     position: Vec2,
     button: Option<MouseButton>,
+    /// The press began over a window or panel: its release is not a map click.
+    over_ui: bool,
+}
+
+/// The pointer is over a window, panel or button drawn above the map.
+fn over_ui(pointer: Option<&PointerOverUi>) -> bool {
+    pointer.is_some_and(|p| p.over)
 }
 
 /// Cursor ray of the first active 3D camera.
@@ -146,10 +155,15 @@ fn update_hover(
     surface: Option<Res<SurfaceHeight>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     cameras: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
+    pointer: Option<Res<PointerOverUi>>,
     mut hovered: ResMut<HoveredProvince>,
 ) {
-    let index =
-        cursor_ray(&windows, &cameras).map_or(0, |(_, ray)| pick_at(&map, surface.as_deref(), ray));
+    // Under a window the map is hidden: nothing is hovered (no highlight, no click through).
+    let index = if over_ui(pointer.as_deref()) {
+        0
+    } else {
+        cursor_ray(&windows, &cameras).map_or(0, |(_, ray)| pick_at(&map, surface.as_deref(), ray))
+    };
     if index != hovered.index {
         hovered.index = index;
         hovered.id = map.province(index).map(|p| p.id.clone());
@@ -163,12 +177,14 @@ fn handle_clicks(
     buttons: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     cameras: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
+    pointer: Option<Res<PointerOverUi>>,
     mut press: ResMut<PressState>,
     mut guard: ResMut<ProvinceClickGuard>,
     mut selected: ResMut<SelectedProvince>,
     mut clicks: MessageWriter<ProvinceClicked>,
 ) {
     let blocked = std::mem::take(&mut guard.blocked);
+    let over_ui = over_ui(pointer.as_deref());
     let Some((cursor, ray)) = cursor_ray(&windows, &cameras) else {
         return;
     };
@@ -176,11 +192,16 @@ fn handle_clicks(
         if buttons.just_pressed(button) {
             press.position = cursor;
             press.button = Some(button);
+            press.over_ui = over_ui;
         } else if buttons.just_released(button)
             && press.button == Some(button)
             && cursor.distance(press.position) <= CLICK_MAX_DRAG_PX
         {
             press.button = None;
+            // A click on a window (pressed or released over it) never reaches the map behind.
+            if std::mem::take(&mut press.over_ui) || over_ui {
+                continue;
+            }
             if blocked && button == MouseButton::Left {
                 continue;
             }

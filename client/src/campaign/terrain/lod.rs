@@ -27,6 +27,8 @@ pub const MAX_PAGES: usize = 256;
 pub const MAX_JOBS: usize = 4;
 /// Time budget for building node meshes each frame.
 pub const BUILD_BUDGET_MS: f32 = 6.0;
+/// A node left by the selector stays drawn this long at most while its replacements build.
+pub const RETIRE_MAX_S: f64 = 2.0;
 
 /// A displayed node.
 struct Node {
@@ -37,12 +39,29 @@ struct Node {
     triangles: usize,
 }
 
+impl Node {
+    /// Footprint (min x, min z, max x, max z) in map units.
+    fn rect(&self) -> (f32, f32, f32, f32) {
+        let extent = self.spec.quads as f32 * self.spec.spacing;
+        let (x, z) = self.spec.origin;
+        (x, z, x + extent, z + extent)
+    }
+}
+
+/// Two footprints share some area (touching edges do not count).
+fn overlaps(a: (f32, f32, f32, f32), b: (f32, f32, f32, f32)) -> bool {
+    a.0 < b.2 && b.0 < a.2 && a.1 < b.3 && b.1 < a.3
+}
+
 #[derive(Resource)]
 pub struct TerrainLod {
     selector: Selector,
     decoder: TileDecoder,
     pub material: Handle<TerrainMaterial>,
     nodes: HashMap<i64, Node>,
+    /// Nodes the selector dropped, kept on screen (with the time they left) until the nodes
+    /// replacing them are built: despawning them at once opened black holes while zooming.
+    retiring: Vec<(Node, f64)>,
     requested: HashSet<i64>,
     failed: HashSet<i64>,
     pub config: Config,
@@ -82,6 +101,7 @@ impl TerrainLod {
             decoder: TileDecoder::start(MAX_JOBS),
             material,
             nodes: HashMap::new(),
+            retiring: Vec::new(),
             requested: HashSet::new(),
             failed: HashSet::new(),
             config: Config::default(),
@@ -309,10 +329,14 @@ pub fn update_lod(
         }
     }
 
-    // Nodes removed and added.
+    // Nodes removed (kept until replaced, see `retiring`) and added.
     for key in &update.removed {
         if let Some(node) = lod.nodes.remove(key) {
-            commands.entity(node.entity).despawn();
+            if node.built_fine == i64::MIN {
+                commands.entity(node.entity).despawn();
+            } else {
+                lod.retiring.push((node, now));
+            }
         }
     }
     let material = lod.material.clone();
@@ -387,12 +411,36 @@ pub fn update_lod(
         built += 1;
     }
     lod.pending_builds = lod.pending_builds.saturating_sub(built);
+
+    // Retired nodes go once no unbuilt node overlaps them any more (or after a delay).
+    let unbuilt: Vec<_> = lod
+        .nodes
+        .values()
+        .filter(|n| n.built_fine == i64::MIN)
+        .map(Node::rect)
+        .collect();
+    let retiring = std::mem::take(&mut lod.retiring);
+    for (node, since) in retiring {
+        let waiting = unbuilt.iter().any(|r| overlaps(*r, node.rect()));
+        if waiting && now - since < RETIRE_MAX_S {
+            lod.retiring.push((node, since));
+        } else {
+            commands.entity(node.entity).despawn();
+        }
+    }
     lod.meshes_built += built as u64;
     lod.build_ms_last = started.elapsed().as_secs_f32() * 1000.0;
 }
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn footprints_overlap_only_when_sharing_area() {
+        let parent = (0.0, 0.0, 64.0, 64.0);
+        assert!(super::overlaps(parent, (32.0, 32.0, 64.0, 64.0)));
+        assert!(!super::overlaps(parent, (64.0, 0.0, 128.0, 64.0)));
+        assert!(!super::overlaps(parent, (100.0, 100.0, 110.0, 110.0)));
+    }
     use super::*;
 
     #[test]
