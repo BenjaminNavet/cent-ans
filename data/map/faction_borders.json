@@ -37,7 +37,7 @@
   "parchment": {
     "width_scale": 1.7,
     "alpha_scale": 1.15,
-    "glow_scale": 0.6,
+    "glow_scale": 0.25,
     "ink_mix": 0.35
   },
   "rest": {

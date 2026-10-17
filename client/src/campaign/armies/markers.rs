@@ -4,8 +4,10 @@
 
 use std::collections::HashMap;
 
+use crate::ui::kit::viewport_to_ui;
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
+use bevy::ui::UiScale;
 use sim_campaign::ArmyId;
 
 use super::figures::{ArmyFigure, FIGURE_HEIGHT, FigureSpec, Livery, Look, layout};
@@ -513,6 +515,7 @@ pub fn update_plates(
     time: Res<Time>,
     mut stats: ResMut<PlateStats>,
     palette: Option<Res<crate::settings::palette::Palette>>,
+    ui_scale: Res<UiScale>,
 ) {
     let Some((camera, camera_transform)) = camera.iter().next() else {
         return;
@@ -520,6 +523,11 @@ pub fn update_plates(
     let viewport = camera
         .logical_viewport_rect()
         .unwrap_or(Rect::new(0.0, 0.0, 1.0e5, 1.0e5));
+    // Plates are UI nodes: their positions are in UI layout pixels (`Val::Px` x `UiScale`).
+    let viewport = Rect::from_corners(
+        viewport_to_ui(viewport.min, &ui_scale),
+        viewport_to_ui(viewport.max, &ui_scale),
+    );
     let shown_area = Rect::new(
         viewport.min.x - VIEWPORT_MARGIN,
         viewport.min.y - VIEWPORT_MARGIN,
@@ -542,6 +550,7 @@ pub fn update_plates(
         let Ok(screen) = camera.world_to_viewport(camera_transform, top) else {
             continue;
         };
+        let screen = viewport_to_ui(screen, &ui_scale);
         if !shown_area.contains(screen)
             || too_far_for_close_view(
                 camera_dist,

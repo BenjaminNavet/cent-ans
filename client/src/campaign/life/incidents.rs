@@ -9,9 +9,11 @@
 //! painting and the `hud_chronicle_decision` pictogram of `HudStyle` belong to the UI kit), shown
 //! at every zoom without the `Signes` layer filter (`MapReadability`).
 
+use crate::ui::kit::viewport_to_ui;
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
+use bevy::ui::UiScale;
 use bevy::ui_widgets::Button;
 use sim_campaign::chronicle::DecisionView;
 
@@ -268,6 +270,7 @@ pub fn place_incidents(
     >,
     mut hits: Query<(&IncidentSceneHit, &mut Node, &mut Visibility), Without<IncidentSeal>>,
     mut stats: ResMut<IncidentStats>,
+    ui_scale: Res<UiScale>,
 ) {
     let Some((camera, transform)) = camera.iter().next() else {
         return;
@@ -277,6 +280,7 @@ pub fn place_incidents(
     for (seal, mut node, mut visibility, mut border) in &mut seals {
         match camera.world_to_viewport(transform, seal.world) {
             Ok(screen) => {
+                let screen = viewport_to_ui(screen, &ui_scale);
                 node.left = Val::Px(screen.x - MARKER_SIZE * 0.5);
                 node.top = Val::Px(screen.y - MARKER_SIZE * 0.5 - MARKER_SIZE * LIFT);
                 *visibility = Visibility::Inherited;
@@ -300,6 +304,10 @@ pub fn place_incidents(
         );
         match projected {
             Some((center, edge)) if visible_ids.contains(&hit.id) => {
+                let (center, edge) = (
+                    viewport_to_ui(center, &ui_scale),
+                    viewport_to_ui(edge, &ui_scale),
+                );
                 let r = hit_radius(center.distance(edge));
                 node.width = Val::Px(r * 2.0);
                 node.height = Val::Px(r * 2.0);

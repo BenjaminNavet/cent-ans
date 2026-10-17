@@ -4,7 +4,9 @@
 //! province; here a pool of screen-space texts follows the projected centroids (the nearest to
 //! the centre of the screen first), like the region labels.
 
+use crate::ui::kit::viewport_to_ui;
 use bevy::prelude::*;
+use bevy::ui::UiScale;
 
 use super::data::ProvinceMap;
 use super::modes::{MapMode, MapModeState};
@@ -88,6 +90,7 @@ fn update_markers(
     map: Res<ProvinceMap>,
     cameras: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
     ground: crate::campaign::terrain::surface::GroundHeight,
+    ui_scale: Res<UiScale>,
     mut stats: ResMut<RelationMarkerStats>,
     mut slots: Query<(
         &RelationMarker,
@@ -107,7 +110,10 @@ fn update_markers(
         }
         return;
     };
-    let viewport = camera.logical_viewport_size().unwrap_or(Vec2::ONE);
+    let viewport = viewport_to_ui(
+        camera.logical_viewport_size().unwrap_or(Vec2::ONE),
+        &ui_scale,
+    );
     let centre = viewport * 0.5;
     let mut candidates: Vec<(f32, Vec2, &'static str, Color)> = Vec::new();
     for province in map.provinces() {
@@ -125,6 +131,7 @@ fn update_markers(
         let Ok(screen) = camera.world_to_viewport(transform, world) else {
             continue;
         };
+        let screen = viewport_to_ui(screen, &ui_scale);
         if screen.x < 0.0 || screen.y < 0.0 || screen.x > viewport.x || screen.y > viewport.y {
             continue;
         }

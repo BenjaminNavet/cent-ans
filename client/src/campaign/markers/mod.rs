@@ -22,9 +22,11 @@ pub mod placement;
 pub mod places;
 pub mod signs;
 
+use crate::ui::kit::viewport_to_ui;
 use bevy::asset::LoadState;
 use bevy::gltf::GltfAssetLabel;
 use bevy::prelude::*;
+use bevy::ui::UiScale;
 use bevy::world_serialization::{WorldAssetRoot, WorldInstanceReady};
 use serde_json::{Value, json};
 
@@ -1092,6 +1094,7 @@ fn update_labels(
     >,
     plates: Query<(&Name, &Node, &Visibility), Without<PlaceLabel>>,
     mut stats: ResMut<MarkerStats>,
+    ui_scale: Res<UiScale>,
 ) {
     let Some((camera, cam_t)) = camera.iter().next() else {
         return;
@@ -1140,6 +1143,7 @@ fn update_labels(
         if eye.distance(world) <= limit
             && let Ok(screen) = camera.world_to_viewport(cam_t, world)
         {
+            let screen = viewport_to_ui(screen, &ui_scale);
             let measured = computed.size() * computed.inverse_scale_factor();
             let size = if measured.x > 1.0 {
                 measured
@@ -1156,9 +1160,16 @@ fn update_labels(
                 rect.max + Vec2::new(0.0, size.y + 4.0),
             );
             let slot = if pinned {
-                // Always shown; still registered so others avoid it.
-                grid.try_place(rect, -1, true);
-                Some(0.0)
+                // Always shown and registered so others avoid it; it dodges an army plate or an
+                // earlier pinned name by sitting just below when that is free.
+                if grid.try_place(rect, label.index as i32, false) {
+                    Some(0.0)
+                } else if grid.try_place(below, label.index as i32, false) {
+                    Some(size.y + 4.0)
+                } else {
+                    grid.try_place(rect, -1, true);
+                    Some(0.0)
+                }
             } else if grid.try_place(rect, label.index as i32, false) {
                 Some(0.0)
             } else if grid.try_place(below, label.index as i32, false) {

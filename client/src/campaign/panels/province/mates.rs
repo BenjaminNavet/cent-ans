@@ -7,9 +7,11 @@
 //! The pastilles are UI nodes re-projected every frame from the colony's map position; the
 //! dotted lines are gizmos on the displayed ground. Dump section `province_mates`.
 
+use crate::ui::kit::viewport_to_ui;
 use bevy::picking::Pickable;
 use bevy::prelude::*;
 use bevy::state::state_scoped::DespawnOnExit;
+use bevy::ui::UiScale;
 use serde_json::json;
 
 use super::ProvincePanel;
@@ -264,6 +266,7 @@ fn place_pastilles(
     ground: GroundHeight,
     camera: Query<(&Camera, &GlobalTransform), With<CampaignCamera>>,
     mut pastilles: Query<(&Pastille, &mut Node)>,
+    ui_scale: Res<UiScale>,
 ) {
     let Ok((camera, transform)) = camera.single() else {
         return;
@@ -279,6 +282,7 @@ fn place_pastilles(
         );
         match camera.world_to_viewport(transform, world) {
             Ok(at) => {
+                let at = viewport_to_ui(at, &ui_scale);
                 let half = match node.width {
                     Val::Px(w) => w * 0.5,
                     _ => 0.0,

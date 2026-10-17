@@ -6,7 +6,9 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+use crate::ui::kit::viewport_to_ui;
 use bevy::prelude::*;
+use bevy::ui::UiScale;
 use serde_json::Value;
 
 use super::borders::smoothstep;
@@ -229,6 +231,7 @@ fn update_labels(
     obstacles: Res<RegionLabelObstacles>,
     cameras: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
     ground: crate::campaign::terrain::surface::GroundHeight,
+    ui_scale: Res<UiScale>,
     mut stats: ResMut<RegionLabelStats>,
     mut slots: Query<
         (
@@ -267,7 +270,11 @@ fn update_labels(
     };
     let weight = tuning.weight_at(distance);
     stats.weight = weight;
-    let Some(viewport) = camera.logical_viewport_size().filter(|_| weight > 0.01) else {
+    let Some(viewport) = camera
+        .logical_viewport_size()
+        .map(|v| viewport_to_ui(v, &ui_scale))
+        .filter(|_| weight > 0.01)
+    else {
         return hide(&mut slots);
     };
     if order.is_empty() {
@@ -281,7 +288,8 @@ fn update_labels(
             let province = map.province(*index)?;
             let (cx, cz) = (province.centroid[0], province.centroid[1]);
             let world = Vec3::new(cx, ground.at(cx, cz).unwrap_or(0.0), cz);
-            let screen = camera.world_to_viewport(transform, world).ok()?;
+            let screen =
+                viewport_to_ui(camera.world_to_viewport(transform, world).ok()?, &ui_scale);
             Some(LabelCandidate {
                 name: province.name.clone(),
                 screen,

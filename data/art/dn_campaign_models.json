@@ -69,6 +69,12 @@
           "albedo_gain": 1.0
         }
       ],
+      "balt_pagan": [
+        {
+          "path": "dn/buildings/village_balt_pagan",
+          "albedo_gain": 1.0
+        }
+      ],
       "med_towers": [
         {
           "path": "dn/buildings/city_ital_commune",
@@ -158,6 +164,12 @@
       "balt": [
         {
           "path": "dn/buildings/castle_balt",
+          "albedo_gain": 1.0
+        }
+      ],
+      "balt_pagan": [
+        {
+          "path": "dn/buildings/village_balt_pagan",
           "albedo_gain": 1.0
         }
       ],
@@ -479,6 +491,12 @@
           "albedo_gain": 1.0
         }
       ],
+      "balt_pagan": [
+        {
+          "path": "dn/buildings/village_balt_pagan",
+          "albedo_gain": 1.0
+        }
+      ],
       "med_towers": [
         {
           "path": "dn/buildings/town_ital_towers",
@@ -699,9 +717,6 @@
     {
       "id": "balt_pagan",
       "family": "rus",
-      "also": [
-        "balt"
-      ],
       "cultures": [
         "cul_lithuanian"
       ],

@@ -449,6 +449,13 @@ pub(super) fn apply_text_scale(
     }
 }
 
+/// A point of the camera viewport (`Camera::world_to_viewport`, logical window pixels) in UI
+/// layout pixels: `Val::Px` positions are multiplied by `UiScale`, so a node placed over a world
+/// point needs `screen / UiScale`, or it drifts toward the top-left whenever the scale is below 1.
+pub fn viewport_to_ui(point: Vec2, scale: &UiScale) -> Vec2 {
+    point / scale.0.max(0.1)
+}
+
 fn spawn_ui_camera(mut commands: Commands, target: Option<Res<OffscreenTarget>>) {
     let mut camera = commands.spawn((
         Name::new("UiCamera"),

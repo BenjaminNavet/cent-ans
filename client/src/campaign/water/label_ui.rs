@@ -1,7 +1,9 @@
 //! On-screen river names (render side of `river_labels.gd`): a pool of UI text nodes, placed on
 //! the draped ground, rotated along the flow, in the UI theme's italic title font (accents).
 
+use crate::ui::kit::viewport_to_ui;
 use bevy::prelude::*;
+use bevy::ui::UiScale;
 
 use super::WaterStats;
 use crate::app::AppState;
@@ -99,6 +101,7 @@ fn update_labels(
     obstacles: Option<Res<RegionLabelObstacles>>,
     regions: Option<Res<RegionLabelStats>>,
     mut shown: ResMut<RiverLabelStats>,
+    ui_scale: Res<UiScale>,
     mut slots: Query<(
         &RiverLabelSlot,
         &mut Text,
@@ -114,7 +117,10 @@ fn update_labels(
         return;
     };
     let eye = transform.translation();
-    let viewport = camera.logical_viewport_size().unwrap_or(Vec2::ONE);
+    let viewport = viewport_to_ui(
+        camera.logical_viewport_size().unwrap_or(Vec2::ONE),
+        &ui_scale,
+    );
     let mut candidates: Vec<(i64, f32, Vec2, f32, &str)> = Vec::new();
     for label in &stats.labels {
         let lift = |p: Vec2| Vec3::new(p.x, ground.at(p.x, p.y).unwrap_or(0.0) + 0.02, p.y);
@@ -126,12 +132,14 @@ fn update_labels(
         let Ok(a) = camera.world_to_viewport(transform, world) else {
             continue;
         };
+        let a = viewport_to_ui(a, &ui_scale);
         if a.x < 0.0 || a.y < 0.0 || a.x > viewport.x || a.y > viewport.y {
             continue;
         }
         let Ok(b) = camera.world_to_viewport(transform, lift(label.px + label.dir * 4.0)) else {
             continue;
         };
+        let b = viewport_to_ui(b, &ui_scale);
         let fade =
             1.0 - ((distance / label.visible_to - FADE_START) / (1.0 - FADE_START)).clamp(0.0, 1.0);
         candidates.push((

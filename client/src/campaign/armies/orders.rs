@@ -201,6 +201,7 @@ pub fn hover_and_input(
     pointer: Res<PointerOverUi>,
     mut commands: MessageWriter<ArmyCommand>,
     mut war_asks: MessageWriter<AskWarDeclaration>,
+    ui_scale: Res<bevy::ui::UiScale>,
 ) {
     let Some(cursor) = cursor_position(&window) else {
         return;
@@ -224,7 +225,8 @@ pub fn hover_and_input(
                 .iter()
                 .find(|(p, _, _)| p.id == marker.id)
                 .map(|(_, node, transform)| {
-                    let scale = node.inverse_scale_factor();
+                    // UI layout pixels (x `UiScale`) to the window pixels of the cursor.
+                    let scale = node.inverse_scale_factor() * ui_scale.0;
                     let center = transform.translation * scale;
                     Rect::from_center_size(center, node.size() * scale)
                 }),

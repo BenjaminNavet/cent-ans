@@ -9,7 +9,9 @@
 //! parchment view, which draws its own tokens), and the hover bubble of a ghost ("Dernière
 //! position connue", "Vue il y a 2 saisons") within [`GHOST_PICK_PX`] of the pointer.
 
+use crate::ui::kit::viewport_to_ui;
 use bevy::prelude::*;
+use bevy::ui::UiScale;
 use data_model::FactionId;
 use serde_json::{Value, json};
 
@@ -129,6 +131,7 @@ pub fn place_labels(
     ground: GroundHeight,
     mut labels: Query<(&GhostLabel, &mut Node, &mut Visibility, &mut TextColor)>,
     mut stats: ResMut<GhostStats>,
+    ui_scale: Res<UiScale>,
 ) {
     let Some((camera, transform)) = camera.iter().find(|(c, _)| c.is_active) else {
         return;
@@ -155,7 +158,7 @@ pub fn place_labels(
         if *visibility != wanted {
             *visibility = wanted;
         }
-        if let Some(p) = at {
+        if let Some(p) = at.map(|p| viewport_to_ui(p, &ui_scale)) {
             node.left = Val::Px((p.x - LABEL_WIDTH * 0.5).round());
             node.top = Val::Px((p.y - LABEL_HEIGHT * 0.5).round());
             color.0 = LABEL_GREY.with_alpha(alpha);

@@ -6,7 +6,9 @@
 
 use std::collections::HashMap;
 
+use crate::ui::kit::viewport_to_ui;
 use bevy::prelude::*;
+use bevy::ui::UiScale;
 
 use super::data::ProvinceMap;
 use super::modes::{MapMode, MapModeState};
@@ -155,6 +157,7 @@ fn place_shields(
     ground: GroundHeight,
     mut shields: Query<(&FeudalShield, &mut Node, &mut Visibility)>,
     mut stats: ResMut<ShieldStats>,
+    ui_scale: Res<UiScale>,
 ) {
     let Some((camera, transform)) = camera.iter().find(|(c, _)| c.is_active) else {
         return;
@@ -168,6 +171,7 @@ fn place_shields(
         let world = Vec3::new(x, ground.at(x, z).unwrap_or(0.0) + SHIELD_LIFT, z);
         match camera.world_to_viewport(transform, world) {
             Ok(screen) => {
+                let screen = viewport_to_ui(screen, &ui_scale);
                 node.left = Val::Px(screen.x - SHIELD_SIZE.x * 0.5);
                 node.top = Val::Px(screen.y - SHIELD_SIZE.y * 0.5);
                 *visibility = Visibility::Inherited;
