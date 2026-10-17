@@ -123,7 +123,7 @@ impl Default for SoldierLook {
             shield_wear: 0.7,
             skin_calm: 0.5,
             steel_grey_mix: 0.45,
-            steel_darken: 0.8,
+            steel_darken: 0.9,
         }
     }
 }
