@@ -17,7 +17,13 @@
   "woods": [
     { "x": 150, "z": 1520, "radius": 90 },
     { "x": 60, "z": 1420, "radius": 60 },
-    { "x": 2330, "z": 1580, "radius": 70 }
+    { "x": 2330, "z": 1580, "radius": 70 },
+    { "x": 1080, "z": 1575, "radius": 80 },
+    { "x": 1640, "z": 1570, "radius": 70 },
+    { "x": 330, "z": 1230, "radius": 45 },
+    { "x": 260, "z": 70, "radius": 80 },
+    { "x": 1950, "z": 60, "radius": 70 },
+    { "x": 2360, "z": 260, "radius": 55 }
   ],
   "mud": [
     { "x": 2230, "z": 420, "radius": 60 },
@@ -50,11 +56,11 @@
       { "type": "church", "x": 330, "z": 1440, "yaw": 0.1 },
       { "type": "plot", "kind": "orchard", "x": 450, "z": 1420, "length": 90, "width": 60, "yaw": 0.1 },
       { "type": "plot", "kind": "orchard", "x": 2150, "z": 1350, "length": 70, "width": 50, "yaw": 0.4 },
-      { "type": "plot", "kind": "ploughland", "x": 1300, "z": 900, "length": 360, "width": 150, "yaw": 0.05, "state": "stubble" },
-      { "type": "plot", "kind": "ploughland", "x": 800, "z": 960, "length": 300, "width": 140, "yaw": -0.1, "state": "stubble" },
-      { "type": "plot", "kind": "ploughland", "x": 1700, "z": 950, "length": 240, "width": 130, "yaw": 0.15, "state": "crop" },
-      { "type": "plot", "kind": "ploughland", "x": 900, "z": 380, "length": 320, "width": 150, "yaw": 0.0, "state": "stubble" },
-      { "type": "plot", "kind": "ploughland", "x": 1500, "z": 330, "length": 280, "width": 140, "yaw": 0.1, "state": "ploughed" },
+      { "type": "plot", "kind": "ploughland", "x": 1300, "z": 900, "length": 220, "width": 90, "yaw": 0.05, "state": "stubble" },
+      { "type": "plot", "kind": "ploughland", "x": 800, "z": 960, "length": 190, "width": 85, "yaw": -0.1, "state": "stubble" },
+      { "type": "plot", "kind": "ploughland", "x": 1700, "z": 950, "length": 170, "width": 80, "yaw": 0.15, "state": "crop" },
+      { "type": "plot", "kind": "ploughland", "x": 900, "z": 380, "length": 200, "width": 90, "yaw": 0.0, "state": "stubble" },
+      { "type": "plot", "kind": "ploughland", "x": 1500, "z": 330, "length": 180, "width": 85, "yaw": 0.1, "state": "ploughed" },
       { "type": "plot", "kind": "meadow", "x": 2150, "z": 650, "length": 180, "width": 110, "yaw": 1.45 },
       { "type": "plot", "kind": "meadow", "x": 2230, "z": 250, "length": 160, "width": 90, "yaw": 1.4 },
       { "type": "prop", "kind": "haystack", "x": 2120, "z": 610 },

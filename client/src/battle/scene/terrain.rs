@@ -243,31 +243,59 @@ fn spawn_scene(
 
 use super::camera;
 
-/// Opening shot: the centroid of the player's army (attacker without a player), seen from behind
-/// it towards the enemy.
-fn opening_frame(player: Option<sim_battle::SideId>, sim: &sim_battle::BattleSim) -> (Vec3, f32) {
+/// Radius (m) around the regiment nearest the army centroid that the opening shot frames.
+const OPENING_CLUSTER_M: f32 = 120.0;
+
+/// Opening shot: the knot of the player's regiments nearest the army centroid (attacker without a
+/// player), seen from behind it towards the enemy centroid. A deployed army is often split in
+/// separate battles, so the plain centroid may fall on an empty meadow.
+pub fn opening_frame(
+    player: Option<sim_battle::SideId>,
+    sim: &sim_battle::BattleSim,
+) -> (Vec3, f32) {
     let side = player.unwrap_or(sim_battle::SideId::Attacker);
-    let (mut sum, mut count) = (Vec3::ZERO, 0.0);
-    for unit in sim
-        .units()
-        .iter()
-        .filter(|u| u.side == side && !u.synthetic)
-    {
-        sum += Vec3::new(unit.x as f32, 0.0, unit.z as f32);
-        count += 1.0;
-    }
     let field = sim.field();
-    let centre = if count > 0.0 {
-        sum / count
-    } else {
-        Vec3::new(field.width as f32 * 0.5, 0.0, field.depth as f32 * 0.5)
+    let middle = Vec3::new(field.width as f32 * 0.5, 0.0, field.depth as f32 * 0.5);
+    let positions = |own: bool| -> Vec<Vec3> {
+        sim.units()
+            .iter()
+            .filter(|u| (u.side == side) == own && !u.synthetic)
+            .map(|u| Vec3::new(u.x as f32, 0.0, u.z as f32))
+            .collect()
     };
-    // Look towards the middle of the field: yaw puts the eye on the far side from it.
-    let toward = Vec3::new(field.width as f32 * 0.5, 0.0, field.depth as f32 * 0.5) - centre;
-    let yaw = if toward.z >= 0.0 {
-        std::f32::consts::PI
+    let mean = |v: &[Vec3]| v.iter().copied().sum::<Vec3>() / v.len().max(1) as f32;
+    let own = positions(true);
+    let enemy = positions(false);
+    let centre = if own.is_empty() {
+        middle
     } else {
+        let centroid = mean(&own);
+        let nearest = own
+            .iter()
+            .copied()
+            .min_by(|a, b| {
+                a.distance_squared(centroid)
+                    .total_cmp(&b.distance_squared(centroid))
+            })
+            .unwrap_or(centroid);
+        let knot: Vec<Vec3> = own
+            .iter()
+            .copied()
+            .filter(|p| p.distance(nearest) <= OPENING_CLUSTER_M)
+            .collect();
+        mean(&knot)
+    };
+    // Look towards the enemy (the middle of the field without one): the eye sits on the far side.
+    let target = if enemy.is_empty() {
+        middle
+    } else {
+        mean(&enemy)
+    };
+    let toward = target - centre;
+    let yaw = if toward.xz().length_squared() < 1.0 {
         0.0
+    } else {
+        (-toward.x).atan2(-toward.z)
     };
     (centre, yaw)
 }
