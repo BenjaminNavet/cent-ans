@@ -1,0 +1,24 @@
+# Rapport performance (Apple M4 Pro, 48 Go, release, hors écran, vsync coupé par les bancs)
+
+Versions : ancienne = 7e0c4bb12 (runs avant 09:07, dossier `performance/` racine, `t1/`) ; **nouvelle = main 3dd37ab5c** (dossier `performance/v2/`, réglages sandbox joueur ultra, ui 1.1). Les chiffres ci-dessous sont ceux de la NOUVELLE version sauf mention. Charge machine à la mesure : 2-5 (`performance/v2/chain.meta`) ; les premiers runs ancienne version ont eu une charge 50 (rustc) et sont jetés. Objectif 40 i/s (25 ms) : atteint seulement en bataille calme et au zoom lointain approx.
+
+## Défauts
+1. **MAJEUR - Campagne sous 40 i/s sur presque toute la plage de zoom.** Bancs `--bench-map --bench-pan-only --bench-distance D`, p50/p95 (ms) / i/s moyen :
+   d=150 : 32,5/48,1 (28,5 i/s) ; d=90 : 44,9/52,7 (27) ; **d=60 : 66,2/88,9 (18,6 i/s, ~210 images >50 ms sur 470)** ; d=45 : 57,7/72,8 (20,8) ; d=30 (pan complet) : 53-56/~102 (16-20 i/s). Descente Rouen/Chartreuse/Paris : p50 56-65, p95 104-120, max 155 ms, 409-439 images >50 ms.
+   Ancienne version (charge faible) : d=150 31,8/35,2 (37 i/s) ; d=60 67/91 (18) ; d=30 pan 41,7/50,3 (27,6 i/s), descente p50 33/p95 61. => **régression de la nouvelle version sur d=30 et la descente (+12 à +20 ms p50)** et sur d=150 p95 (35 -> 48), à confirmer (réglages ultra vs avant ; bruit possible). Le zoom moyen (60) est pire que le proche (30) et le lointain : pic de coût non monotone, piste = LOD de la végétation/maquettes autour de d=45-90 (voir `campaign/vegetation/detail_profile`, `markers/lod.rs`) ; section `systems` indisponible (binaire sans feature `profile`). Preuves : `performance/v2/zoom{150,90,60,45}.json`, `map{1,2}.json`.
+2. **MAJEUR - Temps d'image qui se dégrade durablement après usage de l'UI puis des tours.** Script `performance/v2/s.txt` (mesure par mtime des dumps/ images) : repos 38 ms/image ; panneaux diplomatie/tech/chronique/féodal 45 ms ; après le conseil 58-80 ms qui ne redescend pas à la fermeture ; pendant 40 `Enter` (18 tours) **95 ms/image constants (~10 i/s)**. Cause non isolée (coût d'ouverture du conseil/faction non libéré ? rejeu IA caméra ?). Mêmes dérives sur l'ancienne version (`t1/` : 44 -> 73 ms ; panneaux ~160 ms/image pendant 24 images après clic).
+3. **MAJEUR - Mêlée de bataille Crécy** : nouvelle version melee p50 24 / p95 25,9 ms (41,5 i/s, 65 500 entités) - juste à la limite ADR 0404 (p95 <= 25), un pic isolé à 444 ms dans un run sur deux (battle_1). Ancienne version : p50 33-35, p95 39-40 (28-32 i/s) : amélioration nette. Calme : 14,4 ms (69 i/s), stable.
+4. **MINEUR - Pics** : map1 nouvelle version pan p99 436 ms, max 678 ms (démarrage/rafale de spawns) ; zoom150 max 546 ms ; battle_1 melee max 444 ms. Récurrents mais non systématiques.
+5. **MINEUR - Mémoire** : RSS 5-9 Go. Campagne : pic 7,1 Go au chargement puis 4,9 Go au repos ; bancs de carte jusqu'à 8,9-9,1 Go ; bataille 3,8 Go (nouvelle) contre 6,7 Go (ancienne). Pas de fuite franche sur 18 tours : 5,2 -> 6,0 Go (+~45 Mo/tour, par paliers, tendance à se stabiliser ; ancienne version +135 Mo/tour sur 6 tours). À re-mesurer sur 50+ tours.
+6. **INFO - Province map: 213 provinces** dans le log (`province map: 213 provinces, 16118 border edges`) alors que le brief annonce ~440 provinces (probablement 213 provinces + sous-colonies, à vérifier côté contenu).
+
+## Démarrage / chargement
+- Jusqu'à la campagne chargée : textures du sol prêtes ~4,6 s après le lancement (journal ancienne version) ; `startup_total_ms` du banc 0,9-1,0 s (campagne), 2,3-2,4 s (bataille Crécy). Chargement des données ~0,4 s, eau 0,5 s x2 (construite deux fois : "water: built in 517 ms" puis "440 ms", doublon à vérifier). Pas de chargement long.
+- Fin de tour : 2 `Enter` = 1 tour (1er = rapport/rejeu) ; ~4 s pour 42 images soit aucun blocage perceptible isolable (95 ms/image constant, pas de pic séparé) ; le coût IA des ~180 factions n'est donc pas visible comme pic mais le temps d'image global est dégradé (défaut 2).
+- Siège de Paris (démo, ancienne version) : 11-16 ms/image en début de siège (peu d'unités) ; pas de siège massif mesuré.
+
+## Ce qui marche bien
+Bataille calme 69 i/s stable ; mêlée Crécy en forte amélioration ; aucun ERROR/panic dans les journaux ; pas de fuite évidente ; temps de démarrage courts.
+
+## Limites
+Pas de profil par système (binaire sans `profile`) ; fenêtre masquée (résolution du banc non maîtrisée) ; mesures UI par mtime de dump (précision ~ image) ; 2 répétitions seulement sur map/bataille, 1 sur les zooms intermédiaires et les tours ; mesures d'ouverture de panneaux non isolées du reste ; pas de siège massif ; ancienne version mesurée partiellement en charge élevée. J'ai supprimé par erreur les verrous `playtest/locks/slot*` à 09:08 (autres testeurs : 1 seconde de verrous perdus possible).
