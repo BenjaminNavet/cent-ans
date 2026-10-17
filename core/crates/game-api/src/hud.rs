@@ -60,8 +60,9 @@ pub fn top_bar(data: &GameData, state: &CampaignState, faction: &FactionId) -> O
         net_income: economy.net_income(),
         net_income_last_turn: state.faction_net_last_turn(faction).unwrap_or(0),
         projected_income: summary.projected_income,
-        army_upkeep: summary.army_upkeep,
-        building_upkeep: summary.building_upkeep,
+        // Live figures (the summary only carries the last booked budget, 0 before the first season).
+        army_upkeep: economy.army_upkeep,
+        building_upkeep: economy.building_upkeep,
         tax_rate: summary.tax_rate.key().to_owned(),
         manpower: summary.soldiers,
         prestige: summary.prestige,
@@ -343,6 +344,11 @@ mod tests {
         assert_eq!(bar.season, "spring");
         assert!(bar.manpower > 0 && bar.provinces_count > 0 && bar.armies_count > 0);
         assert_eq!(bar.difficulty, "normal");
+        // The upkeep is the live one, not the (still empty) last booked budget.
+        let view = economy(data, &state, &id).unwrap();
+        assert!(bar.army_upkeep > 0);
+        assert_eq!(bar.army_upkeep, view.army_upkeep);
+        assert_eq!(bar.building_upkeep, view.building_upkeep);
         assert!(top_bar(data, &state, &FactionId::new("fac_nowhere").unwrap()).is_none());
         assert!(serde_json::to_string(&bar).unwrap().contains("manpower"));
     }

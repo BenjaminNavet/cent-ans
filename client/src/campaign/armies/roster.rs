@@ -1015,12 +1015,15 @@ fn rebuild(
     let all = player_entries(&sim, &glides);
     let armies = sorted_filtered(&all, roster.sort, &roster.filters);
     let agents = agent_entries(data, state, &sim.player);
-    let summary = state.faction_summary(&sim.player);
+    // Same live figure as the army panel and the budget (the summary holds the last booked one).
+    let army_upkeep = state
+        .faction_economy(data, &sim.player)
+        .map_or(0, |e| e.army_upkeep);
     let foot = format!(
         "Montre du royaume : {} hommes · {} · entretien {} livres par saison",
         fr::digits(all.iter().map(|e| i64::from(e.men)).sum()),
         fr::count(all.len() as i64, "ost", None),
-        fr::digits(summary.as_ref().map_or(0, |s| s.army_upkeep)),
+        fr::digits(army_upkeep),
     );
     roster.built_for = (
         state.turn,

@@ -874,6 +874,10 @@ fn slot_bar(
 ) {
     let built = bar.slots.iter().filter(|s| !s.built.is_empty()).count();
     let usage = match bar.max {
+        // A historical start can stand above the cap (kept, ADR 0185 rule): say so.
+        Some(max) if bar.used > max => {
+            format!("{title} {}/{max} (au-delà du plafond, conservés)", bar.used)
+        }
         Some(max) => format!("{title} {}/{max}", bar.used),
         None => format!("{title} {built}/{}", bar.slots.len()),
     };

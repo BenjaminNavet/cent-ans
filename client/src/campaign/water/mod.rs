@@ -319,12 +319,18 @@ fn build_water(
     mut commands: Commands,
     mut assets: BuildAssets,
     ground: Res<GroundHeight>,
+    cpu_ground: Option<Res<crate::campaign::terrain::cpu_sampler::CpuSampler>>,
     mut stats: ResMut<WaterStats>,
 ) {
     let Ok(root) = paths::find_root() else {
         warn!("water: repository root not found");
         return;
     };
+    // The terrain sends `RebuildWater` when its sampler is ready: building on the flat default
+    // first would build the whole water twice at startup.
+    if cpu_ground.is_some_and(|sampler| !sampler.is_ready()) {
+        return;
+    }
     let started = Instant::now();
     let map_dir = paths::data_dir(&root).join("map");
     let data = WaterData::load(&map_dir);
