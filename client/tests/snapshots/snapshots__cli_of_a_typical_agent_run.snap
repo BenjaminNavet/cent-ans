@@ -16,5 +16,6 @@ Cli {
     exit_after: None,
     script: None,
     offscreen: true,
+    visible_window: false,
     bench: None,
 }

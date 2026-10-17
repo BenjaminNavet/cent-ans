@@ -258,18 +258,38 @@ pub fn resolve_quality(
 }
 
 /// MSAA of every 3D camera: campaign map or battle preset depending on the state.
+///
+/// The UI camera draws over the world on the same target (window or image) with no clear. Bevy keys
+/// the main texture of a view by (target, format, samples): a UI camera whose MSAA differs from the
+/// world camera's gets its own fresh (black) texture and the final blit replaces the world with
+/// it. Its MSAA was only set once when the scene was entered, so a quality that resolved later
+/// (adapter detected after the first frame, settings changed, state switch) left it mismatched.
+/// While a world scene runs, the UI camera therefore follows `wanted` every frame.
 pub fn apply_msaa(
     quality: Res<RenderQuality>,
     state: Option<Res<State<AppState>>>,
     mut cameras: Query<(&mut Msaa, &Camera), With<Camera3d>>,
+    mut ui_cameras: Query<&mut Msaa, (With<crate::ui::kit::UiCamera>, Without<Camera3d>)>,
 ) {
-    let wanted = match state.as_deref().map(|s| *s.get()) {
+    let current = state.as_deref().map(|s| *s.get());
+    let wanted = match current {
         Some(AppState::Battle) => quality.msaa_battle,
         _ => quality.msaa_campaign,
     };
+    let mut world_active = false;
     for (mut msaa, camera) in &mut cameras {
-        if camera.is_active && *msaa != wanted {
-            *msaa = wanted;
+        if camera.is_active {
+            world_active = true;
+            if *msaa != wanted {
+                *msaa = wanted;
+            }
+        }
+    }
+    if world_active && matches!(current, Some(AppState::Campaign | AppState::Battle)) {
+        for mut msaa in &mut ui_cameras {
+            if *msaa != wanted {
+                *msaa = wanted;
+            }
         }
     }
 }
@@ -372,6 +392,44 @@ pub fn apply_view_distance(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ui_camera_follows_the_world_camera_msaa() {
+        use crate::ui::kit::UiCamera;
+        let mut app = App::new();
+        app.add_plugins(bevy::state::app::StatesPlugin);
+        app.init_state::<AppState>();
+        let mut quality =
+            RenderQuality::resolve(&Settings::default(), &QualityPresets::load(), "medium");
+        quality.msaa_campaign = Msaa::Sample2;
+        quality.msaa_battle = Msaa::Off;
+        app.insert_resource(quality);
+        app.add_systems(Update, apply_msaa);
+        let world_camera = app
+            .world_mut()
+            .spawn((Camera3d::default(), Camera::default(), Msaa::Sample4))
+            .id();
+        let ui_camera = app
+            .world_mut()
+            .spawn((Camera2d, UiCamera, Msaa::Sample4))
+            .id();
+        // Not in a world scene yet: the UI camera is left alone.
+        app.update();
+        assert_eq!(app.world().get::<Msaa>(ui_camera), Some(&Msaa::Sample4));
+        app.world_mut()
+            .resource_mut::<NextState<AppState>>()
+            .set(AppState::Campaign);
+        app.update();
+        app.update();
+        assert_eq!(app.world().get::<Msaa>(world_camera), Some(&Msaa::Sample2));
+        assert_eq!(app.world().get::<Msaa>(ui_camera), Some(&Msaa::Sample2));
+        // The quality resolves differently later (auto level, settings): both follow.
+        app.world_mut()
+            .resource_mut::<RenderQuality>()
+            .msaa_campaign = Msaa::Off;
+        app.update();
+        assert_eq!(app.world().get::<Msaa>(ui_camera), Some(&Msaa::Off));
+    }
 
     #[test]
     fn adapter_levels() {

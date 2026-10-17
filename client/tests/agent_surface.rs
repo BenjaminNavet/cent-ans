@@ -147,6 +147,17 @@ fn agent_run_detection() {
 }
 
 #[test]
+fn visible_window_keeps_the_real_window_and_swapchain() {
+    let cli = Cli::parse(&args(&["--visible-window", "--script", "/tmp/a.txt"])).unwrap();
+    assert!(cli.window_visible() && !cli.wants_offscreen());
+    assert!(cli.is_agent_run(), "still muted");
+    let shot = Cli::parse(&args(&["--visible-window", "--shot", "/tmp/a.png"])).unwrap();
+    assert!(!shot.wants_offscreen(), "--shot reads the swapchain");
+    let plain = Cli::parse(&args(&["--script", "/tmp/a.txt"])).unwrap();
+    assert!(!plain.window_visible());
+}
+
+#[test]
 fn click_if_is_a_non_fatal_click() {
     let commands = parse_script("click_if Confirmer\ntry_click Fermer").unwrap();
     assert_eq!(

@@ -291,6 +291,10 @@ fn spawn_camera(
     if let Some(target) = target {
         camera.insert(RenderTarget::Image(target.0.clone().into()));
     }
+    // Same MSAA as the UI camera from the first frame (see `settings::quality::apply_msaa`).
+    if let Some(quality) = &quality {
+        camera.insert(quality.msaa_campaign);
+    }
 }
 
 /// Re-reads the feel when « Réduire les animations » changes.
