@@ -186,7 +186,8 @@ fn open_close(
     for message in messages.read() {
         match message {
             OpenPanel::Chronicle => {
-                panel.open = true;
+                // Toggle: the launcher of the open panel closes it.
+                panel.open = !panel.open;
                 panel.dirty = true;
             }
             other if displaces(other, "chronicle") => panel.open = false,

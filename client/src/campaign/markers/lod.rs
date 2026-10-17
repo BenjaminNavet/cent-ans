@@ -49,6 +49,23 @@ pub fn end_margin(limit: f32, margin: f32, offset: f32) -> Range<f32> {
     (limit - margin + offset)..(limit + offset)
 }
 
+/// Offset step of the quantised fade range. Bevy never frees a `VisibilityRange` slot (one per
+/// distinct value ever seen, 65535 max), so per-frame continuous offsets used to overflow it and
+/// white-out the ground; a coarse step keeps the set of distinct values small and bounded.
+pub fn offset_step(margin: f32) -> f32 {
+    (margin / 8.0).max(2.0)
+}
+
+/// [`end_margin`] with the offset snapped to [`offset_step`] and clamped to +-`OFFSET_CLAMP`.
+pub fn quantised_end_margin(limit: f32, margin: f32, offset: f32) -> Range<f32> {
+    let step = offset_step(margin);
+    let snapped = (offset.clamp(-OFFSET_CLAMP, OFFSET_CLAMP) / step).round() * step;
+    end_margin(limit, margin, snapped)
+}
+
+/// Largest eye-to-rig distance difference taken into account by the fade ranges.
+const OFFSET_CLAMP: f32 = 4096.0;
+
 /// True when a kind casts shadows at rig distance `distance`.
 pub fn casts_shadow(distance: f32, model_shadow_distance: f32, kind_range: f32) -> bool {
     distance < model_shadow_distance.min(kind_range)
@@ -371,15 +388,13 @@ pub(super) fn fade_maquettes(
         let Ok((t, mut range)) = ranges.get_mut(entity) else {
             return;
         };
-        let offset = if legacy {
-            (eye - t.translation()).length() - rig
+        let raw = (eye - t.translation()).length() - rig;
+        let want = if legacy {
+            end_margin(limit, margin, raw)
         } else {
-            quantise_offset((eye - t.translation()).length() - rig)
+            quantised_end_margin(limit, margin, raw)
         };
-        let want = end_margin(limit, margin, offset);
-        if (range.end_margin.start - want.start).abs() > 0.25
-            || (range.end_margin.end - want.end).abs() > 0.25
-        {
+        if range.end_margin != want {
             range.end_margin = want;
         }
         fading += usize::from(rig > limit - margin && rig < limit);
@@ -487,6 +502,20 @@ pub(super) fn batch_stats(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn quantised_ranges_stay_few_over_a_long_session() {
+        // Regression (white ground): Bevy never frees VisibilityRange slots (65535 max).
+        let mut seen = std::collections::HashSet::new();
+        for limit in [300.0_f32, 600.0, 900.0, 1500.0, 2400.0, 4000.0] {
+            for i in 0..200_000 {
+                let offset = (i as f32) * 0.0137 - 1300.0;
+                let r = quantised_end_margin(limit, 60.0, offset);
+                seen.insert((r.start.to_bits(), r.end.to_bits()));
+            }
+        }
+        assert!(seen.len() < 5000, "{} distinct ranges", seen.len());
+    }
 
     #[test]
     fn alpha_is_one_below_the_band_and_zero_at_the_limit() {

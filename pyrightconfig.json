@@ -6,7 +6,6 @@
     "**/node_modules",
     ".claude",
     "core/target*",
-    "game/.godot",
     "tools/geo/raw",
     "data/map/pyramid",
     "export"

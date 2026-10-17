@@ -197,21 +197,3 @@ def test_build_fine_arrays(tmp_path):
     assert detail.mode == "RGBA" and detail.size == (64, 64)
     size = material_gen.ALBEDO_LAYER_SIZE
     assert albedo.mode == "RGB" and albedo.size == (size, size)
-
-
-def test_shader_tile_sizes_match_materials():
-    """GA1_TILE_SIZE of the figure shader mirrors tile_m of materials.yaml (same order)."""
-    import re
-
-    shader = (ROOT / "game" / "shaders" / "battle_soldier_skinned.gdshader").read_text(
-        encoding="utf-8"
-    )
-    match = re.search(r"GA1_TILE_SIZE\[(\d+)\]\s*=\s*float\[\]\(([^)]*)\)", shader)
-    assert match, "GA1_TILE_SIZE absent du shader"
-    sizes = [float(value) for value in match.group(2).split(",")]
-    entries = material_gen.load_materials()["materials"]
-    assert int(match.group(1)) == len(entries)
-    assert sizes == [float(entry["tile_m"]) for entry in entries]
-    for index, entry in enumerate(entries):
-        constant = f"GA1_TILE_{entry['id'].upper()} = {index};"
-        assert constant in shader, constant

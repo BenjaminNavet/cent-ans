@@ -102,8 +102,8 @@ Cadence des figurines liée à la vitesse : `army_figures.gd`, `data/fx/campaign
 
 ## Vérifier
 Tests headless `game/tests/as1_test.gd` … `as8d_test.gd`, `an1b_clips_test.gd`, `smoke.gd` ;
-schémas : `uv run --project tools pytest`. Godot fenêtré (planches, captures) uniquement via
-`tools/godot_bg.sh`.
+schémas : `uv run --project tools pytest`. Client Bevy (captures) uniquement via
+`client/run_bg.sh` (muet, hors écran).
 
 ## Ce qui manque encore
 Bombarde, mangonneau, porteurs de pierres, cheval attaché, pas du cheval : aucune vidéo libre

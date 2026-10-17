@@ -67,6 +67,8 @@ pub struct Prop {
     pub stretched: bool,
     pub fixed_size: bool,
     pub max_instances: usize,
+    /// Albedo multiplier of the model (`albedo_gain` uniform of `countryside.gdshader`).
+    pub albedo_gain: f32,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -330,6 +332,7 @@ pub fn parse(doc: &Value, data_dir: &Path, projection: &MapProjection) -> Config
                     .unwrap_or(false),
                 max_instances: num(p, "max_instances", render.max_instances_per_prop as f32)
                     as usize,
+                albedo_gain: num(p, "albedo_gain", 1.0),
             });
         }
     }
@@ -423,6 +426,10 @@ mod tests {
         );
         assert!(cfg.rules.iter().all(|r| r.total_weight > 0.0));
         assert_eq!(cfg.render.cell_px, 96.0);
+        // Windmills are authored with dark weathered textures: lifted so they do not read black.
+        for p in cfg.props.iter().filter(|p| p.id.starts_with("windmill_")) {
+            assert!(p.albedo_gain >= 2.0, "{} gain {}", p.id, p.albedo_gain);
+        }
         assert!((cfg.meters_per_px - 719.0).abs() < 50.0);
     }
 }

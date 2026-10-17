@@ -11,10 +11,10 @@ une saison, et des **batailles en temps réel avec pause** en 3D quand deux arm�
 - **Application macOS** : `tools/export_macos.sh` produit `export/Cent Ans.app`, autonome (données
   embarquées). Double-cliquez ; au premier lancement, macOS peut demander d'autoriser l'application dans
   Réglages Système → Confidentialité et sécurité (signature ad hoc).
-- **Depuis les sources** : `core/build.sh` (simulation Rust), `godot --headless --path game --import` une
-  fois, puis `godot --path game`.
-- Réglages, sauvegardes et progression du tutoriel sont rangés dans le dossier utilisateur de Godot
-  (`~/Library/Application Support/Godot/app_userdata/Cent Ans/`).
+- **Depuis les sources** : `tools/launch.sh` (ou le lanceur « Lancer Cent Ans » à la racine) compile le
+  client Bevy puis le lance.
+- Réglages, sauvegardes et progression du tutoriel sont rangés dans le dossier utilisateur du jeu
+  (macOS : `~/Library/Application Support/Cent Ans/`).
 
 ## 2. Menu de départ
 

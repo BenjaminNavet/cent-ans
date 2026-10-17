@@ -9,8 +9,6 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
-from cent_ans_tools.texture_factory.pack import write_texture_import
-
 #: Below this mean slope the derived normal is considered flat (silty rivers): no normal file.
 FLAT_NORMAL_SLOPE = 0.045
 
@@ -67,7 +65,6 @@ def build_tile_files(
         Image.open(tiles / f"{entry['id']}_albedo.png").convert("RGB").save(
             albedo_path, quality=pack_spec.get("albedo_quality", 82), subsampling=2
         )
-        write_texture_import(albedo_path, game_dir)
         total += albedo_path.stat().st_size
         record = {
             "id": entry["id"],
@@ -83,7 +80,6 @@ def build_tile_files(
             normal.save(
                 normal_path, quality=pack_spec.get("normal_quality", 90), subsampling=0
             )
-            write_texture_import(normal_path, game_dir, normal=True)
             total += normal_path.stat().st_size
             record["normal"] = res_dir + f"{entry['id']}_normal.jpg"
         records.append(record)

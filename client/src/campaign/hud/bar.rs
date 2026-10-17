@@ -346,6 +346,9 @@ pub fn spawn_top_bar(
         TopBarMark,
         HudWidget,
         Hovered::default(),
+        // Above the full-screen dim of the central panels (`UiTier::Panel`), below banners and
+        // modals: a launcher stays clickable while a window is open (click = switch / toggle).
+        GlobalZIndex(crate::ui::kit::style::UiTier::Panel.z() + 5),
         crate::ui::kit::widgets::panel_inset(theme),
     ))
     .insert(Node {
@@ -555,5 +558,17 @@ mod tests {
             launcher_tooltip("Techniques", "F4", "x"),
             "[b]Techniques[/b] (F4)\nx"
         );
+    }
+}
+
+#[cfg(test)]
+mod stacking_tests {
+    use crate::ui::kit::style::UiTier;
+
+    /// The bar sits above the full-screen dim of the central panels and below banners.
+    #[test]
+    fn top_bar_between_panels_and_banners() {
+        let z = UiTier::Panel.z() + 5;
+        assert!(z > UiTier::Panel.z() && z < UiTier::Banner.z());
     }
 }

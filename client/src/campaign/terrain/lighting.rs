@@ -5,6 +5,7 @@
 //! (feeds [`SkyDusk`]). Purely visual: it writes the terrain material, the `CampaignSun` light and the
 //! grade of the campaign camera, and never reads a rule.
 
+use bevy::light::GlobalAmbientLight;
 use bevy::prelude::*;
 use serde_json::Value;
 
@@ -18,6 +19,11 @@ use crate::sim::Sim;
 
 /// Illuminance of the `DirectionalLight` per unit of Godot light energy.
 const LUX_PER_ENERGY: f32 = 2_300.0;
+/// Bevy ambient brightness (cd/m2) of one unit of the terrain shader ambient: a sun of energy `e`
+/// lights a face with `e * LUX_PER_ENERGY / PI` and the shader sums `ambient + sun * n.l`, so the
+/// same unit of ambient is the same radiance (lot england: the default 80 cd/m2 left the glb
+/// models of the living map, windmills first, black on their shaded side).
+const AMBIENT_CD_PER_UNIT: f32 = LUX_PER_ENERGY / std::f32::consts::PI;
 /// Stand-in for the filmic tonemap of the Godot environment (which compresses the mid tones the
 /// ground is lit with): measured on matching views, the mean ground colour is 0.75 of the raw lit one.
 const TERRAIN_EXPOSURE: f32 = 0.78;
@@ -344,12 +350,31 @@ fn update_light(
     *light = with_dusk(&blended, state.dusk);
 }
 
+/// Ambient light of the glb scenes (the terrain shader has its own): direction-less sky colour.
+pub fn scene_ambient(ambient: Vec3) -> GlobalAmbientLight {
+    let level = ambient.max_element().max(1e-3);
+    let tint = ambient / level;
+    GlobalAmbientLight {
+        color: Color::linear_rgb(tint.x, tint.y, tint.z),
+        brightness: level * AMBIENT_CD_PER_UNIT,
+        ..default()
+    }
+}
+
 fn apply_light(
     light: Res<CampaignLight>,
     handle: Option<Res<TerrainMaterialHandle>>,
     mut materials: ResMut<Assets<TerrainMaterial>>,
     mut suns: Query<(&mut Transform, &mut DirectionalLight), With<CampaignSun>>,
+    mut ambient_light: ResMut<GlobalAmbientLight>,
 ) {
+    // Every frame, cheaply: a battle (or the council room) leaves its own ambient behind.
+    let scene = scene_ambient(light.ambient);
+    if (ambient_light.brightness - scene.brightness).abs() > 0.5
+        || ambient_light.color != scene.color
+    {
+        *ambient_light = scene;
+    }
     if !light.is_changed() {
         return;
     }
@@ -407,6 +432,16 @@ mod tests {
             serde_json::from_str(include_str!("../../../../data/fx/campaign_lighting.json"))
                 .unwrap();
         LightData::from_json(&atmosphere, &lighting)
+    }
+
+    #[test]
+    fn scene_ambient_matches_the_shader_ambient_unit() {
+        let a = scene_ambient(Vec3::new(0.2, 0.25, 0.4));
+        assert!((a.brightness - 0.4 * AMBIENT_CD_PER_UNIT).abs() < 1e-3);
+        assert!(
+            a.brightness > 80.0,
+            "above the Bevy default that blackened glb models"
+        );
     }
 
     #[test]

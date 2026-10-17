@@ -946,64 +946,12 @@ def store_layer(fine_dir, level, index, count, rgba):
         strip[index * size : (index + 1) * size] = rgba
         tiles.write_png(path, strip)
         fcntl.flock(lock, fcntl.LOCK_UN)
-    write_import(path, "2d_array_texture", count)
-
-
-def write_import(path, importer, slices=1):
-    """Godot ``.import`` settings (VRAM BC7, mipmaps, linear) for an FG3 map.
-
-    An existing file with the same settings is kept (Godot adds its uid and paths).
-    """
-    params = [
-        "compress/mode=2",
-        "compress/high_quality=true",
-        "compress/lossy_quality=0.7",
-        "compress/hdr_compression=1",
-        "compress/channel_pack=1",
-        "mipmaps/generate=true",
-        "mipmaps/limit=-1",
-    ]
-    if importer == "2d_array_texture":
-        params += ["slices/horizontal=1", f"slices/vertical={slices}"]
-    else:
-        params += [
-            "compress/normal_map=2",
-            "roughness/mode=0",
-            "process/fix_alpha_border=false",
-            "process/premult_alpha=false",
-            "detect_3d/compress_to=0",
-        ]
-    import_path = path + ".import"
-    uid = []
-    if os.path.exists(import_path):
-        with open(import_path) as f:
-            text = f.read()
-        if f'importer="{importer}"' in text and all(p in text for p in params):
-            return
-        # FK2: keep the resource uid when the settings change (e.g. more atlas layers).
-        uid = [line for line in text.splitlines() if line.startswith("uid=")][:1]
-    text = "\n".join(
-        [
-            "[remap]",
-            "",
-            f'importer="{importer}"',
-            *uid,
-            "",
-            "[params]",
-            "",
-            *params,
-            "",
-        ]
-    )
-    with open(import_path, "w") as f:
-        f.write(text)
 
 
 def make_detail(fine_dir):
     """Shared detail tiles (``battle_fine_tiles``)."""
     path = os.path.join(tex_dir(fine_dir), TEX_FILES["detail"])
     tiles.make_tiles(path)
-    write_import(path, "2d_array_texture", len(tiles.LAYERS))
 
 
 _HORSE_DONE = []
@@ -1027,7 +975,6 @@ def make_horse(fine_dir):
     occ = _pixels(ao) if ao is not None else np.ones(_pixels(col).shape, np.float32)
     rgba = tiles.horse_pack(_pixels(col), _pixels(nrm), occ, HORSE_SIZE)
     tiles.write_png(path, rgba)
-    write_import(path, "texture")
     print("FG3 horse", path)
     _HORSE_DONE.append(path)
     return True

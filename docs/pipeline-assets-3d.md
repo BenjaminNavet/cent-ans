@@ -1,5 +1,7 @@
 # Procédé de création des assets 3D (image → 3D)
 
+> Historique : client Godot retiré le 17/10/2026 (ADR 0366). Les chemins `game/scripts`, `game/scenes`, `game/shaders` et les scripts `godot_*` cités ici n'existent plus (voir l'historique git).
+
 Adopté par le joueur le 08/10 (ADR 0210, essais dans `docs/wip/i3d-local.md`). À suivre pour tout
 nouvel asset 3D généré : figurine, décor, accessoire, végétation. Gratuit d'abord ; le payant n'est
 qu'un dernier recours, avec une ligne dans `docs/budget.md`.
@@ -281,7 +283,7 @@ masque de teinte) → auto-pondération sur le rig `human` ou `cavalry` → LOD1
    remplacée (`BattleSkinned._merge_ga3`).
 5. **Lien avec l'unité** : champ `figure` de `data/unit_types/unit_<id>.json`
    (`^(infantry|archer|cavalry)_N$`) ; sans champ, repli sur la variante 0 de la famille.
-6. `godot --headless --path game --import`, puis `godot --headless --path game --script res://tests/smoke.gd`.
+6. `CENT_ANS_MUTE=1 client/tests/smoke.sh` (le client Bevy lit les glb directement, pas d'import).
 
 Reproductibilité vérifiée le 2026-10-08 : `man_at_arms` (infantry_0) recuit dans un dossier
 temporaire, 6 s sur Blender 5.2.2 : `.mesh.bin` des trois LOD, albédo et entrée de manifeste

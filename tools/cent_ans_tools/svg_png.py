@@ -20,7 +20,7 @@ from pathlib import Path
 import resvg_py
 from PIL import Image
 
-from cent_ans_tools.ink_icons import INK_RGB, ensure_import_settings
+from cent_ans_tools.ink_icons import INK_RGB
 from cent_ans_tools.paths import REPO_DIR
 
 ICONS_DIR = REPO_DIR / "game" / "assets" / "icons"
@@ -78,7 +78,6 @@ def build(
     for icon_id, svg_name in todo.items():
         target = ink_dir / f"{icon_id}.png"
         render_ink(icons_dir / svg_name).save(target)
-        ensure_import_settings(target)
         table[icon_id] = target.name
         written.append(icon_id)
     payload["icons"] = dict(sorted(table.items()))

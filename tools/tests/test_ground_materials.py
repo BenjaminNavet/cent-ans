@@ -120,9 +120,6 @@ def test_pack_writes_arrays_imports_and_manifest(tmp_path: Path) -> None:
         assert albedo.size == (columns * 128, rows * 128)
     with Image.open(tmp_path / "tex" / gm.NORMAL_NAME) as normal:
         assert normal.size == (columns * 64, rows * 64)
-    imported = (tmp_path / "tex" / f"{gm.NORMAL_NAME}.import").read_text()
-    assert f"slices/horizontal={columns}" in imported
-    assert f"slices/vertical={rows}" in imported
     manifest = json.loads(manifest_path.read_text())
     assert_matches_schema(manifest_path, "ground_materials_pack.schema.json")
     assert [m["layer"] for m in manifest["layers"]] == list(range(count))

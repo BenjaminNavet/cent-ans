@@ -101,6 +101,14 @@ impl Prototypes {
         Lookup::Pending
     }
 
+    /// The model of `path` when it is loaded (never starts a load).
+    pub fn ready(&self, path: &str) -> Option<Arc<Proto>> {
+        match self.map.get(path) {
+            Some(State::Ready(p)) => Some(p.clone()),
+            _ => None,
+        }
+    }
+
     pub fn ready_count(&self) -> usize {
         self.map
             .values()

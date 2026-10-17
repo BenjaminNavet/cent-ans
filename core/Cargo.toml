@@ -6,7 +6,6 @@ members = [
     "crates/sim-battle",
     "crates/ai",
     "crates/game-api",
-    "crates/godot-bridge",
     "crates/vegetation",
     "crates/relief-lod",
     "crates/seed-bots",
@@ -50,19 +49,13 @@ incremental = false
 # Debug builds: dependencies (PNG decoding of 4096² rasters...) are optimised, hot crates too.
 # Lot M2: the data crate walks 4096² rasters (province ids, land mask) once
 # per process; optimise it too so that tests stay fast.
-# Hot simulation crates are optimised even in dev: the debug dylib loaded by
-# `godot --path game` was ~50x slower at end of turn than release (audit A5, T1).
+# Hot simulation crates are optimised even in dev: unoptimised, the end of turn is ~50x
+# slower than release (audit A5, T1).
 [profile.dev.package.sim-campaign]
 opt-level = 2
 [profile.dev.package.sim-battle]
 opt-level = 2
 [profile.dev.package.ai]
-opt-level = 2
-# PB3a : le pont Godot construit des Dictionary/Array et boucle sur les figurines chaque
-# image (get_units, get_soldier_buffers...) ; en dev sans opt-level explicite il hérite
-# du profil `dev` global (opt-level 0) car les crates du workspace ne sont pas couvertes
-# par `[profile.dev.package."*"]` (qui ne vise que les dépendances externes).
-[profile.dev.package.godot-bridge]
 opt-level = 2
 [profile.dev.package."*"]
 opt-level = 3

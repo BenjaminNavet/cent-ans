@@ -579,7 +579,6 @@ pub fn prepare(
 pub fn spawn_tab(
     commands: &mut Commands,
     theme: &UiTheme,
-    state: &FactionMapState,
     sheets: &StartSheets,
     pane: Entity,
     root: Entity,
@@ -596,7 +595,13 @@ pub fn spawn_tab(
             ChildOf(pane),
         ))
         .id();
-    let kingdom_row = filter_row(commands, theme, filters_row, "Royaume");
+    let kingdom_scroll = commands
+        .spawn((
+            crate::ui::kit::scroll_list(theme, "fm:kingdoms", 84.0),
+            ChildOf(filters_row),
+        ))
+        .id();
+    let kingdom_row = filter_row(commands, theme, kingdom_scroll, "Royaume");
     commands.spawn((
         toggle_button(theme, "fmk:", "Tous les royaumes", true),
         FilterButton {
@@ -629,71 +634,15 @@ pub fn spawn_tab(
     commands.spawn((
         typed(
             theme,
-            "Survolez une terre pour la fiche de son seigneur, cliquez pour le choisir.",
+            "Survolez une terre de la carte pour la fiche de son seigneur, cliquez pour la choisir.",
             UiType::Caption,
         ),
         ChildOf(filters_row),
     ));
-    let body = commands
-        .spawn((
-            Name::new("MapBody"),
-            Node {
-                flex_grow: 1.0,
-                min_height: Val::Px(0.0),
-                column_gap: Val::Px(10.0),
-                ..default()
-            },
-            ChildOf(pane),
-        ))
-        .id();
-    let aspect = state
-        .geometry
-        .as_ref()
-        .map_or(1.0, MapGeometry::aspect_ratio);
-    let map = commands
-        .spawn((
-            Name::new("FactionMap"),
-            MapNode,
-            RelativeCursorPosition::default(),
-            Node {
-                height: Val::Percent(100.0),
-                aspect_ratio: Some(aspect),
-                flex_shrink: 1.0,
-                min_width: Val::Px(0.0),
-                ..default()
-            },
-            ImageNode::new(state.image.clone()),
-            ChildOf(body),
-        ))
-        .id();
-    if let Some(geometry) = &state.geometry {
-        for (id, at) in &geometry.banners {
-            commands.spawn((
-                Name::new(format!("banner:{id}")),
-                BannerButton(id.clone()),
-                WidgetButton,
-                Hovered::default(),
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Percent(at.x * 100.0),
-                    top: Val::Percent(at.y * 100.0),
-                    width: Val::Px(BANNER_RADIUS * 2.0),
-                    height: Val::Px(BANNER_RADIUS * 2.0),
-                    margin: UiRect::all(Val::Px(-BANNER_RADIUS)),
-                    border: UiRect::all(Val::Px(2.0)),
-                    border_radius: BorderRadius::MAX,
-                    ..default()
-                },
-                BackgroundColor(style::FE_VELLUM),
-                BorderColor::all(style::FE_GOLD),
-                ChildOf(map),
-            ));
-        }
-    }
     let scroll = commands
         .spawn((
-            crate::ui::kit::scroll_list(theme, "fm:list", 500.0),
-            ChildOf(body),
+            crate::ui::kit::scroll_list(theme, "fm:list", 200.0),
+            ChildOf(pane),
         ))
         .id();
     commands
@@ -701,7 +650,7 @@ pub fn spawn_tab(
         .entry::<Node>()
         .and_modify(|mut node| {
             node.flex_grow = 1.0;
-            node.min_width = Val::Px(120.0);
+            node.min_height = Val::Px(0.0);
         });
     commands.spawn((
         Name::new("FactionList"),
@@ -737,6 +686,104 @@ pub fn spawn_tab(
         ))
         .id();
     commands.spawn((HoverCardBody, Node::default(), ChildOf(card)));
+}
+
+/// Marks the gold ring drawn on the map around the chosen faction.
+#[derive(Component)]
+pub struct MapRing;
+
+/// Spawns the always-visible Europe map (and its banners and selection ring) under `parent`.
+pub fn spawn_map(commands: &mut Commands, state: &FactionMapState, parent: Entity) {
+    let aspect = state
+        .geometry
+        .as_ref()
+        .map_or(1.0, MapGeometry::aspect_ratio);
+    let map = commands
+        .spawn((
+            Name::new("FactionMap"),
+            MapNode,
+            RelativeCursorPosition::default(),
+            Node {
+                width: Val::Percent(100.0),
+                aspect_ratio: Some(aspect),
+                max_height: Val::Percent(100.0),
+                flex_shrink: 1.0,
+                min_width: Val::Px(0.0),
+                ..default()
+            },
+            ImageNode::new(state.image.clone()),
+            ChildOf(parent),
+        ))
+        .id();
+    if let Some(geometry) = &state.geometry {
+        for (id, at) in &geometry.banners {
+            commands.spawn((
+                Name::new(format!("banner:{id}")),
+                BannerButton(id.clone()),
+                WidgetButton,
+                Hovered::default(),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Percent(at.x * 100.0),
+                    top: Val::Percent(at.y * 100.0),
+                    width: Val::Px(BANNER_RADIUS * 2.0),
+                    height: Val::Px(BANNER_RADIUS * 2.0),
+                    margin: UiRect::all(Val::Px(-BANNER_RADIUS)),
+                    border: UiRect::all(Val::Px(2.0)),
+                    border_radius: BorderRadius::MAX,
+                    ..default()
+                },
+                BackgroundColor(style::FE_VELLUM),
+                BorderColor::all(style::FE_GOLD),
+                ChildOf(map),
+            ));
+        }
+    }
+    commands.spawn((
+        Name::new("MapRing"),
+        MapRing,
+        Node {
+            position_type: PositionType::Absolute,
+            width: Val::Px(RING_SIZE),
+            height: Val::Px(RING_SIZE),
+            margin: UiRect::all(Val::Px(-RING_SIZE / 2.0)),
+            border: UiRect::all(Val::Px(3.0)),
+            border_radius: BorderRadius::MAX,
+            ..default()
+        },
+        BorderColor::all(style::FE_GOLD),
+        Visibility::Hidden,
+        ChildOf(map),
+    ));
+}
+
+const RING_SIZE: f32 = 56.0;
+
+/// Frames the chosen faction on the map with a gold ring at its centre.
+pub fn frame_choice(
+    state: Res<FactionMapState>,
+    choice: Res<FactionChoice>,
+    mut rings: Query<(&mut Node, &mut Visibility), With<MapRing>>,
+) {
+    let Ok((mut node, mut visibility)) = rings.single_mut() else {
+        return;
+    };
+    let at = state.geometry.as_ref().and_then(|g| {
+        g.center_of(&choice.faction).or_else(|| {
+            g.banners
+                .iter()
+                .find(|(id, _)| *id == choice.faction)
+                .map(|(_, at)| Vec2::new(at.x, at.y))
+        })
+    });
+    match at {
+        Some(at) => {
+            node.left = Val::Percent(at.x * 100.0);
+            node.top = Val::Percent(at.y * 100.0);
+            *visibility = Visibility::Visible;
+        }
+        None => *visibility = Visibility::Hidden,
+    }
 }
 
 fn filter_row(commands: &mut Commands, theme: &UiTheme, parent: Entity, label: &str) -> Entity {
@@ -1008,6 +1055,60 @@ pub fn hover_card(
     }
 }
 
+/// What is really on screen for the map: node size, visibility, active tab, image content.
+fn probe_map(world: &World, state: &FactionMapState) -> Value {
+    let nodes = QueryState::<(
+        &MapNode,
+        &bevy::ui::ComputedNode,
+        &InheritedVisibility,
+        Option<&ImageNode>,
+    )>::try_new(world);
+    let node = nodes.as_ref().and_then(|q| q.iter_manual(world).next());
+    let panes = QueryState::<(&crate::ui::kit::widgets::TabPane, &Node)>::try_new(world);
+    let active: Vec<String> = panes
+        .as_ref()
+        .map(|q| {
+            q.iter_manual(world)
+                .filter(|(_, n)| n.display != Display::None)
+                .map(|(p, _)| p.name.clone())
+                .collect()
+        })
+        .unwrap_or_default();
+    let image = world
+        .resource::<Assets<Image>>()
+        .get(&state.image)
+        .map(|img| {
+            let data = img.data.as_deref().unwrap_or(&[]);
+            let non_sea = data
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .filter(|p| p[..3] != SEA[..3])
+                .count();
+            json!({ "bytes": data.len(), "non_sea_pixels": non_sea })
+        });
+    json!({
+        "node_exists": node.is_some(),
+        "node_size": node.map(|(_, c, _, _)| [c.size().x, c.size().y]),
+        "inherited_visible": node.map(|(_, _, v, _)| v.get()),
+        "image_node_handle_matches": node.and_then(|(_, _, _, i)| i).map(|i| i.image == state.image),
+        "active_panes": active,
+        "image": image,
+        "ring": ring_probe(world),
+        "chosen_painted": state.painted.as_ref().map(|k| k.2.clone()),
+    })
+}
+
+fn ring_probe(world: &World) -> Value {
+    let q = QueryState::<(&Node, &Visibility), With<MapRing>>::try_new(world);
+    let item = q.as_ref().and_then(|q| q.iter_manual(world).next());
+    json!(item.map(|(n, v)| json!({
+        "visible": *v != Visibility::Hidden,
+        "left": format!("{:?}", n.left),
+        "top": format!("{:?}", n.top),
+    })))
+}
+
 /// Section `menu.faction_map`.
 pub fn dump(world: &World) -> Value {
     let (Some(state), Some(sheets)) = (
@@ -1030,9 +1131,11 @@ pub fn dump(world: &World) -> Value {
         .take(6)
         .map(|(name, ids)| json!({ "kingdom": name, "factions": ids.len() }))
         .collect();
+    let probe = probe_map(world, state);
     json!({
         "loaded": state.geometry.is_some(),
         "screen_open": in_screen,
+        "map": probe,
         "size": state.geometry.as_ref().map(|g| [g.width, g.height]),
         "provinces": state.geometry.as_ref().map(|g| g.slots.len()),
         "land_pixels": state.geometry.as_ref().map(|g| g.grid.iter().filter(|s| **s > 0).count()),
@@ -1091,6 +1194,44 @@ mod tests {
                 [x, y + side],
             ]],
         }
+    }
+
+    #[test]
+    fn the_ring_frames_the_chosen_faction() {
+        let sheets = vec![sheet("a", "x", "kingdom", &["p1"])];
+        let features = vec![square("p1", 1, 0.0, 0.0, 100.0)];
+        let geometry = MapGeometry::build(&features, &sheets, &[], 100);
+        let mut app = App::new();
+        app.insert_resource(FactionMapState {
+            geometry: Some(geometry),
+            image: Handle::default(),
+            filters: Filters::default(),
+            hovered: String::new(),
+            painted: None,
+            repaints: 0,
+            clicks: 0,
+            listed: None,
+        });
+        app.insert_resource(FactionChoice {
+            faction: "a".to_owned(),
+            difficulty: "normal".to_owned(),
+        });
+        let ring = app
+            .world_mut()
+            .spawn((MapRing, Node::default(), Visibility::Hidden))
+            .id();
+        app.add_systems(Update, frame_choice);
+        app.update();
+        assert_eq!(
+            app.world().get::<Visibility>(ring),
+            Some(&Visibility::Visible)
+        );
+        app.world_mut().resource_mut::<FactionChoice>().faction = "zz".to_owned();
+        app.update();
+        assert_eq!(
+            app.world().get::<Visibility>(ring),
+            Some(&Visibility::Hidden)
+        );
     }
 
     #[test]

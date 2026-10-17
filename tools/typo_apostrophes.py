@@ -3,8 +3,7 @@
 Usage : `uv run --project tools python tools/typo_apostrophes.py [--check]`.
 - JSON de `data/` : seules les valeurs de clés d'affichage (`INCLUDED_KEYS`) sont touchées, jamais
   les identifiants, alias, sources, blasons, invites de génération ni la voix (clé de cache audio).
-- GDScript de `game/scripts` et `game/tests` : seules les apostrophes entre deux lettres à
-  l'intérieur d'un littéral entre guillemets doubles ; les commentaires et le code sont intacts.
+- Le client Bevy (`client/src`) n'est pas scanné : ses textes viennent de `data/` (ADR 0366).
 `--check` : n'écrit rien, sort avec le code 1 s'il reste des apostrophes droites à convertir.
 """
 
@@ -47,7 +46,6 @@ EXCLUDED_DIRS = {
     "landmarks",
 }
 WORD_APOSTROPHE = re.compile(r"(?<=\w)'(?=[\w\[])")
-GD_STRING = re.compile(r'"(?:[^"\\\n]|\\.)*"')
 
 
 def _collect(node, key: str, found: set[str]) -> None:
@@ -87,32 +85,6 @@ def convert_json_file(path: Path, write: bool) -> int:
     return changed
 
 
-def convert_gd_file(path: Path, write: bool) -> int:
-    """Convertit les littéraux de texte d'un GDScript ; renvoie le nombre de remplacements."""
-    changed = 0
-    out = []
-    for line in path.read_text(encoding="utf-8").split("\n"):
-        stripped = line.lstrip()
-        if stripped.startswith("#") or "apostrophe droite" in line:
-            out.append(line)
-            continue
-
-        def fix(match: re.Match) -> str:
-            nonlocal changed
-            literal = match.group(0)
-            if "res://" in literal or "user://" in literal:
-                return literal
-            fixed = WORD_APOSTROPHE.sub("’", literal)
-            if fixed != literal:
-                changed += 1
-            return fixed
-
-        out.append(GD_STRING.sub(fix, line))
-    if changed and write:
-        path.write_text("\n".join(out), encoding="utf-8")
-    return changed
-
-
 def main() -> int:
     """Point d'entrée en ligne de commande."""
     write = "--check" not in sys.argv
@@ -122,9 +94,6 @@ def main() -> int:
         if relative.parts[0] in EXCLUDED_DIRS or relative.name == "codex_bundle.json":
             continue
         total += convert_json_file(path, write)
-    for folder in ("game/scripts", "game/tests"):
-        for path in sorted((ROOT / folder).rglob("*.gd")):
-            total += convert_gd_file(path, write)
     print(f"{total} apostrophe(s) {'à convertir' if not write else 'converties'}")
     return 1 if (total and not write) else 0
 

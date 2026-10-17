@@ -1,7 +1,8 @@
 """Self-update of ``tools/launch.sh`` on the ``stable`` branch (ADR 0159).
 
 Each test builds a tiny origin repository and a player clone holding the real launcher, a fake
-core library and a fake Godot, then runs the launcher as a double-click would.
+Bevy client binary, then runs the launcher as a double-click would (ADR 0366: Bevy is the only
+client).
 """
 
 import os
@@ -13,7 +14,7 @@ from pathlib import Path
 import pytest
 
 LAUNCHER = Path(__file__).resolve().parents[1] / "launch.sh"
-FAKE_GODOT = '#!/bin/sh\n[ "$1" = "--version" ] && echo 4.7.2.stable.fake\nexit 0\n'
+FAKE_CLIENT = "#!/bin/sh\nexit 0\n"
 
 pytestmark = pytest.mark.skipif(
     sys.platform == "win32" or shutil.which("git") is None,
@@ -55,15 +56,14 @@ def origin(tmp_path: Path) -> Path:
 
 
 def _clone(origin: Path, branch: str) -> Path:
-    """Player clone of ``origin`` on ``branch``, ready to launch without Rust nor Godot."""
+    """Player clone of ``origin`` on ``branch``, ready to launch without Rust."""
     clone = origin.parent / f"clone-{branch}"
     _git(origin.parent, "clone", "-q", "-b", branch, str(origin), str(clone))
-    # Untracked, as in a real clone: compiled core libraries and the import cache.
-    library_dir = clone / "game" / "bin"
-    library_dir.mkdir(parents=True)
-    for name in ("libcent_ans.debug.dylib", "libcent_ans.debug.so"):
-        (library_dir / name).write_text("")
-    (clone / "game" / ".godot").mkdir()
+    # Untracked, as in a real clone: the compiled client.
+    binary = clone / "client" / "target" / "release" / "cent-ans"
+    binary.parent.mkdir(parents=True)
+    binary.write_text(FAKE_CLIENT)
+    binary.chmod(0o755)
     return clone
 
 
@@ -80,21 +80,28 @@ def _launch(
     clone: Path,
     *arguments: str,
     extra_environment: dict[str, str] | None = None,
-    godot_script: str = FAKE_GODOT,
+    client_script: str = FAKE_CLIENT,
 ) -> subprocess.CompletedProcess:
-    """Runs the launcher of ``clone`` with a fake Godot, outside any CI opt-out."""
-    godot = clone.parent / "fake-godot"
-    godot.write_text(godot_script)
-    godot.chmod(0o755)
+    """Runs the launcher of ``clone`` with a fake client, outside any CI opt-out."""
+    binary = clone / "client" / "target" / "release" / "cent-ans"
+    binary.write_text(client_script)
+    binary.chmod(0o755)
     environment = {
         name: value
         for name, value in os.environ.items()
-        if name not in ("CI", "CENT_ANS_NO_UPDATE")
+        if name not in ("CI", "CENT_ANS_NO_UPDATE", "CENT_ANS_RELIEF_DIR")
     }
-    environment["GODOT"] = str(godot)
+    environment["HOME"] = str(clone.parent / "home")
     environment.update(extra_environment or {})
     return subprocess.run(
-        ["bash", "tools/launch.sh", "--godot", "--no-build", "--no-relief", *arguments],
+        [
+            "bash",
+            "tools/launch.sh",
+            "--no-build",
+            "--no-relief",
+            "--no-models",
+            *arguments,
+        ],
         cwd=clone,
         env=environment,
         capture_output=True,
@@ -187,52 +194,90 @@ def test_unreachable_origin_keeps_the_installed_version(origin: Path) -> None:
 
 
 def test_arguments_survive_the_restart(origin: Path) -> None:
-    """Godot arguments given after ``--`` reach the game started after the update."""
+    """Client arguments given after ``--`` reach the game started after the update."""
     clone = _clone(origin, "stable")
     _publish(origin)
-    godot_log = clone.parent / "godot-arguments.log"
-    logging_godot = FAKE_GODOT.replace("exit 0", f'echo "$@" >> "{godot_log}"\nexit 0')
+    log = clone.parent / "client-arguments.log"
+    logging_client = f'#!/bin/sh\necho "$@" >> "{log}"\n'
 
-    result = _launch(clone, "--", "--headless", godot_script=logging_godot)
+    result = _launch(clone, "--", "--state", "MainMenu", client_script=logging_client)
 
     assert result.returncode == 0, result.stderr
     assert "Mise à jour installée" in result.stdout
-    assert godot_log.read_text().splitlines()[-1].endswith("--headless")
+    assert log.read_text().splitlines()[-1].endswith("--state MainMenu")
 
 
-def test_default_engine_is_the_bevy_client(origin: Path) -> None:
-    """Without ``--godot`` the launcher starts client/target/release/cent-ans (ADR 0362)."""
+def test_client_receives_the_repository_root(origin: Path) -> None:
+    """The client is started with CENT_ANS_ROOT set to the clone (ADR 0362)."""
     clone = _clone(origin, "main")
-    binary = clone / "client" / "target" / "release" / "cent-ans"
-    binary.parent.mkdir(parents=True)
     log = clone.parent / "bevy.log"
-    binary.write_text(f'#!/bin/sh\necho "root=$CENT_ANS_ROOT args=$@" >> "{log}"\n')
-    binary.chmod(0o755)
-    environment = {
-        name: value for name, value in os.environ.items() if name not in ("CI",)
-    }
+    script = f'#!/bin/sh\necho "root=$CENT_ANS_ROOT args=$@" >> "{log}"\n'
 
-    result = subprocess.run(
-        [
-            "bash",
-            "tools/launch.sh",
-            "--no-build",
-            "--no-relief",
-            "--no-models",
-            "--",
-            "--state",
-            "MainMenu",
-        ],
+    result = _launch(clone, "--", "--state", "MainMenu", client_script=script)
+
+    assert result.returncode == 0, result.stderr
+    assert log.read_text().strip().endswith("args=--state MainMenu")
+    assert clone.name in log.read_text()
+
+
+def _relief_launch(clone: Path, store: Path) -> subprocess.CompletedProcess:
+    """Launcher run with the composed-relief check on and a given pyramid store."""
+    binary = clone / "client" / "target" / "release" / "cent-ans"
+    binary.write_text(FAKE_CLIENT)
+    binary.chmod(0o755)
+    environment = {name: value for name, value in os.environ.items() if name != "CI"}
+    environment["CENT_ANS_COMPOSED_PYRAMID"] = str(store)
+    return subprocess.run(
+        ["bash", "tools/launch.sh", "--no-build", "--no-models", "--no-update"],
         cwd=clone,
         env=environment,
         capture_output=True,
         text=True,
     )
 
+
+def test_composed_pyramid_store_is_linked_when_missing(origin: Path) -> None:
+    """No data/map/pyramid but a composed store: it is linked, never downloaded."""
+    clone = _clone(origin, "main")
+    (clone / "data" / "map").mkdir(parents=True)
+    store = clone.parent / "store"
+    store.mkdir()
+    (store / "relief_pyramid.json").write_text("{}")
+
+    result = _relief_launch(clone, store)
+
     assert result.returncode == 0, result.stderr
-    assert log.read_text().strip().endswith("args=--state MainMenu")
-    assert "root=" in log.read_text()
-    assert clone.name in log.read_text()
+    assert (clone / "data" / "map" / "pyramid" / "relief_pyramid.json").is_file()
+    assert (clone / "data" / "map" / "pyramid").is_symlink()
+
+
+def test_missing_composed_pyramid_prints_the_generation_command(origin: Path) -> None:
+    """Neither a pyramid nor a store: a clear message, the game still starts."""
+    clone = _clone(origin, "main")
+    (clone / "data" / "map").mkdir(parents=True)
+
+    result = _relief_launch(clone, clone.parent / "absent-store")
+
+    assert result.returncode == 0, result.stderr
+    assert "compose-relief-real" in result.stdout
+    assert "Lancement du jeu" in result.stdout
+
+
+def test_old_real_pyramid_directory_is_left_alone(origin: Path) -> None:
+    """A pyramid directory without manifest (old v3 package) is reported, never replaced."""
+    clone = _clone(origin, "main")
+    old = clone / "data" / "map" / "pyramid"
+    old.mkdir(parents=True)
+    (old / "package.json").write_text("{}")
+    store = clone.parent / "store"
+    store.mkdir()
+    (store / "relief_pyramid.json").write_text("{}")
+
+    result = _relief_launch(clone, store)
+
+    assert (old / "package.json").exists()
+    assert not old.is_symlink()
+    assert "pyramid_v3_reel" in result.stdout
 
 
 def test_dry_run_changes_nothing(origin: Path) -> None:

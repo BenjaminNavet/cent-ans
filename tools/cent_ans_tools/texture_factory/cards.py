@@ -20,8 +20,6 @@ from cent_ans_tools.texture_factory.color import LUMA, srgb_to_linear
 from cent_ans_tools.texture_factory.generate import _family_dir, load_manifest
 from cent_ans_tools.texture_factory.pack import (
     grid_shape,
-    import_file,
-    write_texture_import,
 )
 
 ALPHA_FLOOR = 24
@@ -155,10 +153,6 @@ def build_card_pack(
     texture_dir.mkdir(parents=True, exist_ok=True)
     albedo_path = texture_dir / pack_spec["albedo"]
     grid.save(albedo_path, quality=WEBP_QUALITY, method=4)
-    imported = Path(f"{albedo_path}.import")
-    slicing = f"slices/horizontal={columns}\nslices/vertical={rows}"
-    if not imported.exists() or slicing not in imported.read_text():
-        imported.write_text(import_file(columns, rows, albedo_path.name, res_dir))
     total = albedo_path.stat().st_size
     max_bytes = pack_spec.get("max_mb", 40) * 1_000_000 if not size else 10**10
     if total > max_bytes:
@@ -198,7 +192,6 @@ def _write_card_files(
         name = entry["id"].removeprefix(prefix)
         path = texture_dir / f"{name}.webp"
         card.save(path, quality=WEBP_QUALITY, method=4)
-        write_texture_import(path, repo_root / "game")
         total += path.stat().st_size
         layers.append(
             {

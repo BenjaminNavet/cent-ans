@@ -1,5 +1,7 @@
 # Serveurs MCP : Godot et Blender
 
+> Historique : le serveur MCP « godot » a été retiré avec le client Godot (17/10/2026, ADR 0366) ; seul Blender reste dans `.mcp.json`.
+
 Accès MCP (Model Context Protocol) de Claude Code à Godot 4.7 et Blender 5.2, configuré au niveau du dépôt via `.mcp.json` (racine). Aucun secret n'y figure ; Claude Code demande une confirmation à la première utilisation d'un serveur de projet.
 
 Installé et vérifié le 2026-09-23 (macOS arm64, Godot 4.7.2, Blender 5.2.2 LTS, Node 22, uv 0.7).

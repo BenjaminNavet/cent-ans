@@ -31,3 +31,11 @@ Rafales de spawn (descente seule, 3 paires) : plus gros pic après démarrage 4 
   hors de la descente, à étaler si on veut < 50 ms au chargement.
 - Vérifier sur machine calme : coût GPU (nouveau vs `fadeband`) et l'énigme ; deux captures de fondu non faites.
 - `decor.rs` (budget 120) et `scars` non touchés.
+
+## Fusion avec main (3012b27d4)
+
+main avait corrigé le même débordement de créneaux `VisibilityRange` par une quantification
+(`quantised_end_margin` : pas `offset_step`, bornage à 4096) et un test de régression. Fusion :
+la bande de fondu (ADR 0405) reste la logique principale ; dans la bande, la marge est calculée par
+`quantised_end_margin` (pas grossier + bornage de main). `CENT_ANS_PERF_OFF=fadeband` reprend l'ancien
+comportement (hors bande aussi, marge continue non quantifiée).

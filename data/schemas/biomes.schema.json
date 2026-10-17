@@ -351,6 +351,17 @@
         "oceanic_max_km": {
           "$ref": "#/$defs/km"
         },
+        "oceanic_land_boxes": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
         "atlantic_boxes": {
           "type": "array",
           "minItems": 1,

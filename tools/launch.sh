@@ -1,35 +1,28 @@
 #!/usr/bin/env bash
 # Starts Cent Ans from the sources on macOS, Linux and Windows (Git Bash) (ADR 0117, ADR 0362).
-# Default: the Bevy client (client/). `--godot` starts the old Godot client (transition).
+# The Bevy client (client/); the Godot client was removed (ADR 0366).
 #   0. fast-forwards the clone when it follows the `stable` branch (ADR 0159; never fatal),
-#   1. Bevy: checks cargo and, on Linux, the system libraries (alsa, udev, vulkan...), then
-#      `cargo build --release` in client/ (cargo decides what to recompile);
-#      Godot: rebuilds the Rust GDExtension when core/ changed (core/build.sh),
+#   1. checks cargo and, on Linux, the system libraries (alsa, udev, vulkan...), then
+#      `cargo build --release` in client/ (cargo decides what to recompile),
 #   1b. downloads the generated 3D models package when absent or older than the published one
 #      (ADR 0212; never fatal: maquettes procédurales de repli),
-#   2. Godot only: runs the headless import when game/ changed since the last import,
-#   3. downloads the fine relief cache when it is absent or older than the published package
-#      (ADR 0149; never fatal: without it the close zoom is only limited),
-#   4. launches the game.
+#   2. checks the composed relief pyramid (data/map/pyramid/relief_pyramid.json; links the usual
+#      store ~/dev/cent-ans-raw/compose/pyramid when present, else prints the generation command;
+#      never fatal: without it the close zoom is only limited),
+#   3. launches the game.
 # Called by the double-click launchers at the root of the repository ("Lancer Cent Ans.*").
-# Usage: tools/launch.sh [--godot] [--dry-run] [--no-update] [--no-build] [--import] [--no-relief]
+# Usage: tools/launch.sh [--dry-run] [--no-update] [--no-build] [--no-relief]
 #                        [--no-models] [-- <extra arguments of the client>]
-#   --godot      start the Godot client (GODOT=..., import, GDExtension) instead of the Bevy one
 #   --dry-run    print what would be done (tools found, missing libraries, commands), change nothing
 #   --no-update  skip the update check (also: CENT_ANS_NO_UPDATE=1)
-#   --no-build   skip the Rust build (the binary / library already built is used)
-#   --import     force the headless import (Godot only)
-#   --no-relief  skip the fine relief check (no download)
+#   --no-build   skip the Rust build (the binary already built is used)
+#   --no-relief  skip the composed relief check
 #   --no-models  skip the generated models check (no download)
-# Arguments after `--` go to the client (Bevy: --state, --faction, --seed...; Godot: engine arguments).
-# Godot: $GODOT if set, else `godot`/`godot4` on the PATH, else the usual install places.
+# Arguments after `--` go to the client (--state, --faction, --seed...).
 # Must stay compatible with the bash 3.2 shipped with macOS.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-GAME="game"
-STAMP="$GAME/.godot/cent_ans_import.stamp"
-GODOT_SERIES="4.7"
 # Branch followed by the players' clones; the CI moves it (.github/workflows/windows.yml).
 UPDATE_BRANCH="stable"
 CLIENT="client"
@@ -42,18 +35,14 @@ ORIGINAL_ARGS=(${1+"$@"})
 UPDATE=1
 [[ -n "${CENT_ANS_NO_UPDATE:-}" || -n "${CI:-}" ]] && UPDATE=0
 BUILD=1
-FORCE_IMPORT=0
-ENGINE="bevy"
 DRY_RUN=0
 RELIEF=1
 MODELS=1
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --godot) ENGINE="godot" ;;
         --dry-run) DRY_RUN=1 ;;
         --no-update) UPDATE=0 ;;
         --no-build) BUILD=0 ;;
-        --import) FORCE_IMPORT=1 ;;
         --no-relief) RELIEF=0 ;;
         --no-models) MODELS=0 ;;
         --)
@@ -61,7 +50,7 @@ while [[ $# -gt 0 ]]; do
             break
             ;;
         -h | --help)
-            sed -n '2,24p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+            sed -n '2,22p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
             exit 0
             ;;
         *)
@@ -182,25 +171,44 @@ if [[ $MODELS -eq 1 ]]; then
 fi
 }
 
-# The installed cache says which package it holds (pyramid/package.json). Only when it differs
-# from the published version does the Python tool decide (and download).
-fetch_relief() {
-if [[ $RELIEF -eq 1 ]]; then
-    RELIEF_WANTED="$(json_version data/map/relief_hosting.json)"
-    RELIEF_HAVE="$(json_version "${CENT_ANS_RELIEF_DIR:-data/map}/pyramid/package.json")"
-    if [[ -n "$RELIEF_WANTED" && "$RELIEF_HAVE" != "$RELIEF_WANTED" ]]; then
-        if command -v uv >/dev/null; then
-            say "Relief fin : vérification du paquet v$RELIEF_WANTED (téléchargement ≈ 5 Go s'il manque ; --no-relief pour passer)…"
-            uv run --project tools cent-ans geo relief-fetch --if-needed ||
-                say "Relief fin non mis à jour (zoom rapproché limité) ; nouvel essai au prochain lancement."
-        else
-            say "Relief fin absent ou ancien, et uv introuvable (https://docs.astral.sh/uv/) : zoom rapproché limité."
+# The Bevy client reads the COMPOSED relief pyramid (ADR 0355): <relief dir>/pyramid/relief_pyramid.json,
+# produced locally by `cent-ans geo compose-relief-real` and kept outside git (the real relief
+# package v3 of the Godot client is NOT used any more). If the pyramid is missing and the usual
+# store (~/dev/cent-ans-raw/compose/pyramid) exists, it is linked in place; otherwise the command
+# to generate it is printed. Never fatal: without it the close zoom falls back to procedural detail.
+COMPOSED_PYRAMID_STORE="${CENT_ANS_COMPOSED_PYRAMID:-$HOME/dev/cent-ans-raw/compose/pyramid}"
+
+relief_dir() { printf '%s\n' "${CENT_ANS_RELIEF_DIR:-data/map}"; }
+
+check_relief() {
+    [[ $RELIEF -eq 1 ]] || return 0
+    local dir manifest
+    dir="$(relief_dir)/pyramid"
+    manifest="$dir/relief_pyramid.json"
+    if [[ -f "$manifest" ]]; then
+        [[ $DRY_RUN -eq 1 ]] && say "(essai à blanc) relief composé : $manifest présent"
+        return 0
+    fi
+    if [[ -f "$COMPOSED_PYRAMID_STORE/relief_pyramid.json" && ! -e "$dir" ]]; then
+        if [[ $DRY_RUN -eq 1 ]]; then
+            say "(essai à blanc) relief composé : $dir serait lié à $COMPOSED_PYRAMID_STORE"
+            return 0
+        fi
+        rm -f "$dir" 2>/dev/null || true
+        if ln -s "$COMPOSED_PYRAMID_STORE" "$dir" 2>/dev/null; then
+            say "Relief composé : $dir lié à $COMPOSED_PYRAMID_STORE."
+            return 0
         fi
     fi
-fi
+    say "Relief composé absent ($manifest) : la carte rapprochée sera limitée."
+    if [[ -e "$dir" || -L "$dir" ]]; then
+        say "  $dir existe mais sans relief_pyramid.json (ancien paquet réel v3 ?) : renommez-le (mv $dir ${dir}_v3_reel) puis relancez."
+    fi
+    say "  Génération (hors git, plusieurs Go) : uv run --project tools cent-ans geo compose-relief-real"
+    say "  puis liez la sortie : ln -s <dossier produit> $dir (voir docs/wip/cc-carte-composee.md)."
 }
 
-# --- Bevy client (default, ADR 0362) ---------------------------------------------------------
+# --- Bevy client (ADR 0362) ---------------------------------------------------------
 
 # Linux only: the system libraries Bevy links or loads (alsa, udev, a Vulkan driver, windowing).
 # Prints what is missing with the install command; returns 1 when something is missing.
@@ -247,7 +255,7 @@ launch_bevy() {
         [[ "$PLATFORM" == "linux" ]] && { check_linux_libraries || true; }
         [[ $BUILD -eq 1 ]] && say "(essai à blanc) compilation : cargo build --release --manifest-path $CLIENT/Cargo.toml"
         [[ $MODELS -eq 1 ]] && say "(essai à blanc) modèles générés : paquet v$(json_version data/art/dn_models_hosting.json) voulu, v$(json_version "${CENT_ANS_MODELS_DIR:-game/assets/models}/dn/package.json") installé"
-        [[ $RELIEF -eq 1 ]] && say "(essai à blanc) relief fin : paquet v$(json_version data/map/relief_hosting.json) voulu, v$(json_version "${CENT_ANS_RELIEF_DIR:-data/map}/pyramid/package.json") installé"
+        check_relief
         say "(essai à blanc) lancement : CENT_ANS_ROOT=$ROOT $CLIENT_BINARY ${1+$*}"
         exit 0
     fi
@@ -261,7 +269,7 @@ launch_bevy() {
                 say "Compilation du client Bevy : première fois, 10 à 30 minutes selon la machine (Bevy est gros)…"
             fi
             cargo build --release --manifest-path "$CLIENT/Cargo.toml" ||
-                fail "La compilation du client Bevy a échoué (voir ci-dessus). À défaut : tools/launch.sh --godot"
+                fail "La compilation du client Bevy a échoué (voir ci-dessus)."
         elif [[ -x "$CLIENT_BINARY" ]]; then
             say "Rust (cargo) absent : le client déjà compilé $CLIENT_BINARY est utilisé tel quel."
         else
@@ -272,194 +280,11 @@ launch_bevy() {
     [[ -x "$CLIENT_BINARY" ]] || fail "Client Bevy absent : $CLIENT_BINARY (relancer sans --no-build)."
 
     fetch_models
-    fetch_relief
+    check_relief
 
     say "Lancement du jeu (Bevy)…"
     export CENT_ANS_ROOT="$ROOT"
     exec "$CLIENT_BINARY" ${1+"$@"}
 }
 
-if [[ "$ENGINE" == "bevy" ]]; then
-    launch_bevy ${1+"$@"}
-fi
-
-# --- Godot -----------------------------------------------------------------------------------
-
-# Prints the first existing executable among the arguments (globs already expanded).
-first_executable() {
-    local candidate
-    for candidate in "$@"; do
-        if [[ -f "$candidate" && -x "$candidate" ]]; then
-            printf '%s\n' "$candidate"
-            return 0
-        fi
-    done
-    return 1
-}
-
-find_godot() {
-    if [[ -n "${GODOT:-}" ]]; then
-        if [[ "$PLATFORM" == "windows" ]] && command -v cygpath >/dev/null; then
-            cygpath -u "$GODOT"
-        else
-            printf '%s\n' "$GODOT"
-        fi
-        return 0
-    fi
-    local name
-    for name in godot godot4; do
-        if command -v "$name" >/dev/null; then
-            command -v "$name"
-            return 0
-        fi
-    done
-    shopt -s nullglob
-    local found=1
-    case "$PLATFORM" in
-        macos)
-            first_executable \
-                /Applications/Godot.app/Contents/MacOS/Godot \
-                "$HOME"/Applications/Godot.app/Contents/MacOS/Godot \
-                /Applications/Godot_v"${GODOT_SERIES}"*.app/Contents/MacOS/Godot \
-                "$HOME"/Downloads/Godot.app/Contents/MacOS/Godot \
-                "$HOME"/Library/Application\ Support/Steam/steamapps/common/Godot\ Engine/Godot.app/Contents/MacOS/Godot &&
-                found=0
-            ;;
-        linux)
-            first_executable \
-                "$HOME"/.local/bin/godot \
-                "$HOME"/Applications/Godot_v"${GODOT_SERIES}"*_linux.* \
-                "$HOME"/Downloads/Godot_v"${GODOT_SERIES}"*_linux.* \
-                "$HOME"/Téléchargements/Godot_v"${GODOT_SERIES}"*_linux.* \
-                "$ROOT"/../Godot_v"${GODOT_SERIES}"*_linux.* \
-                /opt/godot/godot &&
-                found=0
-            ;;
-        windows)
-            # The console build (…_console.exe) is picked separately for the headless import.
-            local exe
-            for exe in \
-                "$ROOT"/../Godot_v"${GODOT_SERIES}"*_win64.exe \
-                "$HOME"/Desktop/Godot_v"${GODOT_SERIES}"*_win64.exe \
-                "$HOME"/Downloads/Godot_v"${GODOT_SERIES}"*_win64.exe \
-                "$HOME"/Downloads/Godot_v"${GODOT_SERIES}"*_win64/Godot_v"${GODOT_SERIES}"*_win64.exe \
-                /c/Godot/Godot_v"${GODOT_SERIES}"*_win64.exe \
-                /c/Program\ Files/Godot/Godot_v"${GODOT_SERIES}"*_win64.exe \
-                "$HOME"/scoop/apps/godot/current/godot.exe; do
-                if [[ -f "$exe" ]]; then
-                    printf '%s\n' "$exe"
-                    found=0
-                    break
-                fi
-            done
-            ;;
-    esac
-    shopt -u nullglob
-    return $found
-}
-
-GODOT_BIN="$(find_godot)" || fail "Godot $GODOT_SERIES introuvable. Installez-le (https://godotengine.org/download)
-ou indiquez son exécutable : GODOT=/chemin/vers/godot $0"
-
-# On Windows the GUI build prints nothing in a terminal: import with the console build.
-GODOT_CLI="$GODOT_BIN"
-if [[ "$PLATFORM" == "windows" && "$GODOT_BIN" == *.exe && -f "${GODOT_BIN%.exe}_console.exe" ]]; then
-    GODOT_CLI="${GODOT_BIN%.exe}_console.exe"
-fi
-
-GODOT_VERSION="$("$GODOT_CLI" --version 2>/dev/null | tail -n 1 | tr -d '\r')" ||
-    fail "Impossible d'exécuter Godot : $GODOT_BIN"
-say "Godot $GODOT_VERSION ($GODOT_BIN)"
-if [[ "$GODOT_VERSION" != "$GODOT_SERIES".* ]]; then
-    say "Attention : le projet attend Godot $GODOT_SERIES.x, le lancement peut échouer."
-fi
-if [[ $DRY_RUN -eq 1 ]]; then
-    say "(essai à blanc) client Godot : $GODOT_BIN, rien n'est modifié."
-    exit 0
-fi
-# Development checkout on main: the CI follows the Godot installed here (ADR 0186).
-if [[ -z "${CI:-}" && "$(git symbolic-ref --quiet --short HEAD 2>/dev/null)" == "main" ]]; then
-    bash "$ROOT/tools/sync_godot_version.sh" "$GODOT_VERSION" || true
-fi
-
-# --- 1. Rust GDExtension ---------------------------------------------------------------------
-
-case "$PLATFORM" in
-    macos) LIB="$GAME/bin/libcent_ans.debug.dylib" ;;
-    linux) LIB="$GAME/bin/libcent_ans.debug.so" ;;
-    windows) LIB="$GAME/bin/cent_ans.debug.dll" ;;
-esac
-
-if [[ $BUILD -eq 1 ]]; then
-    if command -v cargo >/dev/null || [[ -x "$HOME/.cargo/bin/cargo" ]]; then
-        export PATH="$HOME/.cargo/bin:$PATH"
-        say "Compilation du cœur Rust (seulement si core/ a changé)…"
-        core/build.sh || fail "La compilation du cœur Rust a échoué (voir ci-dessus)."
-    elif [[ -f "$LIB" ]]; then
-        say "Rust (cargo) absent : la bibliothèque déjà compilée $LIB est utilisée telle quelle."
-    else
-        fail "Rust (cargo) est nécessaire pour compiler le cœur du jeu : https://rustup.rs"
-    fi
-fi
-[[ -f "$LIB" ]] || fail "Bibliothèque du cœur absente : $LIB (relancer sans --no-build)."
-
-# --- 1b. Generated models (before the import: Godot must see the glb) --------------------
-
-fetch_models
-
-# --- 2. Headless import ----------------------------------------------------------------------
-
-# Fingerprint of game/: Godot version + list of files (catches additions and removals). The
-# compiled libraries are left out: a rebuild of the core needs no import.
-game_fingerprint() {
-    {
-        printf '%s\n' "$GODOT_VERSION"
-        find "$GAME" -path "$GAME/.godot" -prune -o -type f \
-            ! -name '*.dylib' ! -name '*.so' ! -name '*.dll' ! -name '*.pdb' -print |
-            LC_ALL=C sort
-    } | cksum
-}
-
-# A file modified (or checked out by git) since the last import.
-game_modified_since_stamp() {
-    [[ -n "$(find "$GAME" -path "$GAME/.godot" -prune -o -type f \
-        ! -name '*.dylib' ! -name '*.so' ! -name '*.dll' ! -name '*.pdb' \
-        -newer "$STAMP" -print 2>/dev/null | head -n 1)" ]]
-}
-
-NEED_IMPORT=0
-REASON=""
-if [[ $FORCE_IMPORT -eq 1 ]]; then
-    NEED_IMPORT=1 REASON="demandé (--import)"
-elif [[ ! -f "$GAME/.godot/extension_list.cfg" || ! -f "$STAMP" ]]; then
-    NEED_IMPORT=1 REASON="premier lancement, plusieurs minutes"
-elif [[ "$(cat "$STAMP")" != "$(game_fingerprint)" ]]; then
-    NEED_IMPORT=1 REASON="fichiers ajoutés ou supprimés, ou autre version de Godot"
-elif game_modified_since_stamp; then
-    NEED_IMPORT=1 REASON="fichiers du jeu modifiés"
-fi
-
-if [[ $NEED_IMPORT -eq 1 ]]; then
-    say "Import des ressources Godot ($REASON)…"
-    "$GODOT_CLI" --headless --path "$GAME" --import || fail "L'import Godot a échoué (voir ci-dessus)."
-    # QW-D : Godot importe les textures extraites des glb sans compression ; on impose VRAM + mipmaps
-    # (tools/cent_ans_tools/texture_import_rules.py) et on réimporte seulement si un .import change.
-    if command -v uv >/dev/null &&
-        [[ "$(uv run --project tools cent-ans art models-textures-fix 2>/dev/null)" != "0 "* ]]; then
-        say "Textures 3D : compression VRAM imposée, réimport…"
-        "$GODOT_CLI" --headless --path "$GAME" --import || fail "L'import Godot a échoué (voir ci-dessus)."
-    fi
-    # Fingerprint taken after the import: it writes the .import/.uid files next to the assets.
-    game_fingerprint >"$STAMP"
-else
-    say "Ressources déjà importées."
-fi
-
-# --- 3. Fine relief --------------------------------------------------------------------------
-
-fetch_relief
-
-# --- 4. Game ---------------------------------------------------------------------------------
-
-say "Lancement du jeu…"
-exec "$GODOT_BIN" --path "$GAME" ${1+"$@"}
+launch_bevy ${1+"$@"}

@@ -20,7 +20,7 @@ Architecture du dépôt : [`docs/architecture.md`](docs/architecture.md).
 
 ![Écran d'accueil : l'ost devant Paris au crépuscule](docs/img/readme/menu.jpg)
 
-*Captures en jeu. Pour les refaire : `godot --headless --path game --script res://tests/readme_gallery.gd`.*
+*Captures en jeu (client Godot d'origine, retiré le 17/10/2026, ADR 0366).*
 
 ## Fonctionnalités
 
@@ -44,15 +44,15 @@ Interface et textes en français.
 ## Architecture
 
 ```
-core/    Rust : toutes les règles du jeu (simulation de campagne, batailles, IA),
-         exposées à Godot par une GDExtension (godot-rust)
-game/    Godot 4.7 (GDScript) : rendu, interface, entrées — aucune règle de jeu
+core/    Rust : toutes les règles du jeu (simulation de campagne, batailles, IA)
+client/  Bevy 0.20 (Rust) : rendu, interface, entrées — aucune règle de jeu
+game/    assets du client (modèles, textures, icônes, audio…) et réglages .tres
 data/    données de jeu JSON validées par des schémas (data/schemas/), sourcées
 tools/   outils Python (uv) : géographie, assets, audio, scripts Blender
 docs/    conception, décisions d'architecture (ADR), manuel, historique du projet
 ```
 
-La simulation est déterministe et testable sans moteur ; Godot ne fait qu'afficher l'état et
+La simulation est déterministe et testable sans moteur ; le client ne fait qu'afficher l'état et
 transmettre les ordres. Les données (factions, personnages, unités, événements…) vivent dans `data/`,
 jamais dans le code.
 
@@ -61,7 +61,7 @@ jamais dans le code.
 Plateformes prises en charge : **macOS Apple Silicon** et **Windows 10/11 x86_64** (ADR 0087), ainsi que
 **Linux** (x86_64, arm64) depuis les sources (ADR 0117 ; pas encore d'export ni de CI).
 
-Prérequis : [Rust](https://rustup.rs) stable (Godot 4.7 seulement pour `--godot`, l'ancien client),
+Prérequis : [Rust](https://rustup.rs) stable,
 [uv](https://docs.astral.sh/uv/) (outils Python, facultatif pour jouer). Sous Windows, en plus :
 [Git pour Windows](https://git-scm.com/download/win) (Git Bash).
 
@@ -76,18 +76,15 @@ Prérequis : [Rust](https://rustup.rs) stable (Godot 4.7 seulement pour `--godot
 Le lanceur (`tools/launch.sh`) se met d'abord à jour si le clone suit la branche `stable`
 (voir « Mises à jour » ci-dessous), puis compile le client Bevy (`cargo build --release` dans
 `client/` ; cargo ne refait que ce qui a changé, le premier lancement dure 10 à 30 minutes),
-télécharge le relief fin et les modèles générés s'ils manquent ou sont anciens, puis lance le jeu
+vérifie le relief composé (`data/map/pyramid`, voir plus bas), télécharge les modèles générés s'ils manquent ou sont anciens, puis lance le jeu
 (ADR 0362). Sous Linux il vérifie d'abord les bibliothèques système de Bevy (alsa, udev, Vulkan)
 et affiche la commande d'installation de la distribution. Options : `--dry-run` (affiche le plan,
 ne change rien), `--no-update`, `--no-build`, `--no-relief`, `--no-models` et
-`-- <arguments du client>` (`--state`, `--faction`, `--seed`…). **`--godot`** lance l'ancien client
-Godot (cœur GDExtension, import headless ; Godot cherché dans `GODOT`, puis le PATH, puis aux
-emplacements habituels : `GODOT=/chemin/vers/godot tools/launch.sh --godot`) ; `--import` force son
-import.
+`-- <arguments du client>` (`--state`, `--faction`, `--seed`…). Le client Godot d'origine a été retiré (ADR 0366).
 
 **Mises à jour** (ADR 0159) : la branche `stable` avance toute seule sur chaque commit de `main`
 qui passe le test de démarrage en CI. Un clone placé sur `stable` se met à jour à chaque
-lancement, puis recompile et réimporte ce qui a changé :
+lancement, puis recompile ce qui a changé :
 
 ```sh
 git clone -b stable https://github.com/BenjaminNavet/cent-ans.git   # nouvelle installation
@@ -102,66 +99,42 @@ la version installée. Sur une autre branche (`main`, développement), rien n'es
 ```sh
 git clone https://github.com/BenjaminNavet/cent-ans.git
 cd cent-ans
-core/build.sh                               # compile la GDExtension et la copie dans game/bin/
-godot --headless --path game --import       # après chaque changement des ressources
-uv run --project tools cent-ans geo relief-fetch --if-needed   # relief fin (≈ 5 Go, facultatif)
-godot --path game                           # lancer le jeu
+cargo build --release --manifest-path client/Cargo.toml
+CENT_ANS_ROOT=$PWD client/target/release/cent-ans             # lancer le jeu
 ```
 
-Application autonome : `tools/export_macos.sh` produit `export/Cent Ans.app` (modèles d'export
-Godot 4.7 requis).
+**Relief rapproché** : le client lit la pyramide de relief composée `data/map/pyramid/relief_pyramid.json`
+(ADR 0355), hors dépôt. Le lanceur la lie depuis `~/dev/cent-ans-raw/compose/pyramid` si ce dossier existe ;
+sinon elle se génère avec `uv run --project tools cent-ans geo compose-relief-real` (plusieurs Go). Sans elle, le
+zoom rapproché est limité.
 
 ### Windows
 
-**Jouer** : décompresser `Cent Ans Windows.zip` et lancer `Cent Ans.exe`. Il faut une carte graphique
-compatible Vulkan ou Direct3D 12, mais aucune installation supplémentaire (la bibliothèque C de
-Microsoft est intégrée à `cent_ans.release.dll`). En cas de problème, `Cent Ans.console.exe` lance le jeu
-en gardant son journal affiché.
+**Lancer depuis les sources sous Windows** :
 
-**Lancer depuis les sources sous Windows** (le dépôt ne contient pas la DLL compilée) :
-
-1. Installer [Git pour Windows](https://git-scm.com/download/win) (fournit Git Bash),
-   [Rust](https://rustup.rs) (l'installateur propose les « Visual Studio Build Tools », les accepter)
-   et [Godot 4.7.2](https://godotengine.org/download/windows/) (version standard, pas .NET).
+1. Installer [Git pour Windows](https://git-scm.com/download/win) (fournit Git Bash) et
+   [Rust](https://rustup.rs) (l'installateur propose les « Visual Studio Build Tools », les accepter).
 2. Dans Git Bash :
 
    ```sh
    git clone -b stable https://github.com/BenjaminNavet/cent-ans.git   # se met à jour seul
    cd cent-ans
-   core/build-windows.sh                    # facultatif : le lanceur le fait (quelques minutes)
    ```
 
 3. Double-cliquer sur `Lancer Cent Ans.exe` (ou sur `Lancer Cent Ans.bat`, identique, si Windows
-   ou l'antivirus bloque l'exécutable non signé) : il compile `cent_ans.debug.dll`, importe les
-   ressources, puis lance le jeu. Si Godot n'est pas trouvé, placer son exécutable
-   (`Godot_v4.7.2-stable_win64.exe`) à côté du dossier `cent-ans`, ou définir la variable
-   `GODOT`. On peut aussi ouvrir Godot, **Importer** → `cent-ans/game/project.godot`, puis
-   **Lancer** (F5).
+   ou l'antivirus bloque l'exécutable non signé) : il compile le client Bevy puis lance le jeu.
+   Il faut une carte graphique compatible Vulkan ou Direct3D 12.
 
-Le cache du relief fin (`data/map/pyramid/`, ≈ 5 Go) n'est pas dans le dépôt : sans lui, le zoom
-rapproché est limité (avis affiché en jeu). Le lanceur le télécharge au premier lancement et à
-chaque nouvelle version (il faut [uv](https://docs.astral.sh/uv/) ; `tools/launch.sh --no-relief`
-pour s'en passer). À la main : `uv run --project tools cent-ans geo relief-fetch` (voir
-`docs/geo.md`).
-
-**Préparer la version Windows depuis un Mac** (compilation croisée avec
-[cargo-xwin](https://github.com/rust-cross/cargo-xwin), détails dans `docs/tools.md`) :
-
-```sh
-rustup target add x86_64-pc-windows-msvc
-brew install llvm lld && cargo install --locked cargo-xwin
-tools/export_windows.sh                     # export/windows/ et export/Cent Ans Windows.zip
-```
-
-Le workflow GitHub Actions `windows` compile la DLL et lance le test de fumée sur une vraie machine
-Windows (`gh workflow run windows.yml`).
+Le workflow GitHub Actions `windows` compile le client et lance ses tests sur macOS, Linux et Windows
+(`gh workflow run windows.yml`).
 
 ## Tests
 
 ```sh
-cd core && cargo test                                          # simulation Rust
+cd core && cargo test --workspace                              # simulation Rust
+cd client && cargo test --features dev                         # client Bevy
+CENT_ANS_MUTE=1 client/tests/smoke.sh                          # scénarios de fumée (muet, hors écran)
 uv run --project tools pytest                                  # outils Python
-godot --headless --path game --script res://tests/smoke.gd    # smoke test Godot
 ```
 
 ## Documentation

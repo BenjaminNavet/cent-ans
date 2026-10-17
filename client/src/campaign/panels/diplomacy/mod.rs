@@ -289,7 +289,7 @@ fn shortcut(
 }
 
 /// `OpenPanel`, F3 (testing) and Escape.
-fn open_close(
+pub(super) fn open_close(
     mut requests: MessageReader<OpenPanel>,
     keys: Res<ButtonInput<KeyCode>>,
     keymap: Res<KeyMap>,

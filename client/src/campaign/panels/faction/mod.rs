@@ -157,6 +157,11 @@ fn open_close(
 ) {
     for request in requests.read() {
         match request {
+            OpenPanel::Faction(id) if panel.open && panel.faction.as_deref() == Some(id) => {
+                // Toggle: the launcher of the open sheet closes it.
+                panel.open = false;
+                panel.dirty = true;
+            }
             OpenPanel::Faction(id) => {
                 if !panel.open || panel.faction.as_deref() != Some(id) {
                     panel.faction = Some(id.clone());

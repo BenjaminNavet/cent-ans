@@ -378,8 +378,8 @@ mod tests {
     fn reads_the_real_fog_tuning() {
         let text = include_str!("../../../../data/ui/campaign_map.json");
         let p = LookParams::from_map_json(text);
-        assert!((p.fog_a.x - 0.5).abs() < 1e-5);
-        assert!((p.fog_a.y - 0.8).abs() < 1e-5);
+        assert!((p.fog_a.x - 0.2).abs() < 1e-5);
+        assert!((p.fog_a.y - 0.95).abs() < 1e-5);
         assert!(p.fog_veil.x > 0.3, "veil colour parsed (linear)");
         assert!((p.fog_mist.w - 0.1).abs() < 1e-5);
     }

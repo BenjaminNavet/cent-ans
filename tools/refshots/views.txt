@@ -1,4 +1,4 @@
-# Vues de référence Godot / Bevy (lot refshots, tools/compare_views.sh).
+# Vues de référence Bevy (lot refshots, tools/compare_views.sh).
 # nom  genre  paramètres
 #   campaign <lon> <lat> <distance>   : carte de campagne, France 1337, graine 1337, caméra sur le point
 #   battle default                    : bataille personnalisée par défaut, caméra d'ouverture

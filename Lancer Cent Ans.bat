@@ -1,6 +1,6 @@
 @echo off
 rem Double-click launcher for Windows (ADR 0117): runs tools/launch.sh in Git Bash, which
-rem rebuilds and reimports what changed, then starts the game.
+rem rebuilds what changed, then starts the game.
 setlocal
 cd /d "%~dp0"
 set "GITBASH="

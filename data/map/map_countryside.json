@@ -135,35 +135,40 @@
       "max_mult": 36,
       "size_scale": 1.0,
       "fade_from": 70,
-      "max_distance": 120
+      "max_distance": 120,
+      "albedo_gain": 2.8
     },
     "windmill_field": {
       "model": "buildings/village_windmill_post_field",
       "max_mult": 36,
       "size_scale": 1.0,
       "fade_from": 70,
-      "max_distance": 120
+      "max_distance": 120,
+      "albedo_gain": 2.8
     },
     "windmill_polder": {
       "model": "buildings/env_windmill_dutch_polder",
       "max_mult": 30,
       "size_scale": 1.0,
       "fade_from": 70,
-      "max_distance": 120
+      "max_distance": 120,
+      "albedo_gain": 2.8
     },
     "windmill_tower": {
       "model": "buildings/env_windmill_tower_med",
       "max_mult": 30,
       "size_scale": 1.0,
       "fade_from": 70,
-      "max_distance": 120
+      "max_distance": 120,
+      "albedo_gain": 2.8
     },
     "windmill_italian": {
       "model": "buildings/econ_mill_windmill_post_italian",
       "max_mult": 36,
       "size_scale": 1.0,
       "fade_from": 70,
-      "max_distance": 120
+      "max_distance": 120,
+      "albedo_gain": 2.8
     },
     "saltpan_atlantic": {
       "model": "buildings/econ_saltpan_atlantic",

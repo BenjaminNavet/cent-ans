@@ -140,6 +140,8 @@ pub struct BackdropParams {
     pub root: Vec4,
     /// x: water (1), y: ground height (m), z: metres per unit, w: ageing.
     pub look: Vec4,
+    /// rgb: sky colour the water reflects (linear-ish tint of the decor look), w: unused.
+    pub sky: Vec4,
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Clone, Debug)]
@@ -216,8 +218,10 @@ fn build_backdrop(
     mut session: ResMut<BattleSession>,
     mut images: ResMut<Assets<Image>>,
     assets: Res<AssetServer>,
+    look: Option<Res<crate::battle::decor::look::DecorLook>>,
 ) {
     let sim = session.sim_mut();
+    let sky = crate::battle::scene::water::sky_tint(look.as_deref(), sim.weather());
     let Some(works) = sim.siege() else { return };
     let Some(id) = wanted_id(works.landmark.as_ref().map(|l| l.id.as_str())) else {
         return;
@@ -270,6 +274,7 @@ fn build_backdrop(
         ),
         root: Vec4::new(position.x, position.y, position.z, std::f32::consts::PI),
         look: Vec4::new(0.0, GROUND_HEIGHT_M, 1.0, AGING),
+        sky: sky.extend(0.0),
     };
     commands.insert_resource(BackdropState {
         id: id.clone(),

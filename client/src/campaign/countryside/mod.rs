@@ -238,6 +238,7 @@ impl Plugin for CampaignCountrysidePlugin {
                     layer::update_view,
                     layer::stream_cells,
                     layer::swap_lods,
+                    layer::tint_props,
                     layer::apply_view,
                 )
                     .chain()
@@ -389,9 +390,24 @@ fn dump_countryside(world: &World) -> (String, Value) {
             }
         }
     }
+    let mut frames = serde_json::Map::new();
+    if let Some(l) = loaded {
+        for (i, p) in l.config.props.iter().enumerate() {
+            let (Some(f), Some(m)) = (view.frames.get(i), measures.0.get(&i)) else {
+                continue;
+            };
+            frames.insert(
+                p.id.clone(),
+                json!({"mult": f.mult, "spread": f.spread, "fade": f.fade,
+                       "extent_m": m.extent_m, "length_x_m": m.length_x_m,
+                       "stretched": p.stretched, "max_mult": p.max_mult}),
+            );
+        }
+    }
     (
         "countryside".into(),
         json!({
+            "frames": frames,
             "data": data,
             "bridges": {
                 "crossings": bridges.crossings.len(),

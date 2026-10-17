@@ -1,15 +1,10 @@
 {
   "mcpServers": {
-    "godot": {
-      "command": "npx",
-      "args": ["-y", "@coding-solo/godot-mcp"],
-      "env": {
-        "GODOT_PATH": "/opt/homebrew/bin/godot"
-      }
-    },
     "blender": {
       "command": "uvx",
-      "args": ["mcp-for-blender"],
+      "args": [
+        "mcp-for-blender"
+      ],
       "env": {
         "BLENDER_HOST": "localhost",
         "BLENDER_PORT": "9876",
