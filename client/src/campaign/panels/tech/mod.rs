@@ -163,7 +163,7 @@ struct LinkView {
 
 // ---- systems ------------------------------------------------------------------------------
 
-fn open_close(
+pub(super) fn open_close(
     mut panel: ResMut<TechPanel>,
     mut messages: MessageReader<OpenPanel>,
     keys: Res<ButtonInput<KeyCode>>,
@@ -177,7 +177,8 @@ fn open_close(
     for message in messages.read() {
         match message {
             OpenPanel::Tech => {
-                panel.open = true;
+                // Toggle: the launcher of the open panel closes it.
+                panel.open = !panel.open;
                 panel.dirty = true;
             }
             other if displaces(other, "tech") => panel.open = false,
