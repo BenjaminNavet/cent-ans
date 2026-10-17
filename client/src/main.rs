@@ -50,7 +50,7 @@ fn main() -> ExitCode {
                     // Never take the player's focus when an agent launches the client.
                     focused: false,
                     // Agent runs never show a window (player rule: no focus).
-                    visible: !cli.is_agent_run(),
+                    visible: cli.window_visible(),
                     ..default()
                 }),
                 ..default()

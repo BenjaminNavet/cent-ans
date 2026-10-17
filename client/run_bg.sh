@@ -8,6 +8,10 @@
 # directory, since the app starts in /.
 #        --window (opt-in)  do not pass --offscreen (default: --offscreen, muted, LSUIElement app)
 # Env: CENT_ANS_MUTE=1 by default.
+#        --visible-window   development: real window shown, rendering to the swapchain even with
+#                           --script/--shot (shot = Bevy Screenshot::primary_window); the bundle then
+#                           drops LSBackgroundOnly so the window is really composited. The window
+#                           may appear on screen (player consent required); still muted.
 #      CENT_ANS_FEATURES=dev       cargo features (e.g. dev = Bevy dynamic linking)
 #      CENT_ANS_PROFILE=debug      cargo profile dir (default: release)
 #      Every CENT_ANS_* variable is forwarded to the app (`open --env`).
@@ -20,6 +24,8 @@ build=(cargo build)
 [[ -n "${CENT_ANS_FEATURES:-}" ]] && build+=(--features "$CENT_ANS_FEATURES")
 (cd "$here" && "${build[@]}") >&2 || exit 1
 
+visible=0
+for a in "$@"; do [[ $a == --visible-window ]] && visible=1; done
 app="$here/target/CentAnsBevy.app"
 mkdir -p "$app/Contents/MacOS"
 cp "$here/target/$profile/cent-ans" "$app/Contents/MacOS/cent-ans"
@@ -39,6 +45,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 </dict>
 </plist>
 PLIST
+# --visible-window: a background-only app never gets a composited window (blank capture).
+(( visible )) && /usr/bin/plutil -remove LSBackgroundOnly "$app/Contents/Info.plist" >/dev/null 2>&1
 codesign --force --sign - "$app" >/dev/null 2>&1 || true
 
 # Player rule: no focus, no sound. Muted and offscreen by default; `--window` opts out of
@@ -49,7 +57,8 @@ args=()
 tmp_script=""
 while (( $# )); do
 	case "$1" in
-	--window)
+	--window | --visible-window)
+		[[ $1 == --visible-window ]] && args+=(--visible-window)
 		offscreen=0
 		shift
 		;;

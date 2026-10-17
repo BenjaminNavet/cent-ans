@@ -66,6 +66,11 @@ pub struct Cli {
     pub script: Option<PathBuf>,
     /// `--offscreen`: render to an image (implied by `--shot`).
     pub offscreen: bool,
+    /// `--visible-window`: development option, keeps the real window shown and rendering to the
+    /// swapchain even for `--script` / `--shot` / `--dump-state` (`shot` then reads the window
+    /// surface). Reproduces fullscreen / Retina-only defects; still muted, never for agent runs
+    /// that must not take focus.
+    pub visible_window: bool,
     /// `--bench-map`: scripted camera path over the campaign, frame-time report.
     pub bench: Option<BenchConfig>,
 }
@@ -82,6 +87,7 @@ impl Default for Cli {
             exit_after: None,
             script: None,
             offscreen: false,
+            visible_window: false,
             bench: None,
         }
     }
@@ -130,6 +136,7 @@ impl Cli {
                 }
                 "--script" => cli.script = Some(absolute(&value()?)),
                 "--offscreen" => cli.offscreen = true,
+                "--visible-window" => cli.visible_window = true,
                 "--bench-map" => {
                     cli.bench.get_or_insert_with(BenchConfig::default);
                 }
@@ -195,6 +202,11 @@ impl Cli {
 
     /// Whether the main camera renders to an image rather than the window.
     pub fn wants_offscreen(&self) -> bool {
-        self.offscreen || self.shot.is_some()
+        !self.visible_window && (self.offscreen || self.shot.is_some())
+    }
+
+    /// Whether the window is shown: normal play, or an agent run with `--visible-window`.
+    pub fn window_visible(&self) -> bool {
+        self.visible_window || !self.is_agent_run()
     }
 }
