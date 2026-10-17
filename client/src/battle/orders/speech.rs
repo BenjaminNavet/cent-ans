@@ -298,6 +298,17 @@ fn voice_cast(faction: &str, general_id: &str) -> bool {
     !crate::audio::speech::speech_voice(&casting, faction, general_id).is_empty()
 }
 
+/// Name above a speech: the player's own general speaks unmarked, the opponent's is tagged so
+/// that a speech signed by the enemy king over the player's own deployment is not mistaken for
+/// his general's (playtest 17/10).
+fn speaker_label(speaker: &str, own: bool) -> String {
+    if own {
+        speaker.to_owned()
+    } else {
+        format!("{speaker} (ennemi)")
+    }
+}
+
 /// Composes and opens the speech of `side`.
 fn open(
     session: &mut BattleSession,
@@ -307,6 +318,7 @@ fn open(
     deploying: bool,
 ) -> bool {
     let seed = session.seed;
+    let session_player = session.player;
     let sim = session.sim_mut();
     let own = sim.strength(side) as f32;
     let theirs = (sim.strength(side.other()) as f32).max(1.0);
@@ -316,7 +328,7 @@ fn open(
         .general
         .as_ref()
         .map(|g| (g.character.as_str(), g.name.as_str()));
-    let Some(speech) = compose(
+    let Some(mut speech) = compose(
         &read_data("speeches/battle_speeches.json"),
         &read_data("battle_orders/order_war_cry.json"),
         &side_setup.faction,
@@ -336,6 +348,7 @@ fn open(
     if speech.lines.is_empty() {
         return false;
     }
+    speech.speaker = speaker_label(&speech.speaker, Some(side) == session_player);
     // Camera path: the centres of the regiments, along the front.
     let mut points: Vec<Vec3> = Vec::new();
     let mut facing = Vec2::ZERO;
@@ -789,5 +802,11 @@ mod tests {
         assert_eq!(point_at(&path, 0.5), Vec3::new(10.0, 0.0, 0.0));
         assert_eq!(point_at(&path, 1.0), Vec3::new(10.0, 0.0, 20.0));
         assert_eq!(point_at(&path[..1], 0.7), Vec3::ZERO);
+    }
+
+    #[test]
+    fn the_enemy_general_is_tagged() {
+        assert_eq!(speaker_label("Édouard III", true), "Édouard III");
+        assert_eq!(speaker_label("Édouard III", false), "Édouard III (ennemi)");
     }
 }

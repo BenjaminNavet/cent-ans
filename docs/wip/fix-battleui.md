@@ -11,5 +11,11 @@ Branche `fix/battleui`. État : en cours.
 - 6. « côte ouest » : cause = `coastal` de la province (Île-de-France a l'estuaire de la Somme) ; core `battle_request.rs` : un champ de bataille n'est côtier que près d'un port.
 - 7. Aide F1 au-dessus du didacticiel et défilante ; icônes de repli pour « Unité ralliée » / « La place est menacée » ; « Nuit dans » sans retour à la ligne.
 
-## Reste
-Voir fin de fichier (mis à jour au fil de l'eau).
+- 6 (suite). « ÉDOUARD III » au siège de Paris : non reproduit comme erreur d'orateur. Le discours du joueur vient bien de son général (« LE CAPITAINE » dans la démo, camp français) ; la signature d'Édouard III est le discours adverse (étape `Enemy`, vérifié par dumps `battle_speech`). Il est maintenant marqué « (ennemi) » (`speaker_label`).
+- 7 (suite). Cartes du bilan : l'illustration existait mais était écrasée dans la carte portrait ; recadrée comme les cartes du HUD.
+- Test core : `an_inland_field_battle_has_no_coast`.
+
+## Reste / hors lot
+- Siège / Île-de-France dans les panneaux de campagne (`campaign/panels/siege/view.rs:153`, `Siège de {settlement}`) : hors lot, élision à voir si un nom de colonie commence par une voyelle (utiliser `fr::de_place`).
+- Bulle du conseiller par-dessus les modales : lot `overlays`.
+- Mode « Regarder » : titre neutre couvert par test unitaire ; pas rejoué en jeu (15 min de simulation).

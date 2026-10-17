@@ -705,6 +705,22 @@ fn allied_armies_in_the_province_join_the_battle() {
     );
 }
 
+/// Île-de-France is flagged coastal (Somme estuary), but a field battle at Paris must not put the
+/// sea on a flank: only a battle near a port of a coastal province is a coastal field.
+#[test]
+fn an_inland_field_battle_has_no_coast() {
+    let data = game_data();
+    let mut state = quiet_france(data, 32);
+    let lead = first_army_of(&state, "fac_france");
+    let enemy = first_army_of(&state, "fac_england");
+    let index = state.debug_stage_battle(&lead, &enemy).unwrap();
+    let setup = state.battle_setup(data, index).unwrap();
+    assert_eq!(setup.province, "prov_ile_de_france");
+    let province = data_model::ProvinceId::new(&setup.province).unwrap();
+    assert!(data.provinces[&province].coastal);
+    assert!(!setup.coastal, "Paris is inland");
+}
+
 #[test]
 fn a_3d_battle_result_spreads_losses_over_the_coalition() {
     use sim_battle::{BattleOutcome, SideId, SideResult};

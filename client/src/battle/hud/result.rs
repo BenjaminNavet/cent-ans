@@ -440,10 +440,15 @@ fn roster_card(
         ))
         .id();
     if illustration_exists(&row.unit_type) {
+        // The 16:9 picture at the card's height, centred and cropped (as the cards of the HUD),
+        // not squeezed into the portrait card.
+        let art_width = CARD_H * 16.0 / 9.0;
         commands.spawn((
             Node {
                 position_type: PositionType::Absolute,
-                width: Val::Percent(100.0),
+                left: Val::Px((CARD_W - art_width) * 0.5),
+                top: Val::Px(0.0),
+                width: Val::Px(art_width),
                 height: Val::Percent(100.0),
                 ..default()
             },
@@ -1139,6 +1144,50 @@ mod tests {
             formation_key: "line".into(),
             reform_progress: None,
         }
+    }
+
+    fn rout_outcome(winner: SideId) -> (BattleOutcome, HudData) {
+        let data = HudData {
+            own: vec![unit(1, 100, 100, 0)],
+            enemy: vec![unit(2, 100, 80, 0), unit(3, 100, 60, 0)],
+            faction_names: ["France".into(), "Angleterre".into()],
+            ..default()
+        };
+        let mut outcome = BattleOutcome {
+            winner,
+            attacker: sim_battle::SideResult::default(),
+            defender: sim_battle::SideResult::default(),
+            duration: 400.0,
+            end: BattleEnd::Rout,
+        };
+        outcome.attacker.total_losses = 0;
+        // 60 fell in the fight (cards), 50 more in the pursuit after the rout.
+        outcome.defender.total_losses = 110;
+        (outcome, data)
+    }
+
+    #[test]
+    fn pursuit_losses_are_told_apart_from_the_cards() {
+        let (outcome, data) = rout_outcome(SideId::Attacker);
+        let view = build_view(&outcome, SideId::Attacker, false, &data);
+        let enemy = &view.sides[1];
+        assert_eq!((enemy.engaged, enemy.losses, enemy.pursuit), (200, 110, 50));
+        // Survivors agree with the campaign (engaged - dead); the cards show 50 more standing.
+        assert_eq!(enemy.survivors(), 90);
+        assert_eq!(enemy.survivors_on_cards(), 140);
+        assert_eq!(view.sides[0].pursuit, 0);
+    }
+
+    #[test]
+    fn a_spectator_never_sees_a_defeat() {
+        let (outcome, data) = rout_outcome(SideId::Defender);
+        let view = build_view(&outcome, SideId::Attacker, true, &data);
+        assert_eq!(view.title, "Fin de la bataille");
+        assert!(view.spectator && view.won);
+        assert!(view.subtitle.contains("vainqueur : Angleterre"));
+        // The same battle played by the attacker is a defeat.
+        let played = build_view(&outcome, SideId::Attacker, false, &data);
+        assert_eq!(played.title, "Défaite");
     }
 
     #[test]
