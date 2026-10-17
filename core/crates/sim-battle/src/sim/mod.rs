@@ -786,11 +786,16 @@ impl BattleSim {
                     (false, true) => 5,
                     (false, false) => -20,
                 },
-                // EP9: an army that gave up the field unbroken was not routed.
+                // EP9: an army that gave up the field unbroken was not routed; neither was the
+                // garrison that lost the square (SquareHeld) or the army caught by nightfall.
                 routed: !won
                     && !matches!(
                         end,
-                        BattleEnd::Refused | BattleEnd::Lull | BattleEnd::Withdrawal
+                        BattleEnd::Refused
+                            | BattleEnd::Lull
+                            | BattleEnd::Withdrawal
+                            | BattleEnd::SquareHeld
+                            | BattleEnd::Nightfall
                     ),
                 general_killed: self.general_killed[side.index()],
                 general_captured: self.general_captured[side.index()],

@@ -113,6 +113,13 @@ pub struct BattleAiRules {
     /// the defender keeps its ground and lets the battle be refused (EP9,
     /// ADR 0056).
     pub(crate) defender_quiet: f64,
+    /// Playtest 17/10: a defender at least as strong as its enemy (`ratio` >= 0.85) that holds
+    /// its ground (heights, river, cover) while nobody comes sallies out once this long has
+    /// passed (patience clock), instead of waiting for the refusal of the battle ...
+    pub(crate) defender_sally_time: f64,
+    /// ... unless an enemy line regiment is marching on it within this distance (it receives
+    /// the attack on its ground).
+    pub(crate) defender_sally_reach: f64,
     /// Besiegers wait for their engines at most this long before escalading.
     pub(crate) engine_patience: f64,
     /// SG4: a ram whose crew falls below this share of its full crew calls a

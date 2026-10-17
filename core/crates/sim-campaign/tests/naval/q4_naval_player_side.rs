@@ -15,10 +15,10 @@ use data_model::test_support::{fac, game_data};
 fn share(state: &CampaignState, data: &GameData, side: SideId) -> f64 {
     let setup = state.naval_battle_setup(data, 0).unwrap();
     let seed = state.naval.pending[0].seed;
-    let wins = (0..5u64)
+    let wins = (0..sim_campaign::naval::NAVAL_FORECAST_SAMPLES)
         .filter(|k| auto_resolve(&setup, seed.wrapping_add(k * 7919)).winner == Some(side))
         .count();
-    wins as f64 / 5.0
+    wins as f64 / sim_campaign::naval::NAVAL_FORECAST_SAMPLES as f64
 }
 
 #[test]

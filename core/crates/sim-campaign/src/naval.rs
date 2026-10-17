@@ -95,10 +95,15 @@ pub struct PendingNavalBattle {
     pub transport_ships: u32,
     pub interceptor_men: u32,
     pub army_men: u32,
-    /// Share of auto-resolves the player wins (five seeds).
+    /// Share of auto-resolves the player wins ([`NAVAL_FORECAST_SAMPLES`] seeds): the one
+    /// estimate of the dialog (verdict, percentage and balance bar).
     pub win_chance: f64,
     pub player_side: SideId,
 }
+
+/// Auto-resolves averaged for the forecast of a pending naval battle (21 rather than 5: a
+/// half-strength fleet no longer reads as a sure win by luck of five seeds).
+pub const NAVAL_FORECAST_SAMPLES: u64 = 21;
 
 /// Why a pending naval battle cannot be resolved.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -827,7 +832,7 @@ impl CampaignState {
                 let army = self.armies.get(&request.army)?;
                 let setup = naval_setup(self, data, request);
                 let player_side = setup.player_side.unwrap_or(SideId::Defender);
-                let wins = (0..5u64)
+                let wins = (0..NAVAL_FORECAST_SAMPLES)
                     .filter(|k| {
                         auto_resolve(&setup, request.seed.wrapping_add(k * 7919)).winner
                             == Some(player_side)
@@ -848,7 +853,7 @@ impl CampaignState {
                     transport_ships: setup.defender.ships.len() as u32,
                     interceptor_men: setup.attacker.men(),
                     army_men: setup.defender.men(),
-                    win_chance: wins as f64 / 5.0,
+                    win_chance: wins as f64 / NAVAL_FORECAST_SAMPLES as f64,
                     player_side,
                 })
             })

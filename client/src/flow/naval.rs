@@ -186,9 +186,8 @@ fn spawn(
     let player = view.player_side;
     let sides = sides_of(setup, player);
     let (text, tone) = verdict(view.win_chance);
-    let own_men = f64::from(sides[0].0.men().max(1));
-    let foe_men = f64::from(sides[1].0.men().max(1));
-    let share = own_men / (own_men + foe_men);
+    // One estimate for the verdict, the percentage and the balance bar (the forecast of core).
+    let share = view.win_chance;
     let waters = if setup.place_name.is_empty() {
         view.sea_name.clone()
     } else {

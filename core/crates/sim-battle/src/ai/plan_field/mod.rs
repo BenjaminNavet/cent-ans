@@ -85,9 +85,26 @@ pub(in crate::ai) fn plan_field(view: &mut View) {
                     .iter()
                     .any(|&i| dist(&view.units[i], e) < tuning().receive_distance)
         });
+    // Playtest 17/10: nobody comes to a defender that is not outmatched, and no enemy
+    // regiment marches or fights near it: after a while it counter-attacks rather than
+    // let the battle die of a lull (a weaker defender keeps its ground and the battle is
+    // refused).
+    let enemy_active = view.able_enemies().any(|j| {
+        matches!(
+            view.units[j].state,
+            UnitState::Marching | UnitState::Charging | UnitState::Melee
+        ) && front_ref
+            .iter()
+            .any(|&i| dist(&view.units[i], &view.units[j]) < tuning().defender_sally_reach)
+    });
+    let sallies = view.side == SideId::Defender
+        && ratio >= 0.85
+        && !enemy_active
+        && elapsed >= tuning().defender_sally_time;
     let defensive = match view.side {
         SideId::Defender => {
             (ratio < 0.85 || holds_heights || holds_river || receives)
+                && !sallies
                 && (elapsed < tuning().defender_patience
                     || view.sim.quiet_for(tuning().defender_quiet))
         }
@@ -129,6 +146,7 @@ pub(in crate::ai) fn plan_field(view: &mut View) {
         view.sim.recent_missile_losses(view.side.other(), window),
     );
     let duel = !roles.shooters.is_empty()
+        && !sallies
         && shooters_have_ammo
         && contact < tuning().duel_range
         && elapsed
