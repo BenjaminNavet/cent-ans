@@ -38,6 +38,8 @@ pub const MODEL_FADE: f32 = 0.35;
 /// Level of detail of the near models (`DnTreeModels.MODEL_LOD`: lod1, the lod2 crowns are
 /// too sparse up close).
 pub const MODEL_LOD: &str = "lod1";
+/// Level of detail of the near models in the shadow maps (`<id>_lod2.glb`).
+pub const SHADOW_LOD: &str = "lod2";
 /// Brightening of the model textures so the model / impostor switch does not show
 /// (`DnTreeModels.MODEL_BOOST`).
 pub const MODEL_BOOST: f32 = 1.55;
@@ -120,6 +122,11 @@ pub struct ModelSlot {
     pub material_src: Handle<bevy::gltf::GltfMaterial>,
     pub ready: Option<(Handle<Mesh>, Handle<Image>)>,
     pub failed: bool,
+    /// Coarser lod2 mesh of the species, drawn into the sun's shadow maps instead of `ready`
+    /// (a tenth of the vertices, the cost of the shadow pass scales with them); `None` when the
+    /// file is missing.
+    pub shadow_src: Option<Handle<Mesh>>,
+    pub shadow_ready: Option<Handle<Mesh>>,
 }
 
 /// Models and impostor cards of the species, built lazily.
@@ -160,6 +167,11 @@ pub fn request_model(
     if !present {
         return;
     }
+    let shadow_path = format!("models/dn/vegetation/{dn_id}_{SHADOW_LOD}.glb");
+    let shadow_present = !crate::campaign::perf_switch::off("vslod1")
+        && crate::paths::find_root()
+            .map(|root| crate::paths::asset_root(&root).join(&shadow_path).exists())
+            .unwrap_or(false);
     assets.models.insert(
         row,
         ModelSlot {
@@ -179,6 +191,16 @@ pub fn request_model(
             ),
             ready: None,
             failed: false,
+            shadow_src: shadow_present.then(|| {
+                server.load(
+                    GltfAssetLabel::Primitive {
+                        mesh: 0,
+                        primitive: 0,
+                    }
+                    .from_asset(shadow_path),
+                )
+            }),
+            shadow_ready: None,
         },
     );
 }
@@ -196,6 +218,23 @@ pub fn finish_models(
     let rows: Vec<u16> = assets.models.keys().copied().collect();
     for row in rows {
         let slot = assets.models.get_mut(&row).expect("slot");
+        if slot.ready.is_some()
+            && slot.shadow_ready.is_none()
+            && let Some(src) = slot.shadow_src.clone()
+        {
+            let ratio = world.width_ratio.get(row as usize).copied().unwrap_or(1.0);
+            if server.load_state(&src).is_failed() {
+                slot.shadow_src = None;
+            } else if let Some(source) = meshes.get(&src) {
+                match normalised(source, ratio * super::data::style::CROWN_WIDEN) {
+                    Some(mesh) => {
+                        slot.shadow_ready = Some(meshes.add(mesh));
+                        changed = true;
+                    }
+                    None => slot.shadow_src = None,
+                }
+            }
+        }
         if slot.ready.is_some() || slot.failed {
             continue;
         }

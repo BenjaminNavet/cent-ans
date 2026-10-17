@@ -147,6 +147,8 @@ pub struct VegBatch {
     pub mesh_handle: Handle<Mesh>,
     pub records: Arc<Vec<u8>>,
     pub count: u32,
+    /// Coarser mesh drawn into the shadow maps instead of `mesh_handle` (near tree models).
+    pub shadow_mesh: Option<Handle<Mesh>>,
     pub albedo: Handle<Image>,
     /// Normal atlas (impostors); the albedo stands in when `None`.
     pub normal: Option<Handle<Image>>,
@@ -491,52 +493,94 @@ impl<P: PhaseItem, const I: usize> RenderCommand<P> for SetMaterialBindGroup<I> 
 
 pub(super) struct DrawBatch;
 
+/// Same draw with the coarser shadow mesh of the batch (`VegBatch::shadow_mesh`).
+pub(super) struct DrawShadowBatch;
+
 impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
     type Param = (SRes<RenderAssets<RenderMesh>>, SRes<MeshAllocator>);
     type ViewQuery = ();
     type ItemQuery = (Read<InstanceBuffer>, Read<VegBatch>);
 
     fn render<'w>(
-        _item: &P,
-        _view: (),
+        item: &P,
+        view: (),
         item_query: Option<(&'w InstanceBuffer, &'w VegBatch)>,
-        (meshes, allocator): SystemParamItem<'w, '_, Self::Param>,
+        param: SystemParamItem<'w, '_, Self::Param>,
         pass: &mut TrackedRenderPass<'w>,
     ) -> RenderCommandResult {
-        let allocator = allocator.into_inner();
-        let Some((instances, batch)) = item_query else {
-            return RenderCommandResult::Skip;
-        };
-        let mesh_id = batch.mesh_handle.id();
-        let Some(gpu_mesh) = meshes.into_inner().get(mesh_id) else {
-            return RenderCommandResult::Skip;
-        };
-        let Some(vertex_slice) = allocator.mesh_vertex_slice(&mesh_id) else {
-            return RenderCommandResult::Skip;
-        };
-        pass.set_vertex_buffer(0, vertex_slice.buffer.slice(..));
-        pass.set_vertex_buffer(1, instances.buffer.slice(..));
-        match &gpu_mesh.buffer_info {
-            RenderMeshBufferInfo::Indexed {
-                index_format,
-                count,
-            } => {
-                let Some(index_slice) = allocator.mesh_index_slice(&mesh_id) else {
-                    return RenderCommandResult::Skip;
-                };
-                pass.set_index_buffer(index_slice.buffer.slice(..), *index_format);
-                pass.draw_indexed(
-                    index_slice.range.start..(index_slice.range.start + count),
-                    vertex_slice.range.start as i32,
-                    0..instances.count,
-                );
-            }
-            RenderMeshBufferInfo::NonIndexed => {
-                pass.draw(vertex_slice.range, 0..instances.count);
-            }
-        }
-        RenderCommandResult::Success
+        draw_records(item, view, item_query, param, pass, false)
     }
+}
+
+impl<P: PhaseItem> RenderCommand<P> for DrawShadowBatch {
+    type Param = (SRes<RenderAssets<RenderMesh>>, SRes<MeshAllocator>);
+    type ViewQuery = ();
+    type ItemQuery = (Read<InstanceBuffer>, Read<VegBatch>);
+
+    fn render<'w>(
+        item: &P,
+        view: (),
+        item_query: Option<(&'w InstanceBuffer, &'w VegBatch)>,
+        param: SystemParamItem<'w, '_, Self::Param>,
+        pass: &mut TrackedRenderPass<'w>,
+    ) -> RenderCommandResult {
+        draw_records(item, view, item_query, param, pass, true)
+    }
+}
+
+#[allow(clippy::type_complexity)]
+fn draw_records<'w, P: PhaseItem>(
+    _item: &P,
+    _view: (),
+    item_query: Option<(&'w InstanceBuffer, &'w VegBatch)>,
+    (meshes, allocator): SystemParamItem<
+        'w,
+        '_,
+        (SRes<RenderAssets<RenderMesh>>, SRes<MeshAllocator>),
+    >,
+    pass: &mut TrackedRenderPass<'w>,
+    shadow: bool,
+) -> RenderCommandResult {
+    let allocator = allocator.into_inner();
+    let Some((instances, batch)) = item_query else {
+        return RenderCommandResult::Skip;
+    };
+    let count = instances.count;
+    if count == 0 {
+        return RenderCommandResult::Success;
+    }
+    let mesh_id = match (shadow, &batch.shadow_mesh) {
+        (true, Some(handle)) => handle.id(),
+        _ => batch.mesh_handle.id(),
+    };
+    let Some(gpu_mesh) = meshes.into_inner().get(mesh_id) else {
+        return RenderCommandResult::Skip;
+    };
+    let Some(vertex_slice) = allocator.mesh_vertex_slice(&mesh_id) else {
+        return RenderCommandResult::Skip;
+    };
+    pass.set_vertex_buffer(0, vertex_slice.buffer.slice(..));
+    pass.set_vertex_buffer(1, instances.buffer.slice(..));
+    match &gpu_mesh.buffer_info {
+        RenderMeshBufferInfo::Indexed {
+            index_format,
+            count: index_count,
+        } => {
+            let Some(index_slice) = allocator.mesh_index_slice(&mesh_id) else {
+                return RenderCommandResult::Skip;
+            };
+            pass.set_index_buffer(index_slice.buffer.slice(..), *index_format);
+            pass.draw_indexed(
+                index_slice.range.start..(index_slice.range.start + index_count),
+                vertex_slice.range.start as i32,
+                0..count,
+            );
+        }
+        RenderMeshBufferInfo::NonIndexed => {
+            pass.draw(vertex_slice.range, 0..count);
+        }
+    }
+    RenderCommandResult::Success
 }
 
 #[cfg(test)]
