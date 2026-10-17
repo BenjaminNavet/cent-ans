@@ -26,3 +26,22 @@ de triangles ; repli lod1 si absent), `VegBatch::shadow_mesh`, `DrawShadowBatch`
 | 30 | 46,2 / 57,1 | 41,1 / 47,9 |
 
 (Base de départ d=60 sur main : 63,7 / 85,4.)
+
+## Défaut 2 : temps d'image qui monte et ne redescend pas
+
+Sonde ajoutée : section de dump `perf_probe` (`client/src/agent/perf_probe.rs` : temps d'image glissant sur
+60 images, entités vivantes, archétypes les plus peuplés, tailles des collections d'assets).
+Script `out/ui.txt` (panneaux diplomatie/tech/chronique/féodal/conseil/faction ouverts puis fermés, deux tours,
+puis 8 tours de 2 `Enter`) : image moyenne 9-10 ms au repos, 13-14 ms panneau ouvert, **33 ms à la première
+ouverture du Conseil et 28-30 ms ensuite, panneau fermé** (+18 ms durables). Entités et assets sans croissance
+sur 18 tours (flux de tours seul : 20-22 ms stable, le saut 9 -> 22 ms au premier tour est la météo : brouillard
+de départ puis temps clair à d=637, pas une fuite).
+Cause : la salle du Conseil (3 bougies + projecteur à ombres, 9 lumières) restait dans le monde caméra coupée ;
+les lumières à ombres sont extraites et rendues quoi que fasse la caméra (`Visibility::Hidden` sans effet,
+testé). Correctif : `ensure_room` détruit la salle à la fermeture et la reconstruit à l'ouverture
+(`campaign/council/mod.rs`) : repos après fermeture 10,7 ms (28-30 avant), réouverture identique à la première.
+
+| étape | avant | après |
+|---|---|---|
+| Conseil fermé (moyenne 60 images) | 28-30 ms | 10,7 ms |
+| Conseil ouvert | 32-34 ms | 32 ms |

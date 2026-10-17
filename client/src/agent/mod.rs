@@ -9,6 +9,7 @@ pub mod bench_battle;
 pub mod cli;
 pub mod devtools;
 pub mod dump;
+pub mod perf_probe;
 pub mod profile;
 pub mod script;
 
@@ -111,6 +112,7 @@ impl Plugin for AgentPlugin {
         .register_dump(dump_frame)
         .add_systems(Last, drive)
         .add_systems(Update, hide_named);
+        app.add_plugins(perf_probe::PerfProbePlugin);
         bench::add(app, cli);
         // With `dev`, BrpExtrasPlugin (devtools) installs the same transport with a chosen port.
         #[cfg(all(feature = "remote", not(feature = "dev")))]

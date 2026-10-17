@@ -312,8 +312,9 @@ fn council_open(ui: &CourtUi) -> bool {
     ui.screen == Screen::Council
 }
 
-/// Builds the room the first time the council opens (and again when the player's faction
-/// changes, after loading a save); switches the camera on only while the screen is open.
+/// Builds the room each time the council opens (and again when the player's faction changes,
+/// after loading a save), tears it down when the screen closes; the camera is on only while the
+/// screen is open.
 #[allow(clippy::too_many_arguments)]
 fn ensure_room(
     mut commands: Commands,
@@ -328,13 +329,19 @@ fn ensure_room(
     mut cameras: Query<&mut Camera, With<CouncilCamera>>,
 ) {
     let player = sim.player.as_str().to_owned();
+    let wanted = council_open(&ui);
     for mut camera in &mut cameras {
-        let wanted = council_open(&ui);
         if camera.is_active != wanted {
             camera.is_active = wanted;
         }
     }
     if !council_open(&ui) {
+        // The room is torn down with the screen: its candle and spot lights (shadow maps on) are
+        // extracted and rendered whatever the camera and the visibility say, which doubled the
+        // campaign frame time after the first visit. It is rebuilt on the next opening.
+        for (entity, _) in &roots {
+            commands.entity(entity).despawn();
+        }
         return;
     }
     let stale = roots.iter().any(|(_, root)| root.faction != player);
