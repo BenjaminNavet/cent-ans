@@ -156,6 +156,7 @@ fn update_labels(
     let mut taken: Vec<Rect> = Vec::new();
     if let Some(obstacles) = obstacles.as_deref() {
         taken.extend(obstacles.rects.iter().copied());
+        taken.extend(obstacles.names.iter().copied());
         taken.push(Rect::new(0.0, 0.0, viewport.x, obstacles.top_inset));
     }
     if let Some(regions) = regions.as_deref() {

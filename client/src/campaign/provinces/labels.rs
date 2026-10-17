@@ -153,6 +153,10 @@ fn inflate(rect: Rect, by: f32) -> Rect {
 #[derive(Resource, Default, Clone)]
 pub struct RegionLabelObstacles {
     pub rects: Vec<Rect>,
+    /// Town names on screen (preferred position, above the place), written by the markers lot:
+    /// army plates and river names keep clear of them, so a name stays above its place instead
+    /// of dropping under an army plate (`mapgeo`: the "620" plate hid "Paris").
+    pub names: Vec<Rect>,
     pub top_inset: f32,
 }
 
@@ -301,10 +305,16 @@ fn update_labels(
         min: Vec2::new(margin, margin + obstacles.top_inset),
         max: viewport - Vec2::splat(margin),
     };
+    let all_obstacles: Vec<Rect> = obstacles
+        .rects
+        .iter()
+        .chain(obstacles.names.iter())
+        .copied()
+        .collect();
     let placed = layout_labels(
         &candidates,
         safe,
-        &obstacles.rects,
+        &all_obstacles,
         tuning.max_on_screen,
         tuning.font_size,
         tuning.letter_spacing,

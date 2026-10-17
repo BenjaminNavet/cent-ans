@@ -579,6 +579,7 @@ pub fn update_plates(
         });
     }
     let mut blocked: Vec<Rect> = obstacles.rects.clone();
+    blocked.extend(obstacles.names.iter().copied());
     if obstacles.top_inset > 0.0 {
         blocked.push(Rect::new(-1.0e4, -1.0e4, 1.0e5, obstacles.top_inset));
     }

@@ -151,6 +151,21 @@ def compose_coast_patch(
     console.print_json(data=report)
 
 
+@compose_app.command("lake-patch")
+def compose_lake_patch(
+    pyramid: Path = typer.Option(
+        None, help="Dossier de la pyramide E1-E3 à retoucher aussi (hors git)"
+    ),
+    dry_run: bool = typer.Option(False, help="Liste les lacs et compte les tuiles sans écrire"),
+) -> None:
+    """Remet au vrai niveau les lacs flottants (Léman, Garde…) dans le relief E0-E3, heightmaps et lakes.json (lot mapgeo)."""
+    from cent_ans_tools.compose import lake_patch
+    from cent_ans_tools.paths import DATA_DIR
+
+    report = lake_patch.apply(DATA_DIR / "map", pyramid, dry_run=dry_run)
+    console.print_json(data=report)
+
+
 @compose_app.command("valley-rivers")
 def compose_valley_rivers() -> None:
     """Ajoute le Nil, l'Euphrate et le Tigre (`valley_courses.json`) à rivers.geojson (lot CS2, rejouable)."""

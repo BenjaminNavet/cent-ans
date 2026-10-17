@@ -26,7 +26,7 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
-from scipy import ndimage
+from scipy import ndimage, special
 
 from cent_ans_tools.geo import download, terrain
 from cent_ans_tools.geo.provinces import decode_ids
@@ -41,6 +41,11 @@ BORDER_RANGE_PX = 127.0 / BORDER_DIST_SCALE
 BORDER_CHANNELS = 3
 BORDER_SMOOTH_SIGMA = 0.7
 COAST_DIST_SCALE = 2.0  # 1 px = 2 levels, range ±64 px
+#: Gaussian (px) of the sub-pixel shore of ``compute_coast_dist``; the contour of a binary mask is a
+#: staircase of whole pixels (719 m), which the shore bands of the terrain and the sea reproduce.
+COAST_SMOOTH_SIGMA = 1.3
+#: Band (px from the shore) over which the smooth shore field fades into the exact distance.
+COAST_SMOOTH_BAND = (2.0, 4.0)
 NOISE_SEED = 1337
 
 # Mélange de base (prairie, cultures, forêt, roche/lande) par terrain dominant de province.
@@ -358,12 +363,26 @@ def decode_border_dist(encoded: np.ndarray) -> np.ndarray:
 
 
 def compute_coast_dist(water: np.ndarray) -> np.ndarray:
-    """Signed distance (px) to the shore: positive on land, negative on water."""
+    """Signed distance (px) to the shore: positive on land, negative on water.
+
+    Far from the shore the exact distance to the nearest pixel of the other side (minus the half
+    pixel to the pixel edge). Within ``COAST_SMOOTH_BAND`` px of it, the distance to the smooth
+    contour of the blurred mask (``sigma * sqrt(2) * erfinv(2 v - 1)`` for a mask blurred to ``v``):
+    a straight coast stays straight at any angle instead of a staircase of pixels.
+    """
     if water.all() or not water.any():
         return np.where(water, -64.0, 64.0).astype(np.float32)
     inside = ndimage.distance_transform_edt(~water)
     outside = ndimage.distance_transform_edt(water)
-    return (inside - outside).astype(np.float32)
+    exact = inside - outside
+    exact = exact - 0.5 * np.sign(exact)
+    blurred = ndimage.gaussian_filter((~water).astype(np.float32), COAST_SMOOTH_SIGMA)
+    blurred = np.clip(blurred, 1e-4, 1.0 - 1e-4)
+    smooth = COAST_SMOOTH_SIGMA * np.sqrt(2.0) * special.erfinv(2.0 * blurred - 1.0)
+    lo, hi = COAST_SMOOTH_BAND
+    t = np.clip((np.abs(exact) - lo) / (hi - lo), 0.0, 1.0)
+    keep_exact = t * t * (3.0 - 2.0 * t)
+    return (smooth * (1.0 - keep_exact) + exact * keep_exact).astype(np.float32)
 
 
 def encode_coast_dist(signed: np.ndarray) -> np.ndarray:

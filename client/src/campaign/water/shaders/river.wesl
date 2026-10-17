@@ -95,6 +95,11 @@ fn vnoise(p: vec2<f32>) -> f32 {
 }
 
 // river_bed.gdshaderinc `fine_zone_mask`: 1 inside the fine hydrography disc, soft edge at 85-100 %.
+// Far ribbons slide toward the eye by this share of their distance (see `vertex`).
+const FAR_EYE_PUSH: f32 = 0.006;
+const FAR_PUSH_START: f32 = 40.0;
+const FAR_PUSH_FULL: f32 = 200.0;
+
 fn fine_zone_mask(p: vec2<f32>) -> f32 {
     let z = params.fine_zone;
     if z.z <= 0.0 || z.w <= 0.0 {
@@ -179,6 +184,11 @@ fn vertex(in: VertexInput) -> VertexOutput {
         let half_tot = half_w + band_w;
         world = vec4<f32>(world.xyz + dir * half_tot, 1.0);
         world.y = world.y + mix(params.lift_base + params.lift_per_distance * dist, -WATER_SINK, carved);
+        // Far, the coarse terrain nodes bridge the valleys above the ribbon (it showed as a black
+        // dashed line, mapgeo): slide the vertex toward the eye, along its own view ray, so the
+        // ribbon stays on top of the ground it lies on without changing where it is on screen.
+        let to_eye_dir = normalize(view.world_position - world.xyz);
+        world = vec4<f32>(world.xyz + to_eye_dir * (FAR_EYE_PUSH * smoothstep(FAR_PUSH_START, FAR_PUSH_FULL, dist) * dist), 1.0);
         out.carved = carved;
         out.alpha = mix(1.0, clamp(true_px / imp_px, 0.25, 1.0), params.thin_fade);
         out.far = 1.0;
@@ -307,11 +317,14 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     col = (vec3<f32>(luma) + (col - vec3<f32>(luma)) * params.look.x) * params.look.y;
     // Far: sober blue-grey line, still readable (opacity is untouched).
     col = mix(col, params.far_color.rgb, far_t * select(1.0, 0.6, sheet));
+    // A ribbon only a few pixels wide is all bank: the dark soaked edges would turn it into a black
+    // line (the Douro, mapgeo). Banks darken in proportion to the width the screen can show.
+    let bank_k = select(1.0, smoothstep(2.0, 7.0, half_px), !sheet);
     // Wet bank: the outer edge of the ribbon darkens like soaked ground.
-    let wet = smoothstep(params.look2.z, 1.0, edge) * (1.0 - in.carved * 0.5);
-    col = mix(col, params.bank_ink_color.rgb, clamp(ink + wet * params.bank_ink_strength, 0.0, 1.0));
+    let wet = smoothstep(params.look2.z, 1.0, edge) * (1.0 - in.carved * 0.5) * bank_k;
+    col = mix(col, params.bank_ink_color.rgb, clamp(ink * bank_k + wet * params.bank_ink_strength, 0.0, 1.0));
     // VQ: dark wet banks (shade, soaked soil), no light outline.
-    col = mix(col, params.look4.gba, clamp(smoothstep(params.look2.z, 1.0, edge) * params.look3.x, 0.0, 1.0));
+    col = mix(col, params.look4.gba, clamp(smoothstep(params.look2.z, 1.0, edge) * params.look3.x * bank_k, 0.0, 1.0));
     // Wet ground strip: same colour, fading out.
     col = mix(col, params.look4.gba, in_band);
 
@@ -329,7 +342,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         }
     }
     if in_band > 0.5 {
-        let wet_a = params.look3.w * (1.0 - smoothstep(0.0, 1.0, band_t)) * in.alpha * (1.0 - 0.6 * far_t);
+        let wet_a = params.look3.w * (1.0 - smoothstep(0.0, 1.0, band_t)) * in.alpha * (1.0 - 0.6 * far_t) * bank_k;
         alpha = wet_a;
     }
     // Aerial haze: the same camera `DistanceFog` as the ground, so far water blends like it.

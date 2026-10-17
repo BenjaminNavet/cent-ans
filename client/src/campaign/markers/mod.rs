@@ -69,6 +69,7 @@ impl Plugin for CampaignMarkersPlugin {
                         update_pins,
                         sink_maquettes,
                         refresh_signs,
+                        fit_shore,
                         settle_ground,
                         update_range,
                         lod::fade_maquettes,
@@ -113,6 +114,8 @@ pub struct MarkerStats {
     pub labels: usize,
     pub labels_visible: usize,
     pub grounded: usize,
+    /// Maquettes pulled inland off the sea (`placement::shore_fit`).
+    pub shore_moved: usize,
     /// Probe of loaded scenes: (name, world size, world base y, anchor y).
     pub probes: Vec<(String, Vec3, f32, f32)>,
     pub ground_min: f32,
@@ -146,6 +149,13 @@ pub struct GroundAnchor {
     /// and the mean of four ground points at this radius (kit buildings extend below their
     /// floor: better to sink an edge than let the other float). 0 = the centre only.
     pub footprint: f32,
+}
+
+/// Marks an anchored maquette whose footprint (radius in map units) must be pulled off the sea
+/// once the terrain exists (`settle_ground`, `placement::shore_fit`); removed when done.
+#[derive(Component)]
+struct ShoreFit {
+    radius: f32,
 }
 
 /// A maquette: index into `Places`, its range (rig distance beyond which it is hidden).
@@ -259,7 +269,7 @@ fn dump_markers(world: &World) -> (String, Value) {
             "labels": s.labels,
             "labels_visible": s.labels_visible,
             "probes": s.probes.iter().map(|(n, size, base, anchor)| json!({"name": n, "size": [size.x, size.y, size.z], "base_y": base, "anchor_y": anchor})).collect::<Vec<_>>(),
-            "ground": { "ready": world.get_resource::<crate::campaign::terrain::surface::Surface>().is_some(), "anchored": s.grounded, "min_y": s.ground_min, "max_y": s.ground_max },
+            "ground": { "ready": world.get_resource::<crate::campaign::terrain::surface::Surface>().is_some(), "anchored": s.grounded, "shore_moved": s.shore_moved, "min_y": s.ground_min, "max_y": s.ground_max },
             "ruin_signs": s.ruins,
             "worksite_signs": s.worksites,
             "controller_changes": s.controller_changes,
@@ -391,6 +401,9 @@ fn build_markers(
                         lift: 0.0,
                         footprint: 0.0,
                     },
+                    ShoreFit {
+                        radius: width * 0.5,
+                    },
                     ChildOf(root_entity),
                 ))
                 .with_children(|parent| {
@@ -441,6 +454,7 @@ fn build_markers(
                     lift: 0.0,
                     footprint: p.radius * 0.6,
                 },
+                ShoreFit { radius: p.radius },
                 ChildOf(root_entity),
             ));
             entity.observe(lod::prepare_maquette);
@@ -895,7 +909,7 @@ fn update_range(
 fn settle_ground(
     ground: GroundHeight,
     relief: Option<Res<crate::campaign::countryside::ReliefVersion>>,
-    fresh: Query<(), Added<GroundAnchor>>,
+    fresh: Query<(), Changed<GroundAnchor>>,
     mut anchored: Query<(&GroundAnchor, &mut Transform)>,
     mut stats: ResMut<MarkerStats>,
     mut was_ready: Local<bool>,
@@ -922,6 +936,30 @@ fn settle_ground(
     if count > 0 {
         stats.ground_min = lo;
         stats.ground_max = hi;
+    }
+}
+
+/// Pulls coastal maquettes inland (`placement::shore_fit`) once the terrain exists, before
+/// `settle_ground` seats them: the block no longer hangs over the sea.
+fn fit_shore(
+    mut commands: Commands,
+    ground: GroundHeight,
+    mut pending: Query<(Entity, &mut GroundAnchor, &mut Transform, &ShoreFit)>,
+    mut stats: ResMut<MarkerStats>,
+) {
+    if !ground.is_ready() || pending.is_empty() {
+        return;
+    }
+    let is_water = |p: Vec2| ground.at(p.x, p.y).is_some_and(|h| h <= 0.0);
+    for (entity, mut anchor, mut t, fit) in &mut pending {
+        let at = placement::shore_fit(anchor.px, fit.radius, &is_water);
+        if at != anchor.px {
+            anchor.px = at;
+            t.translation.x = at.x;
+            t.translation.z = at.y;
+            stats.shore_moved += 1;
+        }
+        commands.entity(entity).remove::<ShoreFit>();
     }
 }
 
@@ -1098,12 +1136,14 @@ fn update_labels(
     >,
     plates: Query<(&Name, &Node, &Visibility), Without<PlaceLabel>>,
     mut stats: ResMut<MarkerStats>,
+    mut name_obstacles: ResMut<crate::campaign::provinces::RegionLabelObstacles>,
     ui_scale: Res<UiScale>,
 ) {
     let Some((camera, cam_t)) = camera.iter().next() else {
         return;
     };
     let eye = cam_t.translation();
+    let mut name_rects: Vec<Rect> = Vec::new();
     // Priority: rank descending, then the place order (kind, weight, id).
     let mut entries: Vec<_> = labels.iter_mut().collect();
     // Pinned places (selected, player capital) come first and bypass the distance limit and the
@@ -1182,6 +1222,8 @@ fn update_labels(
                 None
             };
             if let Some(drop) = slot {
+                // Army plates and region / river names keep clear of the preferred spot.
+                name_rects.push(rect);
                 node.left = Val::Px(screen.x - size.x * 0.5);
                 node.top = Val::Px(screen.y - size.y + drop);
                 hide = false;
@@ -1199,6 +1241,9 @@ fn update_labels(
     }
     stats.labels_visible = shown;
     stats.pinned = pins.indices.len();
+    if name_obstacles.names != name_rects {
+        name_obstacles.names = name_rects;
+    }
 }
 
 /// Falls back to the flat Blender maquette when a generated landmark glb fails to load.
