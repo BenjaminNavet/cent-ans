@@ -160,6 +160,17 @@ pub struct WaterLook {
     pub mud_color: [f32; 3],
     pub mud_strength: f32,
     pub bank_wet_start: f32,
+    /// Darkening of the water edge towards `wet_color` (0-1): wet banks, no light outline.
+    pub bank_dark: f32,
+    /// Share of the bank foam kept (foam sits inside the edge, never on it).
+    pub bank_foam: f32,
+    /// Wet ground strip outside the ribbon: width in screen px (0 = off) and peak opacity.
+    pub wet_band_px: f32,
+    pub wet_band_alpha: f32,
+    /// Colour of the dark banks and of the wet strip (sRGB).
+    pub wet_color: [f32; 3],
+    /// Share of the campaign camera distance fog applied to the water (0 = none, 1 = like the ground).
+    pub fog_strength: f32,
     pub glint_color: [f32; 3],
     pub glint_strength: f32,
     pub glint_power: f32,
@@ -178,6 +189,12 @@ impl Default for WaterLook {
             mud_color: [0.34, 0.31, 0.22],
             mud_strength: 0.0,
             bank_wet_start: 0.7,
+            bank_dark: 0.0,
+            bank_foam: 1.0,
+            wet_band_px: 0.0,
+            wet_band_alpha: 0.0,
+            wet_color: [0.05, 0.08, 0.05],
+            fog_strength: 0.0,
             glint_color: [1.0, 0.92, 0.75],
             glint_strength: 0.0,
             glint_power: 80.0,
