@@ -6,15 +6,23 @@ L'orchestrateur relit, fusionne dans un worktree d'intégration puis `--ff-only`
 
 | Lot | Contenu | Modèle | État |
 |---|---|---|---|
-| 1 render | terrain noir ultra plein écran, étiquettes sur le menu pause, doublon d'étiquettes | Opus | en cours |
-| 2 campui | recrutement, économie, traditions, UI très grande, sélection de faction, « à paris », boutons fermer | Sonnet | en cours |
-| 3 battleui | dialogue pré-bataille, écran de résultat, élision, discours, F1, icônes | Sonnet | en cours |
-| 4 overlays | bulle du conseiller, file des modales, raccourcis J/C/T, pause | Sonnet | en cours |
-| 5 saveload | journal/chronique/féodal/tutoriel perdus au chargement | Opus | en cours |
-| 6 battlesim | déploiement, issue du siège, IA passive, fuyards figés, chances navales | Opus | en cours |
-| 7 camprules | retraite après défaite, emplacements 9/6, entretien, 213 provinces, eau ×2 | Opus | en cours |
-| 8 mapfx | rochers noirs, charrette, mât, échelles, chevaux, pavois | Opus | en cours |
-| 9 mapgeo | baie du Mont-Saint-Michel, Léman, villes sur l'eau, rivières, côtes, étiquettes | Opus | en cours |
-| 10 perf | campagne < 40 i/s, dérive du temps d'image | — | vague 2, après fusion (machine calme) |
+| 1 render | terrain noir ultra plein écran, étiquettes sur le menu pause, doublon d'étiquettes | Opus | fusionné |
+| 2 campui | recrutement, économie, traditions, UI très grande, sélection de faction, « à paris », boutons fermer | Sonnet | fusionné |
+| 3 battleui | dialogue pré-bataille, écran de résultat, élision, discours, F1, icônes | Sonnet | fusionné |
+| 4 overlays | bulle du conseiller, file des modales, raccourcis J/C/T, pause | Sonnet | fusionné |
+| 5 saveload | journal/chronique/féodal/tutoriel perdus au chargement | Opus | fusionné |
+| 6 battlesim | déploiement, issue du siège, IA passive, fuyards figés, chances navales | Opus | fusionné |
+| 7 camprules | retraite après défaite, emplacements 9/6, entretien, 213 provinces, eau ×2 | Opus | fusionné |
+| 8 mapfx | rochers noirs, charrette, mât, échelles, chevaux, pavois | Opus | fusionné |
+| 9 mapgeo | baie du Mont-Saint-Michel, Léman, villes sur l'eau, rivières, côtes, étiquettes | Opus | fusionné |
+| 10 fog | météo brouillard → brume visible (décision joueur 17/10) | Sonnet | en cours, branche depuis fix/integ |
+| 11 perf | campagne < 40 i/s, dérive du temps d'image | Opus | après fog (machine calme) |
 
 Reprise : `git worktree list | grep gp-fix`, lire `docs/wip/fix-<lot>.md` sur chaque branche.
+
+## État au 17/10 midi
+Lots 1-9 dans main (78fb7f887) : tests core/client/Python, smoke 10/10, seed bots rapides 0 constat.
+Restes par lot : `docs/wip/fix-<lot>.md`. Notables : terrain noir ultra plein écran non prouvé (procédure joueur dans fix-render.md),
+Londres (Tamise cuite dans le glb Meshy), Mont non visible, charrette poreuse au loin, morts clairs, forêts d'hiver, Pétra,
+attaquant IA lent face à un défenseur passif (ADR 0184), pas d'ADR pour la sortie du défenseur.
+Pyramide partagée `~/dev/cent-ans-raw/compose/pyramid` retouchée par mapgeo (coast-patch, lake-patch) : cohérente avec main.
