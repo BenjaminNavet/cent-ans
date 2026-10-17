@@ -58,9 +58,19 @@ impl Lod {
 
     /// Level for a camera distance, keeping the current one inside the hysteresis band.
     pub fn for_distance(distance: f32, current: Option<Lod>) -> Lod {
+        Self::for_distance_scaled(distance, current, 1.0)
+    }
+
+    /// Same with the impostor edge multiplied by `impostor_scale` (`battle_lod` of the quality
+    /// preset: higher presets keep real figures further out).
+    pub fn for_distance_scaled(distance: f32, current: Option<Lod>, impostor_scale: f32) -> Lod {
         const LEVELS: [Lod; 4] = [Lod::Full, Lod::Medium, Lod::Far, Lod::Impostor];
-        const EDGES: [f32; 3] = [LOD0_DISTANCE, LOD1_DISTANCE, IMPOSTOR_DISTANCE];
-        let plain = EDGES.iter().position(|e| distance < *e).unwrap_or(3);
+        let edges: [f32; 3] = [
+            LOD0_DISTANCE,
+            LOD1_DISTANCE,
+            IMPOSTOR_DISTANCE * impostor_scale.clamp(0.25, 4.0),
+        ];
+        let plain = edges.iter().position(|e| distance < *e).unwrap_or(3);
         let Some(current) = current else {
             return LEVELS[plain];
         };
@@ -68,9 +78,9 @@ impl Lod {
         match plain.cmp(&at) {
             std::cmp::Ordering::Equal => current,
             // Moving away: leave the level only past its outer edge plus the margin.
-            std::cmp::Ordering::Greater if distance < EDGES[at] * (1.0 + HYSTERESIS) => current,
+            std::cmp::Ordering::Greater if distance < edges[at] * (1.0 + HYSTERESIS) => current,
             // Approaching: enter the nearer level only below its edge minus the margin.
-            std::cmp::Ordering::Less if distance > EDGES[at - 1] * (1.0 - HYSTERESIS) => current,
+            std::cmp::Ordering::Less if distance > edges[at - 1] * (1.0 - HYSTERESIS) => current,
             _ => LEVELS[plain],
         }
     }
@@ -164,6 +174,7 @@ pub struct RegimentContext<'w, 's> {
     corpses: ResMut<'w, Corpses>,
     arms: ResMut<'w, DroppedArms>,
     settings: Option<Res<'w, crate::settings::Settings>>,
+    quality: Option<Res<'w, crate::settings::quality::RenderQuality>>,
     heraldry: ResMut<'w, BattleHeraldry>,
     arms_atlas: ResMut<'w, ArmsAtlasHandle>,
 }
@@ -335,6 +346,7 @@ pub fn update_regiments(
     mut frames: ResMut<PoseFrames>,
     mut stats: ResMut<SoldierStats>,
     mut batches: Query<&mut SkinnedBatch>,
+    mut env_lod: Local<Option<Option<f32>>>,
 ) {
     let paused = session.paused;
     let speed_factor = session.speed as f32;
@@ -345,6 +357,14 @@ pub fn update_regiments(
     } else {
         time.delta_secs() * speed_factor
     };
+    // `CENT_ANS_BATTLE_LOD=<factor>` overrides the preset (A/B benches, captures).
+    let lod_override = *env_lod.get_or_insert_with(|| {
+        std::env::var("CENT_ANS_BATTLE_LOD")
+            .ok()
+            .and_then(|v| v.parse::<f32>().ok())
+    });
+    let lod_scale =
+        lod_override.unwrap_or_else(|| ctx.quality.as_ref().map_or(1.0, |q| q.battle_lod));
     let camera_position = camera
         .iter()
         .next()
@@ -579,7 +599,7 @@ pub fn update_regiments(
         // Level of detail from the camera distance.
         let ground = cur.first().map_or(0.0, |p| p[1]);
         let distance = camera_position.distance(Vec3::new(unit.x as f32, ground, unit.z as f32));
-        let lod = Lod::for_distance(distance, regiment.lod);
+        let lod = Lod::for_distance_scaled(distance, regiment.lod, lod_scale);
         regiment.lod = Some(lod);
 
         // Records.
@@ -731,6 +751,11 @@ mod tests {
         assert_eq!(Lod::for_distance(250.0, Some(Lod::Impostor)), Lod::Far);
         assert_eq!(Lod::for_distance(17.0, Some(Lod::Full)), Lod::Full);
         assert_eq!(Lod::for_distance(15.0, Some(Lod::Medium)), Lod::Medium);
+        // battle_lod pushes only the impostor edge.
+        assert_eq!(Lod::for_distance_scaled(400.0, None, 1.5), Lod::Far);
+        assert_eq!(Lod::for_distance_scaled(460.0, None, 1.5), Lod::Impostor);
+        assert_eq!(Lod::for_distance_scaled(40.0, None, 1.5), Lod::Medium);
+        assert_eq!(Lod::for_distance_scaled(200.0, None, 0.55), Lod::Impostor);
     }
 
     #[test]

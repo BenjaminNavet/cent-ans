@@ -39,6 +39,8 @@ pub struct Preset {
     pub ssao: bool,
     /// SSAO sample count level (`low`..`ultra`).
     pub ssao_quality: String,
+    /// Battle: multiplier of the distance at which regiments become impostors (`battle_lod`).
+    pub battle_lod: f32,
 }
 
 fn msaa_from(name: &str) -> Option<Msaa> {
@@ -64,6 +66,7 @@ impl Preset {
             veg_max_distance: 900.0,
             ssao: true,
             ssao_quality: "high".to_owned(),
+            battle_lod: 1.0,
         }
     }
 
@@ -81,6 +84,7 @@ impl Preset {
             veg_max_distance: number("veg_max_distance")? as f32,
             ssao: value.get("ssao").and_then(Value::as_bool).unwrap_or(false),
             ssao_quality: text("ssao_quality").unwrap_or("medium").to_owned(),
+            battle_lod: number("battle_lod").unwrap_or(1.0) as f32,
         })
     }
 }
@@ -165,6 +169,8 @@ pub struct RenderQuality {
     pub ssao_battle: bool,
     /// SSAO quality level of the preset (`ssao_quality`).
     pub ssao_quality: String,
+    /// Multiplier of the regiments' impostor distance (`battle_lod` of the preset).
+    pub battle_lod: f32,
     pub msaa_campaign: Msaa,
     pub shadows: bool,
     pub shadow_map_size: usize,
@@ -211,6 +217,7 @@ impl RenderQuality {
             },
             ssao_battle,
             ssao_quality: preset.ssao_quality.clone(),
+            battle_lod: preset.battle_lod,
             msaa_campaign: forced.unwrap_or(preset.map_msaa),
             shadows: settings.shadows,
             shadow_map_size: cascade_map_size(preset.shadow_atlas, preset.shadow_splits),
