@@ -123,6 +123,7 @@ pub fn screen_of(
 }
 
 /// Places the labels over the ghosts; the parchment view fades them out (it draws its own).
+#[allow(clippy::too_many_arguments)]
 pub fn place_labels(
     ghosts: Res<Ghosts>,
     zoom: Option<Res<ZoomView>>,

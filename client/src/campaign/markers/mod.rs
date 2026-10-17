@@ -1083,6 +1083,7 @@ fn sink_maquettes(
 
 /// Projects each label, applies its rank visibility distance, then the greedy declutter of the
 /// name + shield block (measured from the laid-out node).
+#[allow(clippy::too_many_arguments)]
 fn update_labels(
     camera: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
     places: Res<Places>,
