@@ -21,9 +21,12 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 | blight | opus | 1 | bataille : lumière, contraste, voile, perspective aérienne, mise à l'échelle 3D si marge | lancé |
 | rivers | opus | 1 | campagne : rivières réalistes (couleur, berges, reflets, lisibles à toute distance) | fusionné (0366d89f4) ; reste : liseré clair des bords trop « trait de carte », bande de sol mouillé hors ruban, river_fine.wesl, brume sur l'eau |
 | cground | opus | 1 | campagne : sol de près (parcelles, matières, colormap, variation) | fusionné ; `ground_detail.wesl` + `data/fx/ground_detail.json`, réglage `ground_detail` 0/1/2 ; écart-type +16 % (Godot ×1,6 non atteint) ; reste : relief/haies, contraste après regard du joueur |
+| rivers2 | opus | 2 | rivières : liseré clair, bande de sol mouillé, brume sur l'eau, river_fine | lancé |
+| cgrade | opus | 2 | campagne : étalonnage commun à toute la 3D, perspective aérienne par distance/inclinaison, équilibre soleil/ambiance | lancé |
 
 ## Journal
 - 17/10 0 h 45 : état de départ, ADR 0404, vague 1 (5 lots).
 - 17/10 : vq-bench fusionné dans vq/integ (`tools/bevy_bench/ab.sh`, `--bench-battle`). Disque à 22 Go libres : garde-disque VQ (scratchpad vq_disk_guard.sh), tests reportés à la fusion.
 - 17/10 : vq-rivers fusionné (bleu-gris sombre, hauts-fonds boueux, reflet rasant, éclat ; coût nul au bruit près ; `river_display.json > look`). Disque 13 Go libres.
 - 17/10 : vq-cground fusionné (parcelles contrastées par saison, dérive de sol, bandes au plancher caméra ; coût ≤ bruit, à remesurer au calme).
+- 17/10 : disque revenu à 122 Go libres ; vague 2 lancée (rivers2, cgrade).
