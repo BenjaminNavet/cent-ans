@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ground_detail.schema.json",
+  "title": "Détail du sol de campagne de près (ground_detail.wesl)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["macro", "parcel", "strips", "stage", "mottle"],
+  "properties": {
+    "description": {"type": "string"},
+    "macro": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tone_amp", "hue_amp", "fade_footprint", "periods_px"],
+      "properties": {
+        "tone_amp": {"type": "number", "minimum": 0, "maximum": 0.5},
+        "hue_amp": {"type": "number", "minimum": 0, "maximum": 3},
+        "fade_footprint": {"type": "number", "exclusiveMinimum": 0},
+        "periods_px": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "exclusiveMinimum": 0}}
+      }
+    },
+    "parcel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["luma_contrast", "saturation", "jitter", "fade_start_footprint", "fade_end_footprint"],
+      "properties": {
+        "luma_contrast": {"type": "number", "minimum": 0, "maximum": 2},
+        "saturation": {"type": "number", "minimum": 0, "maximum": 2},
+        "jitter": {"type": "number", "minimum": 0, "maximum": 1},
+        "fade_start_footprint": {"type": "number", "minimum": 0},
+        "fade_end_footprint": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "strips": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tone_amp", "balk_amp", "width_min_m", "width_max_m", "plough_share"],
+      "properties": {
+        "tone_amp": {"type": "number", "minimum": 0, "maximum": 0.6},
+        "balk_amp": {"type": "number", "minimum": 0, "maximum": 0.8},
+        "width_min_m": {"type": "number", "exclusiveMinimum": 0},
+        "width_max_m": {"type": "number", "exclusiveMinimum": 0},
+        "plough_share": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amp", "amp_wild", "shares", "tints"],
+      "properties": {
+        "amp": {"type": "number", "minimum": 0, "maximum": 1},
+        "amp_wild": {"type": "number", "minimum": 0, "maximum": 1},
+        "shares": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["spring", "summer", "autumn", "winter"],
+          "patternProperties": {"^(spring|summer|autumn|winter)$": {"$ref": "#/$defs/triple"}}
+        },
+        "tints": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["green", "gold", "brown"],
+          "patternProperties": {"^(green|gold|brown)$": {"$ref": "#/$defs/triple"}}
+        }
+      }
+    },
+    "mottle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amp", "period_m", "fade_end_footprint"],
+      "properties": {
+        "amp": {"type": "number", "minimum": 0, "maximum": 0.5},
+        "period_m": {"type": "number", "exclusiveMinimum": 0},
+        "fade_end_footprint": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  },
+  "$defs": {"triple": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 2}}}
+}
