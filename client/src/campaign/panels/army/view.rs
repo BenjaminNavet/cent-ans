@@ -193,7 +193,7 @@ pub fn spawn_army_panel(
         .spawn((Name::new("army:panel"), panel_page(theme)))
         .insert(Node {
             max_width: Val::Px(940.0),
-            padding: theme.padding("panel"),
+            padding: theme.inner_padding("panel", 2.0),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(6.0),
             ..default()
@@ -688,13 +688,20 @@ pub fn spawn_recruit_panel(
         ))
         .id();
     let panel = commands
-        .spawn((Name::new("rec:panel"), panel_page(theme)))
+        .spawn((
+            Name::new("rec:panel"),
+            panel_page(theme),
+            // Last resort in a very short zone (big text on a small window): the page scrolls
+            // instead of letting the basket spill out of its frame.
+            bevy::ui_widgets::ScrollArea,
+        ))
         .insert(Node {
             width: Val::Px(620.0),
             max_height: Val::Percent(88.0),
-            padding: theme.padding("panel"),
+            padding: theme.inner_padding("panel", 2.0),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(6.0),
+            overflow: Overflow::scroll_y(),
             ..default()
         })
         .id();
