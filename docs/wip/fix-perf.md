@@ -61,3 +61,45 @@ Bissection à d=150 (p50) : sans terrain 22 contre 41 ms ; MSAA ultra (2x carte)
 Le client Bevy ignorait `relief_vertex_px` / `relief_items` du préréglage (4 px / 700 nœuds partout, ultra
 prévu à 6 px / 900). Corrigé (`terrain/lod.rs::sync_relief_quality`, `settings/quality.rs`). A/B alterné :
 d=150 30,5 -> 23,2 ms, d=60 45,8 -> 41,2 ms. Écart d'image 4 px contre 6 px : 1,2/255 en moyenne, invisible.
+
+## Contrôle visuel (3 captures de 1280x800, écarts numériques + un crop)
+
+Ombres lod1 contre lod2 à d=32 : écart moyen 1,6/255, 1,1 % des pixels à plus de 16, ombres des arbres équivalentes
+sur le crop le plus différent. Relief 4 px contre 6 px : voir ADR 0706.
+
+## Bilan (release, ultra, 1280x800 hors écran, p50 / p95 ms ; charge 3-7 dont un démon système à 99 % de CPU)
+
+| banc | avant (main 5afcfbd08) | après |
+|---|---|---|
+| d=150 | 40,7 / 47,6 | 23,5 / 26,8 |
+| d=90 | 42,0 / 49,5 | 37,5 / 45,5 |
+| d=60 | 62,1-63,7 / 82-85 | 41,8 / 53,1 |
+| d=45 | 54,6 / 68,5 | 38,2 / 46,5 |
+| d=30 pan | 46,2 / 57,1 | 36,0 / 42,5 |
+| carte complète, pan (d=30) | non mesuré | 37,9 / 42,4 |
+| carte complète, descentes | 56-65 / 104-120 (rapport) | 35,7 / 47,0 |
+| Conseil fermé après visite | 28-30 ms | 10,7 ms |
+| bataille Crécy mêlée | 24,0 / 25,8 | 24,0 / 25,8 (inchangé) |
+Préréglage « high » (cible de l'ADR 0404) à d=60 : 35,5 / 45.
+
+## Non reproduits
+
+- Pic de 678 ms au démarrage du banc, 546 ms à d=150, 444 ms en mêlée : max observés 70-82 ms (cartes), 38-41 ms
+  (mêlée) sur 6 passes ; les pics du profil (`feature profile`) sont des chargements (envoi de textures 68 ms,
+  `allocate_and_free_meshes` 28 ms, `reseat_ribbons` 34 ms au démarrage), pas de pic de 400 ms. Probablement dus à
+  la charge machine du moment.
+- Régression 7e0c4bb12 -> 3dd37ab5c : non rejouée (pas de build de l'ancienne version) ; les trois causes trouvées
+  (ombres lod1, densité de relief, salle du Conseil) se lisent sur main seul.
+- Surcoût des mips de `model_mips.rs` : `generate_queued_mips` moyenne 0,22 ms/image, max 16 ms (une fois par
+  image chargée) ; copies de matériaux de roche non isolées, sans effet visible dans les pics.
+
+## Restants (hors lot)
+
+- Le 40 i/s (p95 <= 25 ms) n'est pas atteint en ultra à d=30-90 (p95 42-53 ms) : le coût est GPU (soumission
+  `submit_pending_command_buffers` ~30 ms/image de 38) : fragment du terrain (13 ms à d=60), ombres du soleil
+  (11 ms dont 5,6 d'arbres), végétation (7,6 ms), MSAA 2x de la carte en ultra (+7,6 ms à d=150).
+  Pistes : MSAA carte, réglage ultra des ombres, shader du terrain (voir ADR 0169).
+- Salle du Conseil ouverte : 32 ms contre 10 (la campagne se dessine derrière) ; couper la caméra de campagne
+  quand le Conseil couvre l'écran.
+- Clés de préréglage non lues par le client Bevy (à vérifier une par une) : `veg_density`, `veg_detail`,
+  `terrain_near`, `ground_detail`, `clutter_density`, `grass`, `upscale_*`.
