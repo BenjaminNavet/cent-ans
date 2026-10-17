@@ -6,6 +6,14 @@
 - 2 Compteur `live.draught_beasts` : les bêtes d'attelage n'ont pas de `LifeItem` ; compté depuis les `Beast`.
 - 3 Mât de Saint-Denis : c'est le moulin à vent (corps 0,71 u x 4,6 = 3,3 u de haut) ; `windmill_ratio` 1,0 -> 0,45.
 
-## Reste
-- 2 Charrette (bouillie) : à revérifier après les mips.
-- 4, 5 : voir rapport.
+- 4 Oiseaux : échelle des espèces x0,35 (`data/map/map_birds.json`, une oie faisait 1,65 u, un homme 1,7 u). Modèles de la vie (charrettes, bêtes, faune, moulins) : plus de réception d'ombre (`life/models.rs::unshadow_model_meshes`).
+- 5 Pavois : texture de planches (`wood_planks_diff.jpg`) teintée par camp, mips demandés via `MipQueue::request`.
+
+## Non reproduits / non traités
+- Chevaux de bataille (franges, plaques grises) : non reproduit en vue rapprochée à l'arrêt (cavalerie 3, d=14) ; à revoir en mêlée.
+- Morts en croix, très clairs : non traité.
+- Charrette : lisible de près (d=6) ; de loin (d=50) reste poreuse (modèles LOD2 800 triangles, `prop_model(.., 2)` toujours LOD2) -> choisir le LOD selon la distance.
+- Chameaux : taille cohérente avec les figurines (folk_scale) ; l'écart vient des maquettes de monuments (non touché).
+- Forêts d'hiver tramées, Pétra rose : non traités (vérifier le modèle `landmarks`).
+- Brouillard : par conception la météo ne touche pas la couche de brume (`weather/atmosphere.rs`) ; non modifié.
+- Budget de captures dépassé (~25) : le bruit des rochers a demandé de bisecter (mips, normales, ombres).

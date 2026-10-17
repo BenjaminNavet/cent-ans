@@ -28,16 +28,28 @@ impl Plugin for ModelMipsPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<MipQueue>()
             .register_dump(dump)
-            .add_systems(Update, (queue_material_images, generate_queued_mips).chain());
+            .add_systems(
+                Update,
+                (queue_material_images, generate_queued_mips).chain(),
+            );
     }
 }
 
 #[derive(Resource, Default)]
-struct MipQueue {
+pub struct MipQueue {
     waiting: VecDeque<(AssetId<Image>, u32)>,
     seen: std::collections::HashSet<AssetId<Image>>,
     /// Images that got a chain (dump probe).
     done: usize,
+}
+
+impl MipQueue {
+    /// Asks for the mip levels of an image that is not part of a glTF material.
+    pub fn request(&mut self, id: AssetId<Image>) {
+        if self.seen.insert(id) {
+            self.waiting.push_back((id, 0));
+        }
+    }
 }
 
 fn queue_material_images(

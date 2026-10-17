@@ -1005,9 +1005,11 @@ fn smoothed_normals(mesh: &Mesh) -> Option<Mesh> {
     if positions.is_empty() || positions.len() != normals.len() {
         return None;
     }
-    let (lo, hi) = positions.iter().fold((Vec3::MAX, Vec3::MIN), |(lo, hi), p| {
-        (lo.min(Vec3::from(*p)), hi.max(Vec3::from(*p)))
-    });
+    let (lo, hi) = positions
+        .iter()
+        .fold((Vec3::MAX, Vec3::MIN), |(lo, hi), p| {
+            (lo.min(Vec3::from(*p)), hi.max(Vec3::from(*p)))
+        });
     let cell = ((hi - lo).max_element() * NORMAL_SMOOTHING).max(1e-4);
     let key = |p: &[f32; 3]| (Vec3::from(*p) / cell).floor().as_ivec3();
     let mut sums: HashMap<IVec3, Vec3> = HashMap::new();

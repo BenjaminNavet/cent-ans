@@ -561,12 +561,19 @@ fn pavise_wood() -> Mesh {
     strip
 }
 
-fn fieldwork_batch(mesh: Handle<Mesh>, color: [f32; 4]) -> OrientedBatch {
+/// Planks of the pavise boards and of the stake shafts (shared with the bridges).
+const WOOD_TEXTURE: &str = "textures/battle/wood_planks_diff.jpg";
+
+fn fieldwork_batch(
+    mesh: Handle<Mesh>,
+    color: [f32; 4],
+    texture: Option<Handle<Image>>,
+) -> OrientedBatch {
     OrientedBatch {
         mesh_handle: mesh,
         records: Arc::new(Vec::new()),
         count: 0,
-        texture_handle: None,
+        texture_handle: texture,
         params: MaterialParams {
             base_color: color,
             alpha_cutoff: 0.0,
@@ -675,37 +682,33 @@ pub(super) fn update_fieldworks(
     mut fieldworks: ResMut<Fieldworks>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut batches: Query<&mut OrientedBatch>,
+    server: Res<AssetServer>,
+    mut mips: ResMut<crate::fx::model_mips::MipQueue>,
 ) {
     if fieldworks.batches.is_none() {
+        let planks: Handle<Image> = server.load(WOOD_TEXTURE);
+        mips.request(planks.id());
         let shaft = meshes.add(stake_shaft());
         let tip = meshes.add(stake_tip());
         let board = meshes.add(pavise_board());
         let wood = meshes.add(pavise_wood());
-        let mut spawn = |name: &str, mesh: Handle<Mesh>, color: [f32; 4]| {
+        let mut spawn = |name: &str, mesh: Handle<Mesh>, color: [f32; 4], textured: bool| {
             commands
                 .spawn((
                     Name::new(name.to_owned()),
-                    fieldwork_batch(mesh, color),
+                    fieldwork_batch(mesh, color, textured.then(|| planks.clone())),
                     DespawnOnExit(AppState::Battle),
                 ))
                 .id()
         };
-        // Colours: wood of the stake, fresh point, boards tinted by side (the white-ish board
-        // 0.82 / 0.78 / 0.70 times the side colour of the Godot instance), dark wood.
+        // Colours: wood of the stake, fresh point, boards of planked wood (the texture) tinted by
+        // side (the tint is above 1: the planks are dark in linear light), dark wood.
         let ids = [
-            spawn("StakeShafts", shaft, [0.32, 0.24, 0.15, 1.0]),
-            spawn("StakeTips", tip, [0.74, 0.62, 0.43, 1.0]),
-            spawn(
-                "PaviseAttacker",
-                board.clone(),
-                [0.82 * 0.30, 0.78 * 0.36, 0.70 * 0.62, 1.0],
-            ),
-            spawn(
-                "PaviseDefender",
-                board,
-                [0.82 * 0.62, 0.78 * 0.24, 0.70 * 0.20, 1.0],
-            ),
-            spawn("PaviseWood", wood, [0.35, 0.28, 0.18, 1.0]),
+            spawn("StakeShafts", shaft, [0.32, 0.24, 0.15, 1.0], false),
+            spawn("StakeTips", tip, [0.74, 0.62, 0.43, 1.0], false),
+            spawn("PaviseAttacker", board.clone(), [1.6, 1.8, 2.6, 1.0], true),
+            spawn("PaviseDefender", board, [2.6, 1.5, 1.3, 1.0], true),
+            spawn("PaviseWood", wood, [0.35, 0.28, 0.18, 1.0], false),
         ];
         fieldworks.batches = Some(ids);
     }
