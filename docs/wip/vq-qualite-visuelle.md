@@ -21,7 +21,7 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 | blight | opus | 1 | bataille : lumière, contraste, voile, perspective aérienne, mise à l'échelle 3D si marge | fusionné ; voile remplacé par perspective aérienne (`fog.clear.aerial`), soleil 30°/2,2, ambiante réduite, `ssao_quality` lu ; reste : banc calme, SSAO ultra, tonemapping, aerial pluie/neige |
 | rivers | opus | 1 | campagne : rivières réalistes (couleur, berges, reflets, lisibles à toute distance) | fusionné (0366d89f4) ; reste : liseré clair des bords trop « trait de carte », bande de sol mouillé hors ruban, river_fine.wesl, brume sur l'eau |
 | cground | opus | 1 | campagne : sol de près (parcelles, matières, colormap, variation) | fusionné ; `ground_detail.wesl` + `data/fx/ground_detail.json`, réglage `ground_detail` 0/1/2 ; écart-type +16 % (Godot ×1,6 non atteint) ; reste : relief/haies, contraste après regard du joueur |
-| rivers2 | opus | 2 | rivières : liseré clair, bande de sol mouillé, brume sur l'eau, river_fine | lancé |
+| rivers2 | opus | 2 | rivières : liseré clair, bande de sol mouillé, brume sur l'eau, river_fine | fusionné ; reste : teinte aérienne par pixel sur l'eau, bande mouillée des lacs, palier fin sans brume |
 | cgrade | opus | 2 | campagne : étalonnage commun à toute la 3D, perspective aérienne par distance/inclinaison, équilibre soleil/ambiance | lancé |
 
 ## Journal
@@ -31,3 +31,4 @@ Mandat joueur (17/10 ~0 h 40) : « augmenter la qualité visuelle sans passer so
 - 17/10 : vq-cground fusionné (parcelles contrastées par saison, dérive de sol, bandes au plancher caméra ; coût ≤ bruit, à remesurer au calme).
 - 17/10 : disque revenu à 122 Go libres ; vague 2 lancée (rivers2, cgrade).
 - 17/10 : vq-blight fusionné (pas de MetalFX côté Bevy : bataille déjà en natif).
+- 17/10 : vq-rivers2 fusionné (berges sombres, bande mouillée 3 px, DistanceFog sur l'eau ; coût nul).
