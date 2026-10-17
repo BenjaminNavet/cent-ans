@@ -254,9 +254,10 @@ pub fn update_targets(
                 view.range_target(props.chimney_range.max(500.0), 0.7)
                     * view.edge_target(item.anchor, 0.85)
             }
-            Cat::Bird => 1.0,
+            // Flocks retire themselves (`birds::manage_flocks`: another cell, closed season,
+            // far view); forcing 1.0 here every frame kept every flock ever spawned alive.
             // Scenes set their own target (`scenes::scene_targets`).
-            Cat::Scene => continue,
+            Cat::Bird | Cat::Scene => continue,
         };
         fade.target = target;
     }

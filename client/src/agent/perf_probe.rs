@@ -49,7 +49,7 @@ fn dump(world: &World) -> (String, Value) {
         mean = window.ms.iter().sum::<f32>() / window.ms.len() as f32;
         max = window.ms.iter().copied().fold(0.0, f32::max);
     }
-    let mut archetypes: Vec<(usize, Vec<String>)> = world
+    let mut archetypes: Vec<(usize, usize, Vec<String>)> = world
         .archetypes()
         .iter()
         .filter(|a| !a.is_empty())
@@ -63,20 +63,37 @@ fn dump(world: &World) -> (String, Value) {
                     full.rsplit("::").next().unwrap_or(&full).to_owned()
                 })
                 .collect();
-            (a.len() as usize, names)
+            (a.len() as usize, a.id().index(), names)
         })
         .collect();
-    archetypes.sort_by_key(|(n, _)| std::cmp::Reverse(*n));
-    let total: usize = archetypes.iter().map(|(n, _)| n).sum();
+    archetypes.sort_by_key(|(n, _, _)| std::cmp::Reverse(*n));
+    let total: usize = archetypes.iter().map(|(n, _, _)| n).sum();
     let top: Vec<Value> = archetypes
         .iter()
         .take(TOP_ARCHETYPES)
-        .map(|(n, names)| {
+        .map(|(n, id, names)| {
             let mut shown: Vec<&str> = names.iter().map(String::as_str).collect();
             shown.truncate(8);
-            json!({"entities": n, "components": shown})
+            json!({"id": id, "entities": n, "components": shown})
         })
         .collect();
+    // Entities by name (digits and hex runs dropped), parents of meshes by name.
+    let mut by_name: std::collections::HashMap<String, usize> = Default::default();
+    for entity in world.iter_entities() {
+        let Some(name) = entity.get::<Name>() else {
+            continue;
+        };
+        let key: String = name
+            .as_str()
+            .chars()
+            .filter(|c| !c.is_ascii_digit())
+            .take(28)
+            .collect();
+        *by_name.entry(key).or_default() += 1;
+    }
+    let mut names: Vec<(String, usize)> = by_name.into_iter().collect();
+    names.sort_by_key(|(_, n)| std::cmp::Reverse(*n));
+    names.truncate(TOP_ARCHETYPES);
     (
         "perf_probe".into(),
         json!({
@@ -84,6 +101,7 @@ fn dump(world: &World) -> (String, Value) {
             "frame_ms_max": max,
             "live_entities": total,
             "archetypes": world.archetypes().len(),
+            "top_names": names,
             "top_archetypes": top,
             "assets": {
                 "mesh": assets_len::<Mesh>(world),

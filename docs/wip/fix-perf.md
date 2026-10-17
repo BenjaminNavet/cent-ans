@@ -45,3 +45,12 @@ testé). Correctif : `ensure_room` détruit la salle à la fermeture et la recon
 |---|---|---|
 | Conseil fermé (moyenne 60 images) | 28-30 ms | 10,7 ms |
 | Conseil ouvert | 32-34 ms | 32 ms |
+
+### Fuite des vols d'oiseaux (trouvée par la sonde, `top_names`)
+
+`life/stream.rs::update_targets` remettait chaque image la cible de fondu des vols (`Cat::Bird`) à 1,0 alors que
+`birds::manage_flocks` les retire (autre cellule, saison close) : aucun vol n'était jamais détruit, 511 oiseaux au
+tour 4, 1 730 au tour 8 (+4,4 k entités en 4 tours, caméra suivant le rejeu). Correctif : `Cat::Bird` ignoré par
+`update_targets`. Après : entités 49,1 k -> 49,0 k du tour 4 au tour 8 (avant 50,3 k -> 54,7 k).
+Les 8 059 murets / 4 194 cabanes de vigne apparaissent d'un coup entre les tours 3 et 4 puis restent stables
+(file de création budgétée, pas une fuite).
