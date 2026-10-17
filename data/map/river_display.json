@@ -19,28 +19,28 @@
   ],
   "minor_far_alpha": 0.55,
   "shallow_color": [
-    0.48,
-    0.7,
-    0.8
+    0.3,
+    0.38,
+    0.33
   ],
   "deep_color": [
-    0.28,
-    0.52,
-    0.66
+    0.11,
+    0.21,
+    0.25
   ],
   "bank_ink_color": [
-    0.1,
-    0.22,
-    0.3
+    0.13,
+    0.14,
+    0.1
   ],
-  "bank_ink_strength": 0.35,
+  "bank_ink_strength": 0.5,
   "bank_ink_px": 0.6,
   "edge_soft_px": 0.5,
-  "sky_reflect": 0.45,
+  "sky_reflect": 0.3,
   "sky_color": [
-    0.7,
-    0.82,
-    0.92
+    0.52,
+    0.62,
+    0.7
   ],
   "fine": {
     "min_px": 4.0,
@@ -138,6 +138,44 @@
       "Severn",
       "Trent",
       "Humber"
+    ]
+  },
+  "look": {
+    "saturation": 0.72,
+    "brightness": 0.85,
+    "base_reflect": 0.04,
+    "far_color": [
+      0.27,
+      0.36,
+      0.42
+    ],
+    "far_blend": [
+      90.0,
+      600.0
+    ],
+    "mud_color": [
+      0.36,
+      0.33,
+      0.23
+    ],
+    "mud_strength": 0.55,
+    "bank_wet_start": 0.6,
+    "glint_color": [
+      1.0,
+      0.9,
+      0.7
+    ],
+    "glint_strength": 0.45,
+    "glint_power": 110.0,
+    "lake_shallow_color": [
+      0.24,
+      0.36,
+      0.36
+    ],
+    "lake_deep_color": [
+      0.1,
+      0.22,
+      0.28
     ]
   }
 }
