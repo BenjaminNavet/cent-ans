@@ -301,3 +301,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0456 | [Historique client dans la sauvegarde](0456-historique-client-dans-la-sauvegarde.md) | accepté |
 | 0476 | [Le vaincu se replie hors de la province de la bataille](0476-repli-hors-de-la-province.md) | accepté |
 | 0496 | [Géographie de la carte : lacs au vrai niveau, côte lissée, maquettes hors de la mer](0496-geographie-carte-lacs-cotes-maquettes.md) | accepté |
+| 0596 | [La météo « brouillard » de campagne rend la brume visible](0596-meteo-brouillard-brume-visible.md) | accepté |
