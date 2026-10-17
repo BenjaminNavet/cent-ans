@@ -243,6 +243,7 @@ pub fn update_labels(
     mut commands: Commands,
     waypoints: Res<Waypoints>,
     theme: Res<UiTheme>,
+    ui_scale: Res<bevy::ui::UiScale>,
     cameras: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
     mut labels: Query<(
         Entity,
@@ -275,10 +276,10 @@ pub fn update_labels(
         ));
     }
     for (_, label, mut node, mut text, mut visibility) in &mut labels {
-        let projected = waypoints
-            .labels
-            .get(label.0)
-            .and_then(|(world, n)| Some((camera.world_to_viewport(transform, *world).ok()?, *n)));
+        let projected = waypoints.labels.get(label.0).and_then(|(world, n)| {
+            let screen = camera.world_to_viewport(transform, *world).ok()?;
+            Some((crate::ui::kit::viewport_to_ui(screen, &ui_scale), *n))
+        });
         match projected {
             Some((pos, number)) => {
                 node.left = Val::Px(pos.x - 7.0);

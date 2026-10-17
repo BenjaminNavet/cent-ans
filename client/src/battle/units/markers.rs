@@ -493,6 +493,7 @@ fn update_markers(
     theme: Option<Res<UiTheme>>,
     assets: Res<AssetServer>,
     camera: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
+    ui_scale: Res<bevy::ui::UiScale>,
     mut nodes: Query<(&mut Node, &mut Visibility, &mut UiTransform)>,
     mut backgrounds: Query<&mut BackgroundColor>,
     mut borders: Query<&mut BorderColor>,
@@ -532,6 +533,8 @@ fn update_markers(
         let Ok(anchor) = camera.world_to_viewport(camera_transform, top) else {
             continue;
         };
+        // Plates are UI nodes: `Val::Px` is multiplied by `UiScale`.
+        let anchor = crate::ui::kit::viewport_to_ui(anchor, &ui_scale);
         by_id.insert(unit.id, unit);
         entries.push(Entry::single(
             unit.id,
