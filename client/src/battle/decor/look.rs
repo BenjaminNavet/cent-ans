@@ -17,6 +17,25 @@ pub struct FogLook {
     pub horizon_density: f32,
     pub color: [f32; 3],
     pub ambient: f32,
+    /// Distance-based aerial perspective (Bevy `FogFalloff::Atmospheric`) instead of the uniform
+    /// exponential veil; absent = exponential.
+    #[serde(default)]
+    pub aerial: Option<AerialLook>,
+}
+
+/// Aerial perspective of the battle camera: distant objects lose their red first (extinction) and
+/// gain the blue-ish light of the air (inscattering), the near field stays clear.
+#[derive(Debug, Clone, Deserialize)]
+pub struct AerialLook {
+    /// Distance (m) at which the extinction reaches ~98 % (the horizon band uses the second one).
+    pub visibility_m: f32,
+    pub horizon_visibility_m: f32,
+    /// Colour objects fade towards as they are extinguished (linear-ish rgb 0-1).
+    pub extinction: [f32; 3],
+    pub inscattering: [f32; 3],
+    /// Warm glow of the fog on the sun side (colour, exponent); strength 0 = off.
+    pub sun_color: [f32; 3],
+    pub sun_exponent: f32,
 }
 
 #[derive(Debug, Clone, Deserialize)]

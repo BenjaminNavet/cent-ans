@@ -69,7 +69,7 @@
     },
     "midday": {
       "phases": ["midday", "afternoon"],
-      "sun_elevation": 36.0, "sun_azimuth": 218.0, "sun_color": [1.0, 0.94, 0.84], "sun_energy": 1.75,
+      "sun_elevation": 30.0, "sun_azimuth": 218.0, "sun_color": [1.0, 0.93, 0.82], "sun_energy": 2.2,
       "grade": {"temperature": 0.05, "contrast": 1.02, "highlights": [1.0, 0.99, 0.96]}
     },
     "evening": {
@@ -84,7 +84,7 @@
       "sky": {"spring": "clear_midday", "summer": "clear_midday", "autumn": "autumn_clear", "winter": "winter_clear"},
       "sun_energy_scale": 1.0, "sun_elevation_scale": 1.0, "sun_tint": [1.0, 1.0, 1.0],
       "sky_luminance": 0.62, "sky_saturation": 1.0, "sky_tint": [1.0, 1.0, 1.0], "sun_disc": 1.0, "haze": 0.3,
-      "grade": {"contrast": 1.05, "saturation": 0.98, "shadows": [0.98, 0.99, 1.03]}
+      "grade": {"contrast": 1.14, "saturation": 1.04, "shadows": [0.97, 0.99, 1.04]}
     },
     "fog": {
       "sky": {"spring": "misty_morning", "summer": "misty_morning", "autumn": "dawn", "winter": "misty_morning"},
