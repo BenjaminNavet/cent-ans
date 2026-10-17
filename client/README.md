@@ -53,7 +53,7 @@ Dossier `src/ui/kit/` (plugin `UiKitPlugin`, ADR 0357 § 4). Remplace `hud_style
 | Module | Contenu |
 |---|---|
 | `mod.rs` | `UiTheme` (couleurs, polices EB Garamond + repli Noto pour `₶ ▲ ✓`, IM Fell pour les titres, textures 9-slice de `assets/ui/illumination/` avec les marges de `kit.json`), `panel`, `title`, `label`, `typed(variation)`, `ButtonPressed`, `UiCamera`, section de dump `ui_kit` |
-| `style.rs` | palette (`INK`, `RUBRIC`, `GOLD`, jauges…), échelle `UiType` (Title 26, Heading 20, Body 17, Caption 15), étages `UiTier` (`GlobalZIndex` : HUD < panneaux < bandeaux < modales < tutoriel < avis < infobulles) |
+| `style.rs` | palette (`INK`, `RUBRIC`, `GOLD`, jauges…), échelle `UiType` (Title 26, Heading 20, Body 17, Caption 15), étages `UiTier` (`GlobalZIndex` : HUD < avis < panneaux < bandeaux < modales < tutoriel < infobulles) |
 | `widgets.rs` | `button(theme, nom)`, `button_captioned`, `button_small`, `button_primary`, `button_icon`, `toggle_button`, `checkbox`, `tab_bar` + `tab_pane`, `slider`, `gauge`, `scroll_list` + `list_item`, `icon_chip`, `separator`, `section`, `heading`, `caption`, `error_line`, `panel_page` / `panel_sized` / `panel_illuminated` / `panel_note` / `panel_inset` / `card`, `lettrine`, `illuminated_title`, `set_disabled` |
 | `richtext.rs` | `rich_text(theme, assets, bbcode, &RichStyle)` : `[b] [i] [u] [s] [color=#hex] [font_size=N] [url=cible]…[/url] [img=LxH]chemin[/img] [center] [right] [p] [lb] [rb]` → `Text` + `TextSpan` (+ `InlineImage`) ; `parse` pur ; les liens portent `RichLink` + `Hovered` |
 | `tooltip.rs` | `Tooltip { bbcode }` sur n'importe quel nœud ; `TooltipRegistry` (clé de lien → BBCode) ; `TooltipState::open_at / open_child_of` |

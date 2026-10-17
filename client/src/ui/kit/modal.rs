@@ -399,18 +399,26 @@ fn handle_modal_buttons(
     }
 }
 
-fn modal_escape(
+/// Escape answers the active dialog. A dialog that holds Escape back also eats the edge
+/// (`KeyEdges::escape`), so the same press does not open the pause menu behind it (help sheet
+/// closed by Escape); `pause_escape` runs after this system.
+pub fn modal_escape(
     keys: Res<ButtonInput<KeyCode>>,
+    mut edges: Option<ResMut<crate::menu::KeyEdges>>,
     mut queue: ResMut<ModalQueue>,
     mut results: MessageWriter<ModalResult>,
 ) {
-    if keys.just_pressed(KeyCode::Escape)
-        && let Some(entry) = queue.active.as_ref()
-    {
+    // The raw key, or the shared edge (the agent's scripted key presses only show in the latter).
+    let pressed = keys.just_pressed(KeyCode::Escape) || edges.as_ref().is_some_and(|e| e.escape);
+    if pressed && let Some(entry) = queue.active.as_ref() {
         // Information dialogs close as "confirmed"; confirmations cancel.
         let confirmed = entry.spec.no_label.is_empty() || entry.spec.escape_passes;
+        let passes = entry.spec.escape_passes;
         if let Some(key) = queue.finish() {
             results.write(ModalResult { key, confirmed });
+            if !passes && let Some(edges) = edges.as_mut() {
+                edges.escape = false;
+            }
         }
     }
 }
@@ -650,5 +658,41 @@ mod tests {
         app.update();
         assert_eq!(results(&app), 1);
         assert!(!app.world().resource::<ModalQueue>().is_busy());
+    }
+
+    #[test]
+    fn escape_closing_a_dialog_eats_the_edge_so_the_pause_menu_stays_closed() {
+        let mut app = App::new();
+        app.init_resource::<ModalQueue>()
+            .init_resource::<crate::menu::KeyEdges>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .add_message::<ModalResult>()
+            .add_systems(Update, modal_escape);
+        // F1 sheet: an information dialog that holds Escape back.
+        app.world_mut().resource_mut::<ModalQueue>().request(
+            "hud:shortcuts",
+            PRIORITY_REPORT,
+            ModalSpec::info("Aide", "x"),
+        );
+        app.world_mut()
+            .resource_mut::<crate::menu::KeyEdges>()
+            .escape = true;
+        app.update();
+        assert!(!app.world().resource::<ModalQueue>().is_busy());
+        assert!(!app.world().resource::<crate::menu::KeyEdges>().escape);
+        // A dialog that lets Escape through (the briefing) leaves the edge for the pause menu.
+        let mut passing = ModalSpec::confirm("Briefing", "x");
+        passing.escape_passes = true;
+        app.world_mut().resource_mut::<ModalQueue>().request(
+            "briefing",
+            PRIORITY_DECISION,
+            passing,
+        );
+        app.world_mut()
+            .resource_mut::<crate::menu::KeyEdges>()
+            .escape = true;
+        app.update();
+        assert!(!app.world().resource::<ModalQueue>().is_busy());
+        assert!(app.world().resource::<crate::menu::KeyEdges>().escape);
     }
 }

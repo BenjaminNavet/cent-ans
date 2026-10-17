@@ -29,8 +29,8 @@
     },
     {
       "id": "research_idle",
-      "title": "Choisissez une technique (T)",
-      "text": "Aucune recherche n’est en cours : les points de la saison sont perdus. Cliquez pour ouvrir l’arbre.",
+      "title": "Choisissez une technique ({key:map_toggle_tech})",
+      "text": "Aucune recherche en cours : les points s’accumulent en réserve (plafonnée), au-delà ils sont perdus. Cliquez pour ouvrir l’arbre.",
       "action": "alert"
     },
     {

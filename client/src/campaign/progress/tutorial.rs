@@ -532,6 +532,7 @@ fn check_objective(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn rebuild(
     mut commands: Commands,
     mut tutorial: ResMut<Tutorial>,
@@ -540,8 +541,14 @@ fn rebuild(
     codex: Res<crate::codex::store::CodexStore>,
     paused: Option<Res<GamePaused>>,
     settings_screen: Option<Res<SettingsScreen>>,
+    modals: Option<Res<crate::ui::kit::modal::ModalQueue>>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    settings: Option<Res<crate::settings::Settings>>,
 ) {
-    let covered = paused.is_some_and(|p| p.0) || settings_screen.is_some_and(|s| s.root.is_some());
+    // One narrator at a time: the card waits while a modal (briefing, report) is up.
+    let covered = paused.is_some_and(|p| p.0)
+        || settings_screen.is_some_and(|s| s.root.is_some())
+        || modals.is_some_and(|m| m.is_busy());
     let want = tutorial.index.filter(|_| !covered);
     let key = want.map(|i| (i, tutorial.done_timer.is_some(), tutorial.toc_open));
     if key == tutorial.built_for && (tutorial.root.is_some() == key.is_some()) {
@@ -563,9 +570,10 @@ fn rebuild(
     };
     let total = tutorial.steps.len();
     // `[[id]]` / `[[id|label]]` words of the step become Codex links (`CodexText.format`).
+    let keys = crate::campaign::hud::bar::KeyHints::new(keymap.as_deref(), settings.as_deref());
     let step = TutorialStep {
-        text: crate::codex::text::format_auto(&codex, &step.text),
-        advice: crate::codex::text::format_auto(&codex, &step.advice),
+        text: crate::codex::text::format_auto(&codex, &keys.expand(&step.text)),
+        advice: crate::codex::text::format_auto(&codex, &keys.expand(&step.advice)),
         ..step
     };
     tutorial.codex_links =

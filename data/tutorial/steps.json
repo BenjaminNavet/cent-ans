@@ -56,14 +56,14 @@
     },
     "research": {
       "title": "Les technologies",
-      "text": "La jauge de recherche de la barre du haut indique la technologie en cours. Ouvrez l’arbre (touche T ou clic sur la jauge) et choisissez une technologie disponible : sans recherche, les points de la saison sont perdus.",
+      "text": "La jauge de recherche de la barre du haut indique la technologie en cours. Ouvrez l’arbre (touche {key:map_toggle_tech} ou clic sur la jauge) et choisissez une technologie disponible : sans recherche, les points de la saison s’accumulent en réserve dans la limite d’un plafond, puis sont perdus.",
       "objective": "Choisir une recherche.",
       "target": "research",
       "modal_ok": true
     },
     "diplomacy": {
       "title": "La diplomatie",
-      "text": "Le panneau de diplomatie (bouton de la barre ou touche P) liste les puissances, leur attitude envers vous et ses raisons, les traités et la faveur pontificale. Avant chaque envoi, il indique si l’autre partie accepterait.",
+      "text": "Le panneau de diplomatie (bouton de la barre ou touche {key:map_toggle_diplomacy}) liste les puissances, leur attitude envers vous et ses raisons, les traités et la faveur pontificale. Avant chaque envoi, il indique si l’autre partie accepterait.",
       "objective": "Ouvrir la diplomatie.",
       "target": "diplomacy"
     },
@@ -93,14 +93,14 @@
     },
     "governor": {
       "title": "Nommer un gouverneur",
-      "text": "Ouvrez la cour (bouton de la barre ou touche C), choisissez un personnage puis « Nommer gouverneur » et une province. Sa compétence de gouvernance agit sur l’impôt, la construction et l’ordre public. Le bouton « Cour » du panneau de province filtre les gouverneurs possibles.",
+      "text": "Ouvrez la cour (bouton de la barre ou touche {key:map_toggle_court}), choisissez un personnage puis « Nommer gouverneur » et une province. Sa compétence de gouvernance agit sur l’impôt, la construction et l’ordre public. Le bouton « Cour » du panneau de province filtre les gouverneurs possibles.",
       "objective": "Nommer un gouverneur.",
       "target": "governor",
       "modal_ok": true
     },
     "outro": {
       "title": "À vous de jouer",
-      "text": "Vous connaissez l’essentiel. L’encyclopédie (touche L ou Menu → Encyclopédie) décrit chaque unité, bâtiment, technologie, trait et mécanique ; l’aide (F1) rappelle les commandes ; les objectifs (O) suivent votre progression. Bonne campagne !",
+      "text": "Vous connaissez l’essentiel. L’encyclopédie (touche {key:encyclopedia_open} ou Menu → Encyclopédie) décrit chaque unité, bâtiment, technologie, trait et mécanique ; l’aide (F1) rappelle les commandes ; les objectifs (O) suivent votre progression. Bonne campagne !",
       "objective": "Cliquez sur « Terminer ».",
       "target": "",
       "manual": true

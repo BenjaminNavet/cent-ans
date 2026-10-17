@@ -63,6 +63,31 @@ impl<'a> KeyHints<'a> {
             map.label(action, if self.azerty { "azerty" } else { "qwerty" })
         })
     }
+
+    /// Replaces every `{key:ACTION}` of `text` with the key actually bound to the action (no
+    /// key is ever written in the data: the player may have re-bound it). An unbound action
+    /// leaves the word « (non assignée) ».
+    pub fn expand(&self, text: &str) -> String {
+        let mut out = String::with_capacity(text.len());
+        let mut rest = text;
+        while let Some(start) = rest.find("{key:") {
+            out.push_str(&rest[..start]);
+            let after = &rest[start + 5..];
+            let Some(end) = after.find('}') else {
+                out.push_str(&rest[start..]);
+                return out;
+            };
+            let label = self.label(&after[..end]);
+            out.push_str(if label.is_empty() {
+                "non assignée"
+            } else {
+                &label
+            });
+            rest = &after[end + 1..];
+        }
+        out.push_str(rest);
+        out
+    }
 }
 
 /// One window of the launcher: button name, icon id, French name, tooltip line, key action.
@@ -570,5 +595,24 @@ mod stacking_tests {
     fn top_bar_between_panels_and_banners() {
         let z = UiTier::Panel.z() + 5;
         assert!(z > UiTier::Panel.z() && z < UiTier::Banner.z());
+    }
+}
+
+#[cfg(test)]
+mod expand_tests {
+    use super::*;
+
+    #[test]
+    fn key_placeholders_read_the_bound_key() {
+        let map = KeyMap::defaults();
+        let hints = KeyHints::new(Some(&map), None);
+        assert_eq!(
+            hints.expand("Technique ({key:map_toggle_tech}) ou {key:map_toggle_council}."),
+            "Technique (F4) ou J."
+        );
+        assert_eq!(
+            hints.expand("{key:nope} {key:inachevé"),
+            "non assignée {key:inachevé"
+        );
     }
 }

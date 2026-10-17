@@ -103,16 +103,18 @@ impl UiType {
     }
 }
 
-/// Stacking tiers (`PanelStack.Tier`): HUD < panels < banners < modals < tutorial, then toasts
-/// and tooltips above everything. Used through `GlobalZIndex`.
+/// Stacking tiers (`PanelStack.Tier`): HUD < toasts < panels < banners < modals < tutorial, then
+/// tooltips above everything. Used through `GlobalZIndex`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum UiTier {
     Hud,
+    /// Notices and advisor subtitles: above the HUD, under every panel and window, so they never
+    /// cover a title, a button or a decision (they wait behind it).
+    Toast,
     Panel,
     Banner,
     Modal,
     Tutorial,
-    Toast,
     Tooltip,
 }
 
@@ -120,11 +122,11 @@ impl UiTier {
     pub const fn z(self) -> i32 {
         match self {
             Self::Hud => 0,
+            Self::Toast => 5,
             Self::Panel => 10,
             Self::Banner => 20,
             Self::Modal => 30,
             Self::Tutorial => 40,
-            Self::Toast => 90,
             Self::Tooltip => 100,
         }
     }
@@ -156,6 +158,9 @@ mod tests {
     #[test]
     fn tiers_stack_in_order() {
         assert!(UiTier::Modal.z() > UiTier::Panel.z());
-        assert!(UiTier::Tooltip.z() > UiTier::Toast.z());
+        assert!(UiTier::Tooltip.z() > UiTier::Tutorial.z());
+        // Notices never cover a panel or a window.
+        assert!(UiTier::Toast.z() > UiTier::Hud.z());
+        assert!(UiTier::Toast.z() < UiTier::Panel.z());
     }
 }
