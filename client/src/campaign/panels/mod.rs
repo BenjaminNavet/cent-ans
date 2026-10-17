@@ -55,3 +55,53 @@ impl Plugin for CampaignPanelsPlugin {
         ));
     }
 }
+
+#[cfg(test)]
+mod switch_tests {
+    use super::*;
+    use crate::menu::KeyEdges;
+    use crate::settings::KeyMap;
+    use crate::ui::kit::text_field::TextInputFocus;
+
+    fn app() -> App {
+        let mut app = App::new();
+        app.init_resource::<tech::TechPanel>()
+            .init_resource::<diplomacy::DiplomacyUi>()
+            .init_resource::<KeyEdges>()
+            .init_resource::<KeyMap>()
+            .init_resource::<TextInputFocus>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .add_message::<OpenPanel>()
+            .add_systems(Update, (tech::open_close, diplomacy::open_close));
+        app
+    }
+
+    fn send(app: &mut App, panel: OpenPanel) {
+        app.world_mut().write_message(panel);
+        app.update();
+    }
+
+    fn open(app: &App) -> (bool, bool) {
+        (
+            app.world().resource::<tech::TechPanel>().open,
+            app.world().resource::<diplomacy::DiplomacyUi>().open,
+        )
+    }
+
+    /// A launcher click on another window switches in one press; the same launcher toggles.
+    #[test]
+    fn launcher_switches_then_toggles() {
+        let mut app = app();
+        send(&mut app, OpenPanel::Tech);
+        assert_eq!(open(&app), (true, false));
+        send(&mut app, OpenPanel::Diplomacy);
+        assert_eq!(open(&app), (false, true));
+        send(&mut app, OpenPanel::Tech);
+        assert_eq!(open(&app), (true, false));
+        send(&mut app, OpenPanel::Tech);
+        assert_eq!(open(&app), (false, false));
+        send(&mut app, OpenPanel::Diplomacy);
+        send(&mut app, OpenPanel::Diplomacy);
+        assert_eq!(open(&app), (false, false));
+    }
+}
