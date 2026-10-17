@@ -92,8 +92,7 @@ class CoastField:
         self.added = added[sl]
         # distance signée (> 0 sur la terre, < 0 dans l'eau), en pixels composés
         self.signed = (
-            ndimage.distance_transform_edt(new)
-            - ndimage.distance_transform_edt(~new)
+            ndimage.distance_transform_edt(new) - ndimage.distance_transform_edt(~new)
         ).astype(np.float32)
         self.near_carved = ndimage.distance_transform_edt(~self.carved).astype(
             np.float32
@@ -128,7 +127,9 @@ class CoastField:
         if not inside.any():
             return heights
         signed = ndimage.map_coordinates(self.signed, coords, order=1, mode="nearest")
-        near = ndimage.map_coordinates(self.near_carved, coords, order=1, mode="nearest")
+        near = ndimage.map_coordinates(
+            self.near_carved, coords, order=1, mode="nearest"
+        )
         nearest = (
             np.rint(coords).astype(np.int64).clip(0, None)
         )  # pixel composé le plus proche
@@ -191,7 +192,9 @@ def splice_land(
     return out
 
 
-def splice_coastline(old_doc: dict, new_doc: dict, windows: list[tuple[int, int, int, int]]) -> dict:
+def splice_coastline(
+    old_doc: dict, new_doc: dict, windows: list[tuple[int, int, int, int]]
+) -> dict:
     """Côtes : les anneaux inchangés restent ; l'anneau modifié = ancien hors fenêtres + nouveau dedans."""
     from shapely.geometry import Polygon, box
     from shapely.ops import unary_union
@@ -211,17 +214,21 @@ def splice_coastline(old_doc: dict, new_doc: dict, windows: list[tuple[int, int,
         # l'ancien anneau qui recouvre le plus le nouveau
         best = max(
             (f for f in old_doc["features"] if len(f["geometry"]["coordinates"]) > 3),
-            key=lambda f: Polygon(f["geometry"]["coordinates"])
-            .buffer(0)
-            .intersection(new_poly)
-            .area,
+            key=lambda f: (
+                Polygon(f["geometry"]["coordinates"])
+                .buffer(0)
+                .intersection(new_poly)
+                .area
+            ),
         )
         old_poly = Polygon(best["geometry"]["coordinates"]).buffer(0)
         merged = old_poly.difference(cut).union(new_poly.intersection(cut))
         parts = [merged] if merged.geom_type == "Polygon" else list(merged.geoms)
         ring = max(parts, key=lambda p: p.area).exterior
         coords = [[round(x, 1), round(y, 1)] for x, y in ring.coords]
-        features.append({**feat, "geometry": {"type": "LineString", "coordinates": coords}})
+        features.append(
+            {**feat, "geometry": {"type": "LineString", "coordinates": coords}}
+        )
     out["features"] = features
     return out
 
@@ -258,9 +265,12 @@ def patch_tiles(
     return done
 
 
-def splice(old_land_path: Path, old_coast_path: Path, map_dir: Path, windows_cfg: list[dict]) -> dict:
+def splice(
+    old_land_path: Path, old_coast_path: Path, map_dir: Path, windows_cfg: list[dict]
+) -> dict:
     """Remplace ``land_mask.png`` et ``coastline.geojson`` (sortie de ``geo compose``) par l'ancien état
-    hors des fenêtres autour des estuaires d'auteur ; renvoie un rapport."""
+    hors des fenêtres autour des estuaires d'auteur ; renvoie un rapport.
+    """
     from cent_ans_tools.compose.contract import COMPOSE_DIR, ComposedWarp
 
     cw = ComposedWarp.load(COMPOSE_DIR)
@@ -319,7 +329,9 @@ def apply(
         "box_px": field.box,
         "tiles": {},
     }
-    meta = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))["height_tiles"]
+    meta = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))[
+        "height_tiles"
+    ]
     report["tiles"]["E0"] = patch_tiles(
         field, map_dir / meta["dir"], meta["pattern"], 2, dry_run
     )

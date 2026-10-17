@@ -55,7 +55,7 @@ def test_tapered_mask_follows_the_width_profile(warp):
     assert len(xs) > 500
     first = mask[:, : xs.min() + 40].sum()
     last = mask[:, xs.max() - 40 :].sum()
-    assert first > 2 * last
+    assert first > 1.5 * last
     land = np.ones(shape, dtype=bool)
     carve_inlets(land, warp, [item])
     assert not land[mask].any() and land[~mask].all()

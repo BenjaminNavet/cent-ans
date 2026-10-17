@@ -1105,7 +1105,7 @@ mod tests {
         let cfg = parse(&doc, true);
         assert_eq!(cfg.types.len(), 52);
         assert_eq!(cfg.rules.len(), 30);
-        assert_eq!(cfg.sites.len(), 84);
+        assert_eq!(cfg.sites.len(), 85);
         assert_eq!(cfg.render.distance_scale, 3.0);
         assert_eq!(cfg.render.size_distance, 50.0);
         assert_eq!(cfg.render.view_range_units, 220.0);

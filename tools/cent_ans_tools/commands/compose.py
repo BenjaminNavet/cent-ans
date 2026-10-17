@@ -132,7 +132,8 @@ def compose_coast_splice(
 @compose_app.command("coast-patch")
 def compose_coast_patch(
     old_land: Path = typer.Argument(
-        ..., help="Ancien land_mask.png (ex. `git show HEAD:data/map/land_mask.png > ancien.png`)"
+        ...,
+        help="Ancien land_mask.png (ex. `git show HEAD:data/map/land_mask.png > ancien.png`)",
     ),
     pyramid: Path = typer.Option(
         None, help="Dossier de la pyramide E1-E3 à retoucher aussi (hors git)"
