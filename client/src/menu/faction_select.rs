@@ -100,6 +100,8 @@ fn clear_main_menu(
 }
 
 const CARD_WIDTH: f32 = 220.0;
+/// Width of the left panel (tabs).
+const TABS_WIDTH: f32 = 400.0;
 const ART_HEIGHT: f32 = 112.0;
 
 pub struct FactionSelectPlugin;
@@ -136,6 +138,7 @@ impl Plugin for FactionSelectPlugin {
                     faction_map::map_buttons,
                     faction_map::refresh_list,
                     faction_map::repaint,
+                    faction_map::frame_choice,
                     faction_map::hover_card,
                 )
                     .chain()
@@ -278,7 +281,18 @@ fn spawn_screen(
             ChildOf(column),
         ))
         .id();
-    let left = framed(&mut commands, &theme, body, None, 1.0);
+    let left = framed(&mut commands, &theme, body, Some(TABS_WIDTH), 0.0);
+    // The Europe map stays on screen whatever the tab: it sits between the tabs and the pitch.
+    let map_panel = framed(&mut commands, &theme, body, None, 1.0);
+    commands.entity(map_panel).insert(Name::new("MapPanel"));
+    commands
+        .entity(map_panel)
+        .entry::<Node>()
+        .and_modify(|mut n| {
+            n.align_items = AlignItems::Center;
+            n.justify_content = JustifyContent::Center;
+        });
+    faction_map::spawn_map(&mut commands, &map_state, map_panel);
     let special = front.special();
     let mut tabs: Vec<(&str, &str)> = vec![("tab:recommended", "Départs recommandés")];
     if !special.is_empty() {
@@ -290,6 +304,7 @@ fn spawn_screen(
     let pane = commands
         .spawn((tab_pane("start", "tab:recommended", true), ChildOf(left)))
         .id();
+    grow(&mut commands, pane);
     spawn_cards(
         &mut commands,
         &theme,
@@ -304,6 +319,7 @@ fn spawn_screen(
         let pane = commands
             .spawn((tab_pane("start", "tab:special", false), ChildOf(left)))
             .id();
+        grow(&mut commands, pane);
         if !front.special_starts.text.is_empty() {
             commands.spawn((
                 typed(&theme, &front.special_starts.text, UiType::Body),
@@ -324,13 +340,14 @@ fn spawn_screen(
     let pane = commands
         .spawn((tab_pane("start", "tab:all", false), ChildOf(left)))
         .id();
-    faction_map::spawn_tab(&mut commands, &theme, &map_state, &start_sheets, pane, root);
+    grow(&mut commands, pane);
+    faction_map::spawn_tab(&mut commands, &theme, &start_sheets, pane, root);
 
     // Right column: pitch and difficulty.
     let side = commands
         .spawn((
             Node {
-                width: Val::Px(420.0),
+                width: Val::Px(360.0),
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(10.0),
                 ..default()
@@ -338,7 +355,7 @@ fn spawn_screen(
             ChildOf(body),
         ))
         .id();
-    let detail = framed(&mut commands, &theme, side, Some(420.0), 1.0);
+    let detail = framed(&mut commands, &theme, side, Some(360.0), 1.0);
     commands
         .entity(detail)
         .insert((Name::new("Detail"), DetailBox));
@@ -346,7 +363,7 @@ fn spawn_screen(
         .entity(detail)
         .entry::<Node>()
         .and_modify(|mut n| n.overflow = Overflow::clip());
-    let difficulty = framed(&mut commands, &theme, side, Some(420.0), 0.0);
+    let difficulty = framed(&mut commands, &theme, side, Some(360.0), 0.0);
     commands.spawn((
         heading(&theme, "Difficulté de la campagne"),
         ChildOf(difficulty),
@@ -409,6 +426,14 @@ fn spawn_screen(
     ));
 }
 
+/// A tab pane fills the height left by the tab bar (so its scroll list is bounded).
+fn grow(commands: &mut Commands, pane: Entity) {
+    commands.entity(pane).entry::<Node>().and_modify(|mut n| {
+        n.flex_grow = 1.0;
+        n.min_height = Val::Px(0.0);
+    });
+}
+
 /// Parchment panel child of `parent`: `width` px (or growing in the row), `grow` flex factor.
 fn framed(
     commands: &mut Commands,
@@ -443,8 +468,12 @@ fn spawn_cards(
     pane: Entity,
 ) {
     let scroll = commands
-        .spawn((scroll_list(theme, "cards:scroll", 500.0), ChildOf(pane)))
+        .spawn((scroll_list(theme, "cards:scroll", 200.0), ChildOf(pane)))
         .id();
+    commands.entity(scroll).entry::<Node>().and_modify(|mut n| {
+        n.min_height = Val::Px(0.0);
+        n.flex_grow = 1.0;
+    });
     let wrap = commands
         .spawn((
             Node {
