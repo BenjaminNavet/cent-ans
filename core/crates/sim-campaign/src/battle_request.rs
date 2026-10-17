@@ -81,6 +81,12 @@ pub struct AutoSideReport {
     pub routed: bool,
 }
 
+/// A field battle has the sea on a flank only near a port of a coastal province: Île-de-France
+/// is flagged coastal for its Somme estuary, but a battle at Paris is inland.
+fn is_port(data: &GameData, location: &SettlementId) -> bool {
+    data.settlements.get(location).is_some_and(|s| s.port)
+}
+
 impl AutoResolveReport {
     pub(crate) fn new(
         data: &GameData,
@@ -659,7 +665,7 @@ impl CampaignState {
             river: crossing.is_some() || province.is_some_and(|p| !p.rivers.is_empty()),
             crossing,
             season: battle_season(self.season),
-            coastal: province.is_some_and(|p| p.coastal),
+            coastal: province.is_some_and(|p| p.coastal) && is_port(data, &request.location),
             bare_field: false,
             attacker: {
                 // ADR 0330: far allied armies arrive during the battle.
@@ -1088,7 +1094,7 @@ impl CampaignState {
             river: province.is_some_and(|p| !p.rivers.is_empty()),
             crossing: None,
             season: battle_season(self.season),
-            coastal: province.is_some_and(|p| p.coastal),
+            coastal: province.is_some_and(|p| p.coastal) && is_port(data, &request.location),
             bare_field: false,
             attacker,
             defender: side_setup(self, data, &request.attacker, &besiegers),

@@ -633,7 +633,10 @@ pub fn leave_battle(
         lines.push(format!("Résultat de bataille refusé : {message}"));
     }
     lines.extend(notice::aftermath_lines(&aftermath));
-    flow.last_result_title = format!("Bataille de {}", active.view.province_name);
+    flow.last_result_title = format!(
+        "Bataille {}",
+        crate::ui::kit::fr::de_place(&active.view.province_name)
+    );
     flow.notice = Some((flow.last_result_title.clone(), lines.join("\n")));
     flow.last_aftermath = Some(aftermath);
     flow.log_events(&events);

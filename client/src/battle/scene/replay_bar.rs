@@ -341,6 +341,11 @@ fn add_watch_button(
     if existing.iter().any(|name| name.as_str() == WATCH) {
         return;
     }
+    // The result screen already carries its own « Revoir la bataille » in its fixed foot.
+    if existing.iter().any(|name| name.as_str() == "result:watch") {
+        stats.watch_button = true;
+        return;
+    }
     commands.spawn((
         button_primary(&theme, WATCH, "Revoir la bataille"),
         ChildOf(page),

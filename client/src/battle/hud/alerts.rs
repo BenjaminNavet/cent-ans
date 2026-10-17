@@ -37,6 +37,21 @@ pub fn label(kind: AlertKind) -> &'static str {
     }
 }
 
+/// Icon of an alert kind: its own `battle_alert_<key>`, else the nearest icon the ink set has
+/// (« Unité ralliée » and « La place est menacée » have no icon of their own yet).
+fn icon_id(theme: &UiTheme, key: &str) -> String {
+    let own = format!("battle_alert_{key}");
+    if theme.icons.get(&own).is_some() {
+        return own;
+    }
+    match key {
+        "rallied" => "battle_ability_banner_rally",
+        "square_threatened" => "battle_state_under_fire",
+        _ => "battle_alert_reinforcements",
+    }
+    .to_owned()
+}
+
 /// « (×3) » counter, capped at « ×9+ ».
 pub fn count_label(count: usize) -> String {
     match count {
@@ -396,7 +411,7 @@ fn rebuild_rows(
                 ChildOf(list_entity),
             ))
             .with_children(|parent| {
-                parent.spawn(icon(&theme, &assets, &format!("battle_alert_{key}"), 22.0));
+                parent.spawn(icon(&theme, &assets, &icon_id(&theme, key), 22.0));
                 parent.spawn((
                     Text::new(format!("{}{}", label(row.kind), count_label(row.count))),
                     theme.text_font(false, false, UiType::Caption.size()),
