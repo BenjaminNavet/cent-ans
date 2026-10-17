@@ -419,6 +419,14 @@ def geo_biomes() -> None:
     _print_sizes("Carte des biomes", paths)
 
 
+@geo_app.command("biomes-island")
+def geo_biomes_island() -> None:
+    """Île de Bretagne océanique (lot england) : corrige biomes.png en place, puis lancer biome-blend."""
+    from cent_ans_tools.geo import biomes as geo_biomes_step
+
+    _print_sizes("Biomes (île de Bretagne)", geo_biomes_step.patch_island())
+
+
 @geo_app.command("biome-blend")
 def geo_biome_blend() -> None:
     """Fondu des frontières de biomes (TX, ADR 0243) : biomes_blend_ab.png + biomes_blend_dist.png."""

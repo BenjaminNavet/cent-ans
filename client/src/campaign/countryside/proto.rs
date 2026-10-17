@@ -58,6 +58,8 @@ enum State {
 #[derive(Resource, Default)]
 pub struct Prototypes {
     map: HashMap<String, State>,
+    /// Albedo gain per model path (`albedo_gain` of the prop), applied once when it is captured.
+    gains: HashMap<String, f32>,
 }
 
 /// Root of a loading prototype scene.
@@ -101,6 +103,14 @@ impl Prototypes {
         Lookup::Pending
     }
 
+    /// Records the albedo gain of a model (before its first request): the dark weathered textures
+    /// of the windmills read as black silhouettes under the campaign light without it.
+    pub fn set_gain(&mut self, path: &str, gain: f32) {
+        if (gain - 1.0).abs() > 1e-4 && !self.gains.contains_key(path) {
+            self.gains.insert(path.to_string(), gain);
+        }
+    }
+
     pub fn ready_count(&self) -> usize {
         self.map
             .values()
@@ -133,6 +143,7 @@ pub fn capture_prototypes(
     mut commands: Commands,
     mut protos: ResMut<Prototypes>,
     server: Res<AssetServer>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     children: Query<&Children>,
     parents: Query<&ChildOf>,
     transforms: Query<&Transform>,
@@ -212,6 +223,20 @@ pub fn capture_prototypes(
             hi = Vec3::ZERO;
         }
         commands.entity(root).despawn();
+        if let Some(gain) = protos.gains.get(&path).copied() {
+            let mut seen = Vec::new();
+            for prim in &found {
+                if seen.contains(&prim.material.id()) {
+                    continue;
+                }
+                seen.push(prim.material.id());
+                if let Some(mut material) = materials.get_mut(&prim.material) {
+                    let c = material.base_color.to_linear();
+                    material.base_color =
+                        Color::linear_rgba(c.red * gain, c.green * gain, c.blue * gain, c.alpha);
+                }
+            }
+        }
         protos.map.insert(
             path,
             State::Ready(Arc::new(Proto {

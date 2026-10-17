@@ -429,6 +429,7 @@ fn install_cell(
             resolved.insert(inst.prop, None);
             continue;
         };
+        protos.set_gain(&path, cfg.config.props[inst.prop].albedo_gain);
         match protos.request(&path, commands, server) {
             Lookup::Ready(p) => {
                 measures
@@ -541,6 +542,7 @@ pub fn swap_lods(
             inst.lod = lod;
             continue;
         };
+        protos.set_gain(&path, cfg.config.props[inst.prop].albedo_gain);
         let Lookup::Ready(proto) = protos.request(&path, &mut commands, &server) else {
             continue;
         };

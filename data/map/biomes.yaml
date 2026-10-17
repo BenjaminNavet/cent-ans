@@ -58,6 +58,13 @@ rules:
     - [-40.0, 20.0, -5.6, 80.0]
     - [-40.0, 43.2, -1.5, 80.0]
     - [-40.0, 53.3, 10.5, 80.0]
+  # Boîtes [lon_min, lat_min, lon_max, lat_max] où le Cfb reste océanique quelle que soit la
+  # distance à l'Atlantique : l'île de Bretagne, humide et herbeuse (lot england : Londres et le
+  # sud-est sortaient « continental » = openfield labouré, brun). Les boîtes évitent la côte de
+  # Picardie et de Flandre (lon <= 1.55 au nord de 50.9, lon <= 0.5 au nord de 49.8).
+  oceanic_land_boxes:
+    - [-11.0, 49.8, 0.5, 61.0]
+    - [0.5, 50.9, 1.55, 61.0]
   # Steppes (BS/BW et continental sec) au nord de cette latitude ; au sud, semi-aride.
   steppe_min_lat: 44.0
   # Au sud de steppe_min_lat, continental ou méditerranéen dont la sécheresse
