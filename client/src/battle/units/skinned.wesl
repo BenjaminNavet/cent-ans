@@ -36,6 +36,9 @@ struct Params {
     prop_grip: vec4<f32>,
     prop_axis: vec4<f32>,
     prop_side: vec4<f32>,
+    look0: vec4<f32>,         // livery desaturation, value min / max, far glow (data/fx/battle_soldier_look.json)
+    look1: vec4<f32>,         // plain cloth boost, shield wear, wash variation, skin calm
+    look2: vec4<f32>,         // steel grey mix, steel darken, cloth grain, grain fade (m)
     clips: array<vec4<f32>, 96>,
 }
 
@@ -416,6 +419,17 @@ fn skin_colour(i: i32) -> vec3<f32> {
     }
 }
 
+// Dyed cloth of a soldier: livery colour washed out (grey share jittered per soldier), small
+// warm / cool shift, brightness range from the data file.
+fn dyed_cloth(livery: vec3<f32>, h: vec4<f32>) -> vec3<f32> {
+    let lum = dot(livery, vec3<f32>(0.3, 0.59, 0.11));
+    let var_amount = params.look1.z;
+    let wash = clamp(params.look0.x + (h.y - 0.5) * var_amount, 0.0, 1.0);
+    let shift = (h.z - 0.5) * var_amount * 0.5;
+    let tint = vec3<f32>(1.0 + shift, 1.0, 1.0 - shift);
+    return mix(livery, vec3<f32>(lum), wash) * tint * mix(params.look0.y, params.look0.z, h.x);
+}
+
 fn noise2(p: vec2<f32>) -> f32 {
     let i = floor(p);
     let f = fract(p);
@@ -454,8 +468,7 @@ fn impostor_colour(in: VertexOutput) -> vec4<f32> {
     // a rider over a horse body when the quad is wide.
     let h = in.hash;
     let livery = params.livery.rgb;
-    let lum = dot(livery, vec3<f32>(0.3, 0.59, 0.11));
-    let dyed = mix(livery, vec3<f32>(lum), 0.3) * mix(0.62, 0.9, h.x);
+    let dyed = dyed_cloth(livery, h);
     let h5 = fract(h.x * 7.31 + h.z * 3.17);
     var cloth = dyed;
     if h5 >= params.livery.w {
@@ -644,8 +657,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
     let h6 = fract(h.y * 5.13 + h.x * 11.7);
     let dist = length(in.world_position - view.world_position);
     let livery = params.livery.rgb;
-    let lum = dot(livery, vec3<f32>(0.3, 0.59, 0.11));
-    let dyed = mix(livery, vec3<f32>(lum), 0.3) * mix(0.62, 0.9, h.x);
+    let dyed = dyed_cloth(livery, h);
     var albedo = in.color.rgb;
     var metallic = 0.0;
     var roughness = 0.8;
@@ -709,7 +721,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
             if plain_count > 0 {
                 plain = params.plain[min(i32(h6 * f32(plain_count)), plain_count - 1)].rgb;
             }
-            albedo = plain * mix(0.85, 1.15, h.z) * in.color.rgb * 1.6;
+            albedo = plain * mix(0.85, 1.15, h.z) * in.color.rgb * params.look1.x;
         }
         // Arms (nobles) or livery cross (commons) on the chest and back.
         let torso = abs(rn.z) > 0.35 && in.rest.z > params.chest.x && in.rest.z < params.chest.y
@@ -749,9 +761,25 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
         // Saturated arms over the dyed cloth (±6 % brightness).
         albedo = mix(dyed, arms.rgb * mix(0.84, 0.96, h.y), arms.a);
         roughness = 0.65;
+        // Worn paint: bare wood at the rubbed edges, scratches, dirt rising from the ground,
+        // fading with distance (the shield is seen from behind in the front rank).
+        let sw = params.look1.y * (1.0 - smoothstep(params.look2.w * 0.5, params.look2.w * 2.0, dist));
+        if inside && sw > 0.0 {
+            let edge_d = min(min(in.uv.x, 1.0 - in.uv.x), min(in.uv.y, 1.0 - in.uv.y));
+            let wn = noise2(in.uv * vec2<f32>(23.0, 31.0) + h.xy * 17.0) * 0.6 + noise2(in.uv * 90.0 + h.zw * 5.0) * 0.4;
+            let rub = (1.0 - smoothstep(0.0, 0.09, edge_d)) * smoothstep(0.25, 0.65, wn);
+            albedo = mix(albedo, vec3<f32>(0.22, 0.155, 0.095), rub * sw);
+            let scratch = smoothstep(0.9, 1.0, noise2(vec2<f32>(in.uv.x * 5.0, in.uv.y * 150.0) + h.zw * 40.0));
+            albedo = mix(albedo, albedo * 1.5 + vec3<f32>(0.03), scratch * 0.4 * sw);
+            let soil = (1.0 - smoothstep(0.0, 0.9, in.rest.y)) * smoothstep(0.2, 0.8, wn);
+            albedo = mix(albedo, vec3<f32>(0.2, 0.16, 0.115), soil * 0.55 * sw);
+            albedo *= mix(1.0 - 0.3 * sw, 1.0, smoothstep(0.2, 0.75, wn));
+            roughness = mix(roughness, 0.85, soil * sw);
+        }
         livery_surface = true;
     } else if code == C_SKIN {
         albedo = in.color.rgb * mix(vec3<f32>(1.1, 1.06, 1.0), vec3<f32>(0.62, 0.5, 0.4), h6);
+        albedo = mix(albedo, vec3<f32>(dot(albedo, vec3<f32>(0.3, 0.59, 0.11))) * vec3<f32>(1.2, 0.95, 0.8), params.look1.w);
         roughness = 0.6;
     } else if code == C_LEATHER || code == C_WOOD {
         let grain = noise2(in.rest.xy * 40.0);
@@ -790,7 +818,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
         if code == C_LIVERY {
             albedo = mix(g3.rgb, albedo * clamp(g3_l / params.ga3.x, 0.2, 2.2), g3.a);
         } else if code == C_CLOTH {
-            let hose = plain_colour(i32(fract(h6 * 3.7 + h.w) * 7.99)) * mix(0.85, 1.15, h.z) * 1.5;
+            let hose = plain_colour(i32(fract(h6 * 3.7 + h.w) * 7.99)) * mix(0.85, 1.15, h.z) * (params.look1.x * 1.1);
             albedo = mix(g3.rgb, hose * clamp(g3_l / params.ga3.y, 0.2, 2.2), g3.a);
         } else {
             albedo = g3.rgb;
@@ -798,7 +826,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
                 let sat = (g3.r - g3.b) / max(g3.r, 0.001);
                 let skin = smoothstep(0.08, 0.16, g3_l) * smoothstep(0.03, 0.08, g3.r - g3.g)
                     * smoothstep(0.0, 0.02, g3.g - g3.b) * (1.0 - smoothstep(0.8, 0.9, sat));
-                let calm = mix(g3.rgb, vec3<f32>(g3_l) * vec3<f32>(1.3, 0.93, 0.74), 0.4);
+                let calm = mix(g3.rgb, vec3<f32>(g3_l) * vec3<f32>(1.2, 0.95, 0.78), params.look1.w);
                 let tone = mix(vec3<f32>(1.1, 1.06, 1.0), vec3<f32>(0.62, 0.5, 0.4), h6) / vec3<f32>(0.93, 0.86, 0.79);
                 albedo = mix(albedo, calm * tone, skin);
             }
@@ -1027,6 +1055,20 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
         roughness = mix(roughness, 0.42, grip);
     }
 
+    // Steel and mail: cold grey, darker than the painted vertex colour (reads as metal).
+    if code == C_PLATE || code == C_MAIL {
+        let steel_l = dot(albedo, vec3<f32>(0.3, 0.59, 0.11));
+        albedo = mix(albedo, vec3<f32>(steel_l) * vec3<f32>(0.95, 0.97, 1.03), params.look2.x) * params.look2.y;
+    }
+    // Cloth: weave grain and dirt (average colour kept, faded out before it can alias).
+    let grain_w = params.look2.z * (1.0 - smoothstep(params.look2.w / 3.0, params.look2.w, dist));
+    if grain_w > 0.0 && (code == C_LIVERY || code == C_CLOTH || code == C_QUILT) {
+        let weave = noise2(in.rest.xy * 70.0 + h.xy * 9.0) * 0.6 + noise2(in.rest.xy * 17.0 + h.zw * 7.0) * 0.4;
+        albedo *= 1.0 + grain_w * (weave - 0.5) * 2.0;
+        let soil = (1.0 - smoothstep(0.0, 0.8, in.rest.y)) * (0.35 + 0.65 * noise2(in.rest.xz * 11.0 + h.yw * 13.0));
+        albedo = mix(albedo, albedo * vec3<f32>(0.62, 0.55, 0.45), soil * grain_w * 3.0);
+    }
+
     // Occlusion near the ground, selection highlight.
     let ao = mix(0.6, 1.0, smoothstep(0.0, 1.2, in.rest.y));
     albedo = albedo * ao * (1.0 + in.misc.y * 0.25);
@@ -1070,7 +1112,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
     // Far readability: livery surfaces glow a little with distance (A1-01).
     let far = smoothstep(70.0, 175.0, dist);
     if livery_surface && far > 0.0 {
-        pbr_input.material.emissive = vec4<f32>(dyed * far * 0.35, 1.0);
+        pbr_input.material.emissive = vec4<f32>(dyed * far * params.look0.w, 1.0);
     }
     pbr_input.frag_coord = in.position;
     pbr_input.world_position = vec4<f32>(in.world_position, 1.0);
