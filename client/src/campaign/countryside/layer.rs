@@ -540,11 +540,15 @@ pub fn swap_lods(
     mut cells: ResMut<Cells>,
     mut roots: Query<(Entity, &mut PropInst, Option<&Children>)>,
     models: Query<(), With<PropModel>>,
+    mut spawn_budget: ResMut<super::budget::SpawnBudget>,
+    frame_count: Res<bevy::diagnostic::FrameCount>,
 ) {
     let (Some(cfg), Some(lod)) = (cfg, view.lod) else {
         return;
     };
-    let mut budget = 1500usize;
+    // Same per-frame budget as the sowing: a level-of-detail change swaps thousands of models.
+    let per_frame = super::budget::per_frame(cfg.config.render.spawn_roots_per_frame);
+    let mut budget = spawn_budget.left(frame_count.0, per_frame);
     let mut swapped = 0;
     for (entity, mut inst, children) in &mut roots {
         if inst.lod == lod || budget == 0 {
@@ -572,6 +576,7 @@ pub fn swap_lods(
         commands.entity(entity).add_children(&prims);
         inst.lod = lod;
     }
+    spawn_budget.take(frame_count.0, per_frame, swapped);
     cells.swapped += swapped;
 }
 
