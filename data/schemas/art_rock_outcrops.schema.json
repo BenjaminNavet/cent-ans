@@ -33,7 +33,7 @@
         "near_distance": {"type": "number", "minimum": 0, "description": "Distance caméra en deçà de laquelle les affleurements sont à leur taille réelle."},
         "far_distance": {"type": "number", "minimum": 0, "description": "Distance caméra au-delà de laquelle ils sont grossis de `far_scale`."},
         "far_scale": {"type": "number", "minimum": 1, "description": "Grossissement lointain (lisibilité en vue moyenne)."},
-        "max_display_m": {"type": "number", "exclusiveMinimum": 0, "description": "TS-T9 : taille affichée (m) au-delà de laquelle le grossissement lointain s'arrête (jamais sous la taille naturelle)."},
+        "max_display_m": {"type": "number", "exclusiveMinimum": 0, "description": "TS-T9 : plafond de la taille affichée (m) : le grossissement lointain s'arrête là et les plus gros affleurements y sont ramenés."},
         "sink": {"type": "number", "minimum": 0, "maximum": 0.5, "description": "TS-T9 : part de la taille affichée enfoncée dans le sol."},
         "winter_flat_keep": {"type": "number", "minimum": 0, "maximum": 1, "description": "TS-T9 : part des affleurements gardés l'hiver en terrain plat (plaine enneigée)."},
         "flat_slope": {"type": "number", "minimum": 0, "description": "TS-T9 : pente du sol (montée / course) sous laquelle un affleurement compte comme posé en plaine."},

@@ -77,7 +77,7 @@ pub struct RockRender {
     pub near_distance: f32,
     pub far_distance: f32,
     pub far_scale: f32,
-    /// TS-T9: largest displayed size (m) the distance growth may reach (never below the natural size).
+    /// TS-T9: ceiling of the displayed size (m): the distance growth stops there, the biggest rocks shrink to it.
     pub max_display_m: f32,
     /// TS-T9: part of the displayed size sunk into the ground.
     pub sink: f32,
@@ -568,10 +568,10 @@ pub fn scale_for(r: &RockRender, d: f32) -> f32 {
     1.0 + (r.far_scale - 1.0) * s
 }
 
-/// TS-T9: growth factor of a rock of `size_m` metres under the distance scale `scale`: the growth
-/// stops where the displayed size reaches `max_display_m`, but never drops below the natural size.
+/// TS-T9: size factor of a rock of `size_m` metres under the distance scale `scale`: the displayed
+/// size never exceeds `max_display_m` (the growth stops there, the biggest natural rocks shrink to it).
 pub fn capped_scale(scale: f32, size_m: f32, max_display_m: f32) -> f32 {
-    scale.min((max_display_m / size_m.max(1e-3)).max(1.0))
+    scale.min(max_display_m / size_m.max(1e-3))
 }
 
 /// TS-T9: whether a rock stays in winter: those on flat ground thin out to `keep`, by a stable hash
@@ -1342,8 +1342,9 @@ mod tests {
         assert!((capped_scale(1.7, 300.0, 650.0) - 1.7).abs() < 1e-5);
         // Big rock: growth stops at the cap.
         assert!((capped_scale(1.7, 500.0, 650.0) - 1.3).abs() < 1e-5);
-        // Natural size above the cap: stays natural, no shrink and no growth.
-        assert!((capped_scale(1.7, 1100.0, 650.0) - 1.0).abs() < 1e-5);
+        // Natural size above the cap: brought down to the cap.
+        assert!((capped_scale(1.7, 1300.0, 650.0) - 0.5).abs() < 1e-5);
+        assert!(capped_scale(1.3, 1100.0, 800.0) * 1100.0 <= 800.0 + 1e-3);
         assert!((capped_scale(1.0, 100.0, 650.0) - 1.0).abs() < 1e-5);
     }
 

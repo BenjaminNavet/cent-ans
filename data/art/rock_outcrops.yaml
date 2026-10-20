@@ -28,7 +28,7 @@
     "near_distance": 10.0,
     "far_distance": 70.0,
     "far_scale": 1.3,
-    "max_display_m": 650.0,
+    "max_display_m": 700.0,
     "sink": 0.18,
     "winter_flat_keep": 0.3,
     "flat_slope": 0.08,
