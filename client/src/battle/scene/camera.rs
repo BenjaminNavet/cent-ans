@@ -352,6 +352,11 @@ pub fn control_camera(
     state: Option<ResMut<BattleCameraState>>,
     keymap: Option<Res<crate::settings::KeyMap>>,
     text_focus: Option<Res<crate::ui::kit::text_field::TextInputFocus>>,
+    (hover, nodes, parents): (
+        Option<Res<bevy::picking::hover::HoverMap>>,
+        crate::ui::kit::wheel::WheelNodes,
+        Query<&ChildOf>,
+    ),
 ) {
     let Some(mut state) = state else { return };
     let delta = time.delta_secs();
@@ -405,7 +410,10 @@ pub fn control_camera(
         let step = movement.normalize() * state.distance * PAN_SPEED * delta;
         state.pan(step);
     }
-    if scroll.delta.y != 0.0 {
+    // A wheel over a panel (journal, cards…) scrolls the panel, not the field.
+    if scroll.delta.y != 0.0
+        && !crate::ui::kit::wheel::over_ui(hover.as_deref(), &nodes, &parents, |_| false)
+    {
         let lines = match scroll.unit {
             MouseScrollUnit::Line => scroll.delta.y,
             MouseScrollUnit::Pixel => scroll.delta.y / 40.0,

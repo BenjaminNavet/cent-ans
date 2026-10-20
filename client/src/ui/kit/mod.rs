@@ -35,6 +35,7 @@ pub mod style;
 pub mod text_field;
 pub mod tooltip;
 pub mod tooltip_spec;
+pub mod wheel;
 pub mod widgets;
 
 use std::collections::HashMap;

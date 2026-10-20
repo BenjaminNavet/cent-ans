@@ -356,6 +356,14 @@ fn teardown(
     commands.remove_resource::<CampaignRig>();
 }
 
+/// What the camera needs to tell a wheel over a panel from a wheel over the map.
+type WheelParams<'w, 's> = (
+    Option<Res<'w, bevy::picking::hover::HoverMap>>,
+    crate::ui::kit::wheel::WheelNodes<'w, 's>,
+    Query<'w, 's, &'static ChildOf>,
+    Query<'w, 's, (), With<crate::campaign::armies::ArmyPlate>>,
+);
+
 #[allow(clippy::too_many_arguments)]
 fn drive_camera(
     time: Res<Time>,
@@ -371,8 +379,14 @@ fn drive_camera(
     mut rig: ResMut<CampaignRig>,
     mut camera: Query<(&mut Transform, &mut Projection, &Camera), With<CampaignCamera>>,
     text_focus: Option<Res<crate::ui::kit::text_field::TextInputFocus>>,
+    (hover, nodes, parents, plates): WheelParams,
 ) {
     let typing = !crate::ui::kit::text_field::keyboard_free(text_focus);
+    // A wheel over a panel scrolls the panel, not the map (army plates belong to the map).
+    let wheel_on_ui =
+        crate::ui::kit::wheel::over_ui(hover.as_deref(), &nodes, &parents, |entity| {
+            plates.contains(entity)
+        });
     let window = window.single().ok();
     let mut input = RigInput {
         viewport_height: window.map_or(800.0, |w| w.height()),
@@ -411,6 +425,9 @@ fn drive_camera(
     }
     let step = rig.zoom_step;
     for event in wheel.read() {
+        if wheel_on_ui {
+            continue;
+        }
         let factor = match event.unit {
             // One notch up zooms in by `zoom_step`.
             MouseScrollUnit::Line => (1.0 - step).powf(event.y),
@@ -420,6 +437,9 @@ fn drive_camera(
         input.zoom_factors.push(factor);
     }
     for event in pinch.read() {
+        if wheel_on_ui {
+            continue;
+        }
         input.zoom_factors.push(1.0 / (1.0 + event.0).max(0.01));
     }
     input.middle_pressed = mouse.just_pressed(MouseButton::Middle);

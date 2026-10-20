@@ -17,6 +17,7 @@ pub mod figures;
 pub mod hover_text;
 pub mod landmask;
 mod markers;
+pub use markers::ArmyPlate;
 pub mod memory;
 mod orders;
 pub mod path;
