@@ -52,6 +52,11 @@ mod tests {
         assert!(rules.vs_horse_front_factor > 1.0);
         assert!(rules.charge_taken_factor < 1.0);
         // Weaker than the pikes, which stop a charge outright.
-        assert!(rules.charge_loss_hp_fraction < crate::impact::PIKE_STOP_LOSS);
+        assert!(
+            rules.charge_loss_hp_fraction
+                < crate::impact::ImpactRules::bundled()
+                    .stopped
+                    .pikes_loss_hp_fraction
+        );
     }
 }

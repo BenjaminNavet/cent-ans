@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_impact_rules.schema.json",
+  "title": "Choc des charges",
+  "description": "Fichier data/rules/battle_impact.json (ADR 0711) : résolution de l'impact d'une charge (renversés, enfoncement, cohésion, charges arrêtées). Lu par sim-battle (ImpactRules).",
+  "type": "object",
+  "$defs": {
+    "factor": { "type": "number", "minimum": 0, "maximum": 10 }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "knockdown_s": { "type": "number", "minimum": 0, "maximum": 20, "description": "Secondes qu'un homme renversé reste à terre avant de se battre à nouveau." },
+    "knocked_per_rider": { "type": "number", "minimum": 0, "maximum": 5, "description": "Hommes qu'un cheval qui charge peut renverser au plus." },
+    "charge_bonus_s": { "type": "number", "minimum": 0, "maximum": 30, "description": "Durée du bonus de charge (coups, poussée) après l'impact." },
+    "mass": {
+      "type": "object",
+      "description": "Poids d'une charge : statistique charge/100 × lance × coin × piétons, borné.",
+      "properties": {
+        "lance_factor": { "$ref": "#/$defs/factor", "description": "Lances couchées (capacité charge_lance)." },
+        "foot_factor": { "$ref": "#/$defs/factor", "description": "Hommes à pied (bien plus légers que des chevaux)." },
+        "max": { "$ref": "#/$defs/factor", "description": "Poids maximal." }
+      },
+      "required": ["lance_factor", "foot_factor", "max"],
+      "additionalProperties": false
+    },
+    "knocked": {
+      "type": "object",
+      "description": "Part des hommes renversés : poids × exposition × armure × côté, bornée.",
+      "properties": {
+        "exposure_ranged": { "$ref": "#/$defs/factor", "description": "Exposition des tireurs et engins." },
+        "exposure_other": { "$ref": "#/$defs/factor", "description": "Exposition des autres troupes à pied." },
+        "armor_divisor": { "type": "number", "minimum": 1, "description": "Armure qui annulerait les renversés (facteur 1 − armure/diviseur)." },
+        "armor_floor": { "type": "number", "minimum": 0, "maximum": 1, "description": "Plancher du facteur d'armure." },
+        "front_factor": { "$ref": "#/$defs/factor" },
+        "flank_factor": { "$ref": "#/$defs/factor" },
+        "rear_factor": { "$ref": "#/$defs/factor" },
+        "max_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part maximale des hommes renversés." }
+      },
+      "required": ["exposure_ranged", "exposure_other", "armor_divisor", "armor_floor", "front_factor", "flank_factor", "rear_factor", "max_share"],
+      "additionalProperties": false
+    },
+    "drive": {
+      "type": "object",
+      "description": "Mètres dont les chevaux s'enfoncent dans la masse, par rang d'hommes renversés.",
+      "properties": {
+        "base_m_per_rank": { "type": "number", "minimum": 0, "maximum": 5 },
+        "per_mass_m_per_rank": { "type": "number", "minimum": 0, "maximum": 5 },
+        "max_m": { "type": "number", "minimum": 0, "maximum": 30 }
+      },
+      "required": ["base_m_per_rank", "per_mass_m_per_rank", "max_m"],
+      "additionalProperties": false
+    },
+    "cohesion": {
+      "type": "object",
+      "description": "Moral perdu par la cible d'une charge de cavalerie qui porte.",
+      "properties": {
+        "front": { "type": "number", "minimum": 0, "maximum": 50 },
+        "flank_rear": { "type": "number", "minimum": 0, "maximum": 50 }
+      },
+      "required": ["front", "flank_rear"],
+      "additionalProperties": false
+    },
+    "stopped": {
+      "type": "object",
+      "description": "Charges arrêtées : piques, pieux, haies et fossés.",
+      "properties": {
+        "pikes_loss_hp_fraction": { "type": "number", "minimum": 0, "maximum": 0.5, "description": "Part des cavaliers désarçonnés par des piques." },
+        "pikes_morale_loss": { "type": "number", "minimum": 0, "maximum": 50 },
+        "stakes_loss_hp_fraction": { "type": "number", "minimum": 0, "maximum": 0.5, "description": "Part des cavaliers empalés sur les pieux." },
+        "stakes_morale_loss": { "type": "number", "minimum": 0, "maximum": 50 },
+        "broken_morale_loss": { "type": "number", "minimum": 0, "maximum": 50, "description": "Moral perdu par une charge brisée par une haie, un fossé ou des ruelles." }
+      },
+      "required": ["pikes_loss_hp_fraction", "pikes_morale_loss", "stakes_loss_hp_fraction", "stakes_morale_loss", "broken_morale_loss"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["knockdown_s", "knocked_per_rider", "charge_bonus_s", "mass", "knocked", "drive", "cohesion", "stopped"],
+  "additionalProperties": false
+}

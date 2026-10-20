@@ -77,8 +77,6 @@ const MAX_STEPS_PER_CALL: u32 = 600;
 
 /// Gap below which two enemy regiments are in contact (metres).
 pub(crate) const CONTACT_GAP: f64 = 2.5;
-/// Duration of the charge impact bonus (seconds).
-pub(crate) const CHARGE_IMPACT: f64 = 4.0;
 /// Seconds an archer unit must stand still before its stakes are planted.
 pub(crate) const STAKES_DELAY: f64 = 15.0;
 /// Speed ceiling of knights dismounted for a siege assault when the order

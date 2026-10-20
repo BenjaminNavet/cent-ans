@@ -4,7 +4,7 @@
 use crate::common;
 
 use common::*;
-use sim_battle::impact::{self, KNOCKDOWN_TIME};
+use sim_battle::impact;
 use sim_battle::{BattleSim, Command, ImpactEvent, ImpactKind, LossCause};
 
 /// Lab battle between two lists of regiments (AIs off, clear weather).
@@ -73,7 +73,7 @@ fn a_charge_home_knocks_men_down_and_is_reported_once() {
     assert_eq!(archers.loss_by, Some(0));
     // Knocked-down men are back on their feet after the knock-down time.
     assert_eq!(archers.knocked_timer.max(0.0), 0.0);
-    assert!(30.0 - hit.time > KNOCKDOWN_TIME);
+    assert!(30.0 - hit.time > impact::knockdown_time());
 }
 
 #[test]
@@ -85,7 +85,7 @@ fn knocked_down_men_stop_fighting_for_a_while() {
     );
     let before = sim.units()[1].fighting_soldiers();
     sim.units_mut()[1].knocked = 10.0;
-    sim.units_mut()[1].knocked_timer = KNOCKDOWN_TIME;
+    sim.units_mut()[1].knocked_timer = impact::knockdown_time();
     let during = sim.units()[1].fighting_soldiers();
     assert!((before - during - 10.0).abs() < 1e-9, "{before} {during}");
     sim.units_mut()[1].knocked_timer = 0.0;

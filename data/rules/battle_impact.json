@@ -1,0 +1,37 @@
+{
+  "description": "Choc des charges (lot BV2, ADR 0711). Une charge qui arrive au contact renverse des hommes de la cible (ils ne se battent plus pendant quelques secondes), enfonce les chevaux de quelques mètres dans la masse et coûte du moral (cohésion) à la cible. Les piques et les pieux arrêtent la charge et désarçonnent les premiers cavaliers. Le bonus de charge (coups et poussée) dure quelques secondes après l’impact.",
+  "knockdown_s": 3.0,
+  "knocked_per_rider": 1.5,
+  "charge_bonus_s": 4.0,
+  "mass": {
+    "lance_factor": 1.5,
+    "foot_factor": 0.35,
+    "max": 2.0
+  },
+  "knocked": {
+    "exposure_ranged": 0.5,
+    "exposure_other": 0.35,
+    "armor_divisor": 200.0,
+    "armor_floor": 0.4,
+    "front_factor": 1.0,
+    "flank_factor": 1.4,
+    "rear_factor": 1.8,
+    "max_share": 0.6
+  },
+  "drive": {
+    "base_m_per_rank": 0.8,
+    "per_mass_m_per_rank": 0.4,
+    "max_m": 6.0
+  },
+  "cohesion": {
+    "front": 8.0,
+    "flank_rear": 15.0
+  },
+  "stopped": {
+    "pikes_loss_hp_fraction": 0.08,
+    "pikes_morale_loss": 10.0,
+    "stakes_loss_hp_fraction": 0.12,
+    "stakes_morale_loss": 15.0,
+    "broken_morale_loss": 5.0
+  }
+}

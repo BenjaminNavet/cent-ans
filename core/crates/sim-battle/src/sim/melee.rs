@@ -60,10 +60,11 @@ impl BattleSim {
         if cavalry && angle == 0 && self.units[p].stakes_planted {
             let defender_id = self.units[p].id;
             let unit = &mut self.units[i];
-            let loss = unit.hp * 0.12;
+            let stopped = &impact::ImpactRules::bundled().stopped;
+            let loss = unit.hp * stopped.stakes_loss_hp_fraction;
             unit.hp -= loss;
             unit.tick_losses += loss;
-            unit.morale -= 15.0;
+            unit.morale -= stopped.stakes_morale_loss;
             unit.charge_timer = 0.0;
             unit.loss_cause = LossCause::Stakes;
             unit.loss_by = Some(defender_id);
@@ -82,10 +83,11 @@ impl BattleSim {
         {
             let defender_id = self.units[p].id;
             let unit = &mut self.units[i];
-            let loss = unit.hp * impact::PIKE_STOP_LOSS;
+            let stopped = &impact::ImpactRules::bundled().stopped;
+            let loss = unit.hp * stopped.pikes_loss_hp_fraction;
             unit.hp -= loss;
             unit.tick_losses += loss;
-            unit.morale -= 10.0;
+            unit.morale -= stopped.pikes_morale_loss;
             unit.charge_timer = 0.0;
             unit.loss_cause = LossCause::Pikes;
             unit.loss_by = Some(defender_id);
@@ -118,7 +120,7 @@ impl BattleSim {
         };
         if cavalry && (self.field.breaks_charge(from, to) || water.is_some() || decor.is_some()) {
             self.units[i].charge_timer = 0.0;
-            self.units[i].morale -= 5.0;
+            self.units[i].morale -= impact::ImpactRules::bundled().stopped.broken_morale_loss;
             self.log_unit(i, |label| {
                 if let Some(how) = water {
                     format!("La charge des {label} {how}.")
@@ -134,7 +136,7 @@ impl BattleSim {
             });
             return;
         }
-        self.units[i].charge_timer = CHARGE_IMPACT;
+        self.units[i].charge_timer = impact::ImpactRules::bundled().charge_bonus_s;
         // TW bsim: a spear wall breaks a frontal horse charge in part.
         let wall = crate::spear_wall::spear_wall_holds(&self.units[i], &self.units[p], angle);
         let mut wall_taken = 1.0;
@@ -146,7 +148,8 @@ impl BattleSim {
             unit.hp -= loss;
             unit.tick_losses += loss;
             unit.morale -= rules.charge_morale_loss;
-            unit.charge_timer = CHARGE_IMPACT * rules.charge_timer_factor;
+            unit.charge_timer =
+                impact::ImpactRules::bundled().charge_bonus_s * rules.charge_timer_factor;
             unit.loss_cause = LossCause::Pikes;
             unit.loss_by = Some(defender_id);
             wall_taken = rules.charge_taken_factor;
@@ -180,7 +183,7 @@ impl BattleSim {
         if knocked > 0 {
             let target = &mut self.units[p];
             target.knocked = f64::from(knocked);
-            target.knocked_timer = impact::KNOCKDOWN_TIME;
+            target.knocked_timer = impact::knockdown_time();
         }
         self.record_impact(ImpactEvent {
             knocked,
@@ -250,11 +253,7 @@ impl BattleSim {
             / self.field.decor_defense(defender.x, defender.z);
         if attacker.charge_timer > 0.0 {
             let charge = attacker.charge_points();
-            let lance = if attacker.has(Ability::ChargeLance) {
-                1.5
-            } else {
-                1.0
-            };
+            let lance = impact::lance_factor(attacker);
             let wedge = attacker.formation_charge();
             let general = self
                 .general_bonus(attacker.side)
