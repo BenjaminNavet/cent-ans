@@ -294,9 +294,46 @@ fn normalised(source: &Mesh, ratio: f32) -> Option<Mesh> {
             (radial + Vec3::Y * 0.35).normalize().to_array()
         })
         .collect();
+    let scaled: Vec<[f32; 3]> = positions.to_vec();
+    let kept = foot_plate_free(&scaled, mesh.indices(), ratio);
     mesh.attribute(Mesh::ATTRIBUTE_UV_0)?;
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+    if let Some(indices) = kept {
+        mesh.insert_indices(Indices::U32(indices));
+    }
     Some(mesh)
+}
+
+/// Height (share of the tree) under which flat geometry away from the trunk is a ground plate.
+const FOOT_PLATE_HEIGHT: f32 = 0.08;
+/// Radius (share of the crown width) of the trunk kept at the foot.
+const FOOT_TRUNK_RADIUS: f32 = 0.15;
+
+/// Indices without the ground plate some generated models carry at their foot (spruce: 11 % of
+/// the triangles, a disc as wide as the crown). Sunk on flat ground it was hidden; on a slope it
+/// stuck out downhill as a black disc (radial normals pointing down, crown shade, no frost).
+/// `None` when nothing is removed or the mesh is not indexed.
+fn foot_plate_free(
+    positions: &[[f32; 3]],
+    indices: Option<&Indices>,
+    ratio: f32,
+) -> Option<Vec<u32>> {
+    let indices: Vec<u32> = match indices? {
+        Indices::U16(v) => v.iter().map(|&i| i as u32).collect(),
+        Indices::U32(v) => v.clone(),
+    };
+    let trunk = FOOT_TRUNK_RADIUS * ratio;
+    let mut kept = Vec::with_capacity(indices.len());
+    for tri in indices.chunks_exact(3) {
+        let p = [0, 1, 2].map(|k| Vec3::from(positions[tri[k] as usize]));
+        let low = p.iter().all(|v| v.y < FOOT_PLATE_HEIGHT);
+        let centre = (p[0] + p[1] + p[2]) / 3.0;
+        if low && Vec2::new(centre.x, centre.z).length() > trunk {
+            continue;
+        }
+        kept.extend_from_slice(tri);
+    }
+    (kept.len() < indices.len()).then_some(kept)
 }
 
 /// Rescales `positions` in place; `None` when degenerate.
@@ -455,6 +492,27 @@ mod tests {
     fn density_is_bounded() {
         assert_eq!(density_at(10.0), 1.0);
         assert_eq!(density_at(10_000.0), 0.35);
+    }
+
+    #[test]
+    fn foot_plate_is_removed_and_the_trunk_kept() {
+        // A crown triangle, a trunk foot triangle and a wide ground plate triangle.
+        let positions = [
+            [0.0, 0.5, 0.0],
+            [0.2, 0.6, 0.0],
+            [0.0, 0.7, 0.2],
+            [0.0, 0.0, 0.0],
+            [0.02, 0.0, 0.0],
+            [0.0, 0.05, 0.02],
+            [0.4, 0.01, 0.0],
+            [0.3, 0.0, 0.3],
+            [0.45, 0.02, 0.2],
+        ];
+        let indices = Indices::U16((0..9).collect());
+        let kept = foot_plate_free(&positions, Some(&indices), 1.0).expect("plate removed");
+        assert_eq!(kept, vec![0, 1, 2, 3, 4, 5]);
+        let crown_only = Indices::U32(vec![0, 1, 2]);
+        assert!(foot_plate_free(&positions, Some(&crown_only), 1.0).is_none());
     }
 
     #[test]
