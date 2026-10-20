@@ -24,11 +24,18 @@ principale ; pas de push.
 | T6 plaques & fil | Sonnet | `markers/` + `hud/` : cartouche de ville coloré par statut + pastilles ; fil d'événements repliable par catégorie | fusionné (vu : fil + pastilles OK) |
 | T7 sous-bois | Sonnet | `countryside/` : ceinture de sous-bois en lisière (herbes hautes, buissons, bois mort), touffes pâles en neige/toundra, touffes 3D au zoom proche | fusionné + T7b (filtre de pente) |
 | T8 bosquets | Sonnet | `vegetation/` (après T2) : bosquets rendus, clairières avec campement/scierie | fusionné (masses lisibles en vue moyenne) ; objet de vie des clairières à placer (`ForestClearings`) |
+| T9 rochers & ombres | Sonnet | `countryside/rocks.rs` + ombres de `vegetation/` : blocs gris « chou-fleur » plafonnés/teintés/enneigés, ombres d'arbres douces et bleutées sur la neige | fusionné ; disques noirs sous arbres → T2b (fusionné) |
+| T10 neige d hiver | Sonnet | plaques de neige en plaine trop régulières (« camouflage ») | fusionné |
+| T2b retouches | Sonnet | socle plat des conifères générés (disques noirs), vallées trop sombres, pente du sous-bois | fusionné |
+| T7c crêtes & clairières | Sonnet | sous-bois rejeté sur la roche des crêtes ; objet de vie dans chaque clairière (`ForestClearings`) | en cours (`ts/t7c`) |
 
 Vagues (disque : 3 worktrees à la fois, `target` supprimé après fusion) : T1 T2 T3 → T4 T5 T6 → T7 T8.
 Worktrees `../gp-ts-<lot>`, branches `ts/<lot>`.
 
 ## Prochaine étape
-Reste : T2b (disques noirs sous arbres, vallées trop sombres, taches sur falaises) puis captures finales avant/après.
-| T9 rochers & ombres | Sonnet | `countryside/rocks.rs` + ombres de `vegetation/` : blocs gris « chou-fleur » plafonnés/teintés/enneigés, ombres d'arbres douces et bleutées sur la neige | fusionné ; disques noirs sous arbres → T2b |
-| T10 neige d hiver | Sonnet | plaques de neige en plaine trop régulières (« camouflage ») | fusionné |
+Fusionner T7c, puis passe finale de captures avant/après (5 vues de référence + vue armée : trajet/anneaux).
+
+## Restes connus
+- Neige posée sur le dessus des rochers : non faite.
+- Pas de fenêtres émissives dans les villes (choix T4 : halo au sol seulement) ; nombre de halos à Paris d=200 à juger à l'œil.
+- Perf non mesurée sur machine calme.
