@@ -40,6 +40,7 @@ pub mod capture;
 pub mod cluster;
 pub mod cover;
 pub mod decision;
+pub mod feed;
 pub mod flow;
 pub mod help;
 pub mod hint;
@@ -221,6 +222,7 @@ impl Plugin for CampaignHudPlugin {
                 wait::plugin,
             ))
             .add_plugins(layers::plugin)
+            .add_plugins(feed::plugin)
             .register_dump(dump_hud)
             .register_dump(dump_layout)
             .add_systems(OnEnter(AppState::Campaign), spawn_hud)

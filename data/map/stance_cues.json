@@ -63,6 +63,24 @@
   "town": {
     "label": {
       "enemy": "#8f1510"
+    },
+    "plate": {
+      "description": "TS-T6 : cartouche de ville façon grande stratégie. Fond, liseré et encre du nom selon la position du détenteur vu du joueur (propre, allié ou vassal, neutre, ennemi : même partition que `categories` ci-dessus) ; en mode Diplomatie le liseré prend la couleur de la position. Pastilles rondes à droite du nom (au plus `max`), chacune avec infobulle : siège (tours avant capitulation), garnison (effectif), bâtiments (nombre). `min_rank` : rang minimal du lieu (0 hameau, 4 capitale). Rouge réservé aux ennemis (ADR 0155) : le siège est ambre.",
+      "fill_alpha": 0.84,
+      "border_px": 1.5,
+      "status": {
+        "self": {"fill": "#5a4310", "border": "#d9a833", "ink": "#f6e7b8"},
+        "ally": {"fill": "#1f4a25", "border": "#3a9a42", "ink": "#e8f3dc"},
+        "neutral": {"fill": "#43362a", "border": "#8a7a5c", "ink": "#f0e3c4"},
+        "enemy": {"fill": "#5c1511", "border": "#d21f17", "ink": "#f6dcd6"}
+      },
+      "pastilles": {
+        "max": 3,
+        "size_px": 16,
+        "siege": {"color": "#b8651a", "min_rank": 0},
+        "garrison": {"color": "#35506e", "min_rank": 1},
+        "buildings": {"color": "#7a5c22", "min_rank": 2}
+      }
     }
   }
 }

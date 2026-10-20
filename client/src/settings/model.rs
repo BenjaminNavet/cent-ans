@@ -91,6 +91,11 @@ pub struct Settings {
     pub tutorial_postponed: bool,
     /// `feudal_tutorial/done`: the three-step feudal guide was finished or skipped.
     pub feudal_tutorial_done: bool,
+    /// `interface/event_feed_open`: the campaign event feed (top right) is unfolded.
+    pub event_feed_open: bool,
+    /// `interface/event_feed_folded`: ids of the feed rubrics the player folded; `None` until
+    /// the player folds or unfolds one (the data's `default_folded` applies).
+    pub event_feed_folded: Option<Vec<String>>,
     /// `battle/blood`: 0 off, 1 moderate, 2 full.
     pub blood: u32,
     /// `battle/unit_size`: figures per simulated man.
@@ -156,6 +161,8 @@ impl Default for Settings {
             tutorial_done: false,
             tutorial_postponed: false,
             feudal_tutorial_done: false,
+            event_feed_open: false,
+            event_feed_folded: None,
             blood: 1,
             unit_size: 1.0,
             max_figures: 15000,

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "event_feed.schema.json",
+  "title": "Fil d'événements de la carte (TS-T6)",
+  "description": "Rubriques repliables du fil d'événements : regroupement des genres d'événements du cœur (`kind`) et réglages d'affichage. Rendu seulement.",
+  "type": "object",
+  "required": ["width_px", "max_per_category", "keep_turns", "max_chars", "list_max_height_px", "row_height_px", "other", "world_category", "default_folded", "categories"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "width_px": {"type": "number", "minimum": 160, "maximum": 480},
+    "max_per_category": {"type": "integer", "minimum": 1, "maximum": 30},
+    "keep_turns": {"type": "integer", "minimum": 1, "maximum": 20, "description": "Tours gardés dans le fil."},
+    "max_chars": {"type": "integer", "minimum": 12, "maximum": 160, "description": "Longueur d'une entrée avant « … » (texte entier en infobulle)."},
+    "list_max_height_px": {"type": "number", "minimum": 80, "maximum": 800},
+    "row_height_px": {"type": "number", "minimum": 12, "maximum": 60},
+    "other": {"type": "string", "minLength": 1, "description": "Rubrique des événements non listés."},
+    "world_category": {"type": "string", "minLength": 1, "description": "Rubrique des nouvelles lointaines."},
+    "default_folded": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "icon", "kinds"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z_]+$"},
+          "label": {"type": "string", "minLength": 1},
+          "icon": {"type": "string", "minLength": 1},
+          "kinds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+        }
+      }
+    }
+  }
+}
