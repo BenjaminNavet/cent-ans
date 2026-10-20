@@ -225,7 +225,9 @@ impl EventFeed {
         self.next_id = fresh.next_id;
         // Newest first; inside a turn the core's order (most important first) is kept.
         fresh.entries.append(&mut self.entries);
-        let oldest = journal.turn.saturating_sub(cfg.keep_turns.saturating_sub(1));
+        let oldest = journal
+            .turn
+            .saturating_sub(cfg.keep_turns.saturating_sub(1));
         let mut seen: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
         fresh.entries.retain(|e| {
             let n = seen.entry(e.category.clone()).or_default();
@@ -308,7 +310,10 @@ pub fn plugin(app: &mut App) {
         .init_resource::<EventFeed>()
         .init_resource::<FeedUi>()
         .register_dump(dump_feed)
-        .add_systems(OnEnter(AppState::Campaign), (reset_feed, spawn_root).chain())
+        .add_systems(
+            OnEnter(AppState::Campaign),
+            (reset_feed, spawn_root).chain(),
+        )
         .add_systems(
             Update,
             (record_turns, handle_buttons, rebuild, update_visibility)
@@ -329,24 +334,25 @@ fn reset_feed(
 }
 
 fn spawn_root(mut commands: Commands, theme: Res<UiTheme>, cfg: Res<FeedData>) {
-    commands.spawn((
-        Name::new("hud:feed"),
-        FeedRoot,
-        HudWidget,
-        Hovered::default(),
-        FitZone::Side,
-        UiTier::Hud.index(),
-        panel_note(&theme),
-        Node {
+    commands
+        .spawn((
+            Name::new("hud:feed"),
+            FeedRoot,
+            HudWidget,
+            Hovered::default(),
+            FitZone::Side,
+            UiTier::Hud.index(),
+            panel_note(&theme),
+            DespawnOnExit(AppState::Campaign),
+        ))
+        .insert(Node {
             position_type: PositionType::Absolute,
             width: Val::Px(cfg.0.width),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(3.0),
             padding: UiRect::all(Val::Px(6.0)),
             ..default()
-        },
-        DespawnOnExit(AppState::Campaign),
-    ));
+        });
 }
 
 fn record_turns(
@@ -416,9 +422,7 @@ fn handle_buttons(
             }
         }
     }
-    if persist
-        && let (Some(settings), Some(file)) = (settings.as_mut(), file.as_mut())
-    {
+    if persist && let (Some(settings), Some(file)) = (settings.as_mut(), file.as_mut()) {
         let inner = settings.bypass_change_detection();
         inner.event_feed_open = ui.open;
         inner.event_feed_folded = Some(ui.folded.iter().cloned().collect());
@@ -451,7 +455,11 @@ fn rebuild(
     } else {
         format!("Fil des événements ({total})")
     };
-    let arrow = if ui.open { "▾ Replier" } else { "▸ Déplier" };
+    let arrow = if ui.open {
+        "▾ Replier"
+    } else {
+        "▸ Déplier"
+    };
     commands.entity(root).with_children(|panel| {
         panel
             .spawn(Node {
@@ -523,10 +531,7 @@ fn rebuild(
 }
 
 /// Hidden while a window is open (windows dock on the same side) or when the HUD is not there.
-fn update_visibility(
-    stack: Option<Res<PanelStack>>,
-    mut root: Query<&mut Node, With<FeedRoot>>,
-) {
+fn update_visibility(stack: Option<Res<PanelStack>>, mut root: Query<&mut Node, With<FeedRoot>>) {
     let hidden = stack.is_some_and(|s| !s.visible().is_empty());
     let want = if hidden { Display::None } else { Display::Flex };
     for mut node in &mut root {
@@ -547,6 +552,10 @@ fn dump_feed(world: &World) -> (String, Value) {
             json!({
                 "id": c.id,
                 "label": c.label,
+                "icon": c.icon,
+                "icon_resolves": world
+                    .get_resource::<UiTheme>()
+                    .is_some_and(|t| t.icons.get(&c.icon).is_some()),
                 "count": feed.count(&c.id),
                 "folded": ui.folded.contains(&c.id),
                 "entries": feed.in_category(&c.id).map(|e| json!({
@@ -668,7 +677,10 @@ mod tests {
         );
         assert_eq!(feed.count("war"), 1);
         assert_eq!(feed.count(&cfg.world_category), 1);
-        feed.record(&journal(2, vec![entry("battle", "b"), entry("raid", "c")], vec![]), &cfg);
+        feed.record(
+            &journal(2, vec![entry("battle", "b"), entry("raid", "c")], vec![]),
+            &cfg,
+        );
         // War is capped to its two newest; turn 1's world news is still kept (keep_turns 2).
         let war: Vec<_> = feed.in_category("war").map(|e| e.text.as_str()).collect();
         assert_eq!(war, ["b", "c"]);
@@ -711,7 +723,11 @@ mod tests {
         feed.record(
             &journal(
                 1,
-                vec![entry("battle", "a"), entry("raid", "b"), entry("income", "c")],
+                vec![
+                    entry("battle", "a"),
+                    entry("raid", "b"),
+                    entry("income", "c"),
+                ],
                 vec![],
             ),
             &cfg,
@@ -733,7 +749,10 @@ mod tests {
             entry_action(None, Some("fac_x"), "fac_me"),
             EntryAction::Faction("fac_x".into())
         );
-        assert_eq!(entry_action(None, Some("fac_me"), "fac_me"), EntryAction::None);
+        assert_eq!(
+            entry_action(None, Some("fac_me"), "fac_me"),
+            EntryAction::None
+        );
         assert_eq!(entry_action(Some(""), None, "fac_me"), EntryAction::None);
     }
 

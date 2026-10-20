@@ -11,7 +11,7 @@
 use bevy::prelude::*;
 use serde_json::{Value, json};
 
-use super::{MarkerStats, PlaceLabel, Pins, placement, places::Places};
+use super::{MarkerStats, Pins, PlaceLabel, placement, places::Places};
 use crate::campaign::provinces::modes::{self, Cue, MapMode, MapModeState, Tuning};
 use crate::campaign::provinces::overlay::OverlayState;
 use crate::campaign::terrain::surface::GroundHeight;
@@ -122,9 +122,8 @@ impl PlateStyle {
     /// so a broken data file never hides a name).
     pub fn from_cues(cues: &Value) -> Self {
         let plate = &cues["town"]["plate"];
-        let colour = |node: &Value, fallback: Srgba| {
-            node.as_str().and_then(modes::hex).unwrap_or(fallback)
-        };
+        let colour =
+            |node: &Value, fallback: Srgba| node.as_str().and_then(modes::hex).unwrap_or(fallback);
         let fallback = StatusLook {
             fill: Srgba::new(0.26, 0.21, 0.16, 1.0),
             border: Srgba::new(0.54, 0.48, 0.36, 1.0),
@@ -200,7 +199,7 @@ pub fn compact_count(n: u32) -> String {
         0..=999 => n.to_string(),
         1000..=9999 => {
             let tenths = (n + 50) / 100;
-            if tenths % 10 == 0 {
+            if tenths.is_multiple_of(10) {
                 format!("{}k", tenths / 10)
             } else {
                 format!("{},{}k", tenths / 10, tenths % 10)
@@ -241,7 +240,10 @@ pub fn pastilles(facts: &PlateFacts, rank: u8, style: &PlateStyle) -> Vec<Pastil
         out.push(Pastille {
             kind: PastilleKind::Buildings,
             text: facts.buildings.to_string(),
-            tip: format!("[b]Bâtiments[/b]\n{} bâtiment(s) construits", facts.buildings),
+            tip: format!(
+                "[b]Bâtiments[/b]\n{} bâtiment(s) construits",
+                facts.buildings
+            ),
         });
     }
     out.truncate(style.max_pastilles);

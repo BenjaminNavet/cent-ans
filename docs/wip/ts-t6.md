@@ -14,8 +14,13 @@ Branche `ts/t6` (worktree `../gp-ts-t6`). Plan : `ts-style-total-war.md`, ADR 07
 ## État
 - [x] squelette
 - [x] plaque : `markers/plate.rs` (statut, pastilles, dump `campaign_markers.plates`, 6 tests) ; à vérifier au dump en jeu
-- [ ] fil (catégories, repli mémorisé dans `Settings`, clic, dump, tests)
+- [x] fil : `hud/feed.rs`, `data/ui/event_feed.json`, `Settings.event_feed_{open,folded}`, dump `event_feed`, 8 tests, preuve `hud/proof_feed.txt` (OK : plaques par statut 32/36/297/35, 15 entrées après 2 tours, repli persisté)
 - [ ] vérifs finales (fmt, clippy, tests, smoke)
 
+## Restes
+- Fil non restauré depuis une sauvegarde (vide jusqu'au prochain tour) ; entrées d'autres factions sans province ni faction dans le cœur : clic sans effet.
+- Rendu non jugé à l'œil (pas de capture) ; pastilles : taille/espacement à juger. Infobulles des pastilles sous les plaques (GlobalZIndex -1) à vérifier à la souris.
+- Pas d'icône dédiée à la pastille (texte seul).
+
 ## Prochaine étape
-Fil d'événements (`hud/feed.rs`, `data/ui/event_feed.json`, réglages `Settings`).
+Vérifs finales (fmt, clippy, tests, smoke) puis rapport.
