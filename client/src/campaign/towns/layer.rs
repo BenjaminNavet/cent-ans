@@ -229,6 +229,7 @@ impl Plugin for CampaignTownsPlugin {
             );
         super::outbuildings::add(app);
         super::far::add(app);
+        super::glow::add(app);
         super::atlas::add(app);
     }
 }
@@ -1465,6 +1466,7 @@ fn dump_towns(world: &World) -> (String, Value) {
             "spawn_ms_max": state.spawn_ms_max,
             "reposed": state.reposed,
             "totals": {"houses": total.houses, "kit_models": total.kit_models, "blocks": total.blocks, "monuments": total.monuments, "wall_pieces": total.wall_pieces, "towers": total.towers, "gates": total.gates, "suburb_houses": total.suburb_houses, "enclosure_pieces": total.enclosure_pieces, "props": total.props, "entities": total.entities},
+            "glow": super::glow::glow_summary(world),
             "towns": towns,
         }),
     )
