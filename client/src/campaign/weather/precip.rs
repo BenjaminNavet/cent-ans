@@ -375,7 +375,9 @@ mod tests {
         assert!(flake_alpha(0.0, 2.0) > 0.99 && flake_alpha(1.0, 2.0) < 1e-4);
         assert!(flake_alpha(0.6, 3.0) < flake_alpha(0.6, 1.0));
         let p = PrecipitationProfile::default();
-        let sizes: Vec<f32> = (0..64).map(|i| flake_scale(i, p.snow_size_spread)).collect();
+        let sizes: Vec<f32> = (0..64)
+            .map(|i| flake_scale(i, p.snow_size_spread))
+            .collect();
         let (lo, hi) = sizes
             .iter()
             .fold((f32::MAX, f32::MIN), |(a, b), s| (a.min(*s), b.max(*s)));
