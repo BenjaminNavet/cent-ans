@@ -1,0 +1,20 @@
+# TS-T6 proof (CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug CENT_ANS_MUTE=1 client/run_bg.sh --offscreen
+# --state Campaign --script client/src/campaign/hud/proof_feed.txt): town plates by status, then the
+# event feed after two end-of-season turns: header only, unfolded, a rubric folded, an entry clicked.
+state Campaign
+wait 240
+dump out/ts_t6_a.json
+key Enter
+wait 240
+key Enter
+wait 240
+dump out/ts_t6_b.json
+click feed:toggle
+wait 30
+dump out/ts_t6_c.json
+click feed:entry:1
+wait 10
+click feed:fold:diplomacy
+wait 30
+dump out/ts_t6_d.json
+exit

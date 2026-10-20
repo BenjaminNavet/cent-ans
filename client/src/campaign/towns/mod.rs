@@ -7,6 +7,7 @@
 pub mod atlas;
 pub mod data;
 pub mod far;
+pub mod glow;
 pub mod growth;
 pub mod kit;
 pub mod landmark_monuments;

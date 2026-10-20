@@ -77,6 +77,8 @@ impl Plugin for CampaignArmiesPlugin {
         .init_resource::<orders::Reachable>()
         .insert_resource(zoc::ZocTuning::load())
         .init_resource::<zoc::ZocRings>()
+        .insert_resource(path::PathStyle::load())
+        .init_resource::<orders::PathStats>()
         .init_resource::<orders::Ripples>()
         .init_resource::<orders::ReliefTick>()
         .init_resource::<bubble::BubbleHandles>()
