@@ -51,7 +51,7 @@ use crate::settings::{Settings, SettingsFile, SettingsScreen};
 use crate::sim::Sim;
 use crate::ui::kit::modal::ModalQueue;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
-use crate::ui::kit::style::{self, UiType};
+use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::widgets::{
     TabSelected, button_primary, button_small, caption, panel_sized, separator,
 };
@@ -110,9 +110,9 @@ pub struct Tutorial {
 #[derive(Component)]
 struct TutorialCard;
 
-/// Z order of the tutorial card: above the HUD and the map (`UiTier::Hud`, 0) but below every
-/// opened panel (`UiTier::Panel`, 10), so it never covers a panel.
-const TUTORIAL_Z: GlobalZIndex = GlobalZIndex(5);
+/// Z order of the tutorial card: tier `Guide`, above every opened panel and full-screen window so
+/// the objective stays readable, under system modals (pause, settings).
+pub(crate) const TUTORIAL_Z: GlobalZIndex = UiTier::Guide.index();
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<Tutorial>()
@@ -728,4 +728,17 @@ fn dump(world: &World) -> (String, Value) {
             "title": tutorial.index.and_then(|i| tutorial.steps.get(i)).map(|s| s.title.clone()),
         }),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn card_stays_above_every_panel_and_window() {
+        assert!(TUTORIAL_Z.0 > UiTier::Panel.z());
+        assert!(TUTORIAL_Z.0 > UiTier::Banner.z() + 5);
+        assert!(TUTORIAL_Z.0 < UiTier::Modal.z());
+        assert!(TUTORIAL_Z.0 < UiTier::Tooltip.z());
+    }
 }

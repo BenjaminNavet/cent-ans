@@ -463,12 +463,18 @@ fn spawn_screen(mut commands: Commands, theme: Res<UiTheme>, state: Res<State<Ap
     } else {
         AppState::Campaign
     };
+    // In the campaign overlay the Codex stays under the guide card and the tooltips.
+    let z = if scope == AppState::Codex {
+        GlobalZIndex(400)
+    } else {
+        GlobalZIndex(crate::ui::kit::style::UiTier::Guide.z() - 1)
+    };
     let root = commands
         .spawn((
             Name::new("Codex"),
             CodexRoot,
             DespawnOnExit(scope),
-            GlobalZIndex(400),
+            z,
             Node {
                 position_type: PositionType::Absolute,
                 left: Val::Px(0.0),

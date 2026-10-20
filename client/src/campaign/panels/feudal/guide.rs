@@ -24,13 +24,13 @@ use crate::campaign::provinces::modes::{MapMode, MapModeState};
 use crate::menu::pause::GamePaused;
 use crate::settings::{Settings, SettingsFile, SettingsScreen};
 use crate::ui::kit::richtext::{RichStyle, rich_text};
-use crate::ui::kit::style::{self, UiType};
+use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::widgets::{button_primary, button_small, caption, panel_sized, separator};
 use crate::ui::kit::{ButtonPressed, UiTheme, typed};
 
 const CARD_WIDTH: f32 = 380.0;
 const CHECK_INTERVAL: f32 = 0.25;
-const GUIDE_Z: GlobalZIndex = GlobalZIndex(5);
+const GUIDE_Z: GlobalZIndex = UiTier::Guide.index();
 const ENV_GUIDE: &str = "CENT_ANS_FEUDAL_GUIDE";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -366,6 +366,14 @@ fn dump(world: &World) -> (String, serde_json::Value) {
 
 #[cfg(test)]
 mod tests {
+    use super::UiTier;
+
+    #[test]
+    fn guide_card_is_above_panels() {
+        assert!(super::GUIDE_Z.0 > UiTier::Panel.z() + 5);
+        assert!(super::GUIDE_Z.0 < UiTier::Modal.z());
+    }
+
     use super::*;
 
     #[test]

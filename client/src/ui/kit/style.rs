@@ -103,8 +103,10 @@ impl UiType {
     }
 }
 
-/// Stacking tiers (`PanelStack.Tier`): HUD < toasts < panels < banners < modals < tutorial, then
-/// tooltips above everything. Used through `GlobalZIndex`.
+/// Stacking tiers (`PanelStack.Tier`): HUD < toasts < panels < banners < campaign guides < modals
+/// < tutorial highlights, then tooltips above everything. Guide cards (campaign tutorial, feudal
+/// guide) stay over every campaign panel and full-screen window (Codex overlay included) but
+/// under system modals, pause menu and settings. Used through `GlobalZIndex`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum UiTier {
     Hud,
@@ -113,6 +115,8 @@ pub enum UiTier {
     Toast,
     Panel,
     Banner,
+    /// Campaign guide cards: readable and usable over every panel / full-screen window.
+    Guide,
     Modal,
     Tutorial,
     Tooltip,
@@ -125,6 +129,7 @@ impl UiTier {
             Self::Toast => 5,
             Self::Panel => 10,
             Self::Banner => 20,
+            Self::Guide => 28,
             Self::Modal => 30,
             Self::Tutorial => 40,
             Self::Tooltip => 100,
@@ -162,5 +167,9 @@ mod tests {
         // Notices never cover a panel or a window.
         assert!(UiTier::Toast.z() > UiTier::Hud.z());
         assert!(UiTier::Toast.z() < UiTier::Panel.z());
+        // The guide stays above every panel, banner and window, under system modals.
+        assert!(UiTier::Guide.z() > UiTier::Panel.z());
+        assert!(UiTier::Guide.z() > UiTier::Banner.z() + 5);
+        assert!(UiTier::Guide.z() < UiTier::Modal.z());
     }
 }
