@@ -16,7 +16,7 @@ principale ; pas de push.
 ## Lots
 | Lot | Agent | Périmètre | État |
 |---|---|---|---|
-| T1 sol | Opus | `terrain/terrain.wesl` + données saison : neige teintée, masque altitude × pente (normale exagérée) × bruit en plaques, frange de boue, routes boueuses sous la neige, roche plus sombre en altitude, contraste des versants, sol assombri sous les forêts, mélanges de sol en taches | à faire |
+| T1 sol | Opus | `terrain/terrain.wesl` + données saison : neige teintée, masque altitude × pente (normale exagérée) × bruit en plaques, frange de boue, routes boueuses sous la neige, roche plus sombre en altitude, contraste des versants, sol assombri sous les forêts, mélanges de sol en taches | fusionné (0f92314e9) ; à régler : plaques d hiver trop régulières (`snow.patch_frequency`) |
 | T2 forêts | Opus | `vegetation/` : canopée plus sombre, mélange de conifères, conifères givrés selon le masque de neige, lisière nette + arbres isolés devant, arbres plus gros en vue moyenne/lointaine (fin des taches beiges), limite des arbres en altitude, tramage et blocs gris de près, points noirs d'hiver | à faire |
 | T3 atmosphère | Opus | `weather/` + `terrain/post.*` : brume de vallée selon l'altitude, perspective atmosphérique bleutée, brume plus froide/dense en région froide, flocons doux, étalonnage désaturé avec accents chauds conservés | à faire |
 | T4 villes | Sonnet | `towns/` : halo chaud au sol + fenêtres, fumées de cheminées visibles en vue moyenne | à faire |

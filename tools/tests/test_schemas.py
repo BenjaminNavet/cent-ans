@@ -28,6 +28,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "art_ga3_decor.schema.json": ("art/ga3_decor.json",),
     "art_tree_species.schema.json": ("art/tree_species.json",),
     "art_forest_stands.schema.json": ("art/forest_stands.json",),
+    "art_campaign_forest_look.schema.json": ("art/campaign_forest_look.json",),
     "auto_resolve_rules.schema.json": ("rules/auto_resolve.json",),
     "battle_ability.schema.json": ("battle_abilities/*.json",),
     "battle_ai_rules.schema.json": ("rules/battle_ai.json",),
