@@ -207,6 +207,173 @@
           "description": "Part ajourée des houppiers nus."
         }
       }
+    },
+    "open": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "full_distance",
+        "far_distance",
+        "far_share",
+        "focus_keep_units",
+        "focus_fade_units"
+      ],
+      "properties": {
+        "full_distance": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distance caméra jusqu'à laquelle tous les arbres hors forêt sont dessinés."
+        },
+        "far_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Distance caméra à partir de laquelle il n'en reste que far_share."
+        },
+        "far_share": {
+          "$ref": "#/$defs/share",
+          "description": "Part des arbres hors forêt gardée au loin."
+        },
+        "focus_keep_units": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Les arbres hors forêt plus proches que cela du foyer restent tous dessinés (haies proches)."
+        },
+        "focus_fade_units": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Largeur du fondu autour de focus_keep_units."
+        }
+      }
+    },
+    "groves": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cell_px",
+        "per_cell",
+        "trees",
+        "radius_px",
+        "min_crops",
+        "max_per_tile",
+        "far_share",
+        "quality_share"
+      ],
+      "properties": {
+        "cell_px": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Côté (px de carte) des cellules à bosquet."
+        },
+        "per_cell": {
+          "$ref": "#/$defs/share",
+          "description": "Probabilité d'un bosquet par cellule."
+        },
+        "trees": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Arbres par bosquet [min, max]."
+        },
+        "radius_px": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Rayon d'un bosquet [min, max] (px de carte)."
+        },
+        "min_crops": {
+          "$ref": "#/$defs/share",
+          "description": "Part minimale de terres cultivées/prairies du sol."
+        },
+        "max_per_tile": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Plafond de bosquets par case."
+        },
+        "far_share": {
+          "$ref": "#/$defs/share",
+          "description": "Part des bosquets gardée au loin (ils restent lisibles)."
+        },
+        "quality_share": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low",
+            "medium",
+            "high",
+            "ultra"
+          ],
+          "properties": {
+            "low": {
+              "$ref": "#/$defs/share"
+            },
+            "medium": {
+              "$ref": "#/$defs/share"
+            },
+            "high": {
+              "$ref": "#/$defs/share"
+            },
+            "ultra": {
+              "$ref": "#/$defs/share"
+            }
+          }
+        }
+      }
+    },
+    "clearings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cell_px",
+        "per_cell",
+        "radius_px",
+        "min_forest",
+        "wobble",
+        "kinds"
+      ],
+      "properties": {
+        "cell_px": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Côté (px de carte) des cellules à clairière."
+        },
+        "per_cell": {
+          "$ref": "#/$defs/share"
+        },
+        "radius_px": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Rayon d'une clairière [min, max] (px de carte)."
+        },
+        "min_forest": {
+          "$ref": "#/$defs/share",
+          "description": "Masque forestier exigé au centre et sur le pourtour."
+        },
+        "wobble": {
+          "$ref": "#/$defs/share",
+          "description": "Part du rayon dont le contour ondule."
+        },
+        "kinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Modèles de vie (ids de dn_manifest.json) qu'un lot suivant y place."
+        }
+      }
     }
   }
 }
