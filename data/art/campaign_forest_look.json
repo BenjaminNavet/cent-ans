@@ -53,15 +53,15 @@
     "bare_openwork": 0.28
   },
   "open": {
-    "full_distance": 80.0,
-    "far_distance": 320.0,
+    "full_distance": 60.0,
+    "far_distance": 260.0,
     "far_share": 0.06,
     "focus_keep_units": 50.0,
     "focus_fade_units": 40.0
   },
   "groves": {
     "cell_px": 18.0,
-    "per_cell": 0.4,
+    "per_cell": 0.25,
     "trees": [
       4,
       9
@@ -72,7 +72,7 @@
     ],
     "min_crops": 0.15,
     "max_per_tile": 60,
-    "far_share": 0.75,
+    "far_share": 0.5,
     "quality_share": {
       "low": 0.3,
       "medium": 0.65,

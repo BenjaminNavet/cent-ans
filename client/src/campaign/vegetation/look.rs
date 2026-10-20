@@ -90,8 +90,8 @@ pub struct ClearingLook {
 impl Default for OpenLook {
     fn default() -> Self {
         OpenLook {
-            full_distance: 80.0,
-            far_distance: 320.0,
+            full_distance: 60.0,
+            far_distance: 260.0,
             far_share: 0.06,
             focus_keep: 50.0,
             focus_fade: 40.0,
@@ -103,12 +103,12 @@ impl Default for GroveLook {
     fn default() -> Self {
         GroveLook {
             cell_px: 18.0,
-            per_cell: 0.4,
+            per_cell: 0.25,
             trees: (4, 9),
             radius_px: (1.2, 2.6),
             min_crops: 0.15,
             max_per_tile: 60,
-            far_share: 0.75,
+            far_share: 0.5,
             quality_share: [0.3, 0.65, 1.0, 1.0],
         }
     }
@@ -375,7 +375,7 @@ mod tests {
         assert!(thin.keep(Role::Open, 300.0) < 0.1);
         assert!((thin.keep(Role::Open, 10.0) - 1.0).abs() < 1e-5);
         // Groves stay much more than the scattered trees.
-        assert!(thin.keep(Role::Grove, 300.0) > 0.6);
+        assert!(thin.keep(Role::Grove, 300.0) > 0.4);
         // Close view: everything drawn; medium view: in between and decreasing.
         let close = OpenThinning::new(&ForestLook::default(), 40.0, "high");
         assert_eq!(close.keep(Role::Open, 300.0), 1.0);
