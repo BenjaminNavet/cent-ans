@@ -51,8 +51,24 @@ struct SeasonParams {
     winter_ground: vec4<f32>,
     // x, y: plain-snow south fade (fractions of the map height), z: plain snow share.
     snow_plain: vec4<f32>,
-    // rgb: plain snow colour (sRGB).
+    // rgb: sunlit snow colour.
     snow_color: vec4<f32>,
+    // TS-T1 (data `campaign_seasons.json` snow / ground_look): rgb shaded snow, a snow kept under forests.
+    snow_shade: vec4<f32>,
+    // x patch frequency (1 / map px), y snow-line jitter (m), z, w displayed-normal y start / full.
+    snow_mask: vec4<f32>,
+    // rgb mud, a fringe width.
+    mud: vec4<f32>,
+    // rgb dark rock, a strength.
+    rock: vec4<f32>,
+    // x, y displayed-normal y of full / no rock, z, w altitude start / full (m).
+    rock_band: vec4<f32>,
+    // x slope contrast, y crest light, z strata.
+    rock_light: vec4<f32>,
+    // rgb forest-floor tint, a strength.
+    forest_floor: vec4<f32>,
+    // x frequency (1 / map px), y strength, z sharpening.
+    patches: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(3) var<uniform> season: SeasonParams;
@@ -311,7 +327,7 @@ fn vertex(v: Vertex) -> Varyings {
 }
 
 // Season grade of the ground colour (SeasonLook.grade / ground, snow of terrain.gdshader simplified).
-fn season_ground(albedo: vec3<f32>, n: vec3<f32>, altitude: f32, xz: vec2<f32>) -> vec3<f32> {
+fn season_ground(albedo: vec3<f32>, cover: SnowCover, lit: f32) -> vec3<f32> {
     let w = season.weights;
     var gain = vec3<f32>(0.0);
     var saturation = 0.0;
@@ -325,25 +341,88 @@ fn season_ground(albedo: vec3<f32>, n: vec3<f32>, altitude: f32, xz: vec2<f32>) 
     col = col * mix(vec3<f32>(1.0), season.winter_ground.rgb, w.w);
     let luma = dot(col, vec3<f32>(0.299, 0.587, 0.114));
     col = mix(vec3<f32>(luma), col, saturation * (1.0 - season.winter_ground.a * w.w));
-    let snow = season_snow(n, altitude, xz);
-    // Plain winter snow is light (data `snow.plain_color`); the snow of the heights stays cooler.
-    let plain_snow = vec3<f32>(0.78, 0.80, 0.84);
-    let snow_tint = mix(season.snow_color.rgb, plain_snow, smoothstep(300.0, 1500.0, altitude));
-    return mix(col, snow_tint, snow);
+    return snow_apply(col, cover, lit);
 }
 
-// Seasonal snow cover: above the seasonal snow line, plus a share of the plains of the north in
-// winter; it slides off steep slopes.
-fn season_snow(n: vec3<f32>, altitude: f32, xz: vec2<f32>) -> f32 {
+// TS-T1 snow cover of a ground pixel: `snow` the cover, `mud` the brown fringe at its edge,
+// `grain` the noise of the patches (shade of the snow).
+struct SnowCover {
+    snow: f32,
+    mud: f32,
+    grain: f32,
+};
+
+// Multi-scale patch noise of the snow (0..1), its fine octaves fading with the footprint.
+fn snow_patch_noise(p: vec2<f32>, footprint: f32) -> f32 {
+    let f = max(season.snow_mask.x, 1e-4);
+    let fine = 1.0 - smoothstep(0.15, 0.8, footprint);
+    let very_fine = 1.0 - smoothstep(0.04, 0.2, footprint);
+    let n = 0.5 * vnoise(p * f + vec2<f32>(4.7, 1.3))
+        + 0.3 * mix(0.5, vnoise(p * f * 4.1 + vec2<f32>(9.2, 3.8)), fine)
+        + 0.2 * mix(0.5, vnoise(p * f * 17.0 + vec2<f32>(2.1, 7.4)), very_fine);
+    return n;
+}
+
+// Snow of a raw cover `c` (0..1, before the patches): patches of noise `pn`, sharp edge, mud fringe
+// outside it; `flat` the share of the slope that holds the snow.
+fn snow_cover_of(c: f32, pn: f32, flat: f32) -> SnowCover {
+    var out: SnowCover;
+    // The noise shifts the threshold: a cover c leaves about c of the ground white, in patches.
+    let t = c + (pn - 0.5) * 0.9 * (1.0 - smoothstep(0.85, 1.0, c));
+    let fringe = max(season.mud.w, 0.0);
+    out.snow = smoothstep(0.5, 0.6, t) * flat;
+    out.mud = smoothstep(0.5 - fringe, 0.5, t) * (1.0 - out.snow) * smoothstep(0.0, 0.3, c);
+    out.grain = pn;
+    return out;
+}
+
+// Seasonal snow cover: above the seasonal snow line (jittered by the noise), plus a share of the
+// plains of the north in winter, in patches; it slides off the steep slopes of the displayed relief
+// (`disp_y` the vertical component of the exaggerated normal), thinner under the forests.
+fn season_snow(disp_y: f32, altitude: f32, xz: vec2<f32>, footprint: f32, forest: f32) -> SnowCover {
     let w = season.weights;
     let line = dot(w, season.snow_lines);
-    var snow = 0.0;
+    let pn = snow_patch_noise(xz, footprint);
+    var c = 0.0;
     if (line > 0.0) {
-        snow = smoothstep(line - 150.0, line + 150.0, altitude);
+        let alt = altitude + (pn - 0.5) * season.snow_mask.y;
+        c = smoothstep(line - 250.0, line + 250.0, alt);
     }
     let north = 1.0 - smoothstep(season.snow_plain.x * params.map.y, season.snow_plain.y * params.map.y, xz.y);
-    snow = max(snow, w.w * north * season.snow_plain.z);
-    return snow * smoothstep(0.55, 0.85, n.y);
+    c = max(c, w.w * north * season.snow_plain.z);
+    c = c * mix(1.0, season.snow_shade.a, forest);
+    let flat = smoothstep(season.snow_mask.z, season.snow_mask.w, disp_y);
+    return snow_cover_of(c, pn, flat);
+}
+
+// Snow colour: warm in the sun, cold and bluish in the shade (`lit` = n.l x sun visibility),
+// never pure white; the grain of the patches varies it slightly.
+fn snow_tint(lit: f32, grain: f32) -> vec3<f32> {
+    let k = smoothstep(0.05, 0.7, lit);
+    return mix(season.snow_shade.rgb, season.snow_color.rgb, k) * (0.94 + 0.12 * grain);
+}
+
+fn snow_apply(col: vec3<f32>, cover: SnowCover, lit: f32) -> vec3<f32> {
+    var out = mix(col, season.mud.rgb * (0.85 + 0.3 * cover.grain), cover.mud * 0.85);
+    return mix(out, snow_tint(lit, cover.grain), cover.snow);
+}
+
+// TS-T1 dark rock of the heights and of the steep displayed slopes: grey-brown, strata, lighter
+// crests, stronger sunlit / shaded contrast of the slopes. `ndl` the sun term of the normal.
+fn rock_apply(col: vec3<f32>, p: vec2<f32>, disp_y: f32, altitude: f32, footprint: f32, ndl: f32,
+        crest: f32, forest: f32) -> vec3<f32> {
+    let steep = 1.0 - smoothstep(season.rock_band.x, season.rock_band.y, disp_y);
+    let high = smoothstep(season.rock_band.z, season.rock_band.w, altitude);
+    let k = season.rock.a * steep * high * (1.0 - 0.6 * forest);
+    if (k <= 0.001) {
+        return col;
+    }
+    let detail = 1.0 - smoothstep(0.2, 1.0, footprint);
+    let strata = vnoise(p * vec2<f32>(0.5, 2.3) + vec2<f32>(3.3, 8.1)) * 0.6 + vnoise(p * 3.1) * 0.4 * detail;
+    var rock = season.rock.rgb * (1.0 + (strata - 0.5) * 2.0 * season.rock_light.z);
+    rock = rock * (1.0 + season.rock_light.y * crest);
+    rock = rock * mix(1.0, 0.55 + 0.9 * ndl, season.rock_light.x);
+    return mix(col, rock, k);
 }
 
 // Colour grade of the campaign environment (`campaign.seasons.<season>.grade`): contrast about the
@@ -502,7 +581,8 @@ fn wx_clear_at(p: vec2<f32>) -> f32 {
 
 // Wet ground (slightly darker, TB6 `weather_wet_dim`) and fresh snow where it rains / snows
 // (`weather_ground` of campaign_weather.gdshaderinc, per province).
-fn weather_ground(col: vec3<f32>, altitude: f32, p: vec2<f32>, slope: f32) -> vec3<f32> {
+fn weather_ground(col: vec3<f32>, altitude: f32, p: vec2<f32>, disp_y: f32, footprint: f32, lit: f32,
+        forest: f32) -> vec3<f32> {
     let w = wx_at(p);
     if (dot(w, vec4<f32>(1.0)) <= 0.0) {
         return col;
@@ -510,34 +590,43 @@ fn weather_ground(col: vec3<f32>, altitude: f32, p: vec2<f32>, slope: f32) -> ve
     let land = smoothstep(0.0, 4.0, altitude);
     let rain = max(w.r, w.a);
     var out = col * (1.0 - look.mist.z * rain * land);
-    // Fresh snow: on the flat mostly, in patches at its edge.
+    // Fresh snow (TS-T1): patches of the season snow mask, off the steep displayed slopes, tinted
+    // like the season snow, with its mud fringe.
     if (w.g > 0.0) {
-        let flakes = smoothstep(0.45, 0.85, fbm(p * 0.09) * 0.7 + w.g * 0.6);
-        let snow = w.g * flakes * (1.0 - smoothstep(0.35, 0.8, slope));
-        out = mix(out, vec3<f32>(0.80, 0.82, 0.86), snow * 0.7 * land);
+        let pn = snow_patch_noise(p + vec2<f32>(31.7, 12.9), footprint);
+        let c = w.g * 0.85 * mix(1.0, season.snow_shade.a, forest);
+        var cover = snow_cover_of(c, pn, smoothstep(season.snow_mask.z, season.snow_mask.w, disp_y));
+        cover.snow = cover.snow * land;
+        cover.mud = cover.mud * land;
+        out = snow_apply(out, cover, lit);
     }
     return out;
 }
 
 // --- DN-ME4 névés and glaciers (freshwater_ground.gdshaderinc), permanent, all seasons ---
-fn fw_glacier_apply(col: vec3<f32>, p: vec2<f32>, hc: f32, slope: f32, footprint: f32, land: f32) -> vec3<f32> {
+fn fw_glacier_apply(col: vec3<f32>, p: vec2<f32>, hc: f32, slope: f32, footprint: f32, land: f32, disp_y: f32,
+        lit: f32) -> vec3<f32> {
     let g = extras.glacier.line;
     if (g.w <= 0.0 || hc < g.x - 600.0) {
         return col;
     }
     let alt = hc + (fbm(p * 0.035) - 0.5) * 420.0;
-    let flat_k = 1.0 - smoothstep(g.z - 0.12, g.z + 0.25, slope);
+    // TS-T1: the steep faces of the displayed (exaggerated) relief stay bare rock.
+    let flat_k = (1.0 - smoothstep(g.z - 0.12, g.z + 0.25, slope))
+        * smoothstep(season.snow_mask.z, season.snow_mask.w, disp_y);
     // Névé: white patches below the glacier line, cut by the noise.
     let patch_n = vnoise(p * 0.35) * 0.6 + vnoise(p * 1.3) * 0.4;
     let neve = smoothstep(g.x - 500.0, g.x + 150.0, alt) * smoothstep(0.35, 0.6, patch_n + 0.12) * flat_k;
-    var out = mix(col, extras.glacier.neve.rgb * (0.92 + 0.1 * patch_n), neve * 0.8 * g.w * land);
+    let neve_col = snow_tint(lit, patch_n) * extras.glacier.neve.rgb / max(luma(extras.glacier.neve.rgb), 0.1);
+    var out = mix(col, neve_col * luma(season.snow_color.rgb), neve * 0.8 * g.w * land);
     // Glacier: blue-white tongue with crevasses, on gentle slopes above the line.
     let ice = smoothstep(g.x, g.y, alt) * flat_k;
     if (ice > 0.01) {
         let fade_detail = 1.0 - smoothstep(0.5, 2.5, footprint);
         let seams = abs(vnoise(p * vec2<f32>(2.2, 0.7)) - 0.5) * 2.0;
         let crevasse = (1.0 - smoothstep(0.0, 0.1, seams)) * fade_detail;
-        let ice_col = mix(extras.glacier.ice.rgb * (0.9 + 0.15 * patch_n), extras.glacier.crevasse.rgb, crevasse * 0.7);
+        let ice_col = mix(extras.glacier.ice.rgb * (0.9 + 0.15 * patch_n), extras.glacier.crevasse.rgb, crevasse * 0.7)
+            * mix(0.8, 1.0, smoothstep(0.05, 0.7, lit));
         out = mix(out, ice_col, ice * 0.85 * g.w * land);
     }
     return out;
@@ -1648,6 +1737,27 @@ fn dark_masses(cm_in: vec3<f32>, soft: vec3<f32>, q: vec2<f32>, footprint: f32) 
     return cm;
 }
 
+// TS-T1: the transitions between the open soils (grass, farmland, heath / rock) in irregular
+// patches instead of gradients: per-soil noise on the weights, then a sharpening. The forest share
+// stays as it is (the trees follow it).
+fn soil_patches(s_in: vec4<f32>, p: vec2<f32>, footprint: f32) -> vec4<f32> {
+    let k = season.patches.y;
+    let open_sum = s_in.r + s_in.g + s_in.a;
+    if (k <= 0.0 || open_sum < 1e-3) {
+        return s_in;
+    }
+    let f = season.patches.x;
+    let fine = 1.0 - smoothstep(0.1, 0.6, footprint);
+    let q = p * f;
+    let nr = vnoise(q + vec2<f32>(1.7, 9.2)) * 0.65 + mix(0.5, vnoise(q * 3.7 + vec2<f32>(5.1, 2.3)), fine) * 0.35;
+    let ng = vnoise(q + vec2<f32>(8.3, 4.4)) * 0.65 + mix(0.5, vnoise(q * 3.7 + vec2<f32>(0.6, 7.7)), fine) * 0.35;
+    let na = vnoise(q + vec2<f32>(3.9, 6.1)) * 0.65 + mix(0.5, vnoise(q * 3.7 + vec2<f32>(4.2, 1.9)), fine) * 0.35;
+    var o = vec3<f32>(s_in.r, s_in.g, s_in.a) * mix(vec3<f32>(1.0), vec3<f32>(0.2) + 1.6 * vec3<f32>(nr, ng, na), k);
+    o = pow(max(o, vec3<f32>(0.0)), vec3<f32>(max(season.patches.z, 1.0)));
+    o = o * open_sum / max(o.x + o.y + o.z, 1e-4);
+    return vec4<f32>(o.x, o.y, s_in.b, o.z);
+}
+
 fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope: f32, grad: vec2<f32>) -> GroundOut {
     var out: GroundOut;
     let detail_fade = 1.0 - smoothstep(ground.fades.x, ground.fades.y, footprint);
@@ -1684,6 +1794,7 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
         s = vec4<f32>(s.r - moved, s.g + moved, s.b, s.a);
     }
     s = hb_clearing_splat(s, terroir, p, slope, agri_raw);
+    s = soil_patches(s, p, footprint);
     // Land use (R vine, G dryness, B bocage) with the vines of the terroirs; V2b parcels.
     var lu = vec3<f32>(0.0);
     if (ground.splat.z > 0.5) {
@@ -2161,6 +2272,21 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     }
     var n = normalize(in.normal);
     let base_albedo = albedo;
+    // TS-T1: slope of the displayed (exaggerated) relief, the steeper of the interpolated normal
+    // and of the triangle (the vertex normal of a coarse node is smoothed), and the crests
+    // (divergence of the normal along the screen axes, per map px).
+    let dwx = dpdx(in.world);
+    let dwy = dpdy(in.world);
+    let facet = normalize(cross(dwy, dwx));
+    let disp_y = min(n.y, abs(facet.y));
+    let dnx = dpdx(n);
+    let dny = dpdy(n);
+    let curv = dot(dnx, dwx) / max(dot(dwx, dwx), 1e-8) + dot(dny, dwy) / max(dot(dwy, dwy), 1e-8);
+    let crest = clamp(curv * season.rock_light.w, 0.0, 1.0);
+    // Sun term of the geometric normal (snow tint, rock contrast), the shadow fetched once.
+    let sun_vis = sun_shadow(in.world, n, in.clip.xy);
+    let lit0 = max(dot(n, params.sun_dir.xyz), 0.0) * sun_vis;
+    var forest_f = 0.0;
     if (ground.bg.x > 0.5) {
         // Regional ground (TX): the colormap gives the colour far away, the textured soil draws
         // close up (sg_apply of satellite_ground.gdshaderinc: share 0.45 at the closest, 1 far).
@@ -2188,23 +2314,27 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         albedo = mix(base_albedo, painted, land);
         n = normalize(vec3<f32>(n.x + dn.x * land, n.y, n.z - dn.y * land));
         // Forest crowns: relief and tone contrast of the canopy (0.45 bump, 0.35 contrast).
-        let forest_f = g.forest_w * land;
+        forest_f = g.forest_w * land;
+        // TS-T1: green-black ground under the forests.
+        albedo = albedo * mix(vec3<f32>(1.0), season.forest_floor.rgb, season.forest_floor.a * forest_f);
         if (forest_f > 0.01) {
             let cf = canopy_field(in.world.xz, ground_footprint);
             n = normalize(vec3<f32>(n.x - cf.y * 0.45 * forest_f, n.y, n.z - cf.z * 0.45 * forest_f));
             albedo = albedo * (1.0 + 0.35 * forest_f * cf.x);
         }
     }
-    albedo = season_ground(albedo, n, in.altitude, in.world.xz);
+    let land_g = smoothstep(0.0, 2.0, in.altitude);
+    albedo = rock_apply(albedo, in.world.xz, disp_y, in.altitude, ground_footprint, lit0, crest * land_g, forest_f);
+    let cover = season_snow(disp_y, in.altitude, in.world.xz, ground_footprint, forest_f);
+    albedo = season_ground(albedo, cover, lit0);
     // DN-ME4 névés and glaciers, then the TB5 coast band (cliffs, beaches, swash).
     let slope_g = length(in.slope_xz) / max(ground.micro.w, 1.0);
-    let land_g = smoothstep(0.0, 2.0, in.altitude);
-    albedo = fw_glacier_apply(albedo, in.world.xz, in.altitude, slope_g, ground_footprint, land_g);
+    albedo = fw_glacier_apply(albedo, in.world.xz, in.altitude, slope_g, ground_footprint, land_g, disp_y, lit0);
     let coast_out = coast_band(in.world.xz, ground_footprint, in.altitude, in.world.y, slope_g,
-        season_snow(n, in.altitude, in.world.xz), albedo, n);
+        cover.snow, albedo, n);
     albedo = coast_out.color;
     n = coast_out.n;
-    albedo = weather_ground(albedo, in.altitude, in.world.xz, slope_g);
+    albedo = weather_ground(albedo, in.altitude, in.world.xz, disp_y, ground_footprint, lit0, forest_f);
     let to_eye = normalize(view.world_position - in.world);
     albedo = weather_mist(albedo, in.world.xz, in.altitude, ground_footprint, 1.0 - abs(to_eye.y));
     albedo = fog_of_war_veil(albedo, in.world.xz);
@@ -2230,7 +2360,6 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     let rvd = rvd_apply(in.world.xz / params.map.xy, ground_footprint, smoothstep(0.0, 2.0, in.altitude), albedo);
     albedo = rvd.color;
     let ndl = max(dot(n, params.sun_dir.xyz), 0.0);
-    let sun_vis = sun_shadow(in.world, n, in.clip.xy);
     var color = albedo * (params.ambient.rgb * rvd.ao + params.sun_color.rgb * ndl * sun_vis) * params.ambient.a;
     color = campaign_grade(color + paper_emit);
     // Distance fog (depth fog of the Godot environment, simplified).

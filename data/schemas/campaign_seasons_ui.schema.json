@@ -107,6 +107,26 @@
         }
       }
     },
+    "ground_look": {
+      "description": "TS-T1 : aspect du sol de campagne (roche des hauteurs, sol des forêts, taches de sols).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rock_color": {"description": "Roche sombre (gris-brun) des hauteurs et des pentes raides.", "type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+        "rock_strength": {"description": "Force de la roche sombre (0..1).", "type": "number", "minimum": 0, "maximum": 1},
+        "rock_normal": {"description": "Composante verticale de la normale affichée : roche pleine / absente.", "type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+        "rock_altitude_m": {"description": "Altitudes (m) où la roche sombre commence / est pleine sur les pentes.", "type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+        "rock_slope_contrast": {"description": "Contraste des versants au soleil / à l'ombre sur la roche.", "type": "number", "minimum": 0, "maximum": 2},
+        "rock_crest_light": {"description": "Éclaircissement des arêtes de la roche.", "type": "number", "minimum": 0, "maximum": 1},
+        "rock_crest_gain": {"description": "Gain de détection des arêtes (courbure de la normale affichée par pixel de carte).", "type": "number", "minimum": 0},
+        "rock_strata": {"description": "Force des strates et du grain de la roche.", "type": "number", "minimum": 0, "maximum": 1},
+        "forest_floor_tint": {"$ref": "#/$defs/rgb2"},
+        "forest_floor_strength": {"description": "Force de l'assombrissement du sol sous les forêts (vert-noir).", "type": "number", "minimum": 0, "maximum": 1},
+        "patch_frequency": {"description": "Fréquence des taches des transitions de sols, en 1 / pixel de carte.", "type": "number", "minimum": 0},
+        "patch_strength": {"description": "Force du bruit en taches sur les poids des sols ouverts (herbe, cultures, lande).", "type": "number", "minimum": 0, "maximum": 1},
+        "patch_sharpen": {"description": "Exposant de netteté des taches (1 = dégradé).", "type": "number", "minimum": 1, "maximum": 4}
+      }
+    },
     "snow": {
       "description": "Neige de plaine et des toits.",
       "type": "object",
@@ -128,6 +148,13 @@
           "maxItems": 3,
           "items": {"type": "number", "minimum": 0, "maximum": 1}
         },
+        "shade_color": {"description": "Teinte de la neige à l'ombre (froide, bleutée) ; `plain_color` est celle au soleil (TS-T1, jamais blanc pur).", "type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+        "forest_share": {"description": "Part de la neige gardée sous l'emprise des forêts (0..1).", "type": "number", "minimum": 0, "maximum": 1},
+        "patch_frequency": {"description": "Fréquence du bruit des plaques de neige, en 1 / pixel de carte.", "type": "number", "minimum": 0},
+        "line_jitter_m": {"description": "Amplitude du bruit sur la limite des neiges, en mètres.", "type": "number", "minimum": 0},
+        "flat_normal": {"description": "Composante verticale de la normale affichée (relief exagéré) où la neige commence / est pleine ; plus raide = roche nue.", "type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+        "mud_color": {"description": "Boue de la frange entre neige et herbe, et des chemins sous la neige.", "type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+        "mud_fringe": {"description": "Largeur de la frange de boue au bord du masque de neige (0..1).", "type": "number", "minimum": 0, "maximum": 1},
         "south_fade": {
           "description": "Limite sud de la neige de plaine et des toits : début et fin du fondu, en fraction de la hauteur de la carte (0 : bord nord, 1 : bord sud).",
           "type": "array",

@@ -149,7 +149,29 @@
     ],
     "mountain_line_m": 2900,
     "plain_share": 0.55,
-    "plain_color": [0.86, 0.88, 0.92]
+    "plain_color": [0.70, 0.68, 0.64],
+    "shade_color": [0.50, 0.56, 0.68],
+    "forest_share": 0.7,
+    "patch_frequency": 0.12,
+    "line_jitter_m": 260,
+    "flat_normal": [0.62, 0.84],
+    "mud_color": [0.20, 0.13, 0.08],
+    "mud_fringe": 0.18
+  },
+  "ground_look": {
+    "rock_color": [0.085, 0.078, 0.07],
+    "rock_strength": 0.75,
+    "rock_normal": [0.45, 0.75],
+    "rock_altitude_m": [600, 1800],
+    "rock_slope_contrast": 0.5,
+    "rock_crest_light": 0.35,
+    "rock_strata": 0.3,
+    "rock_crest_gain": 3.0,
+    "forest_floor_tint": [0.55, 0.65, 0.5],
+    "forest_floor_strength": 0.7,
+    "patch_frequency": 0.35,
+    "patch_strength": 0.6,
+    "patch_sharpen": 1.6
   },
   "ground": {
     "summer_gold": [
