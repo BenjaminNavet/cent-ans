@@ -18,9 +18,9 @@ principale ; pas de push.
 |---|---|---|---|
 | T1 sol | Opus | `terrain/terrain.wesl` + données saison : neige teintée, masque altitude × pente (normale exagérée) × bruit en plaques, frange de boue, routes boueuses sous la neige, roche plus sombre en altitude, contraste des versants, sol assombri sous les forêts, mélanges de sol en taches | fusionné (0f92314e9) ; à régler : plaques d hiver trop régulières (`snow.patch_frequency`) |
 | T2 forêts | Opus | `vegetation/` : canopée plus sombre, mélange de conifères, conifères givrés selon le masque de neige, lisière nette + arbres isolés devant, arbres plus gros en vue moyenne/lointaine (fin des taches beiges), limite des arbres en altitude, tramage et blocs gris de près, points noirs d'hiver | fusionné (d9e37ef7f) ; reste : arbres épars en vue moyenne → T8, rochers gris + ombres noires sur neige → T9 |
-| T3 atmosphère | Opus | `weather/` + `terrain/post.*` : brume de vallée selon l'altitude, perspective atmosphérique bleutée, brume plus froide/dense en région froide, flocons doux, étalonnage désaturé avec accents chauds conservés | terminé (ts/t3), vérif combinée en cours |
-| T4 villes | Sonnet | `towns/` : halo chaud au sol + fenêtres, fumées de cheminées visibles en vue moyenne | à faire |
-| T5 armées | Sonnet | `armies/` : trajet = ligne lumineuse animée posée sur le relief, anneau de zone de contrôle au sol, grande bannière héraldique derrière chaque armée | à faire |
+| T3 atmosphère | Opus | `weather/` + `terrain/post.*` : brume de vallée selon l'altitude, perspective atmosphérique bleutée, brume plus froide/dense en région froide, flocons doux, étalonnage désaturé avec accents chauds conservés | fusionné ; correctif T3b en cours (plaine basse noyée de brume laiteuse, vue Paris d=200) |
+| T4 villes | Sonnet | `towns/` : halo chaud au sol + fenêtres, fumées de cheminées visibles en vue moyenne | fusionné (non jugé : brume) |
+| T5 armées | Sonnet | `armies/` : trajet = ligne lumineuse animée posée sur le relief, anneau de zone de contrôle au sol, grande bannière héraldique derrière chaque armée | fusionné ; trajet/anneaux pas encore vus à l écran |
 | T6 plaques & fil | Sonnet | `markers/` + `hud/` : cartouche de ville coloré par statut + pastilles ; fil d'événements repliable par catégorie | à faire |
 | T7 sous-bois | Sonnet | `countryside/` : ceinture de sous-bois en lisière (herbes hautes, buissons, bois mort), touffes pâles en neige/toundra, touffes 3D au zoom proche | à faire |
 | T8 bosquets | Sonnet | `vegetation/` (après T2) : bosquets rendus, clairières avec campement/scierie | à faire |
@@ -31,3 +31,4 @@ Worktrees `../gp-ts-<lot>`, branches `ts/<lot>`.
 ## Prochaine étape
 Vagues 1-2 en cours ; T8 (bosquets + lecture des masses en vue moyenne) et T9 lancés.
 | T9 rochers & ombres | Sonnet | `countryside/rocks.rs` + ombres de `vegetation/` : blocs gris « chou-fleur » plafonnés/teintés/enneigés, ombres d'arbres douces et bleutées sur la neige | en cours |
+| T10 neige d hiver | Sonnet | plaques de neige en plaine trop régulières (« camouflage ») | en cours |
