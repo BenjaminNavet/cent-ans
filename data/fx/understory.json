@@ -27,7 +27,7 @@
     "flower_share_in_patch": 0.55,
     "flower_share_outside": 0.04
   },
-  "slope": {"max": 0.25, "pale_max": 0.12},
+  "slope": {"max": 0.12, "pale_max": 0.07},
   "belt": {
     "width_px": 1.8,
     "grid_px": 0.4,
