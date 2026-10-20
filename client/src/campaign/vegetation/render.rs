@@ -324,7 +324,7 @@ fn foot_plate_free(
     };
     let trunk = FOOT_TRUNK_RADIUS * ratio;
     let mut kept = Vec::with_capacity(indices.len());
-    for tri in indices.chunks_exact(3) {
+    for tri in indices.as_chunks::<3>().0 {
         let p = [0, 1, 2].map(|k| Vec3::from(positions[tri[k] as usize]));
         let low = p.iter().all(|v| v.y < FOOT_PLATE_HEIGHT);
         let centre = (p[0] + p[1] + p[2]) / 3.0;

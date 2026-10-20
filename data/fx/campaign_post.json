@@ -49,6 +49,6 @@
     "protect_chroma": [0.32, 0.6],
     "warm_protect": 0.85,
     "protect_luma": [0.88, 1.0],
-    "value_contrast": 0.22
+    "value_contrast": 0.16
   }
 }
