@@ -112,6 +112,7 @@ impl SeasonParams {
             out.snow_plain.y = fade[1].as_f64().unwrap_or(3.0) as f32;
         }
         // Share of a winter plain turned white (the Godot shader gates it by biome and slope).
+        out.snow_plain.w = data["snow"]["region_variation"].as_f64().unwrap_or(0.0) as f32;
         out.snow_plain.z = data["snow"]["plain_share"].as_f64().unwrap_or(0.55) as f32;
         out.snow_color =
             vec3_of(data["snow"].get("plain_color"), out.snow_color.truncate()).extend(0.0);
@@ -301,7 +302,7 @@ mod tests {
         assert!(p.gain[3].w < 1.0, "winter desaturates");
         assert!(p.winter_ground.w > 0.3);
         assert!((p.snow_plain.x - 0.58).abs() < 1e-5);
-        assert!((p.snow_plain.z - 0.55).abs() < 1e-5);
+        assert!((p.snow_plain.z - 0.93).abs() < 1e-5);
         let l = |c: Vec4| 0.299 * c.x + 0.587 * c.y + 0.114 * c.z;
         assert!(l(p.snow_color) < 0.8, "sunlit snow is never pure white");
         assert!(l(p.snow_shade) < l(p.snow_color), "shaded snow is darker");

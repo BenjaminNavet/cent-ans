@@ -12,3 +12,8 @@
   pas de capture de contrôle du rendu ; budgets à régler sur machine calme ; `treeline_m` passé en `pub(crate)`
   (vegetation/mask.rs) ; en hiver, les fleurs/touffes vertes ne deviennent pâles que par la teinte de saison
   (pas de re-semis par masque de neige au sol des touffes proches au-delà de `snow_max`).
+
+## Correctif pente (ts/t7b)
+Filtre de pente du relief réel (`slope.max` 0.25 pour toute pièce, `slope.pale_max` 0.12 pour les touffes pâles :
+replats seulement) dans `data/fx/understory.json`. Bois mort déjà limité à la ceinture de lisière.
+Vue 5.9,45.25,55 été : ceinture 2030 -> ~440, pâles 2842 -> ~1000, proches 13455 -> ~7800 (valeurs mesurées à 0.2/0.12).

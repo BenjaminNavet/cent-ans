@@ -33,6 +33,7 @@ pub mod detail_profile;
 pub mod edges;
 pub mod ground_job;
 pub mod ground_materials;
+pub mod groves;
 pub mod light;
 pub mod look;
 pub mod mask;
@@ -113,6 +114,8 @@ struct VegTiles {
     scattered: usize,
     cleared: usize,
     edge_thinned: usize,
+    groves: usize,
+    clearing_trees: usize,
 }
 
 /// Camera-derived view of the vegetation.
@@ -139,6 +142,7 @@ struct VegRender {
     dirty: bool,
     last_focus: Vec2,
     last_density: f32,
+    last_open_share: f32,
     last_model_radius: f32,
     last_ready_models: usize,
     stats: RenderStats,
@@ -200,6 +204,7 @@ impl Plugin for CampaignVegetationPlugin {
         app.add_plugins((BillboardPlugin, shadow_pass::VegShadowPassPlugin))
             .init_resource::<VegTiles>()
             .init_resource::<VegView>()
+            .init_resource::<groves::ForestClearings>()
             .init_resource::<VegRender>()
             .init_resource::<ground_job::GroundJobs>()
             .init_resource::<VegErrors>()
@@ -245,7 +250,9 @@ fn reset_campaign(
     mut view: ResMut<VegView>,
     mut wet: ResMut<WetDecor>,
     mut ground_jobs: ResMut<ground_job::GroundJobs>,
+    mut clearings: ResMut<groves::ForestClearings>,
 ) {
+    clearings.sites.clear();
     ground_job::clear(&mut ground_jobs);
     for level in &mut wet.levels {
         for entity in level.entities.iter_mut().filter_map(Option::take) {
@@ -389,7 +396,11 @@ fn update_view(
     }
 }
 
-fn poll_scatter(pool: Option<Res<Pool>>, mut tiles: ResMut<VegTiles>) {
+fn poll_scatter(
+    pool: Option<Res<Pool>>,
+    mut tiles: ResMut<VegTiles>,
+    mut clearings: ResMut<groves::ForestClearings>,
+) {
     let Some(pool) = pool else { return };
     for Done {
         index,
@@ -397,8 +408,16 @@ fn poll_scatter(pool: Option<Res<Pool>>, mut tiles: ResMut<VegTiles>) {
         ms,
         cleared,
         edge_thinned,
+        groves,
+        clearing_trees,
+        clearings: sites,
     } in pool.0.poll(4)
     {
+        tiles.groves += groves;
+        tiles.clearing_trees += clearing_trees;
+        for site in sites {
+            clearings.sites.insert(site.cell, site);
+        }
         tiles.scattered += 1;
         tiles.cleared += cleared;
         tiles.edge_thinned += edge_thinned;
@@ -464,14 +483,22 @@ fn assemble_records(
     tiles: Res<VegTiles>,
     mut render: ResMut<VegRender>,
     world: Option<Res<VegWorld>>,
+    quality: Option<Res<crate::settings::RenderQuality>>,
 ) {
     let Some(_world) = world else { return };
+    let thinning = look::OpenThinning::new(
+        &_world.0.look,
+        view.distance,
+        quality.as_ref().map_or("high", |q| q.level.as_str()),
+    );
+    let open_share = thinning.keep(look::Role::Open, f32::MAX);
     if render.running.is_some() || !view.active {
         return;
     }
     let ready_models = render.assets.ready_models();
     let moved = view.focus.distance(render.last_focus) > (view.model_radius * 0.25).max(2.0);
-    let density_changed = (view.density - render.last_density).abs() > 0.05;
+    let density_changed = (view.density - render.last_density).abs() > 0.05
+        || (open_share - render.last_open_share).abs() > 0.03;
     let zone_changed = (view.model_radius > 0.0) != (render.last_model_radius > 0.0)
         || (view.model_radius - render.last_model_radius).abs() > 4.0;
     let models_changed = ready_models != render.last_ready_models;
@@ -512,12 +539,14 @@ fn assemble_records(
     let out = slot.clone();
     std::thread::spawn(move || {
         let started = std::time::Instant::now();
-        let mut assembled = render::assemble(&trees, focus, model_radius, density, &model_rows);
+        let mut assembled =
+            render::assemble(&trees, focus, model_radius, density, &thinning, &model_rows);
         assembled.ms = started.elapsed().as_secs_f32() * 1000.0;
         *out.lock().expect("assembly slot") = Some(assembled);
     });
     render.last_focus = focus;
     render.last_density = density;
+    render.last_open_share = open_share;
     render.last_model_radius = model_radius;
     render.last_ready_models = ready_models;
     render.dirty = false;
@@ -939,6 +968,63 @@ fn update_wetlands(
     }
 }
 
+/// TS-T8: trees per role and distance band from the focus, before and after the thinning of the
+/// medium view (`kept`), the groves and the clearings of the loaded tiles.
+fn dump_open_forest(
+    world: &World,
+    tiles: &VegTiles,
+    view: &VegView,
+    look: &look::ForestLook,
+) -> Value {
+    const BANDS: [f32; 5] = [60.0, 150.0, 300.0, 600.0, f32::MAX];
+    let level = world
+        .get_resource::<crate::settings::RenderQuality>()
+        .map_or("high", |q| q.level.as_str());
+    let thinning = look::OpenThinning::new(look, view.distance, level);
+    // [role][band] = (before, kept)
+    let mut counts = [[(0usize, 0usize); BANDS.len()]; 3];
+    for state in tiles.tiles.values() {
+        let TileState::Ready { trees, .. } = state else {
+            continue;
+        };
+        for tree in trees.iter() {
+            let d = ((tree.x - view.focus.x).powi(2) + (tree.z - view.focus.y).powi(2)).sqrt();
+            let band = BANDS.iter().position(|b| d < *b).unwrap_or(BANDS.len() - 1);
+            let keep = match tree.role {
+                look::Role::Forest => view.density,
+                look::Role::Open => view.density.min(thinning.keep(tree.role, d)),
+                look::Role::Grove => thinning.keep(tree.role, d),
+            };
+            let slot = &mut counts[tree.role as usize][band];
+            slot.0 += 1;
+            slot.1 += usize::from(tree.seed >= 1.0 - keep);
+        }
+    }
+    let bands = |role: usize| -> Vec<Value> {
+        counts[role]
+            .iter()
+            .zip(BANDS)
+            .map(|(c, up_to)| json!({ "to": if up_to == f32::MAX { json!("inf") } else { json!(up_to) }, "total": c.0, "kept": c.1 }))
+            .collect()
+    };
+    let clearings = world.get_resource::<groves::ForestClearings>();
+    json!({
+        "camera_distance": view.distance,
+        "quality": level,
+        "forest": bands(look::Role::Forest as usize),
+        "open": bands(look::Role::Open as usize),
+        "groves": bands(look::Role::Grove as usize),
+        "clearings": clearings.map_or(0, |c| c.sites.len()),
+        "clearing_sites": clearings.map_or(Vec::new(), |c| {
+            c.sites
+                .values()
+                .take(24)
+                .map(|s| json!({"x": s.x, "z": s.z, "radius": s.radius, "kind": look.clearings.kinds.get(s.kind)}))
+                .collect()
+        }),
+    })
+}
+
 fn dump_vegetation(world: &World) -> (String, Value) {
     let mut value = json!({ "ready": false });
     if let Some(errors) = world.get_resource::<VegErrors>()
@@ -1012,9 +1098,17 @@ fn dump_vegetation(world: &World) -> (String, Value) {
             "scattered": tiles.scattered,
             "cleared_trees": tiles.cleared,
             "edge_thinned_trees": tiles.edge_thinned,
+            "grove_trees": tiles.groves,
+            "clearing_trees_removed": tiles.clearing_trees,
             "scatter_ms_avg": if tiles.scattered > 0 { tiles.scatter_ms_total / tiles.scattered as f32 } else { 0.0 },
             "scatter_ms_max": tiles.scatter_ms_max,
         });
+    }
+    if let (Some(tiles), Some(view)) = (
+        world.get_resource::<VegTiles>(),
+        world.get_resource::<VegView>(),
+    ) {
+        value["open_forest"] = dump_open_forest(world, tiles, view, &w.look);
     }
     if let Some(view) = world.get_resource::<VegView>() {
         value["view"] = json!({

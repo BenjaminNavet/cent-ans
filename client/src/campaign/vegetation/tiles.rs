@@ -14,6 +14,8 @@ use vegetation::{
 };
 
 use super::data::{VegetationWorld, style};
+use super::groves::{self, ClearingSite};
+use super::look::Role;
 
 /// Side of a tile (map px): the root tile of the relief pyramid.
 pub const TILE_PX: f64 = 256.0;
@@ -40,6 +42,8 @@ pub struct TreeInst {
     pub seed: f32,
     /// Instance tint (brightness and stand tint of the scatter, `species_tint`).
     pub tint: [f32; 3],
+    /// Forest, open land or grove (thinning of the medium view, TS-T8).
+    pub role: Role,
 }
 
 pub struct Job {
@@ -55,6 +59,20 @@ pub struct Done {
     pub cleared: usize,
     /// Trees removed by the thinning of the forest edges.
     pub edge_thinned: usize,
+    /// Groves added (trees), forest trees removed by clearings, clearings centred in the tile.
+    pub groves: usize,
+    pub clearing_trees: usize,
+    pub clearings: Vec<ClearingSite>,
+}
+
+/// Result of the scatter of a tile.
+pub struct Scattered {
+    pub trees: Vec<TreeInst>,
+    pub cleared: usize,
+    pub edge_thinned: usize,
+    pub groves: usize,
+    pub clearing_trees: usize,
+    pub clearings: Vec<ClearingSite>,
 }
 
 /// Grid of tiles over the map.
@@ -117,15 +135,18 @@ impl ScatterPool {
                         };
                         let Ok(job) = job else { return };
                         let started = std::time::Instant::now();
-                        let (trees, cleared, edge_thinned) = scatter(&world, job.index, job.origin);
+                        let result = scatter(&world, job.index, job.origin);
                         let ms = started.elapsed().as_secs_f32() * 1000.0;
                         if done
                             .send(Done {
                                 index: job.index,
-                                trees,
+                                trees: result.trees,
                                 ms,
-                                cleared,
-                                edge_thinned,
+                                cleared: result.cleared,
+                                edge_thinned: result.edge_thinned,
+                                groves: result.groves,
+                                clearing_trees: result.clearing_trees,
+                                clearings: result.clearings,
                             })
                             .is_err()
                         {
@@ -154,12 +175,9 @@ impl ScatterPool {
 }
 
 /// Scatters one tile (`VegetationTileJob.run` + `VegetationScatter.request`).
-/// Returns the trees, the number removed by the clearings and by the forest edges.
-pub fn scatter(
-    world: &VegetationWorld,
-    index: i64,
-    origin: (f64, f64),
-) -> (Vec<TreeInst>, usize, usize) {
+/// Returns the trees, the number removed by the clearings and by the forest edges, the groves
+/// and the forest clearings (TS-T8).
+pub fn scatter(world: &VegetationWorld, index: i64, origin: (f64, f64)) -> Scattered {
     let coarse = world.coarse(origin, TILE_PX, COARSE_STEP);
     let margin = 12.0;
     let exclusions = world
@@ -172,7 +190,8 @@ pub fn scatter(
                 && y + r + margin >= origin.1
                 && y - r - margin <= origin.1 + TILE_PX
         })
-        .collect();
+        .collect::<Vec<_>>();
+    let groves_exclusions = exclusions.clone();
     let request = TileRequest {
         tile_index: index,
         origin,
@@ -218,10 +237,11 @@ pub fn scatter(
                     record[13].rem_euclid(CUSTOM_STRIDE),
                     record[14],
                 ],
+                role: Role::Open,
             });
         }
     }
-    let cleared = world.clearance.filter_tile(&mut trees, origin, TILE_PX);
+    let mut cleared = world.clearance.filter_tile(&mut trees, origin, TILE_PX);
     let edge_thinned = super::edges::apply(
         &world.splat_forest,
         world.size,
@@ -229,7 +249,36 @@ pub fn scatter(
         &world.look,
         &mut trees,
     );
-    (trees, cleared, edge_thinned)
+    // Clearings in the big forests: the sites whose outline touches the tile cut the forest trees;
+    // the ones centred in the tile are published.
+    let sites = groves::clearing_sites(
+        world,
+        (origin.0 as f32, origin.1 as f32),
+        ((origin.0 + TILE_PX) as f32, (origin.1 + TILE_PX) as f32),
+    );
+    let clearing_trees = groves::open_clearings(&mut trees, &sites);
+    let inside = |x: f32, z: f32| {
+        (x as f64) >= origin.0
+            && (x as f64) < origin.0 + TILE_PX
+            && (z as f64) >= origin.1
+            && (z as f64) < origin.1 + TILE_PX
+    };
+    let clearings = sites.into_iter().filter(|s| inside(s.x, s.z)).collect();
+    // Groves of the meadows, filtered like the other trees (lakes, rivers, roads).
+    let mut groves_trees = groves::place_groves(world, origin, &groves_exclusions);
+    cleared += world
+        .clearance
+        .filter_tile(&mut groves_trees, origin, TILE_PX);
+    let groves = groves_trees.len();
+    trees.extend(groves_trees);
+    Scattered {
+        trees,
+        cleared,
+        edge_thinned,
+        groves,
+        clearing_trees,
+        clearings,
+    }
 }
 
 #[cfg(test)]

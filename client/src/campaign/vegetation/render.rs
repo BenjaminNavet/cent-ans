@@ -19,6 +19,7 @@ use bevy::prelude::*;
 use super::billboard::{Mode, Params as VegParams, push_weighted};
 
 use super::data::VegetationWorld;
+use super::look::{OpenThinning, Role};
 use super::tiles::TreeInst;
 
 pub const ATLAS_ALBEDO: &str = "textures/vegetation/ga3/ga3_impostors_albedo.png";
@@ -413,21 +414,29 @@ pub fn assemble(
     focus: Vec2,
     model_radius: f32,
     density: f32,
+    thinning: &OpenThinning,
     model_rows: &[bool],
 ) -> Assembled {
     let mut out = Assembled::default();
-    let threshold = 1.0 - density;
     let grow = 1.0 / density.sqrt();
     let radius2 = model_radius * model_radius;
     for tile in tiles {
         for tree in tile.iter() {
-            if tree.seed < threshold {
-                out.thinned += 1;
-                continue;
-            }
             let dx = tree.x - focus.x;
             let dz = tree.z - focus.y;
             let d2 = dx * dx + dz * dz;
+            // Open-land trees fade out first (medium view reads the forest masses, TS-T8): the
+            // seeds are nested, so what stays is a subset of the generic thinning.
+            let share = thinning.keep(tree.role, d2.sqrt());
+            let keep = match tree.role {
+                Role::Forest => density,
+                Role::Open => density.min(share),
+                Role::Grove => share,
+            };
+            if tree.seed < 1.0 - keep {
+                out.thinned += 1;
+                continue;
+            }
             let inside = model_radius > 0.0 && d2 <= radius2;
             if inside {
                 out.wanted_rows.insert(tree.row);
@@ -546,13 +555,21 @@ mod tests {
             row: 0,
             seed,
             tint: [1.0; 3],
+            role: crate::campaign::vegetation::look::Role::Open,
         };
         let tiles = vec![Arc::new(vec![
             tree(1.0, 0.9),
             tree(100.0, 0.9),
             tree(2.0, 0.1),
         ])];
-        let out = assemble(&tiles, Vec2::ZERO, 10.0, 0.5, &[true]);
+        let out = assemble(
+            &tiles,
+            Vec2::ZERO,
+            10.0,
+            0.5,
+            &OpenThinning::none(),
+            &[true],
+        );
         assert_eq!((out.near, out.far, out.thinned), (1, 1, 1));
         assert_eq!(
             out.batches[&(0, true)].len(),
@@ -568,7 +585,7 @@ mod tests {
                 .map(|i| tree(9.0, 0.5 + i as f32 / 400.0))
                 .collect::<Vec<_>>(),
         )];
-        let out = assemble(&band, Vec2::ZERO, 10.0, 1.0, &[true]);
+        let out = assemble(&band, Vec2::ZERO, 10.0, 1.0, &OpenThinning::none(), &[true]);
         let models = out.batches[&(0, true)].len() / super::super::billboard::RECORD_BYTES;
         let cards = out.batches[&(0, false)].len() / super::super::billboard::RECORD_BYTES;
         assert_eq!(models + cards, 200);
@@ -576,7 +593,14 @@ mod tests {
         let weight = f32::from_le_bytes(out.batches[&(0, true)][20..24].try_into().unwrap());
         assert_eq!(weight, 1.0);
         // Without a ready model the near tree stays an impostor, but its species is wanted.
-        let out = assemble(&tiles, Vec2::ZERO, 10.0, 1.0, &[false]);
+        let out = assemble(
+            &tiles,
+            Vec2::ZERO,
+            10.0,
+            1.0,
+            &OpenThinning::none(),
+            &[false],
+        );
         assert_eq!((out.near, out.far), (0, 3));
         assert!(out.wanted_rows.contains(&0));
     }

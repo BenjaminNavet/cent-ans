@@ -80,6 +80,8 @@ pub struct CampaignAdjust {
     pub aerial_cold: Vec4,
     /// x, y altitude (m) ramp of the cold, z its share.
     pub cold_alt: Vec4,
+    /// Relative hollows: xy depth (m) ramp, z tap radius (share of the screen height), w plain share.
+    pub mist_d: Vec4,
 }
 
 impl Default for CampaignAdjust {
@@ -100,6 +102,7 @@ impl Default for CampaignAdjust {
             aerial_color: Vec4::ONE,
             aerial_cold: Vec4::ONE,
             cold_alt: Vec4::new(0.0, 1.0, 0.0, 0.0),
+            mist_d: Vec4::new(0.0, 1.0, 0.03, 0.0),
         }
     }
 }
@@ -115,6 +118,16 @@ pub struct MistLook {
     pub morning_opacity: f32,
     pub fog_opacity: f32,
     pub max_opacity: f32,
+    /// Opacity cap in clear weather (the "fog" weather raises it up to `max_opacity`).
+    pub clear_max: f32,
+    /// Depth (m) below the neighbourhood from which a hollow starts / is fully misted.
+    pub hollow_m: [f32; 2],
+    /// Radius of the neighbourhood, share of the screen height.
+    pub tap_radius: f32,
+    /// Share of the absolute low-ground (plain) mist in clear weather, at morning, in fog.
+    pub plain_clear: f32,
+    pub plain_morning: f32,
+    pub plain_fog: f32,
     pub near_share: f32,
     pub far_ratio: [f32; 2],
     pub noise_scale: f32,
@@ -134,6 +147,9 @@ pub struct AerialLook {
     pub strength: f32,
     pub desaturate: f32,
     pub sky_share: f32,
+    /// Share of the strength removed under the "fog" weather (the ADR 0596 depth fog already
+    /// veils the distance: no double veil).
+    pub fog_cut: f32,
     pub color: Vec3,
     pub cold_color: Vec3,
 }
@@ -189,6 +205,12 @@ impl Default for PostLook {
                 morning_opacity: 0.3,
                 fog_opacity: 0.45,
                 max_opacity: 0.82,
+                clear_max: 0.3,
+                hollow_m: [30.0, 300.0],
+                tap_radius: 0.035,
+                plain_clear: 0.0,
+                plain_morning: 0.25,
+                plain_fog: 0.8,
                 near_share: 0.55,
                 far_ratio: [0.7, 1.8],
                 noise_scale: 0.012,
@@ -205,6 +227,7 @@ impl Default for PostLook {
                 strength: 0.5,
                 desaturate: 0.6,
                 sky_share: 0.35,
+                fog_cut: 0.6,
                 color: Vec3::new(0.6, 0.66, 0.74),
                 cold_color: Vec3::new(0.56, 0.65, 0.79),
             },
@@ -272,6 +295,12 @@ impl PostLook {
         mist.morning_opacity = num(&m["morning_opacity"], mist.morning_opacity);
         mist.fog_opacity = num(&m["fog_opacity"], mist.fog_opacity);
         mist.max_opacity = num(&m["max_opacity"], mist.max_opacity).clamp(0.0, 1.0);
+        mist.clear_max = num(&m["clear_max"], mist.clear_max).clamp(0.0, mist.max_opacity);
+        mist.hollow_m = pair(&m["hollow_m"], mist.hollow_m);
+        mist.tap_radius = num(&m["tap_radius"], mist.tap_radius).clamp(0.002, 0.2);
+        mist.plain_clear = num(&m["plain_clear"], mist.plain_clear);
+        mist.plain_morning = num(&m["plain_morning"], mist.plain_morning);
+        mist.plain_fog = num(&m["plain_fog"], mist.plain_fog);
         mist.near_share = num(&m["near_share"], mist.near_share);
         mist.far_ratio = pair(&m["far_ratio"], mist.far_ratio);
         mist.noise_scale = num(&m["noise_scale"], mist.noise_scale);
@@ -288,6 +317,7 @@ impl PostLook {
         aerial.strength = num(&a["strength"], aerial.strength);
         aerial.desaturate = num(&a["desaturate"], aerial.desaturate);
         aerial.sky_share = num(&a["sky_share"], aerial.sky_share);
+        aerial.fog_cut = num(&a["fog_cut"], aerial.fog_cut).clamp(0.0, 1.0);
         aerial.color = rgb(&a["color"], aerial.color);
         aerial.cold_color = rgb(&a["cold_color"], aerial.cold_color);
         let c = &data["cold"];
@@ -337,7 +367,18 @@ impl PostLook {
         let base = m.clear_opacity
             + m.morning_opacity * morning.clamp(0.0, 1.0)
             + m.fog_opacity * fog.clamp(0.0, 1.0);
-        (base * (1.0 + self.cold.density_gain * coldness)).clamp(0.0, m.max_opacity)
+        let cap = m.clear_max + (m.max_opacity - m.clear_max) * fog.clamp(0.0, 1.0);
+        (base * (1.0 + self.cold.density_gain * coldness)).clamp(0.0, cap)
+    }
+
+    /// Share of the plain (absolute low-ground) mist: none in clear weather by default, some at
+    /// morning, most in the "fog" weather. The relative hollows are misted whatever the weather.
+    pub fn plain_share(&self, morning: f32, fog: f32) -> f32 {
+        let m = &self.mist;
+        (m.plain_clear
+            + m.plain_morning * morning.clamp(0.0, 1.0)
+            + m.plain_fog * fog.clamp(0.0, 1.0))
+        .clamp(0.0, 1.0)
     }
 }
 
@@ -359,6 +400,7 @@ pub struct PostStats {
     pub mist_opacity: f32,
     pub mist_band_m: [f32; 2],
     pub aerial_band: [f32; 2],
+    pub plain_share: f32,
     pub depth_bound: bool,
 }
 
@@ -485,7 +527,7 @@ fn sync_atmosphere(
     let follow = m.follow_focus * focus_alt;
     let a = &look.aerial;
     let aerial_strength = if look.enabled && a.enabled {
-        a.strength
+        a.strength * (1.0 - a.fog_cut * fog.clamp(0.0, 1.0))
     } else {
         0.0
     };
@@ -529,6 +571,12 @@ fn sync_atmosphere(
     let aerial_color = linear(a.color).extend(a.sky_share);
     let aerial_cold = linear(a.cold_color).extend(0.0);
     let c = &look.cold;
+    let mist_d = Vec4::new(
+        m.hollow_m[0],
+        m.hollow_m[1].max(m.hollow_m[0] + 1.0),
+        m.tap_radius,
+        look.plain_share(morning, fog),
+    );
     let cold_alt = Vec4::new(
         c.altitude_m[0],
         c.altitude_m[1].max(c.altitude_m[0] + 1.0),
@@ -548,6 +596,7 @@ fn sync_atmosphere(
         pass.aerial_color = aerial_color;
         pass.aerial_cold = aerial_cold;
         pass.cold_alt = cold_alt;
+        pass.mist_d = mist_d;
     }
     *stats = PostStats {
         master,
@@ -555,6 +604,7 @@ fn sync_atmosphere(
         mist_opacity: opacity,
         mist_band_m: [mist_a.x, mist_a.y],
         aerial_band: [aerial_a.x, aerial_a.y],
+        plain_share: mist_d.w,
         depth_bound: true,
     };
 }
@@ -574,6 +624,7 @@ fn dump(world: &World) -> (String, Value) {
             "mist_opacity": stats.mist_opacity,
             "mist_band_m": stats.mist_band_m,
             "aerial_band": stats.aerial_band,
+            "plain_share": stats.plain_share,
             "attached": stats.depth_bound,
         }),
     )
@@ -789,6 +840,11 @@ mod tests {
         assert!(look.mist_opacity(0.0, 1.0, 0.0) > clear);
         assert!(look.mist_opacity(0.0, 0.0, 1.0) > clear);
         assert!(look.mist_opacity(1.0, 1.0, 1.0) <= look.mist.max_opacity);
+        // Clear weather stays under its own cap, whatever the morning and the cold.
+        assert!(look.mist_opacity(1.0, 0.0, 1.0) <= look.mist.clear_max + 1e-6);
+        // A flat plain is not veiled in clear weather, it is at morning and in fog.
+        assert_eq!(look.plain_share(0.0, 0.0), 0.0);
+        assert!(look.plain_share(0.0, 1.0) > look.plain_share(1.0, 0.0));
         let off = PostLook {
             enabled: false,
             ..PostLook::default()

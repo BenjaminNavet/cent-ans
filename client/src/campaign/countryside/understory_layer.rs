@@ -81,6 +81,10 @@ impl Env for WorldEnv<'_> {
         cover
     }
 
+    fn slope(&self, p: Vec2) -> f32 {
+        self.world.slope(p.x as f64, p.y as f64)
+    }
+
     fn pale(&self, p: Vec2) -> f32 {
         let pale = &self.cfg.pale;
         let patch = fbm(p.x, p.y, 733, pale.patch_frequency, 3, 0.5) * 0.5 + 0.5;
