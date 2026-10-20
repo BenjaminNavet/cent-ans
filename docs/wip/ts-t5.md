@@ -3,7 +3,7 @@
 Branche `ts/t5`. Plan : `docs/wip/ts-style-total-war.md`.
 
 ## État
-- Squelette : note seule.
+- Fait (compile, clippy ok) : path.rs (tirets animés, reach_split, blocked), zoc.rs (Ring, pulsation), standard.rs (banner_scale 1.5), données + schémas, dump. Reste : tests complets, smoke, preuve dump.
 
 ## Plan
 1. `path.rs` : `reach_split` / `blocked` dans `PathView`, découpage en tirets animés (`dash_pieces`), `PathStyle` (données `stance_cues.json` bloc `path`). Dessin dans `orders::draw_overlays`.
@@ -12,4 +12,4 @@ Branche `ts/t5`. Plan : `docs/wip/ts-style-total-war.md`.
 4. Dump : `path_segments_*`, `zoc_rings_*`, `banner_scale`.
 
 ## Prochaine étape
-Implémenter path.rs.
+Lancer tests + smoke + preuve dump.

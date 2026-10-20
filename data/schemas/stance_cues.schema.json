@@ -108,7 +108,32 @@
       "properties": {
         "max_rings": {"type": "integer", "minimum": 1, "maximum": 32},
         "color": {"$ref": "#/$defs/color", "description": "Rouge réservé aux ennemis (ADR 0155)."},
-        "alpha": {"$ref": "#/$defs/unit", "description": "Opacité de l'anneau fin ; le disque de fond est à 12 % de cette valeur d'anneau."}
+        "alpha": {"$ref": "#/$defs/unit", "description": "Opacité de l'anneau fin ; le disque de fond est à 12 % de cette valeur d'anneau."},
+        "friend_color": {"$ref": "#/$defs/color", "description": "T5 : anneau discret des armées alliées ou propres (survol, sélection)."},
+        "friend_alpha": {"$ref": "#/$defs/unit"},
+        "pulse_hz": {"type": "number", "minimum": 0, "maximum": 4, "description": "T5 : fréquence de pulsation de l'anneau."},
+        "pulse_depth": {"$ref": "#/$defs/unit", "description": "T5 : profondeur de la pulsation d'opacité."},
+        "segments": {"type": "integer", "minimum": 16, "maximum": 256}
+      }
+    },
+    "path": {
+      "type": "object",
+      "description": "T5 : ligne de marche prévue, tirets lumineux animés (atteignable ce tour vif, au-delà pâle, bloqué terne).",
+      "additionalProperties": false,
+      "properties": {
+        "color": {"$ref": "#/$defs/color"},
+        "blocked_color": {"$ref": "#/$defs/color"},
+        "reach_alpha": {"$ref": "#/$defs/unit"},
+        "beyond_alpha": {"$ref": "#/$defs/unit"},
+        "reach_glow": {"$ref": "#/$defs/unit"},
+        "beyond_glow": {"$ref": "#/$defs/unit"},
+        "blocked_alpha": {"$ref": "#/$defs/unit"},
+        "dash_per_distance": {"type": "number", "minimum": 0.001, "maximum": 0.2},
+        "gap_ratio": {"type": "number", "minimum": 0, "maximum": 4},
+        "speed_per_distance": {"type": "number", "minimum": 0, "maximum": 1},
+        "min_dash": {"type": "number", "minimum": 0.01, "maximum": 10},
+        "max_dash": {"type": "number", "minimum": 1, "maximum": 100},
+        "blocked_max_px": {"type": "number", "minimum": 5, "maximum": 400}
       }
     },
     "town": {

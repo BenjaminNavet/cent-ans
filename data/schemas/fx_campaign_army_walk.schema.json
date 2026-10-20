@@ -32,6 +32,15 @@
         "ship_tilt_gain": {"type": "number", "minimum": 0.0, "maximum": 4.0},
         "cloth_gust": {"type": "number", "minimum": 0.0, "maximum": 3.0}
       }
+    },
+    "standard_banner": {
+      "type": "object",
+      "description": "T5 : agrandissement de l'étendard (hampe, fer, drapeau) pour qu'il domine l'armée en vue proche à moyenne.",
+      "required": ["scale"],
+      "additionalProperties": false,
+      "properties": {
+        "scale": {"type": "number", "minimum": 0.5, "maximum": 4.0}
+      }
     }
   }
 }
