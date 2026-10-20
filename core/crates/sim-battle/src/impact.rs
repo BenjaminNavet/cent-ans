@@ -21,7 +21,7 @@ use data_model::key_enum;
 use data_model::{Ability, UnitCategory};
 use serde::{Deserialize, Serialize};
 
-use crate::unit::Unit;
+use crate::unit::{Unit, UnitState};
 
 /// Impacts kept for the renderer between two reads (older ones dropped).
 pub(crate) const MAX_PENDING_IMPACTS: usize = 256;
@@ -38,11 +38,44 @@ pub struct ImpactRules {
     pub knocked_per_rider: f64,
     /// Seconds the charge bonus (blows, push) lasts after the impact.
     pub charge_bonus_s: f64,
+    /// Seconds after a shock during which a regiment takes no other.
+    pub shock_immunity_s: f64,
+    pub elan: ElanRules,
     pub mass: MassRules,
     pub knocked: KnockedRules,
+    pub weight: WeightRules,
+    pub brace: BraceRules,
+    pub tiers: TierRules,
     pub drive: DriveRules,
     pub cohesion: CohesionRules,
     pub stopped: StoppedRules,
+}
+
+/// Run-up: metres run in a row before the contact.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ElanRules {
+    /// Below this run-up, entering a melee is no charge (no impact, no bonus).
+    pub min_impact_run_up_m: f64,
+    pub full_run_up_mounted_m: f64,
+    pub full_run_up_foot_m: f64,
+    pub min: f64,
+    pub max_run_up_m: f64,
+    /// Share of the cohesion shock that does not depend on the run-up.
+    pub cohesion_floor: f64,
+}
+
+/// Weight of a man struck (body and armour): heavier men fall less.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct WeightRules {
+    pub foot_kg: f64,
+    pub armor_kg_per_point: f64,
+    pub reference_kg: f64,
+    pub exponent: f64,
+    pub scale: f64,
+    pub floor: f64,
+    pub cap: f64,
 }
 
 /// Weight of a charge: charge/100 × lance × wedge × foot, capped.
@@ -60,12 +93,30 @@ pub struct MassRules {
 pub struct KnockedRules {
     pub exposure_ranged: f64,
     pub exposure_other: f64,
-    pub armor_divisor: f64,
-    pub armor_floor: f64,
     pub front_factor: f64,
     pub flank_factor: f64,
     pub rear_factor: f64,
     pub max_share: f64,
+}
+
+/// Bracing of foot standing still and facing the charge.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BraceRules {
+    pub still_s: f64,
+    pub front_base: f64,
+    pub per_rank: f64,
+    pub max: f64,
+    pub cohesion_share: f64,
+}
+
+/// Tiers of the shock: thrown back an instant, or down for the full time.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TierRules {
+    pub recoil_s: f64,
+    pub recoil_intensity: f64,
+    pub down_intensity: f64,
 }
 
 /// Metres the horses drive in, per rank of men knocked down.
@@ -188,6 +239,32 @@ pub fn charge_mass(attacker: &Unit) -> f64 {
     (charge * lance * wedge * horses).clamp(0.0, rules.max)
 }
 
+/// Run-up of `unit` (0-1): metres run in a row over the full run-up,
+/// never below the minimum (a charge from contact still weighs a little).
+pub fn elan(unit: &Unit) -> f64 {
+    let rules = &ImpactRules::bundled().elan;
+    let full = if unit.mounted {
+        rules.full_run_up_mounted_m
+    } else {
+        rules.full_run_up_foot_m
+    };
+    (unit.run_up / full).clamp(rules.min, 1.0)
+}
+
+/// True when `unit` has run far enough in a row for its contact to be a
+/// charge: a regiment already in contact that steps back in does not charge.
+pub fn has_run_up(unit: &Unit) -> bool {
+    unit.run_up >= ImpactRules::bundled().elan.min_impact_run_up_m
+}
+
+/// Multiplier of the men knocked down for the weight of a man of
+/// `defender` (body and armour).
+pub fn weight_factor(defender: &Unit) -> f64 {
+    let rules = &ImpactRules::bundled().weight;
+    let kg = rules.foot_kg + f64::from(defender.stats.armor) * rules.armor_kg_per_point;
+    (rules.scale * (rules.reference_kg / kg).powf(rules.exponent)).clamp(rules.floor, rules.cap)
+}
+
 /// Multiplier of couched lances (charge weight and charge bonus).
 pub(crate) fn lance_factor(attacker: &Unit) -> f64 {
     if attacker.has(Ability::ChargeLance) {
@@ -217,19 +294,70 @@ pub fn knocked_share(mass: f64, defender: &Unit, angle: u8) -> f64 {
         UnitCategory::Ranged | UnitCategory::Siege => rules.exposure_ranged,
         _ => rules.exposure_other,
     };
-    let armour =
-        (1.0 - f64::from(defender.stats.armor) / rules.armor_divisor).clamp(rules.armor_floor, 1.0);
+    (shock_intensity(mass, defender, angle) * exposure).clamp(0.0, rules.max_share)
+}
+
+/// Intensity of a shock of weight `mass` on `defender`: weight × weight of
+/// the men struck × side (flank and rear hit harder).
+pub fn shock_intensity(mass: f64, defender: &Unit, angle: u8) -> f64 {
+    let rules = &ImpactRules::bundled().knocked;
     let side = match angle {
         0 => rules.front_factor,
         1 => rules.flank_factor,
         _ => rules.rear_factor,
     };
-    (mass * exposure * armour * side).clamp(0.0, rules.max_share)
+    mass * weight_factor(defender) * side
 }
 
-/// Men knocked down by a charge (rounded, deterministic).
+/// Seconds the men knocked down by a shock of `intensity` lose: a light
+/// shock throws them back an instant, a heavy one leaves them on the ground.
+pub fn knocked_time(intensity: f64) -> f64 {
+    let rules = ImpactRules::bundled();
+    let tiers = &rules.tiers;
+    let span = (tiers.down_intensity - tiers.recoil_intensity).max(1e-6);
+    let down = ((intensity - tiers.recoil_intensity) / span).clamp(0.0, 1.0);
+    tiers.recoil_s + (rules.knockdown_s - tiers.recoil_s) * down
+}
+
+/// Bracing (0-1) of `defender` against a charge from `angle`: a square
+/// (schiltron) braces fully; foot standing still and struck in front brace
+/// better the more ranks stand behind; moving, engaged, mounted, flank or
+/// rear: none.
+pub fn brace(defender: &Unit, angle: u8) -> f64 {
+    if defender.braced() {
+        return 1.0;
+    }
+    let rules = &ImpactRules::bundled().brace;
+    let standing = matches!(
+        defender.state,
+        UnitState::Idle | UnitState::Shooting | UnitState::Rallied
+    ) && defender.still_time >= rules.still_s;
+    if angle != 0 || defender.mounted || !standing {
+        return 0.0;
+    }
+    let (ranks, _) = defender.ranks_files(defender.soldiers());
+    let extra = f64::from(ranks.max(1) - 1);
+    (rules.front_base + rules.per_rank * extra).clamp(0.0, rules.max)
+}
+
+/// Weight (0-1) of the charge bonus left to `unit`: the run-up of its
+/// latest impact, decaying linearly to nothing over the bonus duration.
+pub fn charge_bonus_weight(unit: &Unit) -> f64 {
+    if unit.charge_timer <= 0.0 {
+        return 0.0;
+    }
+    let full = ImpactRules::bundled().charge_bonus_s.max(1e-6);
+    unit.charge_elan * (unit.charge_timer / full).min(1.0)
+}
+
+/// Men knocked down by a charge at full run-up (rounded, deterministic).
 pub fn knocked_count(attacker: &Unit, defender: &Unit, angle: u8) -> u32 {
-    let share = knocked_share(charge_mass(attacker), defender, angle);
+    knocked_count_at(charge_mass(attacker), attacker, defender, angle)
+}
+
+/// Men knocked down by a charge of weight `mass` (charge weight × run-up).
+pub fn knocked_count_at(mass: f64, attacker: &Unit, defender: &Unit, angle: u8) -> u32 {
+    let share = knocked_share(mass, defender, angle);
     let reach = f64::from(defender.soldiers())
         .min(f64::from(attacker.soldiers()) * ImpactRules::bundled().knocked_per_rider);
     (share * reach).round().max(0.0) as u32
@@ -246,6 +374,12 @@ pub(crate) fn drive_depth(mass: f64, knocked: u32, defender: &Unit) -> f64 {
 
 /// Morale a cavalry charge that goes home costs its target (cohesion):
 /// more on the flank or in the rear.
+/// Cohesion shock of a charge at run-up `elan` (0-1).
+pub fn shock_morale_at(angle: u8, elan: f64) -> f64 {
+    let floor = ImpactRules::bundled().elan.cohesion_floor;
+    shock_morale(angle) * (floor + (1.0 - floor) * elan)
+}
+
 pub fn shock_morale(angle: u8) -> f64 {
     let rules = &ImpactRules::bundled().cohesion;
     if angle == 0 {

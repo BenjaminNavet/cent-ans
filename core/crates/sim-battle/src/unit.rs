@@ -160,6 +160,16 @@ pub struct Unit {
     pub left_field: bool,
     /// Remaining seconds of charge impact bonus.
     pub(crate) charge_timer: f64,
+    /// ADR 0711: metres run in a row (the run-up of a charge).
+    #[serde(default)]
+    pub run_up: f64,
+    /// ADR 0711: run-up (0-1) of the latest charge impact: scales its bonus.
+    #[serde(default = "full_elan")]
+    pub charge_elan: f64,
+    /// ADR 0711: seconds left during which a new charge neither knocks
+    /// down nor shakes the regiment.
+    #[serde(default)]
+    pub shock_immunity: f64,
     /// Seconds before the next volley.
     pub reload: f64,
     /// Seconds spent standing still (archers plant stakes after a while).
@@ -344,6 +354,9 @@ impl Unit {
             arrival_s: setup.arrival_s,
             entry_edge: setup.entry_edge,
             charge_timer: 0.0,
+            run_up: 0.0,
+            charge_elan: 1.0,
+            shock_immunity: 0.0,
             reload: 0.0,
             still_time: 0.0,
             stakes_planted: false,
@@ -1026,6 +1039,10 @@ impl Unit {
     pub(crate) fn has_standard(&self) -> bool {
         !self.synthetic && self.category != UnitCategory::Siege
     }
+}
+
+fn full_elan() -> f64 {
+    1.0
 }
 
 #[cfg(test)]

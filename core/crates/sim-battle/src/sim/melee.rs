@@ -12,7 +12,9 @@ impl BattleSim {
             || (self.units[i].running
                 && self.units[i].target.is_some()
                 && was != UnitState::Melee))
-            && !self.cannot_charge(&self.units[i]);
+            && !self.cannot_charge(&self.units[i])
+            // ADR 0711: no charge without a run-up (no re-charge in contact).
+            && impact::has_run_up(&self.units[i]);
         self.units[i].state = UnitState::Melee;
         self.units[i].destination = None;
         self.units[i].still_time = 0.0;
@@ -38,7 +40,11 @@ impl BattleSim {
     pub(super) fn charge_impact(&mut self, i: usize, p: usize) {
         let angle = attack_angle(&self.units[p], self.units[i].x, self.units[i].z);
         let cavalry = self.units[i].is_cavalry();
-        let mass = impact::charge_mass(&self.units[i]);
+        // ADR 0711: the weight of the charge follows the run-up actually taken.
+        let elan = impact::elan(&self.units[i]);
+        let mass = impact::charge_mass(&self.units[i]) * elan;
+        self.units[i].run_up = 0.0;
+        self.units[i].charge_elan = elan;
         let heading = angle_to(
             self.units[p].x - self.units[i].x,
             self.units[p].z - self.units[i].z,
@@ -158,32 +164,38 @@ impl BattleSim {
                 format!("La charge des {label} s'émousse sur les lances des {spears}.")
             });
         }
-        // Loss of cohesion: the shock of the horses (B-rules, unchanged).
-        // CB4: close ranks take the shock better.
-        let braced = self.ability_charge_taken(&self.units[p]) * wall_taken;
-        let cohesion = if cavalry && !self.units[p].braced() {
-            impact::shock_morale(angle) * braced
+        // Loss of cohesion: the shock of the horses. CB4: close ranks take
+        // the shock better. ADR 0711: foot standing still in front brace,
+        // and a regiment just struck takes no other shock for a while.
+        let taken = self.ability_charge_taken(&self.units[p]) * wall_taken;
+        let rules = impact::ImpactRules::bundled();
+        let immune = self.units[p].shock_immunity > 0.0;
+        let brace = impact::brace(&self.units[p], angle);
+        let cohesion = if cavalry && !immune && !self.units[p].braced() {
+            impact::shock_morale_at(angle, elan)
+                * taken
+                * (1.0 - brace * rules.brace.cohesion_share)
         } else {
             0.0
         };
         self.units[p].morale -= cohesion;
         // BV2: the horses knock men down; they stop fighting until they are
-        // back on their feet.
-        let knocked = if cavalry && self.units[i].mounted {
-            let count = impact::knocked_count(&self.units[i], &self.units[p], angle);
-            if braced == 1.0 {
-                count
-            } else {
-                (f64::from(count) * braced).round() as u32
-            }
+        // back on their feet (thrown back an instant by a light shock).
+        let knocked = if cavalry && self.units[i].mounted && !immune {
+            let count = impact::knocked_count_at(mass, &self.units[i], &self.units[p], angle);
+            (f64::from(count) * taken * (1.0 - brace)).round() as u32
         } else {
             0
         };
         let depth = impact::drive_depth(mass, knocked, &self.units[p]);
         if knocked > 0 {
+            let time = impact::knocked_time(impact::shock_intensity(mass, &self.units[p], angle));
             let target = &mut self.units[p];
             target.knocked = f64::from(knocked);
-            target.knocked_timer = impact::knockdown_time();
+            target.knocked_timer = time;
+        }
+        if cavalry && !immune {
+            self.units[p].shock_immunity = rules.shock_immunity_s;
         }
         self.record_impact(ImpactEvent {
             knocked,
@@ -258,7 +270,12 @@ impl BattleSim {
             let general = self
                 .general_bonus(attacker.side)
                 .map_or(0.0, |g| g.charge_percent);
-            damage *= 1.0 + charge / 100.0 * lance * wedge * (1.0 + general / 100.0);
+            damage *= 1.0
+                + charge / 100.0
+                    * lance
+                    * wedge
+                    * (1.0 + general / 100.0)
+                    * impact::charge_bonus_weight(attacker);
         }
         let angle = attack_angle(defender, attacker.x, attacker.z);
         damage *= match angle {
@@ -360,6 +377,9 @@ impl BattleSim {
             let unit = &mut self.units[i];
             if unit.charge_timer > 0.0 {
                 unit.charge_timer -= DT;
+            }
+            if unit.shock_immunity > 0.0 {
+                unit.shock_immunity -= DT;
             }
             if unit.knocked_timer > 0.0 {
                 unit.knocked_timer -= DT;

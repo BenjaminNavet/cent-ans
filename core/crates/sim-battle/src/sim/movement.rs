@@ -163,6 +163,7 @@ impl BattleSim {
         let unit = &mut self.units[index];
         unit.blocked_by = blocked;
         if blocked.is_some() || in_house {
+            unit.run_up = 0.0;
             unit.facing = turn_towards(unit.facing, heading, Self::turn_rate(unit) * 4.0);
             return dist;
         }
@@ -180,6 +181,14 @@ impl BattleSim {
         unit.facing = turn_towards(unit.facing, heading, rate);
         unit.still_time = 0.0;
         unit.stakes_planted = false;
+        // ADR 0711: the run-up of a charge grows while the regiment runs.
+        unit.run_up = if unit.state != UnitState::Routing
+            && (unit.running || unit.state == UnitState::Charging)
+        {
+            (unit.run_up + step).min(impact::ImpactRules::bundled().elan.max_run_up_m)
+        } else {
+            0.0
+        };
         dist - step
     }
 
@@ -569,6 +578,7 @@ impl BattleSim {
                 unit.state = UnitState::Idle;
             }
             unit.still_time += DT;
+            unit.run_up = 0.0;
             if unit.has(Ability::Stakes) && !unit.stakes_planted && unit.still_time >= STAKES_DELAY
             {
                 unit.stakes_planted = true;

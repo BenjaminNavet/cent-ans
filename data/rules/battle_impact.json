@@ -1,8 +1,17 @@
 {
-  "description": "Choc des charges (lot BV2, ADR 0711). Une charge qui arrive au contact renverse des hommes de la cible (ils ne se battent plus pendant quelques secondes), enfonce les chevaux de quelques mètres dans la masse et coûte du moral (cohésion) à la cible. Les piques et les pieux arrêtent la charge et désarçonnent les premiers cavaliers. Le bonus de charge (coups et poussée) dure quelques secondes après l’impact.",
+  "description": "Choc des charges (lot BV2, ADR 0711). Une charge qui arrive au contact renverse des hommes de la cible (ils ne se battent plus pendant quelques secondes), enfonce les chevaux de quelques mètres dans la masse et coûte du moral (cohésion) à la cible. Les piques et les pieux arrêtent la charge et désarçonnent les premiers cavaliers. La force du choc dépend de l’élan réellement pris avant le contact (mètres courus) et du poids des hommes chargés. Le bonus de charge (coups et poussée) dure quelques secondes après l’impact. Une troupe à pied arrêtée, face à la charge, s’arc-boute d’autant mieux qu’elle a de rangs derrière elle. Un choc léger fait reculer les hommes un instant, un choc lourd les jette à terre. Après un choc, une troupe n’en subit pas d’autre pendant quelques secondes. Le bonus de charge décroît jusqu’à zéro.",
   "knockdown_s": 3.0,
   "knocked_per_rider": 1.5,
-  "charge_bonus_s": 4.0,
+  "charge_bonus_s": 8.0,
+  "shock_immunity_s": 3.0,
+  "elan": {
+    "min_impact_run_up_m": 5.0,
+    "full_run_up_mounted_m": 40.0,
+    "full_run_up_foot_m": 15.0,
+    "min": 0.25,
+    "max_run_up_m": 200.0,
+    "cohesion_floor": 0.5
+  },
   "mass": {
     "lance_factor": 1.5,
     "foot_factor": 0.35,
@@ -11,12 +20,31 @@
   "knocked": {
     "exposure_ranged": 0.5,
     "exposure_other": 0.35,
-    "armor_divisor": 200.0,
-    "armor_floor": 0.4,
     "front_factor": 1.0,
     "flank_factor": 1.4,
     "rear_factor": 1.8,
     "max_share": 0.6
+  },
+  "weight": {
+    "foot_kg": 75.0,
+    "armor_kg_per_point": 0.4,
+    "reference_kg": 91.0,
+    "exponent": 2.0,
+    "scale": 0.8,
+    "floor": 0.4,
+    "cap": 1.2
+  },
+  "brace": {
+    "still_s": 1.0,
+    "front_base": 0.15,
+    "per_rank": 0.05,
+    "max": 0.6,
+    "cohesion_share": 0.5
+  },
+  "tiers": {
+    "recoil_s": 1.0,
+    "recoil_intensity": 0.15,
+    "down_intensity": 0.45
   },
   "drive": {
     "base_m_per_rank": 0.8,

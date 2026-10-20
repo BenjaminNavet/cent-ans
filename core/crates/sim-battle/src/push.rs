@@ -192,7 +192,8 @@ impl PressureRules {
         pressure *= unit.formation.def().modifiers.push_drive;
         if unit.charge_timer > 0.0 {
             let charge = f64::from(unit.stats.charge.unwrap_or(20));
-            pressure *= 1.0 + charge / 100.0 * self.charge_factor;
+            pressure *= 1.0
+                + charge / 100.0 * self.charge_factor * crate::impact::charge_bonus_weight(unit);
         }
         if opponent.mounted && unit.has(Ability::PikeSquare) {
             pressure *= self.pikes_against_horse_factor;

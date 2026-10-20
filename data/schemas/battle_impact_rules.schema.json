@@ -5,75 +5,390 @@
   "description": "Fichier data/rules/battle_impact.json (ADR 0711) : résolution de l'impact d'une charge (renversés, enfoncement, cohésion, charges arrêtées). Lu par sim-battle (ImpactRules).",
   "type": "object",
   "$defs": {
-    "factor": { "type": "number", "minimum": 0, "maximum": 10 }
+    "factor": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    }
   },
   "properties": {
-    "description": { "type": "string" },
-    "knockdown_s": { "type": "number", "minimum": 0, "maximum": 20, "description": "Secondes qu'un homme renversé reste à terre avant de se battre à nouveau." },
-    "knocked_per_rider": { "type": "number", "minimum": 0, "maximum": 5, "description": "Hommes qu'un cheval qui charge peut renverser au plus." },
-    "charge_bonus_s": { "type": "number", "minimum": 0, "maximum": 30, "description": "Durée du bonus de charge (coups, poussée) après l'impact." },
+    "description": {
+      "type": "string"
+    },
+    "knockdown_s": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 20,
+      "description": "Secondes qu'un homme renversé reste à terre avant de se battre à nouveau."
+    },
+    "knocked_per_rider": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Hommes qu'un cheval qui charge peut renverser au plus."
+    },
+    "charge_bonus_s": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 30,
+      "description": "Durée du bonus de charge (coups, poussée) après l'impact ; il décroît linéairement de l'élan de l'impact jusqu'à zéro."
+    },
+    "shock_immunity_s": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 30,
+      "description": "Secondes après un choc pendant lesquelles une troupe n'est plus renversée ni ébranlée par une nouvelle charge."
+    },
+    "elan": {
+      "type": "object",
+      "description": "Élan : mètres courus d'affilée avant le contact. Une charge lancée de loin frappe plus fort qu'une charge partie au contact.",
+      "properties": {
+        "min_impact_run_up_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Mètres courus d'affilée en dessous desquels une entrée en mêlée n'est pas une charge (pas d'impact, pas de bonus) : un régiment déjà au contact ne recharge pas."
+        },
+        "full_run_up_mounted_m": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 500,
+          "description": "Mètres de course pour l'élan complet d'une cavalerie."
+        },
+        "full_run_up_foot_m": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 500,
+          "description": "Mètres de course pour l'élan complet de troupes à pied."
+        },
+        "min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Élan minimal (charge partie au contact)."
+        },
+        "max_run_up_m": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 2000,
+          "description": "Plafond des mètres courus mémorisés."
+        },
+        "cohesion_floor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part du choc moral qui ne dépend pas de l'élan."
+        }
+      },
+      "required": [
+        "min_impact_run_up_m",
+        "full_run_up_mounted_m",
+        "full_run_up_foot_m",
+        "min",
+        "max_run_up_m",
+        "cohesion_floor"
+      ],
+      "additionalProperties": false
+    },
     "mass": {
       "type": "object",
       "description": "Poids d'une charge : statistique charge/100 × lance × coin × piétons, borné.",
       "properties": {
-        "lance_factor": { "$ref": "#/$defs/factor", "description": "Lances couchées (capacité charge_lance)." },
-        "foot_factor": { "$ref": "#/$defs/factor", "description": "Hommes à pied (bien plus légers que des chevaux)." },
-        "max": { "$ref": "#/$defs/factor", "description": "Poids maximal." }
+        "lance_factor": {
+          "$ref": "#/$defs/factor",
+          "description": "Lances couchées (capacité charge_lance)."
+        },
+        "foot_factor": {
+          "$ref": "#/$defs/factor",
+          "description": "Hommes à pied (bien plus légers que des chevaux)."
+        },
+        "max": {
+          "$ref": "#/$defs/factor",
+          "description": "Poids maximal."
+        }
       },
-      "required": ["lance_factor", "foot_factor", "max"],
+      "required": [
+        "lance_factor",
+        "foot_factor",
+        "max"
+      ],
       "additionalProperties": false
     },
     "knocked": {
       "type": "object",
-      "description": "Part des hommes renversés : poids × exposition × armure × côté, bornée.",
+      "description": "Part des hommes renversés : poids × élan × exposition × poids de la cible × côté, bornée.",
       "properties": {
-        "exposure_ranged": { "$ref": "#/$defs/factor", "description": "Exposition des tireurs et engins." },
-        "exposure_other": { "$ref": "#/$defs/factor", "description": "Exposition des autres troupes à pied." },
-        "armor_divisor": { "type": "number", "minimum": 1, "description": "Armure qui annulerait les renversés (facteur 1 − armure/diviseur)." },
-        "armor_floor": { "type": "number", "minimum": 0, "maximum": 1, "description": "Plancher du facteur d'armure." },
-        "front_factor": { "$ref": "#/$defs/factor" },
-        "flank_factor": { "$ref": "#/$defs/factor" },
-        "rear_factor": { "$ref": "#/$defs/factor" },
-        "max_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part maximale des hommes renversés." }
+        "exposure_ranged": {
+          "$ref": "#/$defs/factor",
+          "description": "Exposition des tireurs et engins."
+        },
+        "exposure_other": {
+          "$ref": "#/$defs/factor",
+          "description": "Exposition des autres troupes à pied."
+        },
+        "front_factor": {
+          "$ref": "#/$defs/factor"
+        },
+        "flank_factor": {
+          "$ref": "#/$defs/factor"
+        },
+        "rear_factor": {
+          "$ref": "#/$defs/factor"
+        },
+        "max_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part maximale des hommes renversés."
+        }
       },
-      "required": ["exposure_ranged", "exposure_other", "armor_divisor", "armor_floor", "front_factor", "flank_factor", "rear_factor", "max_share"],
+      "required": [
+        "exposure_ranged",
+        "exposure_other",
+        "front_factor",
+        "flank_factor",
+        "rear_factor",
+        "max_share"
+      ],
+      "additionalProperties": false
+    },
+    "weight": {
+      "type": "object",
+      "description": "Poids d'un homme chargé (corps + armure) : plus il est lourd, moins il est renversé. Facteur = échelle × (référence / poids)^exposant, borné.",
+      "properties": {
+        "foot_kg": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 200,
+          "description": "Poids d'un homme sans armure."
+        },
+        "armor_kg_per_point": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Kilogrammes par point d'armure."
+        },
+        "reference_kg": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 300,
+          "description": "Poids de référence."
+        },
+        "exponent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Exposant du rapport de poids."
+        },
+        "scale": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Facteur au poids de référence."
+        },
+        "floor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Plancher du facteur."
+        },
+        "cap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Plafond du facteur."
+        }
+      },
+      "required": [
+        "foot_kg",
+        "armor_kg_per_point",
+        "reference_kg",
+        "exponent",
+        "scale",
+        "floor",
+        "cap"
+      ],
+      "additionalProperties": false
+    },
+    "brace": {
+      "type": "object",
+      "description": "Arc-boutement d'une troupe à pied arrêtée, face à la charge : part des renversés évitée, croissante avec les rangs. Le schiltron (formation braced) l'est entièrement.",
+      "properties": {
+        "still_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 30,
+          "description": "Secondes à l'arrêt avant de pouvoir s'arc-bouter."
+        },
+        "front_base": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Arc-boutement d'un seul rang."
+        },
+        "per_rank": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Arc-boutement ajouté par rang supplémentaire."
+        },
+        "max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Arc-boutement maximal (hors schiltron)."
+        },
+        "cohesion_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de l'arc-boutement qui protège aussi le moral."
+        }
+      },
+      "required": [
+        "still_s",
+        "front_base",
+        "per_rank",
+        "max",
+        "cohesion_share"
+      ],
+      "additionalProperties": false
+    },
+    "tiers": {
+      "type": "object",
+      "description": "Paliers du choc selon son intensité (poids × élan × poids de la cible × côté) : sous le premier seuil les hommes reculent un instant, au-delà du second ils restent à terre toute la durée.",
+      "properties": {
+        "recoil_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Secondes perdues par un homme simplement repoussé."
+        },
+        "recoil_intensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Intensité en dessous de laquelle les hommes ne sont que repoussés."
+        },
+        "down_intensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Intensité à partir de laquelle les hommes restent à terre knockdown_s."
+        }
+      },
+      "required": [
+        "recoil_s",
+        "recoil_intensity",
+        "down_intensity"
+      ],
       "additionalProperties": false
     },
     "drive": {
       "type": "object",
       "description": "Mètres dont les chevaux s'enfoncent dans la masse, par rang d'hommes renversés.",
       "properties": {
-        "base_m_per_rank": { "type": "number", "minimum": 0, "maximum": 5 },
-        "per_mass_m_per_rank": { "type": "number", "minimum": 0, "maximum": 5 },
-        "max_m": { "type": "number", "minimum": 0, "maximum": 30 }
+        "base_m_per_rank": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "per_mass_m_per_rank": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "max_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 30
+        }
       },
-      "required": ["base_m_per_rank", "per_mass_m_per_rank", "max_m"],
+      "required": [
+        "base_m_per_rank",
+        "per_mass_m_per_rank",
+        "max_m"
+      ],
       "additionalProperties": false
     },
     "cohesion": {
       "type": "object",
       "description": "Moral perdu par la cible d'une charge de cavalerie qui porte.",
       "properties": {
-        "front": { "type": "number", "minimum": 0, "maximum": 50 },
-        "flank_rear": { "type": "number", "minimum": 0, "maximum": 50 }
+        "front": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "flank_rear": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50
+        }
       },
-      "required": ["front", "flank_rear"],
+      "required": [
+        "front",
+        "flank_rear"
+      ],
       "additionalProperties": false
     },
     "stopped": {
       "type": "object",
       "description": "Charges arrêtées : piques, pieux, haies et fossés.",
       "properties": {
-        "pikes_loss_hp_fraction": { "type": "number", "minimum": 0, "maximum": 0.5, "description": "Part des cavaliers désarçonnés par des piques." },
-        "pikes_morale_loss": { "type": "number", "minimum": 0, "maximum": 50 },
-        "stakes_loss_hp_fraction": { "type": "number", "minimum": 0, "maximum": 0.5, "description": "Part des cavaliers empalés sur les pieux." },
-        "stakes_morale_loss": { "type": "number", "minimum": 0, "maximum": 50 },
-        "broken_morale_loss": { "type": "number", "minimum": 0, "maximum": 50, "description": "Moral perdu par une charge brisée par une haie, un fossé ou des ruelles." }
+        "pikes_loss_hp_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "Part des cavaliers désarçonnés par des piques."
+        },
+        "pikes_morale_loss": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "stakes_loss_hp_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "Part des cavaliers empalés sur les pieux."
+        },
+        "stakes_morale_loss": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "broken_morale_loss": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50,
+          "description": "Moral perdu par une charge brisée par une haie, un fossé ou des ruelles."
+        }
       },
-      "required": ["pikes_loss_hp_fraction", "pikes_morale_loss", "stakes_loss_hp_fraction", "stakes_morale_loss", "broken_morale_loss"],
+      "required": [
+        "pikes_loss_hp_fraction",
+        "pikes_morale_loss",
+        "stakes_loss_hp_fraction",
+        "stakes_morale_loss",
+        "broken_morale_loss"
+      ],
       "additionalProperties": false
     }
   },
-  "required": ["knockdown_s", "knocked_per_rider", "charge_bonus_s", "mass", "knocked", "drive", "cohesion", "stopped"],
+  "required": [
+    "knockdown_s",
+    "knocked_per_rider",
+    "charge_bonus_s",
+    "shock_immunity_s",
+    "elan",
+    "mass",
+    "knocked",
+    "weight",
+    "brace",
+    "tiers",
+    "drive",
+    "cohesion",
+    "stopped"
+  ],
   "additionalProperties": false
 }
