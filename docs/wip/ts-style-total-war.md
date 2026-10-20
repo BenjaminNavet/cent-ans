@@ -21,8 +21,8 @@ principale ; pas de push.
 | T3 atmosphère | Opus | `weather/` + `terrain/post.*` : brume de vallée selon l'altitude, perspective atmosphérique bleutée, brume plus froide/dense en région froide, flocons doux, étalonnage désaturé avec accents chauds conservés | fusionné ; correctif T3b en cours (plaine basse noyée de brume laiteuse, vue Paris d=200) |
 | T4 villes | Sonnet | `towns/` : halo chaud au sol + fenêtres, fumées de cheminées visibles en vue moyenne | fusionné (non jugé : brume) |
 | T5 armées | Sonnet | `armies/` : trajet = ligne lumineuse animée posée sur le relief, anneau de zone de contrôle au sol, grande bannière héraldique derrière chaque armée | fusionné ; trajet/anneaux pas encore vus à l écran |
-| T6 plaques & fil | Sonnet | `markers/` + `hud/` : cartouche de ville coloré par statut + pastilles ; fil d'événements repliable par catégorie | à faire |
-| T7 sous-bois | Sonnet | `countryside/` : ceinture de sous-bois en lisière (herbes hautes, buissons, bois mort), touffes pâles en neige/toundra, touffes 3D au zoom proche | à faire |
+| T6 plaques & fil | Sonnet | `markers/` + `hud/` : cartouche de ville coloré par statut + pastilles ; fil d'événements repliable par catégorie | fusionné (vu : fil + pastilles OK) |
+| T7 sous-bois | Sonnet | `countryside/` : ceinture de sous-bois en lisière (herbes hautes, buissons, bois mort), touffes pâles en neige/toundra, touffes 3D au zoom proche | fusionné ; correctif T7b en cours (taches brunes sur falaises raides) |
 | T8 bosquets | Sonnet | `vegetation/` (après T2) : bosquets rendus, clairières avec campement/scierie | à faire |
 
 Vagues (disque : 3 worktrees à la fois, `target` supprimé après fusion) : T1 T2 T3 → T4 T5 T6 → T7 T8.
@@ -30,5 +30,5 @@ Worktrees `../gp-ts-<lot>`, branches `ts/<lot>`.
 
 ## Prochaine étape
 Vagues 1-2 en cours ; T8 (bosquets + lecture des masses en vue moyenne) et T9 lancés.
-| T9 rochers & ombres | Sonnet | `countryside/rocks.rs` + ombres de `vegetation/` : blocs gris « chou-fleur » plafonnés/teintés/enneigés, ombres d'arbres douces et bleutées sur la neige | en cours |
+| T9 rochers & ombres | Sonnet | `countryside/rocks.rs` + ombres de `vegetation/` : blocs gris « chou-fleur » plafonnés/teintés/enneigés, ombres d'arbres douces et bleutées sur la neige | terminé, vérif en cours |
 | T10 neige d hiver | Sonnet | plaques de neige en plaine trop régulières (« camouflage ») | en cours |
