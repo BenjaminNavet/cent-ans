@@ -389,11 +389,11 @@ pub fn add_plugin(app: &mut App) {
         );
 }
 
+/// Campaign cameras that do not carry the pass yet.
+type BareCameras = (With<CampaignCamera>, Without<CampaignAdjust>);
+
 /// Puts the pass on every campaign camera that lacks it; the depth buffer must be readable.
-fn attach(
-    mut commands: Commands,
-    mut cameras: Query<(Entity, &mut Camera3d), (With<CampaignCamera>, Without<CampaignAdjust>)>,
-) {
+fn attach(mut commands: Commands, mut cameras: Query<(Entity, &mut Camera3d), BareCameras>) {
     if crate::campaign::perf_switch::off("post") {
         return;
     }
@@ -510,12 +510,7 @@ fn sync_atmosphere(
         g.protect_luma[1].max(g.protect_luma[0] + 1e-3),
         master,
     );
-    let mist_a = Vec4::new(
-        m.full_m + follow,
-        m.top_m + follow,
-        opacity,
-        m.near_share,
-    );
+    let mist_a = Vec4::new(m.full_m + follow, m.top_m + follow, opacity, m.near_share);
     let mist_b = Vec4::new(
         m.far_ratio[0] * distance,
         m.far_ratio[1].max(m.far_ratio[0] + 0.01) * distance,
@@ -760,11 +755,7 @@ fn campaign_post_pass(
     };
     let mut pass = ctx.command_encoder().begin_render_pass(&descriptor);
     pass.set_pipeline(render_pipeline);
-    pass.set_bind_group(
-        0,
-        &bind_group,
-        &[adjust_index.index(), view_offset.offset],
-    );
+    pass.set_bind_group(0, &bind_group, &[adjust_index.index(), view_offset.offset]);
     pass.draw(0..3, 0..1);
 }
 
