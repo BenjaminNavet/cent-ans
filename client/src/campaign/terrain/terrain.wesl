@@ -358,7 +358,9 @@ fn snow_patch_noise(p: vec2<f32>, footprint: f32) -> vec2<f32> {
     let f = max(season.snow_mask.x, 1e-4);
     let fine = 1.0 - smoothstep(0.15, 0.8, footprint);
     let very_fine = 1.0 - smoothstep(0.04, 0.2, footprint);
-    let n = 0.5 * vnoise(p * f + vec2<f32>(4.7, 1.3))
+    // The coarse octave fades with distance too, so no giant patch repeats in the far view.
+    let coarse = 1.0 - smoothstep(1.5, 5.0, footprint);
+    let n = 0.5 * mix(0.5, vnoise(p * f + vec2<f32>(4.7, 1.3)), coarse)
         + 0.3 * mix(0.5, vnoise(p * f * 4.1 + vec2<f32>(9.2, 3.8)), fine)
         + 0.2 * mix(0.5, vnoise(p * f * 17.0 + vec2<f32>(2.1, 7.4)), very_fine);
     let d = mix(0.5, vnoise(p * f * 9.0 + vec2<f32>(6.6, 0.4)) * 0.6 + vnoise(p * f * 31.0 + vec2<f32>(1.2, 5.5)) * 0.4 * very_fine
@@ -374,14 +376,14 @@ fn snow_cover_of(c: f32, noise: vec2<f32>, flat_y: f32) -> SnowCover {
     // The noise shifts the threshold: a cover c leaves about c of the ground white, in patches.
     let t = c + (pn - 0.5) * 0.9 * (1.0 - smoothstep(0.85, 1.0, c));
     let fringe = max(season.mud.w, 0.0);
-    out.snow = smoothstep(0.5, 0.6, t) * smoothstep(season.snow_mask.z, season.snow_mask.w, flat_y);
+    out.snow = smoothstep(0.42, 0.68, t) * smoothstep(season.snow_mask.z, season.snow_mask.w, flat_y);
     // Thin snow towards the edge of the cover and in the plains: the soil shows through in
     // small holes (detail noise), the deep snow of the heights stays whole.
     let thin = 1.0 - smoothstep(0.65, 1.1, t);
     out.snow = out.snow * (1.0 - thin * 0.6 * (1.0 - smoothstep(0.3, 0.6, noise.y)));
     // Mud only in the band just outside the snow, on the ground that could hold it (not on the
     // bare rock of the steep faces above the snow line).
-    out.mud = smoothstep(0.5 - fringe, 0.5, t) * (1.0 - smoothstep(0.5, 0.6, t)) * smoothstep(0.0, 0.3, c)
+    out.mud = smoothstep(0.5 - fringe, 0.5, t) * (1.0 - smoothstep(0.42, 0.68, t)) * smoothstep(0.0, 0.3, c)
         * smoothstep(season.snow_mask.z - 0.15, season.snow_mask.z + 0.05, flat_y);
     out.grain = noise.y;
     return out;
@@ -400,7 +402,10 @@ fn season_snow(disp_y: f32, altitude: f32, xz: vec2<f32>, footprint: f32, forest
         c = smoothstep(line - 250.0, line + 250.0, alt);
     }
     let north = 1.0 - smoothstep(season.snow_plain.x * params.map.y, season.snow_plain.y * params.map.y, xz.y);
-    c = max(c, w.w * north * season.snow_plain.z);
+    // Plains: near-continuous cover, with a low-frequency variation (some regions less snowy).
+    let region = vnoise(xz * max(season.snow_mask.x, 1e-4) * 0.12 + vec2<f32>(13.1, 5.3));
+    let plain = season.snow_plain.z * (1.0 - season.snow_plain.w * smoothstep(0.35, 0.75, region));
+    c = max(c, w.w * north * plain);
     c = c * mix(1.0, season.snow_shade.a, forest);
     return snow_cover_of(c, pn, disp_y);
 }
