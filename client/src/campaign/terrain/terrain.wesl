@@ -352,27 +352,38 @@ struct SnowCover {
     grain: f32,
 };
 
-// Multi-scale patch noise of the snow (0..1), its fine octaves fading with the footprint.
-fn snow_patch_noise(p: vec2<f32>, footprint: f32) -> f32 {
+// Multi-scale patch noise of the snow (x, 0..1), its fine octaves fading with the footprint, and
+// an independent detail noise (y) for the thin snow that lets the soil show through.
+fn snow_patch_noise(p: vec2<f32>, footprint: f32) -> vec2<f32> {
     let f = max(season.snow_mask.x, 1e-4);
     let fine = 1.0 - smoothstep(0.15, 0.8, footprint);
     let very_fine = 1.0 - smoothstep(0.04, 0.2, footprint);
     let n = 0.5 * vnoise(p * f + vec2<f32>(4.7, 1.3))
         + 0.3 * mix(0.5, vnoise(p * f * 4.1 + vec2<f32>(9.2, 3.8)), fine)
         + 0.2 * mix(0.5, vnoise(p * f * 17.0 + vec2<f32>(2.1, 7.4)), very_fine);
-    return n;
+    let d = mix(0.5, vnoise(p * f * 9.0 + vec2<f32>(6.6, 0.4)) * 0.6 + vnoise(p * f * 31.0 + vec2<f32>(1.2, 5.5)) * 0.4 * very_fine
+        + 0.2 * (1.0 - very_fine), fine);
+    return vec2<f32>(n, d);
 }
 
 // Snow of a raw cover `c` (0..1, before the patches): patches of noise `pn`, sharp edge, mud fringe
-// outside it; `flat` the share of the slope that holds the snow.
-fn snow_cover_of(c: f32, pn: f32, flat: f32) -> SnowCover {
+// outside it; `flat_y` the vertical component of the displayed normal (steep = bare).
+fn snow_cover_of(c: f32, noise: vec2<f32>, flat_y: f32) -> SnowCover {
     var out: SnowCover;
+    let pn = noise.x;
     // The noise shifts the threshold: a cover c leaves about c of the ground white, in patches.
     let t = c + (pn - 0.5) * 0.9 * (1.0 - smoothstep(0.85, 1.0, c));
     let fringe = max(season.mud.w, 0.0);
-    out.snow = smoothstep(0.5, 0.6, t) * flat;
-    out.mud = smoothstep(0.5 - fringe, 0.5, t) * (1.0 - out.snow) * smoothstep(0.0, 0.3, c);
-    out.grain = pn;
+    out.snow = smoothstep(0.5, 0.6, t) * smoothstep(season.snow_mask.z, season.snow_mask.w, flat_y);
+    // Thin snow towards the edge of the cover and in the plains: the soil shows through in
+    // small holes (detail noise), the deep snow of the heights stays whole.
+    let thin = 1.0 - smoothstep(0.65, 1.1, t);
+    out.snow = out.snow * (1.0 - thin * 0.6 * (1.0 - smoothstep(0.3, 0.6, noise.y)));
+    // Mud only in the band just outside the snow, on the ground that could hold it (not on the
+    // bare rock of the steep faces above the snow line).
+    out.mud = smoothstep(0.5 - fringe, 0.5, t) * (1.0 - smoothstep(0.5, 0.6, t)) * smoothstep(0.0, 0.3, c)
+        * smoothstep(season.snow_mask.z - 0.15, season.snow_mask.z + 0.05, flat_y);
+    out.grain = noise.y;
     return out;
 }
 
@@ -385,21 +396,20 @@ fn season_snow(disp_y: f32, altitude: f32, xz: vec2<f32>, footprint: f32, forest
     let pn = snow_patch_noise(xz, footprint);
     var c = 0.0;
     if (line > 0.0) {
-        let alt = altitude + (pn - 0.5) * season.snow_mask.y;
+        let alt = altitude + (pn.x - 0.5) * season.snow_mask.y;
         c = smoothstep(line - 250.0, line + 250.0, alt);
     }
     let north = 1.0 - smoothstep(season.snow_plain.x * params.map.y, season.snow_plain.y * params.map.y, xz.y);
     c = max(c, w.w * north * season.snow_plain.z);
     c = c * mix(1.0, season.snow_shade.a, forest);
-    let flat = smoothstep(season.snow_mask.z, season.snow_mask.w, disp_y);
-    return snow_cover_of(c, pn, flat);
+    return snow_cover_of(c, pn, disp_y);
 }
 
 // Snow colour: warm in the sun, cold and bluish in the shade (`lit` = n.l x sun visibility),
 // never pure white; the grain of the patches varies it slightly.
 fn snow_tint(lit: f32, grain: f32) -> vec3<f32> {
     let k = smoothstep(0.05, 0.7, lit);
-    return mix(season.snow_shade.rgb, season.snow_color.rgb, k) * (0.94 + 0.12 * grain);
+    return mix(season.snow_shade.rgb, season.snow_color.rgb, k) * (0.86 + 0.24 * grain);
 }
 
 fn snow_apply(col: vec3<f32>, cover: SnowCover, lit: f32) -> vec3<f32> {
@@ -594,8 +604,8 @@ fn weather_ground(col: vec3<f32>, altitude: f32, p: vec2<f32>, disp_y: f32, foot
     // like the season snow, with its mud fringe.
     if (w.g > 0.0) {
         let pn = snow_patch_noise(p + vec2<f32>(31.7, 12.9), footprint);
-        let c = w.g * 0.85 * mix(1.0, season.snow_shade.a, forest);
-        var cover = snow_cover_of(c, pn, smoothstep(season.snow_mask.z, season.snow_mask.w, disp_y));
+        let c = w.g * 0.7 * mix(1.0, season.snow_shade.a, forest);
+        var cover = snow_cover_of(c, pn, disp_y);
         cover.snow = cover.snow * land;
         cover.mud = cover.mud * land;
         out = snow_apply(out, cover, lit);

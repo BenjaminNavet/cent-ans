@@ -150,7 +150,7 @@
     "mountain_line_m": 2900,
     "plain_share": 0.55,
     "plain_color": [0.70, 0.68, 0.64],
-    "shade_color": [0.50, 0.56, 0.68],
+    "shade_color": [0.55, 0.57, 0.63],
     "forest_share": 0.7,
     "patch_frequency": 0.12,
     "line_jitter_m": 260,
@@ -159,7 +159,7 @@
     "mud_fringe": 0.18
   },
   "ground_look": {
-    "rock_color": [0.085, 0.078, 0.07],
+    "rock_color": [0.11, 0.10, 0.09],
     "rock_strength": 0.75,
     "rock_normal": [0.45, 0.75],
     "rock_altitude_m": [600, 1800],
