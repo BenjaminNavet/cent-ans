@@ -4,7 +4,7 @@
   "title": "Sous-bois et touffes de la carte de campagne (countryside/understory.rs)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["seed", "far", "near", "belt", "pale", "budget", "kinds"],
+  "required": ["seed", "far", "near", "belt", "pale", "slope", "budget", "kinds"],
   "$defs": {
     "level": {
       "type": "object",
@@ -48,6 +48,15 @@
         "flower_patch_threshold": {"type": "number", "minimum": -1, "maximum": 1},
         "flower_share_in_patch": {"type": "number", "minimum": 0, "maximum": 1},
         "flower_share_outside": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "slope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max", "pale_max"],
+      "properties": {
+        "max": {"type": "number", "exclusiveMinimum": 0, "description": "Pente maximale (m par m, relief réel) portant une pièce de sous-bois."},
+        "pale_max": {"type": "number", "exclusiveMinimum": 0, "description": "Pente maximale portant une touffe pâle (replats herbeux)."}
       }
     },
     "belt": {

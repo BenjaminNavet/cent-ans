@@ -132,6 +132,10 @@ pub struct Config {
     pub near: Near,
     pub belt: Belt,
     pub pale: Pale,
+    /// Steepest ground (m of height per m, real relief) that carries any piece, and the steepest
+    /// that carries a pale tuft (grassy flats only).
+    pub slope_max: f32,
+    pub pale_slope_max: f32,
     /// Per level (far, near), per quality level (low, medium, high, ultra): cap of pieces shown.
     pub budget: [[usize; 4]; 2],
     pub kinds: Vec<Kind>,
@@ -263,6 +267,8 @@ impl Config {
                 tundra_share: num(&p["tundra_share"], 0.8),
                 patch_frequency: num(&p["patch_frequency"], 0.05),
             },
+            slope_max: num(&doc["slope"]["max"], 0.45),
+            pale_slope_max: num(&doc["slope"]["pale_max"], 0.3),
             budget: [
                 budget_of(&doc["budget"]["far"]),
                 budget_of(&doc["budget"]["near"]),
@@ -296,6 +302,8 @@ pub trait Env {
     fn snow(&self, p: Vec2) -> f32;
     /// Weight [0, 1] of the pale ground (patchy snow, tundra).
     fn pale(&self, p: Vec2) -> f32;
+    /// Slope of the real relief (m of height per m).
+    fn slope(&self, p: Vec2) -> f32;
 }
 
 /// One sown tuft, bush or branch.
@@ -401,7 +409,11 @@ fn seed_belt(cfg: &Config, env: &dyn Env, key: IVec2, low: Vec2, side: f32, out:
             g.x.clamp(0, n as i32 - 1) as usize,
             g.y.clamp(0, n as i32 - 1) as usize,
         );
-        if roll >= weights[gj * n + gi] || env.crops(p) > belt.crops_max || !env.open(p) {
+        if roll >= weights[gj * n + gi]
+            || env.crops(p) > belt.crops_max
+            || !env.open(p)
+            || env.slope(p) > cfg.slope_max
+        {
             continue;
         }
         let category = belt
@@ -441,6 +453,7 @@ fn seed_pale(cfg: &Config, env: &dyn Env, key: IVec2, low: Vec2, side: f32, out:
             || env.forest(p) > pale.forest_max
             || env.crops(p) > pale.crops_max
             || !env.open(p)
+            || env.slope(p) > cfg.pale_slope_max
         {
             continue;
         }
@@ -478,6 +491,7 @@ pub fn seed_near(
             || env.crops(p) > near.crops_max
             || env.snow(p) > near.snow_max
             || !env.open(p)
+            || env.slope(p) > cfg.slope_max
         {
             continue;
         }
@@ -594,6 +608,7 @@ mod tests {
         open: bool,
         snow: f32,
         pale: f32,
+        slope: f32,
         forest_all: bool,
     }
 
@@ -604,6 +619,7 @@ mod tests {
                 open: true,
                 snow: 0.0,
                 pale: 0.0,
+                slope: 0.0,
                 forest_all: false,
             }
         }
@@ -628,6 +644,9 @@ mod tests {
         }
         fn pale(&self, _: Vec2) -> f32 {
             self.pale
+        }
+        fn slope(&self, _: Vec2) -> f32 {
+            self.slope
         }
     }
 
@@ -774,6 +793,29 @@ mod tests {
                 .count()
         };
         assert!(count(1.0) > count(-1.0) * 4);
+    }
+
+    #[test]
+    fn nothing_on_steep_ground_and_pale_only_on_flats() {
+        let cfg = config();
+        let flat = |_: Vec2| 0.0;
+        let steep = Flat {
+            slope: cfg.slope_max + 0.1,
+            pale: 0.8,
+            ..Flat::default()
+        };
+        assert!(edge_pieces(&steep).is_empty());
+        assert!(seed_far(&cfg, &steep, IVec2::new(10, 0)).is_empty());
+        assert!(seed_near(&cfg, &steep, &flat, IVec2::new(20, 20)).is_empty());
+        // Between the two limits: the belt and the near tufts stay, the pale tufts go.
+        let sloped = Flat {
+            slope: (cfg.slope_max + cfg.pale_slope_max) * 0.5,
+            pale: 0.8,
+            ..Flat::default()
+        };
+        assert!(!edge_pieces(&sloped).is_empty());
+        assert!(seed_far(&cfg, &sloped, IVec2::new(10, 0)).is_empty());
+        assert!(!seed_near(&cfg, &sloped, &flat, IVec2::new(20, 20)).is_empty());
     }
 
     #[test]

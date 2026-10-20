@@ -98,7 +98,7 @@ impl VegetationWorld {
         2100.0 + (900.0 - 2100.0) * t
     }
 
-    fn slope(&self, x: f64, y: f64) -> f32 {
+    pub(crate) fn slope(&self, x: f64, y: f64) -> f32 {
         let dx = self.height_m(x + 2.0, y) - self.height_m(x - 2.0, y);
         let dy = self.height_m(x, y + 2.0) - self.height_m(x, y - 2.0);
         (dx * dx + dy * dy).sqrt() / (4.0 * self.meters_per_px)
