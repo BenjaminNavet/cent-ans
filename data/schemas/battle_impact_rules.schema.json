@@ -31,7 +31,13 @@
       "type": "number",
       "minimum": 0,
       "maximum": 30,
-      "description": "Durée du bonus de charge (coups, poussée) après l'impact ; il décroît linéairement de l'élan de l'impact jusqu'à zéro."
+      "description": "Durée du bonus de charge (coups, poussée) après l'impact, à hauteur de l'élan de l'impact."
+    },
+    "charge_bonus_fade_s": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 30,
+      "description": "Dernières secondes du bonus de charge, sur lesquelles il décroît jusqu'à zéro (0 : bonus entier jusqu'au bout)."
     },
     "shock_immunity_s": {
       "type": "number",
@@ -243,6 +249,12 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Part de l'arc-boutement qui protège aussi le moral."
+        },
+        "bonus_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de l'arc-boutement qui émousse aussi le bonus de charge de l'assaillant (charge à pied comme à cheval)."
         }
       },
       "required": [
@@ -250,7 +262,8 @@
         "front_base",
         "per_rank",
         "max",
-        "cohesion_share"
+        "cohesion_share",
+        "bonus_share"
       ],
       "additionalProperties": false
     },
@@ -379,6 +392,7 @@
     "knockdown_s",
     "knocked_per_rider",
     "charge_bonus_s",
+    "charge_bonus_fade_s",
     "shock_immunity_s",
     "elan",
     "mass",

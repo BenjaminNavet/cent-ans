@@ -38,6 +38,8 @@ pub struct ImpactRules {
     pub knocked_per_rider: f64,
     /// Seconds the charge bonus (blows, push) lasts after the impact.
     pub charge_bonus_s: f64,
+    /// Last seconds of the charge bonus, over which it fades to nothing.
+    pub charge_bonus_fade_s: f64,
     /// Seconds after a shock during which a regiment takes no other.
     pub shock_immunity_s: f64,
     pub elan: ElanRules,
@@ -108,6 +110,8 @@ pub struct BraceRules {
     pub per_rank: f64,
     pub max: f64,
     pub cohesion_share: f64,
+    /// Share of the bracing that also blunts the charger's bonus.
+    pub bonus_share: f64,
 }
 
 /// Tiers of the shock: thrown back an instant, or down for the full time.
@@ -320,7 +324,8 @@ pub fn knocked_time(intensity: f64) -> f64 {
 }
 
 /// Bracing (0-1) of `defender` against a charge from `angle`: a square
-/// (schiltron) braces fully; foot standing still and struck in front brace
+/// (schiltron) braces fully; infantry holding its ground (fighting in place
+/// or standing still, not running) and struck in front brace
 /// better the more ranks stand behind; moving, engaged, mounted, flank or
 /// rear: none.
 pub fn brace(defender: &Unit, angle: u8) -> f64 {
@@ -328,11 +333,22 @@ pub fn brace(defender: &Unit, angle: u8) -> f64 {
         return 1.0;
     }
     let rules = &ImpactRules::bundled().brace;
-    let standing = matches!(
-        defender.state,
-        UnitState::Idle | UnitState::Shooting | UnitState::Rallied
-    ) && defender.still_time >= rules.still_s;
-    if angle != 0 || defender.mounted || !standing {
+    // Holding its ground: not running nor charging, either already
+    // fighting in place or standing still for a moment.
+    let standing = !defender.running
+        && defender.run_up <= 0.0
+        && match defender.state {
+            UnitState::Melee => true,
+            UnitState::Idle | UnitState::Shooting | UnitState::Rallied => {
+                defender.still_time >= rules.still_s
+            }
+            _ => false,
+        };
+    if angle != 0
+        || defender.mounted
+        || defender.category != UnitCategory::Infantry
+        || !standing
+    {
         return 0.0;
     }
     let (ranks, _) = defender.ranks_files(defender.soldiers());
@@ -341,13 +357,19 @@ pub fn brace(defender: &Unit, angle: u8) -> f64 {
 }
 
 /// Weight (0-1) of the charge bonus left to `unit`: the run-up of its
-/// latest impact, decaying linearly to nothing over the bonus duration.
+/// latest impact, whole at first, then fading to nothing over the last
+/// `charge_bonus_fade_s` seconds.
 pub fn charge_bonus_weight(unit: &Unit) -> f64 {
     if unit.charge_timer <= 0.0 {
         return 0.0;
     }
-    let full = ImpactRules::bundled().charge_bonus_s.max(1e-6);
-    unit.charge_elan * (unit.charge_timer / full).min(1.0)
+    let fade = ImpactRules::bundled().charge_bonus_fade_s;
+    let left = if fade > 0.0 {
+        (unit.charge_timer / fade).min(1.0)
+    } else {
+        1.0
+    };
+    unit.charge_elan * left
 }
 
 /// Men knocked down by a charge at full run-up (rounded, deterministic).

@@ -43,8 +43,15 @@ impl BattleSim {
         // ADR 0711: the weight of the charge follows the run-up actually taken.
         let elan = impact::elan(&self.units[i]);
         let mass = impact::charge_mass(&self.units[i]) * elan;
+        // A formed line holding its ground in front blunts the bonus of a
+        // horse charge (foot against foot: the push decides, ADR 0071).
+        let blunted = if cavalry && self.units[i].mounted {
+            impact::brace(&self.units[p], angle) * impact::ImpactRules::bundled().brace.bonus_share
+        } else {
+            0.0
+        };
         self.units[i].run_up = 0.0;
-        self.units[i].charge_elan = elan;
+        self.units[i].charge_elan = elan * (1.0 - blunted);
         let heading = angle_to(
             self.units[p].x - self.units[i].x,
             self.units[p].z - self.units[i].z,
