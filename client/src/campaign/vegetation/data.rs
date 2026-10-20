@@ -51,7 +51,6 @@ pub mod style {
     pub const CROWN_WIDEN: f32 = 1.25;
     /// Height of the edge trees (`generalised_edge_height`) and share removed (`edge_thin`).
     pub const EDGE_HEIGHT: f32 = 0.85;
-    pub const EDGE_THIN: f32 = 0.1;
     pub const GROVE_LOW: f32 = 0.28;
     pub const GROVE_HIGH: f32 = 0.42;
     pub const GROVE_CORE: f64 = 0.55;
@@ -159,6 +158,8 @@ pub struct VegetationWorld {
     pub beech: BeechParams,
     pub default_biome: usize,
     pub stand_count: usize,
+    /// Forest look (`campaign_forest_look.json`, lot TS-T2).
+    pub look: super::look::ForestLook,
     pub load_ms: f32,
 }
 
@@ -585,6 +586,7 @@ pub fn load(root: &Path, heights: Arc<HeightGrid>) -> Result<VegetationWorld, St
         beech,
         default_biome,
         stand_count,
+        look: super::look::ForestLook::load(),
         load_ms: started.elapsed().as_secs_f32() * 1000.0,
     })
 }

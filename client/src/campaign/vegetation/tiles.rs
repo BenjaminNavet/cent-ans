@@ -222,8 +222,13 @@ pub fn scatter(
         }
     }
     let cleared = world.clearance.filter_tile(&mut trees, origin, TILE_PX);
-    let edge_thinned =
-        super::edges::apply(&world.splat_forest, world.size, world.cover, &mut trees);
+    let edge_thinned = super::edges::apply(
+        &world.splat_forest,
+        world.size,
+        world.cover,
+        &world.look,
+        &mut trees,
+    );
     (trees, cleared, edge_thinned)
 }
 

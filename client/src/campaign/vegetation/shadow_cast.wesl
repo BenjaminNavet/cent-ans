@@ -25,6 +25,16 @@ struct Params {
     grade: vec4<f32>,
     lift: vec4<f32>,
     highlights: vec4<f32>,
+    // Forest look (`look.rs`): value, saturation, tree / stand value spreads; rgb balance, crown
+    // shade; stand period, height spread, height period, frost green share; far growth start,
+    // end, gain, bare openwork; frost rgb, strength; frost altitudes; bare rgb, look set.
+    canopy: vec4<f32>,
+    balance: vec4<f32>,
+    shape: vec4<f32>,
+    far: vec4<f32>,
+    frost: vec4<f32>,
+    winter: vec4<f32>,
+    bare: vec4<f32>,
 }
 
 @group(0) @binding(0) var<uniform> view: View;
@@ -112,7 +122,11 @@ fn vertex(in: Vertex) -> VertexOutput {
     let s = sin(yaw);
     let seed = in.scale_seed.z;
     let mode = params.frame.w;
-    let jitter = 1.0 + 0.25 * (2.0 * fract(seed * 53.17) - 1.0);
+    // Stand height variety of the main pass (`canopy_size` of `billboard.wesl`, without the far
+    // growth: the shadow maps are only drawn near by).
+    let stand_h = 1.0 + params.shape.y
+        * (2.0 * value_noise(origin.xz / max(params.shape.z, 1.0) + vec2<f32>(7.3, 1.9)) - 1.0);
+    let jitter = (1.0 + 0.25 * (2.0 * fract(seed * 53.17) - 1.0)) * stand_h;
     let gust = wind_gust(origin.xz);
     let shiver = sin(globals.time * 1.7 + seed * 23.0) * (0.4 + 0.6 * gust);
     var world: vec3<f32>;
@@ -179,7 +193,8 @@ fn cut(in: VertexOutput) {
             discard;
         }
         let t = textureSampleLevel(albedo_texture, albedo_sampler, in.uv0, lod);
-        if winter && value_noise(in.local * 40.0 + vec2<f32>(seed * 29.0, seed * 3.0)) < 0.45 {
+        if winter && lod < 1.5
+            && value_noise(in.local * 16.0 + vec2<f32>(seed * 29.0, seed * 3.0)) < params.far.w {
             discard;
         }
         if t.a * (1.0 + lod * 0.35) < params.frame.z {
@@ -189,7 +204,7 @@ fn cut(in: VertexOutput) {
         if bayer4(in.position.xy) >= zone {
             discard;
         }
-        if winter && value_noise(in.local * 2.4) < 0.5 {
+        if winter && value_noise(in.local * 2.4) < params.far.w + 0.05 {
             discard;
         }
     }

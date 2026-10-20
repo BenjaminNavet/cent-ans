@@ -33,7 +33,8 @@ pub const MODEL_RADIUS_FACTOR: f32 = 0.6;
 pub const MODEL_RADIUS_MIN: f32 = 8.0;
 pub const MODEL_RADIUS_MAX: f32 = 40.0;
 pub const MODEL_MAX_DISTANCE: f32 = 150.0;
-/// Outer share of the model zone where models and impostors are dithered (`generalised_model_fade`).
+/// Outer share of the model zone where trees switch from model to impostor one by one
+/// (`generalised_model_fade`; a per-pixel Bayer dither showed a 4 x 4 pattern, TS-T2).
 pub const MODEL_FADE: f32 = 0.35;
 /// Level of detail of the near models (`DnTreeModels.MODEL_LOD`: lod1, the lod2 crowns are
 /// too sparse up close).
@@ -394,14 +395,16 @@ pub fn assemble(
             if inside {
                 out.wanted_rows.insert(tree.row);
             }
-            let near = inside && model_rows.get(tree.row as usize).copied().unwrap_or(false);
+            let modelled = inside && model_rows.get(tree.row as usize).copied().unwrap_or(false);
             let position = Vec3::new(tree.x, tree.y, tree.z);
-            // Share taken by the model: 0 at the zone edge, 1 inside the core (`model_fade`).
-            let zone = if near {
+            // Share taken by the models: 0 at the zone edge, 1 inside the core (`model_fade`); each
+            // tree of the band is wholly a model or wholly an impostor, drawn by its own hash.
+            let zone = if modelled {
                 ((model_radius - d2.sqrt()) / (model_radius * MODEL_FADE).max(1e-3)).clamp(0.0, 1.0)
             } else {
                 0.0
             };
+            let near = modelled && zone > (tree.seed * 97.31).fract();
             if near {
                 // Near models keep their size.
                 let buffer = out.batches.entry((tree.row, true)).or_default();
@@ -410,12 +413,11 @@ pub fn assemble(
                     position,
                     tree.yaw_deg,
                     tree.height,
-                    zone,
+                    1.0,
                     tree.seed,
                     tree.tint,
                 );
-            }
-            if !near || zone < 1.0 {
+            } else {
                 // Thinning grows the remaining far trees.
                 let buffer = out.batches.entry((tree.row, false)).or_default();
                 push_weighted(
@@ -423,7 +425,7 @@ pub fn assemble(
                     position,
                     tree.yaw_deg,
                     tree.height * grow,
-                    zone,
+                    0.0,
                     tree.seed,
                     tree.tint,
                 );
@@ -502,15 +504,19 @@ mod tests {
             out.batches[&(0, false)].len(),
             super::super::billboard::RECORD_BYTES
         );
-        // In the outer band of the zone a tree has both records, dithered by its zone weight.
-        let band = vec![Arc::new(vec![tree(9.0, 0.9)])];
+        // In the outer band of the zone a tree is either a model or an impostor, never both.
+        let band = vec![Arc::new(
+            (0..200)
+                .map(|i| tree(9.0, 0.5 + i as f32 / 400.0))
+                .collect::<Vec<_>>(),
+        )];
         let out = assemble(&band, Vec2::ZERO, 10.0, 1.0, &[true]);
-        assert_eq!(
-            out.batches[&(0, true)].len(),
-            out.batches[&(0, false)].len()
-        );
+        let models = out.batches[&(0, true)].len() / super::super::billboard::RECORD_BYTES;
+        let cards = out.batches[&(0, false)].len() / super::super::billboard::RECORD_BYTES;
+        assert_eq!(models + cards, 200);
+        assert!((30..90).contains(&models), "{models}");
         let weight = f32::from_le_bytes(out.batches[&(0, true)][20..24].try_into().unwrap());
-        assert!((weight - 1.0 / 3.5).abs() < 1e-4);
+        assert_eq!(weight, 1.0);
         // Without a ready model the near tree stays an impostor, but its species is wanted.
         let out = assemble(&tiles, Vec2::ZERO, 10.0, 1.0, &[false]);
         assert_eq!((out.near, out.far), (0, 3));
