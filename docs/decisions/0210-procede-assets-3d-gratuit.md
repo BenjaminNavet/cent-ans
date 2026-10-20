@@ -30,3 +30,11 @@ retouche une pose sans rien changer d'autre, mais demande 25-35 min par image su
 - HF PRO (25 min/jour) lèverait la limite de TRELLIS : dépense à décider par le joueur.
 - Le test des vues générées par le LoRA d'angles de Qwen n'a pas été mené à terme (trop long) ;
   à éprouver au premier asset qui en a besoin.
+
+## Addendum du 20/10 — Qwen-Image-Edit retiré
+
+Qwen-Image-Edit-2511 n'a servi qu'à l'essai du 08/10 : trop lent (25-35 min par image), jamais
+retenu en production ; les figurines passent par Z-Image Turbo, les vues manquantes par fal. Le
+modèle (30 Go) et son LoRA d'angles sont retirés de la machine. `dn_batch.py --local-fallback`
+saute la vue de dos Qwen quand le modèle est absent. Le réinstaller si un asset exige une retouche
+gratuite avec image de référence.

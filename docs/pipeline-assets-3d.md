@@ -10,7 +10,7 @@ qu'un dernier recours, avec une ligne dans `docs/budget.md`.
 
 | Asset | Image (2D) | 3D |
 |---|---|---|
-| **Figurines** (soldats, cavaliers, personnages) | **Qwen-Image-Edit-2511** local, avec une figurine validée en image de référence | **TRELLIS** gratuit (Space HF), puis **SF3D** local en repli |
+| **Figurines** (soldats, cavaliers, personnages) | **Z-Image Turbo** local (prompt figurines, bible § 14.8) ; retouche avec référence : fal ou NB2 (Qwen local retiré le 20/10) | **TRELLIS** gratuit (Space HF), puis **SF3D** local en repli |
 | **Décor, bâtiments, accessoires, engins** | **Z-Image Turbo** local (texte seul) | **TRELLIS 1** (fal ou Space HF), repli SF3D ; TRELLIS.2 local écarté (ADR 0342, addendum du 11/10 soir) |
 | **Cas difficiles** (vues impossibles à obtenir en local) | Nano Banana 2 via OpenRouter, un seul appel payant | idem |
 
@@ -20,7 +20,7 @@ Jamais de meilleur-de-N sur un modèle payant (fal, NB2) : un seul appel.
 
 ## 2. Respecter la charte à l'étape image
 
-Aucun modèle ne « connaît » la charte : elle passe par le **prompt** et, pour Qwen et NB2, par des
+Aucun modèle ne « connaît » la charte : elle passe par le **prompt** et, pour les modèles d'édition (fal, NB2), par des
 **images de référence**. Z-Image ne lit que le texte. On vérifie l'image **avant** la 3D ; une
 image hors charte ne part pas en 3D.
 
@@ -64,7 +64,11 @@ venant du haut. C'est le style par défaut de `data/art/ga3_decor.json`. Deux gr
 TRELLIS.2 n'a vu à l'entraînement que des rendus Blender d'assets 3D sous cet angle : une photo ou
 une peinture lui réussit moins bien (branches trop fines, volumes plats).
 
-### Qwen-Image-Edit-2511 (figurines, retouches, vues manquantes)
+### Qwen-Image-Edit-2511 (retiré le 20/10)
+**Retiré de la machine le 20/10** (30 Go, inutilisé depuis l'essai du 08/10, trop lent).
+Pour le réinstaller : `mflux-save` depuis `Qwen/Qwen-Image-Edit-2511` (≈ 20 min de téléchargement).
+Notes d'origine conservées ci-dessous.
+
 Local et gratuit (Apache 2.0, 20 B), quantifié q6 dans `~/models/mflux/qwen-image-edit-2511-q6`
 (≈ 30 Go). Très fidèle en retouche : change la pose sans toucher au reste (essai archer du 08/10).
 **Lent** : 25-35 min par image 1024² en 25 étapes quand la RAM est partagée (machine 48 Go),
@@ -172,7 +176,7 @@ objets longs).
 - **Pourquoi un modèle d'édition** : Z-Image Turbo part d'un texte ; lui demander « le même objet vu de
   dos » donne un *autre* objet. Il faut un modèle qui reçoit l'image de face et redessine le même objet
   sous un autre angle (prompts `VIEW_PROMPTS` : mêmes matières, proportions, lumière, fond gris).
-- **Voie gratuite (choix 1)** : Qwen-Image-Edit-2511 local + LoRA Multiple-Angles (§ 3), ≈ plusieurs
+- **Voie gratuite (retirée le 20/10, modèle supprimé)** : Qwen-Image-Edit-2511 local + LoRA Multiple-Angles (§ 3), ≈ plusieurs
   minutes par vue sur le M4 Pro ; puis TRELLIS HF multivue (quota) ou, à défaut, SF3D depuis la face.
 - **Voie payante (nuit DN)** : `fal-ai/flux-2/edit` (0,024 $ par vue) → rembg → `fal-ai/trellis/multi`
   (0,02 $, `multiimage_algo: stochastic`). Bilan de la nuit : 389 vues = **9,34 $, premier poste**
@@ -338,7 +342,7 @@ uv run --with rembg --with onnxruntime --with fal-client --with pillow --with nu
 
 ### Repli local (`dn_batch.py`), désactivé par défaut (règle du joueur)
 - Par défaut, si fal échoue (erreur, filtre de contenu, solde, plafond `DN_FAL_CAP_USD`), l'échec est seulement journalisé (`failures.jsonl`) et listé pour une **session locale séparée** : jamais de repli local dans la même session. L'option explicite `--local-fallback` l'active.
-- Avec `--local-fallback` : 3D : le lot enchaîne seul TRELLIS HF (si quota) puis SF3D local sous `gpu.lock` ; vue de dos Qwen-Image-Edit local (LoRA Multiple-Angles, ≈ 25 min) pour les classes orientées ; le repli est journalisé (`failures.jsonl`, `generation.json` : `fallbacks`, `backend3d_used`).
+- Avec `--local-fallback` : 3D : le lot enchaîne seul TRELLIS HF (si quota) puis SF3D local sous `gpu.lock` ; vue de dos Qwen-Image-Edit local (LoRA Multiple-Angles, ≈ 25 min) pour les classes orientées, sautée si le modèle est absent (supprimé le 20/10) ; le repli est journalisé (`failures.jsonl`, `generation.json` : `fallbacks`, `backend3d_used`).
 - Meilleur-de-N : refusé sur un modèle payant (`--image-backend fal` avec `--seeds`/`seeds` > 1) ; autorisé en local.
 - Image (avec `--local-fallback` seulement) : entrée refusée par la charte D5 ou sans image fal (filtre de contenu) → 3 graines de plus en mflux local avant d'abandonner.
 - Test : `uv run --project tools pytest tools/tests/test_dn_batch_fallback.py` (fal simulé en échec).
