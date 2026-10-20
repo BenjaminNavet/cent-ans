@@ -8,10 +8,10 @@ Branche `ts/t3`, worktree `../gp-ts-t3`. Plan : `docs/wip/ts-style-total-war.md`
 - Flocons (`weather/precip.rs`) : quads face caméra, disque flou, tailles/alpha variables, dérive.
 
 ## État
-- [ ] squelette (données, schéma, note)
-- [ ] passe profondeur + brume + aérien + froid + étalonnage
-- [ ] flocons doux
+- [x] squelette (données, schéma, note)
+- [x] passe profondeur + brume + aérien + froid + étalonnage (compile, tests unitaires ; rendu à vérifier)
+- [x] flocons doux (quads face caméra, disque flou, `precipitation.tres` snow_*)
 - [ ] vérifs + captures
 
 ## Prochaine étape
-Implémenter la passe dans `terrain/post.rs` / `post.wesl`.
+Vérifier le rendu (dump `campaign_post`, captures alps_mid / alps_winter / town_winter), régler les données.
