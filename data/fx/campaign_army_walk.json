@@ -15,5 +15,8 @@
     "fade_per_s": 6.0,
     "ship_tilt_gain": 1.0,
     "cloth_gust": 0.6
+  },
+  "standard_banner": {
+    "scale": 1.5
   }
 }

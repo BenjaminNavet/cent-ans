@@ -1,0 +1,20 @@
+{
+  "description": "TS-T6 : fil d'événements de la carte de campagne, panneau compact en haut à droite, replié par rubrique. Chaque rubrique regroupe des genres d'événements du cœur (`kind`) ; un événement absent de toute liste va à la rubrique `other`. Les nouvelles lointaines (« Monde » du journal) vont toujours à `world_category`. Rendu seulement : le cœur décide quelles nouvelles sont pertinentes (réglage `interface/news_filter`). `default_folded` : rubriques repliées tant que le joueur n'a rien choisi (l'état choisi est gardé dans les réglages). `icon` : id d'icône de `icons_ink.json`.",
+  "width_px": 276,
+  "max_per_category": 6,
+  "keep_turns": 3,
+  "max_chars": 46,
+  "list_max_height_px": 280,
+  "row_height_px": 24,
+  "other": "world",
+  "world_category": "world",
+  "default_folded": ["economy", "people", "world"],
+  "categories": [
+    {"id": "war", "label": "Guerre", "icon": "hud_enemy_army", "kinds": ["battle", "siege_started", "siege_lifted", "province_captured", "raid", "attrition", "army_destroyed", "general_captured", "war_declared", "revolt", "ransom", "victory", "defeat", "campaign_ended", "faction_destroyed"]},
+    {"id": "diplomacy", "label": "Diplomatie", "icon": "hud_diplomacy", "kinds": ["peace_signed", "alliance_formed", "alliance_broken", "vassalage", "vassal_rebellion", "embargo", "diplomatic_offer", "diplomacy", "marriage", "royal_act", "agent", "excommunication", "schism", "heresy", "crusade"]},
+    {"id": "armies", "label": "Armées et recrutement", "icon": "hud_army", "kinds": ["recruited", "captain", "level_up", "chivalry"]},
+    {"id": "economy", "label": "Économie", "icon": "hud_treasury", "kinds": ["income", "bankruptcy", "building_completed", "trade", "coinage", "table", "edict", "technology_researched", "famine", "plague"]},
+    {"id": "people", "label": "Personnages", "icon": "hud_court", "kinds": ["birth", "death", "succession", "no_heir", "regency", "trait_acquired", "skill_learned", "appointment", "loyalty", "medicine"]},
+    {"id": "world", "label": "Monde", "icon": "hud_other", "kinds": ["mission", "chronicle"]}
+  ]
+}
