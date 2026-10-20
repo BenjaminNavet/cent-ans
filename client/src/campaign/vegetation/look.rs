@@ -120,16 +120,36 @@ pub struct ClearingLife {
 
 impl Default for ClearingLife {
     fn default() -> Self {
+        let object = |model: &str, size_m: f32, fraction: f32| LifeObject {
+            model: model.into(),
+            size_m,
+            fraction,
+        };
         ClearingLife {
-            max_distance: 0.0,
-            fade_from: 0.0,
+            max_distance: 90.0,
+            fade_from: 70.0,
             real_below: 20.0,
             full_from: 60.0,
             max_factor: 6.0,
             fov_deg: 45.0,
             lod: 1,
-            budget: [0; 4],
-            objects: Default::default(),
+            budget: [0, 8, 20, 40],
+            objects: [
+                (
+                    "env_charcoal_kiln".to_string(),
+                    object("dn/buildings/env_charcoal_kiln", 6.0, 0.03),
+                ),
+                (
+                    "econ_charcoal_stack_burners".to_string(),
+                    object("dn/props/econ_charcoal_stack_burners", 6.0, 0.03),
+                ),
+                (
+                    "econ_timber_yard_logs".to_string(),
+                    object("dn/buildings/econ_timber_yard_logs", 8.0, 0.035),
+                ),
+            ]
+            .into_iter()
+            .collect(),
         }
     }
 }
@@ -347,7 +367,7 @@ fn parse_life(v: &Value) -> ClearingLife {
                     })
                     .collect()
             })
-            .unwrap_or_default(),
+            .unwrap_or(d.objects),
     }
 }
 
