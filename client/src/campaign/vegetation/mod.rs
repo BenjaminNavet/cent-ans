@@ -659,7 +659,12 @@ fn apply_records(
                     .quad
                     .get_or_insert_with(|| meshes.add(render::quad_mesh()))
                     .clone();
-                let mut params = render::impostor_params(row, rows, ratio, class);
+                let gain = render
+                    .assets
+                    .gains
+                    .get_or_insert_with(render::ModelGains::load)
+                    .impostor_gain;
+                let mut params = render::impostor_params(row, rows, ratio, class, gain);
                 params.season = season_weights;
                 let entity = commands
                     .spawn((

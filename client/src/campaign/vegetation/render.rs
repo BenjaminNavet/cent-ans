@@ -44,12 +44,17 @@ pub const SHADOW_LOD: &str = "lod2";
 /// (`DnTreeModels.MODEL_BOOST`).
 pub const MODEL_BOOST: f32 = 1.55;
 /// Per-species gains and saturation of the model textures (`DnTreeModels`).
+/// Albedo gain of the impostors when `impostor_gain` is missing from `GAINS_FILE`.
+pub const IMPOSTOR_GAIN: f32 = 1.6;
 pub const GAINS_FILE: &str = "art/tree_model_gains.json";
 
 /// Colour calibration of the model textures, read from `GAINS_FILE`.
 #[derive(Default, Clone)]
 pub struct ModelGains {
     pub chroma: f32,
+    /// Albedo gain of the far impostors (`impostor_gain`; the atlas is baked to the model's
+    /// luminance, this brings the lit result of the cards down to the models' relative to the ground).
+    pub impostor_gain: f32,
     pub faithful: std::collections::HashSet<String>,
     pub gains: HashMap<String, Vec3>,
 }
@@ -58,6 +63,9 @@ impl ModelGains {
     pub fn parse(value: &serde_json::Value) -> ModelGains {
         let mut out = ModelGains {
             chroma: value["model_chroma"].as_f64().unwrap_or(1.0) as f32,
+            impostor_gain: value["impostor_gain"]
+                .as_f64()
+                .unwrap_or(IMPOSTOR_GAIN as f64) as f32,
             ..default()
         };
         if let Some(list) = value["faithful"].as_array() {
@@ -83,6 +91,7 @@ impl ModelGains {
             .map(|v| ModelGains::parse(&v))
             .unwrap_or(ModelGains {
                 chroma: 1.0,
+                impostor_gain: IMPOSTOR_GAIN,
                 ..default()
             })
     }
@@ -328,8 +337,9 @@ pub fn quad_mesh() -> Mesh {
 }
 
 /// Impostor batch parameters of species `row` (`campaign_tree_impostor.gdshaderinc` uniforms).
-pub fn impostor_params(row: u16, rows: u32, ratio: f32, season_class: i32) -> VegParams {
+pub fn impostor_params(row: u16, rows: u32, ratio: f32, season_class: i32, gain: f32) -> VegParams {
     let mut p = VegParams::new(Mode::Impostor);
+    p.wind.w = gain;
     p.tint.w = season_class as f32;
     p.atlas = Vec4::new(
         ATLAS_VIEWS as f32,
@@ -460,7 +470,7 @@ mod tests {
         );
         let m = model_params(&gains, "fir", 2);
         assert_eq!((m.frame.w, m.tint.w, m.extra.x), (3.0, 2.0, 1.6));
-        let p = impostor_params(3, 41, 0.8, 2);
+        let p = impostor_params(3, 41, 0.8, 2, 1.5);
         assert_eq!((p.atlas.z, p.atlas.y, p.tint.w), (3.0, 41.0, 2.0));
     }
 

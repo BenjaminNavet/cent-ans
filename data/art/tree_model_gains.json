@@ -1,6 +1,8 @@
 {
  "description": "Facteur de couleur (RVB linéaire) appliqué à la texture du glb DN de chaque essence pour atteindre la luminance de son imposteur (ga3_vegetation_l2.py atlas, lot DN-FORET, ADR 0216). Lu par DnTreeModels.",
  "model_chroma": 1.6,
+ "impostor_gain": 1.5,
+ "impostor_gain_note": "Gain d'albedo des imposteurs (1,6 avant) : à 220-600 unités les cimes d'imposteurs sortaient environ 12 % plus claires que le sol forestier, contre 5 % pour les modèles proches ; 1,5 les ramène à l'écart des modèles.",
  "model_chroma_note": "Saturation des textures des modèles autour de leur luminance (DN-forets, 09/10 : textures TRELLIS/SF3D grisâtres). Conservée par ga3_vegetation_l2.py atlas.",
  "faithful": [
   "alder",
