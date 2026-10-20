@@ -10,6 +10,25 @@
     "color": { "$ref": "common.schema.json#/$defs/color_hex" },
     "unit": {"type": "number", "minimum": 0, "maximum": 1},
     "category": {"enum": ["self", "enemy", "friend", "other"]},
+    "plate_look": {
+      "type": "object",
+      "required": ["fill", "border", "ink"],
+      "additionalProperties": false,
+      "properties": {
+        "fill": {"$ref": "#/$defs/color"},
+        "border": {"$ref": "#/$defs/color"},
+        "ink": {"$ref": "#/$defs/color"}
+      }
+    },
+    "plate_pastille": {
+      "type": "object",
+      "required": ["color", "min_rank"],
+      "additionalProperties": false,
+      "properties": {
+        "color": {"$ref": "#/$defs/color"},
+        "min_rank": {"type": "integer", "minimum": 0, "maximum": 4}
+      }
+    },
     "plate": {
       "type": "object",
       "required": ["color", "width_px"],
@@ -148,6 +167,40 @@
           "properties": {
             "enemy": {"$ref": "#/$defs/color"},
             "friend": {"$ref": "#/$defs/color"}
+          }
+        },
+        "plate": {
+          "type": "object",
+          "description": "TS-T6 : cartouche de ville (fond, liseré, encre par position du détenteur) et pastilles d'information.",
+          "required": ["fill_alpha", "border_px", "status", "pastilles"],
+          "additionalProperties": false,
+          "properties": {
+            "description": {"type": "string"},
+            "fill_alpha": {"$ref": "#/$defs/unit"},
+            "border_px": {"type": "number", "minimum": 0, "maximum": 6},
+            "status": {
+              "type": "object",
+              "required": ["self", "ally", "neutral", "enemy"],
+              "additionalProperties": false,
+              "properties": {
+                "self": {"$ref": "#/$defs/plate_look"},
+                "ally": {"$ref": "#/$defs/plate_look"},
+                "neutral": {"$ref": "#/$defs/plate_look"},
+                "enemy": {"$ref": "#/$defs/plate_look"}
+              }
+            },
+            "pastilles": {
+              "type": "object",
+              "required": ["max", "size_px", "siege", "garrison", "buildings"],
+              "additionalProperties": false,
+              "properties": {
+                "max": {"type": "integer", "minimum": 0, "maximum": 3},
+                "size_px": {"type": "number", "minimum": 8, "maximum": 40},
+                "siege": {"$ref": "#/$defs/plate_pastille"},
+                "garrison": {"$ref": "#/$defs/plate_pastille"},
+                "buildings": {"$ref": "#/$defs/plate_pastille"}
+              }
+            }
           }
         }
       }
