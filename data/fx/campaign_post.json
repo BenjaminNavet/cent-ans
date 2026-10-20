@@ -1,0 +1,61 @@
+{
+  "description": "Lot T3 du chantier TS (ADR 0710) : atmosphère de la carte de campagne, rendu seulement, appliquée par la passe plein écran de la caméra de campagne (client/src/campaign/terrain/post.rs) d'après la profondeur, donc au monde entier (sol, arbres, villes, armées), jamais à l'interface. `valley_mist` : brume de vallée dans les creux relatifs du relief (vallées, fonds de rivière, en bancs partiels ; une plaine plate n'est voilée que le matin et par brouillard, `plain_*`), plafonnée par temps clair (`clear_max`), plus marquée le matin et par météo brouillard (ADR 0596). `aerial` : perspective atmosphérique, le lointain se dissout en gris-bleu froid. `cold` : brume plus bleutée et plus dense en hiver, sous la neige, au nord et en altitude. `grade` : étalonnage désaturé (vert de plaine surtout) qui épargne les teintes déjà très saturées, chaudes ou lumineuses (bannières, feux, rouge ennemi), contraste de valeurs. Tout s'éteint avec `enabled` ; chaque bloc a son propre interrupteur. Tout s'efface en vue parchemin (ADR 0124). Altitudes en mètres, distances en multiples de la distance de caméra, couleurs sRGB.",
+  "enabled": true,
+  "legacy_adjust": {
+    "contrast": 1.06,
+    "saturation": 1.08
+  },
+  "valley_mist": {
+    "enabled": true,
+    "full_m": 120,
+    "top_m": 1400,
+    "follow_focus": 0.4,
+    "clear_opacity": 0.2,
+    "morning_opacity": 0.08,
+    "fog_opacity": 0.2,
+    "max_opacity": 0.55,
+    "clear_max": 0.32,
+    "hollow_m": [30, 300],
+    "tap_radius": 0.035,
+    "plain_clear": 0.0,
+    "plain_morning": 0.2,
+    "plain_fog": 0.4,
+    "near_share": 0.15,
+    "far_ratio": [0.7, 1.8],
+    "noise_scale": 0.012,
+    "noise_drift": [0.9, 0.25],
+    "noise_amount": 0.7,
+    "sea_share": 0.5,
+    "color": [0.84, 0.86, 0.88],
+    "cold_color": [0.72, 0.79, 0.9]
+  },
+  "aerial": {
+    "enabled": true,
+    "begin_ratio": 1.15,
+    "end_ratio": 3.6,
+    "strength": 0.5,
+    "desaturate": 0.6,
+    "sky_share": 0.35,
+    "fog_cut": 0.6,
+    "color": [0.6, 0.66, 0.74],
+    "cold_color": [0.56, 0.65, 0.79]
+  },
+  "cold": {
+    "winter": 0.9,
+    "snow": 0.6,
+    "latitude_deg": [50.0, 62.0],
+    "latitude_share": 0.6,
+    "altitude_m": [1400.0, 3200.0],
+    "altitude_share": 0.5,
+    "density_gain": 0.45
+  },
+  "grade": {
+    "enabled": true,
+    "desaturation": 0.16,
+    "green_desaturation": 0.22,
+    "protect_chroma": [0.32, 0.6],
+    "warm_protect": 0.85,
+    "protect_luma": [0.88, 1.0],
+    "value_contrast": 0.16
+  }
+}

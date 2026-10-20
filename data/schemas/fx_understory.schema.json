@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_understory.schema.json",
+  "title": "Sous-bois et touffes de la carte de campagne (countryside/understory.rs)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["seed", "far", "near", "belt", "pale", "slope", "budget", "kinds"],
+  "$defs": {
+    "level": {
+      "type": "object",
+      "required": ["cell_px", "max_distance", "fade_start", "radius_factor", "min_radius", "max_radius", "max_cells"],
+      "properties": {
+        "cell_px": {"type": "number", "exclusiveMinimum": 0},
+        "max_distance": {"type": "number", "exclusiveMinimum": 0},
+        "fade_start": {"type": "number", "minimum": 0, "maximum": 1},
+        "radius_factor": {"type": "number", "exclusiveMinimum": 0},
+        "min_radius": {"type": "number", "minimum": 0},
+        "max_radius": {"type": "number", "exclusiveMinimum": 0},
+        "max_cells": {"type": "integer", "minimum": 1}
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["low", "medium", "high", "ultra"],
+      "properties": {
+        "low": {"type": "integer", "minimum": 0},
+        "medium": {"type": "integer", "minimum": 0},
+        "high": {"type": "integer", "minimum": 0},
+        "ultra": {"type": "integer", "minimum": 0}
+      }
+    },
+    "color": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 2}}
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "seed": {"type": "integer"},
+    "far": {"$ref": "#/$defs/level"},
+    "near": {
+      "allOf": [{"$ref": "#/$defs/level"}],
+      "required": ["spacing_px", "forest_max", "crops_max", "snow_max", "flower_patch_frequency", "flower_patch_threshold", "flower_share_in_patch", "flower_share_outside"],
+      "properties": {
+        "spacing_px": {"type": "number", "exclusiveMinimum": 0},
+        "forest_max": {"type": "number", "minimum": 0, "maximum": 1},
+        "crops_max": {"type": "number", "minimum": 0, "maximum": 1},
+        "snow_max": {"type": "number", "minimum": 0, "maximum": 1},
+        "flower_patch_frequency": {"type": "number", "exclusiveMinimum": 0},
+        "flower_patch_threshold": {"type": "number", "minimum": -1, "maximum": 1},
+        "flower_share_in_patch": {"type": "number", "minimum": 0, "maximum": 1},
+        "flower_share_outside": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "rock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_share", "slope_gain", "max_altitude_m"],
+      "description": "TS-T7c : test roche du semis (masque de roche du shader terrain : pente affichée raide et altitude, bande `ground_look` de data/ui/campaign_seasons.json).",
+      "properties": {
+        "max_share": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part de roche au-dessus de laquelle aucune pièce n'est semée (1 : jamais de rejet)."},
+        "slope_gain": {"type": "number", "minimum": 0, "description": "Pente affichée / pente réelle (HEIGHT_SCALE x m par px x exagération du relief)."},
+        "max_altitude_m": {"type": "number", "minimum": 0, "description": "Altitude (m) au-dessus de laquelle le sol compte comme roche quelle que soit la pente (0 : pas de ligne)."}
+      }
+    },
+    "slope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max", "pale_max"],
+      "properties": {
+        "max": {"type": "number", "exclusiveMinimum": 0, "description": "Pente maximale (m par m, relief réel) portant une pièce de sous-bois."},
+        "pale_max": {"type": "number", "exclusiveMinimum": 0, "description": "Pente maximale portant une touffe pâle (replats herbeux)."}
+      }
+    },
+    "belt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width_px", "grid_px", "spacing_px", "forest_min", "inside_max", "crops_max", "falloff", "mix"],
+      "properties": {
+        "width_px": {"type": "number", "exclusiveMinimum": 0},
+        "grid_px": {"type": "number", "exclusiveMinimum": 0},
+        "spacing_px": {"type": "number", "exclusiveMinimum": 0},
+        "forest_min": {"type": "number", "minimum": 0, "maximum": 1},
+        "inside_max": {"type": "number", "minimum": 0, "maximum": 1},
+        "crops_max": {"type": "number", "minimum": 0, "maximum": 1},
+        "falloff": {"type": "number", "exclusiveMinimum": 0},
+        "mix": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["belt_tall", "belt_fern", "belt_bush", "belt_deadwood"],
+          "properties": {
+            "belt_tall": {"type": "number", "minimum": 0},
+            "belt_fern": {"type": "number", "minimum": 0},
+            "belt_bush": {"type": "number", "minimum": 0},
+            "belt_deadwood": {"type": "number", "minimum": 0}
+          }
+        }
+      }
+    },
+    "pale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spacing_px", "snow_min", "crops_max", "forest_max", "tundra_start_m", "tundra_end_m", "tundra_share", "patch_frequency"],
+      "properties": {
+        "spacing_px": {"type": "number", "exclusiveMinimum": 0},
+        "snow_min": {"type": "number", "minimum": 0, "maximum": 1},
+        "crops_max": {"type": "number", "minimum": 0, "maximum": 1},
+        "forest_max": {"type": "number", "minimum": 0, "maximum": 1},
+        "tundra_start_m": {"type": "number", "minimum": 0},
+        "tundra_end_m": {"type": "number", "minimum": 0},
+        "tundra_share": {"type": "number", "minimum": 0, "maximum": 1},
+        "patch_frequency": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["far", "near"],
+      "properties": {"far": {"$ref": "#/$defs/budget"}, "near": {"$ref": "#/$defs/budget"}}
+    },
+    "kinds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["belt_tall", "belt_fern", "belt_bush", "belt_deadwood", "pale", "near_tall", "near_flowers"],
+      "patternProperties": {
+        "^(belt_tall|belt_fern|belt_bush|belt_deadwood|pale|near_tall|near_flowers)$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["texture", "height_px", "width_ratio", "cards", "season_tint"],
+          "properties": {
+            "texture": {"type": "string"},
+            "height_px": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "exclusiveMinimum": 0}},
+            "width_ratio": {"type": "number", "exclusiveMinimum": 0},
+            "cards": {"type": "integer", "minimum": 1, "maximum": 4},
+            "flat": {"type": "boolean"},
+            "season_tint": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/color"}}
+          }
+        }
+      }
+    }
+  }
+}

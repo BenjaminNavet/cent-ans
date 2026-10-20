@@ -28,8 +28,26 @@ pub struct SeasonParams {
     pub winter_ground: Vec4,
     /// x, y: plain-snow fade towards the south (fractions of the map height), z: plain snow share.
     pub snow_plain: Vec4,
-    /// rgb: colour of the plain snow of the ground (sRGB), a: unused.
+    /// rgb: colour of the sunlit snow of the ground, a: unused.
     pub snow_color: Vec4,
+    /// rgb: colour of the snow in the shade (cold), a: snow share kept under the forests.
+    pub snow_shade: Vec4,
+    /// x: patch noise frequency (1 / map px), y: altitude jitter of the snow line (m),
+    /// z, w: displayed-normal `y` where the snow starts / is full (steeper stays bare).
+    pub snow_mask: Vec4,
+    /// rgb: mud of the fringe between snow and grass and of the tracks under the snow, a: fringe width.
+    pub mud: Vec4,
+    /// rgb: dark rock of the heights and steep slopes, a: strength.
+    pub rock: Vec4,
+    /// x, y: displayed-normal `y` of full / no rock, z, w: altitude (m) where the rock starts / is full.
+    pub rock_band: Vec4,
+    /// x: sunlit / shaded slope contrast on the rock, y: lighter crests, z: strata strength,
+    /// w: crest detection gain (curvature of the displayed normal per map px).
+    pub rock_light: Vec4,
+    /// rgb: ground tint under the forests (green-black), a: strength.
+    pub forest_floor: Vec4,
+    /// x: frequency (1 / map px) of the soil patches, y: strength, z: sharpening, w: highest opacity of the cast shadows on the ground (TS-T9; 1 = no cap).
+    pub patches: Vec4,
 }
 
 impl Default for SeasonParams {
@@ -42,6 +60,14 @@ impl Default for SeasonParams {
             winter_ground: Vec4::new(1.0, 1.0, 1.0, 0.0),
             snow_plain: Vec4::new(2.0, 3.0, 0.0, 0.0),
             snow_color: Vec4::new(0.86, 0.88, 0.92, 0.0),
+            snow_shade: Vec4::new(0.86, 0.88, 0.92, 1.0),
+            snow_mask: Vec4::new(0.0, 0.0, 0.55, 0.85),
+            mud: Vec4::new(0.2, 0.15, 0.1, 0.0),
+            rock: Vec4::new(0.19, 0.17, 0.15, 0.0),
+            rock_band: Vec4::new(0.4, 0.7, 1000.0, 2000.0),
+            rock_light: Vec4::ZERO,
+            forest_floor: Vec4::new(1.0, 1.0, 1.0, 0.0),
+            patches: Vec4::new(0.0, 0.0, 0.0, 1.0),
         }
     }
 }
@@ -86,15 +112,74 @@ impl SeasonParams {
             out.snow_plain.y = fade[1].as_f64().unwrap_or(3.0) as f32;
         }
         // Share of a winter plain turned white (the Godot shader gates it by biome and slope).
+        out.snow_plain.w = data["snow"]["region_variation"].as_f64().unwrap_or(0.0) as f32;
         out.snow_plain.z = data["snow"]["plain_share"].as_f64().unwrap_or(0.55) as f32;
         out.snow_color =
             vec3_of(data["snow"].get("plain_color"), out.snow_color.truncate()).extend(0.0);
+        let snow = &data["snow"];
+        let num = |v: &Value, fallback: f32| v.as_f64().map_or(fallback, |x| x as f32);
+        let pair = |v: &Value, fallback: Vec2| match v.as_array() {
+            Some(a) if a.len() >= 2 => Vec2::new(num(&a[0], fallback.x), num(&a[1], fallback.y)),
+            _ => fallback,
+        };
+        out.snow_shade = vec3_of(snow.get("shade_color"), out.snow_color.truncate())
+            .extend(num(&snow["forest_share"], out.snow_shade.w));
+        let flat = pair(
+            &snow["flat_normal"],
+            Vec2::new(out.snow_mask.z, out.snow_mask.w),
+        );
+        out.snow_mask = Vec4::new(
+            num(&snow["patch_frequency"], out.snow_mask.x),
+            num(&snow["line_jitter_m"], out.snow_mask.y),
+            flat.x,
+            flat.y,
+        );
+        out.mud = vec3_of(snow.get("mud_color"), out.mud.truncate())
+            .extend(num(&snow["mud_fringe"], out.mud.w));
+        let look = &data["ground_look"];
+        out.rock = vec3_of(look.get("rock_color"), out.rock.truncate())
+            .extend(num(&look["rock_strength"], out.rock.w));
+        let steep = pair(
+            &look["rock_normal"],
+            Vec2::new(out.rock_band.x, out.rock_band.y),
+        );
+        let alt = pair(
+            &look["rock_altitude_m"],
+            Vec2::new(out.rock_band.z, out.rock_band.w),
+        );
+        out.rock_band = Vec4::new(steep.x, steep.y, alt.x, alt.y);
+        out.rock_light = Vec4::new(
+            num(&look["rock_slope_contrast"], 0.0),
+            num(&look["rock_crest_light"], 0.0),
+            num(&look["rock_strata"], 0.0),
+            num(&look["rock_crest_gain"], 0.0),
+        );
+        out.forest_floor = vec3_of(look.get("forest_floor_tint"), Vec3::ONE)
+            .extend(num(&look["forest_floor_strength"], 0.0));
+        out.patches = Vec4::new(
+            num(&look["patch_frequency"], 0.0),
+            num(&look["patch_strength"], 0.0),
+            num(&look["patch_sharpen"], 1.0),
+            num(&look["shadow_max_opacity"], 1.0).clamp(0.0, 1.0),
+        );
         let ground = &data["ground"];
         out.summer_gold = vec3_of(ground.get("summer_gold"), Vec3::ONE).extend(0.0);
         out.winter_ground = vec3_of(ground.get("winter_ground_tint"), Vec3::ONE)
             .extend(ground["winter_ground_desat"].as_f64().unwrap_or(0.0) as f32);
         out
     }
+}
+
+/// TS-T1: winter colours of a dirt road over the snow (dark mud): `(dirt, rut, edge)` from the
+/// summer ones, the mud of the snow fringe and the winter weight.
+pub fn road_winter_colors(base: [Vec4; 3], mud: Vec3, winter: f32) -> [Vec4; 3] {
+    let k = (winter * 0.85).clamp(0.0, 1.0);
+    let target = [mud * 0.75, mud * 0.5, mud];
+    let mut out = base;
+    for (o, t) in out.iter_mut().zip(target) {
+        *o = o.truncate().lerp(t, k).extend(o.w);
+    }
+    out
 }
 
 /// Smoothed season weights (`SeasonVisuals`).
@@ -196,14 +281,39 @@ mod tests {
     }
 
     #[test]
+    fn roads_turn_to_mud_in_winter_only() {
+        let base = [Vec4::new(0.2, 0.15, 0.1, 1.0); 3];
+        let mud = Vec3::new(0.1, 0.06, 0.04);
+        assert_eq!(road_winter_colors(base, mud, 0.0), base);
+        let w = road_winter_colors(base, mud, 1.0);
+        assert!(w[0].x < base[0].x && w[1].x < w[0].x && w[2].w == 1.0);
+    }
+
+    #[test]
     fn parses_the_real_data_file() {
         let text = include_str!("../../../../data/ui/campaign_seasons.json");
         let p = SeasonParams::from_json(text);
+        assert!(
+            (0.35..=0.45).contains(&p.patches.w),
+            "shadow cap {}",
+            p.patches.w
+        );
         assert_eq!(p.snow_lines, Vec4::new(2000.0, 2900.0, 2300.0, 650.0));
         assert!(p.gain[3].w < 1.0, "winter desaturates");
         assert!(p.winter_ground.w > 0.3);
         assert!((p.snow_plain.x - 0.58).abs() < 1e-5);
-        assert!((p.snow_plain.z - 0.55).abs() < 1e-5);
-        assert!(p.snow_color.x > 0.8, "plain snow is light, not grey");
+        assert!((p.snow_plain.z - 0.93).abs() < 1e-5);
+        let l = |c: Vec4| 0.299 * c.x + 0.587 * c.y + 0.114 * c.z;
+        assert!(l(p.snow_color) < 0.8, "sunlit snow is never pure white");
+        assert!(l(p.snow_shade) < l(p.snow_color), "shaded snow is darker");
+        assert!(
+            p.snow_shade.z > p.snow_shade.x,
+            "shaded snow is cold (blue)"
+        );
+        assert!(p.snow_mask.z < p.snow_mask.w && p.snow_mask.x > 0.0);
+        assert!(p.mud.w > 0.0 && p.rock.w > 0.0 && p.forest_floor.w > 0.0);
+        assert!(p.rock_band.x < p.rock_band.y && p.rock_band.z < p.rock_band.w);
+        assert!(l(p.rock) < 0.2, "the rock of the heights is dark");
+        assert!(p.patches.x > 0.0 && p.patches.z >= 1.0);
     }
 }

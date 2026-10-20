@@ -92,13 +92,13 @@ impl VegetationWorld {
         self.heights.height_m_at(x as f32, y as f32)
     }
 
-    fn treeline_m(&self, y: f64) -> f32 {
+    pub(crate) fn treeline_m(&self, y: f64) -> f32 {
         let north = 1.0 - (y / self.size.1.max(1.0)).clamp(0.0, 1.0) as f32;
         let t = smoothstep(0.55, 0.95, north);
         2100.0 + (900.0 - 2100.0) * t
     }
 
-    fn slope(&self, x: f64, y: f64) -> f32 {
+    pub(crate) fn slope(&self, x: f64, y: f64) -> f32 {
         let dx = self.height_m(x + 2.0, y) - self.height_m(x - 2.0, y);
         let dy = self.height_m(x, y + 2.0) - self.height_m(x, y - 2.0);
         (dx * dx + dy * dy).sqrt() / (4.0 * self.meters_per_px)
@@ -122,10 +122,20 @@ impl VegetationWorld {
             return out;
         }
         let treeline = self.treeline_m(y);
-        let altitude_factor = 1.0 - smoothstep(treeline - 350.0, treeline, height_m);
-        let slope_factor = 1.0 - smoothstep(0.35, 0.8, self.slope(x, y));
         let (xf, yf) = (x as f32, y as f32);
         let n = fbm(xf, yf, NOISE_SEED, 1.0 / 48.0, 4, 0.55);
+        // Crisp tree line (TS-T2): a narrow band, waved by the low-frequency noise, and the forest
+        // ends on the rock of the steep slopes instead of thinning out over hundreds of metres.
+        let look = &self.look;
+        let line = treeline + n * look.treeline_jitter_m;
+        let altitude_factor =
+            1.0 - smoothstep(line - look.treeline_fade_m.max(1.0), line, height_m);
+        let slope_factor = 1.0
+            - smoothstep(
+                look.rock_slope.x,
+                look.rock_slope.y.max(look.rock_slope.x + 1e-3),
+                self.slope(x, y),
+            );
         let raw_forest = self.splat_forest.texel(self.size, x, y, 0);
         let mut forest = smoothstep(self.cover.0, self.cover.1, raw_forest);
         let mut crops = self.splat_crops.texel(self.size, x, y, 0);

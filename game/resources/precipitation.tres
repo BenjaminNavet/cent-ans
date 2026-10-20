@@ -29,3 +29,7 @@ snow_sway_far_ratio = 0.03
 amount_ratio_near = 1.0
 amount_ratio_far = 0.45
 rain_amount_scale = 0.45
+snow_size_spread = Vector2(0.55, 1.6)
+snow_alpha_range = Vector2(0.3, 0.85)
+snow_softness = 2.2
+snow_drift_share = 0.7

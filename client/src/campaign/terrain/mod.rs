@@ -104,6 +104,7 @@ impl Plugin for CampaignTerrainPlugin {
                     relief_gpu::sync_relief_gpu,
                     season::update_season,
                     apply_season,
+                    tint_roads_by_season,
                     look::sync_fog_mask,
                     look::sync_zoom,
                     look::sync_weather_ground,
@@ -538,6 +539,53 @@ fn apply_season(
     }
 }
 
+/// TS-T1: dirt roads turn to dark mud across the winter snow (coarse ribbons and fine roads).
+fn tint_roads_by_season(
+    weights: Res<season::SeasonWeights>,
+    handle: Option<Res<TerrainMaterialHandle>>,
+    terrain: Res<Assets<TerrainMaterial>>,
+    mut ribbons: ResMut<Assets<crate::campaign::water::materials::RoadRibbonMaterial>>,
+    mut fine: ResMut<Assets<crate::campaign::water::fine::material::FineRoadMaterial>>,
+    mut last: Local<Option<(f32, usize)>>,
+) {
+    let Some(mud) = handle
+        .and_then(|h| terrain.get(&h.0))
+        .map(|m| m.season.mud.truncate())
+    else {
+        return;
+    };
+    let winter = weights.weights.w;
+    let count = ribbons.len() + fine.len();
+    if *last == Some((winter, count)) {
+        return;
+    }
+    *last = Some((winter, count));
+    let base = crate::campaign::water::materials::RoadRibbonMaterial::default().params;
+    let [dirt, rut, edge] = season::road_winter_colors(
+        [base.dirt_color, base.rut_color, base.grass_edge],
+        mud,
+        winter,
+    );
+    for (_, m) in ribbons.iter_mut() {
+        m.params.dirt_color = dirt;
+        m.params.rut_color = rut;
+        m.params.grass_edge = edge;
+    }
+    let base = crate::campaign::water::fine::material::FineRoadParams::default();
+    let [dirt, rut, edge] = season::road_winter_colors(
+        [base.dirt_color, base.rut_color, base.grass_edge],
+        mud,
+        winter,
+    );
+    let [main, ..] = season::road_winter_colors([base.main_color; 3], mud, winter);
+    for (_, m) in fine.iter_mut() {
+        m.params.dirt_color = dirt;
+        m.params.main_color = main;
+        m.params.rut_color = rut;
+        m.params.grass_edge = edge;
+    }
+}
+
 fn spawn_sun(mut commands: Commands) {
     let dir = sun_direction(34.0);
     commands.spawn((
@@ -623,6 +671,10 @@ fn dump_terrain(world: &World) -> (String, Value) {
             "season_weights": material.season.weights.to_array(),
             "snow_plain": material.season.snow_plain.to_array(),
             "snow_color": material.season.snow_color.to_array(),
+            "snow_shade": material.season.snow_shade.to_array(),
+            "snow_mask": material.season.snow_mask.to_array(),
+            "rock": material.season.rock.to_array(),
+            "forest_floor": material.season.forest_floor.to_array(),
             "fog_of_war": {
                 "bound": material.fog_mask.is_some(),
                 "enabled": material.look.fog_a.w,

@@ -19,6 +19,7 @@ use bevy::prelude::*;
 use super::billboard::{Mode, Params as VegParams, push_weighted};
 
 use super::data::VegetationWorld;
+use super::look::{OpenThinning, Role};
 use super::tiles::TreeInst;
 
 pub const ATLAS_ALBEDO: &str = "textures/vegetation/ga3/ga3_impostors_albedo.png";
@@ -33,7 +34,8 @@ pub const MODEL_RADIUS_FACTOR: f32 = 0.6;
 pub const MODEL_RADIUS_MIN: f32 = 8.0;
 pub const MODEL_RADIUS_MAX: f32 = 40.0;
 pub const MODEL_MAX_DISTANCE: f32 = 150.0;
-/// Outer share of the model zone where models and impostors are dithered (`generalised_model_fade`).
+/// Outer share of the model zone where trees switch from model to impostor one by one
+/// (`generalised_model_fade`; a per-pixel Bayer dither showed a 4 x 4 pattern, TS-T2).
 pub const MODEL_FADE: f32 = 0.35;
 /// Level of detail of the near models (`DnTreeModels.MODEL_LOD`: lod1, the lod2 crowns are
 /// too sparse up close).
@@ -293,9 +295,46 @@ fn normalised(source: &Mesh, ratio: f32) -> Option<Mesh> {
             (radial + Vec3::Y * 0.35).normalize().to_array()
         })
         .collect();
+    let scaled: Vec<[f32; 3]> = positions.to_vec();
+    let kept = foot_plate_free(&scaled, mesh.indices(), ratio);
     mesh.attribute(Mesh::ATTRIBUTE_UV_0)?;
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+    if let Some(indices) = kept {
+        mesh.insert_indices(Indices::U32(indices));
+    }
     Some(mesh)
+}
+
+/// Height (share of the tree) under which flat geometry away from the trunk is a ground plate.
+const FOOT_PLATE_HEIGHT: f32 = 0.08;
+/// Radius (share of the crown width) of the trunk kept at the foot.
+const FOOT_TRUNK_RADIUS: f32 = 0.15;
+
+/// Indices without the ground plate some generated models carry at their foot (spruce: 11 % of
+/// the triangles, a disc as wide as the crown). Sunk on flat ground it was hidden; on a slope it
+/// stuck out downhill as a black disc (radial normals pointing down, crown shade, no frost).
+/// `None` when nothing is removed or the mesh is not indexed.
+fn foot_plate_free(
+    positions: &[[f32; 3]],
+    indices: Option<&Indices>,
+    ratio: f32,
+) -> Option<Vec<u32>> {
+    let indices: Vec<u32> = match indices? {
+        Indices::U16(v) => v.iter().map(|&i| i as u32).collect(),
+        Indices::U32(v) => v.clone(),
+    };
+    let trunk = FOOT_TRUNK_RADIUS * ratio;
+    let mut kept = Vec::with_capacity(indices.len());
+    for tri in indices.as_chunks::<3>().0 {
+        let p = [0, 1, 2].map(|k| Vec3::from(positions[tri[k] as usize]));
+        let low = p.iter().all(|v| v.y < FOOT_PLATE_HEIGHT);
+        let centre = (p[0] + p[1] + p[2]) / 3.0;
+        if low && Vec2::new(centre.x, centre.z).length() > trunk {
+            continue;
+        }
+        kept.extend_from_slice(tri);
+    }
+    (kept.len() < indices.len()).then_some(kept)
 }
 
 /// Rescales `positions` in place; `None` when degenerate.
@@ -375,33 +414,43 @@ pub fn assemble(
     focus: Vec2,
     model_radius: f32,
     density: f32,
+    thinning: &OpenThinning,
     model_rows: &[bool],
 ) -> Assembled {
     let mut out = Assembled::default();
-    let threshold = 1.0 - density;
     let grow = 1.0 / density.sqrt();
     let radius2 = model_radius * model_radius;
     for tile in tiles {
         for tree in tile.iter() {
-            if tree.seed < threshold {
-                out.thinned += 1;
-                continue;
-            }
             let dx = tree.x - focus.x;
             let dz = tree.z - focus.y;
             let d2 = dx * dx + dz * dz;
+            // Open-land trees fade out first (medium view reads the forest masses, TS-T8): the
+            // seeds are nested, so what stays is a subset of the generic thinning.
+            let share = thinning.keep(tree.role, d2.sqrt());
+            let keep = match tree.role {
+                Role::Forest => density,
+                Role::Open => density.min(share),
+                Role::Grove => share,
+            };
+            if tree.seed < 1.0 - keep {
+                out.thinned += 1;
+                continue;
+            }
             let inside = model_radius > 0.0 && d2 <= radius2;
             if inside {
                 out.wanted_rows.insert(tree.row);
             }
-            let near = inside && model_rows.get(tree.row as usize).copied().unwrap_or(false);
+            let modelled = inside && model_rows.get(tree.row as usize).copied().unwrap_or(false);
             let position = Vec3::new(tree.x, tree.y, tree.z);
-            // Share taken by the model: 0 at the zone edge, 1 inside the core (`model_fade`).
-            let zone = if near {
+            // Share taken by the models: 0 at the zone edge, 1 inside the core (`model_fade`); each
+            // tree of the band is wholly a model or wholly an impostor, drawn by its own hash.
+            let zone = if modelled {
                 ((model_radius - d2.sqrt()) / (model_radius * MODEL_FADE).max(1e-3)).clamp(0.0, 1.0)
             } else {
                 0.0
             };
+            let near = modelled && zone > (tree.seed * 97.31).fract();
             if near {
                 // Near models keep their size.
                 let buffer = out.batches.entry((tree.row, true)).or_default();
@@ -410,12 +459,11 @@ pub fn assemble(
                     position,
                     tree.yaw_deg,
                     tree.height,
-                    zone,
+                    1.0,
                     tree.seed,
                     tree.tint,
                 );
-            }
-            if !near || zone < 1.0 {
+            } else {
                 // Thinning grows the remaining far trees.
                 let buffer = out.batches.entry((tree.row, false)).or_default();
                 push_weighted(
@@ -423,7 +471,7 @@ pub fn assemble(
                     position,
                     tree.yaw_deg,
                     tree.height * grow,
-                    zone,
+                    0.0,
                     tree.seed,
                     tree.tint,
                 );
@@ -453,6 +501,27 @@ mod tests {
     fn density_is_bounded() {
         assert_eq!(density_at(10.0), 1.0);
         assert_eq!(density_at(10_000.0), 0.35);
+    }
+
+    #[test]
+    fn foot_plate_is_removed_and_the_trunk_kept() {
+        // A crown triangle, a trunk foot triangle and a wide ground plate triangle.
+        let positions = [
+            [0.0, 0.5, 0.0],
+            [0.2, 0.6, 0.0],
+            [0.0, 0.7, 0.2],
+            [0.0, 0.0, 0.0],
+            [0.02, 0.0, 0.0],
+            [0.0, 0.05, 0.02],
+            [0.4, 0.01, 0.0],
+            [0.3, 0.0, 0.3],
+            [0.45, 0.02, 0.2],
+        ];
+        let indices = Indices::U16((0..9).collect());
+        let kept = foot_plate_free(&positions, Some(&indices), 1.0).expect("plate removed");
+        assert_eq!(kept, vec![0, 1, 2, 3, 4, 5]);
+        let crown_only = Indices::U32(vec![0, 1, 2]);
+        assert!(foot_plate_free(&positions, Some(&crown_only), 1.0).is_none());
     }
 
     #[test]
@@ -486,13 +555,21 @@ mod tests {
             row: 0,
             seed,
             tint: [1.0; 3],
+            role: crate::campaign::vegetation::look::Role::Open,
         };
         let tiles = vec![Arc::new(vec![
             tree(1.0, 0.9),
             tree(100.0, 0.9),
             tree(2.0, 0.1),
         ])];
-        let out = assemble(&tiles, Vec2::ZERO, 10.0, 0.5, &[true]);
+        let out = assemble(
+            &tiles,
+            Vec2::ZERO,
+            10.0,
+            0.5,
+            &OpenThinning::none(),
+            &[true],
+        );
         assert_eq!((out.near, out.far, out.thinned), (1, 1, 1));
         assert_eq!(
             out.batches[&(0, true)].len(),
@@ -502,17 +579,28 @@ mod tests {
             out.batches[&(0, false)].len(),
             super::super::billboard::RECORD_BYTES
         );
-        // In the outer band of the zone a tree has both records, dithered by its zone weight.
-        let band = vec![Arc::new(vec![tree(9.0, 0.9)])];
-        let out = assemble(&band, Vec2::ZERO, 10.0, 1.0, &[true]);
-        assert_eq!(
-            out.batches[&(0, true)].len(),
-            out.batches[&(0, false)].len()
-        );
+        // In the outer band of the zone a tree is either a model or an impostor, never both.
+        let band = vec![Arc::new(
+            (0..200)
+                .map(|i| tree(9.0, 0.5 + i as f32 / 400.0))
+                .collect::<Vec<_>>(),
+        )];
+        let out = assemble(&band, Vec2::ZERO, 10.0, 1.0, &OpenThinning::none(), &[true]);
+        let models = out.batches[&(0, true)].len() / super::super::billboard::RECORD_BYTES;
+        let cards = out.batches[&(0, false)].len() / super::super::billboard::RECORD_BYTES;
+        assert_eq!(models + cards, 200);
+        assert!((30..90).contains(&models), "{models}");
         let weight = f32::from_le_bytes(out.batches[&(0, true)][20..24].try_into().unwrap());
-        assert!((weight - 1.0 / 3.5).abs() < 1e-4);
+        assert_eq!(weight, 1.0);
         // Without a ready model the near tree stays an impostor, but its species is wanted.
-        let out = assemble(&tiles, Vec2::ZERO, 10.0, 1.0, &[false]);
+        let out = assemble(
+            &tiles,
+            Vec2::ZERO,
+            10.0,
+            1.0,
+            &OpenThinning::none(),
+            &[false],
+        );
         assert_eq!((out.near, out.far), (0, 3));
         assert!(out.wanted_rows.contains(&0));
     }

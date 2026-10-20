@@ -1,0 +1,65 @@
+{
+  "description": "TS-T7 : sous-bois et touffes de la carte de campagne (rendu seulement). Niveau « far » (cellules de 16 px) : ceinture de sous-bois le long des lisières de forêt et touffes pâles sur la neige et la toundra ; niveau « near » (cellules de 10 px) : touffes d'herbes hautes et fleurs au sol, sous la distance de caméra max_distance. Tailles en px de carte (même échelle stylisée que les arbres). Teintes par saison : printemps, été, automne, hiver (multiplicateur linéaire de la carte).",
+  "seed": 7007,
+  "far": {
+    "cell_px": 16.0,
+    "max_distance": 260.0,
+    "fade_start": 0.8,
+    "radius_factor": 1.3,
+    "min_radius": 40.0,
+    "max_radius": 300.0,
+    "max_cells": 700
+  },
+  "near": {
+    "cell_px": 10.0,
+    "max_distance": 120.0,
+    "fade_start": 0.75,
+    "radius_factor": 1.0,
+    "min_radius": 20.0,
+    "max_radius": 70.0,
+    "max_cells": 160,
+    "spacing_px": 0.42,
+    "forest_max": 0.4,
+    "crops_max": 0.2,
+    "snow_max": 0.6,
+    "flower_patch_frequency": 0.06,
+    "flower_patch_threshold": 0.3,
+    "flower_share_in_patch": 0.55,
+    "flower_share_outside": 0.04
+  },
+  "slope": {"max": 0.12, "pale_max": 0.07},
+  "rock": {"max_share": 0.15, "slope_gain": 6.0, "max_altitude_m": 2000.0},
+  "belt": {
+    "width_px": 1.8,
+    "grid_px": 0.4,
+    "spacing_px": 0.26,
+    "forest_min": 0.45,
+    "inside_max": 0.35,
+    "crops_max": 0.2,
+    "falloff": 1.3,
+    "mix": {"belt_tall": 0.42, "belt_fern": 0.2, "belt_bush": 0.2, "belt_deadwood": 0.18}
+  },
+  "pale": {
+    "spacing_px": 0.85,
+    "snow_min": 0.2,
+    "crops_max": 0.25,
+    "forest_max": 0.3,
+    "tundra_start_m": 500.0,
+    "tundra_end_m": 150.0,
+    "tundra_share": 0.8,
+    "patch_frequency": 0.05
+  },
+  "budget": {
+    "far": {"low": 0, "medium": 14000, "high": 30000, "ultra": 55000},
+    "near": {"low": 0, "medium": 12000, "high": 26000, "ultra": 45000}
+  },
+  "kinds": {
+    "belt_tall": {"texture": "textures/vegetation/dn_cards/card_grass_tuft_dry.png", "height_px": [0.3, 0.5], "width_ratio": 0.8, "cards": 3, "season_tint": [[0.95, 1.05, 0.85], [1.0, 0.95, 0.75], [1.05, 0.8, 0.62], [0.95, 0.88, 0.78]]},
+    "belt_fern": {"texture": "textures/vegetation/dn_cards/card_fern_bracken.png", "height_px": [0.3, 0.45], "width_ratio": 1.0, "cards": 3, "season_tint": [[0.9, 1.05, 0.8], [0.9, 1.0, 0.75], [1.1, 0.75, 0.5], [0.85, 0.78, 0.68]]},
+    "belt_bush": {"texture": "@bush", "height_px": [0.35, 0.6], "width_ratio": 1.1, "cards": 3, "season_tint": [[0.8, 0.95, 0.7], [0.75, 0.85, 0.65], [0.95, 0.65, 0.5], [0.7, 0.66, 0.62]]},
+    "belt_deadwood": {"texture": "@deadwood", "height_px": [0.4, 0.8], "width_ratio": 1.0, "cards": 1, "flat": true, "season_tint": [[0.85, 0.8, 0.75], [0.85, 0.8, 0.75], [0.85, 0.78, 0.7], [0.8, 0.78, 0.78]]},
+    "pale": {"texture": "textures/vegetation/dn_cards/card_grass_esparto.png", "height_px": [0.35, 0.6], "width_ratio": 0.8, "cards": 3, "season_tint": [[1.0, 1.0, 0.85], [1.05, 1.0, 0.8], [1.05, 0.95, 0.8], [1.15, 1.1, 1.0]]},
+    "near_tall": {"texture": "textures/vegetation/dn_cards/card_grass_tuft_dry.png", "height_px": [0.22, 0.4], "width_ratio": 0.75, "cards": 3, "season_tint": [[0.95, 1.05, 0.85], [1.05, 0.95, 0.75], [1.1, 0.8, 0.6], [1.1, 1.02, 0.9]]},
+    "near_flowers": {"texture": "textures/vegetation/dn_cards/card_flowers_meadow.png", "height_px": [0.2, 0.32], "width_ratio": 0.9, "cards": 3, "season_tint": [[1.0, 1.0, 1.0], [1.0, 0.95, 0.9], [0.9, 0.7, 0.55], [0.7, 0.68, 0.64]]}
+  }
+}
