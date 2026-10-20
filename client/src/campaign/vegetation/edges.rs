@@ -12,7 +12,7 @@
 //! the cut every tree stays (lowered on the first band), no random thinning frays the edge.
 
 use super::data::{Plane, style};
-use super::look::ForestLook;
+use super::look::{ForestLook, Role};
 use super::mask::smoothstep;
 use super::tiles::TreeInst;
 
@@ -52,6 +52,7 @@ pub fn apply(
     trees.retain_mut(|tree| {
         let raw = cover.texel(map_size, tree.x as f64, tree.z as f64, 0);
         let d = smoothstep(range.0, range.1, raw);
+        tree.role = if d <= 0.0 { Role::Open } else { Role::Forest };
         if d <= 0.0 {
             // Field trees (hedgerows, lone trees, groves) are untouched.
             return true;
@@ -81,6 +82,7 @@ mod tests {
             row: 0,
             seed,
             tint: [1.0; 3],
+            role: crate::campaign::vegetation::look::Role::Open,
         }
     }
 

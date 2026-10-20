@@ -124,6 +124,7 @@
         "forest_floor_strength": {"description": "Force de l'assombrissement du sol sous les forêts (vert-noir).", "type": "number", "minimum": 0, "maximum": 1},
         "patch_frequency": {"description": "Fréquence des taches des transitions de sols, en 1 / pixel de carte.", "type": "number", "minimum": 0},
         "patch_strength": {"description": "Force du bruit en taches sur les poids des sols ouverts (herbe, cultures, lande).", "type": "number", "minimum": 0, "maximum": 1},
+        "shadow_max_opacity": {"description": "TS-T9 : opacité maximale des ombres portées au sol (arbres, relief) : l'ombre garde au moins 1 - cette part de la lumière, teintée par la couleur du ciel (bleutée sur la neige).", "type": "number", "minimum": 0, "maximum": 1},
         "patch_sharpen": {"description": "Exposant de netteté des taches (1 = dégradé).", "type": "number", "minimum": 1, "maximum": 4}
       }
     },
@@ -141,6 +142,7 @@
           "minimum": 0,
           "maximum": 1
         },
+        "region_variation": {"description": "Variation basse fréquence de la couverture de plaine : part retirée dans les régions les moins enneigées (0..1).", "type": "number", "minimum": 0, "maximum": 1},
         "plain_color": {
           "description": "Teinte de la neige de plaine du sol (sRGB 0..1) ; plus claire que la neige d'altitude, moins grise.",
           "type": "array",

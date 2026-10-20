@@ -53,6 +53,22 @@ pub fn next_state(on: bool, distance: f32, limit: f32) -> bool {
     limit > 0.0 && distance < threshold
 }
 
+/// TS-T9: colour of the ground after the opacity cap of the cast shadows, mirror of the end of the
+/// terrain shader (`terrain.wesl`): the shadowed colour never falls under `1 - max_opacity` of the
+/// luminance of the lit ground, with the hue of the sky (ambient) light. `ambient` is the sky
+/// colour, `shadowed` the colour shaded by the sun map, `lit` the same ground fully lit.
+pub fn capped_shadow(
+    shadowed: [f32; 3],
+    lit: [f32; 3],
+    ambient: [f32; 3],
+    max_opacity: f32,
+) -> [f32; 3] {
+    let lum = |c: [f32; 3]| 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    let sky_lum = lum(ambient).max(1e-4);
+    let floor = lum(lit) * (1.0 - max_opacity);
+    std::array::from_fn(|i| shadowed[i].max(floor * ambient[i] / sky_lum))
+}
+
 /// `veg_shadow_distance` of every preset of `render_quality.json`.
 pub fn read_presets(text: &str) -> HashMap<String, f32> {
     let mut out = HashMap::new();
@@ -136,6 +152,22 @@ mod tests {
         assert!(next_state(true, 74.0, limit));
         assert!(!next_state(true, 80.0, limit));
         assert!(!next_state(false, 10.0, shadow_limit(0.0)));
+    }
+
+    #[test]
+    fn cast_shadow_opacity_is_capped_and_sky_tinted() {
+        let ambient = [0.5, 0.6, 0.9];
+        let lit = [0.8, 0.8, 0.8];
+        // Black shadow (no ambient on the ground): lifted to 60 % of the lit luminance, blue-tinted.
+        let out = capped_shadow([0.0; 3], lit, ambient, 0.4);
+        let lum = |c: [f32; 3]| 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+        assert!((lum(out) - 0.8 * 0.6).abs() < 1e-4, "{out:?}");
+        assert!(out[2] > out[0], "bluish: {out:?}");
+        // A shadow already lighter than the floor is left alone; a lit ground too.
+        let light = [0.7, 0.7, 0.75];
+        assert_eq!(capped_shadow(light, lit, ambient, 0.4), light);
+        // No cap: untouched.
+        assert_eq!(capped_shadow([0.0; 3], lit, ambient, 1.0), [0.0; 3]);
     }
 
     #[test]
