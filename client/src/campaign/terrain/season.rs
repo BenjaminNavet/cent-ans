@@ -46,7 +46,7 @@ pub struct SeasonParams {
     pub rock_light: Vec4,
     /// rgb: ground tint under the forests (green-black), a: strength.
     pub forest_floor: Vec4,
-    /// x: frequency (1 / map px) of the soil patches, y: strength, z: sharpening, w: unused.
+    /// x: frequency (1 / map px) of the soil patches, y: strength, z: sharpening, w: highest opacity of the cast shadows on the ground (TS-T9; 1 = no cap).
     pub patches: Vec4,
 }
 
@@ -67,7 +67,7 @@ impl Default for SeasonParams {
             rock_band: Vec4::new(0.4, 0.7, 1000.0, 2000.0),
             rock_light: Vec4::ZERO,
             forest_floor: Vec4::new(1.0, 1.0, 1.0, 0.0),
-            patches: Vec4::ZERO,
+            patches: Vec4::new(0.0, 0.0, 0.0, 1.0),
         }
     }
 }
@@ -160,7 +160,7 @@ impl SeasonParams {
             num(&look["patch_frequency"], 0.0),
             num(&look["patch_strength"], 0.0),
             num(&look["patch_sharpen"], 1.0),
-            0.0,
+            num(&look["shadow_max_opacity"], 1.0).clamp(0.0, 1.0),
         );
         let ground = &data["ground"];
         out.summer_gold = vec3_of(ground.get("summer_gold"), Vec3::ONE).extend(0.0);
@@ -293,6 +293,11 @@ mod tests {
     fn parses_the_real_data_file() {
         let text = include_str!("../../../../data/ui/campaign_seasons.json");
         let p = SeasonParams::from_json(text);
+        assert!(
+            (0.35..=0.45).contains(&p.patches.w),
+            "shadow cap {}",
+            p.patches.w
+        );
         assert_eq!(p.snow_lines, Vec4::new(2000.0, 2900.0, 2300.0, 650.0));
         assert!(p.gain[3].w < 1.0, "winter desaturates");
         assert!(p.winter_ground.w > 0.3);

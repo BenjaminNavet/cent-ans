@@ -160,6 +160,7 @@
     "mud_fringe": 0.1
   },
   "ground_look": {
+    "shadow_max_opacity": 0.4,
     "rock_color": [0.11, 0.10, 0.09],
     "rock_strength": 0.75,
     "rock_normal": [0.45, 0.75],
