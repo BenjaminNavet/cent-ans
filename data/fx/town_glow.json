@@ -1,0 +1,37 @@
+{
+  "description": "Lot T4 (chantier TS, ADR 0710) : repérage des villes de loin comme dans Total War. `halo` : lueur chaude additive posée sur le sol autour de chaque place (rayon = rayon de la maquette x radius_per_unit, borné), plus forte en hiver (nuits longues, feux de cheminée) ; fondue par distance caméra (distance_in/out) et absente en vue parchemin (1 - poids stratégique). `plumes` : fumées de cheminées (planche de fumée du joueur), nombre = rayon de la place / units_per_plume borné, seulement près du point visé et sous max_distance, plafonnées à max_active x facteur de qualité. Rendu seulement, aucune règle de jeu.",
+  "enabled": true,
+  "halo": {
+    "color": [1.0, 0.55, 0.2],
+    "radius_per_unit": 2.4,
+    "radius_min": 1.6,
+    "radius_max": 16.0,
+    "season_alpha": [0.16, 0.12, 0.2, 0.3],
+    "distance_in": [25.0, 70.0],
+    "distance_out": [560.0, 950.0],
+    "lift": 0.15,
+    "flicker": 0.08,
+    "flicker_hz": 0.45,
+    "settle_period_s": 0.5
+  },
+  "plumes": {
+    "units_per_plume": 1.4,
+    "min_per_place": 1,
+    "max_per_place": 5,
+    "max_distance": 520.0,
+    "max_active": 36,
+    "update_period_s": 0.4,
+    "color": [0.6, 0.57, 0.54, 0.5],
+    "life": 7.0,
+    "amount": 5.0,
+    "size_per_unit": [0.12, 0.3],
+    "size_min": [0.35, 0.8],
+    "rise_per_unit": 0.14,
+    "rise_min": 0.25,
+    "distance_gain": 0.35,
+    "distance_ref": 150.0,
+    "distance_gain_max": 3.0,
+    "chimney_height": 0.5
+  },
+  "quality_factor": {"low": 0.35, "medium": 0.7, "high": 1.0, "ultra": 1.0}
+}
