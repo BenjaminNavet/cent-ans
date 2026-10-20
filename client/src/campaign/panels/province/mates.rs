@@ -22,6 +22,7 @@ use crate::campaign::markers::places::Places;
 use crate::campaign::terrain::surface::GroundHeight;
 use crate::sim::Sim;
 use crate::ui::kit::icons::icon;
+use crate::ui::kit::panel_stack::PanelStack;
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::{UiTheme, typed};
 
@@ -132,17 +133,22 @@ fn kind_icon(kind: &str) -> &'static str {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn rebuild(
     mut commands: Commands,
     mut mates: ResMut<Mates>,
     panel: Res<ProvincePanel>,
+    stack: Res<PanelStack>,
     places: Res<Places>,
     sim: Res<Sim>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
 ) {
+    // The panel may stay `open` while the stack hides it (suspended under a central screen,
+    // not yet shown): the cartouche and pastilles follow what is actually visible.
     let wanted = panel
         .mates_view()
+        .filter(|_| stack.is_open(super::STACK_ID))
         .map(|(province, selected)| (province.to_owned(), selected.map(str::to_owned)));
     let rows = wanted
         .as_ref()

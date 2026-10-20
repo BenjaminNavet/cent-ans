@@ -317,6 +317,12 @@ impl TooltipState {
         });
     }
 
+    /// Whether an API open is queued and not yet applied by the driver (the chain is still empty
+    /// meanwhile: openers must not read that as « my bubble is gone »).
+    pub fn has_pending_open(&self) -> bool {
+        !self.requests.is_empty()
+    }
+
     /// Opens the child bubble of level `parent` for link `target`.
     pub fn open_child_of(&mut self, parent: usize, target: &str) {
         self.requests.push(Request::Child {
@@ -425,6 +431,30 @@ fn tooltip_driver(
             state.chain.lock_all();
         }
         let any_panel_hovered = panel_hover.iter().any(|(_, hovered)| hovered.get());
+        // Safety net: an API bubble (no host of its own) whose opener forgot to close it must not
+        // block the hosts for good. A host hovered for DELAY while the pointer is on no bubble
+        // evicts it; the empty-chain branch then opens the host's bubble at once.
+        if state.source.is_none() && !state.pinned && !state.chain.locked() && !any_panel_hovered {
+            let hovered_host = hosts
+                .iter()
+                .filter(|(_, tooltip, hovered)| hovered.get() && !tooltip.bbcode.is_empty())
+                .max_by_key(|(entity, _, _)| *entity)
+                .map(|(entity, _, _)| entity);
+            state.pending_host = match (hovered_host, state.pending_host) {
+                (Some(entity), Some((host, elapsed))) if host == entity => {
+                    Some((entity, elapsed + dt))
+                }
+                (Some(entity), _) => Some((entity, 0.0)),
+                (None, _) => None,
+            };
+            if let Some((_, elapsed)) = state.pending_host
+                && elapsed >= DELAY
+            {
+                state.chain.clear();
+            }
+        } else {
+            state.pending_host = None;
+        }
         if !state.chain.locked() {
             // An unlocked root follows its host: closes when the pointer leaves it.
             let still_hovered = state

@@ -34,7 +34,7 @@ use super::{CodexOverlay, CodexRoot, OpenCodex, text};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::ui::kit::RichLink;
-use crate::ui::kit::tooltip::{Anchor, TooltipPanel, TooltipRegistry, TooltipState};
+use crate::ui::kit::tooltip::{Anchor, TooltipChain, TooltipPanel, TooltipRegistry, TooltipState};
 
 /// Seconds of hover before a bubble opens.
 pub const HOVER_DELAY: f32 = 0.35;
@@ -239,14 +239,36 @@ fn hover_bubbles(
         _ => state.pending = None,
     }
 
-    // Close after the grace once the pointer left the link and the bubbles.
+    // Close after the grace once the pointer left the link and the bubbles. The open request is
+    // applied by the tooltip driver later: while it is queued the chain is still empty and the
+    // state must be kept (dropping it left the bubble stuck on screen).
+    if tooltips.has_pending_open() {
+        return;
+    }
+    close_after_grace(
+        state,
+        &mut tooltips.chain,
+        hovered_link.as_deref(),
+        on_panel,
+        dt,
+    );
+}
+
+/// Grace countdown of the hover bubble; clears the chain when it elapses.
+fn close_after_grace(
+    state: &mut BubbleState,
+    chain: &mut TooltipChain,
+    hovered_link: Option<&str>,
+    on_panel: bool,
+    dt: f32,
+) {
     if let Some((target, outside)) = state.open.take()
-        && !tooltips.chain.is_empty()
+        && !chain.is_empty()
     {
-        let near = on_panel || hovered_link.as_deref() == Some(target.as_str());
+        let near = on_panel || hovered_link == Some(target.as_str());
         let outside = if near { 0.0 } else { outside + dt };
         if outside >= CLOSE_GRACE {
-            tooltips.chain.clear();
+            chain.clear();
         } else {
             state.open = Some((target, outside));
         }
@@ -441,5 +463,21 @@ mod tests {
         assert!(bubble.contains("1346"));
         assert!(bubble.contains("[url=cdx:cdx_b]"));
         assert!(bubble_bbcode(&store, "cdx_zz").is_none());
+    }
+
+    #[test]
+    fn pending_open_keeps_the_grace_state_and_leaving_closes_the_bubble() {
+        let mut tooltips = TooltipState::default();
+        let mut state = BubbleState::default();
+        tooltips.open_at("x", Vec2::ZERO, false);
+        state.open = Some(("cdx:a".into(), 0.0));
+        // Queued open, chain still empty: the countdown must survive (regression: stuck bubble).
+        assert!(tooltips.has_pending_open());
+        // Once applied, leaving closes after the grace.
+        tooltips.chain.open_root("x", Vec2::ZERO, false);
+        close_after_grace(&mut state, &mut tooltips.chain, None, false, 0.3);
+        assert!(!tooltips.chain.is_empty() && state.open.is_some());
+        close_after_grace(&mut state, &mut tooltips.chain, None, false, 0.3);
+        assert!(tooltips.chain.is_empty());
     }
 }
