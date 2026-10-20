@@ -344,11 +344,7 @@ pub fn brace(defender: &Unit, angle: u8) -> f64 {
             }
             _ => false,
         };
-    if angle != 0
-        || defender.mounted
-        || defender.category != UnitCategory::Infantry
-        || !standing
-    {
+    if angle != 0 || defender.mounted || defender.category != UnitCategory::Infantry || !standing {
         return 0.0;
     }
     let (ranks, _) = defender.ranks_files(defender.soldiers());
