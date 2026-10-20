@@ -20,6 +20,7 @@ pub mod dn;
 pub mod lod;
 pub mod placement;
 pub mod places;
+pub mod plate;
 pub mod signs;
 
 use crate::ui::kit::viewport_to_ui;
@@ -86,6 +87,14 @@ impl Plugin for CampaignMarkersPlugin {
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
+            )
+            .add_systems(
+                Update,
+                plate::update_plates
+                    .after(update_shields)
+                    .before(update_labels)
+                    .run_if(|built: Res<MarkersBuilt>| built.0)
+                    .run_if(in_state(AppState::Campaign)),
             );
     }
 }
@@ -113,6 +122,8 @@ pub struct MarkerStats {
     pub pinned: usize,
     pub labels: usize,
     pub labels_visible: usize,
+    /// Town plates: status and pill counters (TS-T6).
+    pub plates: plate::PlateStats,
     pub grounded: usize,
     /// Maquettes pulled inland off the sea (`placement::shore_fit`).
     pub shore_moved: usize,
@@ -268,6 +279,7 @@ fn dump_markers(world: &World) -> (String, Value) {
             },
             "labels": s.labels,
             "labels_visible": s.labels_visible,
+            "plates": s.plates.dump(),
             "probes": s.probes.iter().map(|(n, size, base, anchor)| json!({"name": n, "size": [size.x, size.y, size.z], "base_y": base, "anchor_y": anchor})).collect::<Vec<_>>(),
             "ground": { "ready": world.get_resource::<crate::campaign::terrain::surface::Surface>().is_some(), "anchored": s.grounded, "shore_moved": s.shore_moved, "min_y": s.ground_min, "max_y": s.ground_max },
             "ruin_signs": s.ruins,
@@ -489,20 +501,30 @@ fn build_markers(
     for (i, p) in places.places.iter().enumerate() {
         let size = 10.0 + 2.0 * f32::from(p.rank);
         let side = places.catalog.shield_side(&p.kind, p.rank);
-        commands
+        let mut name_id = Entity::PLACEHOLDER;
+        let mut pastilles_id = Entity::PLACEHOLDER;
+        let root = commands
             .spawn((
                 Name::new(format!("Label_{}", p.id)),
+                // Cartouche: shield | name | pills (colours set by `plate::update_plates`).
                 Node {
                     position_type: PositionType::Absolute,
-                    flex_direction: FlexDirection::Column,
+                    flex_direction: FlexDirection::Row,
                     align_items: AlignItems::Center,
-                    row_gap: Val::Px(places.catalog.shield_gap()),
+                    column_gap: Val::Px(places.catalog.shield_gap()),
+                    padding: UiRect::axes(Val::Px(5.0), Val::Px(2.0)),
+                    border: UiRect::all(Val::Px(1.5)),
+                    border_radius: BorderRadius::all(Val::Px(5.0)),
                     ..default()
                 },
+                BackgroundColor(Color::srgba(0.26, 0.21, 0.16, 0.84)),
+                BorderColor::all(Color::srgb(0.54, 0.48, 0.36)),
+                Pickable::IGNORE,
                 Visibility::Hidden,
                 // World labels sit under the whole UI (the HUD is `GlobalZIndex(0)`).
                 GlobalZIndex(-1),
                 PlaceLabel { index: i },
+                plate::PlateState::default(),
                 DespawnOnExit(AppState::Campaign),
             ))
             .with_children(|label| {
@@ -516,6 +538,7 @@ fn build_markers(
                             ..default()
                         },
                         ImageNode::default(),
+                        Pickable::IGNORE,
                         LabelShield {
                             controller: String::new(),
                             index: i,
@@ -536,20 +559,38 @@ fn build_markers(
                                 ..default()
                             },
                             ImageNode::default(),
+                            Pickable::IGNORE,
                             OccupantShield,
                         ));
                     });
-                label.spawn((
-                    Name::new("Name"),
-                    Text::new(p.name.clone()),
-                    theme.text_font(p.rank >= 3, false, size),
-                    TextColor(Color::srgb(0.13, 0.085, 0.045)),
-                    TextShadow {
-                        offset: Vec2::splat(1.0),
-                        color: Color::srgba(0.93, 0.87, 0.72, 0.8),
-                    },
-                ));
-            });
+                name_id = label
+                    .spawn((
+                        Name::new("Name"),
+                        Text::new(p.name.clone()),
+                        theme.text_font(p.rank >= 3, false, size),
+                        TextColor(Color::srgb(0.94, 0.89, 0.77)),
+                        Pickable::IGNORE,
+                    ))
+                    .id();
+                pastilles_id = label
+                    .spawn((
+                        Name::new("Pastilles"),
+                        Node {
+                            flex_direction: FlexDirection::Row,
+                            align_items: AlignItems::Center,
+                            column_gap: Val::Px(3.0),
+                            display: Display::None,
+                            ..default()
+                        },
+                        Pickable::IGNORE,
+                    ))
+                    .id();
+            })
+            .id();
+        commands.entity(root).insert(plate::PlateParts {
+            name: name_id,
+            pastilles: pastilles_id,
+        });
     }
 
     stats.settlements = places.places.len();

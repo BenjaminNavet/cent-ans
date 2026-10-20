@@ -52,6 +52,12 @@ const FIGURE_SCALE: f32 = super::figures::SKINNED_SCALE;
 const STERN_STAFF: Vec3 = Vec3::new(-0.9, 0.95, 0.0);
 const STERN_SINK: f32 = 3.0;
 
+/// Rest heights of pole, finial and flag and the stretch of the pole once the standard is
+/// enlarged by `scale` (the foot of the pole stays in the hand).
+pub fn enlarged(rest_y: [f32; 3], pole_stretch: f32, scale: f32) -> ([f32; 3], f32) {
+    (rest_y.map(|y| y * scale), pole_stretch * scale)
+}
+
 /// Foot of the pole of a fleet in the marker frame, before the marker's own rotation.
 pub fn stern_anchor() -> Vec3 {
     STERN_STAFF * super::figures::SHIP_SCALE - Vec3::Y * STERN_SINK
@@ -67,6 +73,9 @@ pub struct SwaySettings {
     pub lean_deg: f32,
     pub fade_per_s: f32,
     pub cloth_gust: f32,
+    /// T5: enlargement of the whole standard (pole, finial, cloth) so that it dominates the
+    /// army from the close to the medium view (`standard_banner.scale`).
+    pub banner_scale: f32,
 }
 
 impl Default for SwaySettings {
@@ -79,6 +88,7 @@ impl Default for SwaySettings {
             lean_deg: 2.0,
             fade_per_s: 6.0,
             cloth_gust: 0.6,
+            banner_scale: 1.5,
         }
     }
 }
@@ -99,6 +109,10 @@ impl SwaySettings {
             settings.lean_deg = f("lean_deg", settings.lean_deg);
             settings.fade_per_s = f("fade_per_s", settings.fade_per_s);
             settings.cloth_gust = f("cloth_gust", settings.cloth_gust);
+            settings.banner_scale = json["standard_banner"]["scale"]
+                .as_f64()
+                .map_or(settings.banner_scale, |v| v as f32)
+                .clamp(0.5, 4.0);
         }
         settings
     }
@@ -183,6 +197,8 @@ struct Parts {
     /// a taller pole).
     rest_y: [f32; 3],
     pole_stretch: f32,
+    /// Enlargement of the cloth and of the finial.
+    size: f32,
     choice: ClothChoice,
 }
 
@@ -369,18 +385,24 @@ pub fn update_standards(
                 material.clone(),
             );
             let tall = choice.mode == ClothMode::Banner;
+            let (rest_y, pole_stretch) = enlarged(
+                if tall {
+                    [POLE_TALL * 0.5, POLE_TALL + 0.15, POLE_TALL - 0.35]
+                } else {
+                    [POLE_REST_Y, FINIAL_REST_Y, FLAG_REST_Y]
+                },
+                if tall { POLE_TALL / POLE_HEIGHT } else { 1.0 },
+                cfg.banner_scale,
+            );
             standards.parts.insert(
                 marker.id.clone(),
                 Parts {
                     entities,
                     sway: Sway::default(),
                     material,
-                    rest_y: if tall {
-                        [POLE_TALL * 0.5, POLE_TALL + 0.15, POLE_TALL - 0.35]
-                    } else {
-                        [POLE_REST_Y, FINIAL_REST_Y, FLAG_REST_Y]
-                    },
-                    pole_stretch: if tall { POLE_TALL / POLE_HEIGHT } else { 1.0 },
+                    rest_y,
+                    pole_stretch,
+                    size: cfg.banner_scale,
                     choice,
                 },
             );
@@ -446,7 +468,8 @@ pub fn update_standards(
             part_transform.translation = transform.translation + scale * local_position;
             part_transform.scale = match part {
                 StandardPart::Pole => scale * Vec3::new(1.0, parts.pole_stretch, 1.0),
-                _ => scale,
+                StandardPart::Flag => scale * parts.size,
+                StandardPart::Finial => scale * parts.size.sqrt(),
             };
             // The flag is turned towards the camera and waved by its shader: only the pole's
             // lean is handed over (`pole_dir`, `gust`).
@@ -544,6 +567,12 @@ pub fn dump_standards(world: &World) -> (String, Value) {
             "max_amp": r.max_amp,
             "max_bob": r.max_bob,
             "max_tilt_deg": r.max_tilt_deg,
+            "banner_scale": standards.settings.banner_scale,
+            "max_banner_height": standards
+                .parts
+                .values()
+                .map(|p| p.rest_y[1])
+                .fold(0.0f32, f32::max),
             "textured": textured,
             "fallback_colour": standards.parts.len() - textured,
             "by_source": by_source,
@@ -635,6 +664,16 @@ mod tests {
     }
 
     #[test]
+    fn enlarged_standard_keeps_its_foot_and_grows_upwards() {
+        let rest = [POLE_REST_Y, FINIAL_REST_Y, FLAG_REST_Y];
+        let (big, stretch) = enlarged(rest, 1.0, 1.5);
+        assert!((big[1] - FINIAL_REST_Y * 1.5).abs() < 1e-5);
+        // The pole (height POLE_HEIGHT, centred) still starts at the hand.
+        assert!((big[0] - stretch * POLE_HEIGHT * 0.5).abs() < 1e-4);
+        assert_eq!(enlarged(rest, 1.0, 1.0), (rest, 1.0));
+    }
+
+    #[test]
     fn hand_is_the_lords_or_the_bearers() {
         let lord = hand(1.8);
         assert!((lord.y - 3.8 * 1.8).abs() < 1e-5);
@@ -650,5 +689,6 @@ mod tests {
         assert!(cfg.enabled);
         assert!((cfg.step_hz - 1.9).abs() < 1e-6);
         assert!((cfg.cloth_gust - 0.6).abs() < 1e-6);
+        assert!(cfg.banner_scale > 1.0);
     }
 }

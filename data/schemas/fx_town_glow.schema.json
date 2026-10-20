@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_town_glow.schema.json",
+  "title": "Halo et fumées des villes de la carte (lot TS-T4)",
+  "description": "Fichier data/fx/town_glow.json : lueur chaude au sol et fumées de cheminées des places de la carte de campagne. Rendu seulement.",
+  "type": "object",
+  "$defs": {
+    "positive": {"type": "number", "exclusiveMinimum": 0},
+    "pair": {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 2, "maxItems": 2}
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "enabled": {"type": "boolean"},
+    "halo": {
+      "type": "object",
+      "properties": {
+        "color": {"$ref": "common.schema.json#/$defs/rgb3"},
+        "radius_per_unit": {"$ref": "#/$defs/positive"},
+        "radius_min": {"$ref": "#/$defs/positive"},
+        "radius_max": {"$ref": "#/$defs/positive"},
+        "season_alpha": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 4, "maxItems": 4, "description": "Opacité du halo au printemps, été, automne, hiver."},
+        "distance_in": {"$ref": "#/$defs/pair"},
+        "distance_out": {"$ref": "#/$defs/pair"},
+        "lift": {"type": "number", "minimum": 0},
+        "flicker": {"type": "number", "minimum": 0, "maximum": 1},
+        "flicker_hz": {"$ref": "#/$defs/positive"},
+        "settle_period_s": {"$ref": "#/$defs/positive"}
+      },
+      "additionalProperties": false
+    },
+    "plumes": {
+      "type": "object",
+      "properties": {
+        "units_per_plume": {"$ref": "#/$defs/positive"},
+        "min_per_place": {"type": "integer", "minimum": 0},
+        "max_per_place": {"type": "integer", "minimum": 0},
+        "max_distance": {"$ref": "#/$defs/positive"},
+        "max_active": {"type": "integer", "minimum": 0},
+        "update_period_s": {"$ref": "#/$defs/positive"},
+        "color": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 4, "maxItems": 4},
+        "life": {"$ref": "#/$defs/positive"},
+        "amount": {"$ref": "#/$defs/positive"},
+        "size_per_unit": {"$ref": "#/$defs/pair"},
+        "size_min": {"$ref": "#/$defs/pair"},
+        "rise_per_unit": {"$ref": "#/$defs/positive"},
+        "rise_min": {"$ref": "#/$defs/positive"},
+        "distance_gain": {"type": "number", "minimum": 0},
+        "distance_ref": {"$ref": "#/$defs/positive"},
+        "distance_gain_max": {"type": "number", "minimum": 0},
+        "chimney_height": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "quality_factor": {
+      "type": "object",
+      "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1}
+    }
+  },
+  "additionalProperties": false
+}

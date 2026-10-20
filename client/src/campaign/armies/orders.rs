@@ -122,6 +122,12 @@ pub struct PathPreviewState {
     pub hint: Option<String>,
 }
 
+/// Dashes of the march line drawn last frame (dump).
+#[derive(Resource, Default)]
+pub struct PathStats {
+    pub dashes: usize,
+}
+
 #[derive(Resource, Default)]
 pub struct Reachable {
     pub army: Option<ArmyId>,
@@ -903,6 +909,7 @@ pub fn preview_under_cursor(
     places: Res<Places>,
     lanes: Res<SeaLanes>,
     tick: Res<ReliefTick>,
+    style: Res<super::path::PathStyle>,
     mut preview: ResMut<PathPreviewState>,
     mut hint: ResMut<HoverHint>,
     pointer: Res<PointerOverUi>,
@@ -1024,7 +1031,18 @@ pub fn preview_under_cursor(
                 }
                 None => Some("Aucun chemin".to_owned()),
             };
-            preview.view = plan.and_then(|plan| preview_from_plan(&plan, &ground, distance));
+            preview.view = match plan {
+                Some(plan) => preview_from_plan(&plan, &ground, distance),
+                None => views.get(army).map(|v| {
+                    super::path::blocked_view(
+                        Vec2::new(v.point[0], v.point[1]),
+                        px,
+                        style.blocked_max_px,
+                        &ground,
+                        distance,
+                    )
+                }),
+            };
         }
     }
     preview.attack = army_stance != Stance::Friend || preview.place_attack.is_some();
@@ -1055,21 +1073,39 @@ pub fn draw_overlays(
     mut gizmos: Gizmos,
     time: Res<Time>,
     preview: Res<PathPreviewState>,
+    style: Res<super::path::PathStyle>,
+    mut stats: ResMut<PathStats>,
     mut ripples: ResMut<Ripples>,
     views: Res<ArmyViews>,
     selected: Res<SelectedArmy>,
     ground: GroundHeight,
     camera: Query<(&Camera, &GlobalTransform, &Projection), With<Camera3d>>,
 ) {
-    let color = if preview.sea == SeaHover::Port {
-        Color::srgba(0.25, 0.5, 0.85, 0.9)
-    } else {
-        PATH_COLOR
-    };
+    let path_distance = camera.iter().next().map_or(100.0, |(_, t, _)| {
+        let mid = preview
+            .view
+            .as_ref()
+            .and_then(|v| v.points.get(v.points.len() / 2))
+            .copied()
+            .unwrap_or(Vec3::ZERO);
+        camera_distance(t, mid)
+    });
+    let sea = (preview.sea == SeaHover::Port).then_some(Color::srgba(0.25, 0.5, 0.85, 0.9));
+    let color = sea.unwrap_or(PATH_COLOR);
+    stats.dashes = 0;
     if let Some(view) = &preview.view {
-        gizmos.linestrip(view.points.iter().copied(), color);
-        for &end in view.turn_ends.iter().filter_map(|i| view.corners.get(*i)) {
-            gizmos.sphere(Isometry3d::from_translation(end), 0.8, color);
+        stats.dashes = super::path::draw_path(
+            &mut gizmos,
+            view,
+            &style,
+            sea,
+            time.elapsed_secs(),
+            path_distance,
+        );
+        if !view.blocked {
+            for &end in view.turn_ends.iter().filter_map(|i| view.corners.get(*i)) {
+                gizmos.sphere(Isometry3d::from_translation(end), 0.8, color);
+            }
         }
     }
     if let Some(view) = selected.0.as_ref().and_then(|id| views.get(id)) {
@@ -1191,9 +1227,6 @@ pub fn dump_armies(world: &World) -> (String, Value) {
             "last_order": last,
             "path_length": preview.view.as_ref().map_or(0, |v| v.points.len()),
             "path_turns": preview.view.as_ref().map_or(0, |v| v.turns),
-            "reachable_cells": reachable.count,
-            "reachable_next_cells": reachable.next_count,
-            "movement_budget": reachable.budget,
             "bubble_quads": bubble.quads,
             "bubble_builds": bubble.builds,
             "figure_scenes": figures,
@@ -1214,6 +1247,21 @@ pub fn dump_armies(world: &World) -> (String, Value) {
             "pointer_over_ui": pointer.over,
             "pointer_blocked_frames": pointer.blocked_frames,
     });
+    let overlays = json!({
+        "path_reach_points": preview.view.as_ref().map_or(0, |v| v.reach_split),
+        "path_beyond_points": preview.view.as_ref().map_or(0, |v| v.points.len().saturating_sub(v.reach_split + 1)),
+        "path_blocked": preview.view.as_ref().is_some_and(|v| v.blocked),
+        "zoc_rings": world.resource::<super::zoc::ZocRings>().rings.len(),
+        "zoc_rings_hostile": world.resource::<super::zoc::ZocRings>().hostile(),
+        "zoc_radius_px": world.resource::<super::zoc::ZocRings>().radius_px,
+        "path_dashes": world.resource::<PathStats>().dashes,
+        "reachable_cells": reachable.count,
+        "reachable_next_cells": reachable.next_count,
+        "movement_budget": reachable.budget,
+    });
+    if let (Some(section), Some(extra)) = (section.as_object_mut(), overlays.as_object()) {
+        section.extend(extra.clone());
+    }
     if let (Some(section), Some(extra)) = (section.as_object_mut(), skinned.as_object()) {
         section.extend(extra.clone());
     }

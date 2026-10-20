@@ -87,7 +87,7 @@ pub struct Tuft {
 }
 
 /// Seeding context of one cell (all the inputs are read-only).
-struct Cover<'a> {
+pub(super) struct Cover<'a> {
     world: &'a VegetationWorld,
     circles: Vec<(Vec2, f32)>,
     lakes: Vec<usize>,
@@ -106,7 +106,7 @@ fn segment_distance_sq(p: Vec2, a: Vec2, b: Vec2) -> f32 {
 }
 
 impl<'a> Cover<'a> {
-    fn new(world: &'a VegetationWorld, low: Vec2, high: Vec2) -> Cover<'a> {
+    pub(super) fn new(world: &'a VegetationWorld, low: Vec2, high: Vec2) -> Cover<'a> {
         let pad = Vec2::splat(1.0);
         let (lo, hi) = (low - pad, high + pad);
         let circles = world
@@ -149,7 +149,7 @@ impl<'a> Cover<'a> {
     }
 
     /// Land that is neither water nor a clearing nor a main road.
-    fn open(&self, p: Vec2) -> bool {
+    pub(super) fn open(&self, p: Vec2) -> bool {
         let w = self.world;
         let (x, y) = (p.x as f64, p.y as f64);
         if w.heights.height_m_at(p.x, p.y) <= 1.0 {
@@ -424,7 +424,7 @@ pub fn bush_image() -> Image {
     image
 }
 
-fn mipmapped_sampler() -> ImageSampler {
+pub(super) fn mipmapped_sampler() -> ImageSampler {
     ImageSampler::Descriptor(ImageSamplerDescriptor {
         mag_filter: ImageFilterMode::Linear,
         min_filter: ImageFilterMode::Linear,
@@ -865,6 +865,7 @@ pub fn dump(world: &World) -> (String, Value) {
             "build_ms_max": c.build_ms_max,
             "seed_ms_max": c.seed_ms_max,
             "grass_mips": c.grass_mips_done,
+            "understory": super::understory_layer::summary(world),
         }),
     )
 }
