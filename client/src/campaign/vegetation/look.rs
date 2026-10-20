@@ -62,8 +62,8 @@ impl Default for ForestLook {
             frost_strength: 0.85,
             green_share: 0.3,
             frost_altitude: Vec2::new(1.5, 4.0),
-            bare: Vec3::new(0.3, 0.25, 0.2),
-            bare_openwork: 0.2,
+            bare: Vec3::new(0.22, 0.18, 0.15),
+            bare_openwork: 0.28,
         }
     }
 }
