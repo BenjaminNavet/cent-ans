@@ -303,3 +303,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0496 | [Géographie de la carte : lacs au vrai niveau, côte lissée, maquettes hors de la mer](0496-geographie-carte-lacs-cotes-maquettes.md) | accepté |
 | 0596 | [La météo « brouillard » de campagne rend la brume visible](0596-meteo-brouillard-brume-visible.md) | accepté |
 | 0710 | [La carte de campagne vise l'atmosphère de Total War](0710-style-total-war-campagne.md) | accepté |
+| 0711 | [Le choc des charges est un modèle en données (élan, poids, arc-boutement, paliers)](0711-choc-des-charges-en-donnees.md) | accepté |

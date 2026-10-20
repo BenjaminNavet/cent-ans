@@ -2,21 +2,19 @@
 
 Branche `feat/choc`, worktree `../gp-choc`. Mandat du joueur (20/10) : enchaîner les 4 lots.
 
-## Lots
-1. [fait] Constantes du choc → `data/rules/battle_impact.json` (`ImpactRules`), sans changer les résultats.
-2. [code écrit] Élan réel au contact (mètres courus avant l'impact) × rapport de poids chargeur / cible.
-3. [code écrit] Arc-boutement graduel : à l'arrêt, face à la charge, profondeur (rangs) ; schiltron = complet.
-4. [code écrit] Paliers (reculé / renversé selon l'intensité), immunité courte après un choc, bonus de charge décroissant.
-Puis : recalage (Crécy/Poitiers, duel symétrique, seed bots rapides), ADR 0711, fusion dans main.
+## État : lots 1-4 codés, équilibre vert
+1. Constantes → `data/rules/battle_impact.json` (`ImpactRules`).
+2. Élan couru (`run_up`) × poids de la cible : poids actif ; élan neutre (`elan.min` 1, seuil 0).
+3. Arc-boutement graduel : infanterie à l'arrêt ou en mêlée, face à la charge, par rangs ; actif
+   (0.15 + 0.05/rang, max 0.6 ; cohésion ×0.25 ; émousse le bonus à cheval ×0.5).
+4. Paliers recul/chute actifs ; immunité (0 s) et décroissance du bonus (0 s) neutres.
 
-## État
-- Lot 1 : fait, 509 tests sim-battle verts.
+## Constat
+Impacts de charge rejoués à chaque retour en mêlée (≈ 7 000 pour la cavalerie d'un camp sur 10 duels).
+Le seuil `min_impact_run_up_m` 5 m corrige, mais l'équilibre actuel en dépend : avec le seuil, ou
+`elan.min` ≤ 0.7, ou l'immunité, échouent b6, `ai_beats_passive`, `ai_battles_last_minutes`, duel
+symétrique, Poitiers, Crécy.
 
-## Constat lot 2
-Un régiment au contact relançait un impact de charge à chaque retour en mêlée (≈ 7 000 impacts
-de cavalerie d'un camp sur 10 duels symétriques) : bonus de charge quasi permanent. Désormais
-`elan.min_impact_run_up_m` (5 m courus) est exigé : plus d'impact sans élan.
-
-## Prochaine étape
-Recalage : 9 tests d'équilibre rouges (duel symétrique, IA contre passive, fins de bataille,
-b6 empreinte, bv2). Leviers : `battle_pace.melee_rate`, `charge_bonus_s`, cohésion, renversés.
+## Suite (chantier séparé, à proposer au joueur)
+Activer seuil 5 m, `elan.min` ~0.5, immunité ~1 s, décroissance ~13 s, puis recaler `battle_pace.melee_rate`,
+l'IA de charge (reprendre du champ avant de recharger) et les tests d'équilibre.
