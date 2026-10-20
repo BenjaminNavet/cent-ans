@@ -12,4 +12,7 @@ Branche `ts/t8`, worktree `/Users/jean_hubert/dev/gp-ts-t8`. Plan : `docs/wip/ts
 5. Dump `vegetation.open_forest` : instances forêt / hors forêt / bosquets par palier de distance.
 
 ## État
-- Squelette (module `groves.rs` vide).
+- Fait (compile, 56 tests végétation verts) : rôles d'arbre, bloc `open`/`groves`/`clearings` dans
+  `campaign_forest_look.json` + schéma, `OpenThinning` dans `assemble`, `groves.rs` (bosquets,
+  clairières, ressource `ForestClearings`), dump `vegetation.open_forest`.
+- Reste : dump en jeu (avant/après), réglage des parts, clippy/test/smoke finaux.

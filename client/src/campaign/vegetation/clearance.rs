@@ -225,6 +225,7 @@ mod tests {
             row: 0,
             seed: 0.5,
             tint: [1.0; 3],
+            role: crate::campaign::vegetation::look::Role::Open,
         }
     }
 
