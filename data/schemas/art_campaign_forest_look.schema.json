@@ -371,7 +371,47 @@
           "items": {
             "type": "string"
           },
-          "description": "Modèles de vie (ids de dn_manifest.json) qu'un lot suivant y place."
+          "description": "Modèles de vie (ids de dn_manifest.json) placés dans les clairières."
+        },
+        "life": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "TS-T7c : objets de vie des clairières (client/src/campaign/vegetation/clearing_life.rs). Taille réelle sous real_below, puis part d'écran `fraction` jusqu'à max_factor (même règle que le décor).",
+          "properties": {
+            "max_distance": {"type": "number", "minimum": 0, "description": "Distance caméra au-delà de laquelle rien n'est montré."},
+            "fade_from": {"type": "number", "minimum": 0, "description": "Distance caméra où l'objet commence à rétrécir."},
+            "real_below": {"type": "number", "minimum": 0},
+            "full_from": {"type": "number", "minimum": 0},
+            "max_factor": {"type": "number", "minimum": 1},
+            "fov_deg": {"type": "number", "exclusiveMinimum": 0, "maximum": 170},
+            "lod": {"type": "integer", "minimum": 0, "maximum": 2, "description": "Niveau de détail des glb."},
+            "budget": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["low", "medium", "high", "ultra"],
+              "properties": {
+                "low": {"type": "integer", "minimum": 0},
+                "medium": {"type": "integer", "minimum": 0},
+                "high": {"type": "integer", "minimum": 0},
+                "ultra": {"type": "integer", "minimum": 0}
+              },
+              "description": "Objets montrés au plus, par qualité."
+            },
+            "objects": {
+              "type": "object",
+              "description": "Par id de `kinds` : glb `models/<model>_lod<lod>.glb`.",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["model", "size_m", "fraction"],
+                "properties": {
+                  "model": {"type": "string"},
+                  "size_m": {"type": "number", "exclusiveMinimum": 0},
+                  "fraction": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
+                }
+              }
+            }
+          }
         }
       }
     }

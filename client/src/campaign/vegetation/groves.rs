@@ -7,8 +7,8 @@
 //!   without an impostor row.
 //! - **Clearings**: holes in the heart of the big forests, one per grid cell at most, outline
 //!   waved by two harmonics. The sites are a pure function of the grid cell, so tiles agree on
-//!   them; they are exposed through [`ForestClearings`] for a later lot that places a life
-//!   object (charcoal kiln, wood yard) in them.
+//!   them; they are exposed through [`ForestClearings`], where `clearing_life.rs` (TS-T7c)
+//!   places a life object (charcoal kiln, timber yard) in each.
 //!
 //! Everything is deterministic (hash of the cell) and runs on the scatter worker of the tile.
 
@@ -51,6 +51,19 @@ pub struct ClearingSite {
 }
 
 impl ClearingSite {
+    #[cfg(test)]
+    pub fn for_test(x: f32, z: f32, kind: usize, cell: (i64, i64)) -> ClearingSite {
+        ClearingSite {
+            x,
+            z,
+            radius: 4.0,
+            kind,
+            cell,
+            phase: (0.0, 0.0),
+            wobble: 0.25,
+        }
+    }
+
     /// Largest distance from the centre of the outline.
     pub fn reach(&self) -> f32 {
         self.radius * (1.0 + self.wobble)

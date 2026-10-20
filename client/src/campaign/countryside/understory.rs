@@ -122,6 +122,22 @@ pub struct SnowModel {
     pub snow_lines: Vec4,
     pub snow_plain: Vec4,
     pub line_jitter_m: f32,
+    /// Terrain shader rock band (`ground_look`): displayed normal y of full / no rock, altitude
+    /// (m) of the start / full of the rock. All zero: no rock line known.
+    pub rock_band: Vec4,
+}
+
+/// Rock test of the placement, the terrain shader's rock mask (`rock_apply`) evaluated on the
+/// ground: steep *displayed* slope (real slope times `slope_gain`, the relief exaggeration) and
+/// high altitude.
+#[derive(Clone, Debug)]
+pub struct RockRule {
+    /// Rock share above which no piece is placed (1: never rejects).
+    pub max_share: f32,
+    /// Displayed slope over real slope (`HEIGHT_SCALE` x metres per px x the relief exaggeration).
+    pub slope_gain: f32,
+    /// Altitude (m) above which the ground counts as rock whatever its slope (0: no line).
+    pub max_altitude_m: f32,
 }
 
 #[derive(Clone, Debug)]
@@ -136,6 +152,8 @@ pub struct Config {
     /// that carries a pale tuft (grassy flats only).
     pub slope_max: f32,
     pub pale_slope_max: f32,
+    /// Bare rock test (TS-T7c): no piece where the terrain shows rock.
+    pub rock: RockRule,
     /// Per level (far, near), per quality level (low, medium, high, ultra): cap of pieces shown.
     pub budget: [[usize; 4]; 2],
     pub kinds: Vec<Kind>,
@@ -269,6 +287,11 @@ impl Config {
             },
             slope_max: num(&doc["slope"]["max"], 0.45),
             pale_slope_max: num(&doc["slope"]["pale_max"], 0.3),
+            rock: RockRule {
+                max_share: num(&doc["rock"]["max_share"], 1.0),
+                slope_gain: num(&doc["rock"]["slope_gain"], 1.0).max(0.0),
+                max_altitude_m: num(&doc["rock"]["max_altitude_m"], 0.0).max(0.0),
+            },
             budget: [
                 budget_of(&doc["budget"]["far"]),
                 budget_of(&doc["budget"]["near"]),
@@ -276,6 +299,25 @@ impl Config {
             kinds,
             snow,
         }
+    }
+
+    /// Share [0, 1] of bare rock the terrain shows at a point of real `slope` (m/m) and
+    /// `altitude_m`: the shader's `steep * high` (0 without a known rock band).
+    pub fn rock_share(&self, slope: f32, altitude_m: f32) -> f32 {
+        if self.rock.max_altitude_m > 0.0 && altitude_m > self.rock.max_altitude_m {
+            return 1.0;
+        }
+        let b = self.snow.rock_band;
+        if b.y <= b.x || b.w <= b.z {
+            return 0.0;
+        }
+        let shown = slope * self.rock.slope_gain;
+        let normal_y = 1.0 / (1.0 + shown * shown).sqrt();
+        let step = |a: f32, e: f32, x: f32| {
+            let t = ((x - a) / (e - a)).clamp(0.0, 1.0);
+            t * t * (3.0 - 2.0 * t)
+        };
+        (1.0 - step(b.x, b.y, normal_y)) * step(b.z, b.w, altitude_m)
     }
 
     /// Cap of pieces for a quality level (`low` .. `ultra`; anything else is `high`).
@@ -304,6 +346,10 @@ pub trait Env {
     fn pale(&self, p: Vec2) -> f32;
     /// Slope of the real relief (m of height per m).
     fn slope(&self, p: Vec2) -> f32;
+    /// Bare rock share [0, 1] of the terrain (see [`Config::rock_share`]).
+    fn rock(&self, _p: Vec2) -> f32 {
+        0.0
+    }
 }
 
 /// One sown tuft, bush or branch.
@@ -413,6 +459,7 @@ fn seed_belt(cfg: &Config, env: &dyn Env, key: IVec2, low: Vec2, side: f32, out:
             || env.crops(p) > belt.crops_max
             || !env.open(p)
             || env.slope(p) > cfg.slope_max
+            || env.rock(p) > cfg.rock.max_share
         {
             continue;
         }
@@ -454,6 +501,7 @@ fn seed_pale(cfg: &Config, env: &dyn Env, key: IVec2, low: Vec2, side: f32, out:
             || env.crops(p) > pale.crops_max
             || !env.open(p)
             || env.slope(p) > cfg.pale_slope_max
+            || env.rock(p) > cfg.rock.max_share
         {
             continue;
         }
@@ -492,6 +540,7 @@ pub fn seed_near(
             || env.snow(p) > near.snow_max
             || !env.open(p)
             || env.slope(p) > cfg.slope_max
+            || env.rock(p) > cfg.rock.max_share
         {
             continue;
         }
@@ -656,6 +705,22 @@ mod tests {
         )
         .expect("understory.json");
         Config::from_json(&serde_json::from_str(&text).unwrap(), SnowModel::default())
+    }
+
+    #[test]
+    fn rock_share_follows_steepness_and_altitude() {
+        let mut cfg = config();
+        cfg.snow.rock_band = Vec4::new(0.45, 0.75, 600.0, 1800.0);
+        let line = cfg.rock.max_altitude_m;
+        // High ground steep once exaggerated is rock; the same slope low down is not.
+        assert!(cfg.rock_share(0.3, line - 100.0) > cfg.rock.max_share);
+        assert!(cfg.rock_share(0.3, 300.0) < 1e-6);
+        assert!(cfg.rock_share(0.0, line - 100.0) < 1e-6);
+        // Above the rock line everything is rock.
+        assert_eq!(cfg.rock_share(0.0, line + 1.0), 1.0);
+        // Without a known band only the altitude line works.
+        cfg.snow.rock_band = Vec4::ZERO;
+        assert_eq!(cfg.rock_share(1.0, line - 1.0), 0.0);
     }
 
     /// Cells along the forest edge `x = 0` (the cell column `x in [0, 16)`).

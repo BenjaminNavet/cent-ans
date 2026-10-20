@@ -28,6 +28,7 @@
     "flower_share_outside": 0.04
   },
   "slope": {"max": 0.12, "pale_max": 0.07},
+  "rock": {"max_share": 0.15, "slope_gain": 6.0, "max_altitude_m": 2000.0},
   "belt": {
     "width_px": 1.8,
     "grid_px": 0.4,

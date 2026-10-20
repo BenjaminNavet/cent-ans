@@ -28,6 +28,7 @@
 
 pub mod billboard;
 pub mod clearance;
+pub mod clearing_life;
 pub mod data;
 pub mod detail_profile;
 pub mod edges;
@@ -205,6 +206,7 @@ impl Plugin for CampaignVegetationPlugin {
             .init_resource::<VegTiles>()
             .init_resource::<VegView>()
             .init_resource::<groves::ForestClearings>()
+            .init_resource::<clearing_life::ClearingLifeView>()
             .init_resource::<VegRender>()
             .init_resource::<ground_job::GroundJobs>()
             .init_resource::<VegErrors>()
@@ -216,9 +218,12 @@ impl Plugin for CampaignVegetationPlugin {
             .register_dump(dump_ported)
             .add_systems(
                 OnEnter(AppState::Campaign),
-                (reset_campaign, shadows::reset),
+                (reset_campaign, shadows::reset, clearing_life::reset),
             )
-            .add_systems(OnExit(AppState::Campaign), (reset_campaign, shadows::reset))
+            .add_systems(
+                OnExit(AppState::Campaign),
+                (reset_campaign, shadows::reset, clearing_life::reset),
+            )
             .add_systems(
                 Update,
                 (
@@ -236,6 +241,7 @@ impl Plugin for CampaignVegetationPlugin {
                     update_wetlands,
                     sync_season,
                     light::sync_light,
+                    clearing_life::stream_clearing_life,
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),

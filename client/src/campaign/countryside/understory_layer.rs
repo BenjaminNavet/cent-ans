@@ -85,6 +85,11 @@ impl Env for WorldEnv<'_> {
         self.world.slope(p.x as f64, p.y as f64)
     }
 
+    fn rock(&self, p: Vec2) -> f32 {
+        let altitude = self.world.heights.height_m_at(p.x, p.y);
+        self.cfg.rock_share(self.slope(p), altitude)
+    }
+
     fn pale(&self, p: Vec2) -> f32 {
         let pale = &self.cfg.pale;
         let patch = fbm(p.x, p.y, 733, pale.patch_frequency, 3, 0.5) * 0.5 + 0.5;
@@ -212,6 +217,7 @@ fn load_config() -> Option<Config> {
             snow_lines: season.snow_lines,
             snow_plain: season.snow_plain,
             line_jitter_m: season.snow_mask.y,
+            rock_band: season.rock_band,
         })
         .unwrap_or_default();
     Some(Config::from_json(&doc, snow))

@@ -50,6 +50,17 @@
         "flower_share_outside": {"type": "number", "minimum": 0, "maximum": 1}
       }
     },
+    "rock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_share", "slope_gain", "max_altitude_m"],
+      "description": "TS-T7c : test roche du semis (masque de roche du shader terrain : pente affichée raide et altitude, bande `ground_look` de data/ui/campaign_seasons.json).",
+      "properties": {
+        "max_share": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part de roche au-dessus de laquelle aucune pièce n'est semée (1 : jamais de rejet)."},
+        "slope_gain": {"type": "number", "minimum": 0, "description": "Pente affichée / pente réelle (HEIGHT_SCALE x m par px x exagération du relief)."},
+        "max_altitude_m": {"type": "number", "minimum": 0, "description": "Altitude (m) au-dessus de laquelle le sol compte comme roche quelle que soit la pente (0 : pas de ligne)."}
+      }
+    },
     "slope": {
       "type": "object",
       "additionalProperties": false,

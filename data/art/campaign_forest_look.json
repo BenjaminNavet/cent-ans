@@ -93,6 +93,21 @@
       "env_charcoal_kiln",
       "econ_charcoal_stack_burners",
       "econ_timber_yard_logs"
-    ]
+    ],
+    "life": {
+      "max_distance": 90.0,
+      "fade_from": 70.0,
+      "real_below": 20.0,
+      "full_from": 60.0,
+      "max_factor": 6.0,
+      "fov_deg": 45.0,
+      "lod": 1,
+      "budget": {"low": 0, "medium": 8, "high": 20, "ultra": 40},
+      "objects": {
+        "env_charcoal_kiln": {"model": "dn/buildings/env_charcoal_kiln", "size_m": 6.0, "fraction": 0.03},
+        "econ_charcoal_stack_burners": {"model": "dn/props/econ_charcoal_stack_burners", "size_m": 6.0, "fraction": 0.03},
+        "econ_timber_yard_logs": {"model": "dn/buildings/econ_timber_yard_logs", "size_m": 8.0, "fraction": 0.035}
+      }
+    }
   }
 }

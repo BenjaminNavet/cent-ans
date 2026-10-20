@@ -85,6 +85,53 @@ pub struct ClearingLook {
     pub wobble: f32,
     /// Models (`dn_manifest.json` ids) a later lot places in the clearings.
     pub kinds: Vec<String>,
+    /// TS-T7c: the life objects placed in the clearings (`clearing_life.rs`).
+    pub life: ClearingLife,
+}
+
+/// One life object of a clearing: glb `models/<model>_lod<lod>.glb`.
+#[derive(Clone, Debug, PartialEq)]
+pub struct LifeObject {
+    pub model: String,
+    /// Real width (m) of the object, base of the on-screen size.
+    pub size_m: f32,
+    /// Share of the screen height it holds at the most.
+    pub fraction: f32,
+}
+
+/// Sizing, range and budget of the life objects of the clearings.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ClearingLife {
+    /// Camera distance beyond which no object is shown, and where the fade out starts.
+    pub max_distance: f32,
+    pub fade_from: f32,
+    /// Camera distance under which the size is real, and from which it holds its screen share.
+    pub real_below: f32,
+    pub full_from: f32,
+    pub max_factor: f32,
+    pub fov_deg: f32,
+    /// Level of detail of the glb files.
+    pub lod: usize,
+    /// Objects shown at the most, per quality (low, medium, high, ultra).
+    pub budget: [usize; 4],
+    /// By id of `ClearingLook::kinds`.
+    pub objects: std::collections::BTreeMap<String, LifeObject>,
+}
+
+impl Default for ClearingLife {
+    fn default() -> Self {
+        ClearingLife {
+            max_distance: 0.0,
+            fade_from: 0.0,
+            real_below: 20.0,
+            full_from: 60.0,
+            max_factor: 6.0,
+            fov_deg: 45.0,
+            lod: 1,
+            budget: [0; 4],
+            objects: Default::default(),
+        }
+    }
 }
 
 impl Default for OpenLook {
@@ -127,6 +174,7 @@ impl Default for ClearingLook {
                 "econ_charcoal_stack_burners".into(),
                 "econ_timber_yard_logs".into(),
             ],
+            life: ClearingLife::default(),
         }
     }
 }
@@ -262,6 +310,47 @@ fn rgb(v: &Value, default: Vec3) -> Vec3 {
     )
 }
 
+fn parse_life(v: &Value) -> ClearingLife {
+    let d = ClearingLife::default();
+    let budget = |i: usize, key: &str| {
+        v["budget"][key]
+            .as_u64()
+            .map_or(d.budget[i], |n| n as usize)
+    };
+    ClearingLife {
+        max_distance: num(&v["max_distance"], d.max_distance),
+        fade_from: num(&v["fade_from"], d.fade_from),
+        real_below: num(&v["real_below"], d.real_below),
+        full_from: num(&v["full_from"], d.full_from),
+        max_factor: num(&v["max_factor"], d.max_factor),
+        fov_deg: num(&v["fov_deg"], d.fov_deg),
+        lod: v["lod"].as_u64().map_or(d.lod, |n| n.min(2) as usize),
+        budget: [
+            budget(0, "low"),
+            budget(1, "medium"),
+            budget(2, "high"),
+            budget(3, "ultra"),
+        ],
+        objects: v["objects"]
+            .as_object()
+            .map(|o| {
+                o.iter()
+                    .filter_map(|(id, e)| {
+                        Some((
+                            id.clone(),
+                            LifeObject {
+                                model: e["model"].as_str()?.to_string(),
+                                size_m: num(&e["size_m"], 5.0).max(0.1),
+                                fraction: num(&e["fraction"], 0.03),
+                            },
+                        ))
+                    })
+                    .collect()
+            })
+            .unwrap_or_default(),
+    }
+}
+
 impl ForestLook {
     pub fn parse(v: &Value) -> ForestLook {
         let d = ForestLook::default();
@@ -341,6 +430,7 @@ impl ForestLook {
                     })
                     .filter(|k: &Vec<String>| !k.is_empty())
                     .unwrap_or(cd.kinds),
+                life: parse_life(&cl["life"]),
             },
         }
     }
