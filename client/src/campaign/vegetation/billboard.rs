@@ -44,8 +44,8 @@ const SHADER_PATH: &str = "embedded://cent_ans_client/campaign/vegetation/billbo
 
 /// Bytes of one record: x, y, z, yaw (deg), scale, 0, seed, r, g, b.
 pub const RECORD_BYTES: usize = 40;
-/// Bytes of the parameter block (`Params` of `billboard.wesl`: twelve `vec4`).
-const PARAM_BYTES: u64 = 240;
+/// Bytes of the parameter block (`Params` of `billboard.wesl`: twenty-two `vec4`).
+const PARAM_BYTES: u64 = 352;
 
 /// What a batch draws (`params.frame.w`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -93,6 +93,20 @@ pub struct Params {
     pub grade: Vec4,
     pub lift: Vec4,
     pub highlights: Vec4,
+    /// Forest look (`look.rs`, trees only): value, saturation, tree and stand value spreads.
+    pub canopy: Vec4,
+    /// RGB balance of the canopy, crown shade.
+    pub balance: Vec4,
+    /// Stand period, height spread, height period, frost green share.
+    pub shape: Vec4,
+    /// Far growth start, end, size gain, bare openwork.
+    pub far: Vec4,
+    /// Frost colour, frost strength.
+    pub frost: Vec4,
+    /// Frost altitudes (low, high), unused, unused.
+    pub winter: Vec4,
+    /// Bare broadleaf colour, 1 when the look is set.
+    pub bare: Vec4,
 }
 
 impl Params {
@@ -113,7 +127,41 @@ impl Params {
             grade: Vec4::ZERO,
             lift: Vec4::ZERO,
             highlights: Vec4::ONE,
+            canopy: Vec4::new(1.0, 1.0, 0.0, 0.0),
+            balance: Vec4::new(1.0, 1.0, 1.0, 0.0),
+            shape: Vec4::new(26.0, 0.0, 40.0, 0.0),
+            far: Vec4::new(150.0, 600.0, 0.0, 0.45),
+            frost: Vec4::new(0.75, 0.78, 0.82, 0.7),
+            winter: Vec4::new(3.0, 5.0, 0.0, 0.0),
+            bare: Vec4::new(0.105, 0.09, 0.082, 0.0),
         }
+    }
+
+    /// Sets the forest look terms (tree batches).
+    pub fn with_look(mut self, look: &super::look::ForestLook) -> Params {
+        self.canopy = Vec4::new(
+            look.value,
+            look.saturation,
+            look.tree_value_spread,
+            look.stand_value_spread,
+        );
+        self.balance = look.balance.extend(look.crown_shade);
+        self.shape = Vec4::new(
+            look.stand_period,
+            look.height_spread,
+            look.height_period,
+            look.green_share,
+        );
+        self.far = Vec4::new(
+            look.grow_start,
+            look.grow_end,
+            look.far_size_gain,
+            look.bare_openwork,
+        );
+        self.frost = look.frost.extend(look.frost_strength);
+        self.winter = Vec4::new(look.frost_altitude.x, look.frost_altitude.y, 0.0, 0.0);
+        self.bare = look.bare.extend(1.0);
+        self
     }
 
     fn to_bytes(self) -> Vec<u8> {
@@ -133,6 +181,13 @@ impl Params {
             self.grade,
             self.lift,
             self.highlights,
+            self.canopy,
+            self.balance,
+            self.shape,
+            self.far,
+            self.frost,
+            self.winter,
+            self.bare,
         ]
         .iter()
         .flat_map(|v| v.to_array())

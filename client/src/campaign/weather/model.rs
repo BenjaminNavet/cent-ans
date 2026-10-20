@@ -202,6 +202,12 @@ pub struct PrecipitationProfile {
     pub amount_near: f32,
     pub amount_far: f32,
     pub rain_amount_scale: f32,
+    /// TS-T3 soft flakes: size multiplier range per flake, opacity range, edge softness of the
+    /// disc (1 = hard, higher = blurrier), sideways drift as a share of the sway.
+    pub snow_size_spread: [f32; 2],
+    pub snow_alpha: [f32; 2],
+    pub snow_softness: f32,
+    pub snow_drift: f32,
 }
 
 impl Default for PrecipitationProfile {
@@ -232,6 +238,10 @@ impl Default for PrecipitationProfile {
             amount_near: 1.0,
             amount_far: 0.6,
             rain_amount_scale: 1.0,
+            snow_size_spread: [0.6, 1.5],
+            snow_alpha: [0.35, 0.9],
+            snow_softness: 2.0,
+            snow_drift: 0.6,
         }
     }
 }
@@ -270,6 +280,10 @@ impl PrecipitationProfile {
             amount_near: tres.f32("amount_ratio_near", d.amount_near),
             amount_far: tres.f32("amount_ratio_far", d.amount_far),
             rain_amount_scale: tres.f32("rain_amount_scale", d.rain_amount_scale),
+            snow_size_spread: v2("snow_size_spread", d.snow_size_spread),
+            snow_alpha: v2("snow_alpha_range", d.snow_alpha),
+            snow_softness: tres.f32("snow_softness", d.snow_softness),
+            snow_drift: tres.f32("snow_drift_share", d.snow_drift),
         }
     }
 
