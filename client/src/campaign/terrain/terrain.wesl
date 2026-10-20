@@ -2371,6 +2371,12 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     albedo = rvd.color;
     let ndl = max(dot(n, params.sun_dir.xyz), 0.0);
     var color = albedo * (params.ambient.rgb * rvd.ao + params.sun_color.rgb * ndl * sun_vis) * params.ambient.a;
+    // TS-T9: a cast shadow is the sky light, never black: it keeps at least `1 - opacity` of the lit
+    // ground, with the hue of the ambient (sky) light (see `shadows::capped_shadow`).
+    let sky = params.ambient.rgb / max(dot(params.ambient.rgb, vec3<f32>(0.2126, 0.7152, 0.0722)), 1e-4);
+    let lit_full = albedo * (params.ambient.rgb * rvd.ao + params.sun_color.rgb * ndl) * params.ambient.a;
+    let shade_floor = vec3<f32>(dot(lit_full, vec3<f32>(0.2126, 0.7152, 0.0722))) * sky * (1.0 - season.patches.w);
+    color = max(color, shade_floor);
     color = campaign_grade(color + paper_emit);
     // Distance fog (depth fog of the Godot environment, simplified).
     let d = distance(in.world, view.world_position);

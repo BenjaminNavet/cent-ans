@@ -77,6 +77,16 @@ pub struct RockRender {
     pub near_distance: f32,
     pub far_distance: f32,
     pub far_scale: f32,
+    /// TS-T9: largest displayed size (m) the distance growth may reach (never below the natural size).
+    pub max_display_m: f32,
+    /// TS-T9: part of the displayed size sunk into the ground.
+    pub sink: f32,
+    /// TS-T9: winter share of the rocks kept on flat ground (snowy plains).
+    pub winter_flat_keep: f32,
+    /// TS-T9: ground slope under which a rock counts as standing on a plain.
+    pub flat_slope: f32,
+    /// TS-T9: factor on the albedo gain (dark rock of the terrain).
+    pub albedo_scale: f32,
     pub lod_distances: [f32; 2],
     pub fade_start: f32,
     pub fade_end: f32,
@@ -140,6 +150,11 @@ pub fn parse(
         near_distance: num(r, "near_distance", 15.0),
         far_distance: num(r, "far_distance", 110.0),
         far_scale: num(r, "far_scale", 2.6),
+        max_display_m: num(r, "max_display_m", 650.0),
+        sink: num(r, "sink", 0.15),
+        winter_flat_keep: num(r, "winter_flat_keep", 1.0),
+        flat_slope: num(r, "flat_slope", 0.08),
+        albedo_scale: num(r, "albedo_scale", 1.0),
         lod_distances: pair(&r["lod_distances"], [45.0, 160.0]),
         fade_start: num(r, "fade_start", 950.0),
         fade_end: num(r, "fade_end", 1200.0),
@@ -349,6 +364,8 @@ pub struct Rock {
     /// Size in px (map units).
     pub size: f32,
     pub stretch: f32,
+    /// Ground slope at the rock (rise over run).
+    pub slope: f32,
 }
 
 fn clear_of_water(t: &dyn Terrain, p: Vec2, clearance: f32) -> bool {
@@ -404,6 +421,7 @@ fn place(
         yaw,
         size,
         stretch,
+        slope: probe.slope,
     });
     true
 }
@@ -550,6 +568,27 @@ pub fn scale_for(r: &RockRender, d: f32) -> f32 {
     1.0 + (r.far_scale - 1.0) * s
 }
 
+/// TS-T9: growth factor of a rock of `size_m` metres under the distance scale `scale`: the growth
+/// stops where the displayed size reaches `max_display_m`, but never drops below the natural size.
+pub fn capped_scale(scale: f32, size_m: f32, max_display_m: f32) -> f32 {
+    scale.min((max_display_m / size_m.max(1e-3)).max(1.0))
+}
+
+/// TS-T9: whether a rock stays in winter: those on flat ground thin out to `keep`, by a stable hash
+/// of the position.
+pub fn winter_keeps(r: &RockRender, slope: f32, pos: Vec2, winter: f32) -> bool {
+    if slope >= r.flat_slope || winter < 0.5 {
+        return true;
+    }
+    let h = ((pos.x * 12.9898 + pos.y * 78.233).sin() * 43758.547)
+        .fract()
+        .abs();
+    h < r.winter_flat_keep
+}
+
+/// TS-T9: size classes of the dump (displayed size, m).
+pub const SIZE_BUCKETS_M: [f32; 3] = [250.0, 500.0, 800.0];
+
 pub fn lod_for(r: &RockRender, d: f32) -> usize {
     if d < r.lod_distances[0] {
         0
@@ -583,6 +622,8 @@ pub struct RockModel;
 #[derive(Component)]
 pub struct RockInst {
     pub key: (IVec2, u32),
+    /// Height of the ground under the rock (the sink is applied on top).
+    pub ground_y: f32,
     pub grounded: bool,
     pub last_relief: u32,
 }
@@ -605,6 +646,10 @@ pub struct RockView {
     pub backlog: bool,
     pub despawned: usize,
     pub visible: usize,
+    /// TS-T9: visible rocks by displayed size (< 250 m, < 500 m, < 800 m, larger).
+    pub size_buckets: [usize; 4],
+    /// TS-T9: rocks hidden by the winter thinning of the plains.
+    pub winter_thinned: usize,
     pub by_outcrop: HashMap<String, usize>,
     /// Material of a model per outcrop, base colour multiplied by the outcrop's albedo gain.
     pub tinted: HashMap<(usize, AssetId<StandardMaterial>), Handle<StandardMaterial>>,
@@ -850,7 +895,7 @@ pub fn stream_rocks(
         let proto = tinted_proto(
             &proto,
             rock.outcrop,
-            o.albedo_gain,
+            o.albedo_gain.map(|g| g * cfg.render.albedo_scale),
             &mut view.tinted,
             &mut materials,
             &mut view.smoothed,
@@ -875,6 +920,7 @@ pub fn stream_rocks(
                 Visibility::Hidden,
                 RockInst {
                     key,
+                    ground_y: 0.0,
                     grounded: false,
                     last_relief: u32::MAX,
                 },
@@ -1048,13 +1094,18 @@ pub fn apply_rocks(
     ground: GroundHeight,
     relief: Option<Res<super::ReliefVersion>>,
     mut view: ResMut<RockView>,
+    season: Option<Res<crate::campaign::terrain::season::SeasonWeights>>,
     mut query: Query<(&mut RockInst, &mut Transform, &mut Visibility)>,
 ) {
     if relief.is_some_and(|r| r.is_changed()) {
         view.relief_version = view.relief_version.wrapping_add(1);
     }
-    let factor = view.scale * view.opacity;
+    let winter = season.map_or(0.0, |s| s.weights.w);
+    let r = &plan.config.render;
+    let mpp = plan.config.meters_per_px;
     let mut visible = 0;
+    let mut buckets = [0usize; 4];
+    let mut thinned = 0;
     for (mut inst, mut tr, mut vis) in &mut query {
         let Some(TileState::Ready(rocks)) = view.tiles.get(&inst.key.0) else {
             continue;
@@ -1064,15 +1115,25 @@ pub fn apply_rocks(
         if (!inst.grounded || inst.last_relief != view.relief_version)
             && let Some(y) = ground.at(rock.pos.x, rock.pos.y)
         {
-            tr.translation.y = y;
+            inst.ground_y = y;
             inst.grounded = true;
             inst.last_relief = view.relief_version;
         }
+        let growth = capped_scale(view.scale, rock.size * mpp, r.max_display_m);
+        let factor = growth * view.opacity;
         let unit = rock.size / o.length_m * factor.max(1e-5);
         tr.scale = Vec3::new(unit * rock.stretch, unit, unit / rock.stretch);
-        let show = inst.grounded && view.opacity > 0.01;
+        tr.translation.y = inst.ground_y - r.sink * rock.size * growth;
+        let kept = winter_keeps(r, rock.slope, rock.pos, winter);
+        let show = inst.grounded && view.opacity > 0.01 && kept;
+        if inst.grounded && !kept {
+            thinned += 1;
+        }
         if show {
             visible += 1;
+            let displayed_m = rock.size * mpp * growth;
+            let bucket = SIZE_BUCKETS_M.iter().filter(|b| displayed_m >= **b).count();
+            buckets[bucket] += 1;
         }
         let wanted = if show {
             Visibility::Inherited
@@ -1084,6 +1145,8 @@ pub fn apply_rocks(
         }
     }
     view.visible = visible;
+    view.size_buckets = buckets;
+    view.winter_thinned = thinned;
 }
 
 pub fn reset(mut view: ResMut<RockView>) {
@@ -1108,6 +1171,11 @@ pub fn dump(world: &World) -> (String, Value) {
             "spawned": view.spawned,
             "despawned": view.despawned,
             "visible": view.visible,
+            "size_buckets_m": view.size_buckets,
+            "size_bucket_limits_m": SIZE_BUCKETS_M,
+            "winter_thinned": view.winter_thinned,
+            "max_display_m": plan.map_or(0.0, |p| p.config.render.max_display_m),
+            "sink": plan.map_or(0.0, |p| p.config.render.sink),
             "lod": view.lod,
             "scale": view.scale,
             "opacity": view.opacity,
@@ -1266,6 +1334,32 @@ mod tests {
             }
         }
         assert!(seed_tile(&Town(Hills), &config(), IVec2::new(0, 3)).is_empty());
+    }
+
+    #[test]
+    fn growth_is_capped_and_never_shrinks() {
+        // Small rock: the full distance growth.
+        assert!((capped_scale(1.7, 300.0, 650.0) - 1.7).abs() < 1e-5);
+        // Big rock: growth stops at the cap.
+        assert!((capped_scale(1.7, 500.0, 650.0) - 1.3).abs() < 1e-5);
+        // Natural size above the cap: stays natural, no shrink and no growth.
+        assert!((capped_scale(1.7, 1100.0, 650.0) - 1.0).abs() < 1e-5);
+        assert!((capped_scale(1.0, 100.0, 650.0) - 1.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn winter_thins_flat_ground_only() {
+        let mut r = config().render.clone();
+        r.winter_flat_keep = 0.3;
+        r.flat_slope = 0.08;
+        let mut kept = 0;
+        for i in 0..400 {
+            let pos = Vec2::new(i as f32 * 1.7, i as f32 * 0.9 + 3.0);
+            assert!(winter_keeps(&r, 0.3, pos, 1.0), "steep rocks stay");
+            assert!(winter_keeps(&r, 0.0, pos, 0.0), "all stay out of winter");
+            kept += winter_keeps(&r, 0.0, pos, 1.0) as u32;
+        }
+        assert!((60..180).contains(&kept), "kept {kept}/400");
     }
 
     #[test]
