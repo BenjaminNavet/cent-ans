@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_campaign_forest_look.schema.json",
+  "title": "Rendu des forêts de campagne (lot TS-T2)",
+  "description": "`data/art/campaign_forest_look.json` : réglages de rendu des arbres de la carte de campagne (canopée, lisière, vue lointaine, hiver).",
+  "type": "object",
+  "required": [
+    "canopy",
+    "edge",
+    "treeline",
+    "far",
+    "winter"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "rgb": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "share": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  },
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "canopy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "saturation",
+        "balance",
+        "tree_value_spread",
+        "stand_value_spread",
+        "stand_period_units",
+        "height_spread",
+        "height_period_units",
+        "crown_shade"
+      ],
+      "properties": {
+        "value": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Facteur de valeur de l'albédo des imposteurs (sous 1 : canopée plus sombre)."
+        },
+        "saturation": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Saturation autour de la luminance."
+        },
+        "balance": {
+          "$ref": "#/$defs/rgb",
+          "description": "Balance RVB (vert dominant : moins olive)."
+        },
+        "tree_value_spread": {
+          "$ref": "#/$defs/share",
+          "description": "Écart de valeur d'un arbre à l'autre (±)."
+        },
+        "stand_value_spread": {
+          "$ref": "#/$defs/share",
+          "description": "Écart de valeur entre peuplements (bruit basse fréquence, ±)."
+        },
+        "stand_period_units": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height_spread": {
+          "$ref": "#/$defs/share",
+          "description": "Écart de hauteur entre peuplements (±)."
+        },
+        "height_period_units": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "crown_shade": {
+          "$ref": "#/$defs/share",
+          "description": "Assombrissement du bas des houppiers (volume)."
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cut",
+        "outlier_share",
+        "outlier_group_px"
+      ],
+      "properties": {
+        "cut": {
+          "$ref": "#/$defs/share",
+          "description": "Part de la rampe de couverture où passe la lisière : en deçà, seuls les arbres isolés restent."
+        },
+        "outlier_share": {
+          "$ref": "#/$defs/share",
+          "description": "Part des arbres gardés devant la lisière (isolés et petits bosquets)."
+        },
+        "outlier_group_px": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Taille (px de carte) des cellules qui groupent les arbres gardés en bosquets."
+        }
+      }
+    },
+    "treeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fade_m",
+        "jitter_m",
+        "slope"
+      ],
+      "properties": {
+        "fade_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Bande (m) sous la limite des arbres où la couverture s'éteint (étroite : limite franche)."
+        },
+        "jitter_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Ondulation (m) de la limite des arbres par un bruit basse fréquence."
+        },
+        "slope": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Pentes (dénivelé / distance) où la forêt s'éteint sur la roche."
+        }
+      }
+    },
+    "far": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grow_start_units",
+        "grow_end_units",
+        "size_gain"
+      ],
+      "properties": {
+        "grow_start_units": {
+          "type": "number",
+          "minimum": 0
+        },
+        "grow_end_units": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "size_gain": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Agrandissement des imposteurs au loin (0 : taille réelle), pour une masse sombre lisible."
+        }
+      }
+    },
+    "winter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "frost",
+        "frost_strength",
+        "green_share",
+        "frost_altitude_units",
+        "bare",
+        "bare_openwork"
+      ],
+      "properties": {
+        "frost": {
+          "$ref": "#/$defs/rgb",
+          "description": "Couleur du givre sur le dessus des conifères."
+        },
+        "frost_strength": {
+          "$ref": "#/$defs/share"
+        },
+        "green_share": {
+          "$ref": "#/$defs/share",
+          "description": "Part des conifères restés verts en plaine (moins en altitude)."
+        },
+        "frost_altitude_units": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Altitudes (unités de carte) où le givre passe de partiel à complet."
+        },
+        "bare": {
+          "$ref": "#/$defs/rgb",
+          "description": "Gris-brun des feuillus nus (linéaire)."
+        },
+        "bare_openwork": {
+          "$ref": "#/$defs/share",
+          "description": "Part ajourée des houppiers nus."
+        }
+      }
+    }
+  }
+}
