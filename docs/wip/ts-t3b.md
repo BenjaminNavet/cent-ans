@@ -9,7 +9,11 @@ Branche `ts/t3b`, worktree `../gp-ts-t3b`. Défaut : bassin parisien (2.35,48.85
 
 ## État
 - [x] code + données + schéma, tests unitaires
-- [ ] captures paris / alps_mid / plaine d'hiver, vérifs complètes
+- [x] captures paris / alps_mid / plaine d'hiver (Płock, temps clair forcé) ; fmt, clippy, 1348 tests, schéma, smoke 10/10
 
 ## Prochaine étape
-Captures, réglage, fmt/clippy/tests/smoke, commit final.
+Terminé, en attente de fusion.
+
+## Points ouverts
+- La vue Paris n'est pas en temps clair : la météo réelle au foyer est « brouillard » (intensité 0,92). Le voile blanc lointain restant vient surtout du brouillard de distance de l'ADR 0596 (`weather/atmosphere.rs`, hors périmètre de ce lot) ; la perspective aérienne de T3 est réduite de 60 % sous brouillard (`aerial.fog_cut`) pour ne pas doubler.
+- Brume de vallée : 16 lectures de profondeur de plus par pixel (anneau de voisins).

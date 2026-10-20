@@ -59,6 +59,7 @@
         "strength": { "$ref": "#/$defs/unit" },
         "desaturate": { "$ref": "#/$defs/unit" },
         "sky_share": { "$ref": "#/$defs/unit" },
+        "fog_cut": { "$ref": "#/$defs/unit" },
         "color": { "$ref": "#/$defs/rgb" },
         "cold_color": { "$ref": "#/$defs/rgb" }
       },
