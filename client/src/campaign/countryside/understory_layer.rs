@@ -362,11 +362,11 @@ pub fn apply_look(state: Res<Understory>, mut materials: ResMut<Assets<StandardM
             AlphaMode::Mask(c) => c,
             _ => cutoff,
         };
-        if material.base_color != want || (cutoff_now - cutoff).abs() > 0.01 {
-            if let Some(mut material) = materials.get_mut(handle) {
-                material.base_color = want;
-                material.alpha_mode = AlphaMode::Mask(cutoff);
-            }
+        if (material.base_color != want || (cutoff_now - cutoff).abs() > 0.01)
+            && let Some(mut material) = materials.get_mut(handle)
+        {
+            material.base_color = want;
+            material.alpha_mode = AlphaMode::Mask(cutoff);
         }
     }
 }
