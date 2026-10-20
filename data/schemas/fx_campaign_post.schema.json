@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_campaign_post.schema.json",
+  "title": "Atmosphère et étalonnage de la carte de campagne (lot TS-T3)",
+  "description": "Fichier data/fx/campaign_post.json : brume de vallée, perspective atmosphérique, froid et étalonnage de la passe plein écran de la caméra de campagne (client/src/campaign/terrain/post.rs). Aucune règle de jeu.",
+  "type": "object",
+  "$defs": {
+    "rgb": { "$ref": "common.schema.json#/$defs/rgb3" },
+    "unit": { "type": "number", "minimum": 0, "maximum": 1 },
+    "pair": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+  },
+  "required": ["enabled", "valley_mist", "aerial", "cold", "grade"],
+  "properties": {
+    "description": { "type": "string" },
+    "enabled": { "type": "boolean" },
+    "legacy_adjust": {
+      "type": "object",
+      "properties": {
+        "contrast": { "type": "number", "minimum": 0.5, "maximum": 2 },
+        "saturation": { "type": "number", "minimum": 0, "maximum": 2 }
+      },
+      "additionalProperties": false
+    },
+    "valley_mist": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "full_m": { "type": "number" },
+        "top_m": { "type": "number" },
+        "follow_focus": { "$ref": "#/$defs/unit" },
+        "clear_opacity": { "$ref": "#/$defs/unit" },
+        "morning_opacity": { "$ref": "#/$defs/unit" },
+        "fog_opacity": { "$ref": "#/$defs/unit" },
+        "max_opacity": { "$ref": "#/$defs/unit" },
+        "near_share": { "$ref": "#/$defs/unit" },
+        "far_ratio": { "$ref": "#/$defs/pair" },
+        "noise_scale": { "type": "number", "minimum": 0 },
+        "noise_drift": { "$ref": "#/$defs/pair" },
+        "noise_amount": { "$ref": "#/$defs/unit" },
+        "sea_share": { "$ref": "#/$defs/unit" },
+        "color": { "$ref": "#/$defs/rgb" },
+        "cold_color": { "$ref": "#/$defs/rgb" }
+      },
+      "required": ["enabled"],
+      "additionalProperties": false
+    },
+    "aerial": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "begin_ratio": { "type": "number", "minimum": 0 },
+        "end_ratio": { "type": "number", "minimum": 0 },
+        "strength": { "$ref": "#/$defs/unit" },
+        "desaturate": { "$ref": "#/$defs/unit" },
+        "sky_share": { "$ref": "#/$defs/unit" },
+        "color": { "$ref": "#/$defs/rgb" },
+        "cold_color": { "$ref": "#/$defs/rgb" }
+      },
+      "required": ["enabled"],
+      "additionalProperties": false
+    },
+    "cold": {
+      "type": "object",
+      "properties": {
+        "winter": { "$ref": "#/$defs/unit" },
+        "snow": { "$ref": "#/$defs/unit" },
+        "latitude_deg": { "$ref": "#/$defs/pair" },
+        "latitude_share": { "$ref": "#/$defs/unit" },
+        "altitude_m": { "$ref": "#/$defs/pair" },
+        "altitude_share": { "$ref": "#/$defs/unit" },
+        "density_gain": { "type": "number", "minimum": 0, "maximum": 2 }
+      },
+      "additionalProperties": false
+    },
+    "grade": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "desaturation": { "$ref": "#/$defs/unit" },
+        "green_desaturation": { "$ref": "#/$defs/unit" },
+        "protect_chroma": { "$ref": "#/$defs/pair" },
+        "warm_protect": { "$ref": "#/$defs/unit" },
+        "protect_luma": { "$ref": "#/$defs/pair" },
+        "value_contrast": { "$ref": "#/$defs/unit" }
+      },
+      "required": ["enabled"],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
