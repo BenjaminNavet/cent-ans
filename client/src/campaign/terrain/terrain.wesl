@@ -376,14 +376,14 @@ fn snow_cover_of(c: f32, noise: vec2<f32>, flat_y: f32) -> SnowCover {
     // The noise shifts the threshold: a cover c leaves about c of the ground white, in patches.
     let t = c + (pn - 0.5) * 0.9 * (1.0 - smoothstep(0.85, 1.0, c));
     let fringe = max(season.mud.w, 0.0);
-    out.snow = smoothstep(0.5, 0.6, t) * smoothstep(season.snow_mask.z, season.snow_mask.w, flat_y);
+    out.snow = smoothstep(0.42, 0.68, t) * smoothstep(season.snow_mask.z, season.snow_mask.w, flat_y);
     // Thin snow towards the edge of the cover and in the plains: the soil shows through in
     // small holes (detail noise), the deep snow of the heights stays whole.
     let thin = 1.0 - smoothstep(0.65, 1.1, t);
     out.snow = out.snow * (1.0 - thin * 0.6 * (1.0 - smoothstep(0.3, 0.6, noise.y)));
     // Mud only in the band just outside the snow, on the ground that could hold it (not on the
     // bare rock of the steep faces above the snow line).
-    out.mud = smoothstep(0.5 - fringe, 0.5, t) * (1.0 - smoothstep(0.5, 0.6, t)) * smoothstep(0.0, 0.3, c)
+    out.mud = smoothstep(0.5 - fringe, 0.5, t) * (1.0 - smoothstep(0.42, 0.68, t)) * smoothstep(0.0, 0.3, c)
         * smoothstep(season.snow_mask.z - 0.15, season.snow_mask.z + 0.05, flat_y);
     out.grain = noise.y;
     return out;
