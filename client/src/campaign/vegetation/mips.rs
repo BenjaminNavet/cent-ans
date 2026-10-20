@@ -73,6 +73,57 @@ pub fn chain(base: &[u8], w: usize, h: usize, levels: u32, weighted: bool) -> Ve
     out
 }
 
+/// Next level of the normal atlas: every channel (the alpha holds the baked occlusion) is
+/// averaged with the coverage of the albedo as weight, so the neutral background of the cells
+/// (flat normal, no occlusion) does not wash the crowns out far away. `weights` is the coverage
+/// (sum of the alpha of the children / 4, as the albedo's alpha chain) of the source level.
+pub fn downsample_covered(src: &[u8], weights: &[f32], w: usize, h: usize) -> (Vec<u8>, Vec<f32>) {
+    let (nw, nh) = (w / 2, h / 2);
+    let mut out = vec![0u8; nw * nh * 4];
+    let mut out_weights = vec![0f32; nw * nh];
+    for y in 0..nh {
+        for x in 0..nw {
+            let mut sum = [0f32; 4];
+            let mut total = 0f32;
+            for (dx, dy) in [(0, 0), (1, 0), (0, 1), (1, 1)] {
+                let t = (2 * y + dy) * w + 2 * x + dx;
+                let k = weights[t];
+                for (c, acc) in sum.iter_mut().enumerate() {
+                    *acc += src[t * 4 + c] as f32 * k;
+                }
+                total += k;
+            }
+            let o = y * nw + x;
+            out_weights[o] = total / 4.0;
+            for (c, acc) in sum.iter().enumerate() {
+                out[o * 4 + c] = if total > 0.0 {
+                    (acc / total).round() as u8
+                } else {
+                    // Empty cell area: the neutral background of the atlas.
+                    [128, 128, 255, 255][c]
+                };
+            }
+        }
+    }
+    (out, out_weights)
+}
+
+/// Whole chain of the normal atlas weighted by the coverage `alpha` (albedo alpha, level 0).
+pub fn chain_covered(base: &[u8], alpha: &[u8], w: usize, h: usize, levels: u32) -> Vec<u8> {
+    let mut out = Vec::with_capacity(base.len() * 4 / 3 + 16);
+    out.extend_from_slice(base);
+    let mut current = base.to_vec();
+    let mut weights: Vec<f32> = alpha.iter().map(|a| *a as f32).collect();
+    let (mut cw, mut ch) = (w, h);
+    for _ in 1..levels {
+        (current, weights) = downsample_covered(&current, &weights, cw, ch);
+        cw /= 2;
+        ch /= 2;
+        out.extend_from_slice(&current);
+    }
+    out
+}
+
 type Slot = Arc<Mutex<Option<Vec<u8>>>>;
 
 enum Job {
@@ -133,13 +184,43 @@ pub(super) fn build_atlas_mips(
                     mips.jobs[n] = Job::Done;
                     continue;
                 }
+                // The normal atlas is weighted by the coverage of the albedo (its own alpha is the
+                // occlusion): wait for the albedo, whose level 0 stays first in its data.
+                let coverage: Option<Vec<u8>> = if weighted {
+                    None
+                } else {
+                    let Some(albedo) = render.assets.atlas.as_ref().and_then(|a| images.get(a))
+                    else {
+                        continue;
+                    };
+                    let texels = (w * h) as usize;
+                    let Some(bytes) = albedo.data.as_ref().filter(|d| {
+                        albedo.width() == w && albedo.height() == h && d.len() >= texels * 4
+                    }) else {
+                        mips.jobs[n] = Job::Done;
+                        continue;
+                    };
+                    Some(
+                        bytes[..texels * 4]
+                            .as_chunks::<4>()
+                            .0
+                            .iter()
+                            .map(|p| p[3])
+                            .collect(),
+                    )
+                };
                 let levels = level_count(w / super::render::ATLAS_VIEWS);
                 let slot: Slot = Arc::default();
                 let out = slot.clone();
                 std::thread::Builder::new()
                     .name("vegetation-mips".into())
                     .spawn(move || {
-                        let built = chain(&data, w as usize, h as usize, levels, weighted);
+                        let built = match &coverage {
+                            Some(alpha) => {
+                                chain_covered(&data, alpha, w as usize, h as usize, levels)
+                            }
+                            None => chain(&data, w as usize, h as usize, levels, weighted),
+                        };
                         *out.lock().expect("mip slot") = Some(built);
                     })
                     .ok();
@@ -191,6 +272,21 @@ mod tests {
         assert_eq!(out[3], 64);
         let plain = downsample(&src, 2, 2, false);
         assert_eq!(plain[0], 50);
+    }
+
+    #[test]
+    fn covered_chain_ignores_the_empty_background() {
+        // 2x2 normal texels: one crown texel (tilted normal, occlusion 200) and three background
+        // texels (flat normal, no occlusion) with no coverage.
+        let src = [
+            200, 100, 240, 200, 128, 128, 255, 255, 128, 128, 255, 255, 128, 128, 255, 255,
+        ];
+        let weights = [255.0, 0.0, 0.0, 0.0];
+        let (out, w) = downsample_covered(&src, &weights, 2, 2);
+        assert_eq!(out, vec![200, 100, 240, 200]);
+        assert_eq!(w, vec![255.0 / 4.0]);
+        let (empty, _) = downsample_covered(&src, &[0.0; 4], 2, 2);
+        assert_eq!(empty, vec![128, 128, 255, 255]);
     }
 
     #[test]

@@ -173,7 +173,9 @@ fn vertex(in: Vertex) -> VertexOutput {
         out.right = right;
         out.up = up;
         out.face = face;
-        out.tint = params.tint.rgb * tone * (1.0 + params.wind.z * gust);
+        // Per-instance tint (brightness and stand tint of the scatter) like the near models: without
+        // it the impostors lost the stand's darker, olive tone and read lighter than the models.
+        out.tint = params.tint.rgb * in.tint * tone * (1.0 + params.wind.z * gust);
         out.local = local;
     } else if mode < 1.5 {
         // Reed clump: two crossed cards, magnified with the distance of the camera.
