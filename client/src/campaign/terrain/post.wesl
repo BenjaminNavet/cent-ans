@@ -38,6 +38,9 @@ struct CampaignAdjust {
     aerial_cold: vec4<f32>,
     // x, y: altitude (m) ramp of the cold, z: its share, w: unused.
     cold_alt: vec4<f32>,
+    // Relative hollows: xy depth (m) below the neighbourhood from no mist to full, z tap radius
+    // (share of the screen height), w share of the plain (absolute low-ground) mist.
+    mist_d: vec4<f32>,
 }
 
 @group(0) @binding(0) var screen: texture_2d<f32>;
@@ -88,6 +91,40 @@ fn scene_depth(uv: vec2<f32>) -> f32 {
     return textureLoad(depth_texture, coord, 0);
 }
 
+// World height at screen `uv`, w = 0 on the sky.
+fn world_y_at(uv: vec2<f32>) -> vec2<f32> {
+    let d = scene_depth(uv);
+    if (d <= 0.0) {
+        return vec2<f32>(0.0, 0.0);
+    }
+    let w = view.world_from_clip * vec4<f32>(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0, d, 1.0);
+    return vec2<f32>(w.y / w.w, 1.0);
+}
+
+// How far (world height) the pixel sits below the mean of a screen-space ring of neighbours:
+// zero on a plain or a regular slope (symmetric taps average out), positive in a valley floor
+// or a river bottom, negative on a crest.
+fn hollow_depth(uv: vec2<f32>, y: f32) -> f32 {
+    let size = vec2<f32>(textureDimensions(depth_texture));
+    let r = vec2<f32>(adjust.mist_d.z * size.y / size.x, adjust.mist_d.z);
+    var sum = 0.0;
+    var count = 0.0;
+    for (var i = 0; i < 8; i = i + 1) {
+        let a = f32(i) * 0.785398 + 0.3;
+        let dir = vec2<f32>(cos(a), sin(a));
+        for (var k = 0; k < 2; k = k + 1) {
+            let q = uv + dir * r * (0.5 + 0.5 * f32(k));
+            let s = world_y_at(clamp(q, vec2<f32>(0.001), vec2<f32>(0.999)));
+            sum = sum + s.x * s.y;
+            count = count + s.y;
+        }
+    }
+    if (count < 4.0) {
+        return 0.0;
+    }
+    return sum / count - y;
+}
+
 // Valley mist and aerial perspective on a linear colour.
 fn atmosphere(c: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
     let master = adjust.desat2.w;
@@ -107,18 +144,22 @@ fn atmosphere(c: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
     let world = w.xyz / w.w;
     let dist = distance(world, view.world_position);
     var out = c;
-    // Valley mist: dense on the low ground, gone above the top altitude.
+    // Valley mist: in the relative hollows of the relief (valleys, river bottoms) in partial
+    // banks; the absolute low ground (plains) only gets the `mist_d.w` share (morning, fog).
     let alt_raw = world.y * adjust.mist_c.w;
     let alt = max(alt_raw, 0.0);
     let cold_here = clamp(coldness + adjust.cold_alt.z * smoothstep(adjust.cold_alt.x, adjust.cold_alt.y, alt), 0.0, 1.0);
     if (adjust.mist_a.z > 0.0) {
         let low = 1.0 - smoothstep(adjust.mist_a.x, adjust.mist_a.y, alt);
+        let hollow = hollow_depth(uv, world.y) * adjust.mist_c.w;
+        let rel = smoothstep(adjust.mist_d.x, adjust.mist_d.y, hollow);
+        let shape = max(rel * (0.35 + 0.65 * low), low * low * adjust.mist_d.w);
         let p = world.xz * adjust.mist_b.z + adjust.mist_c.xy * adjust.mist_b.z;
         let n = vnoise(p) * 0.65 + vnoise(p * 2.7 + 5.3) * 0.35;
         let banks = mix(1.0, smoothstep(0.2, 0.8, n), adjust.mist_b.w);
         let far = mix(adjust.mist_a.w, 1.0, smoothstep(adjust.mist_b.x, adjust.mist_b.y, dist));
         let sea = select(1.0, adjust.mist_c.z, alt_raw < -0.5);
-        let mist = clamp(low * low * banks * far * sea * adjust.mist_a.z, 0.0, 1.0) * master;
+        let mist = clamp(shape * banks * far * sea * adjust.mist_a.z, 0.0, 1.0) * master;
         let colour = mix(adjust.mist_color.rgb, adjust.mist_cold.rgb, cold_here);
         out = mix(out, colour, mist);
     }
