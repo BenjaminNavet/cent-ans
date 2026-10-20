@@ -141,6 +141,7 @@
           "minimum": 0,
           "maximum": 1
         },
+        "region_variation": {"description": "Variation basse fréquence de la couverture de plaine : part retirée dans les régions les moins enneigées (0..1).", "type": "number", "minimum": 0, "maximum": 1},
         "plain_color": {
           "description": "Teinte de la neige de plaine du sol (sRGB 0..1) ; plus claire que la neige d'altitude, moins grise.",
           "type": "array",
