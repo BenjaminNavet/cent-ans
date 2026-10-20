@@ -34,6 +34,16 @@ struct Params {
     grade: vec4<f32>,      // saturation, contrast, shadow saturation, strength (terrain grade)
     lift: vec4<f32>,
     highlights: vec4<f32>,
+    // Forest look (`look.rs`): value, saturation, tree / stand value spreads; rgb balance, crown
+    // shade; stand period, height spread, height period, frost green share; far growth start,
+    // end, gain, bare openwork; frost rgb, strength; frost altitudes; bare rgb, look set.
+    canopy: vec4<f32>,
+    balance: vec4<f32>,
+    shape: vec4<f32>,
+    far: vec4<f32>,
+    frost: vec4<f32>,
+    winter: vec4<f32>,
+    bare: vec4<f32>,
 }
 
 @group(2) @binding(0) var albedo_texture: texture_2d<f32>;
@@ -111,6 +121,32 @@ fn rotate_y(v: vec3<f32>, c: f32, s: f32) -> vec3<f32> {
     return vec3<f32>(c * v.x + s * v.z, v.y, -s * v.x + c * v.z);
 }
 
+const LUMA: vec3<f32> = vec3<f32>(0.2126, 0.7152, 0.0722);
+
+// Stand and tree value variety (TS-T2): a low-frequency stand noise and a per-tree draw, the darker
+// stands leaning blue-green, the lighter ones warmer.
+fn canopy_tone(p: vec2<f32>, seed: f32) -> vec3<f32> {
+    let stand = value_noise(p / max(params.shape.x, 1.0));
+    let tree = fract(seed * 71.37);
+    let v = (1.0 + params.canopy.w * (2.0 * stand - 1.0)) * (1.0 + params.canopy.z * (2.0 * tree - 1.0));
+    return mix(vec3<f32>(0.94, 1.0, 1.03), vec3<f32>(1.04, 1.02, 0.92), stand) * v;
+}
+
+// Stand height variety and growth with the camera distance (a far forest stays a mass of trees).
+fn canopy_size(p: vec2<f32>, origin: vec3<f32>) -> f32 {
+    let h = 1.0 + params.shape.y * (2.0 * value_noise(p / max(params.shape.z, 1.0) + vec2<f32>(7.3, 1.9)) - 1.0);
+    let d = distance(view.world_position, origin);
+    return h * (1.0 + params.far.z * smoothstep(params.far.x, max(params.far.y, params.far.x + 1.0), d));
+}
+
+// Darker, greener canopy (less uniform light olive): saturation, balance and value.
+fn canopy_grade(c: vec3<f32>, top: f32) -> vec3<f32> {
+    let l = dot(c, LUMA);
+    let s = vec3<f32>(l) + (c - vec3<f32>(l)) * params.canopy.y;
+    let shade = mix(1.0 - params.balance.w, 1.0, smoothstep(0.0, 0.8, top));
+    return max(s * params.balance.rgb * params.canopy.x * shade, vec3<f32>(0.0));
+}
+
 @vertex
 fn vertex(in: Vertex) -> VertexOutput {
     var out: VertexOutput;
@@ -146,16 +182,10 @@ fn vertex(in: Vertex) -> VertexOutput {
         let face = normalize(to_cam + vec3<f32>(0.0, 1e-4, 0.0));
         let right = normalize(cross(vec3<f32>(0.0, 1.0, 0.0), face) + vec3<f32>(1e-5, 0.0, 0.0));
         let up = cross(face, right);
-        // Stand variety: tone by a low-frequency noise on the position, scale jitter per tree.
+        // Stand variety: tone and height by low-frequency noises on the position, jitter per tree.
         let jitter = 1.0 + 0.25 * (2.0 * fract(seed * 53.17) - 1.0);
-        let n = value_noise(origin.xz / 22.0) + 0.18 * (fract(seed * 13.1) - 0.5);
-        var tone = vec3<f32>(1.0);
-        if n < 0.5 {
-            tone = mix(vec3<f32>(0.84, 0.9, 0.86), vec3<f32>(1.0), smoothstep(0.3, 0.45, n));
-        } else {
-            tone = mix(vec3<f32>(1.0), vec3<f32>(1.07, 1.04, 0.9), smoothstep(0.55, 0.7, n));
-        }
-        let height = in.scale_seed.x * jitter;
+        let tone = canopy_tone(origin.xz, seed);
+        let height = in.scale_seed.x * jitter * canopy_size(origin.xz, origin);
         let width = height * params.atlas.w;
         let corner = in.uv;
         let local = vec2<f32>(corner.x - 0.5, 1.0 - corner.y);
@@ -192,7 +222,7 @@ fn vertex(in: Vertex) -> VertexOutput {
     } else if mode > 2.5 {
         // Tree model: mesh of height 1 (foot at 0), crown width already set by the normalisation.
         let jitter = 1.0 + 0.25 * (2.0 * fract(seed * 53.17) - 1.0);
-        let size = in.scale_seed.x * jitter;
+        let size = in.scale_seed.x * jitter * canopy_size(origin.xz, origin);
         let p = in.position * size;
         world = rotate_y(p, c, s) + origin;
         let gust = wind_gust(origin.xz);
@@ -203,7 +233,7 @@ fn vertex(in: Vertex) -> VertexOutput {
         out.face = rotate_y(in.normal, c, s);
         out.uv0 = in.uv;
         out.local = vec2<f32>(in.position.x + in.position.z, in.position.y) * 6.0;
-        out.tint = params.tint.rgb * in.tint * (1.0 + params.wind.z * gust);
+        out.tint = params.tint.rgb * in.tint * canopy_tone(origin.xz, seed) * (1.0 + params.wind.z * gust);
     } else {
         // Pond: flat disc of diameter `scale`, slightly magnified with the distance.
         let d = distance(view.world_position, origin);
@@ -224,7 +254,7 @@ fn season_deciduous(cls: f32) -> bool {
 }
 
 // `foliage_season` of `foliage_common.gdshaderinc`.
-fn foliage_season(albedo: vec3<f32>, cls: f32, seed: f32, leaves: f32, up: f32, world_y: f32) -> vec3<f32> {
+fn foliage_season(albedo: vec3<f32>, cls: f32, seed: f32, leaves: f32, up: f32, world_y: f32, top: f32) -> vec3<f32> {
     let w = params.season;
     let lum = dot(albedo, vec3<f32>(0.2126, 0.7152, 0.0722));
     let broadleaf = season_deciduous(cls);
@@ -247,15 +277,22 @@ fn foliage_season(albedo: vec3<f32>, cls: f32, seed: f32, leaves: f32, up: f32, 
         target_color = vec3<f32>(0.34, 0.22, 0.03);
     }
     let autumn = mix(albedo, target_color * (lum / 0.09) * mix(0.8, 1.2, leaves), turn * 0.85);
-    let bare = vec3<f32>(0.105, 0.090, 0.082);
+    // Winter (TS-T2): bare broadleaves grey-brown (never black dots), conifers frosted on the top
+    // of the crown, more with the altitude, a share of them staying green in the lowlands.
+    let bare = params.bare.rgb;
+    let alt = smoothstep(params.winter.x, max(params.winter.y, params.winter.x + 0.01), world_y);
     var winter: vec3<f32>;
     if broadleaf {
-        winter = bare * mix(0.8, 1.25, leaves);
+        winter = mix(bare * mix(0.8, 1.2, leaves), params.frost.rgb, 0.45 * alt * smoothstep(0.4, 0.9, top));
     } else if hedge {
         winter = mix(albedo, bare, 0.7);
     } else {
-        let snow = max(smoothstep(3.0, 5.0, world_y), 0.5 * smoothstep(0.45, 0.9, up));
-        winter = mix(albedo * 0.8, vec3<f32>(0.75, 0.78, 0.82), snow * smoothstep(0.35, 0.8, leaves) * 0.7);
+        let cover = smoothstep(0.15, 0.75, 0.55 * up + 0.6 * top + (leaves - 0.5) * 0.6 + 0.25 * alt);
+        var frost = params.frost.w * cover * mix(0.55, 1.0, alt);
+        if fract(seed * 41.7) < params.shape.w * (1.0 - alt) {
+            frost = frost * 0.2;
+        }
+        winter = mix(albedo * 0.85, params.frost.rgb, frost);
     }
     return spring * w.x + albedo * w.y + autumn * w.z + winter * w.w;
 }
@@ -358,16 +395,24 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         discard;
     }
     if mode < 0.5 {
-        let pick = in.misc.x > bayer4(in.position.xy);
-        let uv = select(in.uv0, in.uv1, pick);
-        let t = textureSampleLevel(albedo_texture, albedo_sampler, uv, lod);
-        let nt = textureSampleLevel(normal_texture, albedo_sampler, uv, lod);
+        // The two nearest baked views blended (TS-T2: a Bayer pick between them showed a 4x4
+        // pattern on every crown); colour weighted by the alpha of each view.
+        let b = in.misc.x;
+        let t0 = textureSampleLevel(albedo_texture, albedo_sampler, in.uv0, lod);
+        let t1 = textureSampleLevel(albedo_texture, albedo_sampler, in.uv1, lod);
+        let n0 = textureSampleLevel(normal_texture, albedo_sampler, in.uv0, lod);
+        let n1 = textureSampleLevel(normal_texture, albedo_sampler, in.uv1, lod);
+        let a = mix(t0.a, t1.a, b);
+        let wa = t0.a * (1.0 - b);
+        let wb = t1.a * b;
+        let t = vec4<f32>((t0.rgb * wa + t1.rgb * wb) / max(wa + wb, 1e-4), a);
+        let nt = (n0 * wa + n1 * wb) / max(wa + wb, 1e-4);
         let seed = in.misc.y;
         let cls = params.tint.w;
         let leaves = value_noise(in.local * 24.0 + vec2<f32>(seed * 17.0, seed * 5.0));
-        // Winter: broadleaf crowns are openwork.
-        if season_deciduous(cls) && params.season.w > 0.5
-            && value_noise(in.local * 40.0 + vec2<f32>(seed * 29.0, seed * 3.0)) < 0.45 {
+        // Winter: broadleaf crowns are openwork near by (far away the holes would stipple).
+        if season_deciduous(cls) && params.season.w > 0.5 && lod < 1.5
+            && value_noise(in.local * 16.0 + vec2<f32>(seed * 29.0, seed * 3.0)) < params.far.w {
             discard;
         }
         if t.a * (1.0 + lod * 0.35) < params.frame.z {
@@ -380,7 +425,9 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         var albedo = t.rgb * in.tint * mix(0.85, 1.12, leaves) * params.wind.w;
         let lum = max(dot(albedo, vec3<f32>(0.2126, 0.7152, 0.0722)), 1e-3);
         albedo = albedo * max(1.0, 0.045 / lum);
-        color = vec4<f32>(foliage_season(albedo, cls, seed, leaves, baked.y, in.misc.z), 1.0);
+        let top = smoothstep(params.frame.y, 1.0, in.local.y);
+        albedo = canopy_grade(albedo, top);
+        color = vec4<f32>(foliage_season(albedo, cls, seed, leaves, baked.y, in.misc.z, top), 1.0);
         occlusion = mix(0.55, 1.0, nt.a);
     } else if mode < 1.5 {
         let t = textureSample(albedo_texture, albedo_sampler, in.uv0);
@@ -396,12 +443,13 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         let leaves = value_noise(in.local) * 0.6 + value_noise(in.local * 2.3) * 0.4;
         let luma = dot(t.rgb, vec3<f32>(0.2126, 0.7152, 0.0722));
         let rgb = max(vec3<f32>(luma) + (t.rgb - vec3<f32>(luma)) * params.extra.x, vec3<f32>(0.0));
-        let albedo = rgb * params.extra.yzw * in.tint * mix(0.86, 1.1, leaves);
+        let top = clamp(in.local.y / 6.0, 0.0, 1.0);
+        let albedo = canopy_grade(rgb * params.extra.yzw * in.tint * mix(0.86, 1.1, leaves), top);
         normal = normalize(in.face);
-        if season_deciduous(cls) && params.season.w > 0.5 && value_noise(in.local * 2.4) < 0.5 {
+        if season_deciduous(cls) && params.season.w > 0.5 && value_noise(in.local * 2.4) < params.far.w + 0.05 {
             discard;
         }
-        color = vec4<f32>(foliage_season(albedo, cls, seed, leaves, normal.y, in.misc.z), 1.0);
+        color = vec4<f32>(foliage_season(albedo, cls, seed, leaves, normal.y, in.misc.z, top), 1.0);
     } else {
         let r = length(in.uv0 - vec2<f32>(0.5)) * 2.0;
         if r > 1.0 || hash12(in.position.xy) > smoothstep(1.0, 0.7, r) * params.range.w {

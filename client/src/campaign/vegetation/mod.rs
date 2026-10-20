@@ -612,7 +612,8 @@ fn apply_records(
                         .assets
                         .gains
                         .get_or_insert_with(render::ModelGains::load);
-                    let mut params = render::model_params(gains, species_id, class);
+                    let mut params =
+                        render::model_params(gains, species_id, class).with_look(&world.0.look);
                     params.season = season_weights;
                     let entity = commands
                         .spawn((
@@ -665,7 +666,8 @@ fn apply_records(
                     .gains
                     .get_or_insert_with(render::ModelGains::load)
                     .impostor_gain;
-                let mut params = render::impostor_params(row, rows, ratio, class, gain);
+                let mut params =
+                    render::impostor_params(row, rows, ratio, class, gain).with_look(&world.0.look);
                 params.season = season_weights;
                 let entity = commands
                     .spawn((

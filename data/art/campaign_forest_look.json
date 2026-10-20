@@ -3,7 +3,11 @@
   "canopy": {
     "value": 0.72,
     "saturation": 1.3,
-    "balance": [0.86, 1.0, 0.78],
+    "balance": [
+      0.86,
+      1.0,
+      0.78
+    ],
     "tree_value_spread": 0.22,
     "stand_value_spread": 0.3,
     "stand_period_units": 26.0,
@@ -16,17 +20,36 @@
     "outlier_share": 0.1,
     "outlier_group_px": 1.2
   },
+  "treeline": {
+    "fade_m": 90.0,
+    "jitter_m": 120.0,
+    "slope": [
+      0.5,
+      0.68
+    ]
+  },
   "far": {
     "grow_start_units": 140.0,
     "grow_end_units": 600.0,
     "size_gain": 0.7
   },
   "winter": {
-    "frost": [0.80, 0.84, 0.88],
+    "frost": [
+      0.8,
+      0.84,
+      0.88
+    ],
     "frost_strength": 0.85,
     "green_share": 0.3,
-    "frost_altitude_units": [1.5, 4.0],
-    "bare": [0.30, 0.25, 0.20],
+    "frost_altitude_units": [
+      1.5,
+      4.0
+    ],
+    "bare": [
+      0.3,
+      0.25,
+      0.2
+    ],
     "bare_openwork": 0.2
   }
 }

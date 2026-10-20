@@ -23,6 +23,9 @@ pub struct ForestLook {
     pub edge_cut: f32,
     pub outlier_share: f32,
     pub outlier_group_px: f32,
+    pub treeline_fade_m: f32,
+    pub treeline_jitter_m: f32,
+    pub rock_slope: Vec2,
     pub grow_start: f32,
     pub grow_end: f32,
     pub far_size_gain: f32,
@@ -49,6 +52,9 @@ impl Default for ForestLook {
             edge_cut: 0.42,
             outlier_share: 0.1,
             outlier_group_px: 1.2,
+            treeline_fade_m: 90.0,
+            treeline_jitter_m: 120.0,
+            rock_slope: Vec2::new(0.5, 0.68),
             grow_start: 140.0,
             grow_end: 600.0,
             far_size_gain: 0.7,
@@ -67,13 +73,18 @@ fn num(v: &Value, default: f32) -> f32 {
 }
 
 fn rgb(v: &Value, default: Vec3) -> Vec3 {
-    Vec3::new(num(&v[0], default.x), num(&v[1], default.y), num(&v[2], default.z))
+    Vec3::new(
+        num(&v[0], default.x),
+        num(&v[1], default.y),
+        num(&v[2], default.z),
+    )
 }
 
 impl ForestLook {
     pub fn parse(v: &Value) -> ForestLook {
         let d = ForestLook::default();
         let (c, e, f, w) = (&v["canopy"], &v["edge"], &v["far"], &v["winter"]);
+        let t = &v["treeline"];
         ForestLook {
             value: num(&c["value"], d.value),
             saturation: num(&c["saturation"], d.saturation),
@@ -87,6 +98,12 @@ impl ForestLook {
             edge_cut: num(&e["cut"], d.edge_cut),
             outlier_share: num(&e["outlier_share"], d.outlier_share),
             outlier_group_px: num(&e["outlier_group_px"], d.outlier_group_px),
+            treeline_fade_m: num(&t["fade_m"], d.treeline_fade_m),
+            treeline_jitter_m: num(&t["jitter_m"], d.treeline_jitter_m),
+            rock_slope: Vec2::new(
+                num(&t["slope"][0], d.rock_slope.x),
+                num(&t["slope"][1], d.rock_slope.y),
+            ),
             grow_start: num(&f["grow_start_units"], d.grow_start),
             grow_end: num(&f["grow_end_units"], d.grow_end),
             far_size_gain: num(&f["size_gain"], d.far_size_gain),
