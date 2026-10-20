@@ -12,10 +12,10 @@ Branche `ts/t6` (worktree `../gp-ts-t6`). Plan : `ts-style-total-war.md`, ADR 07
   tour du `TurnJournal` (même source que `ChronicleLog`), catégories dans `data/ui/event_feed.json`.
 
 ## État
-- [ ] squelette
-- [ ] plaque (statut, pastilles, dump, tests)
+- [x] squelette
+- [x] plaque : `markers/plate.rs` (statut, pastilles, dump `campaign_markers.plates`, 6 tests) ; à vérifier au dump en jeu
 - [ ] fil (catégories, repli mémorisé dans `Settings`, clic, dump, tests)
 - [ ] vérifs finales (fmt, clippy, tests, smoke)
 
 ## Prochaine étape
-Squelette.
+Fil d'événements (`hud/feed.rs`, `data/ui/event_feed.json`, réglages `Settings`).
