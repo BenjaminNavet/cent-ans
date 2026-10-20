@@ -25,6 +25,8 @@ pub mod rocks;
 pub mod scar_meshes;
 pub mod scars;
 pub mod terrain_data;
+pub mod understory;
+pub mod understory_layer;
 pub mod water_props;
 
 use std::sync::{Arc, Mutex};
@@ -111,6 +113,7 @@ impl Plugin for CampaignCountrysidePlugin {
             .register_dump(rocks::dump)
             .register_dump(clutter::dump)
             .init_resource::<clutter::Clutter>()
+            .init_resource::<understory_layer::Understory>()
             .init_resource::<rocks::RockView>()
             .init_resource::<water_props::WaterView>()
             .add_systems(
@@ -119,6 +122,7 @@ impl Plugin for CampaignCountrysidePlugin {
                     reset,
                     proto::reset,
                     clutter::reset,
+                    understory_layer::reset,
                     scars::reset,
                     decor::reset,
                     water_props::reset,
@@ -185,6 +189,9 @@ impl Plugin for CampaignCountrysidePlugin {
                     clutter::update_view,
                     clutter::stream_clutter,
                     clutter::apply_season,
+                    understory_layer::update_view,
+                    understory_layer::stream,
+                    understory_layer::apply_look,
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign))

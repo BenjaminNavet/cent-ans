@@ -92,7 +92,7 @@ impl VegetationWorld {
         self.heights.height_m_at(x as f32, y as f32)
     }
 
-    fn treeline_m(&self, y: f64) -> f32 {
+    pub(crate) fn treeline_m(&self, y: f64) -> f32 {
         let north = 1.0 - (y / self.size.1.max(1.0)).clamp(0.0, 1.0) as f32;
         let t = smoothstep(0.55, 0.95, north);
         2100.0 + (900.0 - 2100.0) * t
