@@ -125,6 +125,7 @@ pub fn line_style(kind: &str) -> Option<LineStyle> {
     Some(match kind {
         "battle" | "siege_started" | "province_captured" | "war_declared" => WAR,
         "revolt" => style("#a1121a", true, "⚑"),
+        "unrest" => style("#8a5a10", false, "⚑"),
         "plague" => style("#4a6b2a", true, "☠"),
         "famine" => style("#8a5a10", true, "⚠"),
         "building_completed" => style("#1a5c8b", false, "⚒"),
@@ -182,6 +183,7 @@ pub fn kind_label(kind: &str) -> &'static str {
         "regency" => "Régence",
         "general_captured" => "Chef capturé",
         "revolt" => "Révolte",
+        "unrest" => "Grogne",
         "plague" => "Peste",
         "table" => "La Table",
         "edict" => "Édit régional",

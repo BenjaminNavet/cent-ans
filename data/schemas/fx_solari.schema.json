@@ -8,7 +8,10 @@
     "_comment": { "type": "string" },
     "enabled": { "type": "boolean" },
     "restir": { "type": "boolean" },
-    "max_bounces": { "type": "integer", "minimum": 1, "maximum": 8 }
+    "max_bounces": { "type": "integer", "minimum": 1, "maximum": 8 },
+    "ground_step_m": { "type": "number", "minimum": 1 },
+    "max_triangles": { "type": "integer", "minimum": 1 },
+    "max_instances": { "type": "integer", "minimum": 1 }
   },
   "required": ["enabled"],
   "additionalProperties": false

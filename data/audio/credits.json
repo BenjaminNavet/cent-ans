@@ -240,14 +240,6 @@
       "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/"
     },
     {
-      "file": "assets/third_party/music/wikimedia/cabezon_duviensela.mp3",
-      "title": "Antonio de Cabezón — « Duviensela », clavicorde",
-      "creators": "Joan Benson, clavicorde (1973)",
-      "licence": "CC BY-SA 2.0",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Antonio_de_Cabezon_-_Duuiensela.ogg",
-      "licence_url": "https://creativecommons.org/licenses/by-sa/2.0/"
-    },
-    {
       "file": "assets/third_party/music/wikimedia/cantigas_santa_maria.mp3",
       "title": "Cantigas de Santa María (Alphonse X, XIIIe s.), tradition orale castillane",
       "creators": "Fundación Joaquín Díaz",
@@ -294,22 +286,6 @@
       "licence": "CC BY-SA 3.0",
       "source_url": "https://commons.wikimedia.org/wiki/File:Fundaci%C3%B3n_Joaqu%C3%ADn_D%C3%ADaz_-_ATO_00330_01_-_Fol%C3%ADa.ogg",
       "licence_url": "https://creativecommons.org/licenses/by-sa/3.0/"
-    },
-    {
-      "file": "assets/third_party/music/wikimedia/gibbons_pavan_mb16.mp3",
-      "title": "Orlando Gibbons — Pavane MB 16, clavecin flamand",
-      "creators": "David Joseph Stith, clavecin",
-      "licence": "CC0",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Orlando_Gibbons_Pavan_MB16.wav",
-      "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/"
-    },
-    {
-      "file": "assets/third_party/music/wikimedia/greensleeves_juglaresa.mp3",
-      "title": "« Greensleeves » (Angleterre, XVIe s.), instruments anciens",
-      "creators": "Emilio Villalba et Sara Marina (*La Pequeña Juglaresa*, 2020)",
-      "licence": "CC BY 3.0",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Greensleeves._La_Juglaresa.opus",
-      "licence_url": "https://creativecommons.org/licenses/by/3.0/"
     },
     {
       "file": "assets/third_party/music/wikimedia/huseyni_saz_semai.mp3",
@@ -359,22 +335,6 @@
       "creators": "Phillip W. Serna, violes de gambe",
       "licence": "CC BY-SA 4.0",
       "source_url": "https://commons.wikimedia.org/wiki/File:Étienne_Moulinié_(1599–1676)_–_Fantasia_à4,_VdGS_No.2_for_2_Treble_Viols,_Tenor_&_Bass_Viols_(1639).ogg",
-      "licence_url": "https://creativecommons.org/licenses/by-sa/4.0/"
-    },
-    {
-      "file": "assets/third_party/music/wikimedia/ortiz_recercada_primera.mp3",
-      "title": "Diego Ortiz — Recercada primera sobre tenores italianos, *Trattado de Glosas* (1553)",
-      "creators": "Phillip W. Serna, viole de gambe",
-      "licence": "CC BY-SA 4.0",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Diego_Ortiz_(1510-1570)_-_Recercada_primera_sobre_tenores_italianos_from_Trattado_de_Glosas,_Libro_Secundo_(1553).ogg",
-      "licence_url": "https://creativecommons.org/licenses/by-sa/4.0/"
-    },
-    {
-      "file": "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3",
-      "title": "Diego Ortiz — Recercada segunda sobre tenores italianos, *Trattado de Glosas* (1553)",
-      "creators": "Phillip W. Serna, viole de gambe",
-      "licence": "CC BY-SA 4.0",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Diego_Ortiz_(1510-1570)_-_Recercada_segunda_sobre_tenores_italianos_from_Trattado_de_Glosas_(1553).ogg",
       "licence_url": "https://creativecommons.org/licenses/by-sa/4.0/"
     },
     {

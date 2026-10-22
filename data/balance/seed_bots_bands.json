@@ -8,5 +8,9 @@
   "rebel_takeovers_per_game": { "status": "to_initialise" },
   "seasons_above_revolt_threshold_per_game": { "status": "to_initialise" },
   "ai_refused_orders": { "status": "to_initialise" },
-  "ai_declined_proposals": { "status": "to_initialise" }
+  "ai_declined_proposals": { "status": "to_initialise" },
+  "fr_en_war_share": { "status": "to_initialise" },
+  "unrest_warnings_per_game": { "status": "to_initialise" },
+  "revolts_put_down_per_game": { "status": "to_initialise" },
+  "uprisings_per_game": { "status": "to_initialise" }
 }

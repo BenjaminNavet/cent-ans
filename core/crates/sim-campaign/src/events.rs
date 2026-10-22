@@ -87,6 +87,9 @@ pub enum EventKind {
     Loyalty,
     /// RG13a: a council office falls vacant (its holder died or left).
     CouncilVacancy,
+    /// B4 (ADR 0731): graded revolts. A warning (rising tension, `loss`) or
+    /// the news of an uprising put down (not `loss`).
+    Unrest,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

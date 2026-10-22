@@ -3,7 +3,7 @@
   "all_label": "Tout",
   "other": "other",
   "genres": [
-    {"id": "war", "label": "Guerre", "kinds": ["battle", "siege_started", "siege_lifted", "province_captured", "raid", "attrition", "army_destroyed", "general_captured", "war_declared", "revolt", "captain", "ransom"]},
+    {"id": "war", "label": "Guerre", "kinds": ["battle", "siege_started", "siege_lifted", "province_captured", "raid", "attrition", "army_destroyed", "general_captured", "war_declared", "revolt", "unrest", "captain", "ransom"]},
     {"id": "diplomacy", "label": "Diplomatie", "kinds": ["peace_signed", "alliance_formed", "alliance_broken", "vassalage", "vassal_rebellion", "embargo", "diplomatic_offer", "diplomacy", "marriage", "royal_act", "agent"]},
     {"id": "economy", "label": "Économie", "kinds": ["income", "bankruptcy", "recruited", "building_completed", "trade", "coinage", "table", "edict", "technology_researched", "famine"]},
     {"id": "people", "label": "Personnages", "kinds": ["birth", "death", "succession", "no_heir", "regency", "trait_acquired", "skill_learned", "appointment", "level_up", "loyalty", "chivalry", "medicine"]},

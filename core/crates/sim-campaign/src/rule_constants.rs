@@ -79,10 +79,24 @@ pub fn rule_constants(data: &GameData) -> BTreeMap<&'static str, f64> {
         "revolt_unrest_threshold",
         population_rules.revolt_unrest_threshold,
     );
-    values.insert("revolt_seasons", f64::from(population_rules.revolt_seasons));
+    // B4 (ADR 0731): graded revolts (`data/rules/revolt.json`).
+    let revolt_rules = &data.revolt_rules;
+    values.insert("revolt_tension_max", f64::from(revolt_rules.tension_max));
     values.insert(
-        "revolt_control_threshold",
-        population_rules.revolt_control_threshold,
+        "revolt_warning_first",
+        revolt_rules
+            .warning_tensions
+            .iter()
+            .min()
+            .map_or(0.0, |w| f64::from(*w)),
+    );
+    values.insert(
+        "revolt_rebel_siege_seasons",
+        f64::from(revolt_rules.rebel_siege_seasons),
+    );
+    values.insert(
+        "revolt_min_seasons",
+        f64::from(revolt_rules.min_seasons_to_revolt()),
     );
     values.insert("health_neutral", population::HEALTH_NEUTRAL);
     values.insert(

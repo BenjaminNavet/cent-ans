@@ -81,6 +81,9 @@ pub struct ProvinceRow {
     pub unrest: i64,
     pub revolt_seasons: u32,
     pub revolt_seasons_needed: u32,
+    /// B4: tension gauge of the province (0 to `tension_max`).
+    pub tension: u32,
+    pub tension_max: u32,
     pub revolt_threshold: f64,
     pub devastation: u8,
     pub slots_busy: usize,
@@ -185,7 +188,9 @@ pub fn holdings_overview(
             income: province_income,
             unrest: weighted.round() as i64,
             revolt_seasons: province.revolt_seasons,
-            revolt_seasons_needed: data.population_rules.revolt_seasons.max(1),
+            revolt_seasons_needed: data.revolt_rules.min_seasons_to_revolt().max(1),
+            tension: province.tension,
+            tension_max: data.revolt_rules.tension_max,
             revolt_threshold: data.population_rules.revolt_unrest_threshold,
             devastation: province.devastation,
             slots_busy,
@@ -293,7 +298,7 @@ fn settlement_row(
     });
 
     let province = state.provinces.get(&live.province);
-    let revolt_seasons = province.map_or(0, |p| p.revolt_seasons);
+    let revolt_seasons = province.map_or(0, |p| p.revolt_seasons + u32::from(p.uprising.is_some()));
     let weighted_unrest = province.map_or(0.0, |p| population::weighted_unrest(&p.population));
 
     let mut danger_reasons = Vec::new();

@@ -308,3 +308,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0721 | [Parjure : événements diplomatiques en table, à fenêtre](0721-parjure-evenements-diplomatiques-a-fenetre.md) | accepté |
 | 0722 | [Brouillard de la prévision de bataille](0722-brouillard-de-la-prevision.md) | accepté |
 | 0723 | [Sort de la ville prise : culture, remise, libération, banditisme](0723-sort-de-la-ville-prise-culture-cession-liberation.md) | accepté |
+| 0731 | [Révoltes graduées et armée rebelle](0731-revoltes-graduees-et-armee-rebelle.md) | accepté |

@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use sim_campaign::{CampaignState, EventKind, GameEvent};
 
 /// Names of the metrics, as keys of the bands file.
-pub const METRIC_NAMES: [&str; 10] = [
+pub const METRIC_NAMES: [&str; 14] = [
     "revolts_per_game",
     "bankruptcies_per_game",
     "war_turns_mean",
@@ -32,6 +32,10 @@ pub const METRIC_NAMES: [&str; 10] = [
     "seasons_above_revolt_threshold_per_game",
     "ai_refused_orders",
     "ai_declined_proposals",
+    "fr_en_war_share",
+    "unrest_warnings_per_game",
+    "revolts_put_down_per_game",
+    "uprisings_per_game",
 ];
 
 /// The metrics of one game.
@@ -59,11 +63,24 @@ pub struct GameMetrics {
     /// B1: treaty proposals of the AI declined by their target (normal outcome).
     #[serde(default)]
     pub ai_declined_proposals: u32,
+    /// B4: share (0-1) of the turns France and England were at war (guard-rail 54-76 %
+    /// over a full century, ADR 0731).
+    #[serde(default)]
+    pub fr_en_war_share: f64,
+    /// B4: tension warnings issued ([`EventKind::Unrest`] with `loss`).
+    #[serde(default)]
+    pub unrest_warnings: u32,
+    /// B4: uprisings put down by force ([`EventKind::Unrest`] without `loss`).
+    #[serde(default)]
+    pub revolts_put_down: u32,
+    /// B4: uprisings (a rebel army raised: [`EventKind::Revolt`] carrying an army).
+    #[serde(default)]
+    pub uprisings: u32,
 }
 
 impl GameMetrics {
     /// The values by metric name (same names as [`METRIC_NAMES`]).
-    pub fn values(&self) -> [(&'static str, f64); 10] {
+    pub fn values(&self) -> [(&'static str, f64); 14] {
         [
             (METRIC_NAMES[0], f64::from(self.revolts)),
             (METRIC_NAMES[1], f64::from(self.bankruptcies)),
@@ -78,6 +95,10 @@ impl GameMetrics {
             ),
             (METRIC_NAMES[8], f64::from(self.ai_refused_orders)),
             (METRIC_NAMES[9], f64::from(self.ai_declined_proposals)),
+            (METRIC_NAMES[10], self.fr_en_war_share),
+            (METRIC_NAMES[11], f64::from(self.unrest_warnings)),
+            (METRIC_NAMES[12], f64::from(self.revolts_put_down)),
+            (METRIC_NAMES[13], f64::from(self.uprisings)),
         ]
     }
 }
@@ -88,6 +109,10 @@ pub struct MetricsTracker {
     revolts_occupied: u32,
     rebel_takeovers: u32,
     seasons_above_revolt_threshold: u32,
+    fr_en_war_turns: u32,
+    unrest_warnings: u32,
+    revolts_put_down: u32,
+    uprisings: u32,
     bankruptcies: u32,
     turns: u32,
     /// War pairs in progress, with the turn they were first seen.
@@ -108,9 +133,14 @@ fn alive_factions(state: &CampaignState) -> BTreeSet<FactionId> {
 
 fn war_pairs(state: &CampaignState) -> BTreeSet<(FactionId, FactionId)> {
     let mut pairs = BTreeSet::new();
-    for (id, faction) in state.factions.iter().filter(|(_, f)| f.alive) {
+    for (id, faction) in state
+        .factions
+        .iter()
+        .filter(|(id, f)| f.alive && !id.is_rebels())
+    {
         for other in &faction.at_war_with {
-            if state.factions.get(other).is_some_and(|f| f.alive) {
+            // B4: the war against the rebels of a revolt is not a war between realms.
+            if !other.is_rebels() && state.factions.get(other).is_some_and(|f| f.alive) {
                 pairs.insert(if id < other {
                     (id.clone(), other.clone())
                 } else {
@@ -130,6 +160,10 @@ impl MetricsTracker {
             revolts_occupied: 0,
             rebel_takeovers: 0,
             seasons_above_revolt_threshold: 0,
+            fr_en_war_turns: 0,
+            unrest_warnings: 0,
+            revolts_put_down: 0,
+            uprisings: 0,
             bankruptcies: 0,
             turns: 0,
             wars: BTreeMap::new(),
@@ -147,7 +181,12 @@ impl MetricsTracker {
                 EventKind::Revolt => {
                     self.revolts += 1;
                     self.observe_revolt(state, event);
+                    if event.army.is_some() {
+                        self.uprisings += 1;
+                    }
                 }
+                EventKind::Unrest if event.loss => self.unrest_warnings += 1,
+                EventKind::Unrest => self.revolts_put_down += 1,
                 EventKind::Bankruptcy => self.bankruptcies += 1,
                 _ => {}
             }
@@ -157,6 +196,13 @@ impl MetricsTracker {
             .values()
             .filter(|province| province.revolt_seasons > 0)
             .count() as u32;
+        if let (Ok(france), Ok(england)) =
+            (FactionId::new("fac_france"), FactionId::new("fac_england"))
+        {
+            if state.is_at_war(&france, &england) {
+                self.fr_en_war_turns += 1;
+            }
+        }
         let pairs = war_pairs(state);
         let ended: Vec<_> = self
             .wars
@@ -223,6 +269,14 @@ impl MetricsTracker {
             seasons_above_revolt_threshold: self.seasons_above_revolt_threshold,
             ai_refused_orders: state.ai_refused_orders(),
             ai_declined_proposals: state.ai_declined_proposals(),
+            fr_en_war_share: if self.turns == 0 {
+                0.0
+            } else {
+                f64::from(self.fr_en_war_turns) / f64::from(self.turns)
+            },
+            unrest_warnings: self.unrest_warnings,
+            revolts_put_down: self.revolts_put_down,
+            uprisings: self.uprisings,
         }
     }
 }
