@@ -124,6 +124,19 @@ pub struct AiMoveRecord {
     pub notable: Option<AiMoveNotability>,
 }
 
+/// How many refused AI orders are kept as text samples.
+pub const AI_REFUSAL_SAMPLES: usize = 16;
+
+/// Counter of the AI orders the core refused (B1), never saved.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct AiRefusals {
+    /// Orders the core refused: the planner proposed something illegal.
+    pub count: u32,
+    /// Treaty proposals the other side declined: a normal outcome, kept apart.
+    pub declined: u32,
+    pub samples: Vec<String>,
+}
+
 /// Recording switch and tuning, set by the interface (never saved).
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct AiReplayLog {
@@ -200,22 +213,62 @@ impl CampaignState {
     }
 
     /// Applies `order` for AI `faction`, recording the move it makes.
+    ///
+    /// B1: a refused order is no longer dropped silently, it is counted
+    /// ([`CampaignState::ai_refused_orders`]) and its first occurrences kept.
     pub(crate) fn apply_ai_order(&mut self, data: &GameData, faction: &FactionId, order: Order) {
+        let label =
+            (self.ai_refusals.samples.len() < AI_REFUSAL_SAMPLES).then(|| format!("{order:?}"));
+        if let Err(error) = self.apply_ai_order_inner(data, faction, order) {
+            if matches!(
+                error,
+                crate::OrderError::Diplomacy(crate::diplomacy::DiplomacyError::Refused(_))
+            ) {
+                self.ai_refusals.declined += 1;
+                return;
+            }
+            self.ai_refusals.count += 1;
+            if let Some(label) = label {
+                self.ai_refusals.samples.push(format!(
+                    "turn {} {faction}: {label} -> {error:?}",
+                    self.turn
+                ));
+            }
+        }
+    }
+
+    /// Number of AI orders the core refused since this state was created
+    /// (never saved).
+    pub fn ai_refused_orders(&self) -> u32 {
+        self.ai_refusals.count
+    }
+
+    /// Treaty proposals of the AI the other side declined (not an error).
+    pub fn ai_declined_proposals(&self) -> u32 {
+        self.ai_refusals.declined
+    }
+
+    /// The first refused AI orders (at most [`AI_REFUSAL_SAMPLES`]), as text.
+    pub fn ai_refused_order_samples(&self) -> &[String] {
+        &self.ai_refusals.samples
+    }
+
+    fn apply_ai_order_inner(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        order: Order,
+    ) -> Result<(), crate::OrderError> {
         if !self.ai_replay.enabled {
-            let _ = self.apply_order(data, faction, order);
-            return;
+            return self.apply_order(data, faction, order);
         }
         let (army, target) = match &order {
             Order::MoveArmy { army, .. } | Order::Embark { army, .. } => (army.clone(), None),
             Order::Attack { army, target_army } => (army.clone(), Some(target_army.clone())),
-            _ => {
-                let _ = self.apply_order(data, faction, order);
-                return;
-            }
+            _ => return self.apply_order(data, faction, order),
         };
         let Some(start) = self.armies.get(&army).map(|a| self.army_point(data, a)) else {
-            let _ = self.apply_order(data, faction, order);
-            return;
+            return self.apply_order(data, faction, order);
         };
         let target_faction = target
             .as_ref()
@@ -232,7 +285,7 @@ impl CampaignState {
             }
             Ok(OrderOutcome::Done) => {
                 let Some(port) = embark_to else {
-                    return;
+                    return Ok(());
                 };
                 let end = self
                     .armies
@@ -258,8 +311,9 @@ impl CampaignState {
                     });
                 }
             }
-            Err(_) => {}
+            Err(error) => return Err(error),
         }
+        Ok(())
     }
 
     /// Resumes the marches of AI `faction`, recording them.

@@ -17,9 +17,6 @@ use sim_campaign::negotiation::{evaluate_treaty_with, Article};
 use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{CampaignState, Order};
 
-/// Turns per decade (one defection roll each).
-const DECADE_TURNS: u32 = 40;
-
 /// Pure per-campaign roll in 0..1000 for `faction` and `salt` (splitmix64
 /// of the seed): the AI stays deterministic without touching the RNG.
 pub fn campaign_roll(state: &CampaignState, faction: &FactionId, salt: u64) -> u64 {
@@ -245,7 +242,12 @@ pub fn side_change(
         return Some(change);
     }
     // One roll per decade: the fall of a crown is not written.
-    let decade = u64::from(state.turn / DECADE_TURNS);
+    let decade = u64::from(
+        state.turn
+            / data_model::AiCampaign::bundled()
+                .tuning
+                .alignment_decade_turns,
+    );
     if campaign_roll(state, faction, salts::DEFECTION + decade) >= rules.history_permille {
         return None;
     }

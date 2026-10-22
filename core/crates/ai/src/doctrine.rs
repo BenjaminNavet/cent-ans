@@ -9,12 +9,9 @@
 
 use std::collections::BTreeMap;
 
-use data_model::{FactionId, GameData, UnitTypeId};
+use data_model::{AiCampaign, FactionId, GameData, UnitTypeId};
 use sim_campaign::orders::RecruitOption;
 use sim_campaign::CampaignState;
-
-/// Weight of the unit's value against the doctrine's deficit (tie-break).
-const VALUE_WEIGHT: f64 = 1e-3;
 
 /// Field regiments of `faction`, by unit type (garrisons left out: they
 /// are the realm's fixed cost, not its army).
@@ -96,7 +93,7 @@ pub fn pick_recruit<'a>(
         } else {
             -1.0
         };
-        deficit + VALUE_WEIGHT * value(o) / max_value
+        deficit + AiCampaign::bundled().tuning.doctrine_value_weight * value(o) / max_value
     };
     options.iter().copied().max_by(|a, b| {
         score(a)

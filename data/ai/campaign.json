@@ -65,5 +65,20 @@
     "sortie_desperate_odds": 25,
     "surrender_min_chance": 35,
     "surrender_retry_turns": 3
+  },
+  "tuning": {
+    "subsidy_deficit_seasons": 2,
+    "subsidy_spare_divisor": 3,
+    "subsidy_wealth_ratio": 3,
+    "subsidy_min": 100,
+    "diplomacy_plan_period": 6,
+    "trade_min_attitude": 10,
+    "player_trade_min_attitude": 30,
+    "character_max_sent_per_turn": 4,
+    "convoy_regiments": 2,
+    "route_sample_km": 4.0,
+    "ambush_candidates": 4,
+    "alignment_decade_turns": 40,
+    "doctrine_value_weight": 0.001
   }
 }

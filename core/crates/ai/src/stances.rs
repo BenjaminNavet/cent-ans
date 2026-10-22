@@ -31,11 +31,6 @@ use sim_campaign::{
     ArmyId, CampaignState, Cell, MoveOrderTarget, Order, Place, Stance, StopReason,
 };
 
-/// Sampling step (km) of a route when looking for the lands it crosses.
-const ROUTE_SAMPLE_KM: f32 = 4.0;
-/// Ambush cells tried with a full march preview at most.
-const AMBUSH_CANDIDATES: usize = 4;
-
 /// Distance from `p` to the polyline `route`.
 fn route_distance(p: [f32; 2], route: &[[f32; 2]]) -> f32 {
     match route {
@@ -126,7 +121,7 @@ fn threatening_route(
     let km = points_km(data, state.army_base_grid_allowance(data, army)) * turns;
     let route = truncate_route(&route, km as f32 * px_per_km);
     // Does it cross our lands? Sampled every few kilometres.
-    let step = ROUTE_SAMPLE_KM * px_per_km;
+    let step = data_model::AiCampaign::bundled().tuning.route_sample_km * px_per_km;
     let crosses = route.windows(2).any(|w| {
         let d = dist(w[0], w[1]);
         let n = (d / step).ceil().max(1.0) as usize;
@@ -261,7 +256,7 @@ pub fn ambush_orders_after(
     let grid = data.navgrid();
     prey.covered_cells(state, data, army_id, budget)
         .into_iter()
-        .take(AMBUSH_CANDIDATES)
+        .take(data_model::AiCampaign::bundled().tuning.ambush_candidates)
         .find_map(|(_, _, cell)| {
             let point = cell.center(grid);
             let (cost, stop) = state.preview_march_to_point(data, army_id, point)?;

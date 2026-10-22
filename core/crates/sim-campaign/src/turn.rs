@@ -51,13 +51,15 @@ impl CampaignState {
         battle_request::auto_resolve_all_pending(self, data, &mut events);
         crate::naval::auto_resolve_all_pending(self, data, &mut events);
 
-        // 2. Each AI faction plays in id order (spec § 3.4).
-        let ai_factions: Vec<FactionId> = self
+        // 2. Each AI faction plays in a seeded order that changes every turn
+        // (B1: no faction always plays first or last; spec § 3.4).
+        let mut ai_factions: Vec<FactionId> = self
             .factions
             .iter()
             .filter(|(id, f)| f.alive && **id != self.player_faction)
             .map(|(id, _)| id.clone())
             .collect();
+        self.shuffle_ai_order(&mut ai_factions);
         let mut timings = Vec::with_capacity(ai_factions.len());
         // CT1: the record of the AI moves (for the replay) starts afresh.
         self.ai_replay_begin(data);
@@ -71,6 +73,23 @@ impl CampaignState {
         self.ai_replay_finish(data);
         self.record_budget_history(&purses, resolved_turn);
         (events, timings)
+    }
+
+    /// Orders the AI factions by a key hashed from the seed, the turn and the
+    /// faction id: deterministic, different from one turn to the next.
+    fn shuffle_ai_order(&self, factions: &mut [FactionId]) {
+        let key = |id: &FactionId| {
+            let name_hash = id.as_str().bytes().fold(0xcbf2_9ce4_8422_2325_u64, |h, b| {
+                (h ^ u64::from(b)).wrapping_mul(0x0000_0100_0000_01b3)
+            });
+            data_model::util::splitmix64(
+                self.seed
+                    ^ 0x4149_4f52_4445_5231_u64
+                    ^ u64::from(self.turn).wrapping_mul(0x9E37_79B9_7F4A_7C15)
+                    ^ name_hash,
+            )
+        };
+        factions.sort_by_key(|id| (key(id), id.clone()));
     }
 
     /// The turn of AI faction `faction` (spec § 3.4, step 2): its multi-turn

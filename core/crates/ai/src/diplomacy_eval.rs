@@ -11,18 +11,11 @@
 //! `sim_campaign::negotiation::evaluate_treaty`; the AI only sends what the
 //! other side would likely sign (the player receives it as an offer).
 
-use data_model::{FactionId, GameData};
+use data_model::{AiCampaign, FactionId, GameData};
 use sim_campaign::diplomacy::{PAPACY_FACTION, REBELS_FACTION};
 use sim_campaign::negotiation::{evaluate_treaty_with, friendly, Article, Party};
 use sim_campaign::plan_cache::PlanCache;
 use sim_campaign::{CampaignState, Order};
-
-/// Seasons between two treaty plans of one faction.
-const PLAN_PERIOD: u32 = 6;
-/// Attitude of the proposer towards a partner worth a trade agreement.
-const TRADE_MIN_ATTITUDE: i32 = 10;
-/// Attitude a player partner must show to receive a trade offer.
-const PLAYER_TRADE_MIN_ATTITUDE: i32 = 30;
 
 fn slot(faction: &FactionId) -> u32 {
     faction
@@ -44,7 +37,7 @@ pub fn plan_treaties(cache: &PlanCache, data: &GameData, faction: &FactionId) ->
     if !rules.enabled || !negotiable(state, faction) {
         return Vec::new();
     }
-    let phase = (state.turn + slot(faction)) % PLAN_PERIOD;
+    let phase = (state.turn + slot(faction)) % AiCampaign::bundled().tuning.diplomacy_plan_period;
     let order = match phase {
         0 => plan_trade(cache, data, faction),
         3 => plan_access(cache, data, faction).or_else(|| plan_passage(cache, data, faction)),
@@ -84,9 +77,9 @@ fn plan_trade(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Option
         .map(|id| (id.clone(), cache.attitude(data, faction, id).0))
         .filter(|(id, attitude)| {
             let needed = if id == &state.player_faction {
-                PLAYER_TRADE_MIN_ATTITUDE
+                AiCampaign::bundled().tuning.player_trade_min_attitude
             } else {
-                TRADE_MIN_ATTITUDE
+                AiCampaign::bundled().tuning.trade_min_attitude
             };
             *attitude >= needed
         })

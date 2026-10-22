@@ -11,12 +11,9 @@ use sim_campaign::Order;
 
 use super::Context;
 
-/// Characters sent per turn at most.
-const MAX_SENT_PER_TURN: usize = 4;
-
-/// A chiefless army of at most this many regiments is a convoy (ADR 0272)
-/// that joins a led army: it is not worth a commander's trip.
-const CONVOY_REGIMENTS: usize = 2;
+// B1: the trip limits (`character_max_sent_per_turn`, `convoy_regiments`; a
+// chiefless army of at most that many regiments is a convoy, ADR 0272) live
+// in `data/ai/campaign.json` (`tuning`).
 
 /// `busy`: characters already commanding, governing or named this turn.
 pub(super) fn plan_character_moves(
@@ -61,7 +58,11 @@ pub(super) fn plan_character_moves(
     let mut sent = 0;
     let mut taken: BTreeSet<&CharacterId> = BTreeSet::new();
     for province in demands {
-        if sent >= MAX_SENT_PER_TURN {
+        if sent
+            >= data_model::AiCampaign::bundled()
+                .tuning
+                .character_max_sent_per_turn
+        {
             break;
         }
         // Somebody already waits there (or is on the way): nothing to do.
@@ -106,7 +107,9 @@ fn demand_provinces(ctx: &Context) -> Vec<ProvinceId> {
     let mut out: Vec<ProvinceId> = Vec::new();
     let owned = |p: &ProvinceId| ctx.owns(p);
     for army in state.armies.values().filter(|a| {
-        &a.faction == ctx.faction && a.general.is_none() && a.units.len() > CONVOY_REGIMENTS
+        &a.faction == ctx.faction
+            && a.general.is_none()
+            && a.units.len() > data_model::AiCampaign::bundled().tuning.convoy_regiments
     }) {
         if let Some(p) = state.army_province(data, army) {
             if owned(&p) && !out.contains(&p) {

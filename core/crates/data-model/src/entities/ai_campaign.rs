@@ -18,6 +18,42 @@ pub struct AiCampaign {
     /// and the recruitment into armies.
     #[serde(default)]
     pub military_orders: MilitaryOrdersRules,
+    /// B1: balance constants once hard-coded in `ai/src`.
+    pub tuning: AiTuning,
+}
+
+/// Balance constants of the campaign AI that had no other home (B1):
+/// subsidies, treaty plans, character trips, ambush search, alignment and
+/// doctrine tie-breaks.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AiTuning {
+    /// Seasons of the ally's deficit a subsidy covers ahead.
+    pub subsidy_deficit_seasons: i64,
+    /// The donor gives at most 1/n of its spare money per turn.
+    pub subsidy_spare_divisor: i64,
+    /// Only a realm this many times richer pays subsidies.
+    pub subsidy_wealth_ratio: i64,
+    /// Smallest subsidy worth a courier.
+    pub subsidy_min: i64,
+    /// Seasons between two treaty plans of one faction.
+    pub diplomacy_plan_period: u32,
+    /// Attitude of the proposer towards an AI partner worth a trade agreement.
+    pub trade_min_attitude: i32,
+    /// Attitude a player partner must show to receive a trade offer.
+    pub player_trade_min_attitude: i32,
+    /// Characters sent per turn at most.
+    pub character_max_sent_per_turn: usize,
+    /// A chiefless army of at most this many regiments is a convoy.
+    pub convoy_regiments: usize,
+    /// Sampling step (km) of a route when looking for the lands it crosses.
+    pub route_sample_km: f32,
+    /// Ambush cells tried with a full march preview at most.
+    pub ambush_candidates: usize,
+    /// Turns per decade (one defection roll each).
+    pub alignment_decade_turns: u32,
+    /// Weight of the unit's value against the doctrine's deficit (tie-break).
+    pub doctrine_value_weight: f64,
 }
 
 /// Army objectives: targets, defence, sieges, retreats.

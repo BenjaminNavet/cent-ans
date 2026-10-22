@@ -5,7 +5,7 @@
   "description": "Fichier data/ai/campaign.json : les seuils et facteurs numériques du planificateur de campagne (core/crates/ai/src/campaign).",
   "type": "object",
   "additionalProperties": false,
-  "required": ["military", "economy"],
+  "required": ["military", "economy", "tuning"],
   "properties": {
     "description": { "type": "string" },
     "military": {
@@ -87,6 +87,27 @@
         "sortie_desperate_odds": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Pourcentage minimal de puissance pour la sortie d'une garnison affamée." },
         "surrender_min_chance": { "type": "integer", "minimum": 1, "maximum": 100, "description": "Chance de reddition (%) à partir de laquelle l'assiégeant somme la garnison." },
         "surrender_retry_turns": { "type": "integer", "minimum": 0, "description": "Tours entre deux sommations sur un même siège (0 : chaque tour)." }
+      }
+    },
+    "tuning": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "B1 : constantes d'équilibre de l'IA autrefois codées en dur (subventions, diplomatie, personnages, embuscades, alignement, doctrine).",
+      "required": ["subsidy_deficit_seasons", "subsidy_spare_divisor", "subsidy_wealth_ratio", "subsidy_min", "diplomacy_plan_period", "trade_min_attitude", "player_trade_min_attitude", "character_max_sent_per_turn", "convoy_regiments", "route_sample_km", "ambush_candidates", "alignment_decade_turns", "doctrine_value_weight"],
+      "properties": {
+        "subsidy_deficit_seasons": { "type": "integer", "minimum": 0, "description": "Saisons de déficit qu'une subvention doit couvrir." },
+        "subsidy_spare_divisor": { "type": "integer", "minimum": 1, "description": "Un donateur ne cède que 1/diviseur de son excédent." },
+        "subsidy_wealth_ratio": { "type": "integer", "minimum": 0, "description": "Le donateur doit être au moins ce multiple de fois plus riche que le bénéficiaire." },
+        "subsidy_min": { "type": "integer", "minimum": 0, "description": "Montant minimal d'une subvention (livres)." },
+        "diplomacy_plan_period": { "type": "integer", "minimum": 1, "description": "Période (tours) du plan diplomatique de chaque faction." },
+        "trade_min_attitude": { "type": "integer", "description": "Attitude minimale pour proposer un accord commercial à une IA." },
+        "player_trade_min_attitude": { "type": "integer", "description": "Attitude minimale pour proposer un accord commercial au joueur." },
+        "character_max_sent_per_turn": { "type": "integer", "minimum": 0, "description": "Personnages envoyés au plus par tour et par faction." },
+        "convoy_regiments": { "type": "integer", "minimum": 0, "description": "Une armée de plus de ce nombre de régiments sans général peut escorter un personnage." },
+        "route_sample_km": { "type": "number", "exclusiveMinimum": 0, "description": "Pas d'échantillonnage (km) de la route d'une armée ennemie pour l'embuscade (> 0)." },
+        "ambush_candidates": { "type": "integer", "minimum": 0, "description": "Nombre de sites d'embuscade examinés." },
+        "alignment_decade_turns": { "type": "integer", "minimum": 1, "description": "Tours par « décennie » de l'alignement." },
+        "doctrine_value_weight": { "type": "number", "description": "Poids de la valeur d'un ordre dans le départage des doctrines." }
       }
     }
   }

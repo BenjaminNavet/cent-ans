@@ -10,6 +10,7 @@
 //!   makes peace or when the game ends. 0 when no war broke out.
 //! - `factions_eliminated`: factions seen alive that are no longer alive (`FactionState::alive`),
 //!   which is more reliable than counting `FactionDestroyed` events (two code paths emit them).
+//! - `ai_refused_orders` (B1): AI orders the core refused (counted by `CampaignState`).
 //! - `leader_territory_share`: provinces owned (`province_owner`) by the faction owning the most,
 //!   `fac_rebels` excluded, over all provinces of the map, at the end of the game.
 
@@ -20,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use sim_campaign::{CampaignState, EventKind, GameEvent};
 
 /// Names of the metrics, as keys of the bands file.
-pub const METRIC_NAMES: [&str; 8] = [
+pub const METRIC_NAMES: [&str; 10] = [
     "revolts_per_game",
     "bankruptcies_per_game",
     "war_turns_mean",
@@ -29,6 +30,8 @@ pub const METRIC_NAMES: [&str; 8] = [
     "revolts_occupied_per_game",
     "rebel_takeovers_per_game",
     "seasons_above_revolt_threshold_per_game",
+    "ai_refused_orders",
+    "ai_declined_proposals",
 ];
 
 /// The metrics of one game.
@@ -50,11 +53,17 @@ pub struct GameMetrics {
     pub rebel_takeovers: u32,
     /// Province-seasons spent with the revolt counter running (unrest above the threshold).
     pub seasons_above_revolt_threshold: u32,
+    /// B1: AI orders refused by the core (planner proposed an order the core rejected).
+    #[serde(default)]
+    pub ai_refused_orders: u32,
+    /// B1: treaty proposals of the AI declined by their target (normal outcome).
+    #[serde(default)]
+    pub ai_declined_proposals: u32,
 }
 
 impl GameMetrics {
     /// The values by metric name (same names as [`METRIC_NAMES`]).
-    pub fn values(&self) -> [(&'static str, f64); 8] {
+    pub fn values(&self) -> [(&'static str, f64); 10] {
         [
             (METRIC_NAMES[0], f64::from(self.revolts)),
             (METRIC_NAMES[1], f64::from(self.bankruptcies)),
@@ -67,6 +76,8 @@ impl GameMetrics {
                 METRIC_NAMES[7],
                 f64::from(self.seasons_above_revolt_threshold),
             ),
+            (METRIC_NAMES[8], f64::from(self.ai_refused_orders)),
+            (METRIC_NAMES[9], f64::from(self.ai_declined_proposals)),
         ]
     }
 }
@@ -198,6 +209,9 @@ impl MetricsTracker {
         } else {
             f64::from(self.durations.iter().sum::<u32>()) / self.durations.len() as f64
         };
+        for sample in state.ai_refused_order_samples() {
+            eprintln!("ai refused order: {sample}");
+        }
         GameMetrics {
             revolts: self.revolts,
             bankruptcies: self.bankruptcies,
@@ -207,6 +221,8 @@ impl MetricsTracker {
             revolts_occupied: self.revolts_occupied,
             rebel_takeovers: self.rebel_takeovers,
             seasons_above_revolt_threshold: self.seasons_above_revolt_threshold,
+            ai_refused_orders: state.ai_refused_orders(),
+            ai_declined_proposals: state.ai_declined_proposals(),
         }
     }
 }

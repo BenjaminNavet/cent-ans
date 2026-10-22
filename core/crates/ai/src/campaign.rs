@@ -392,7 +392,7 @@ fn state_plans(
                         let treasury = state.factions.get(faction).map_or(0, |f| f.treasury)
                             - money_fief.as_ref().map_or(0, gift_amount);
                         let spare = (treasury - upkeep.0 - upkeep.1).max(0)
-                            / crate::support::SUBSIDY_SPARE_DIVISOR;
+                            / AiCampaign::bundled().tuning.subsidy_spare_divisor;
                         let subsidies = crate::support::plan_subsidies(cache, data, faction, spare);
                         (money_fief, embargoes, subsidies)
                     },

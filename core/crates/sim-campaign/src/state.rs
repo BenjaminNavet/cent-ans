@@ -1142,6 +1142,9 @@ pub struct CampaignState {
     /// replay on the map (off unless the interface turns it on); never saved.
     #[serde(skip)]
     pub(crate) ai_replay: crate::ai_replay::AiReplayLog,
+    /// B1: AI orders refused by the core, counted for the seed bots; never saved.
+    #[serde(skip)]
+    pub(crate) ai_refusals: crate::ai_replay::AiRefusals,
     /// CV3: classification of the last field battle (heroic, disaster...)
     /// for the UI; absent from older saves.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1206,6 +1209,7 @@ impl CampaignState {
             last_papal_call_end: None,
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),
+            ai_refusals: crate::ai_replay::AiRefusals::default(),
             last_battle_outcome: None,
             battle_history: crate::battle_history::BattleHistory::default(),
         }
