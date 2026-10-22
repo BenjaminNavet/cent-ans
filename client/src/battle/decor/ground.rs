@@ -235,7 +235,6 @@ pub struct GroundExtension {
     pub micro_normal: Option<Handle<Image>>,
     /// EP6 decor fields (RGBA8, nearest): kind / 8, yaw / pi, edge ramp, coverage.
     #[texture(109)]
-    #[sampler(110)]
     pub decor_fields: Option<Handle<Image>>,
     /// R2 relief map (RGBA8): slope, hollow at 30 m, hollow at 90 m.
     #[texture(111)]

@@ -45,9 +45,12 @@ processed-assets = ["bevy/asset_processor", "bevy/compressed_image_saver", "bevy
 # Bevy feature widens the view bind groups of every PBR material. Runtime switch: `enabled` of
 # data/fx/battle_decals.json (off too).
 decals = ["bevy/pbr_clustered_decals"]
-# solari (docs/wip/bevy-solari.md): raytraced lighting trial (bevy_solari), OFF by default. Needs a GPU with
-# ray queries; the plugin is only added when the adapter exposes them (see src/battle/scene/solari.rs).
+# solari (docs/wip/bevy-solari.md): raytraced lighting (bevy_solari). Needs a GPU with ray queries; the
+# plugin is only added when the adapter exposes them (see src/battle/scene/solari.rs).
 solari = ["bevy/bevy_solari", "dep:wgpu"]
+# Owner decision 2026-10-22: every Bevy feature lot is on by default. `ground.wesl` imports the clustered
+# decal module, which Bevy only registers with `decals`, so the ground shader needs it in every build.
+default = ["decals", "solari"]
 
 [dependencies]
 # solari: adapter probe before the app is built (same wgpu as Bevy's).
@@ -58,10 +61,11 @@ tracing = { version = "0.1", optional = true }
 tracing-subscriber = { version = "0.3", optional = true }
 bevy = { version = "=0.20.0", features = [
     "jpeg", "png", "webp", "mp3", "wav",
-    # pbr lot (docs/wip/bevy-pbr.md): optional PBR texture slots and PCSS soft shadows. Nothing changes
-    # until a material fills a slot or the `soft_shadows` post-effect (settings) is enabled.
-    "pbr_anisotropy_texture", "pbr_multi_layer_material_textures", "pbr_specular_textures",
-    "pbr_transmission_textures", "experimental_pbr_pcss",
+    # pbr lot (docs/wip/bevy-pbr.md): PCSS soft shadows (`soft_shadows` post-effect in settings).
+    # NOT enabled: pbr_anisotropy_texture, pbr_multi_layer_material_textures, pbr_specular_textures,
+    # pbr_transmission_textures. Each adds sampler slots to StandardMaterial; with all four the ground,
+    # stone and building extensions hit 17-19 samplers and Metal's limit of 16 crashes the battle at load.
+    "experimental_pbr_pcss",
 ] }
 data-model = { path = "../core/crates/data-model" }
 sim-campaign = { path = "../core/crates/sim-campaign" }
