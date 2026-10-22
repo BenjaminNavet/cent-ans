@@ -8,7 +8,8 @@
 //! `RaytracingMesh3d` cannot reuse their handle. A substitute is a child of the original (same
 //! transform, no `Mesh3d`, hence invisible to the raster) carrying a copy of the mesh reduced to
 //! position/normal/uv/tangent, plus a `StandardMaterial` of the mean colour of the original.
-//! The ground gets a coarse grid built from the battlefield. Instanced soldiers are left out.
+//! The ground gets a coarse grid built from the battlefield (rays only; the visible ground is
+//! rendered deferred, with its own G-buffer shader path, and lit by Solari). Instanced soldiers are left out.
 //! See docs/wip/bevy-solari.md. Msaa must be off, shadow maps are replaced by ray queries.
 
 use bevy::asset::RenderAssetUsages;
@@ -24,6 +25,7 @@ use bevy::solari::SolariPlugins;
 use bevy::solari::prelude::{RaytracingMesh3d, SolariLighting};
 use serde::Deserialize;
 
+use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::battle::decor::ground::GroundMaterial;
 use crate::battle::decor::wind::WindMaterial;
@@ -105,6 +107,7 @@ pub struct SolariTrialPlugin;
 
 impl Plugin for SolariTrialPlugin {
     fn build(&self, app: &mut App) {
+        app.register_dump(dump_solari);
         let Some(settings) = SolariSettings::load().filter(|settings| settings.enabled) else {
             return;
         };
@@ -133,7 +136,6 @@ impl Plugin for SolariTrialPlugin {
                     substitute_decor::<SiegeStoneMaterial>,
                     substitute_decor::<BuildingAtlasMaterial>,
                     substitute_decor::<WindMaterial>,
-                    force_forward::<GroundMaterial>,
                     force_forward::<SiegeStoneMaterial>,
                     force_forward::<BuildingAtlasMaterial>,
                     force_forward::<WindMaterial>,
@@ -142,6 +144,24 @@ impl Plugin for SolariTrialPlugin {
             )
             .add_systems(OnExit(AppState::Battle), reset_substitutes);
     }
+}
+
+/// Dump section `solari`: whether the plugin is active and whether the battle ground goes through
+/// the deferred G-buffer path (its material no longer forced to forward rendering).
+fn dump_solari(world: &World) -> (String, serde_json::Value) {
+    let active = world.contains_resource::<SolariSettings>();
+    let ground_deferred = active
+        && world
+            .get_resource::<Assets<GroundMaterial>>()
+            .is_some_and(|materials| {
+                materials
+                    .iter()
+                    .any(|(_, m)| m.base.opaque_render_method != OpaqueRendererMethod::Forward)
+            });
+    (
+        "solari".to_owned(),
+        serde_json::json!({ "active": active, "ground_deferred": ground_deferred }),
+    )
 }
 
 fn light_camera(
@@ -500,9 +520,10 @@ fn substitute_ground(
 }
 
 /// Solari makes the deferred renderer the default, and a deferred-resolved material is dropped
-/// from the main pass. The custom-shader materials (ground, wind foliage/grass, stone, building
-/// atlas) have no G-buffer output, so they are forced back to forward rendering: still visible,
-/// lit by the raster lights but not by Solari.
+/// from the main pass. The custom-shader materials (wind foliage/grass, stone, building atlas) have
+/// no G-buffer output, so they are forced back to forward rendering: still visible, lit by the
+/// raster lights but not by Solari. The ground is NOT in this list: `ground.wesl` has a deferred
+/// path (`deferred_fragment_shader`), so Solari lights it.
 fn force_forward<M: Material + BaseColor>(
     mut events: MessageReader<AssetEvent<M>>,
     mut materials: ResMut<Assets<M>>,

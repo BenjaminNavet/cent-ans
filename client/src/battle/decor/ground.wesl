@@ -11,12 +11,27 @@
 //
 // Texture reads below flow control use explicit gradients or levels (WGSL uniformity rules).
 import bevy_pbr::render::{
-    forward_io::{VertexOutput, FragmentOutput},
     pbr_fragment::pbr_input_from_standard_material,
-    pbr_functions::{apply_pbr_lighting, main_pass_post_lighting_processing},
+    pbr_types::PbrInput,
     mesh_view_bindings::view,
 };
 import bevy_pbr::decal::clustered::apply_decals;
+
+// Two render paths share `ground_pbr_input` below (the whole material computation):
+// - forward (default): `apply_pbr_lighting` + post-lighting processing in the main pass;
+// - deferred (`PREPASS_PIPELINE`, used when Solari makes the deferred renderer the default): the
+//   same PbrInput goes to the G-buffer through `deferred_output`, lit afterwards (Solari / deferred
+//   lighting pass). The G-buffer keeps base colour (8-bit sRGB), perceptual roughness (8 bit), the
+//   shading normal (octahedral) and emissive: that is all this shader produces (snow, mud, splat,
+//   decals and the weather are already folded into those), so only precision is lost.
+@if(PREPASS_PIPELINE)
+import bevy_pbr::prepass::io::{VertexOutput, FragmentOutput};
+@if(PREPASS_PIPELINE)
+import bevy_pbr::deferred::functions::deferred_output;
+@if(!PREPASS_PIPELINE)
+import bevy_pbr::render::forward_io::{VertexOutput, FragmentOutput};
+@if(!PREPASS_PIPELINE)
+import bevy_pbr::render::pbr_functions::{apply_pbr_lighting, main_pass_post_lighting_processing};
 
 struct GroundParams {
     layers: array<vec4<f32>, 13>,
@@ -222,15 +237,17 @@ fn layer_albedo(k: i32, uv: vec2<f32>, g: Grads, scale: f32) -> vec3<f32> {
     return textureSampleGrad(albedo_array, albedo_sampler, uv, k, g.dx * scale, g.dy * scale).rgb;
 }
 
-fn layer_normal_xy(k: i32, uv: vec2<f32>, g: Grads, scale: f32) -> vec2<f32> {
-    if ground.detail.z < 0.5 {
+// `normals_on` is false once the normal strength has faded to 0 (beyond `detail.y`): the taps would
+// be multiplied by 0, so they are skipped (explicit gradients: legal in non-uniform control flow).
+fn layer_normal_xy(k: i32, uv: vec2<f32>, g: Grads, scale: f32, normals_on: bool) -> vec2<f32> {
+    if ground.detail.z < 0.5 || !normals_on {
         return vec2<f32>(0.0);
     }
     return textureSampleGrad(normal_array, albedo_sampler, uv, k, g.dx * scale, g.dy * scale).xy * 2.0 - 1.0;
 }
 
-@fragment
-fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> FragmentOutput {
+// The ground material as a PbrInput (shared by the forward and the deferred paths).
+fn ground_pbr_input(in: VertexOutput, is_front: bool) -> PbrInput {
     var pbr_input = pbr_input_from_standard_material(in, is_front);
     let p = in.world_position.xz;
     let world_y = in.world_position.y;
@@ -372,6 +389,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
 
     // Layers: two taps (scales and orientations), flattened to their mean at mid distance.
     let far_k = smoothstep(ground.far.y, ground.far.z, view_dist) * ground.far.x;
+    let normals_on = ground.detail.x > 0.0 && view_dist < ground.detail.y;
     let g2 = Grads(rot_a(g.dx), rot_a(g.dy));
     var albedo = vec3<f32>(0.0);
     var nxy = vec2<f32>(0.0);
@@ -392,7 +410,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
         let uv1 = p / s;
         let uv2 = rot_a(p) / (s * 2.3) + vec2<f32>(0.37, 0.71);
         var a = mix(layer_albedo(i, uv1, g, 1.0 / s), layer_albedo(i, uv2, g2, 1.0 / (s * 2.3)), blend);
-        var n = mix(layer_normal_xy(i, uv1, g, 1.0 / s), layer_normal_xy(i, uv2, g2, 1.0 / (s * 2.3)), blend);
+        var n = mix(layer_normal_xy(i, uv1, g, 1.0 / s, normals_on), layer_normal_xy(i, uv2, g2, 1.0 / (s * 2.3), normals_on), blend);
         let mean = ground.layers[i].rgb;
         a = mix(a, mean, far_k);
         n = n * (1.0 - far_k);
@@ -448,7 +466,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
         let dcol = layer_albedo(dom, uvn, gn, 1.0 / s);
         let dl = bt_luma(dcol) / max(bt_luma(ground.layers[dom].rgb), 0.02);
         albedo = albedo * mix(1.0, clamp(dl, 0.55, 1.5), near_k * 0.5);
-        nxy = nxy + layer_normal_xy(dom, uvn, gn, 1.0 / s) * near_k * 0.6;
+        nxy = nxy + layer_normal_xy(dom, uvn, gn, 1.0 / s, normals_on) * near_k * 0.6;
     }
     // PO4 micro grain on grass, meadows, dirt and mud (not rock nor snow).
     var nd_k = 1.0 - smoothstep(ground.micro.z * 0.45, ground.micro.z, view_dist);
@@ -463,8 +481,10 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
         let mref = textureSampleLevel(micro_albedo, micro_albedo_sampler, muv, ml, 12.0).rgb;
         let mlum = bt_luma(mcol) / max(bt_luma(mref), 0.02);
         albedo = albedo * mix(1.0, clamp(mlum, 0.5, 1.6), nd_k * ground.micro.y);
-        let mn = textureSampleGrad(micro_normal, micro_albedo_sampler, muv, ml, mdx, mdy).xy * 2.0 - 1.0;
-        nxy = nxy + mn * nd_k * 0.8;
+        if normals_on {
+            let mn = textureSampleGrad(micro_normal, micro_albedo_sampler, muv, ml, mdx, mdy).xy * 2.0 - 1.0;
+            nxy = nxy + mn * nd_k * 0.8;
+        }
     }
     // Furrows, faded where their period goes under a few pixels and at mid distance.
     if w_plough > 0.0 || w_fresh > 0.0 {
@@ -539,9 +559,20 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
 
     // Clustered decals (lot decals): blood and mud traces; a no-op without the `decals` feature.
     apply_decals(&pbr_input);
+    return pbr_input;
+}
 
+@fragment
+fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> FragmentOutput {
+    let pbr_input = ground_pbr_input(in, is_front);
+@if(PREPASS_PIPELINE)
+    return deferred_output(in, pbr_input);
+@if(!PREPASS_PIPELINE)
     var out: FragmentOutput;
+@if(!PREPASS_PIPELINE)
     out.color = apply_pbr_lighting(pbr_input);
+@if(!PREPASS_PIPELINE)
     out.color = main_pass_post_lighting_processing(pbr_input, out.color);
+@if(!PREPASS_PIPELINE)
     return out;
 }
