@@ -307,4 +307,20 @@ mod tests {
         };
         assert!((big.effective_ui_scale(1800.0) - 2.0).abs() < 1e-6);
     }
+
+    /// `Settings` is inspectable through BRP: auto-registered, with its `Resource` reflection.
+    #[cfg(feature = "reflect-inspect")]
+    #[test]
+    fn settings_is_reflected_for_brp() {
+        let registry = bevy::ecs::reflect::AppTypeRegistry::new_with_derived_types();
+        let registry = registry.read();
+        let registration = registry
+            .get(std::any::TypeId::of::<Settings>())
+            .expect("Settings auto-registered");
+        assert!(
+            registration
+                .data::<bevy::ecs::reflect::ReflectResource>()
+                .is_some()
+        );
+    }
 }

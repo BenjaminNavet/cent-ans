@@ -1,6 +1,6 @@
 # Lot misc — features Bevy 0.20 diverses
 
-État : code écrit, compilation et tests en attente de la fin du banc release (`pgrep -f "bench.sh perf_"`).
+État : TERMINÉ. clippy `--features dev --all-targets -D warnings` propre, `cargo fmt`, tests : 1404 OK + 1 échec préexistant (`campaign::markers::dn::tests::real_table_and_glbs` : glb absent du worktree, sans lien avec le lot), nouveau test `settings_is_reflected_for_brp` OK. Pas de lancement BRP en direct (disque à 99 %).
 
 ## Tableau de décisions
 
@@ -16,7 +16,7 @@
 - `WaypointLabel` (`battle/orders/marks.rs`) : `#[require(Node, Visibility::Hidden, Pickable::IGNORE)]`, spawn allégé.
 - `Single<(&Camera,&GlobalTransform), With<BattleCamera>>` : `marks.rs` (labels de waypoints), `formations.rs` (`draw_ghosts`).
 - `Single<Entity, With<BattleHudRoot>>` : `hud/journal.rs`, `cursor_tips.rs`, `orders_bar.rs`, `info.rs`, `formation_menu.rs`.
-- `Populated<>` : voir ci-dessous.
+- `Populated<>` : non appliqué. Les gardes `is_empty()` du code sont des inversions (« spawn si absent ») ou portent sur des `Vec`, pas sur des requêtes à early-return ; aucun cas simple et sûr.
 
-## Prochaine étape
-Compiler (clippy dev + tests), vérifier `world.get_resources` sur `Settings` via BRP offscreen.
+## Reste
+Vérification live optionnelle : `client/brp.sh world.get_resources` avec le type `cent_ans_client::settings::model::Settings` sur un client `dev` offscreen.
