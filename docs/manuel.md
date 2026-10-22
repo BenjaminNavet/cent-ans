@@ -481,5 +481,6 @@ Le panneau de faction n'a pas de raccourci.
 ## 16. Crédits
 
 Voir `CREDITS.md` et l'écran Crédits : icônes game-icons.net (CC BY 3.0), relief ETOPO 2022 (NOAA), côtes
-et rivières Natural Earth, moteur Godot, godot-rust. Modèles, écus, sons, musiques et illustration du menu
-sont générés par les outils du projet.
+et rivières Natural Earth, moteur Bevy (Rust). Modèles, écus et illustration du menu sont générés par les
+outils du projet. Les musiques et une partie des sons sont des pistes tierces sous licence libre (CC BY et
+équivalentes), listées avec leurs auteurs dans la section Musique de l'écran Crédits et dans `CREDITS.md`.

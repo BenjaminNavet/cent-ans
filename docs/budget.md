@@ -1,23 +1,24 @@
 # Budget cloud (v1)
 
-**Synthèse (2026-10-09)**
+**Synthèse (2026-10-22)**
 
 Générée par `cent-ans budget summary` (`BudgetLedger.render_summary()`), qui lit **toutes** les tables ci-dessous
 et somme la colonne « Coût réel » (la colonne « Cumul » est recalculée, plus jamais lue). À régénérer quand une
-enveloppe bouge.
+enveloppe bouge. Régénérée le 2026-10-22 : l'ancienne synthèse (117,39 $ au 09/10) omettait TX, QW-E, RG13 et
+le banc Meshy MX. Aucun montant historique n'a été modifié.
 
-**Plafond v1 de 50 $ dépassé : ~117 $ (117,39 $) dépensés, sur 17 enveloppes.** Arbitrage du 09/10 (joueur : « attaquer tous les points ») : le plafond de 50 $ reste la référence historique de la v1 ; désormais **toute dépense cloud passe par une enveloppe nommée, approuvée par le joueur**, avec son plafond propre. Enveloppe DN close : `dn_batch.py` refuse toute dépense fal par défaut (`DN_FAL_CAP_USD` = 0 ; le passer explicitement avec une enveloppe approuvée).
+**Plafond v1 de 50 $ dépassé : 136,39 $ dépensés, sur 20 enveloppes.** Arbitrage du 09/10 (joueur : « attaquer tous les points ») : le plafond de 50 $ reste la référence historique de la v1 ; désormais **toute dépense cloud passe par une enveloppe nommée, approuvée par le joueur**, avec son plafond propre. Enveloppe DN close : `dn_batch.py` refuse toute dépense fal par défaut (`DN_FAL_CAP_USD` = 0 ; le passer explicitement avec une enveloppe approuvée).
 Plafond d'origine : 50,00 $ pour la v1, non modifié ici ; chaque enveloppe garde son plafond propre (voir ses titres), et la règle
 « en dessous du plafond, aucune confirmation » ne vaut que pour le plafond de 50 $ de l'enveloppe en cours.
 
 Par fournisseur :
 
 - OpenRouter : 59,82 $
-- fal.ai : 57,57 $
+- fal.ai : 76,57 $
 - OpenAI, local, Poly Haven, Freesound (CC0), données ouvertes : 0,00 $
-- **Total général : 117,39 $**
+- **Total général : 136,39 $**
 
-Par enveloppe (plafond propre) :
+Par enveloppe (plafond propre, tel que nommé dans le titre de chaque section) :
 
 - Principal (sessions 1-5, plafond v1 50 $) : 19,20 $
 - Session 7 (50 $) : 1,07 $
@@ -34,22 +35,25 @@ Par enveloppe (plafond propre) :
 - Biomes HB (8 $) : 3,82 $
 - Nuit visuelle VN (5 $) : 1,04 $
 - Campagne TB (25 $, annulée ADR 0152) : 0,00 $
-- **Nuit DN (≤ 10 $, ADR 0210)** : **42,43 $** (**dépassement de ~32,4 $ sur l'enveloppe**)
-- Conseil RG13 (2 $) : 0,61 $
-
+- **Nuit DN (≤ 10 $, ADR 0210)** : **42,67 $** (**dépassement de ~32,7 $ sur l'enveloppe**)
+- **Textures régionales TX (10 $, ADR 0236)** : **11,82 $** (**dépassement de ~1,8 $ sur l'enveloppe**)
+- Figurine yaya QW-E (1 $) : 0,05 $
+- Conseil RG13 (2 $) : 0,60 $
+- Banc Meshy MX (8 $) : 6,90 $
 
 Dépassements à signaler :
 
-- **Plafond global v1** : 50 $ annoncés, ~117 $ réels (OpenRouter 59,82 $ + fal.ai 57,57 $). Les enveloppes
-  propres (50 + 20 + 50 + 15 + 15 + 10 + 10 + …) ont été ouvertes au fil des sessions sans relever le plafond de
+- **Plafond global v1** : 50 $ annoncés, 136,39 $ réels (OpenRouter 59,82 $ + fal.ai 76,57 $). Les enveloppes
+  propres (50 + 20 + 50 + 15 + 15 + 10 + 10 + 10 + …) ont été ouvertes au fil des sessions sans relever le plafond de
   l'en-tête.
-- **Nuit DN** : enveloppe ≤ 10 $ (ADR 0210), 42,43 $ consignés, dont 9,00 $ de TRELLIS 2 (30 appels,
-  `fal-ai/trellis-2`) alors que le joueur interdit TRELLIS 2 (lot B du plan QW le retire du code).
+- **Nuit DN** : enveloppe ≤ 10 $ (ADR 0210), 42,67 $ consignés, dont 9,00 $ de TRELLIS 2 (30 appels,
+  `fal-ai/trellis-2`) alors que le joueur interdit TRELLIS 2 (lot B du plan QW le retire du code). Le total de
+  09/10 (42,43 $, rapproché du journal fal plus bas) est antérieur aux lots DN-TROUS ; l'écart de 0,24 $ entre les deux
+  n'est pas expliqué ici.
+- **Textures régionales TX** : 11,82 $ contre une enveloppe de 10 $ (validée par le joueur, ADR 0236) : à confirmer.
 - **Plafonds contradictoires dans le code** : `tools/experiments/dn_batch.py` lit `DN_FAL_CAP_USD` avec une valeur par
   défaut de **43,5 $** ; la valeur de 29,50 $ citée ailleurs n'existe plus dans l'arbre (non retrouvée) ; l'ADR
   fixe ≤ 10 $. Aucune des trois valeurs n'est cohérente avec les autres : à trancher avec le plafond ci-dessus.
-- **Colonne « Cumul » de la table DN** : mélangeait cumul du journal, « cumul chantier » par lot et texte ; elle
-  était lue comme 0,02 $ par l'ancien `budget.py`. Recalculée ici (dernière ligne : 42,43 $).
 
 Rapprochement avec le journal fal (`~/dev/cent-ans-raw/dn/fal_spend.jsonl`, 2 667 appels, 8-9/10) : **43,14 $**
 au journal contre **42,43 $** au registre, soit **0,71 $ d'écart** (le registre est plus bas). Journal par
