@@ -19,3 +19,9 @@ Statut : inventaire fait (2026-10-22), rien d'implémenté.
 ## Points ouverts
 - Sources JPG sRGB vs données linéaires (normales, masques) : choix du format par suffixe (`_diff`, `_nor`, ...).
 - Les .tres/JSON qui référencent les chemins doivent suivre le changement d'extension.
+
+## Essai encodeur (2026-10-22)
+- `brew` n'a pas de formule KTX. KTX-Software 4.4.2 (release GitHub, `.pkg` dézippé avec `pkgutil --expand-full`, sans sudo) : `ktx` + `libktx*.dylib` copiés côte à côte.
+- `ktx create --encode bc7` n'existe pas en 4.4 : passer par **UASTC + zstd** (`--format R8G8B8A8_SRGB|UNORM --encode uastc --uastc-quality 2 --zstd 19 --generate-mipmap`), que Bevy transcode en BC7 (feature `basis-universal` + `zstd`).
+- Mesure sur `castle_wall_varriation_{diff,nor}.jpg` : diff 2,4 Mo JPG → 5,1 Mo KTX2 (8,2 s), nor 0,97 → 1,3 Mo (1,4 s). Le disque grossit ; le gain est GPU (BC7 = 1 o/texel contre 4 o en RGBA8, mips inclus) et chargement (pas de décodage JPEG).
+- Conséquence : ne pas committer ~630 Mo de KTX2. Sources JPG/PNG restent dans git ; KTX2 = cache généré (gitignoré) → convient au préprocesseur Bevy (`AssetMode::Processed`).
