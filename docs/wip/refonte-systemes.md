@@ -1,6 +1,6 @@
 # Refonte des systèmes : mêlée, révoltes, économie, IA de campagne
 
-État au 21/10/2026 : **plan seulement, rien n'est implémenté.** Quatre chantiers indépendants,
+État au 22/10/2026 : **chantier 1 lot A fait (métriques de révoltes, b52938098) ; le reste n'est pas implémenté.** Quatre chantiers indépendants,
 à lancer dans une autre session. Chacun commence par un lot de **mesure** (seed bots, ADR 0348,
 ou tests), sans changement de règle, puis enchaîne des lots de règles. Le détail de chaque lot
 (fichiers, tests, risques) est dans les notes de travail locales de l'agent.
@@ -20,6 +20,11 @@ sans armée ni bataille. Moins d'occupations depuis la règle de fatigue d'EQ6.
   seuil, province occupée ou non). Unifier la bande cible : 3-15 (seed bots) contre 4-10
   (`balance_probe`). Corriger la description de `population.json` (« 2 saisons » alors que
   la valeur est 5). L'écart actuel est dans le bruit (±0,8) : mesurer avant de conclure.
+  *Fait (22/10)* : métriques `revolts_occupied`, `rebel_takeovers`, `seasons_above_revolt_threshold`
+  (bandes `to_initialise`) ; description de `population.json` corrigée. Mesure (`run --quick --balance
+  --seeds 1..4 --turns 60`, 3 parties/bot, bruit élevé) : révoltes/partie 0 à 4,3 selon le bot
+  (aggressor 4,3, random-legal 3,7, sailor 2,5, turtle 2, builder 1, diplomat 0) ; prises par les
+  rebelles 0 à 1 ; saisons au-dessus du seuil 0 à 24 par partie. Reste : unifier la bande 3-15 / 4-10.
 - **B** : jauge de tension cumulée (monte au-dessus du seuil, redescend lentement) à la
   place du compteur de saisons consécutives.
 - **C** : armée rebelle levée selon la richesse et la culture de la province ; la vaincre
