@@ -26,7 +26,9 @@
     "min_gold": 60,
     "extra_unrest": 10,
     "victim_opinion": -10,
-    "opinion_turns": 12
+    "opinion_turns": 12,
+    "banditry_devastation": 0,
+    "banditry_turns": 0
   },
   "sack": {
     "gold_income_share": 4.0,
@@ -40,7 +42,9 @@
     "papal_favor": -3,
     "victim_opinion": -25,
     "others_opinion": -5,
-    "opinion_turns": 20
+    "opinion_turns": 20,
+    "banditry_devastation": 10,
+    "banditry_turns": 4
   },
   "raze": {
     "effects": {
@@ -55,7 +59,9 @@
       "papal_favor": -5,
       "victim_opinion": -40,
       "others_opinion": -15,
-      "opinion_turns": 40
+      "opinion_turns": 40,
+      "banditry_devastation": 15,
+      "banditry_turns": 6
     },
     "fortification_loss": 1,
     "ruin_turns": 8
@@ -86,7 +92,9 @@
       "occupy": 60,
       "ransom": 20,
       "sack": 10,
-      "raze": 0
+      "raze": 0,
+      "gift": 0,
+      "liberate": 0
     },
     "factions": {
       "fac_england": {
@@ -132,6 +140,38 @@
       "ransom": 0,
       "sack": 0,
       "raze": 40
+    },
+    "allied_present_bonus": {
+      "occupy": 0,
+      "ransom": 0,
+      "sack": 0,
+      "raze": 0,
+      "gift": 70,
+      "liberate": 0
+    },
+    "liberate_bonus": {
+      "occupy": 0,
+      "ransom": 0,
+      "sack": 0,
+      "raze": 0,
+      "gift": 0,
+      "liberate": 75
     }
+  },
+  "foreign_culture_extra": {
+    "occupy": 4,
+    "ransom": 4,
+    "sack": 6,
+    "raze": 10
+  },
+  "gift": {
+    "recipient_opinion": 20,
+    "opinion_turns": 20
+  },
+  "liberate": {
+    "former_holder_opinion": 30,
+    "allies_opinion": 10,
+    "opinion_turns": 20,
+    "prestige": 5
   }
 }

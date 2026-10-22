@@ -22,7 +22,9 @@
         "papal_favor": { "$ref": "#/$defs/delta" },
         "victim_opinion": { "$ref": "#/$defs/delta", "description": "Opinion de l'ancien tenant envers le preneur." },
         "others_opinion": { "$ref": "#/$defs/delta", "description": "Opinion de toutes les autres factions envers le preneur." },
-        "opinion_turns": { "type": "integer", "minimum": 0, "maximum": 200 }
+        "opinion_turns": { "type": "integer", "minimum": 0, "maximum": 200 },
+        "banditry_devastation": { "$ref": "#/$defs/points", "description": "Banditisme : dévastation temporaire ajoutée après l'issue (M2, × part de la place), retirée au bout de banditry_turns." },
+        "banditry_turns": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Durée (tours) du banditisme." }
       },
       "required": ["gold_income_share", "min_gold", "extra_unrest"],
       "additionalProperties": false
@@ -33,13 +35,49 @@
         "occupy": { "type": "integer" },
         "ransom": { "type": "integer" },
         "sack": { "type": "integer" },
-        "raze": { "type": "integer" }
+        "raze": { "type": "integer" },
+        "gift": { "type": "integer" },
+        "liberate": { "type": "integer" }
       },
       "additionalProperties": false
     }
   },
   "properties": {
     "description": { "type": "string" },
+    "foreign_culture_extra": {
+      "type": "object",
+      "description": "Troubles ajoutés quand la culture de la province n'est pas celle du preneur (langue, droit coutumier), par sort (M2, ADR 0723).",
+      "properties": {
+        "occupy": { "$ref": "#/$defs/points" },
+        "ransom": { "$ref": "#/$defs/points" },
+        "sack": { "$ref": "#/$defs/points" },
+        "raze": { "$ref": "#/$defs/points" }
+      },
+      "required": ["occupy", "ransom", "sack", "raze"],
+      "additionalProperties": false
+    },
+    "gift": {
+      "type": "object",
+      "description": "Remettre la place à un allié ou vassal (don féodal) : sans troubles (M2).",
+      "properties": {
+        "recipient_opinion": { "$ref": "#/$defs/delta", "description": "Opinion du bénéficiaire envers le donateur." },
+        "opinion_turns": { "type": "integer", "minimum": 0, "maximum": 200 }
+      },
+      "required": ["recipient_opinion", "opinion_turns"],
+      "additionalProperties": false
+    },
+    "liberate": {
+      "type": "object",
+      "description": "Libérer la place : la rendre à son tenant de droit ; annule la rancune M1 sur cette place (M2).",
+      "properties": {
+        "former_holder_opinion": { "$ref": "#/$defs/delta" },
+        "allies_opinion": { "$ref": "#/$defs/delta", "description": "Opinion des alliés de l'ancien tenant envers le libérateur." },
+        "opinion_turns": { "type": "integer", "minimum": 0, "maximum": 200 },
+        "prestige": { "$ref": "#/$defs/delta", "description": "Prestige du chef du libérateur." }
+      },
+      "required": ["former_holder_opinion", "allies_opinion", "opinion_turns", "prestige"],
+      "additionalProperties": false
+    },
     "occupy": {
       "type": "object",
       "properties": {
@@ -115,12 +153,14 @@
         "poor_bonus": { "$ref": "#/$defs/scores" },
         "foreign_culture_bonus": { "$ref": "#/$defs/scores" },
         "own_land_bonus": { "$ref": "#/$defs/scores" },
-        "exposed_bonus": { "$ref": "#/$defs/scores" }
+        "exposed_bonus": { "$ref": "#/$defs/scores" },
+        "allied_present_bonus": { "$ref": "#/$defs/scores", "description": "Ajouté quand une armée alliée est sur la place (siège commun) : pousse à la remettre." },
+        "liberate_bonus": { "$ref": "#/$defs/scores", "description": "Ajouté quand la place a un tenant de droit en paix avec le preneur : pousse à la libérer." }
       },
       "required": ["default", "poor_treasury", "poor_bonus", "foreign_culture_bonus", "own_land_bonus", "exposed_bonus"],
       "additionalProperties": false
     }
   },
-  "required": ["occupy", "raid", "siege", "ransom", "sack", "raze", "place_share", "raze_forbidden_kinds", "raze_forbidden_settlements", "ai"],
+  "required": ["foreign_culture_extra", "gift", "liberate", "occupy", "raid", "siege", "ransom", "sack", "raze", "place_share", "raze_forbidden_kinds", "raze_forbidden_settlements", "ai"],
   "additionalProperties": false
 }

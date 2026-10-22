@@ -19,6 +19,13 @@ pub struct CaptureRules {
     pub ransom: OutcomeRules,
     pub sack: OutcomeRules,
     pub raze: RazeRules,
+    /// M2 (ADR 0723): extra unrest when the province's culture is not the
+    /// captor's, by outcome.
+    pub foreign_culture_extra: OutcomeScoresPoints,
+    /// M2: « Remettre la place » (feudal gift to an ally or vassal).
+    pub gift: GiftRules,
+    /// M2: « Libérer la place » (back to its rightful holder).
+    pub liberate: LiberateRules,
     /// Scale (0-1) of the gold, population, devastation and extra unrest of
     /// an outcome by kind of place (the city of the province is 1).
     pub place_share: BTreeMap<SettlementKind, f64>,
@@ -39,6 +46,38 @@ pub struct OccupyRules {
     pub unrest_city: u8,
     /// Unrest added when another place of the province is taken.
     pub unrest_place: u8,
+}
+
+/// One unrest figure per outcome that takes the place by force.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OutcomeScoresPoints {
+    pub occupy: u8,
+    pub ransom: u8,
+    pub sack: u8,
+    pub raze: u8,
+}
+
+/// « Remettre la place »: no unrest; the recipient is grateful for a while.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GiftRules {
+    /// Opinion of the recipient towards the giver.
+    pub recipient_opinion: i32,
+    pub opinion_turns: u32,
+}
+
+/// « Libérer la place »: no unrest; the former holder and its allies are
+/// grateful, the giver gains prestige; the M1 grudge on the place falls.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct LiberateRules {
+    pub former_holder_opinion: i32,
+    /// Opinion of the allies of the former holder towards the liberator.
+    pub allies_opinion: i32,
+    pub opinion_turns: u32,
+    /// Prestige of the liberator's ruler.
+    pub prestige: i32,
 }
 
 /// A chevauchée: what one turn of raiding does to a province.
@@ -143,6 +182,12 @@ pub struct OutcomeRules {
     /// Duration (turns) of the opinion modifiers.
     #[serde(default)]
     pub opinion_turns: u32,
+    /// M2: banditry after the outcome, extra devastation (× place share)
+    /// removed after `banditry_turns` turns.
+    #[serde(default)]
+    pub banditry_devastation: u8,
+    #[serde(default)]
+    pub banditry_turns: u32,
 }
 
 /// « Raser / brûler »: the extra effects plus the loss of the place.
@@ -179,6 +224,12 @@ pub struct CaptureAiRules {
     /// Added for a place (not the city) whose province city stays in enemy
     /// hands: it cannot be held.
     pub exposed_bonus: OutcomeScores,
+    /// M2: added when an allied army stands on the place (joint siege).
+    #[serde(default)]
+    pub allied_present_bonus: OutcomeScores,
+    /// M2: added when the place has a rightful holder at peace with the captor.
+    #[serde(default)]
+    pub liberate_bonus: OutcomeScores,
 }
 
 /// One score per outcome.
@@ -193,6 +244,10 @@ pub struct OutcomeScores {
     pub sack: i32,
     #[serde(default)]
     pub raze: i32,
+    #[serde(default)]
+    pub gift: i32,
+    #[serde(default)]
+    pub liberate: i32,
 }
 
 crate::bundled_rules!(CaptureRules, "rules/capture.json", default);
