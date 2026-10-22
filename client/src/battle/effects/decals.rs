@@ -585,13 +585,16 @@ mod tests {
     }
 
     #[test]
-    fn data_file_parses_and_is_off() {
+    fn data_file_parses_and_is_on() {
         let root = crate::paths::find_root().expect("repo root");
         let text =
             std::fs::read_to_string(crate::paths::data_dir(&root).join("fx/battle_decals.json"))
                 .expect("battle_decals.json");
         let settings: DecalSettings = serde_json::from_str(&text).expect("valid settings");
-        assert!(!settings.enabled, "decals stay off until measured");
+        assert!(
+            settings.enabled,
+            "decals are on by default (owner decision 2026-10-22)"
+        );
     }
 
     #[test]
