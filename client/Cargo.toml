@@ -18,7 +18,13 @@ path = "src/main.rs"
 
 [features]
 # Fast iterations: Bevy dynamic linking. The player binary is linked statically.
-dev = ["bevy/dynamic_linking", "bevy/file_watcher", "bevy/debug", "remote", "reflect-inspect", "dep:bevy_brp_extras", "dep:bevy_egui", "dep:bevy_console", "dep:clap"]
+dev = ["bevy/dynamic_linking", "bevy/file_watcher", "bevy/debug", "remote", "reflect-inspect", "dep:bevy_brp_extras", "dep:bevy_egui", "dep:bevy_console", "dep:clap", "bevy-devtools"]
+# Lot devtools: Bevy 0.20 dev tools (diagnostics overlay, render debug overlay, system stepping).
+# Only reachable through `dev`; the player build never enables them (docs/wip/bevy-devtools.md).
+bevy-devtools = ["bevy/bevy_dev_tools", "bevy/render_dev_tools", "bevy/bevy_debug_stepping"]
+# Lot devtools: subsecond hotpatching of systems (`dx serve --hotpatch`). Separate from `dev`
+# because it is untested with `dynamic_linking`; see client/README.md.
+hotpatch = ["bevy/hotpatching"]
 # Bevy Remote Protocol (HTTP, localhost) for live inspection by agents.
 remote = ["bevy/bevy_remote"]
 # Per-system timings (bevy_ecs tracing spans + our own subscriber layer, no Chrome/Tracy crate):

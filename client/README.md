@@ -444,6 +444,12 @@ Rien de tout cela n'est dans le binaire joueur. `dev` = liaison dynamique + `bev
 - **Piloter un client en marche** (sans focus ni son) : lancer `CENT_ANS_MUTE=1 CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug CENT_ANS_BRP_PORT=15742 client/run_bg.sh --offscreen --state Campaign --exit-after 100000 > out/run.log 2>&1 &`, puis `CENT_ANS_BRP_PORT=15742 client/brp.sh <méthode> [json]` : `cent_ans/dump` (JSON de `--dump-state`, en direct), `brp_extras/send_keys {"keys":["F4"]}`, `brp_extras/type_text`, `brp_extras/screenshot {"path":"/abs.png","camera":<entité>}` (sous `--offscreen` la fenêtre est noire : passer une caméra), `brp_extras/shutdown`, `rpc.discover`. Port par défaut 15702 ; un port par agent.
 - **Console** : `F8` ou la touche sous Échap (`CENT_ANS_CONSOLE_KEY=<KeyCode>` pour changer F8). `dump-state [fichier absolu]`, `goto <État>`, `wireframe`, `shadows`, `help`. Preuve sans fenêtre : `CENT_ANS_CONSOLE_DEMO="wireframe;goto codex"`.
 - **Ordre des systèmes** : `CENT_ANS_SHUFFLE_SEED=<n>` (mélange, mono-fil, reproductible), `client/tests/shuffle.sh [-s "1 2 3"] [scénario...]`, `CENT_ANS_AMBIGUITIES=1` pour lister les conflits sans ordre.
+- **Outils Bevy 0.20 (lot devtools)** : feature `bevy-devtools` (comprise dans `dev`, jamais dans le build joueur) = `bevy/bevy_dev_tools` + `bevy/render_dev_tools` + `bevy/bevy_debug_stepping`. Code : `src/agent/bevy_tools.rs`. Rien n'est actif par défaut (captures propres) ; `CENT_ANS_DEVTOOLS=diagnostics,render,stepping` (ou `all`) à l'ouverture :
+  - `diagnostics` (ou `fps`) : fenêtre déplaçable / repliable FPS, durée d'image, nombre d'entités (`DiagnosticsOverlay`). Commande console `overlay` pour l'ouvrir / fermer à chaud.
+  - `render` : surcouche de débogage du rendu de Bevy, `F9` change de mode, `F10` l'opacité (`F2` appartient aux repères de caméra de bataille).
+  - `stepping` : exécution pas à pas des systèmes d'`Update` (ressource `Stepping`), pilotée par la console : `step on|off|frame|continue|status`.
+  - `free_camera` / `bevy_camera_controller` : non adoptés, la caméra du jeu a ses contrôleurs et un second se battrait avec eux.
+  - **Hotpatching** : feature séparée `hotpatch` (`bevy/hotpatching`), hors `dev` ; voir `docs/wip/bevy-devtools.md` pour le résultat de compatibilité avec `dynamic_linking` et l'usage.
 - MCP `bevy_brp_mcp` : non adopté (52 outils, ~31 000 jetons) ; voir `docs/wip/bm-devtools2.md` § 2 pour l'activer en local.
 
 ## Accessibilité (lot access)

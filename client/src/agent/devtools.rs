@@ -58,6 +58,7 @@ impl Plugin for DevToolsPlugin {
             app.add_systems(Update, probe_empty_meshes);
         }
         app.add_plugins(console::DevConsolePlugin);
+        app.add_plugins(super::bevy_tools::BevyToolsPlugin);
         if let Some(seed) = std::env::var("CENT_ANS_SHUFFLE_SEED")
             .ok()
             .and_then(|text| text.parse::<u64>().ok())

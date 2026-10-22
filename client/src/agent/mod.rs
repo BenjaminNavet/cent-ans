@@ -6,6 +6,8 @@
 
 pub mod bench;
 pub mod bench_battle;
+#[cfg(feature = "dev")]
+pub mod bevy_tools;
 pub mod cli;
 pub mod devtools;
 pub mod dump;
