@@ -64,7 +64,7 @@ pub use entities::army_traditions::{
     TraditionBranch, TraditionBranchDef, TraditionEffects,
 };
 pub use entities::auto_resolve::{
-    AutoResolveRules, AutoResolveWeather, TerrainEffects, WeatherChances,
+    AutoResolveRules, AutoResolveWeather, ForecastFogRules, TerrainEffects, WeatherChances,
 };
 pub use entities::battle_ability::{
     AbilityCondition, AbilityKind, BattleAbility, BattleAbilityAi, BattleAbilityEffects,

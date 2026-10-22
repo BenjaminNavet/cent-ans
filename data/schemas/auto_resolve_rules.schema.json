@@ -64,6 +64,17 @@
     "jitter": { "$ref": "#/$defs/share", "description": "Fortune des armes : chaque phase est multipliée par 1 ± jitter." },
     "battle_fortune": { "type": "number", "minimum": 0, "maximum": 0.9, "description": "Brouillard de guerre : les dégâts de chaque camp sont multipliés une fois par bataille par 1 ± battle_fortune (ADR 0181)." },
     "forecast_samples": { "type": "integer", "minimum": 1, "maximum": 1000, "description": "Auto-résolutions lancées par la prévision d'avant-bataille (ADR 0181)." },
+    "forecast_fog": {
+      "type": "object", "additionalProperties": false,
+      "description": "ADR 0722 : demi-largeur du bruit relatif de la prévision selon la connaissance de l'ennemi (jamais appliqué à la bataille).",
+      "required": ["spread_unseen", "spread_scouted", "spread_spied", "spread_spied_from_place"],
+      "properties": {
+        "spread_unseen": { "type": "number", "minimum": 0, "maximum": 0.9 },
+        "spread_scouted": { "type": "number", "minimum": 0, "maximum": 0.9 },
+        "spread_spied": { "type": "number", "minimum": 0, "maximum": 0.9 },
+        "spread_spied_from_place": { "type": "number", "minimum": 0, "maximum": 0.9 }
+      }
+    },
     "river_attacker": { "$ref": "#/$defs/factor", "description": "Multiplicateur de l'attaquant qui franchit une rivière." },
     "walls_attacker": { "$ref": "#/$defs/factor", "description": "Multiplicateur de l'attaquant qui donne l'assaut à des murailles." },
     "walls_defender_ranged": { "$ref": "#/$defs/factor", "description": "Multiplicateur du tir du défenseur depuis ses murailles." },

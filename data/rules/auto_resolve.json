@@ -41,6 +41,7 @@
   "wall_defender_steadiness": 0.5,
   "wall_hold_morale": 6.0,
   "legacy_defender_bonus": 1.15,
+  "forecast_fog": { "spread_unseen": 0.15, "spread_scouted": 0.10, "spread_spied": 0.05, "spread_spied_from_place": 0.01 },
   "weather": {
     "spring": { "clear": 60, "rain": 30, "fog": 10, "snow": 0 },
     "summer": { "clear": 80, "rain": 15, "fog": 5, "snow": 0 },

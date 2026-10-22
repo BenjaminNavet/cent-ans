@@ -163,6 +163,10 @@ pub struct AutoResolveRules {
     /// Defender bonus of the legacy `defender_terrain_bonus` flag, used when
     /// the terrain is unknown.
     pub legacy_defender_bonus: f64,
+    /// ADR 0722: fog of the pre-battle forecast (noise on the displayed
+    /// odds only, never on the battle).
+    #[serde(default)]
+    pub forecast_fog: ForecastFogRules,
     pub weather: AutoResolveWeather,
     /// Terrain effects; a terrain left out has no effect.
     #[serde(default)]
@@ -175,6 +179,32 @@ impl AutoResolveRules {
     /// Effects of `terrain` (neutral when not listed).
     pub fn terrain_effects(&self, terrain: Terrain) -> TerrainEffects {
         self.terrain.get(&terrain).copied().unwrap_or_default()
+    }
+}
+
+/// ADR 0722: the forecast is only as exact as the player's knowledge of the
+/// enemy. Spreads are half-widths of the relative noise on the displayed odds.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ForecastFogRules {
+    /// Knowledge: enemy not in sight.
+    pub spread_unseen: f64,
+    /// Knowledge: enemy army in sight (scouts, vision mask).
+    pub spread_scouted: f64,
+    /// Knowledge: a spy of ours is near the enemy army.
+    pub spread_spied: f64,
+    /// Knowledge: spied and seen from a friendly settlement.
+    pub spread_spied_from_place: f64,
+}
+
+impl Default for ForecastFogRules {
+    fn default() -> Self {
+        Self {
+            spread_unseen: 0.15,
+            spread_scouted: 0.10,
+            spread_spied: 0.05,
+            spread_spied_from_place: 0.01,
+        }
     }
 }
 

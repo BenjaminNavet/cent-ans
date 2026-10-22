@@ -306,3 +306,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0711 | [Le choc des charges est un modèle en données (élan, poids, arc-boutement, paliers)](0711-choc-des-charges-en-donnees.md) | accepté |
 | 0720 | [Rancunes datées : des missions ancrées dans un affront subi](0720-rancunes-datees.md) | accepté |
 | 0721 | [Parjure : événements diplomatiques en table, à fenêtre](0721-parjure-evenements-diplomatiques-a-fenetre.md) | accepté |
+| 0722 | [Brouillard de la prévision de bataille](0722-brouillard-de-la-prevision.md) | accepté |
