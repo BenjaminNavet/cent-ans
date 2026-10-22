@@ -5,14 +5,26 @@ Axes : parcours complet joueur ; qualité visuelle / perf. Git : commits sur mai
 Captures : budget du CLAUDE.md relevé pour la nuit (travail visuel demandé) ; stockées hors git (`out/`).
 
 ## État
-- [ ] Build release du client
-- [ ] Parcours : menu → nouvelle campagne → tours → bataille → résultat
+- [x] Build release, fenêtre réelle, captures (tools/playtest_window.sh)
+- [x] Parcours testé : menu, choix de faction, campagne (fin de saison + confirmation), bataille (IA vs IA accélérée, cinématique), Codex, Réglages, Crédits
+- [ ] Écran de résultat de bataille, sauvegarde/chargement, tutoriel, siège : à tester
 
-## Constats
-(à remplir)
+## Constats (réels, fenêtre visible)
+- Le `shot` interne du swapchain est noir sur la campagne ; l'écran réel est correct (outil de capture seulement).
+- Perf en fenêtre : ultra ≈ 61 ms/image (16 i/s), haute 16,7 ms (60 i/s, vsync) : cause principale des apparitions tardives.
+  Ultra = MSAA 4x/2x carte, SDFGI, ombres 500 m, brume volumétrique, relief 6 px (render_quality.json). Réglage joueur laissé tel quel.
+- Marqueurs de campagne : stables dès la 1re image (labels_visible 32) ; les arrivées tardives sont du rendu lent.
+- Menu principal : texte blanc peu lisible sur la carte claire (à corriger).
+- Bataille : régiments = rectangles rigides pivotant autour de leur centre (core), figurines collées aux places.
+
+## Fait
+- `client/src/battle/units/follow.rs` : suiveurs par figurine (vitesse/rotation limitées, cap = direction de marche), tests ; commit f73dada3d.
+- Clic armée : le relâchement ne sélectionne plus aussi la province/ville sous l'armée (`ProvinceClickGuard.army_press`).
 
 ## Prochaine étape
-Lancer le parcours en fenêtre visible.
+1. Vérifier visuellement les suiveurs sur un pivot de régiment (gros plan) ; régler PULL/MAX_SPEED si besoin.
+2. Collisions brouillonnes entre régiments = règles du cœur (separation.rs, push.rs) : lot à part avec la refonte mêlée (docs/wip/refonte-systemes.md § 2), tests b6 / Crécy / Poitiers à surveiller.
+3. Contraste du menu principal ; écran de résultat ; sauvegarde/chargement ; tutoriel ; siège.
 
 ## Retours du joueur (22/10, pendant la nuit)
 1. Campagne : éléments qui apparaissent en retard (étiquettes de villes par vagues après l'arrivée sur la carte — confirmé par captures `out/nuit/p8`).
