@@ -45,8 +45,13 @@ processed-assets = ["bevy/asset_processor", "bevy/compressed_image_saver", "bevy
 # Bevy feature widens the view bind groups of every PBR material. Runtime switch: `enabled` of
 # data/fx/battle_decals.json (off too).
 decals = ["bevy/pbr_clustered_decals"]
+# solari (docs/wip/bevy-solari.md): raytraced lighting trial (bevy_solari), OFF by default. Needs a GPU with
+# ray queries; the plugin is only added when the adapter exposes them (see src/battle/scene/solari.rs).
+solari = ["bevy/bevy_solari", "dep:wgpu"]
 
 [dependencies]
+# solari: adapter probe before the app is built (same wgpu as Bevy's).
+wgpu = { version = "=30.0.1", optional = true, default-features = false }
 # Renamed: Bevy derive macros would otherwise resolve `bevy_ecs` as a direct dependency.
 ecs_trace = { package = "bevy_ecs", version = "=0.20.0", optional = true, features = ["trace", "debug"] }
 tracing = { version = "0.1", optional = true }
