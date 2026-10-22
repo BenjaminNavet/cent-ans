@@ -28,3 +28,9 @@ Solari enabled:false (chemin forward) : `Too many bindings of type Samplers in S
 - Identifier le matériau à 17 échantillonneurs en forward (sol : 3 propres ; fusionner `micro_albedo_sampler` dans `albedo_sampler` en ferait 2).
 - Contrôle visuel du sol différé sous Solari (session principale).
 - Lancer la campagne pour valider le shader campagne modifié à l'exécution.
+
+## fwd-samplers (22/10)
+- Décompte forward : vue = 8 (4 ombres PCSS, area_light, dfg, décals, env map) + StandardMaterial 6 + sol 3 = 17. Les décals expliquent 1 des 17 mais ne sont pas la cause seule (un autre matériau de 6 + 8 = 14 passe).
+- Correctif : sol à 1 échantillonneur propre (micro grain lit avec `albedo_sampler`, même descripteur ; relief et trample lus par `bilinear_clamped` via textureLoad). 15 en forward, décals conservés. Tests naga du sol OK.
+- Non vérifié à l'exécution : tout lancement Battle (Solari on ou off, y compris HEAD sans le correctif) se fige dans `wgpu command_encoder.finish -> begin_render_pass -> ioGPUResourceListAddHashValue` (CPU 100-300 %, > 10 min pour 5 images). Cause inconnue, indépendante des décals et du correctif.
+- Campagne : terrain.wesl a 10 échantillonneurs propres + vue : à vérifier/réduire.

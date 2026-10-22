@@ -55,14 +55,12 @@ struct GroundParams {
 @group(constants::MATERIAL_BIND_GROUP) @binding(102) var albedo_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(103) var normal_array: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(105) var micro_albedo: texture_2d_array<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(106) var micro_albedo_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(107) var micro_normal: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(109) var decor_fields: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(111) var relief_map: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(112) var relief_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(113) var trample_map: texture_2d<f32>;
-// Samplers are shared (Metal allows 16 per stage): the normal arrays use their albedo
-// sampler, the trample map the relief sampler (both linear, clamped).
+// Samplers are shared (Metal allows 16 per stage): the normal arrays and the micro grain pack use
+// the albedo sampler; the relief and trample maps are read without a sampler (`bilinear_clamped`).
 
 const L_GRASS: i32 = 0;
 const L_MEADOW: i32 = 1;
@@ -176,6 +174,22 @@ fn decor_texel(uv: vec2<f32>) -> vec4<f32> {
     let dims = vec2<i32>(textureDimensions(decor_fields));
     let texel = clamp(vec2<i32>(floor(uv * vec2<f32>(dims))), vec2<i32>(0), dims - vec2<i32>(1));
     return textureLoad(decor_fields, texel, 0);
+}
+
+// Bilinear, clamped read at mip 0 without a sampler (Metal allows 16 samplers per stage): same
+// result as a linear, clamp-to-edge sampler; frees the relief / trample sampler slot.
+fn bilinear_clamped(tex: texture_2d<f32>, uv: vec2<f32>) -> vec4<f32> {
+    let dims = vec2<i32>(textureDimensions(tex));
+    let q = uv * vec2<f32>(dims) - 0.5;
+    let f = fract(q);
+    let i0 = vec2<i32>(floor(q));
+    let lo = vec2<i32>(0);
+    let hi = dims - vec2<i32>(1);
+    let a = textureLoad(tex, clamp(i0, lo, hi), 0);
+    let b = textureLoad(tex, clamp(i0 + vec2<i32>(1, 0), lo, hi), 0);
+    let c = textureLoad(tex, clamp(i0 + vec2<i32>(0, 1), lo, hi), 0);
+    let d = textureLoad(tex, clamp(i0 + vec2<i32>(1, 1), lo, hi), 0);
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
 // Bilinear "clear" coverage (Godot `splat_b.g`, a linear-filtered 4 m map): the decor map is
@@ -320,7 +334,7 @@ fn ground_pbr_input(in: VertexOutput, is_front: bool) -> PbrInput {
     var relief = vec4<f32>(0.0, 0.5, 0.5, 1.0);
     if ground.relief.z > 0.0 {
         let ruv = (p - ground.relief_rect.xy) / ground.relief_rect.zw;
-        let r = textureSampleLevel(relief_map, relief_sampler, ruv, 0.0);
+        let r = bilinear_clamped(relief_map, ruv);
         if all(ruv >= vec2<f32>(0.0)) && all(ruv <= vec2<f32>(1.0)) {
             relief = r;
         }
@@ -361,7 +375,7 @@ fn ground_pbr_input(in: VertexOutput, is_front: bool) -> PbrInput {
     var trampled = 0.0;
     if ground.weather.y > 0.0 && ground.trample_rect.z > 0.0 {
         let tuv = (p - ground.trample_rect.xy) / ground.trample_rect.zw;
-        let tm = textureSampleLevel(trample_map, relief_sampler, tuv, 0.0).r;
+        let tm = bilinear_clamped(trample_map, tuv).r;
         if all(tuv >= vec2<f32>(0.0)) && all(tuv <= vec2<f32>(1.0)) {
             trampled = smoothstep(0.08, 0.85, tm + (fine - 0.5) * 0.35 * tm);
         }
@@ -477,12 +491,12 @@ fn ground_pbr_input(in: VertexOutput, is_front: bool) -> PbrInput {
         let muv = rot_a(p) / mt + vec2<f32>(0.37, 0.11);
         let mdx = rot_a(g.dx) / mt;
         let mdy = rot_a(g.dy) / mt;
-        let mcol = textureSampleGrad(micro_albedo, micro_albedo_sampler, muv, ml, mdx, mdy).rgb;
-        let mref = textureSampleLevel(micro_albedo, micro_albedo_sampler, muv, ml, 12.0).rgb;
+        let mcol = textureSampleGrad(micro_albedo, albedo_sampler, muv, ml, mdx, mdy).rgb;
+        let mref = textureSampleLevel(micro_albedo, albedo_sampler, muv, ml, 12.0).rgb;
         let mlum = bt_luma(mcol) / max(bt_luma(mref), 0.02);
         albedo = albedo * mix(1.0, clamp(mlum, 0.5, 1.6), nd_k * ground.micro.y);
         if normals_on {
-            let mn = textureSampleGrad(micro_normal, micro_albedo_sampler, muv, ml, mdx, mdy).xy * 2.0 - 1.0;
+            let mn = textureSampleGrad(micro_normal, albedo_sampler, muv, ml, mdx, mdy).xy * 2.0 - 1.0;
             nxy = nxy + mn * nd_k * 0.8;
         }
     }
