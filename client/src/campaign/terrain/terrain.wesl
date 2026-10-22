@@ -107,7 +107,6 @@ struct LookParams {
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(4) var<uniform> look: LookParams;
 @group(constants::MATERIAL_BIND_GROUP) @binding(5) var fog_mask: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(6) var fog_mask_sampler: sampler;
 
 // Regional ground (ground.rs, TX ADR 0243): 45 layers by (biome, role), biome blend, splat, grain.
 struct GroundParams {
@@ -182,12 +181,10 @@ struct FieldParams {
 @group(constants::MATERIAL_BIND_GROUP) @binding(16) var<uniform> fields: FieldParams;
 @group(constants::MATERIAL_BIND_GROUP) @binding(17) var height_lod: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(18) var wash_tex: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(19) var wash_sampler: sampler;
 // Close patchwork (campvis3): parcels materials, land use, terroir mask.
 @group(constants::MATERIAL_BIND_GROUP) @binding(20) var parcels_albedo: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(21) var parcels_normal: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(22) var landuse_tex: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(23) var landuse_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(24) var terroir_tex: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(25) var terroir_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(26) var occlusion_tex: texture_2d<f32>;
@@ -793,7 +790,7 @@ fn fog_of_war_veil(col: vec3<f32>, p: vec2<f32>) -> vec3<f32> {
     }
     let jitter = vec2<f32>(fbm(p * 0.035), fbm(p * 0.035 + vec2<f32>(31.7, 5.3))) - 0.5;
     let q = (p + jitter * look.fog_veil.w) / look.fog_map.xy;
-    let seen = textureSampleLevel(fog_mask, fog_mask_sampler, q, 0.0).r;
+    let seen = textureSampleLevel(fog_mask, terroir_sampler, q, 0.0).r;
     let fogged = 1.0 - smoothstep(0.32, 0.68, seen);
     if (fogged <= 0.0) {
         return col;
@@ -1026,14 +1023,14 @@ fn parchment_ground(base: vec3<f32>, n: vec3<f32>, altitude: f32, p: vec2<f32>, 
     // Watercolour wash of the realms: owner pigment, granular, pooling near the borders.
     let jitter = (vec2<f32>(vnoise(p * 0.6), vnoise(p * 0.6 + vec2<f32>(5.0, 3.0))) - 0.5) * 3.0;
     let q = (p + jitter) / params.map.xy;
-    let wash_here = textureSampleLevel(wash_tex, wash_sampler, q, 0.0);
+    let wash_here = textureSampleLevel(wash_tex, terroir_sampler, q, 0.0);
     if (wash_here.a > 0.5) {
         let step_uv = 6.0 / params.map.xy;
         var diff = 0.0;
-        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, wash_sampler, q + vec2<f32>(step_uv.x, 0.0), 0.0)));
-        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, wash_sampler, q - vec2<f32>(step_uv.x, 0.0), 0.0)));
-        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, wash_sampler, q + vec2<f32>(0.0, step_uv.y), 0.0)));
-        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, wash_sampler, q - vec2<f32>(0.0, step_uv.y), 0.0)));
+        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, terroir_sampler, q + vec2<f32>(step_uv.x, 0.0), 0.0)));
+        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, terroir_sampler, q - vec2<f32>(step_uv.x, 0.0), 0.0)));
+        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, terroir_sampler, q + vec2<f32>(0.0, step_uv.y), 0.0)));
+        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, terroir_sampler, q - vec2<f32>(0.0, step_uv.y), 0.0)));
         let pool = smoothstep(0.02, 0.2, diff);
         var wash = wash_here.rgb / max(max(wash_here.r, max(wash_here.g, wash_here.b)), 0.05);
         let gran = 0.8 + 0.4 * vnoise(p * 0.35) * vnoise(p * 0.07 + vec2<f32>(4.0));
@@ -1813,7 +1810,7 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     // Land use (R vine, G dryness, B bocage) with the vines of the terroirs; V2b parcels.
     var lu = vec3<f32>(0.0);
     if (ground.splat.z > 0.5) {
-        lu = textureSampleLevel(landuse_tex, landuse_sampler, uv, 0.0).rgb;
+        lu = textureSampleLevel(landuse_tex, terroir_sampler, uv, 0.0).rgb;
     }
     lu = terroir_landuse(lu, terroir);
     let v2 = v2b_parcels(p, footprint, s, lu);

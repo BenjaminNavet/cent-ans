@@ -77,9 +77,10 @@ pub struct TerrainMaterial {
     pub season: super::season::SeasonParams,
     #[uniform(4)]
     pub look: super::look::LookParams,
+    // Metal allows 16 samplers per fragment stage (material + view). fog_mask, wash and landuse
+    // have the same linear clamp sampler as terroir, so the shader reads them with `terroir_sampler`.
     /// Fog-of-war coverage (R8, `FogOfWar::mask`); unbound when the fog is off.
     #[texture(5)]
-    #[sampler(6)]
     pub fog_mask: Option<Handle<Image>>,
     /// Regional ground tables (`ground.rs`, TX).
     #[uniform(7)]
@@ -106,7 +107,6 @@ pub struct TerrainMaterial {
     pub height_lod: Option<Handle<Image>>,
     /// Owner colour per 4 px block (faction wash of the parchment).
     #[texture(18)]
-    #[sampler(19)]
     pub wash: Option<Handle<Image>>,
     /// Parcels materials of the painted fields (`hb_albedo` of `hb_ground.gdshaderinc`), sampled
     /// with `ground_sampler`; normal + roughness array (Rg8) beside it.
@@ -116,7 +116,6 @@ pub struct TerrainMaterial {
     pub parcels_normal: Option<Handle<Image>>,
     /// Land-use raster (`countryside::landuse`): R vine, G dryness, B bocage.
     #[texture(22)]
-    #[sampler(23)]
     pub landuse: Option<Handle<Image>>,
     /// Terroir mask (`terroir.rs`): R fields, G vine, B burnt, A pasture.
     #[texture(24)]
