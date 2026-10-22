@@ -29,6 +29,10 @@ profile = ["dep:ecs_trace", "dep:tracing", "dep:tracing-subscriber"]
 # committed). Enabled by `tools/launch.sh`; the dev build keeps reading raw JPG/PNG.
 processed-assets = ["bevy/asset_processor", "bevy/compressed_image_saver", "bevy/ktx2", "bevy/zstd_rust"]
 
+# solari (docs/wip/bevy-solari.md): raytraced lighting trial (bevy_solari), OFF by default. Needs a GPU with
+# ray queries; the plugin is only added when the adapter exposes them (see src/battle/scene/solari.rs).
+# solari = ["bevy/bevy_solari"]
+
 [dependencies]
 # Renamed: Bevy derive macros would otherwise resolve `bevy_ecs` as a direct dependency.
 ecs_trace = { package = "bevy_ecs", version = "=0.20.0", optional = true, features = ["trace", "debug"] }
