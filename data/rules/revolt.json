@@ -1,0 +1,21 @@
+{
+  "description": "B4 (ADR 0731) : révoltes graduées. Chaque province porte une jauge de tension (0-100) : elle monte chaque saison où le mécontentement moyen dépasse revolt_unrest_threshold (population.json), d'autant plus vite que l'excès est grand, et redescend lentement sinon. Des avis paraissent aux paliers d'avertissement. À 100, la révolte lève une armée de fac_rebels dans la province : la vaincre rend l'ordre, la laisser tenir plusieurs saisons livre la ville aux rebelles.",
+  "tension_max": 100,
+  "tension_rise_base": 14.0,
+  "tension_rise_per_point": 0.5,
+  "tension_decay": 5.0,
+  "warning_tensions": [50, 75],
+  "tension_after_revolt": 40,
+  "garrison_loss_percent": 25,
+  "rebel_levy": {
+    "population_per_regiment": 6000,
+    "min_regiments": 1,
+    "max_regiments": 6,
+    "peasant_unit_type": "unit_goedendag_militia",
+    "burgher_unit_type": "unit_urban_militia"
+  },
+  "rebel_siege_seasons": 3,
+  "rebel_rout_percent": 30,
+  "repression_tension": 20,
+  "repression_disorder_relief": 20
+}

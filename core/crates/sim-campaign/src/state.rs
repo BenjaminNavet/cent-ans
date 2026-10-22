@@ -412,6 +412,17 @@ pub struct Construction {
     pub drawn: BTreeMap<data_model::ResourceId, u32>,
 }
 
+/// B4 (ADR 0731): an uprising under way in a province.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Uprising {
+    /// The `fac_rebels` army raised for it.
+    pub army: ArmyId,
+    /// Men the rebel army had when raised.
+    pub raised_strength: u32,
+    /// Seasons the army has held the province.
+    pub seasons: u32,
+}
+
 /// Dynamic state of a province (static data stays in [`GameData`]).
 ///
 /// The land and the people stay here; owner, controller, garrison,
@@ -434,6 +445,14 @@ pub struct ProvinceState {
     /// above the revolt threshold (spec § 1.1); resets to 0 below it.
     #[serde(default)]
     pub revolt_seasons: u32,
+    /// B4 (ADR 0731): cumulative tension (0 to `RevoltRules::tension_max`):
+    /// rises while the unrest stays above the threshold, falls slowly
+    /// otherwise; the province rises when it is full.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub tension: u32,
+    /// B4: the uprising under way (a rebel army stands in the province).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uprising: Option<Uprising>,
     /// Share (0-100) of the population following `heresy_religion` (M5).
     #[serde(default)]
     pub heresy: u8,

@@ -103,6 +103,8 @@ pub mod folders {
     pub const AUTO_RESOLVE_RULES: &str = "auto_resolve.json";
     /// Public order tuning, inside `rules/`; optional.
     pub const POPULATION_RULES: &str = "population.json";
+    /// Graded revolts (ADR 0731), inside `rules/`; optional.
+    pub const REVOLT_RULES: &str = "revolt.json";
     pub const ECONOMY_RULES: &str = "economy.json";
     /// Diplomacy tuning (opinion caps), inside `rules/`; optional.
     pub const DIPLOMACY_RULES: &str = "diplomacy.json";
@@ -364,6 +366,8 @@ pub struct GameData {
     /// `data/rules/population.json`;
     /// [`crate::PopulationRules::default`] when absent.
     pub population_rules: crate::entities::population_rules::PopulationRules,
+    /// `data/rules/revolt.json` (ADR 0731).
+    pub revolt_rules: crate::entities::revolt_rules::RevoltRules,
     /// `data/rules/economy.json`; [`crate::EconomyRules::default`]
     /// when absent.
     pub economy_rules: crate::entities::economy_rules::EconomyRules,
@@ -532,6 +536,7 @@ impl GameData {
             vision_rules: None,
             auto_resolve: Default::default(),
             population_rules: Default::default(),
+            revolt_rules: Default::default(),
             economy_rules: Default::default(),
             diplomacy_rules: Default::default(),
             campaign_weather: Default::default(),
@@ -657,6 +662,10 @@ impl GameData {
         read_into(
             &mut data.population_rules,
             &root.join(folders::RULES).join(folders::POPULATION_RULES),
+        )?;
+        read_into(
+            &mut data.revolt_rules,
+            &root.join(folders::RULES).join(folders::REVOLT_RULES),
         )?;
         read_into(
             &mut data.economy_rules,

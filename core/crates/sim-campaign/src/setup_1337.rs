@@ -233,6 +233,8 @@ fn init_provinces(state: &mut CampaignState, data: &GameData) -> Result<(), Camp
                 devastation: 0,
                 population: province.population.classes.clone(),
                 revolt_seasons: 0,
+                tension: 0,
+                uprising: None,
                 heresy: 0,
                 heresy_religion: None,
                 faith_override: None,

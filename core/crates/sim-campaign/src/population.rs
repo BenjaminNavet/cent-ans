@@ -51,10 +51,9 @@ const HEALTH_SPEED: f64 = 0.20;
 const WEALTH_SPEED: f64 = 0.15;
 const GOODS_SPEED: f64 = 0.25;
 const UNREST_SPEED: f64 = 0.20;
-// EQ1: the revolt thresholds and delay are in `data/rules/population.json`
-// (`PopulationRules::revolt_*`).
-/// Garrison lost to a revolt.
-pub const REVOLT_GARRISON_LOSS_PERCENT: u32 = 25;
+// B4: the revolt threshold is in `data/rules/population.json`
+// (`PopulationRules::revolt_unrest_threshold`); tension, uprising and
+// garrison loss are in `data/rules/revolt.json` (`crate::revolt`).
 /// Average health below which a plague may strike.
 pub const PLAGUE_HEALTH_THRESHOLD: u8 = 30;
 /// Share of the population a local plague kills (before resistance).
@@ -592,68 +591,9 @@ pub(crate) fn resolve_population(
             );
         }
 
-        // ----- revolt tracking ---------------------------------------------
-        let rules = &data.population_rules;
+        // ----- revolt tension (B4, ADR 0731) ---------------------------------
         let weighted = weighted_unrest(&province.population);
-        // EQ1: a province the rebels already hold does not rise against them.
-        if weighted > rules.revolt_unrest_threshold && !controller.is_rebels() {
-            province.revolt_seasons += 1;
-        } else {
-            province.revolt_seasons = 0;
-        }
-        if province.revolt_seasons >= rules.revolt_seasons.max(1) {
-            // EQ1: a revolt vents the anger for a while; the next one needs
-            // as many seasons of high unrest again.
-            province.revolt_seasons = 0;
-            let province_name = province_data.name.display.clone();
-            // The rebels rise at the city.
-            let city_id = province.city.clone();
-            let Some(city) = state.settlements.get_mut(&city_id) else {
-                continue;
-            };
-            let lost = city.garrison_strength() * REVOLT_GARRISON_LOSS_PERCENT / 100;
-            let mut removed = 0u32;
-            city.garrison.retain_mut(|unit| {
-                if removed >= lost {
-                    return true;
-                }
-                if unit.strength <= lost - removed {
-                    removed += unit.strength;
-                    false
-                } else {
-                    unit.strength -= lost - removed;
-                    removed = lost;
-                    true
-                }
-            });
-            events.push(
-                GameEvent::new(
-                    EventKind::Revolt,
-                    format!("Révolte à {province_name} : la garnison est affaiblie."),
-                )
-                .province(&id)
-                .faction(&controller),
-            );
-            if weighted > rules.revolt_control_threshold {
-                if let Ok(rebels) = FactionId::new("fac_rebels") {
-                    if state.factions.contains_key(&rebels) {
-                        let province = state.provinces.get_mut(&id).expect("exists");
-                        province.revolt_seasons = 0;
-                        let city = state.settlements.get_mut(&city_id).expect("exists");
-                        // The mutinous garrison goes over to the rebels.
-                        city.hand_over(&rebels);
-                        events.push(
-                            GameEvent::new(
-                                EventKind::Revolt,
-                                format!("{province_name} passe aux mains des rebelles."),
-                            )
-                            .province(&id)
-                            .faction(&rebels),
-                        );
-                    }
-                }
-            }
-        }
+        crate::revolt::resolve(state, data, &id, weighted, &controller, events);
 
         // ----- plague / famine -----------------------------------------------
         let province = state.provinces.get_mut(&id).expect("exists");

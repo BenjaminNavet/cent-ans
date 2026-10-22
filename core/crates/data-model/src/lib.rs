@@ -159,6 +159,7 @@ pub use entities::resource::{Resource, ResourceCategory};
 pub use entities::retinue::{
     Acquisition, AcquisitionTrigger, Companion, CompanionCategory, CompanionConditions, Retinue,
 };
+pub use entities::revolt_rules::{RebelLevy, RevoltRules};
 pub use entities::river_crossing::{CrossingFactors, MapCrossing, RiverCrossingRules};
 pub use entities::river_nav::{MapPass, NavigableRiver, NavigableRivers, RiverPlace};
 pub use entities::royal_act::{CaptainRules, RoyalAct};

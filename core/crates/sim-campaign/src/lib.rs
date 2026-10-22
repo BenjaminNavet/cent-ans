@@ -121,6 +121,7 @@ pub mod religion;
 pub mod replenish;
 pub mod research;
 pub mod retinue;
+pub mod revolt;
 pub mod river_crossing;
 pub mod river_nav;
 pub mod rng;
@@ -206,8 +207,8 @@ pub use skills::LearnSkillError;
 pub use state::{
     Army, ArmyId, ArmyPosition, BattleRequest, CampaignState, CharacterState, Construction,
     FactionState, FactionSummary, MoraleModifier, MoveTarget, ProvinceState, QueuedRecruit, Season,
-    SettlementState, SiegeState, Stance, Unit, MAX_MOVEMENT_POINTS, START_YEAR, STATE_VERSION,
-    TURNS_PER_YEAR,
+    SettlementState, SiegeState, Stance, Unit, Uprising, MAX_MOVEMENT_POINTS, START_YEAR,
+    STATE_VERSION, TURNS_PER_YEAR,
 };
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use trade::{faction_trade_income, trade_routes, TradeMode, TradeRouteView};

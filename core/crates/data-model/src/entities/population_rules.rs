@@ -42,13 +42,6 @@ pub struct PopulationRules {
     /// EQ1: weighted unrest above which a province is at risk of revolt.
     #[serde(default = "default_revolt_threshold")]
     pub revolt_unrest_threshold: f64,
-    /// EQ1: consecutive seasons above the threshold before a revolt; the
-    /// count starts over after each revolt.
-    #[serde(default = "default_revolt_seasons")]
-    pub revolt_seasons: u32,
-    /// Weighted unrest above which a revolting province falls to the rebels.
-    #[serde(default = "default_revolt_control_threshold")]
-    pub revolt_control_threshold: f64,
     /// EQ2: the province disorder gauge (`ProvinceState::unrest`) loses
     /// this much each season...
     #[serde(default = "default_disorder_decay_flat")]
@@ -93,15 +86,6 @@ fn default_disorder_max() -> f64 {
 
 fn default_revolt_threshold() -> f64 {
     75.0
-}
-
-/// RS-B (ADR 0100): 3 before.
-fn default_revolt_seasons() -> u32 {
-    5
-}
-
-fn default_revolt_control_threshold() -> f64 {
-    90.0
 }
 
 fn default_disorder_decay_flat() -> u8 {

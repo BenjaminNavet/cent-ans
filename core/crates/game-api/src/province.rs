@@ -112,6 +112,11 @@ pub struct ProvinceSheet {
     pub revolt_seasons: u32,
     pub revolt_threshold: i64,
     pub revolt_seasons_needed: u32,
+    /// B4 (ADR 0731): tension gauge (0 to `tension_max`), cumulative.
+    pub tension: u32,
+    pub tension_max: u32,
+    /// B4: a rebel army holds the province (uprising under way).
+    pub uprising: bool,
     pub devastation: u8,
     pub population_total: u64,
     pub classes: Vec<ClassView>,
@@ -276,7 +281,10 @@ pub fn province_sheet(
         disorder: live.unrest,
         revolt_seasons: live.revolt_seasons,
         revolt_threshold: data.population_rules.revolt_unrest_threshold.round() as i64,
-        revolt_seasons_needed: data.population_rules.revolt_seasons,
+        revolt_seasons_needed: data.revolt_rules.min_seasons_to_revolt(),
+        tension: live.tension,
+        tension_max: data.revolt_rules.tension_max,
+        uprising: live.uprising.is_some(),
         devastation: live.devastation,
         population_total: live.population.total(),
         classes,

@@ -165,7 +165,10 @@ fn extreme_unrest_hands_the_province_to_the_rebels() {
     }
     let rebels = fac("fac_rebels");
     let mut taken_by_rebels = false;
-    for _ in 0..6 {
+    // B4: a rebel army must first rise, then hold the province unopposed.
+    let seasons =
+        data.revolt_rules.min_seasons_to_revolt() + data.revolt_rules.rebel_siege_seasons + 4;
+    for _ in 0..seasons {
         set_all_unrest(&mut state, &boulogne, 100);
         state.end_turn_with(data, idle);
         if state.province_controller(&boulogne) == Some(&rebels) {
@@ -175,7 +178,7 @@ fn extreme_unrest_hands_the_province_to_the_rebels() {
     }
     assert!(
         taken_by_rebels,
-        "unrest > 90 must hand the province to fac_rebels; controller = {:?}",
+        "an uprising left unopposed must hand the province to fac_rebels; controller = {:?}",
         state.province_controller(&boulogne)
     );
 }

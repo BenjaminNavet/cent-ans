@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/revolt_rules.schema.json",
+  "title": "Règles des révoltes graduées",
+  "description": "Fichier data/rules/revolt.json (lot B4, ADR 0731) : jauge de tension par province, avis, armée rebelle et répression. Lu par sim-campaign (RevoltRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "tension_max": { "type": "integer", "minimum": 1, "maximum": 255, "description": "Tension à laquelle la province se révolte (plafond de la jauge)." },
+    "tension_rise_base": { "type": "number", "minimum": 0, "maximum": 100, "description": "Hausse par saison où le mécontentement moyen dépasse le seuil de révolte de population.json." },
+    "tension_rise_per_point": { "type": "number", "minimum": 0, "maximum": 10, "description": "Hausse supplémentaire par point de mécontentement au-delà du seuil." },
+    "tension_decay": { "type": "number", "minimum": 0, "maximum": 100, "description": "Baisse par saison sous le seuil." },
+    "warning_tensions": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 255 }, "description": "Paliers de tension qui émettent un avis (une fois par franchissement montant)." },
+    "tension_after_revolt": { "type": "integer", "minimum": 0, "maximum": 255, "description": "Tension de la province juste après le soulèvement (la colère retombe en partie)." },
+    "garrison_loss_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Part de la garnison de la ville perdue au soulèvement." },
+    "rebel_levy": {
+      "type": "object",
+      "description": "Taille et composition de l'armée rebelle levée.",
+      "properties": {
+        "population_per_regiment": { "type": "integer", "minimum": 1, "maximum": 10000000, "description": "Habitants de la province pour un régiment rebelle." },
+        "min_regiments": { "type": "integer", "minimum": 1, "maximum": 50 },
+        "max_regiments": { "type": "integer", "minimum": 1, "maximum": 50 },
+        "peasant_unit_type": { "type": "string", "pattern": "^unit_[a-z0-9_]+$", "description": "Type de régiment levé parmi les paysans." },
+        "burgher_unit_type": { "type": "string", "pattern": "^unit_[a-z0-9_]+$", "description": "Type de régiment levé parmi les bourgeois (en proportion de leur part de la population)." }
+      },
+      "required": ["population_per_regiment", "min_regiments", "max_regiments", "peasant_unit_type", "burgher_unit_type"],
+      "additionalProperties": false
+    },
+    "rebel_siege_seasons": { "type": "integer", "minimum": 1, "maximum": 20, "description": "Saisons pendant lesquelles l'armée rebelle doit tenir la province avant que la ville ne lui soit livrée." },
+    "rebel_rout_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "L'armée rebelle est dispersée quand ses effectifs tombent sous cette part de l'effectif levé." },
+    "repression_tension": { "type": "integer", "minimum": 0, "maximum": 255, "description": "Tension de la province une fois la révolte matée (au plus)." },
+    "repression_disorder_relief": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Points de troubles récents (ProvinceState::unrest) ôtés par la répression." }
+  },
+  "required": ["tension_max", "tension_rise_base", "tension_rise_per_point", "tension_decay", "warning_tensions", "tension_after_revolt", "garrison_loss_percent", "rebel_levy", "rebel_siege_seasons", "rebel_rout_percent", "repression_tension", "repression_disorder_relief"],
+  "additionalProperties": false
+}

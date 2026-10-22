@@ -27,7 +27,7 @@ fn a_revolt_needs_several_seasons_again_after_each_one() {
     let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     state.chronicle.disabled = true;
     let province = ProvinceId::new("prov_kent").unwrap();
-    let needed = data.population_rules.revolt_seasons;
+    let needed = data.revolt_rules.min_seasons_to_revolt();
     assert!(needed >= 2);
     let mut revolts = 0;
     let turns = needed * 3;
