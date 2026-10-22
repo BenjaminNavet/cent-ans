@@ -955,8 +955,8 @@
   {
    "from": "set_bazas",
    "to": "set_libourne",
-   "cost": 45.27,
-   "road": true,
+   "cost": 90.53,
+   "road": false,
    "sea": false
   },
   {
@@ -1466,7 +1466,7 @@
   {
    "from": "set_brest",
    "to": "set_saint_malo",
-   "cost": 205.87,
+   "cost": 202.98,
    "road": false,
    "sea": false
   },
@@ -1725,8 +1725,8 @@
   {
    "from": "set_caen",
    "to": "set_dieppe",
-   "cost": 106.4,
-   "road": true,
+   "cost": 212.79,
+   "road": false,
    "sea": false
   },
   {
@@ -2047,7 +2047,7 @@
   {
    "from": "set_cherbourg",
    "to": "set_saint_malo",
-   "cost": 276.23,
+   "cost": 278.06,
    "road": false,
    "sea": true
   },
@@ -3790,7 +3790,7 @@
   {
    "from": "set_lamballe",
    "to": "set_saint_malo",
-   "cost": 25.21,
+   "cost": 23.76,
    "road": true,
    "sea": false
   },
@@ -4448,7 +4448,7 @@
   {
    "from": "set_nantes",
    "to": "set_saint_malo",
-   "cost": 152.72,
+   "cost": 152.49,
    "road": true,
    "sea": false
   },

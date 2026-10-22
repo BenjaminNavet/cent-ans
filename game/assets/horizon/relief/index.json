@@ -386,15 +386,15 @@
   },
   "prov_bretagne": {
    "file": "prov_bretagne.bin",
-   "lon": -2.6403,
-   "lat": 47.532,
-   "ref_m": 3.7,
+   "lon": -2.5863,
+   "lat": 47.524,
+   "ref_m": 3.4,
    "terrain": "bocage",
    "coastal": true,
-   "coast_bearing_deg": 196.1,
-   "skyline_max_deg": 0.29,
-   "relief_max_m": 115.0,
-   "sea_share": 0.426
+   "coast_bearing_deg": 205.3,
+   "skyline_max_deg": 0.28,
+   "relief_max_m": 102.0,
+   "sea_share": 0.378
   },
   "prov_briansk": {
    "file": "prov_briansk.bin",
@@ -854,15 +854,15 @@
   },
   "prov_guyenne": {
    "file": "prov_guyenne.bin",
-   "lon": -1.1491,
-   "lat": 44.6629,
-   "ref_m": 3.6,
+   "lon": -0.5649,
+   "lat": 45.0113,
+   "ref_m": 1.5,
    "terrain": "plains",
    "coastal": true,
-   "coast_bearing_deg": 344.6,
-   "skyline_max_deg": 0.08,
-   "relief_max_m": 57.0,
-   "sea_share": 0.377
+   "coast_bearing_deg": 318.6,
+   "skyline_max_deg": 0.18,
+   "relief_max_m": 84.0,
+   "sea_share": 0.045
   },
   "prov_gwynedd": {
    "file": "prov_gwynedd.bin",
@@ -1538,15 +1538,15 @@
   },
   "prov_normandie": {
    "file": "prov_normandie.bin",
-   "lon": 0.0273,
-   "lat": 49.3308,
-   "ref_m": 11.3,
+   "lon": 0.4449,
+   "lat": 49.4127,
+   "ref_m": 83.3,
    "terrain": "plains",
    "coastal": true,
-   "coast_bearing_deg": 334.3,
-   "skyline_max_deg": 0.48,
-   "relief_max_m": 153.0,
-   "sea_share": 0.379
+   "coast_bearing_deg": 336.3,
+   "skyline_max_deg": 0.17,
+   "relief_max_m": 148.0,
+   "sea_share": 0.014
   },
   "prov_novgorod": {
    "file": "prov_novgorod.bin",
@@ -1646,15 +1646,15 @@
   },
   "prov_penthievre": {
    "file": "prov_penthievre.bin",
-   "lon": -2.5381,
-   "lat": 48.5756,
-   "ref_m": 67.5,
+   "lon": -2.5407,
+   "lat": 48.5823,
+   "ref_m": 60.1,
    "terrain": "bocage",
    "coastal": true,
-   "coast_bearing_deg": 333.2,
-   "skyline_max_deg": 0.33,
+   "coast_bearing_deg": 333.5,
+   "skyline_max_deg": 0.34,
    "relief_max_m": 125.0,
-   "sea_share": 0.391
+   "sea_share": 0.422
   },
   "prov_perugia": {
    "file": "prov_perugia.bin",
@@ -1922,15 +1922,15 @@
   },
   "prov_saintonge": {
    "file": "prov_saintonge.bin",
-   "lon": -1.0284,
-   "lat": 45.6233,
-   "ref_m": 5.6,
+   "lon": -0.7109,
+   "lat": 45.3361,
+   "ref_m": 1.1,
    "terrain": "plains",
    "coastal": true,
-   "coast_bearing_deg": 227.1,
-   "skyline_max_deg": 0.01,
-   "relief_max_m": 46.0,
-   "sea_share": 0.35
+   "coast_bearing_deg": 273.8,
+   "skyline_max_deg": 0.24,
+   "relief_max_m": 90.0,
+   "sea_share": 0.202
   },
   "prov_saluzzo": {
    "file": "prov_saluzzo.bin",
