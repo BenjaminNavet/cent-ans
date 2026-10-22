@@ -123,8 +123,11 @@ impl Plugin for SolariTrialPlugin {
             }
         }
         info!("solari: ray-query GPU found, raytraced lighting on in battles");
-        app.add_plugins(SolariPlugins)
-            .insert_resource(settings)
+        // The campaign prototype (`campaign/terrain/solari_proxy.rs`) may have added them already.
+        if !app.is_plugin_added::<bevy::solari::realtime::SolariLightingPlugin>() {
+            app.add_plugins(SolariPlugins);
+        }
+        app.insert_resource(settings)
             .init_resource::<Substitutes>()
             .add_systems(
                 Update,

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_solari_campaign.schema.json",
+  "title": "Prototype bevy_solari en campagne",
+  "description": "Fichier data/fx/solari_campaign.json : éclairage raytracé du terrain de campagne via un maillage proxy grossier (build avec la feature Cargo solari, GPU à ray queries). Rendu seulement.",
+  "type": "object",
+  "properties": {
+    "_comment": { "type": "string" },
+    "enabled": { "type": "boolean" },
+    "terrain_proxy_triangles": { "type": "integer", "minimum": 1000, "maximum": 4000000, "description": "Triangles visés du maillage proxy du terrain." },
+    "albedo_from": { "enum": ["composed_map", "flat"], "description": "Albédo du proxy : carte composée basse résolution ou couleur plate." },
+    "flat_color": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3, "description": "Couleur sRGB du mode flat." },
+    "restir": { "type": "boolean" },
+    "max_bounces": { "type": "integer", "minimum": 1, "maximum": 8 },
+    "sky_intensity": { "type": "number", "minimum": 0, "description": "Intensité de la lumière d'environnement (ciel dégradé), seule source ambiante de Solari." }
+  },
+  "required": ["enabled"],
+  "additionalProperties": false
+}

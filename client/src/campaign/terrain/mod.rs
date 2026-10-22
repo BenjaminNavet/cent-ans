@@ -37,6 +37,8 @@ pub mod relief_gpu;
 pub mod relief_state;
 pub mod season;
 pub mod shadows;
+#[cfg(feature = "solari")]
+pub mod solari_proxy;
 pub mod surface;
 pub mod terroir;
 pub mod tres;
@@ -72,6 +74,9 @@ impl Plugin for CampaignTerrainPlugin {
         embedded_asset!(app, "terrain_shadow.wesl");
         // Shared relief module: `import cent_ans_client::campaign::terrain::relief::{...}`.
         bevy::shader::load_shader_library!(app, "relief.wesl");
+        // bevy_solari prototype on the map (docs/wip/bevy-solari-campagne-proto.md).
+        #[cfg(feature = "solari")]
+        solari_proxy::add_plugin(app);
         app.init_resource::<cpu_sampler::CpuSampler>()
             .init_resource::<season::SeasonWeights>();
         app.add_plugins(MaterialPlugin::<TerrainMaterial>::default())
