@@ -8,7 +8,11 @@
   "region": "hongrie",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_slavonia_west",
+    "prov_syrmia",
+    "prov_transdanubia_west"
+  ],
   "rivers": [
     "Danube",
     "Ipoly",

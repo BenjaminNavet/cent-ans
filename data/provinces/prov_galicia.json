@@ -8,7 +8,13 @@
   "region": "iberie_nord",
   "terrain": "hills",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_barcelona",
+    "prov_lara",
+    "prov_lisboa",
+    "prov_navarra",
+    "prov_toledo"
+  ],
   "rivers": [
     "Miño",
     "Sil",

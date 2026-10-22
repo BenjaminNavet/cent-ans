@@ -8,7 +8,16 @@
   "region": "pays_bas",
   "terrain": "hills",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brabant",
+    "prov_cologne",
+    "prov_hainaut",
+    "prov_ile_de_france",
+    "prov_julich",
+    "prov_lorraine",
+    "prov_namur",
+    "prov_trier"
+  ],
   "rivers": [
     "Meuse",
     "Ourthe",

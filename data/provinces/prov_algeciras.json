@@ -8,7 +8,10 @@
   "region": "iberie_sud",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_granada",
+    "prov_murcia"
+  ],
   "coastal": true,
   "rivers": [
     "Guadarranque"

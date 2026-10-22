@@ -8,7 +8,9 @@
   "region": "angleterre_sud",
   "terrain": "hills",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_middlesex"
+  ],
   "rivers": [
     "Medway",
     "Stour",

@@ -8,7 +8,12 @@
   "region": "rus_centre",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_kostroma",
+    "prov_moscow",
+    "prov_suzdal",
+    "prov_yaroslavl"
+  ],
   "coastal": false,
   "rivers": [
     "Nero (lac)"

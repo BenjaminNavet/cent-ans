@@ -8,7 +8,10 @@
   "region": "scandinavie",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_gotaland",
+    "prov_vestlandet"
+  ],
   "rivers": [
     "Fyris",
     "Svartån"

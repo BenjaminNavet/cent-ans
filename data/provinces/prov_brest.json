@@ -8,7 +8,16 @@
   "region": "lituanie",
   "terrain": "marsh",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_lesser_poland",
+    "prov_lviv",
+    "prov_pomesania",
+    "prov_riga",
+    "prov_riga_archbishopric",
+    "prov_samland",
+    "prov_vilnius",
+    "prov_warsaw"
+  ],
   "rivers": [
     "Bug",
     "Moukhavets",

@@ -1,0 +1,488 @@
+{
+  "id": "formigny",
+  "name": "Bataille de Formigny",
+  "date": "1450-04-15",
+  "year": 1450,
+  "summary": "15 avril 1450. Sir Thomas Kyriell, qui marche de Carentan vers Bayeux avec 4 000 hommes, trouve le comte de Clermont en travers du chemin. Il s’établit derrière le ruisseau de Val, ses archers derrière des pieux au cœur du bocage, vergers et haies. Deux couleuvrines délogent les archers, mais l’ordonnance échoue à franchir le ruisseau jusqu’à l’arrivée de Richemont et de ses Bretons sur le flanc, en fin d’après-midi : la Normandie anglaise est perdue.",
+  "province": "prov_normandie",
+  "province_name": "Normandie",
+  "terrain": "bocage",
+  "season": "spring",
+  "site": {
+    "lon": -0.906,
+    "lat": 49.342,
+    "bearing_deg": 270,
+    "place": "Formigny (Calvados)"
+  },
+  "field": {
+    "width_m": 2400,
+    "depth_m": 1600,
+    "line_gap_m": 700,
+    "zone_depth_m": 450,
+    "max_regiments_per_side": 160
+  },
+  "ground": "muddy",
+  "weather": {
+    "start": "clear",
+    "label": "Après-midi de printemps, prés détrempés par les pluies d’avril"
+  },
+  "start_hour": 14.0,
+  "woods": [
+    {
+      "x": 80,
+      "z": 1450,
+      "radius": 100
+    },
+    {
+      "x": 2330,
+      "z": 1500,
+      "radius": 90
+    }
+  ],
+  "mud": [
+    {
+      "x": 1000,
+      "z": 900,
+      "radius": 80
+    },
+    {
+      "x": 1450,
+      "z": 880,
+      "radius": 70
+    }
+  ],
+  "streams": [
+    {
+      "kind": "brook",
+      "width": 6,
+      "points": [
+        [
+          -40,
+          960
+        ],
+        [
+          400,
+          1000
+        ],
+        [
+          800,
+          1010
+        ],
+        [
+          1200,
+          1010
+        ],
+        [
+          1600,
+          990
+        ],
+        [
+          2000,
+          960
+        ],
+        [
+          2440,
+          940
+        ]
+      ]
+    }
+  ],
+  "roads": [
+    {
+      "kind": "main",
+      "width": 6,
+      "points": [
+        [
+          1180,
+          -40
+        ],
+        [
+          1170,
+          500
+        ],
+        [
+          1180,
+          1000
+        ],
+        [
+          1170,
+          1500
+        ],
+        [
+          1180,
+          1640
+        ]
+      ]
+    }
+  ],
+  "obstacles": [
+    {
+      "kind": "hedge",
+      "a": [
+        200,
+        1180
+      ],
+      "b": [
+        560,
+        1190
+      ]
+    },
+    {
+      "kind": "hedge",
+      "a": [
+        560,
+        1190
+      ],
+      "b": [
+        560,
+        1400
+      ]
+    },
+    {
+      "kind": "hedge",
+      "a": [
+        1600,
+        1150
+      ],
+      "b": [
+        1900,
+        1160
+      ]
+    },
+    {
+      "kind": "hedge",
+      "a": [
+        1900,
+        1160
+      ],
+      "b": [
+        1900,
+        1420
+      ]
+    },
+    {
+      "kind": "hedge",
+      "a": [
+        300,
+        600
+      ],
+      "b": [
+        700,
+        610
+      ]
+    },
+    {
+      "kind": "hedge",
+      "a": [
+        1500,
+        560
+      ],
+      "b": [
+        1850,
+        570
+      ]
+    },
+    {
+      "kind": "hedge",
+      "a": [
+        1850,
+        570
+      ],
+      "b": [
+        1850,
+        780
+      ]
+    },
+    {
+      "kind": "hedge",
+      "a": [
+        500,
+        400
+      ],
+      "b": [
+        500,
+        760
+      ]
+    },
+    {
+      "kind": "fence",
+      "a": [
+        880,
+        1130
+      ],
+      "b": [
+        1450,
+        1135
+      ]
+    },
+    {
+      "kind": "ditch",
+      "a": [
+        880,
+        1085
+      ],
+      "b": [
+        1450,
+        1090
+      ]
+    }
+  ],
+  "decor": {
+    "description": "Le bocage normand : petits enclos de haies et de talus, vergers de pommiers, le ruisseau de Val et son pont, l’église de Formigny, les pieux des archers anglais devant le chemin.",
+    "clear": true,
+    "items": [
+      {
+        "type": "hamlet",
+        "layout": "street",
+        "x": 1330,
+        "z": 1420,
+        "yaw": 0.0,
+        "houses": 12,
+        "seed": 1450
+      },
+      {
+        "type": "church",
+        "x": 1260,
+        "z": 1380,
+        "yaw": 0.1
+      },
+      {
+        "type": "plot",
+        "kind": "orchard",
+        "x": 700,
+        "z": 1300,
+        "length": 160,
+        "width": 90,
+        "yaw": 0.0
+      },
+      {
+        "type": "plot",
+        "kind": "orchard",
+        "x": 450,
+        "z": 1280,
+        "length": 120,
+        "width": 80,
+        "yaw": 0.0
+      },
+      {
+        "type": "plot",
+        "kind": "meadow",
+        "x": 1000,
+        "z": 700,
+        "length": 220,
+        "width": 120,
+        "yaw": 0.0
+      },
+      {
+        "type": "plot",
+        "kind": "meadow",
+        "x": 1700,
+        "z": 700,
+        "length": 200,
+        "width": 110,
+        "yaw": 0.1
+      },
+      {
+        "type": "plot",
+        "kind": "ploughland",
+        "x": 700,
+        "z": 400,
+        "length": 260,
+        "width": 130,
+        "yaw": 0.0,
+        "state": "ploughed"
+      },
+      {
+        "type": "camp",
+        "side": "defender",
+        "x": 1100,
+        "z": 1555,
+        "yaw": 3.14159,
+        "seed": 1450
+      },
+      {
+        "type": "camp",
+        "side": "attacker",
+        "x": 1200,
+        "z": 45,
+        "yaw": 0.0,
+        "seed": 15
+      }
+    ]
+  },
+  "armies": {
+    "attacker": {
+      "faction": "fac_france",
+      "faction_name": "France",
+      "army": "Armée du comte de Clermont",
+      "general": {
+        "name": "Charles de Bourbon, comte de Clermont",
+        "regiment": 6,
+        "command": 6
+      },
+      "regiments": [
+        {
+          "unit_type": "unit_culveriners",
+          "count": 2,
+          "soldiers": 30,
+          "x": 1100,
+          "z": 520,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 0,
+          "ammo": 30,
+          "label": "Couleuvrines de Giraud (deux pièces)"
+        },
+        {
+          "unit_type": "unit_francs_archers",
+          "count": 4,
+          "soldiers": 140,
+          "x": 1250,
+          "z": 330,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 0,
+          "morale": 50,
+          "label": "Francs-archers de Normandie"
+        },
+        {
+          "unit_type": "unit_ordonnance_gendarmes",
+          "count": 4,
+          "soldiers": 120,
+          "x": 1250,
+          "z": 230,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 0,
+          "experience": 4,
+          "label": "Compagnies d’ordonnance de Clermont"
+        },
+        {
+          "unit_type": "unit_men_at_arms_foot",
+          "count": 3,
+          "soldiers": 120,
+          "x": 1700,
+          "z": 280,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 1,
+          "label": "Hommes d’armes à pied de Brézé et de Bueil"
+        },
+        {
+          "unit_type": "unit_breton_knights",
+          "count": 4,
+          "soldiers": 120,
+          "x": 2300,
+          "z": 600,
+          "facing_deg": 270,
+          "gap_m": 8,
+          "wave": 2,
+          "experience": 4,
+          "label": "Bretons du connétable de Richemont (arrivée tardive)"
+        },
+        {
+          "unit_type": "unit_francs_archers",
+          "count": 2,
+          "soldiers": 140,
+          "x": 2300,
+          "z": 780,
+          "facing_deg": 270,
+          "gap_m": 8,
+          "wave": 2,
+          "label": "Archers bretons de Richemont"
+        }
+      ],
+      "waves": [
+        {
+          "label": "Les couleuvrines, les francs-archers et l’ordonnance",
+          "assault": true
+        },
+        {
+          "label": "Les hommes d’armes à pied",
+          "release_s": 280,
+          "after": 0,
+          "assault": true
+        },
+        {
+          "label": "Les Bretons de Richemont sur le flanc",
+          "release_s": 520,
+          "after": 1,
+          "assault": true
+        }
+      ]
+    },
+    "defender": {
+      "faction": "fac_england",
+      "faction_name": "Angleterre",
+      "army": "Armée de sir Thomas Kyriell",
+      "general": {
+        "name": "Sir Thomas Kyriell",
+        "regiment": 11,
+        "command": 6
+      },
+      "regiments": [
+        {
+          "unit_type": "unit_longbowmen",
+          "count": 6,
+          "soldiers": 150,
+          "x": 1100,
+          "z": 1180,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 60,
+          "experience": 3,
+          "label": "Archers de Kyriell derrière les pieux"
+        },
+        {
+          "unit_type": "unit_men_at_arms_foot",
+          "count": 5,
+          "soldiers": 130,
+          "x": 1100,
+          "z": 1250,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 80,
+          "experience": 3,
+          "label": "Hommes d’armes de Matthew Gough et de Norbury"
+        },
+        {
+          "unit_type": "unit_english_retinue",
+          "count": 1,
+          "soldiers": 120,
+          "x": 1100,
+          "z": 1330,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 100,
+          "experience": 4,
+          "label": "Maison de sir Thomas Kyriell"
+        },
+        {
+          "unit_type": "unit_longbowmen",
+          "count": 3,
+          "soldiers": 140,
+          "x": 400,
+          "z": 1100,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 60,
+          "label": "Archers de l’aile gauche dans les vergers"
+        }
+      ]
+    }
+  },
+  "historical_winner": "attacker",
+  "campaign": {
+    "from_year": 1417,
+    "to_year": 1450
+  },
+  "sources": [
+    "Mathieu d’Escouchy, Chronique (éd. Beaucourt)",
+    "Thomas Basin, Histoire de Charles VII",
+    "Anne Curry, The Hundred Years War 1337-1453 (2003)"
+  ]
+}

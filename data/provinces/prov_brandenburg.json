@@ -8,7 +8,16 @@
   "region": "empire_est",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brunswick",
+    "prov_glogow",
+    "prov_holstein",
+    "prov_lesser_poland",
+    "prov_mecklenburg",
+    "prov_meissen",
+    "prov_pomerania_stettin",
+    "prov_pomerania_wolgast"
+  ],
   "rivers": [
     "Elbe",
     "Havel",

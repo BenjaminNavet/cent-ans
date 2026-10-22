@@ -8,7 +8,13 @@
   "region": "italie_centre",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_ferrara",
+    "prov_firenze",
+    "prov_mantova",
+    "prov_rimini",
+    "prov_venezia"
+  ],
   "rivers": [
     "Reno",
     "Savena"

@@ -43,11 +43,44 @@ def real_labels() -> tuple[np.ndarray, dict[int, str]]:
     return labels, index_to_id
 
 
+def load_splits(path: Path | None = None) -> dict[str, list[dict]]:
+    """Scissions d'une province composée (``province_splits.json``), ``{}`` sans fichier.
+
+    Format : ``{"splits": {base_id: [{"id": ..., "seed_lonlat": [lon, lat], "weight": 1.0}, ...]}}``.
+    Le premier élément porte l'id de la base. Chaque pixel de la base va à la partie dont la
+    graine est la plus proche (distance en pixels réels, divisée par ``weight``).
+    """
+    path = path or COMPOSE_DIR / "province_splits.json"
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text("utf-8"))["splits"]
+
+
+def _split_seeds(
+    cw: ComposedWarp, new_index: dict[str, int], splits: dict[str, list[dict]]
+) -> dict[int, tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
+    """Graines des scissions en pixels réels : ``index de base -> (x, y, poids, index)``."""
+    grid = cw.real_map_grid()
+    out = {}
+    for base, parts in splits.items():
+        lon = np.array([part["seed_lonlat"][0] for part in parts], dtype=np.float64)
+        lat = np.array([part["seed_lonlat"][1] for part in parts], dtype=np.float64)
+        sx, sy = grid.lonlat_to_pixel(lon, lat)
+        weights = np.array([part.get("weight", 1.0) for part in parts])
+        indices = np.array([new_index[part["id"]] for part in parts])
+        out[new_index[base]] = (sx, sy, weights, indices)
+    return out
+
+
 def pull_labels(
-    cw: ComposedWarp, new_index: dict[str, int], id_map: dict[str, str | None]
+    cw: ComposedWarp,
+    new_index: dict[str, int],
+    id_map: dict[str, str | None],
+    splits: dict[str, list[dict]] | None = None,
 ) -> np.ndarray:
     """Étiquette composée brute de chaque pixel par déformation inverse (0 = aucune)."""
     old, index_to_id = real_labels()
+    seeds = _split_seeds(cw, new_index, splits or {})
     lut = np.zeros(max(index_to_id) + 1, dtype=np.uint16)
     for old_index, old_id in index_to_id.items():
         target = id_map.get(old_id)
@@ -67,7 +100,16 @@ def pull_labels(
         iy = np.clip(
             np.floor(np.where(ok, ry, 0)).astype(np.int64), 0, old.shape[0] - 1
         )
-        out[r0:r1] = np.where(ok, lut[old[iy, ix]], 0)
+        chunk = np.where(ok, lut[old[iy, ix]], 0)
+        for base_index, (sx, sy, weights, indices) in seeds.items():
+            inside = chunk == base_index
+            if not inside.any():
+                continue
+            dist = np.hypot(
+                rx[inside][:, None] - sx[None, :], ry[inside][:, None] - sy[None, :]
+            )
+            chunk[inside] = indices[np.argmin(dist / weights[None, :], axis=1)]
+        out[r0:r1] = chunk
     return out
 
 
@@ -118,7 +160,7 @@ def build_labels(
     ids = sorted(p.stem for p in provinces_dir.glob("*.json"))
     new_index = {pid: i for i, pid in enumerate(ids, start=1)}
     id_map = json.loads((COMPOSE_DIR / "id_map.json").read_text("utf-8"))["provinces"]
-    raw = pull_labels(cw, new_index, id_map)
+    raw = pull_labels(cw, new_index, id_map, load_splits())
     labels = np.where(land, raw, 0).astype(np.uint16)
     labels, filled = fill_small_land_gaps(labels, land)
     labels = smooth(labels, labels > 0, 5)

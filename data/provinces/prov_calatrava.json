@@ -8,7 +8,10 @@
   "region": "iberie_centre",
   "terrain": "plains",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_murcia",
+    "prov_toledo"
+  ],
   "coastal": false,
   "rivers": [
     "Guadiana"

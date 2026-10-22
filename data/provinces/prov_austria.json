@@ -8,7 +8,13 @@
   "region": "empire_est",
   "terrain": "hills",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bohemia",
+    "prov_oberbayern",
+    "prov_slavonia_west",
+    "prov_transdanubia_west",
+    "prov_venezia"
+  ],
   "rivers": [
     "Danube",
     "Enns",

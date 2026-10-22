@@ -9,7 +9,12 @@
   "terrain": "plains",
   "climate": "oceanic",
   "neighbors": [
-    "prov_flandre"
+    "prov_boulonnais",
+    "prov_flandre",
+    "prov_flandre_wallonne",
+    "prov_hainaut",
+    "prov_ile_de_france",
+    "prov_ponthieu"
   ],
   "rivers": [
     "Scarpe",

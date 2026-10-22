@@ -8,7 +8,11 @@
   "region": "maghreb",
   "terrain": "desert",
   "climate": "arid",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bougie",
+    "prov_tripolitania",
+    "prov_tunis"
+  ],
   "coastal": true,
   "rivers": [
     "Oued Gabès"

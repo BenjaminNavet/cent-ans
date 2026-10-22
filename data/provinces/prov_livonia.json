@@ -8,7 +8,15 @@
   "region": "livonie",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_dorpat",
+    "prov_harrien_wierland",
+    "prov_osel_wiek",
+    "prov_pskov",
+    "prov_riga",
+    "prov_riga_archbishopric",
+    "prov_vitebsk"
+  ],
   "rivers": [
     "Aa de Livonie (Gauja)"
   ],

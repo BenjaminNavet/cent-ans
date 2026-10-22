@@ -8,7 +8,15 @@
   "region": "empire_sud",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_austria",
+    "prov_bohemia",
+    "prov_nuremberg",
+    "prov_swabia",
+    "prov_tirol",
+    "prov_venezia",
+    "prov_waldstatten"
+  ],
   "rivers": [
     "Isar",
     "Inn",

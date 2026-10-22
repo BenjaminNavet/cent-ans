@@ -27,22 +27,16 @@ fn neighbours_come_from_the_map_graph() {
 }
 
 #[test]
-fn most_provinces_have_map_neighbours() {
+fn province_files_list_the_map_neighbours() {
+    // B3 (ADR 0730): the source files carry the land adjacency of the geometry.
     let data = game_data();
-    let with_files = data
-        .provinces
-        .values()
-        .filter(|p| !p.neighbors.is_empty())
-        .count();
-    let with_map = data
-        .provinces
-        .keys()
-        .filter(|id| !land_neighbors(data, id).is_empty())
-        .count();
-    assert!(
-        with_map > 5 * with_files.max(1),
-        "{with_map} vs {with_files}"
-    );
+    for (id, province) in &data.provinces {
+        let mut from_file = province.neighbors.clone();
+        from_file.sort();
+        let mut from_map = land_neighbors(data, id).to_vec();
+        from_map.sort();
+        assert_eq!(from_file, from_map, "{id}");
+    }
 }
 
 #[test]

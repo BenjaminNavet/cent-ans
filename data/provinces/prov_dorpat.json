@@ -8,7 +8,12 @@
   "region": "livonie",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_harrien_wierland",
+    "prov_livonia",
+    "prov_novgorod",
+    "prov_pskov"
+  ],
   "rivers": [
     "Emajõgi"
   ],

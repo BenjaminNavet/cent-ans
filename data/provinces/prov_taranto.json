@@ -8,7 +8,9 @@
   "region": "italie_sud",
   "terrain": "plains",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_napoli"
+  ],
   "rivers": [
     "Tara",
     "Ofanto",

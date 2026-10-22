@@ -8,7 +8,11 @@
   "region": "maghreb",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bougie",
+    "prov_fes",
+    "prov_rabat_sale"
+  ],
   "coastal": true,
   "rivers": [
     "Tafna",

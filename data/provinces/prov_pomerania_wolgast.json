@@ -8,7 +8,11 @@
   "region": "pomeranie",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brandenburg",
+    "prov_mecklenburg",
+    "prov_pomerania_stettin"
+  ],
   "rivers": [
     "Peene",
     "Ryck"

@@ -8,7 +8,13 @@
   "region": "france_ouest",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_alencon",
+    "prov_bretagne",
+    "prov_normandie",
+    "prov_saintonge",
+    "prov_touraine"
+  ],
   "rivers": [
     "Clain",
     "Vienne",

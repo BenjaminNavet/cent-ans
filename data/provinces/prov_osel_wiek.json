@@ -8,7 +8,10 @@
   "region": "livonie",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_harrien_wierland",
+    "prov_livonia"
+  ],
   "coastal": true,
   "ports": [
     "Hapsal",

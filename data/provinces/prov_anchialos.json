@@ -8,7 +8,11 @@
   "region": "balkans",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_constantinople",
+    "prov_muntenia",
+    "prov_tarnovo"
+  ],
   "coastal": true,
   "ports": [
     "Anchialos",

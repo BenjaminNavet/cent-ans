@@ -8,7 +8,10 @@
   "region": "ecosse",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_isles",
+    "prov_lothian"
+  ],
   "rivers": [
     "Forth",
     "Tay",

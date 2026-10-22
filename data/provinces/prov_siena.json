@@ -8,7 +8,9 @@
   "region": "italie_centre",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_firenze"
+  ],
   "rivers": [
     "Arbia"
   ],

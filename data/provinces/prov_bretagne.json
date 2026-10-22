@@ -9,7 +9,9 @@
   "terrain": "bocage",
   "climate": "oceanic",
   "neighbors": [
-    "prov_normandie"
+    "prov_normandie",
+    "prov_penthievre",
+    "prov_poitou"
   ],
   "rivers": [
     "Loire",

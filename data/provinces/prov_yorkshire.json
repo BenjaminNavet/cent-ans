@@ -8,7 +8,13 @@
   "region": "angleterre_nord",
   "terrain": "hills",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_devon",
+    "prov_gwynedd",
+    "prov_lancaster",
+    "prov_lothian",
+    "prov_middlesex"
+  ],
   "rivers": [
     "Ouse",
     "Humber",

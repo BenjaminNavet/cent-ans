@@ -8,7 +8,18 @@
   "region": "italie_centre",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bologna",
+    "prov_genova",
+    "prov_mantova",
+    "prov_milano",
+    "prov_perugia",
+    "prov_pisa",
+    "prov_rimini",
+    "prov_siena",
+    "prov_urbino",
+    "prov_verona"
+  ],
   "rivers": [
     "Arno",
     "Ombrone",

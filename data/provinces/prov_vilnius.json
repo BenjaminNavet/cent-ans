@@ -8,7 +8,14 @@
   "region": "lituanie",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brest",
+    "prov_briansk",
+    "prov_kyiv",
+    "prov_lviv",
+    "prov_riga_archbishopric",
+    "prov_vitebsk"
+  ],
   "rivers": [
     "Neris",
     "Vilnia",

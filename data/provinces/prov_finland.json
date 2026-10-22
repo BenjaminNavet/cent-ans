@@ -8,7 +8,9 @@
   "region": "finlande",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_novgorod"
+  ],
   "rivers": [
     "Aurajoki",
     "Vanajavesi"

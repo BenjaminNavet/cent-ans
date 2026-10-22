@@ -8,7 +8,11 @@
   "region": "grece",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_epirus",
+    "prov_morea",
+    "prov_thessalonica"
+  ],
   "coastal": true,
   "rivers": [
     "Céphise",

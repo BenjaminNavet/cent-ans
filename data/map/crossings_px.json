@@ -8,19 +8,19 @@
    "structure": "stone",
    "river": "Loire",
    "px": [
-    1568.604,
-    3001.364
+    1568.721,
+    3001.396
    ],
    "dir": [
     -0.9662,
     -0.2577
    ],
-   "width": 1.22,
+   "width": 1.296,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
-    -0.0054,
-    -1.0
+    -0.1713,
+    -0.9852
    ]
   },
   {
@@ -185,13 +185,9 @@
     -0.9999,
     -0.0101
    ],
-   "width": 1.714,
+   "width": 1.2,
    "snapped": true,
-   "in_custom_zone": false,
-   "axis": [
-    0.7068,
-    0.7074
-   ]
+   "in_custom_zone": false
   },
   {
    "id": "bridge_pont_de_la_charite_sur_loire",
@@ -892,20 +888,16 @@
    "structure": "wood",
    "river": "Tamise",
    "px": [
-    1247.667,
-    1949.553
+    1247.011,
+    1949.101
    ],
    "dir": [
-    0.7749,
-    0.6321
+    0.8523,
+    0.523
    ],
-   "width": 0.854,
+   "width": 0.85,
    "snapped": true,
-   "in_custom_zone": false,
-   "axis": [
-    -0.7054,
-    0.7089
-   ]
+   "in_custom_zone": false
   },
   {
    "id": "bridge_henley_bridge",
@@ -1159,13 +1151,9 @@
     -0.4472,
     -0.8944
    ],
-   "width": 0.894,
+   "width": 0.8,
    "snapped": true,
-   "in_custom_zone": false,
-   "axis": [
-    1.0,
-    0.0
-   ]
+   "in_custom_zone": false
   },
   {
    "id": "bridge_pont_d_audenarde",
@@ -1570,16 +1558,20 @@
    "structure": "stone",
    "river": "Èbre",
    "px": [
-    768.132,
-    3877.246
+    765.884,
+    3875.232
    ],
    "dir": [
-    0.7412,
-    0.6713
+    0.7477,
+    0.664
    ],
-   "width": 0.436,
+   "width": 0.456,
    "snapped": true,
-   "in_custom_zone": false
+   "in_custom_zone": false,
+   "axis": [
+    -0.4472,
+    0.8944
+   ]
   },
   {
    "id": "bridge_pont_de_logrono",
@@ -1624,19 +1616,19 @@
    "structure": "stone",
    "river": "Èbre",
    "px": [
-    1199.424,
-    4397.739
+    1199.612,
+    4397.888
    ],
    "dir": [
-    0.7809,
-    0.6247
+    0.7833,
+    0.6217
    ],
-   "width": 0.778,
+   "width": 0.787,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
-    0.716,
-    -0.6981
+    0.761,
+    -0.6487
    ]
   },
   {
@@ -1664,16 +1656,20 @@
    "structure": "wood",
    "river": "Danube",
    "px": [
-    3073.465,
-    3034.653
+    3075.939,
+    3031.939
    ],
    "dir": [
-    0.6616,
-    -0.7498
+    0.6863,
+    -0.7273
    ],
-   "width": 0.805,
+   "width": 0.808,
    "snapped": true,
-   "in_custom_zone": false
+   "in_custom_zone": false,
+   "axis": [
+    -0.7071,
+    -0.7071
+   ]
   },
   {
    "id": "bridge_pont_de_donauworth",
@@ -1808,20 +1804,16 @@
    "structure": "wood",
    "river": "Somme",
    "px": [
-    1602.163,
-    2355.0
+    1602.778,
+    2355.542
    ],
    "dir": [
     -0.75,
     -0.6614
    ],
-   "width": 0.635,
+   "width": 0.42,
    "snapped": true,
-   "in_custom_zone": false,
-   "axis": [
-    1.0,
-    0.0
-   ]
+   "in_custom_zone": false
   },
   {
    "id": "bridge_ponts_d_amiens",
@@ -1830,19 +1822,19 @@
    "structure": "stone",
    "river": "Somme",
    "px": [
-    1634.392,
-    2379.799
+    1634.328,
+    2379.761
    ],
    "dir": [
     -0.8627,
     -0.5057
    ],
-   "width": 0.434,
+   "width": 0.432,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
-    0.7062,
-    -0.708
+    0.6958,
+    -0.7183
    ]
   },
   {
@@ -1924,20 +1916,16 @@
    "structure": "stone",
    "river": "Marne",
    "px": [
-    1756.672,
-    2728.978
+    1757.365,
+    2728.789
    ],
    "dir": [
-    -0.9507,
-    0.31
+    -0.979,
+    0.204
    ],
-   "width": 0.532,
+   "width": 0.518,
    "snapped": true,
-   "in_custom_zone": false,
-   "axis": [
-    -0.0814,
-    -0.9967
-   ]
+   "in_custom_zone": false
   },
   {
    "id": "bridge_pont_de_chateau_thierry",
@@ -2036,19 +2024,19 @@
    "structure": "stone",
    "river": "Vienne",
    "px": [
-    1243.643,
-    3114.357
+    1237.776,
+    3110.736
    ],
    "dir": [
-    -0.8544,
-    -0.5196
+    -0.8472,
+    -0.5313
    ],
-   "width": 0.515,
+   "width": 0.51,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
-    0.7071,
-    -0.7071
+    0.6877,
+    -0.726
    ]
   },
   {
@@ -2152,19 +2140,19 @@
    "structure": "stone",
    "river": "Charente",
    "px": [
-    1068.95,
-    3396.954
+    1068.317,
+    3395.683
    ],
    "dir": [
-    -0.4603,
-    -0.8878
+    -0.4343,
+    -0.9008
    ],
-   "width": 0.472,
+   "width": 0.477,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
-    -0.7075,
-    0.7067
+    -0.7071,
+    0.7071
    ]
   },
   {
@@ -2426,16 +2414,20 @@
    "structure": "stone",
    "river": "Moselle",
    "px": [
-    2384.887,
-    2784.584
+    2385.0,
+    2784.481
    ],
    "dir": [
     0.739,
     -0.6738
    ],
-   "width": 0.61,
+   "width": 0.825,
    "snapped": true,
-   "in_custom_zone": false
+   "in_custom_zone": false,
+   "axis": [
+    0.0,
+    1.0
+   ]
   },
   {
    "id": "bridge_pont_romain_de_treves",
@@ -2444,19 +2436,19 @@
    "structure": "stone",
    "river": "Moselle",
    "px": [
-    2464.779,
-    2591.797
+    2465.41,
+    2590.729
    ],
    "dir": [
-    0.4778,
-    -0.8785
+    0.5472,
+    -0.837
    ],
-   "width": 0.626,
+   "width": 0.809,
    "snapped": true,
    "in_custom_zone": false,
    "axis": [
-    0.9125,
-    0.4091
+    0.2977,
+    0.9547
    ]
   },
   {
@@ -2629,18 +2621,18 @@
    "river": "Somme",
    "road_type": "computed",
    "px": [
-    1565.922,
-    2321.0
+    1493.554,
+    2259.0
    ],
    "dir": [
-    -0.7906,
-    -0.6123
+    -0.7944,
+    -0.6075
    ],
    "axis": [
-    1.0,
+    -1.0,
     0.0
    ],
-   "width": 0.686,
+   "width": 0.691,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2649,21 +2641,21 @@
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Somme",
+   "river": "Garonne",
    "road_type": "computed",
    "px": [
-    1558.043,
-    2315.0
+    1365.873,
+    3892.127
    ],
    "dir": [
-    -0.7894,
-    -0.6139
+    -0.5871,
+    -0.8095
    ],
    "axis": [
-    1.0,
-    0.0
+    -0.7071,
+    0.7071
    ],
-   "width": 0.684,
+   "width": 1.112,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2672,21 +2664,21 @@
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Somme",
+   "river": "Charente",
    "road_type": "computed",
    "px": [
-    1518.251,
-    2279.0
+    971.0,
+    3318.436
    ],
    "dir": [
-    -0.7613,
-    -0.6484
+    -0.9998,
+    0.0183
    ],
    "axis": [
-    -1.0,
-    0.0
+    0.0,
+    -1.0
    ],
-   "width": 0.648,
+   "width": 0.45,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2695,72 +2687,26 @@
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Somme",
+   "river": "Lot",
    "road_type": "computed",
    "px": [
-    1496.067,
-    2261.0
+    1313.737,
+    3831.01
    ],
    "dir": [
-    -0.7743,
-    -0.6328
+    -0.9994,
+    0.0333
    ],
    "axis": [
-    -1.0,
-    0.0
+    -0.6905,
+    -0.7234
    ],
-   "width": 0.664,
+   "width": 0.603,
    "snapped": true,
    "in_custom_zone": false
   },
   {
    "id": "road_4",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Garonne",
-   "road_type": "computed",
-   "px": [
-    1312.192,
-    3849.808
-   ],
-   "dir": [
-    -0.636,
-    -0.7717
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 1.102,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_5",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Lot",
-   "road_type": "computed",
-   "px": [
-    1331.877,
-    3831.877
-   ],
-   "dir": [
-    -0.9873,
-    -0.1587
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 0.768,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_6",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -2783,6 +2729,52 @@
    "in_custom_zone": false
   },
   {
+   "id": "road_5",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Garonne",
+   "road_type": "computed",
+   "px": [
+    1478.098,
+    3983.902
+   ],
+   "dir": [
+    -0.5391,
+    -0.8423
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.117,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_6",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Garonne",
+   "road_type": "computed",
+   "px": [
+    1447.952,
+    3956.048
+   ],
+   "dir": [
+    -0.9721,
+    -0.2346
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 1.283,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
    "id": "road_7",
    "name": "",
    "type": "road",
@@ -2790,46 +2782,23 @@
    "river": "Garonne",
    "road_type": "computed",
    "px": [
-    1392.456,
-    3915.544
+    1397.231,
+    3919.0
    ],
    "dir": [
-    -0.8154,
-    -0.579
+    -0.8036,
+    -0.5952
    ],
    "axis": [
-    -0.7071,
-    0.7071
+    1.0,
+    0.0
    ],
-   "width": 1.114,
+   "width": 1.846,
    "snapped": true,
    "in_custom_zone": false
   },
   {
    "id": "road_8",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Garonne",
-   "road_type": "computed",
-   "px": [
-    1529.763,
-    4066.237
-   ],
-   "dir": [
-    -0.5167,
-    -0.8562
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.104,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_9",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -2852,6 +2821,29 @@
    "in_custom_zone": false
   },
   {
+   "id": "road_9",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhône",
+   "road_type": "computed",
+   "px": [
+    2148.08,
+    3754.08
+   ],
+   "dir": [
+    -0.3677,
+    0.93
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.137,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
    "id": "road_10",
    "name": "",
    "type": "road",
@@ -2859,18 +2851,18 @@
    "river": "Rhône",
    "road_type": "computed",
    "px": [
-    2150.158,
-    3747.737
+    2149.868,
+    4176.132
    ],
    "dir": [
-    -0.2559,
-    0.9667
+    0.1152,
+    0.9933
    ],
    "axis": [
-    -0.5547,
-    -0.8321
+    0.7071,
+    -0.7071
    ],
-   "width": 1.396,
+   "width": 1.403,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2879,21 +2871,21 @@
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Rhône",
+   "river": "Nile",
    "road_type": "computed",
    "px": [
-    2153.963,
-    3902.037
+    6130.496,
+    5849.99
    ],
    "dir": [
-    0.1414,
-    0.9899
+    0.6562,
+    0.7546
    ],
    "axis": [
-    0.7071,
-    -0.7071
+    0.8288,
+    -0.5595
    ],
-   "width": 1.342,
+   "width": 1.309,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2901,22 +2893,22 @@
    "id": "road_12",
    "name": "",
    "type": "road",
-   "structure": "wood",
-   "river": "Nile",
+   "structure": "stone",
+   "river": "Kızılırmak",
    "road_type": "computed",
    "px": [
-    6108.46,
-    5833.0
+    6243.0,
+    3938.091
    ],
    "dir": [
-    0.8137,
-    0.5812
+    -0.9258,
+    -0.3781
    ],
    "axis": [
-    1.0,
-    0.0
+    0.0,
+    1.0
    ],
-   "width": 2.236,
+   "width": 0.224,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -2928,92 +2920,23 @@
    "river": "Kızılırmak",
    "road_type": "computed",
    "px": [
-    6131.418,
-    3743.0
+    6462.728,
+    3612.456
    ],
    "dir": [
-    0.0836,
-    -0.9965
+    -0.4096,
+    0.9123
    ],
    "axis": [
-    -1.0,
-    0.0
+    0.4472,
+    0.8944
    ],
-   "width": 0.216,
+   "width": 0.267,
    "snapped": true,
    "in_custom_zone": false
   },
   {
    "id": "road_14",
-   "name": "",
-   "type": "road",
-   "structure": "stone",
-   "river": "Kızılırmak",
-   "road_type": "computed",
-   "px": [
-    6139.02,
-    3786.98
-   ],
-   "dir": [
-    -0.5105,
-    -0.8599
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 0.215,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_15",
-   "name": "",
-   "type": "road",
-   "structure": "stone",
-   "river": "Kızılırmak",
-   "road_type": "computed",
-   "px": [
-    6303.0,
-    3941.392
-   ],
-   "dir": [
-    -0.9864,
-    0.1644
-   ],
-   "axis": [
-    0.0,
-    1.0
-   ],
-   "width": 0.21,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_16",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Kızılırmak",
-   "road_type": "computed",
-   "px": [
-    6302.794,
-    3344.059
-   ],
-   "dir": [
-    0.3916,
-    -0.9202
-   ],
-   "axis": [
-    -0.6,
-    -0.8
-   ],
-   "width": 0.471,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_17",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3036,6 +2959,75 @@
    "in_custom_zone": false
   },
   {
+   "id": "road_15",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhine",
+   "road_type": "computed",
+   "px": [
+    2235.881,
+    1855.559
+   ],
+   "dir": [
+    -0.8932,
+    -0.4496
+   ],
+   "axis": [
+    0.8944,
+    -0.4472
+   ],
+   "width": 1.684,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_16",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Schelde",
+   "road_type": "computed",
+   "px": [
+    2011.778,
+    2006.64
+   ],
+   "dir": [
+    0.6585,
+    -0.7526
+   ],
+   "axis": [
+    -1.0,
+    0.0088
+   ],
+   "width": 1.071,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_17",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Maas",
+   "road_type": "computed",
+   "px": [
+    2091.745,
+    1870.255
+   ],
+   "dir": [
+    -0.976,
+    -0.2179
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.007,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
    "id": "road_18",
    "name": "",
    "type": "road",
@@ -3043,69 +3035,23 @@
    "river": "Rhine",
    "road_type": "computed",
    "px": [
-    2236.253,
-    1855.747
+    2313.025,
+    1886.975
    ],
    "dir": [
-    -0.8932,
-    -0.4496
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.422,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_19",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Maas",
-   "road_type": "computed",
-   "px": [
-    2088.373,
-    1869.627
-   ],
-   "dir": [
-    -0.9916,
-    -0.1293
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.072,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_20",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhine",
-   "road_type": "computed",
-   "px": [
-    2318.246,
-    1889.754
-   ],
-   "dir": [
-    -0.887,
-    -0.4617
+    -0.8752,
+    -0.4837
    ],
    "axis": [
     -0.7071,
     0.7071
    ],
-   "width": 1.415,
+   "width": 1.405,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_21",
+   "id": "road_19",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3128,7 +3074,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_22",
+   "id": "road_20",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3151,76 +3097,30 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_23",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Danube",
-   "road_type": "computed",
-   "px": [
-    3084.435,
-    3024.718
-   ],
-   "dir": [
-    0.8398,
-    -0.543
-   ],
-   "axis": [
-    -0.8944,
-    -0.4472
-   ],
-   "width": 0.95,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_24",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Guadalquivir",
-   "road_type": "computed",
-   "px": [
-    541.0,
-    4771.91
-   ],
-   "dir": [
-    -0.7809,
-    0.6247
-   ],
-   "axis": [
-    0.0,
-    1.0
-   ],
-   "width": 1.088,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_25",
+   "id": "road_21",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Rhine",
    "road_type": "computed",
    "px": [
-    2684.052,
-    2966.052
+    2684.165,
+    2965.583
    ],
    "dir": [
-    0.2256,
-    -0.9742
+    0.2524,
+    -0.9676
    ],
    "axis": [
-    -0.7071,
-    -0.7071
+    -0.8944,
+    -0.4472
    ],
-   "width": 1.518,
+   "width": 1.316,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_26",
+   "id": "road_22",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3243,53 +3143,53 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_27",
+   "id": "road_23",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Ebro",
    "road_type": "computed",
    "px": [
-    1421.813,
-    4556.187
+    1278.052,
+    4477.948
    ],
    "dir": [
-    0.8078,
-    0.5895
+    0.4299,
+    0.9029
    ],
    "axis": [
     -0.7071,
     0.7071
    ],
-   "width": 0.831,
+   "width": 0.852,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_28",
+   "id": "road_24",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Ebro",
    "road_type": "computed",
    "px": [
-    1289.115,
-    4494.885
+    1505.692,
+    4653.692
    ],
    "dir": [
-    0.4808,
-    0.8768
+    -0.5241,
+    0.8517
    ],
    "axis": [
     -0.7071,
-    0.7071
+    -0.7071
    ],
-   "width": 0.83,
+   "width": 0.873,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_29",
+   "id": "road_25",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3312,2100 +3212,76 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_30",
+   "id": "road_26",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Dordogne",
    "road_type": "computed",
    "px": [
-    1161.793,
-    3633.275
+    1161.755,
+    3633.234
    ],
    "dir": [
-    -0.6897,
-    -0.7241
+    -0.6811,
+    -0.7322
    ],
    "axis": [
-    0.4179,
-    -0.9085
+    0.4311,
+    -0.9023
    ],
-   "width": 0.861,
+   "width": 0.86,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_31",
+   "id": "road_27",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Garonne",
    "road_type": "computed",
    "px": [
-    1133.842,
-    3662.158
+    1135.233,
+    3663.8
    ],
    "dir": [
-    -0.6504,
-    -0.7596
+    -0.6452,
+    -0.764
    ],
    "axis": [
-    0.7071,
-    -0.7071
+    0.6919,
+    -0.722
    ],
-   "width": 1.103,
+   "width": 1.106,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_32",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Ebro",
-   "road_type": "computed",
-   "px": [
-    1202.099,
-    4399.901
-   ],
-   "dir": [
-    0.7408,
-    0.6717
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 0.773,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_33",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Elbe",
-   "road_type": "computed",
-   "px": [
-    3259.962,
-    1921.962
-   ],
-   "dir": [
-    0.2873,
-    -0.9578
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 1.362,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_34",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Oder",
-   "road_type": "computed",
-   "px": [
-    3630.05,
-    1958.05
-   ],
-   "dir": [
-    0.1961,
-    -0.9806
-   ],
-   "axis": [
-    0.7071,
-    0.7071
-   ],
-   "width": 1.262,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_35",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Warta",
-   "road_type": "computed",
-   "px": [
-    4218.029,
-    2112.679
-   ],
-   "dir": [
-    -0.4605,
-    -0.8877
-   ],
-   "axis": [
-    1.0,
-    -0.0012
-   ],
-   "width": 0.397,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_36",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Elbe",
-   "road_type": "computed",
-   "px": [
-    3523.737,
-    2258.263
-   ],
-   "dir": [
-    -0.8087,
-    -0.5882
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 1.195,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_37",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhône",
-   "road_type": "computed",
-   "px": [
-    2331.847,
-    3651.847
-   ],
-   "dir": [
-    -0.7173,
-    0.6968
-   ],
-   "axis": [
-    0.7071,
-    0.7071
-   ],
-   "width": 0.892,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_38",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhine",
-   "road_type": "computed",
-   "px": [
-    2794.04,
-    3259.96
-   ],
-   "dir": [
-    -0.9871,
-    -0.1601
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.226,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_39",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Mosel",
-   "road_type": "computed",
-   "px": [
-    2390.207,
-    2955.864
-   ],
-   "dir": [
-    -0.764,
-    -0.6452
-   ],
-   "axis": [
-    -0.0058,
-    -1.0
-   ],
-   "width": 0.765,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_40",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Danube",
-   "road_type": "computed",
-   "px": [
-    5038.191,
-    3578.191
-   ],
-   "dir": [
-    0.8219,
-    -0.5696
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 1.372,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_41",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Ebro",
-   "road_type": "computed",
-   "px": [
-    759.902,
-    3870.098
-   ],
-   "dir": [
-    0.7782,
-    0.628
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 0.438,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_42",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Po",
-   "road_type": "computed",
-   "px": [
-    3172.046,
-    3930.046
-   ],
-   "dir": [
-    0.9686,
-    -0.2487
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 1.219,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_43",
+   "id": "road_28",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Dordogne",
    "road_type": "computed",
    "px": [
-    1159.693,
-    3630.839
+    1166.114,
+    3636.273
    ],
    "dir": [
-    -0.6178,
-    -0.7863
+    -0.9806,
+    -0.1961
    ],
    "axis": [
-    0.974,
-    -0.2265
-   ],
-   "width": 0.883,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_44",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Loire",
-   "road_type": "computed",
-   "px": [
-    2010.105,
-    3583.895
-   ],
-   "dir": [
-    -0.2918,
-    -0.9565
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.158,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_45",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Weser",
-   "road_type": "computed",
-   "px": [
-    2674.18,
-    1619.0
-   ],
-   "dir": [
-    -0.7926,
-    -0.6097
-   ],
-   "axis": [
-    -1.0,
-    0.0
-   ],
-   "width": 1.23,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_46",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Elbe",
-   "road_type": "computed",
-   "px": [
-    2847.833,
-    1568.167
-   ],
-   "dir": [
-    0.8297,
-    0.5583
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.223,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_47",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Elbe",
-   "road_type": "computed",
-   "px": [
-    2859.828,
-    1566.172
-   ],
-   "dir": [
-    -0.9638,
-    -0.2666
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.379,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_48",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Vistula",
-   "road_type": "computed",
-   "px": [
-    4564.068,
-    2111.932
-   ],
-   "dir": [
-    -0.3867,
-    -0.9222
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 1.225,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_49",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Desna",
-   "road_type": "computed",
-   "px": [
-    5828.002,
-    1456.002
-   ],
-   "dir": [
-    0.9998,
-    -0.02
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 0.571,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_50",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Dnipro",
-   "road_type": "computed",
-   "px": [
-    5447.279,
-    1584.721
-   ],
-   "dir": [
-    0.5576,
-    0.8301
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 0.544,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_51",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Desna",
-   "road_type": "computed",
-   "px": [
-    5891.239,
-    1614.941
-   ],
-   "dir": [
-    0.1927,
-    0.9812
-   ],
-   "axis": [
-    -0.72,
-    -0.694
-   ],
-   "width": 0.759,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_52",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Dnipro",
-   "road_type": "computed",
-   "px": [
-    5497.7,
-    1471.7
-   ],
-   "dir": [
-    -0.8944,
-    0.4472
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 0.553,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_53",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Danube",
-   "road_type": "computed",
-   "px": [
-    3984.149,
-    3005.851
-   ],
-   "dir": [
-    0.9553,
-    0.2957
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 1.404,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_54",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Oder",
-   "road_type": "computed",
-   "px": [
-    4185.676,
-    2459.524
-   ],
-   "dir": [
-    -0.5334,
-    -0.8459
-   ],
-   "axis": [
-    0.713,
-    -0.7012
-   ],
-   "width": 1.019,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_55",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Duero",
-   "road_type": "computed",
-   "px": [
-    702.009,
-    4088.005
-   ],
-   "dir": [
-    -0.9131,
-    -0.4077
-   ],
-   "axis": [
-    -0.0089,
-    1.0
-   ],
-   "width": 0.442,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_56",
-   "name": "",
-   "type": "road",
-   "structure": "stone",
-   "river": "Kızılırmak",
-   "road_type": "computed",
-   "px": [
-    6138.18,
-    3785.82
-   ],
-   "dir": [
     -0.6585,
     -0.7526
    ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 0.209,
+   "width": 1.314,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_57",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Guadalquivir",
-   "road_type": "computed",
-   "px": [
-    527.0,
-    4839.865
-   ],
-   "dir": [
-    0.7507,
-    0.6606
-   ],
-   "axis": [
-    0.0,
-    -1.0
-   ],
-   "width": 1.132,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_58",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Vienne",
-   "road_type": "computed",
-   "px": [
-    1260.957,
-    3124.506
-   ],
-   "dir": [
-    -0.863,
-    -0.5053
-   ],
-   "axis": [
-    -0.0011,
-    1.0
-   ],
-   "width": 0.579,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_59",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Loire",
-   "road_type": "computed",
-   "px": [
-    1259.205,
-    3083.205
-   ],
-   "dir": [
-    -0.9684,
-    0.2494
-   ],
-   "axis": [
-    0.7071,
-    0.7071
-   ],
-   "width": 1.394,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_60",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Seine",
-   "road_type": "computed",
-   "px": [
-    1382.025,
-    2474.025
-   ],
-   "dir": [
-    -0.3162,
-    0.9487
-   ],
-   "axis": [
-    0.7071,
-    0.7071
-   ],
-   "width": 1.062,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_61",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Seine",
-   "road_type": "computed",
-   "px": [
-    1363.941,
-    2473.941
-   ],
-   "dir": [
-    0.0476,
-    -0.9989
-   ],
-   "axis": [
-    0.7071,
-    0.7071
-   ],
-   "width": 1.283,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_62",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Guadalquivir",
-   "road_type": "computed",
-   "px": [
-    731.444,
-    4802.934
-   ],
-   "dir": [
-    -0.6034,
-    -0.7974
-   ],
-   "axis": [
-    -0.9998,
-    -0.0186
-   ],
-   "width": 1.053,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_63",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Guadalquivir",
-   "road_type": "computed",
-   "px": [
-    735.812,
-    4803.812
-   ],
-   "dir": [
-    -0.9191,
-    0.3939
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 0.873,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_64",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Guadalquivir",
-   "road_type": "computed",
-   "px": [
-    816.462,
-    4833.0
-   ],
-   "dir": [
-    -0.7886,
-    -0.6149
-   ],
-   "axis": [
-    -1.0,
-    0.0
-   ],
-   "width": 1.258,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_65",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Guadalquivir",
-   "road_type": "computed",
-   "px": [
-    1018.899,
-    4924.561
-   ],
-   "dir": [
-    -0.0222,
-    -0.9998
-   ],
-   "axis": [
-    -0.7147,
-    -0.6995
-   ],
-   "width": 0.577,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_66",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Guadalquivir",
-   "road_type": "computed",
-   "px": [
-    993.1,
-    4907.0
-   ],
-   "dir": [
-    -0.8,
-    0.6
-   ],
-   "axis": [
-    -1.0,
-    0.0
-   ],
-   "width": 0.769,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_67",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Guadalquivir",
-   "road_type": "computed",
-   "px": [
-    724.022,
-    4802.796
-   ],
-   "dir": [
-    -0.8,
-    0.6
-   ],
-   "axis": [
-    -0.9998,
-    -0.0186
-   ],
-   "width": 1.341,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_68",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Guadalquivir",
-   "road_type": "computed",
-   "px": [
-    808.534,
-    4827.0
-   ],
-   "dir": [
-    -0.8192,
-    -0.5735
-   ],
-   "axis": [
-    -1.0,
-    0.0
-   ],
-   "width": 1.369,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_69",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Po",
-   "road_type": "computed",
-   "px": [
-    2768.655,
-    3953.345
-   ],
-   "dir": [
-    0.7882,
-    0.6154
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.037,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_70",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Po",
-   "road_type": "computed",
-   "px": [
-    2609.639,
-    4043.541
-   ],
-   "dir": [
-    0.8374,
-    -0.5466
-   ],
-   "axis": [
-    0.7007,
-    0.7134
-   ],
-   "width": 0.928,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_71",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhône",
-   "road_type": "computed",
-   "px": [
-    2155.85,
-    3719.425
-   ],
-   "dir": [
-    -0.3714,
-    0.9285
-   ],
-   "axis": [
-    -0.8944,
-    -0.4472
-   ],
-   "width": 1.029,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_72",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Po",
-   "road_type": "computed",
-   "px": [
-    3376.336,
-    3918.336
-   ],
-   "dir": [
-    0.9564,
-    -0.2921
-   ],
-   "axis": [
-    0.7071,
-    0.7071
-   ],
-   "width": 1.189,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_73",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Sava",
-   "road_type": "computed",
-   "px": [
-    3749.313,
-    3518.687
-   ],
-   "dir": [
-    0.8872,
-    0.4614
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 0.323,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_74",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Po",
-   "road_type": "computed",
-   "px": [
-    3464.164,
-    3903.836
-   ],
-   "dir": [
-    0.7316,
-    0.6817
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 1.051,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_75",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhine",
-   "road_type": "computed",
-   "px": [
-    2483.788,
-    2170.212
-   ],
-   "dir": [
-    -0.6644,
-    -0.7474
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.352,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_76",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhine",
-   "road_type": "computed",
-   "px": [
-    2497.213,
-    2210.013
-   ],
-   "dir": [
-    -0.037,
-    -0.9993
-   ],
-   "axis": [
-    0.87,
-    -0.493
-   ],
-   "width": 1.52,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_77",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Maas",
-   "road_type": "computed",
-   "px": [
-    2267.226,
-    2185.0
-   ],
-   "dir": [
-    0.0185,
-    -0.9998
-   ],
-   "axis": [
-    -1.0,
-    0.0
-   ],
-   "width": 0.849,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_78",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhine",
-   "road_type": "computed",
-   "px": [
-    2497.39,
-    2212.033
-   ],
-   "dir": [
-    -0.1414,
-    -0.9899
-   ],
-   "axis": [
-    0.7218,
-    0.6921
-   ],
-   "width": 2.188,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_79",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhine",
-   "road_type": "computed",
-   "px": [
-    2752.527,
-    2545.473
-   ],
-   "dir": [
-    -0.7017,
-    -0.7124
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 1.333,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_80",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Guadalquivir",
-   "road_type": "computed",
-   "px": [
-    713.497,
-    4803.557
-   ],
-   "dir": [
-    -0.96,
-    -0.28
-   ],
-   "axis": [
-    -0.0032,
-    1.0
-   ],
-   "width": 0.858,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_81",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Guadalquivir",
-   "road_type": "computed",
-   "px": [
-    706.716,
-    4802.716
-   ],
-   "dir": [
-    -0.9962,
-    0.0866
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 1.085,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_82",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Danube",
-   "road_type": "computed",
-   "px": [
-    5069.5,
-    3558.25
-   ],
-   "dir": [
-    0.9816,
-    -0.1909
-   ],
-   "axis": [
-    0.8944,
-    0.4472
-   ],
-   "width": 2.214,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_83",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Danube",
-   "road_type": "computed",
-   "px": [
-    4865.857,
-    3594.143
-   ],
-   "dir": [
-    0.2169,
-    0.9762
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 1.6,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_84",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Danube",
-   "road_type": "computed",
-   "px": [
-    5340.589,
-    3348.589
-   ],
-   "dir": [
-    0.7835,
-    -0.6214
-   ],
-   "axis": [
-    0.7071,
-    0.7071
-   ],
-   "width": 1.359,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_85",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Nile (Damietta branch)",
-   "road_type": "computed",
-   "px": [
-    6136.31,
-    5649.458
-   ],
-   "dir": [
-    0.5364,
-    -0.844
-   ],
-   "axis": [
-    -1.0,
-    -0.0058
-   ],
-   "width": 1.003,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_86",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Nile (Rosetta branch)",
-   "road_type": "computed",
-   "px": [
-    5949.183,
-    5692.105
-   ],
-   "dir": [
-    -0.8029,
-    -0.5961
-   ],
-   "axis": [
-    -0.8872,
-    0.4614
-   ],
-   "width": 0.945,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_87",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Saône",
-   "road_type": "computed",
-   "px": [
-    2263.189,
-    3295.339
-   ],
-   "dir": [
-    -0.2747,
-    0.9615
-   ],
-   "axis": [
-    1.0,
-    -0.002
-   ],
-   "width": 0.716,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_88",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Seine",
-   "road_type": "computed",
-   "px": [
-    1908.22,
-    2892.22
-   ],
-   "dir": [
-    -0.9701,
-    0.2425
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 1.101,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_89",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Seine",
-   "road_type": "computed",
-   "px": [
-    2093.849,
-    3133.561
-   ],
-   "dir": [
-    0.2692,
-    -0.9631
-   ],
-   "axis": [
-    -0.6247,
-    -0.7809
-   ],
-   "width": 1.035,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_90",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Maas",
-   "road_type": "computed",
-   "px": [
-    2285.0,
-    3114.15
-   ],
-   "dir": [
-    -0.8944,
-    -0.4472
-   ],
-   "axis": [
-    0.0,
-    -1.0
-   ],
-   "width": 0.648,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_91",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Mosel",
-   "road_type": "computed",
-   "px": [
-    2378.716,
-    2945.284
-   ],
-   "dir": [
-    -0.9487,
-    -0.3162
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 0.645,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_92",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Kızılırmak",
-   "road_type": "computed",
-   "px": [
-    6508.208,
-    3555.429
-   ],
-   "dir": [
-    -0.502,
-    0.8649
-   ],
-   "axis": [
-    -0.0583,
-    -0.9983
-   ],
-   "width": 0.375,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_93",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Weser",
-   "road_type": "computed",
-   "px": [
-    3014.375,
-    2202.375
-   ],
-   "dir": [
-    0.0,
-    -1.0
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 1.026,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_94",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Weser",
-   "road_type": "computed",
-   "px": [
-    3056.844,
-    2244.844
-   ],
-   "dir": [
-    -0.995,
-    -0.0995
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 1.112,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_95",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Weser",
-   "road_type": "computed",
-   "px": [
-    3117.0,
-    2426.918
-   ],
-   "dir": [
-    -0.8437,
-    -0.5369
-   ],
-   "axis": [
-    0.0,
-    1.0
-   ],
-   "width": 0.711,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_96",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Po",
-   "road_type": "computed",
-   "px": [
-    3247.815,
-    3915.815
-   ],
-   "dir": [
-    0.9887,
-    -0.1501
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 1.304,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_97",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Po",
-   "road_type": "computed",
-   "px": [
-    3305.935,
-    3937.935
-   ],
-   "dir": [
-    0.9998,
-    -0.0208
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 1.455,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_98",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Po",
-   "road_type": "computed",
-   "px": [
-    2987.878,
-    3950.918
-   ],
-   "dir": [
-    0.1738,
-    -0.9848
-   ],
-   "axis": [
-    -0.7094,
-    -0.7048
-   ],
-   "width": 1.278,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_99",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Po",
-   "road_type": "computed",
-   "px": [
-    2842.075,
-    3965.925
-   ],
-   "dir": [
-    0.9899,
-    0.1414
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.307,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_100",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Oder",
-   "road_type": "computed",
-   "px": [
-    3903.87,
-    2194.13
-   ],
-   "dir": [
-    -0.825,
-    -0.5651
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.055,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_101",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Oder",
-   "road_type": "computed",
-   "px": [
-    3946.144,
-    2263.856
-   ],
-   "dir": [
-    -0.2747,
-    -0.9615
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.183,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_102",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Oder",
-   "road_type": "computed",
-   "px": [
-    3995.768,
-    2309.818
-   ],
-   "dir": [
-    -0.9648,
-    0.2631
-   ],
-   "axis": [
-    0.7214,
-    0.6925
-   ],
-   "width": 1.197,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_103",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Danube",
-   "road_type": "computed",
-   "px": [
-    4127.976,
-    3034.024
-   ],
-   "dir": [
-    0.9091,
-    0.4167
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.327,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_104",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Dniester",
-   "road_type": "computed",
-   "px": [
-    5083.851,
-    2601.907
-   ],
-   "dir": [
-    0.7526,
-    0.6585
-   ],
-   "axis": [
-    0.7849,
-    -0.6196
-   ],
-   "width": 0.507,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_105",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhine",
-   "road_type": "computed",
-   "px": [
-    2755.379,
-    2548.621
-   ],
-   "dir": [
-    -0.6499,
-    -0.76
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 1.337,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_106",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhine",
-   "road_type": "computed",
-   "px": [
-    2777.823,
-    2648.646
-   ],
-   "dir": [
-    0.1451,
-    -0.9894
-   ],
-   "axis": [
-    -0.4472,
-    -0.8944
-   ],
-   "width": 2.327,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_107",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Daugava",
-   "road_type": "computed",
-   "px": [
-    4695.961,
-    1207.961
-   ],
-   "dir": [
-    -0.8,
-    0.6
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 0.562,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_108",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Desna",
-   "road_type": "computed",
-   "px": [
-    5646.235,
-    2089.765
-   ],
-   "dir": [
-    0.4258,
-    0.9048
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 0.478,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_109",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Daugava",
-   "road_type": "computed",
-   "px": [
-    4600.014,
-    1181.995
-   ],
-   "dir": [
-    -0.9025,
-    -0.4306
-   ],
-   "axis": [
-    -0.9487,
-    0.3162
-   ],
-   "width": 0.806,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_110",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Daugava",
-   "road_type": "computed",
-   "px": [
-    4713.918,
-    1206.082
-   ],
-   "dir": [
-    -0.9296,
-    -0.3686
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 0.606,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_111",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Oka",
-   "road_type": "computed",
-   "px": [
-    6259.0,
-    1096.758
-   ],
-   "dir": [
-    0.6887,
-    -0.725
-   ],
-   "axis": [
-    0.0,
-    1.0
-   ],
-   "width": 0.65,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_112",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Oka",
-   "road_type": "computed",
-   "px": [
-    6320.805,
-    1088.805
-   ],
-   "dir": [
-    0.0712,
-    0.9975
-   ],
-   "axis": [
-    0.7071,
-    0.7071
-   ],
-   "width": 0.691,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_113",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Oka",
-   "road_type": "computed",
-   "px": [
-    6269.627,
-    1086.824
-   ],
-   "dir": [
-    0.7519,
-    -0.6592
-   ],
-   "axis": [
-    1.0,
-    0.0036
-   ],
-   "width": 0.678,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_114",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Daugava",
-   "road_type": "computed",
-   "px": [
-    5455.383,
-    1289.767
-   ],
-   "dir": [
-    -0.9285,
-    0.3714
-   ],
-   "axis": [
-    0.4472,
-    0.8944
-   ],
-   "width": 0.528,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_115",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Dnipro",
-   "road_type": "computed",
-   "px": [
-    5575.703,
-    1421.703
-   ],
-   "dir": [
-    -0.9119,
-    0.4104
-   ],
-   "axis": [
-    0.7071,
-    0.7071
-   ],
-   "width": 0.565,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_116",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Oka",
-   "road_type": "computed",
-   "px": [
-    6020.073,
-    1319.927
-   ],
-   "dir": [
-    0.9832,
-    -0.1827
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 0.783,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_117",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Oka",
-   "road_type": "computed",
-   "px": [
-    6039.66,
-    1380.34
-   ],
-   "dir": [
-    -0.2364,
-    -0.9717
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 0.519,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_118",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Danube",
-   "road_type": "computed",
-   "px": [
-    3374.452,
-    2908.452
-   ],
-   "dir": [
-    0.4657,
-    -0.8849
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 1.058,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_119",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Danube",
-   "road_type": "computed",
-   "px": [
-    3498.034,
-    2895.966
-   ],
-   "dir": [
-    0.507,
-    0.8619
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.088,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_120",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Dordogne",
-   "road_type": "computed",
-   "px": [
-    1166.311,
-    3636.311
-   ],
-   "dir": [
-    -0.9855,
-    -0.1699
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
-   ],
-   "width": 1.387,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_121",
+   "id": "road_29",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5428,421 +3304,352 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_122",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Lot",
-   "road_type": "computed",
-   "px": [
-    1303.2,
-    3831.4
-   ],
-   "dir": [
-    -1.0,
-    0.0
-   ],
-   "axis": [
-    -0.4472,
-    -0.8944
-   ],
-   "width": 0.503,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_123",
+   "id": "road_30",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Garonne",
    "road_type": "computed",
    "px": [
-    1336.591,
-    3869.409
+    1184.492,
+    3719.508
    ],
    "dir": [
-    -0.8514,
-    -0.5245
+    -0.9138,
+    -0.4061
    ],
    "axis": [
     0.7071,
     -0.7071
    ],
-   "width": 1.13,
+   "width": 1.178,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_124",
+   "id": "road_31",
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Vistula",
+   "river": "Ebro",
    "road_type": "computed",
    "px": [
-    4315.994,
-    1996.283
+    1202.099,
+    4399.901
    ],
    "dir": [
-    -0.8772,
-    -0.4801
+    0.7408,
+    0.6717
    ],
    "axis": [
-    0.8112,
-    -0.5848
+    -0.7071,
+    0.7071
    ],
-   "width": 1.27,
+   "width": 0.773,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_125",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Vistula",
-   "road_type": "computed",
-   "px": [
-    4134.109,
-    1869.891
-   ],
-   "dir": [
-    -0.8906,
-    -0.4548
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.208,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_126",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Oder",
-   "road_type": "computed",
-   "px": [
-    4045.856,
-    2347.948
-   ],
-   "dir": [
-    -0.8607,
-    -0.509
-   ],
-   "axis": [
-    -0.77,
-    0.638
-   ],
-   "width": 1.081,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_127",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Warta",
-   "road_type": "computed",
-   "px": [
-    4229.302,
-    2168.164
-   ],
-   "dir": [
-    0.0506,
-    -0.9987
-   ],
-   "axis": [
-    -0.706,
-    0.7082
-   ],
-   "width": 0.522,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_128",
+   "id": "road_32",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Elbe",
    "road_type": "computed",
    "px": [
-    3764.392,
-    2573.432
+    3259.872,
+    1922.248
    ],
    "dir": [
-    -0.6839,
-    -0.7295
+    0.3091,
+    -0.951
    ],
    "axis": [
-    -0.2425,
-    0.9701
+    -0.8321,
+    -0.5547
    ],
-   "width": 1.338,
+   "width": 1.246,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_129",
+   "id": "road_33",
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Maas",
+   "river": "Oder",
    "road_type": "computed",
    "px": [
-    2145.858,
-    2292.974
+    3620.483,
+    1925.517
    ],
    "dir": [
-    0.8,
-    0.6
-   ],
-   "axis": [
-    -1.0,
-    -0.0036
-   ],
-   "width": 1.41,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_130",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Maas",
-   "road_type": "computed",
-   "px": [
-    2152.289,
-    2292.997
-   ],
-   "dir": [
-    0.7894,
-    -0.6139
-   ],
-   "axis": [
-    -1.0,
-    -0.0036
-   ],
-   "width": 1.369,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_131",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Mosel",
-   "road_type": "computed",
-   "px": [
-    2390.867,
-    2704.123
-   ],
-   "dir": [
-    0.8077,
-    -0.5896
-   ],
-   "axis": [
-    -0.004,
-    1.0
-   ],
-   "width": 0.767,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_132",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Tarn",
-   "road_type": "computed",
-   "px": [
-    1848.096,
-    4103.607
-   ],
-   "dir": [
-    -0.995,
-    -0.0995
-   ],
-   "axis": [
-    0.7007,
-    0.7134
-   ],
-   "width": 0.469,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_133",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Dordogne",
-   "road_type": "computed",
-   "px": [
-    1603.0,
-    3771.267
-   ],
-   "dir": [
-    -0.9886,
-    -0.1504
-   ],
-   "axis": [
-    0.0,
-    1.0
-   ],
-   "width": 0.678,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_134",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Lot",
-   "road_type": "computed",
-   "px": [
-    1680.012,
-    3916.012
-   ],
-   "dir": [
-    -0.9994,
-    -0.0349
+    -0.6568,
+    -0.7541
    ],
    "axis": [
     0.7071,
-    0.7071
+    -0.7071
    ],
-   "width": 0.539,
+   "width": 1.052,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_135",
+   "id": "road_34",
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Duero",
+   "river": "Warta",
    "road_type": "computed",
    "px": [
-    223.908,
-    3781.71
+    3947.81,
+    2025.0
    ],
    "dir": [
-    -0.6247,
-    -0.7809
+    -0.0599,
+    -0.9982
    ],
    "axis": [
-    0.6622,
-    -0.7493
+    1.0,
+    0.0
    ],
-   "width": 0.914,
+   "width": 0.359,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_136",
+   "id": "road_35",
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Guadalquivir",
+   "river": "Warta",
    "road_type": "computed",
    "px": [
-    540.181,
-    4791.53
+    3735.5,
+    1933.0
    ],
    "dir": [
-    -0.0263,
-    0.9997
-   ],
-   "axis": [
-    0.7125,
-    0.7017
-   ],
-   "width": 1.163,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_137",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Thames",
-   "road_type": "computed",
-   "px": [
-    1263.958,
-    1978.042
-   ],
-   "dir": [
-    0.908,
-    0.4191
-   ],
-   "axis": [
     -0.7071,
-    0.7071
-   ],
-   "width": 0.906,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_138",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhine",
-   "road_type": "computed",
-   "px": [
-    2854.174,
-    3231.841
-   ],
-   "dir": [
-    -0.9583,
-    -0.2857
+    -0.7071
    ],
    "axis": [
-    0.7117,
-    -0.7025
+    1.0,
+    0.0
    ],
-   "width": 1.009,
+   "width": 0.509,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_139",
+   "id": "road_36",
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Rhine",
+   "river": "Warta",
    "road_type": "computed",
    "px": [
-    2681.602,
-    2993.602
+    3780.782,
+    1933.0
    ],
    "dir": [
-    0.2951,
-    -0.9555
+    -0.8262,
+    -0.5633
+   ],
+   "axis": [
+    1.0,
+    0.0
+   ],
+   "width": 0.639,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_37",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Warta",
+   "road_type": "computed",
+   "px": [
+    3740.436,
+    1933.0
+   ],
+   "dir": [
+    -0.4104,
+    0.9119
+   ],
+   "axis": [
+    1.0,
+    0.0
+   ],
+   "width": 0.395,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_38",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Warta",
+   "road_type": "computed",
+   "px": [
+    3789.7,
+    1938.88
+   ],
+   "dir": [
+    -0.9285,
+    0.3714
+   ],
+   "axis": [
+    0.9285,
+    0.3714
+   ],
+   "width": 0.522,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_39",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Elbe",
+   "road_type": "computed",
+   "px": [
+    3555.297,
+    2301.757
+   ],
+   "dir": [
+    -0.6894,
+    -0.7244
+   ],
+   "axis": [
+    -0.9138,
+    0.4061
+   ],
+   "width": 1.248,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_40",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oder",
+   "road_type": "computed",
+   "px": [
+    3549.651,
+    1715.651
+   ],
+   "dir": [
+    0.1701,
+    -0.9854
    ],
    "axis": [
     -0.7071,
     -0.7071
    ],
-   "width": 1.454,
+   "width": 1.285,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_140",
+   "id": "road_41",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oder",
+   "road_type": "computed",
+   "px": [
+    3548.054,
+    1765.946
+   ],
+   "dir": [
+    -0.2873,
+    -0.9578
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.192,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_42",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhône",
+   "road_type": "computed",
+   "px": [
+    2342.007,
+    3646.007
+   ],
+   "dir": [
+    -0.9312,
+    0.3644
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 0.919,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_43",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhine",
+   "road_type": "computed",
+   "px": [
+    2794.04,
+    3259.96
+   ],
+   "dir": [
+    -0.9871,
+    -0.1601
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.226,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_44",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhine",
+   "road_type": "computed",
+   "px": [
+    2816.309,
+    3256.309
+   ],
+   "dir": [
+    -0.3511,
+    0.9363
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.082,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_45",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5865,25 +3672,2210 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_141",
+   "id": "road_46",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Mosel",
+   "road_type": "computed",
+   "px": [
+    2399.0,
+    2961.985
+   ],
+   "dir": [
+    -0.6508,
+    -0.7593
+   ],
+   "axis": [
+    0.0,
+    -1.0
+   ],
+   "width": 0.884,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_47",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    5056.715,
+    3562.715
+   ],
+   "dir": [
+    0.8662,
+    -0.4997
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.397,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_48",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Po",
+   "road_type": "computed",
+   "px": [
+    3191.89,
+    3921.88
+   ],
+   "dir": [
+    0.7826,
+    -0.6225
+   ],
+   "axis": [
+    -0.7039,
+    -0.7103
+   ],
+   "width": 1.056,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_49",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Dordogne",
+   "road_type": "computed",
+   "px": [
+    1159.411,
+    3630.469
+   ],
+   "dir": [
+    -0.6044,
+    -0.7967
+   ],
+   "axis": [
+    0.9928,
+    -0.1196
+   ],
+   "width": 0.927,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_50",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Cher",
+   "road_type": "computed",
+   "px": [
+    1649.759,
+    3285.924
+   ],
+   "dir": [
+    -0.3898,
+    -0.9209
+   ],
+   "axis": [
+    -0.7032,
+    0.711
+   ],
+   "width": 0.467,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_51",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Vienne",
+   "road_type": "computed",
+   "px": [
+    1479.256,
+    3516.744
+   ],
+   "dir": [
+    -0.9918,
+    0.128
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.673,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_52",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Loire",
+   "road_type": "computed",
+   "px": [
+    2014.343,
+    3613.671
+   ],
+   "dir": [
+    0.2279,
+    -0.9737
+   ],
+   "axis": [
+    0.8944,
+    0.4472
+   ],
+   "width": 1.038,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_53",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Weser",
+   "road_type": "computed",
+   "px": [
+    2674.18,
+    1619.0
+   ],
+   "dir": [
+    -0.7926,
+    -0.6097
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 1.23,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_54",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Elbe",
+   "road_type": "computed",
+   "px": [
+    2866.268,
+    1568.312
+   ],
+   "dir": [
+    -0.9349,
+    -0.355
+   ],
+   "axis": [
+    0.7723,
+    -0.6353
+   ],
+   "width": 1.382,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_55",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Elbe",
+   "road_type": "computed",
+   "px": [
+    2854.031,
+    1571.969
+   ],
+   "dir": [
+    0.8632,
+    0.5049
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.24,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_56",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Vistula",
+   "road_type": "computed",
+   "px": [
+    4549.213,
+    2090.787
+   ],
+   "dir": [
+    -0.6894,
+    -0.7244
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 1.136,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_57",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Vistula",
+   "road_type": "computed",
+   "px": [
+    4439.64,
+    2029.64
+   ],
+   "dir": [
+    -0.9701,
+    0.2425
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.333,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_58",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Vistula",
+   "road_type": "computed",
+   "px": [
+    4471.965,
+    2030.035
+   ],
+   "dir": [
+    -0.8926,
+    -0.4508
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 1.201,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_59",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5843.391,
+    1790.609
+   ],
+   "dir": [
+    -0.186,
+    0.9825
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.789,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_60",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5851.0,
+    1772.273
+   ],
+   "dir": [
+    -0.6675,
+    0.7446
+   ],
+   "axis": [
+    0.0,
+    1.0
+   ],
+   "width": 0.664,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_61",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5885.604,
+    1632.396
+   ],
+   "dir": [
+    -0.0487,
+    0.9988
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.654,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_62",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5891.261,
+    1615.054
+   ],
+   "dir": [
+    0.1927,
+    0.9812
+   ],
+   "axis": [
+    -0.5825,
+    0.8128
+   ],
+   "width": 0.596,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_63",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5883.0,
+    1541.112
+   ],
+   "dir": [
+    0.722,
+    0.6919
+   ],
+   "axis": [
+    0.0,
+    -1.0
+   ],
+   "width": 0.597,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_64",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5886.343,
+    1604.343
+   ],
+   "dir": [
+    0.0665,
+    0.9978
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 0.664,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_65",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Dnipro",
+   "road_type": "computed",
+   "px": [
+    5461.557,
+    1636.279
+   ],
+   "dir": [
+    -0.6919,
+    0.722
+   ],
+   "axis": [
+    -0.8944,
+    -0.4472
+   ],
+   "width": 0.558,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_66",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Dnipro",
+   "road_type": "computed",
+   "px": [
+    5530.25,
+    1462.25
+   ],
+   "dir": [
+    -0.774,
+    0.6332
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 0.525,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_67",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Trent",
+   "road_type": "computed",
+   "px": [
+    1365.0,
+    1496.081
+   ],
+   "dir": [
+    0.5922,
+    -0.8058
+   ],
+   "axis": [
+    0.0,
+    -1.0
+   ],
+   "width": 0.929,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_68",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    4055.824,
+    3034.176
+   ],
+   "dir": [
+    0.7474,
+    0.6644
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 1.276,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_69",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oder",
+   "road_type": "computed",
+   "px": [
+    4193.713,
+    2476.287
+   ],
+   "dir": [
+    -0.3068,
+    -0.9518
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.117,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_70",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Ebro",
+   "road_type": "computed",
+   "px": [
+    912.509,
+    4045.982
+   ],
+   "dir": [
+    0.8204,
+    0.5718
+   ],
+   "axis": [
+    -0.4472,
+    0.8944
+   ],
+   "width": 0.595,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_71",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Ebro",
+   "road_type": "computed",
+   "px": [
+    852.25,
+    3992.375
+   ],
+   "dir": [
+    0.5547,
+    0.8321
+   ],
+   "axis": [
+    0.8944,
+    -0.4472
+   ],
+   "width": 0.512,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_72",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Duero",
+   "road_type": "computed",
+   "px": [
+    722.11,
+    4091.89
+   ],
+   "dir": [
+    -0.8215,
+    -0.5702
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.412,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_73",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Kızılırmak",
+   "road_type": "computed",
+   "px": [
+    6508.222,
+    3555.403
+   ],
+   "dir": [
+    -0.502,
+    0.8649
+   ],
+   "axis": [
+    -0.2113,
+    -0.9774
+   ],
+   "width": 0.307,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_74",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Kızılırmak",
+   "road_type": "computed",
+   "px": [
+    6453.475,
+    3640.525
+   ],
+   "dir": [
+    -0.1961,
+    0.9806
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 0.373,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_75",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Kızılırmak",
+   "road_type": "computed",
+   "px": [
+    6215.749,
+    3926.251
+   ],
+   "dir": [
+    -0.9796,
+    0.2009
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 0.376,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_76",
+   "name": "",
+   "type": "road",
+   "structure": "stone",
+   "river": "Kızılırmak",
+   "road_type": "computed",
+   "px": [
+    6385.0,
+    3818.311
+   ],
+   "dir": [
+    -0.8473,
+    0.5311
+   ],
+   "axis": [
+    0.0,
+    -1.0
+   ],
+   "width": 0.244,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_77",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Kızılırmak",
+   "road_type": "computed",
+   "px": [
+    6452.49,
+    3645.51
+   ],
+   "dir": [
+    -0.1972,
+    0.9804
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 0.374,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_78",
+   "name": "",
+   "type": "road",
+   "structure": "stone",
+   "river": "Kızılırmak",
+   "road_type": "computed",
+   "px": [
+    6380.012,
+    3823.0
+   ],
+   "dir": [
+    -0.5735,
+    0.8192
+   ],
+   "axis": [
+    1.0,
+    0.0
+   ],
+   "width": 0.253,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_79",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Kızılırmak",
+   "road_type": "computed",
+   "px": [
+    6415.1,
+    3754.9
+   ],
+   "dir": [
+    -0.1104,
+    0.9939
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 0.331,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_80",
+   "name": "",
+   "type": "road",
+   "structure": "stone",
+   "river": "Kızılırmak",
+   "road_type": "computed",
+   "px": [
+    6206.634,
+    3927.0
+   ],
+   "dir": [
+    -0.6946,
+    -0.7194
+   ],
+   "axis": [
+    1.0,
+    0.0
+   ],
+   "width": 0.288,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_81",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Vienne",
+   "road_type": "computed",
+   "px": [
+    1251.0,
+    3118.729
+   ],
+   "dir": [
+    -0.863,
+    -0.5051
+   ],
+   "axis": [
+    0.0,
+    1.0
+   ],
+   "width": 0.579,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_82",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Loire",
+   "road_type": "computed",
+   "px": [
+    1249.613,
+    3085.613
+   ],
+   "dir": [
+    -0.9711,
+    0.2388
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.402,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_83",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Seine",
+   "road_type": "computed",
+   "px": [
+    1363.966,
+    2476.034
+   ],
+   "dir": [
+    -0.0665,
+    -0.9978
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.262,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_84",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Seine",
+   "road_type": "computed",
+   "px": [
+    1382.025,
+    2474.025
+   ],
+   "dir": [
+    -0.3162,
+    0.9487
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.062,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_85",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Guadalquivir",
+   "road_type": "computed",
+   "px": [
+    723.964,
+    4802.839
+   ],
+   "dir": [
+    -0.8,
+    0.6
+   ],
+   "axis": [
+    -0.9997,
+    -0.0229
+   ],
+   "width": 1.334,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_86",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Guadalquivir",
+   "road_type": "computed",
+   "px": [
+    733.525,
+    4805.0
+   ],
+   "dir": [
+    -0.8321,
+    -0.5547
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 1.493,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_87",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Guadalquivir",
+   "road_type": "computed",
+   "px": [
+    734.764,
+    4805.0
+   ],
+   "dir": [
+    -0.6727,
+    0.7399
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 1.115,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_88",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Guadalquivir",
+   "road_type": "computed",
+   "px": [
+    755.864,
+    4813.0
+   ],
+   "dir": [
+    0.3571,
+    0.9341
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.87,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_89",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Guadalquivir",
+   "road_type": "computed",
+   "px": [
+    753.689,
+    4813.0
+   ],
+   "dir": [
+    -0.774,
+    -0.6332
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 1.299,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_90",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Guadalquivir",
+   "road_type": "computed",
+   "px": [
+    798.578,
+    4823.0
+   ],
+   "dir": [
+    -0.6044,
+    0.7967
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.975,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_91",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Po",
+   "road_type": "computed",
+   "px": [
+    2762.196,
+    3949.804
+   ],
+   "dir": [
+    0.943,
+    0.3328
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.137,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_92",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Po",
+   "road_type": "computed",
+   "px": [
+    2588.026,
+    4070.026
+   ],
+   "dir": [
+    0.1703,
+    -0.9854
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.081,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_93",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhône",
+   "road_type": "computed",
+   "px": [
+    2155.729,
+    3719.729
+   ],
+   "dir": [
+    -0.3714,
+    0.9285
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.116,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_94",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhône",
+   "road_type": "computed",
+   "px": [
+    2275.4,
+    3758.6
+   ],
+   "dir": [
+    -0.4741,
+    -0.8805
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 1.032,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_95",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhône",
+   "road_type": "computed",
+   "px": [
+    2300.093,
+    3762.093
+   ],
+   "dir": [
+    -0.364,
+    0.9314
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.067,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_96",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Po",
+   "road_type": "computed",
+   "px": [
+    3357.863,
+    3925.863
+   ],
+   "dir": [
+    0.8779,
+    -0.4789
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.094,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_97",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    3795.525,
+    3568.475
+   ],
+   "dir": [
+    0.9985,
+    -0.0555
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 0.57,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_98",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Po",
+   "road_type": "computed",
+   "px": [
+    3462.122,
+    3901.878
+   ],
+   "dir": [
+    0.7372,
+    0.6757
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 1.051,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_99",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Rhine",
    "road_type": "computed",
    "px": [
-    2845.905,
-    3230.095
+    2487.99,
+    2175.021
    ],
    "dir": [
-    -0.9909,
-    -0.1344
+    -0.6313,
+    -0.7756
+   ],
+   "axis": [
+    0.4472,
+    -0.8944
+   ],
+   "width": 1.48,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_100",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhine",
+   "road_type": "computed",
+   "px": [
+    2496.088,
+    2193.912
+   ],
+   "dir": [
+    -0.4138,
+    -0.9104
    ],
    "axis": [
     0.7071,
     -0.7071
    ],
-   "width": 1.146,
+   "width": 1.441,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_101",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Maas",
+   "road_type": "computed",
+   "px": [
+    2275.558,
+    2145.0
+   ],
+   "dir": [
+    0.3409,
+    -0.9401
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.904,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_102",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhine",
+   "road_type": "computed",
+   "px": [
+    2549.875,
+    2318.125
+   ],
+   "dir": [
+    -0.2124,
+    -0.9772
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.604,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_103",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Guadalquivir",
+   "road_type": "computed",
+   "px": [
+    713.467,
+    4803.549
+   ],
+   "dir": [
+    -0.96,
+    -0.28
+   ],
+   "axis": [
+    -0.0347,
+    0.9994
+   ],
+   "width": 0.851,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_104",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Guadalquivir",
+   "road_type": "computed",
+   "px": [
+    623.449,
+    4789.0
+   ],
+   "dir": [
+    0.2676,
+    0.9635
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.881,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_105",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Guadalquivir",
+   "road_type": "computed",
+   "px": [
+    620.956,
+    4789.0
+   ],
+   "dir": [
+    -0.7668,
+    -0.6419
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 1.323,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_106",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Warta",
+   "road_type": "computed",
+   "px": [
+    4382.283,
+    2390.283
+   ],
+   "dir": [
+    -0.0224,
+    -0.9997
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 0.465,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_107",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Vistula",
+   "road_type": "computed",
+   "px": [
+    4521.609,
+    2571.609
+   ],
+   "dir": [
+    0.6402,
+    -0.7682
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.058,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_108",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    5068.462,
+    3558.462
+   ],
+   "dir": [
+    0.9784,
+    -0.2067
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.61,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_109",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    4864.096,
+    3602.096
+   ],
+   "dir": [
+    -0.4797,
+    0.8774
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.406,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_110",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    5348.769,
+    3341.885
+   ],
+   "dir": [
+    0.7612,
+    -0.6485
+   ],
+   "axis": [
+    0.8944,
+    0.4472
+   ],
+   "width": 1.466,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_111",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Nile (Damietta branch)",
+   "road_type": "computed",
+   "px": [
+    6137.519,
+    5647.519
+   ],
+   "dir": [
+    0.5199,
+    -0.8542
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 0.875,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_112",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Nile (Rosetta branch)",
+   "road_type": "computed",
+   "px": [
+    5948.861,
+    5691.866
+   ],
+   "dir": [
+    -0.8029,
+    -0.5961
+   ],
+   "axis": [
+    -0.8222,
+    0.5692
+   ],
+   "width": 0.897,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_113",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Saône",
+   "road_type": "computed",
+   "px": [
+    2253.035,
+    3307.0
+   ],
+   "dir": [
+    -0.652,
+    0.7582
+   ],
+   "axis": [
+    1.0,
+    0.0
+   ],
+   "width": 0.912,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_114",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Marne",
+   "road_type": "computed",
+   "px": [
+    1762.178,
+    2729.089
+   ],
+   "dir": [
+    -0.9884,
+    -0.1521
+   ],
+   "axis": [
+    -0.7124,
+    -0.7018
+   ],
+   "width": 0.886,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_115",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Seine",
+   "road_type": "computed",
+   "px": [
+    1908.22,
+    2892.22
+   ],
+   "dir": [
+    -0.9701,
+    0.2425
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.101,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_116",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Mosel",
+   "road_type": "computed",
+   "px": [
+    2383.586,
+    2949.032
+   ],
+   "dir": [
+    -0.6733,
+    -0.7393
+   ],
+   "axis": [
+    0.6783,
+    -0.7348
+   ],
+   "width": 0.573,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_117",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Weser",
+   "road_type": "computed",
+   "px": [
+    3039.373,
+    2227.0
+   ],
+   "dir": [
+    -0.824,
+    -0.5665
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 1.257,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_118",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Weser",
+   "road_type": "computed",
+   "px": [
+    3154.861,
+    2452.925
+   ],
+   "dir": [
+    -0.6757,
+    -0.7372
+   ],
+   "axis": [
+    -0.7433,
+    0.669
+   ],
+   "width": 0.551,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_119",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Po",
+   "road_type": "computed",
+   "px": [
+    3305.935,
+    3937.935
+   ],
+   "dir": [
+    0.9998,
+    -0.0208
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.455,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_120",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Po",
+   "road_type": "computed",
+   "px": [
+    3179.975,
+    3925.975
+   ],
+   "dir": [
+    0.8944,
+    -0.4472
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.106,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_121",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Po",
+   "road_type": "computed",
+   "px": [
+    2995.834,
+    3945.834
+   ],
+   "dir": [
+    0.9638,
+    -0.2666
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.206,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_122",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Po",
+   "road_type": "computed",
+   "px": [
+    2842.681,
+    3966.043
+   ],
+   "dir": [
+    0.9662,
+    0.2577
+   ],
+   "axis": [
+    0.6866,
+    -0.727
+   ],
+   "width": 1.189,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_123",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oder",
+   "road_type": "computed",
+   "px": [
+    3903.87,
+    2194.13
+   ],
+   "dir": [
+    -0.825,
+    -0.5651
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.055,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_124",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Warta",
+   "road_type": "computed",
+   "px": [
+    4222.778,
+    2121.222
+   ],
+   "dir": [
+    -0.5256,
+    -0.8507
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 0.362,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_125",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oder",
+   "road_type": "computed",
+   "px": [
+    3944.055,
+    2253.945
+   ],
+   "dir": [
+    -0.1465,
+    -0.9892
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.289,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_126",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oder",
+   "road_type": "computed",
+   "px": [
+    3995.807,
+    2309.807
+   ],
+   "dir": [
+    -0.9662,
+    0.2577
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.187,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_127",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    4145.864,
+    3038.136
+   ],
+   "dir": [
+    0.3511,
+    0.9363
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.415,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_128",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Dniester",
+   "road_type": "computed",
+   "px": [
+    5083.553,
+    2601.665
+   ],
+   "dir": [
+    0.8,
+    0.6
+   ],
+   "axis": [
+    0.4771,
+    -0.8789
+   ],
+   "width": 0.508,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_129",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhine",
+   "road_type": "computed",
+   "px": [
+    2755.753,
+    2549.059
+   ],
+   "dir": [
+    -0.6499,
+    -0.76
+   ],
+   "axis": [
+    -0.123,
+    0.9924
+   ],
+   "width": 1.806,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_130",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhine",
+   "road_type": "computed",
+   "px": [
+    2758.116,
+    2551.884
+   ],
+   "dir": [
+    -0.6357,
+    -0.7719
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 1.341,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_131",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Daugava",
+   "road_type": "computed",
+   "px": [
+    4695.961,
+    1207.961
+   ],
+   "dir": [
+    -0.8,
+    0.6
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 0.562,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_132",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5635.966,
+    2186.392
+   ],
+   "dir": [
+    0.1483,
+    0.9889
+   ],
+   "axis": [
+    0.5961,
+    -0.8029
+   ],
+   "width": 0.636,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_133",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5647.0,
+    2107.75
+   ],
+   "dir": [
+    0.5547,
+    0.8321
+   ],
+   "axis": [
+    0.0,
+    -1.0
+   ],
+   "width": 0.812,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_134",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5647.0,
+    2108.981
+   ],
+   "dir": [
+    -0.5547,
+    0.8321
+   ],
+   "axis": [
+    0.0,
+    -1.0
+   ],
+   "width": 0.813,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_135",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5641.0,
+    2162.891
+   ],
+   "dir": [
+    -0.6919,
+    0.722
+   ],
+   "axis": [
+    0.0,
+    -1.0
+   ],
+   "width": 0.653,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_136",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5641.0,
+    2144.501
+   ],
+   "dir": [
+    0.8725,
+    0.4886
+   ],
+   "axis": [
+    0.0,
+    -1.0
+   ],
+   "width": 0.517,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_137",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Desna",
+   "road_type": "computed",
+   "px": [
+    5647.0,
+    2096.648
+   ],
+   "dir": [
+    0.5767,
+    0.817
+   ],
+   "axis": [
+    0.0,
+    -1.0
+   ],
+   "width": 0.781,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_138",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Daugava",
+   "road_type": "computed",
+   "px": [
+    5214.416,
+    1382.988
+   ],
+   "dir": [
+    -0.9514,
+    -0.3078
+   ],
+   "axis": [
+    0.5755,
+    -0.8178
+   ],
+   "width": 0.568,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_139",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Daugava",
+   "road_type": "computed",
+   "px": [
+    5076.055,
+    1341.444
+   ],
+   "dir": [
+    -0.9567,
+    0.2912
+   ],
+   "axis": [
+    0.7809,
+    0.6247
+   ],
+   "width": 0.659,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_140",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Daugava",
+   "road_type": "computed",
+   "px": [
+    4532.035,
+    1155.965
+   ],
+   "dir": [
+    -0.9619,
+    -0.2733
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.641,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_141",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Daugava",
+   "road_type": "computed",
+   "px": [
+    4713.918,
+    1206.082
+   ],
+   "dir": [
+    -0.9296,
+    -0.3686
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.606,
    "snapped": true,
    "in_custom_zone": false
   },
@@ -5892,26 +5884,716 @@
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Danube",
+   "river": "Oka",
    "road_type": "computed",
    "px": [
-    2952.101,
-    3125.899
+    6263.0,
+    1092.839
    ],
    "dir": [
-    0.9857,
-    0.1683
+    0.7304,
+    -0.683
    ],
    "axis": [
-    0.7071,
-    -0.7071
+    0.0,
+    1.0
    ],
-   "width": 0.842,
+   "width": 0.615,
    "snapped": true,
    "in_custom_zone": false
   },
   {
    "id": "road_143",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oka",
+   "road_type": "computed",
+   "px": [
+    6257.219,
+    1110.781
+   ],
+   "dir": [
+    -0.3542,
+    -0.9352
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.491,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_144",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oka",
+   "road_type": "computed",
+   "px": [
+    6332.915,
+    1090.915
+   ],
+   "dir": [
+    0.8805,
+    -0.4741
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 0.471,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_145",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oka",
+   "road_type": "computed",
+   "px": [
+    6310.55,
+    1081.0
+   ],
+   "dir": [
+    0.2747,
+    0.9615
+   ],
+   "axis": [
+    1.0,
+    0.0
+   ],
+   "width": 0.468,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_146",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oka",
+   "road_type": "computed",
+   "px": [
+    6276.692,
+    1081.0
+   ],
+   "dir": [
+    0.7977,
+    -0.6031
+   ],
+   "axis": [
+    1.0,
+    0.0
+   ],
+   "width": 0.745,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_147",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Daugava",
+   "road_type": "computed",
+   "px": [
+    5455.657,
+    1289.657
+   ],
+   "dir": [
+    -0.9285,
+    0.3714
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 0.573,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_148",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Dnipro",
+   "road_type": "computed",
+   "px": [
+    5575.703,
+    1421.703
+   ],
+   "dir": [
+    -0.9119,
+    0.4104
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 0.565,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_149",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oka",
+   "road_type": "computed",
+   "px": [
+    6022.49,
+    1319.51
+   ],
+   "dir": [
+    0.9868,
+    -0.1618
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 0.761,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_150",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oka",
+   "road_type": "computed",
+   "px": [
+    6048.738,
+    1393.0
+   ],
+   "dir": [
+    -0.3511,
+    -0.9363
+   ],
+   "axis": [
+    1.0,
+    0.0
+   ],
+   "width": 0.473,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_151",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Don",
+   "road_type": "computed",
+   "px": [
+    6289.112,
+    1305.944
+   ],
+   "dir": [
+    0.8944,
+    0.4472
+   ],
+   "axis": [
+    0.8944,
+    -0.4472
+   ],
+   "width": 0.659,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_152",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    3374.529,
+    2908.305
+   ],
+   "dir": [
+    0.452,
+    -0.892
+   ],
+   "axis": [
+    -0.6897,
+    -0.7241
+   ],
+   "width": 1.073,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_153",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    3498.034,
+    2895.966
+   ],
+   "dir": [
+    0.507,
+    0.8619
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.088,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_154",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Vistula",
+   "road_type": "computed",
+   "px": [
+    4315.994,
+    1996.283
+   ],
+   "dir": [
+    -0.8772,
+    -0.4801
+   ],
+   "axis": [
+    0.8112,
+    -0.5848
+   ],
+   "width": 1.27,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_155",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Vistula",
+   "road_type": "computed",
+   "px": [
+    4134.109,
+    1869.891
+   ],
+   "dir": [
+    -0.8906,
+    -0.4548
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.208,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_156",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oder",
+   "road_type": "computed",
+   "px": [
+    4045.614,
+    2347.805
+   ],
+   "dir": [
+    -0.8607,
+    -0.509
+   ],
+   "axis": [
+    -0.7102,
+    0.704
+   ],
+   "width": 1.051,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_157",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Warta",
+   "road_type": "computed",
+   "px": [
+    4229.76,
+    2162.24
+   ],
+   "dir": [
+    0.102,
+    -0.9948
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.555,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_158",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Elbe",
+   "road_type": "computed",
+   "px": [
+    3891.782,
+    2490.218
+   ],
+   "dir": [
+    0.6196,
+    0.7849
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.861,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_159",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Elbe",
+   "road_type": "computed",
+   "px": [
+    3800.214,
+    2581.82
+   ],
+   "dir": [
+    -0.9642,
+    -0.2652
+   ],
+   "axis": [
+    -0.717,
+    0.6971
+   ],
+   "width": 1.281,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_160",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Maas",
+   "road_type": "computed",
+   "px": [
+    2246.63,
+    2269.598
+   ],
+   "dir": [
+    0.9998,
+    -0.0196
+   ],
+   "axis": [
+    -0.758,
+    0.6522
+   ],
+   "width": 1.327,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_161",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Mosel",
+   "road_type": "computed",
+   "px": [
+    2374.35,
+    2878.35
+   ],
+   "dir": [
+    -0.9806,
+    -0.1961
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.084,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_162",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Mosel",
+   "road_type": "computed",
+   "px": [
+    2376.977,
+    2880.977
+   ],
+   "dir": [
+    0.3417,
+    -0.9398
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 0.66,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_163",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Tarn",
+   "road_type": "computed",
+   "px": [
+    1858.88,
+    4104.88
+   ],
+   "dir": [
+    -0.9981,
+    -0.0624
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 0.502,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_164",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Dordogne",
+   "road_type": "computed",
+   "px": [
+    1548.533,
+    3796.067
+   ],
+   "dir": [
+    -0.9906,
+    0.1366
+   ],
+   "axis": [
+    0.4472,
+    0.8944
+   ],
+   "width": 0.826,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_165",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Lot",
+   "road_type": "computed",
+   "px": [
+    1642.749,
+    3914.749
+   ],
+   "dir": [
+    -0.9539,
+    0.3
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 0.483,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_166",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Duero",
+   "road_type": "computed",
+   "px": [
+    224.007,
+    3781.834
+   ],
+   "dir": [
+    -0.6247,
+    -0.7809
+   ],
+   "axis": [
+    0.5728,
+    -0.8197
+   ],
+   "width": 0.938,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_167",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Guadalquivir",
+   "road_type": "computed",
+   "px": [
+    538.736,
+    4776.736
+   ],
+   "dir": [
+    -0.0971,
+    0.9953
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.1,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_168",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Thames",
+   "road_type": "computed",
+   "px": [
+    1263.618,
+    1977.878
+   ],
+   "dir": [
+    0.8849,
+    0.4657
+   ],
+   "axis": [
+    -0.9191,
+    0.3939
+   ],
+   "width": 1.094,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_169",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhine",
+   "road_type": "computed",
+   "px": [
+    2854.162,
+    3231.838
+   ],
+   "dir": [
+    -0.9583,
+    -0.2857
+   ],
+   "axis": [
+    0.7071,
+    -0.7071
+   ],
+   "width": 1.006,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_170",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhine",
+   "road_type": "computed",
+   "px": [
+    2635.744,
+    3169.744
+   ],
+   "dir": [
+    0.2747,
+    -0.9615
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.388,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_171",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhine",
+   "road_type": "computed",
+   "px": [
+    2679.98,
+    3257.98
+   ],
+   "dir": [
+    -0.9701,
+    0.2425
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.287,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_172",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    3041.888,
+    3063.888
+   ],
+   "dir": [
+    0.8944,
+    -0.4472
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 0.828,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_173",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5934,410 +6616,617 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_144",
+   "id": "road_174",
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Loire",
+   "river": "Thames",
    "road_type": "computed",
    "px": [
-    2011.928,
-    3590.072
+    1238.048,
+    1932.048
    ],
    "dir": [
-    -0.2716,
-    -0.9624
+    -0.2216,
+    0.9751
    ],
    "axis": [
     -0.7071,
-    0.7071
+    -0.7071
    ],
-   "width": 1.158,
+   "width": 1.004,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_145",
+   "id": "road_175",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Vistula",
    "road_type": "computed",
    "px": [
-    4054.049,
-    1589.271
+    4056.275,
+    1605.725
    ],
    "dir": [
-    0.1122,
-    -0.9937
+    -0.3045,
+    -0.9525
    ],
    "axis": [
-    -0.7103,
-    -0.7039
-   ],
-   "width": 1.465,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_146",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Rhine",
-   "road_type": "computed",
-   "px": [
-    2758.116,
-    2551.884
-   ],
-   "dir": [
-    -0.6357,
-    -0.7719
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.341,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_147",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Maas",
-   "road_type": "computed",
-   "px": [
-    2268.586,
-    2858.586
-   ],
-   "dir": [
-    0.3714,
-    -0.9285
-   ],
-   "axis": [
-    0.7071,
+    -0.7071,
     0.7071
    ],
-   "width": 0.815,
+   "width": 1.294,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_148",
+   "id": "road_176",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Vistula",
+   "road_type": "computed",
+   "px": [
+    4093.562,
+    1722.438
+   ],
+   "dir": [
+    -0.4138,
+    -0.9104
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 1.228,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_177",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Vistula",
+   "road_type": "computed",
+   "px": [
+    4097.53,
+    1762.059
+   ],
+   "dir": [
+    0.8412,
+    -0.5408
+   ],
+   "axis": [
+    0.4472,
+    0.8944
+   ],
+   "width": 1.156,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_178",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Marne",
    "road_type": "computed",
    "px": [
-    1762.152,
-    2729.085
+    1728.366,
+    2731.317
    ],
    "dir": [
-    -0.9884,
-    -0.1521
+    0.4985,
+    0.8669
    ],
    "axis": [
-    0.7111,
-    0.7031
+    -0.8944,
+    0.4472
    ],
-   "width": 0.883,
+   "width": 0.52,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_149",
+   "id": "road_179",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Marne",
+   "road_type": "computed",
+   "px": [
+    1741.66,
+    2729.0
+   ],
+   "dir": [
+    -0.6995,
+    -0.7147
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.727,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_180",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Maas",
+   "road_type": "computed",
+   "px": [
+    2272.986,
+    2869.0
+   ],
+   "dir": [
+    -0.5812,
+    -0.8137
+   ],
+   "axis": [
+    1.0,
+    0.0
+   ],
+   "width": 0.913,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_181",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Marne",
+   "road_type": "computed",
+   "px": [
+    2077.463,
+    2831.231
+   ],
+   "dir": [
+    -0.4717,
+    -0.8818
+   ],
+   "axis": [
+    0.8944,
+    0.4472
+   ],
+   "width": 0.886,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_182",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Marne",
+   "road_type": "computed",
+   "px": [
+    1767.081,
+    2728.52
+   ],
+   "dir": [
+    -0.8269,
+    0.5623
+   ],
+   "axis": [
+    0.9701,
+    0.2425
+   ],
+   "width": 0.696,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_183",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Elbe",
    "road_type": "computed",
    "px": [
-    3677.977,
-    2481.977
+    3668.162,
+    2446.162
    ],
    "dir": [
-    -0.9967,
-    0.0814
+    0.9156,
+    -0.402
    ],
    "axis": [
     0.7071,
     0.7071
    ],
-   "width": 1.503,
+   "width": 1.22,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_150",
+   "id": "road_184",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Elbe",
    "road_type": "computed",
    "px": [
-    3672.3,
-    2444.3
+    3703.734,
+    2506.072
    ],
    "dir": [
-    0.8997,
-    -0.4366
+    -0.4104,
+    0.9119
    ],
    "axis": [
-    0.7071,
-    0.7071
+    0.6823,
+    0.7311
    ],
-   "width": 1.208,
+   "width": 1.229,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_151",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Elbe",
-   "road_type": "computed",
-   "px": [
-    3555.297,
-    2301.757
-   ],
-   "dir": [
-    -0.6894,
-    -0.7244
-   ],
-   "axis": [
-    0.9138,
-    -0.4061
-   ],
-   "width": 1.248,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_152",
+   "id": "road_185",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Po",
    "road_type": "computed",
    "px": [
-    2995.869,
-    3945.823
+    2987.999,
+    3949.999
    ],
    "dir": [
-    0.9567,
-    -0.2912
+    0.156,
+    -0.9878
    ],
    "axis": [
-    0.7084,
-    0.7058
+    0.7071,
+    0.7071
    ],
-   "width": 1.19,
+   "width": 1.297,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_153",
+   "id": "road_186",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Loire",
    "road_type": "computed",
    "px": [
-    1823.17,
-    3324.198
+    1775.716,
+    3220.284
    ],
    "dir": [
-    -0.9457,
-    0.3251
+    -0.4363,
+    -0.8998
    ],
    "axis": [
-    -0.6508,
-    -0.7593
+    0.7071,
+    -0.7071
    ],
-   "width": 1.173,
+   "width": 1.212,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_154",
+   "id": "road_187",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Loire",
+   "road_type": "computed",
+   "px": [
+    1757.478,
+    3147.089
+   ],
+   "dir": [
+    -0.5747,
+    -0.8183
+   ],
+   "axis": [
+    0.2425,
+    -0.9701
+   ],
+   "width": 1.529,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_188",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Loire",
+   "road_type": "computed",
+   "px": [
+    1775.529,
+    3197.529
+   ],
+   "dir": [
+    0.2631,
+    -0.9648
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.318,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_189",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Allier",
+   "road_type": "computed",
+   "px": [
+    1819.0,
+    3392.08
+   ],
+   "dir": [
+    -0.6985,
+    -0.7156
+   ],
+   "axis": [
+    0.0,
+    -1.0
+   ],
+   "width": 0.653,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_190",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Mosel",
+   "road_type": "computed",
+   "px": [
+    2415.205,
+    2675.394
+   ],
+   "dir": [
+    0.0317,
+    -0.9995
+   ],
+   "axis": [
+    0.6,
+    -0.8
+   ],
+   "width": 1.047,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_191",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Dnipro",
    "road_type": "computed",
    "px": [
-    5595.724,
-    1965.724
+    5593.8,
+    1991.8
    ],
    "dir": [
-    -0.2609,
-    0.9654
+    -0.5547,
+    0.8321
    ],
    "axis": [
     0.7071,
     0.7071
-   ],
-   "width": 0.632,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_155",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Sava",
-   "road_type": "computed",
-   "px": [
-    4436.683,
-    3608.683
-   ],
-   "dir": [
-    -0.168,
-    0.9858
-   ],
-   "axis": [
-    -0.7071,
-    -0.7071
    ],
    "width": 0.558,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_156",
+   "id": "road_192",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Sava",
    "road_type": "computed",
    "px": [
-    4431.128,
-    3603.128
+    4421.767,
+    3599.767
    ],
    "dir": [
-    0.9933,
-    0.1155
+    0.9937,
+    -0.112
    ],
    "axis": [
     -0.7071,
     -0.7071
    ],
-   "width": 0.731,
+   "width": 0.582,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_157",
+   "id": "road_193",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Sava",
    "road_type": "computed",
    "px": [
-    4474.014,
-    3636.014
+    4435.479,
+    3613.479
    ],
    "dir": [
-    0.7011,
-    -0.7131
+    -0.2964,
+    0.9551
    ],
    "axis": [
     -0.7071,
     -0.7071
    ],
-   "width": 0.457,
+   "width": 0.515,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_158",
+   "id": "road_194",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4463.962,
+    3641.137
+   ],
+   "dir": [
+    -0.5145,
+    0.8575
+   ],
+   "axis": [
+    -0.9899,
+    -0.1414
+   ],
+   "width": 0.494,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_195",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4462.052,
+    3640.052
+   ],
+   "dir": [
+    0.9799,
+    -0.1996
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 0.546,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_196",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4468.641,
+    3641.806
+   ],
+   "dir": [
+    0.6738,
+    -0.739
+   ],
+   "axis": [
+    -0.9899,
+    -0.1414
+   ],
+   "width": 0.551,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_197",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Don",
    "road_type": "computed",
    "px": [
-    6261.88,
-    1287.869
+    6281.531,
+    1298.469
    ],
    "dir": [
-    0.9138,
-    0.4061
+    0.7071,
+    0.7071
    ],
    "axis": [
-    0.6139,
-    -0.7894
+    0.7071,
+    -0.7071
    ],
-   "width": 0.533,
+   "width": 0.525,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_159",
+   "id": "road_198",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Oder",
+   "road_type": "computed",
+   "px": [
+    4185.655,
+    2459.492
+   ],
+   "dir": [
+    -0.5334,
+    -0.8459
+   ],
+   "axis": [
+    -0.9833,
+    -0.1821
+   ],
+   "width": 1.356,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_199",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Loire",
    "road_type": "computed",
    "px": [
-    1511.853,
-    3030.427
+    1442.369,
+    3073.685
    ],
    "dir": [
-    -0.6549,
-    0.7557
+    -0.7809,
+    0.6247
    ],
    "axis": [
     -0.8944,
     -0.4472
    ],
-   "width": 1.225,
+   "width": 1.315,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_160",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Loire",
-   "road_type": "computed",
-   "px": [
-    1337.405,
-    3076.595
-   ],
-   "dir": [
-    -0.9662,
-    -0.2577
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 1.385,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_161",
+   "id": "road_200",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Ebro",
    "road_type": "computed",
    "px": [
-    1122.005,
-    4312.99
+    1120.135,
+    4310.731
    ],
    "dir": [
-    0.641,
-    0.7675
+    0.6364,
+    0.7713
    ],
    "axis": [
     -0.4472,
@@ -6348,7 +7237,30 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_162",
+   "id": "road_201",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Ebro",
+   "road_type": "computed",
+   "px": [
+    1019.629,
+    4172.371
+   ],
+   "dir": [
+    0.6776,
+    0.7354
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.71,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_202",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6371,145 +7283,145 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_163",
+   "id": "road_203",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Danube",
    "road_type": "computed",
    "px": [
-    4388.294,
-    3552.294
+    4367.755,
+    3551.49
    ],
    "dir": [
-    0.9879,
-    -0.1552
+    0.8815,
+    0.4722
    ],
    "axis": [
-    0.7071,
-    0.7071
+    -0.4472,
+    0.8944
    ],
-   "width": 1.654,
+   "width": 1.333,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_164",
+   "id": "road_204",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Danube",
    "road_type": "computed",
    "px": [
-    4359.5,
-    3516.25
+    4355.88,
+    3534.423
    ],
    "dir": [
-    -0.9048,
-    0.4258
+    -0.5812,
+    0.8137
    ],
    "axis": [
-    0.8944,
-    0.4472
+    0.669,
+    0.7433
    ],
-   "width": 1.697,
+   "width": 1.369,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_165",
+   "id": "road_205",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    4361.65,
+    3303.819
+   ],
+   "dir": [
+    0.2554,
+    0.9668
+   ],
+   "axis": [
+    0.6402,
+    -0.7682
+   ],
+   "width": 1.626,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_206",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    4398.481,
+    3072.481
+   ],
+   "dir": [
+    -0.1984,
+    0.9801
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.584,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_207",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Sava",
    "road_type": "computed",
    "px": [
-    3999.295,
-    3581.236
+    3999.012,
+    3580.988
    ],
    "dir": [
-    0.6508,
-    0.7593
+    0.8396,
+    0.5433
    ],
    "axis": [
-    -0.9999,
-    0.0172
+    -0.7071,
+    0.7071
    ],
-   "width": 0.584,
+   "width": 0.46,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_166",
+   "id": "road_208",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Dnipro",
    "road_type": "computed",
    "px": [
-    5479.977,
-    1781.977
+    5495.6,
+    1747.6
    ],
    "dir": [
-    -0.3408,
-    0.9401
+    -0.7071,
+    0.7071
    ],
    "axis": [
     0.7071,
     0.7071
    ],
-   "width": 0.598,
+   "width": 0.542,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_167",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Daugava",
-   "road_type": "computed",
-   "px": [
-    5214.416,
-    1382.988
-   ],
-   "dir": [
-    -0.9514,
-    -0.3078
-   ],
-   "axis": [
-    -0.5755,
-    0.8178
-   ],
-   "width": 0.568,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_168",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Daugava",
-   "road_type": "computed",
-   "px": [
-    5226.009,
-    1385.991
-   ],
-   "dir": [
-    -0.974,
-    -0.2265
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 0.642,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_169",
+   "id": "road_209",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6532,444 +7444,697 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_170",
+   "id": "road_210",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Elbe",
    "road_type": "computed",
    "px": [
-    3774.035,
-    2579.965
+    3748.209,
+    2559.791
    ],
    "dir": [
-    -0.9602,
-    -0.2793
+    -0.5408,
+    -0.8412
    ],
    "axis": [
     0.7071,
     -0.7071
    ],
-   "width": 1.28,
+   "width": 1.154,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_171",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Elbe",
-   "road_type": "computed",
-   "px": [
-    3895.932,
-    2498.068
-   ],
-   "dir": [
-    0.3131,
-    0.9497
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 0.988,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_172",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Elbe",
-   "road_type": "computed",
-   "px": [
-    3894.147,
-    2493.853
-   ],
-   "dir": [
-    0.464,
-    0.8858
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 0.838,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_173",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Elbe",
-   "road_type": "computed",
-   "px": [
-    3744.487,
-    2553.513
-   ],
-   "dir": [
-    -0.5313,
-    -0.8472
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 1.157,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_174",
+   "id": "road_211",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Danube",
    "road_type": "computed",
    "px": [
-    4358.031,
-    3378.031
+    4348.722,
+    3387.867
    ],
    "dir": [
-    -0.4167,
-    0.9091
+    -0.5547,
+    0.8321
+   ],
+   "axis": [
+    0.6402,
+    0.7682
+   ],
+   "width": 1.388,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_212",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    4397.982,
+    3549.982
+   ],
+   "dir": [
+    0.9479,
+    -0.3185
    ],
    "axis": [
     0.7071,
     0.7071
    ],
-   "width": 1.412,
+   "width": 1.492,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_175",
+   "id": "road_213",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Danube",
    "road_type": "computed",
    "px": [
-    4184.1,
-    3075.9
+    4178.242,
+    3069.758
    ],
    "dir": [
-    0.7119,
-    0.7023
+    0.6947,
+    0.7193
    ],
    "axis": [
     -0.7071,
     0.7071
    ],
-   "width": 1.306,
+   "width": 1.303,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_176",
+   "id": "road_214",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Danube",
    "road_type": "computed",
    "px": [
-    4360.168,
-    3056.168
+    4356.393,
+    3058.393
    ],
    "dir": [
-    0.9026,
-    -0.4305
+    0.812,
+    -0.5836
    ],
    "axis": [
     0.7071,
     0.7071
    ],
-   "width": 1.416,
+   "width": 1.348,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_177",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Danube",
-   "road_type": "computed",
-   "px": [
-    4145.864,
-    3038.136
-   ],
-   "dir": [
-    0.3511,
-    0.9363
-   ],
-   "axis": [
-    -0.7071,
-    0.7071
-   ],
-   "width": 1.415,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_178",
+   "id": "road_215",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Daugava",
    "road_type": "computed",
    "px": [
-    4479.526,
-    1131.933
+    4479.881,
+    1132.185
    ],
    "dir": [
-    -0.8095,
-    -0.5872
+    -0.816,
+    -0.578
    ],
    "axis": [
-    0.8448,
-    -0.5351
+    0.9348,
+    -0.3552
    ],
-   "width": 0.603,
+   "width": 0.675,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_179",
+   "id": "road_216",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Seine",
+   "road_type": "computed",
+   "px": [
+    1402.005,
+    2513.995
+   ],
+   "dir": [
+    -0.9627,
+    -0.2707
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 1.089,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_217",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Seine",
+   "road_type": "computed",
+   "px": [
+    1399.945,
+    2501.945
+   ],
+   "dir": [
+    0.749,
+    -0.6626
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 0.952,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_218",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Garonne",
    "road_type": "computed",
    "px": [
-    1428.261,
-    4213.739
+    1465.97,
+    4200.03
    ],
    "dir": [
-    -0.4669,
-    -0.8843
+    0.9326,
+    0.361
    ],
    "axis": [
     0.7071,
     -0.7071
    ],
-   "width": 0.753,
+   "width": 0.922,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_180",
+   "id": "road_219",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Garonne",
    "road_type": "computed",
    "px": [
-    1449.45,
-    4192.55
+    1422.164,
+    4202.308
    ],
    "dir": [
-    0.9044,
-    0.4266
+    -0.5158,
+    -0.8567
+   ],
+   "axis": [
+    0.6508,
+    -0.7593
+   ],
+   "width": 0.752,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_220",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Dnipro",
+   "road_type": "computed",
+   "px": [
+    5680.776,
+    1356.112
+   ],
+   "dir": [
+    -0.9048,
+    -0.4258
+   ],
+   "axis": [
+    0.8944,
+    -0.4472
+   ],
+   "width": 0.662,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_221",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Dnipro",
+   "road_type": "computed",
+   "px": [
+    5631.74,
+    1394.994
+   ],
+   "dir": [
+    0.251,
+    0.968
+   ],
+   "axis": [
+    0.7186,
+    -0.6954
+   ],
+   "width": 0.596,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_222",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Dnipro",
+   "road_type": "computed",
+   "px": [
+    5594.085,
+    1423.915
+   ],
+   "dir": [
+    -0.9138,
+    -0.4061
    ],
    "axis": [
     0.7071,
     -0.7071
    ],
-   "width": 0.845,
+   "width": 0.564,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_181",
-   "name": "",
-   "type": "road",
-   "structure": "stone",
-   "river": "Kızılırmak",
-   "road_type": "computed",
-   "px": [
-    6620.863,
-    3435.137
-   ],
-   "dir": [
-    -0.9987,
-    -0.0512
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 0.279,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_182",
+   "id": "road_223",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Dnipro",
    "road_type": "computed",
    "px": [
-    5632.038,
-    1395.962
+    5564.068,
+    1428.068
    ],
    "dir": [
-    0.3328,
-    0.943
-   ],
-   "axis": [
-    0.7071,
-    -0.7071
-   ],
-   "width": 0.572,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_183",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Dnipro",
-   "road_type": "computed",
-   "px": [
-    5680.314,
-    1355.895
-   ],
-   "dir": [
-    -0.9051,
-    -0.4251
-   ],
-   "axis": [
-    0.9487,
-    -0.3162
-   ],
-   "width": 0.754,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_184",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Dnipro",
-   "road_type": "computed",
-   "px": [
-    5594.428,
-    1424.048
-   ],
-   "dir": [
-    -0.9536,
-    -0.3011
-   ],
-   "axis": [
-    0.8321,
-    -0.5547
-   ],
-   "width": 0.678,
-   "snapped": true,
-   "in_custom_zone": false
-  },
-  {
-   "id": "road_185",
-   "name": "",
-   "type": "road",
-   "structure": "wood",
-   "river": "Dnipro",
-   "road_type": "computed",
-   "px": [
-    5571.722,
-    1423.722
-   ],
-   "dir": [
-    -0.8808,
-    0.4735
+    -0.8656,
+    0.5008
    ],
    "axis": [
     -0.7071,
     -0.7071
    ],
-   "width": 0.548,
+   "width": 0.54,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_186",
+   "id": "road_224",
    "name": "",
    "type": "road",
    "structure": "wood",
-   "river": "Danube",
+   "river": "Garonne",
    "road_type": "computed",
    "px": [
-    4844.59,
-    3626.59
+    1558.108,
+    4144.108
    ],
    "dir": [
-    -0.3939,
-    0.9191
+    0.9357,
+    -0.3528
    ],
    "axis": [
     -0.7071,
     -0.7071
    ],
-   "width": 1.454,
+   "width": 1.143,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_187",
+   "id": "road_225",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Garonne",
+   "road_type": "computed",
+   "px": [
+    1565.692,
+    4129.411
+   ],
+   "dir": [
+    -0.2804,
+    -0.9599
+   ],
+   "axis": [
+    0.6,
+    -0.8
+   ],
+   "width": 1.315,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_226",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Danube",
    "road_type": "computed",
    "px": [
-    4848.091,
-    3651.637
+    4845.98,
+    3623.767
    ],
    "dir": [
-    0.9524,
-    -0.3048
+    -0.4871,
+    0.8734
    ],
    "axis": [
-    -0.5547,
-    -0.8321
+    -0.6376,
+    -0.7704
    ],
-   "width": 1.404,
+   "width": 1.448,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_188",
+   "id": "road_227",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Danube",
    "road_type": "computed",
    "px": [
-    4472.158,
-    3525.842
+    4856.193,
+    3648.193
    ],
    "dir": [
-    0.6044,
-    0.7967
+    0.9037,
+    -0.4281
    ],
    "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 1.433,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_228",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Danube",
+   "road_type": "computed",
+   "px": [
+    4474.188,
+    3527.664
+   ],
+   "dir": [
+    0.8838,
+    0.4679
+   ],
+   "axis": [
+    0.6644,
+    -0.7474
+   ],
+   "width": 1.378,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_229",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4418.773,
+    3600.134
+   ],
+   "dir": [
+    0.987,
+    -0.1607
+   ],
+   "axis": [
+    -0.1961,
+    0.9806
+   ],
+   "width": 0.486,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_230",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4026.3,
+    3622.3
+   ],
+   "dir": [
+    0.0,
+    1.0
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 0.637,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_231",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    3987.483,
+    3587.483
+   ],
+   "dir": [
+    0.6961,
+    -0.7179
+   ],
+   "axis": [
+    -0.7071,
+    -0.7071
+   ],
+   "width": 0.448,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_232",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4174.422,
+    3659.0
+   ],
+   "dir": [
+    0.7564,
+    -0.6542
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.694,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_233",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4234.431,
+    3647.569
+   ],
+   "dir": [
+    0.9806,
+    -0.1961
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.818,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_234",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4360.325,
+    3637.0
+   ],
+   "dir": [
     0.7071,
     -0.7071
    ],
-   "width": 1.351,
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.641,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_189",
+   "id": "road_235",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4285.25,
+    3637.0
+   ],
+   "dir": [
+    0.6,
+    -0.8
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.568,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_236",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4417.659,
+    3600.341
+   ],
+   "dir": [
+    0.9814,
+    -0.192
+   ],
+   "axis": [
+    -0.7071,
+    0.7071
+   ],
+   "width": 0.816,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_237",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4208.96,
+    3659.0
+   ],
+   "dir": [
+    0.616,
+    -0.7877
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.576,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_238",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4245.044,
+    3637.0
+   ],
+   "dir": [
+    0.6112,
+    -0.7915
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.573,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_239",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Sava",
+   "road_type": "computed",
+   "px": [
+    4316.731,
+    3637.0
+   ],
+   "dir": [
+    0.4472,
+    0.8944
+   ],
+   "axis": [
+    -1.0,
+    0.0
+   ],
+   "width": 0.509,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_240",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6992,71 +8157,94 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_190",
+   "id": "road_241",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhine",
+   "road_type": "computed",
+   "px": [
+    2681.602,
+    2993.602
+   ],
+   "dir": [
+    0.2951,
+    -0.9555
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.454,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_242",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Danube",
    "road_type": "computed",
    "px": [
-    4765.843,
-    3529.843
+    4715.513,
+    3531.879
    ],
    "dir": [
-    0.4045,
-    -0.9145
+    0.962,
+    -0.2732
    ],
    "axis": [
-    0.7071,
-    0.7071
+    0.7311,
+    0.6823
    ],
-   "width": 1.359,
+   "width": 1.571,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_191",
+   "id": "road_243",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Vistula",
    "road_type": "computed",
    "px": [
-    4425.935,
-    2035.935
+    4432.42,
+    2032.42
    ],
    "dir": [
-    -0.943,
-    0.3328
+    -0.8662,
+    0.4997
    ],
    "axis": [
     0.7071,
     0.7071
    ],
-   "width": 1.268,
+   "width": 1.183,
    "snapped": true,
    "in_custom_zone": false
   },
   {
-   "id": "road_192",
+   "id": "road_244",
    "name": "",
    "type": "road",
    "structure": "wood",
    "river": "Sava",
    "road_type": "computed",
    "px": [
-    3978.157,
-    3588.225
+    3973.279,
+    3588.721
    ],
    "dir": [
-    0.9993,
-    0.0377
+    0.9848,
+    -0.1738
    ],
    "axis": [
-    0.0085,
-    1.0
+    -0.7071,
+    0.7071
    ],
-   "width": 0.445,
+   "width": 0.776,
    "snapped": true,
    "in_custom_zone": false
   }

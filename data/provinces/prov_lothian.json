@@ -8,7 +8,10 @@
   "region": "ecosse",
   "terrain": "hills",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_fife",
+    "prov_yorkshire"
+  ],
   "rivers": [
     "Tweed",
     "Forth",
@@ -55,7 +58,7 @@
     ],
     "voronoi_weight": 0.9
   },
-  "owner": "fac_england",
+  "owner": "fac_scotland",
   "culture": "cul_scottish",
   "religion": "rel_catholic",
   "population": {
@@ -102,7 +105,7 @@
   ],
   "fortification_level": 3,
   "base_supply": 2500,
-  "description": "Lothian et Marches écossaises cédées à Édouard III par Édouard Balliol (traité de Newcastle, 1334) ; château d’Édimbourg tenu par une garnison anglaise (1335-1341). Dunbar (comtesse Agnès) résiste. David II est en exil à Château-Gaillard. Province composée : regroupe aussi Galloway et Annandale.",
+  "description": "Lothian et Marches écossaises, que le roi d’Écosse David II (en exil en France, 13 ans) tient par ses gardiens (Robert Stewart, Andrew Murray) tandis qu’Édouard Balliol les revendique : cédées à Édouard III en 1334 (traité de Newcastle), elles restent disputées. Début 1337 le château d’Édimbourg est une garnison anglaise isolée (1335-1341) et Dunbar (comtesse Agnès) résiste aux Anglais ; la province est écossaise de droit et de fait, la couronne d’Angleterre n’y tient que des forts. Province composée : regroupe aussi Galloway et Annandale.",
   "sources": [
     "Seconde guerre d'indépendance écossaise",
     "Édouard Balliol",

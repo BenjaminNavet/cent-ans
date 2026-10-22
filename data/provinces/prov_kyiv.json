@@ -8,7 +8,11 @@
   "region": "rus_sud",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_briansk",
+    "prov_lviv",
+    "prov_vilnius"
+  ],
   "rivers": [
     "Dniepr",
     "Desna",

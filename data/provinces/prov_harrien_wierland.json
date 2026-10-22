@@ -8,7 +8,12 @@
   "region": "livonie",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_dorpat",
+    "prov_livonia",
+    "prov_novgorod",
+    "prov_osel_wiek"
+  ],
   "coastal": true,
   "ports": [
     "Reval",

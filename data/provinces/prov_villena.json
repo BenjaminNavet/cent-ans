@@ -8,7 +8,10 @@
   "region": "iberie_sud",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_barcelona",
+    "prov_murcia"
+  ],
   "coastal": false,
   "rivers": [
     "Vinalopó"

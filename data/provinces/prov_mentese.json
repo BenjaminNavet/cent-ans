@@ -8,7 +8,11 @@
   "region": "anatolie",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_izmir",
+    "prov_kutahya",
+    "prov_teke"
+  ],
   "coastal": true,
   "rivers": [
     "Dalaman"

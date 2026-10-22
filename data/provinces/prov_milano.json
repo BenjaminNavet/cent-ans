@@ -8,7 +8,18 @@
   "region": "italie_nord",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_firenze",
+    "prov_genova",
+    "prov_mantova",
+    "prov_montferrat",
+    "prov_pavia",
+    "prov_savoie",
+    "prov_tirol",
+    "prov_trent",
+    "prov_verona",
+    "prov_waldstatten"
+  ],
   "rivers": [
     "Pô",
     "Tessin",

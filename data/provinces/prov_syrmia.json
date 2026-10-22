@@ -8,7 +8,16 @@
   "region": "hongrie",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bosnia",
+    "prov_hungary_central",
+    "prov_kosovo",
+    "prov_muntenia",
+    "prov_slavonia_west",
+    "prov_transdanubia_west",
+    "prov_transylvania",
+    "prov_vidin"
+  ],
   "rivers": [
     "Danube",
     "Save",

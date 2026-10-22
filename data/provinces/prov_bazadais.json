@@ -1,0 +1,103 @@
+{
+  "id": "prov_bazadais",
+  "name": {
+    "display": "Bazadais",
+    "local": "Basadés",
+    "local_language": "gascon"
+  },
+  "region": "aquitaine",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [
+    "prov_agenais",
+    "prov_armagnac",
+    "prov_bearn",
+    "prov_gascogne",
+    "prov_guyenne"
+  ],
+  "rivers": [
+    "Garonne",
+    "Ciron",
+    "Dropt"
+  ],
+  "coastal": false,
+  "ports": [],
+  "resources": [
+    "res_wine",
+    "res_wood",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Bazas",
+      "local": "Basats",
+      "local_language": "gascon"
+    },
+    "lat": 44.4318,
+    "lon": -0.2128
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.2128,
+      44.4318
+    ],
+    "seed_lonlat": [
+      -0.25,
+      44.45
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_england",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Bazas, La Réole et Langon comptent quelques milliers d’habitants ; 30 % de l’ancienne Guyenne.",
+    "classes": {
+      "peasants": {
+        "count": 113342,
+        "unrest": 14,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 20835,
+        "unrest": 14,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3473,
+        "unrest": 14,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1250,
+        "unrest": 14,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_water_mill",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1000,
+  "description": "Bazadais et Haute-Garonne anglaise : Bazas, Langon, La Réole. Marche orientale du duché, face à l’Agenais français ; La Réole (château de Quat’Sos) est la clé de la Garonne, prise par Charles de Valois en 1324 puis rendue. Vignes, blé, forêts de pins et bastides. Détachée de la Guyenne en 1337 pour donner de la profondeur au front principal.",
+  "sources": [
+    "Bazadais",
+    "La Réole",
+    "Guerre de Saint-Sardos",
+    "Duché d’Aquitaine"
+  ]
+}

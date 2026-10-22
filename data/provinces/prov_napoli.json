@@ -8,7 +8,11 @@
   "region": "italie_sud",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_rimini",
+    "prov_sicilia",
+    "prov_taranto"
+  ],
   "rivers": [
     "Volturno",
     "Garigliano",

@@ -8,7 +8,10 @@
   "region": "france_ouest",
   "terrain": "bocage",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_normandie",
+    "prov_poitou"
+  ],
   "rivers": [
     "Sarthe",
     "Huisne"

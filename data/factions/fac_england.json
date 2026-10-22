@@ -111,6 +111,11 @@
       "kind": "throne",
       "faction": "fac_france",
       "note": "Édouard III, petit-fils de Philippe IV le Bel par sa mère Isabelle, revendique la couronne de France (1337, titre pris en 1340)."
+    },
+    {
+      "kind": "province",
+      "province": "prov_lothian",
+      "note": "Basses-Terres cédées à Édouard III par Édouard Balliol en 1334 (traité de Newcastle) ; garnisons anglaises à Édimbourg et à Stirling."
     }
   ],
   "victory": {
@@ -133,11 +138,13 @@
       {
         "id": "obj_en_aquitaine",
         "title": "L’héritage des Plantagenêts",
-        "description": "Tenir la Guyenne (avec la Gascogne), la Normandie et le Poitou (avec l’Anjou).",
+        "description": "Tenir la Guyenne, le Bazadais et la Gascogne, la Normandie et le Poitou (avec l’Anjou).",
         "condition": {
           "kind": "control_all",
           "provinces": [
             "prov_guyenne",
+            "prov_bazadais",
+            "prov_gascogne",
             "prov_normandie",
             "prov_poitou"
           ]

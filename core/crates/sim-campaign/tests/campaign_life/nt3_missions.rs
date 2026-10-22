@@ -282,7 +282,13 @@ fn the_generator_follows_the_situation() {
             seen.insert(m.goal);
             if m.goal == MissionGoal::Control && !m.template.starts_with("fr_") {
                 let p = m.province.as_ref().unwrap();
-                assert_eq!(s.province_controller(p), Some(&england));
+                // B3: full neighbour lists, the target belongs to one of the
+                // player's enemies (not only the first one the test declared).
+                let holder = s.province_controller(p).expect("held target");
+                assert!(
+                    s.factions[&player].at_war_with.contains(holder),
+                    "{p} is held by {holder:?}, not an enemy"
+                );
                 let neighbours = s
                     .provinces
                     .keys()

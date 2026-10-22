@@ -8,7 +8,10 @@
   "region": "balkans",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bosnia",
+    "prov_kosovo"
+  ],
   "coastal": true,
   "ports": [
     "Raguse",

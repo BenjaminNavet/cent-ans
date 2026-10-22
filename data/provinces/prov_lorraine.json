@@ -8,7 +8,16 @@
   "region": "empire_rhin",
   "terrain": "hills",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_baden",
+    "prov_bourgogne",
+    "prov_ile_de_france",
+    "prov_liege",
+    "prov_palatinate",
+    "prov_swabia",
+    "prov_trier",
+    "prov_waldstatten"
+  ],
   "rivers": [
     "Moselle",
     "Meurthe",

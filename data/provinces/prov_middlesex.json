@@ -8,7 +8,11 @@
   "region": "angleterre_sud",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_devon",
+    "prov_kent",
+    "prov_yorkshire"
+  ],
   "rivers": [
     "Tamise",
     "Lea",

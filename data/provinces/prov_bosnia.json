@@ -8,7 +8,12 @@
   "region": "balkans",
   "terrain": "mountains",
   "climate": "mountain",
-  "neighbors": [],
+  "neighbors": [
+    "prov_kosovo",
+    "prov_ragusa",
+    "prov_slavonia_west",
+    "prov_syrmia"
+  ],
   "coastal": true,
   "rivers": [
     "Bosna",

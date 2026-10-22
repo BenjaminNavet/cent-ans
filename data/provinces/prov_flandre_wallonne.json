@@ -8,7 +8,11 @@
   "region": "pays_bas",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_artois",
+    "prov_flandre",
+    "prov_hainaut"
+  ],
   "rivers": [
     "Deûle",
     "Scarpe"

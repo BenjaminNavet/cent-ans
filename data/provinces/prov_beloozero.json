@@ -8,7 +8,13 @@
   "region": "rus_nord",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_kostroma",
+    "prov_moscow",
+    "prov_novgorod",
+    "prov_tver",
+    "prov_yaroslavl"
+  ],
   "coastal": false,
   "rivers": [
     "Cheksna",

@@ -8,7 +8,10 @@
   "region": "norvege",
   "terrain": "mountains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_gotaland",
+    "prov_svealand"
+  ],
   "coastal": true,
   "ports": [
     "Bergen",

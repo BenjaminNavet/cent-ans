@@ -242,6 +242,8 @@
       "panorama": "gascony_hills",
       "provinces": [
         "prov_guyenne",
+        "prov_bazadais",
+        "prov_gascogne",
         "prov_agenais",
         "prov_saintonge"
       ]

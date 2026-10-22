@@ -8,7 +8,12 @@
   "region": "livonie",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brest",
+    "prov_livonia",
+    "prov_pilten",
+    "prov_riga_archbishopric"
+  ],
   "rivers": [
     "Dvina",
     "Venta",

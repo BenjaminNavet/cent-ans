@@ -8,7 +8,14 @@
   "region": "silesie",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bohemia",
+    "prov_brandenburg",
+    "prov_legnica",
+    "prov_lesser_poland",
+    "prov_meissen",
+    "prov_upper_silesia"
+  ],
   "rivers": [
     "Oder",
     "Bóbr"

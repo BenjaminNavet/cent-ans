@@ -8,7 +8,15 @@
   "region": "irlande",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_connacht",
+    "prov_desmond",
+    "prov_kildare",
+    "prov_leinster",
+    "prov_ormond",
+    "prov_thomond",
+    "prov_tyrone"
+  ],
   "rivers": [
     "Liffey",
     "Boyne",

@@ -8,7 +8,9 @@
   },
   "de_jure_liege": "tit_france",
   "de_jure_provinces": [
-    "prov_guyenne"
+    "prov_guyenne",
+    "prov_bazadais",
+    "prov_gascogne"
   ],
   "holder_1337": {
     "faction": "fac_england",

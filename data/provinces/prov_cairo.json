@@ -8,7 +8,10 @@
   "region": "egypte",
   "terrain": "plains",
   "climate": "arid",
-  "neighbors": [],
+  "neighbors": [
+    "prov_alexandria",
+    "prov_jerusalem"
+  ],
   "coastal": true,
   "rivers": [
     "Nil",

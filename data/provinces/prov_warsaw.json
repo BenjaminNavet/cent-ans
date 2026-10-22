@@ -8,7 +8,13 @@
   "region": "mazovie",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brest",
+    "prov_lesser_poland",
+    "prov_plock",
+    "prov_pomesania",
+    "prov_rawa"
+  ],
   "rivers": [
     "Vistule",
     "Świder"

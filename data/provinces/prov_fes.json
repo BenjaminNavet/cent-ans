@@ -8,7 +8,10 @@
   "region": "maghreb",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_rabat_sale",
+    "prov_tlemcen"
+  ],
   "coastal": true,
   "rivers": [
     "Sebou",

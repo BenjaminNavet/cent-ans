@@ -8,7 +8,12 @@
   "region": "maghreb",
   "terrain": "mountains",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_gabes",
+    "prov_tlemcen",
+    "prov_tripolitania",
+    "prov_tunis"
+  ],
   "coastal": true,
   "rivers": [
     "Soummam",

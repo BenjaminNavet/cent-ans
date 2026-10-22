@@ -8,7 +8,9 @@
   "region": "italie_nord",
   "terrain": "hills",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_savoie"
+  ],
   "rivers": [
     "Pô"
   ],

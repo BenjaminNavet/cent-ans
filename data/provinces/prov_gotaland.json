@@ -8,7 +8,11 @@
   "region": "scandinavie",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_sjaelland",
+    "prov_svealand",
+    "prov_vestlandet"
+  ],
   "rivers": [
     "Motala ström"
   ],

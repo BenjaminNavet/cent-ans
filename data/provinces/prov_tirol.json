@@ -8,7 +8,13 @@
   "region": "empire_sud",
   "terrain": "mountains",
   "climate": "mountain",
-  "neighbors": [],
+  "neighbors": [
+    "prov_milano",
+    "prov_oberbayern",
+    "prov_trent",
+    "prov_venezia",
+    "prov_waldstatten"
+  ],
   "rivers": [
     "Inn",
     "Eisack"

@@ -8,7 +8,14 @@
   "region": "italie_nord",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_ferrara",
+    "prov_firenze",
+    "prov_mantova",
+    "prov_milano",
+    "prov_trent",
+    "prov_venezia"
+  ],
   "rivers": [
     "Adige",
     "Brenta",

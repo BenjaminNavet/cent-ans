@@ -8,7 +8,11 @@
   "region": "grece",
   "terrain": "mountains",
   "climate": "mountain",
-  "neighbors": [],
+  "neighbors": [
+    "prov_attica",
+    "prov_morea",
+    "prov_thessalonica"
+  ],
   "coastal": true,
   "rivers": [
     "Arachthos",

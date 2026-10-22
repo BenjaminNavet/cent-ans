@@ -8,7 +8,11 @@
   "region": "pays_bas",
   "terrain": "marsh",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brabant",
+    "prov_gueldre",
+    "prov_westphalia"
+  ],
   "rivers": [
     "Rhin",
     "Vecht",

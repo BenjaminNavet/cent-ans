@@ -8,7 +8,15 @@
   "region": "empire_sud",
   "terrain": "mountains",
   "climate": "mountain",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bourgogne",
+    "prov_lorraine",
+    "prov_milano",
+    "prov_oberbayern",
+    "prov_savoie",
+    "prov_swabia",
+    "prov_tirol"
+  ],
   "rivers": [
     "Reuss",
     "Rhin",

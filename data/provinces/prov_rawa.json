@@ -8,7 +8,11 @@
   "region": "mazovie",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_lesser_poland",
+    "prov_plock",
+    "prov_warsaw"
+  ],
   "rivers": [
     "Rawka",
     "Bzura"

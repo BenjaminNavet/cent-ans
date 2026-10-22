@@ -8,7 +8,17 @@
   "region": "france_centre",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_agenais",
+    "prov_beaucaire",
+    "prov_blois",
+    "prov_bourbonnais",
+    "prov_carcassonne",
+    "prov_ile_de_france",
+    "prov_normandie",
+    "prov_poitou",
+    "prov_saintonge"
+  ],
   "rivers": [
     "Loire",
     "Cher",

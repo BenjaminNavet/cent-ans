@@ -1,0 +1,58 @@
+[
+  {
+    "id": "set_bazas",
+    "province": "prov_bazadais",
+    "kind": "city",
+    "name": {
+      "display": "Bazas",
+      "local": "Basats",
+      "local_language": "gascon"
+    },
+    "lonlat": [
+      -0.2128,
+      44.4318
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Cité épiscopale du Bazadais sur son éperon dominant le Beuve, capitale d’une sénéchaussée anglo-gasconne ; carrefour des routes de Bordeaux vers Toulouse et vers les Landes.",
+    "sources": [
+      "Bazas",
+      "Bazadais"
+    ]
+  },
+  {
+    "id": "set_la_reole",
+    "province": "prov_bazadais",
+    "kind": "castle",
+    "name": {
+      "display": "La Réole",
+      "local": "La Riola",
+      "local_language": "gascon"
+    },
+    "lonlat": [
+      0.0333,
+      44.5833
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Place forte et prieuré sur la Garonne, clé de la frontière du duché d’Aquitaine : château de Quat’Sos, assiégé et pris par les Français durant la guerre de Saint-Sardos (1324), rendu en 1327.",
+    "sources": [
+      "La Réole",
+      "Guerre de Saint-Sardos"
+    ]
+  }
+]

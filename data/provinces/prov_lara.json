@@ -8,7 +8,9 @@
   "region": "iberie_nord",
   "terrain": "hills",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_galicia"
+  ],
   "coastal": false,
   "rivers": [
     "Arlanza"

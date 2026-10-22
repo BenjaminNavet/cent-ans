@@ -8,7 +8,15 @@
   "region": "iberie_sud",
   "terrain": "heath",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_algeciras",
+    "prov_barcelona",
+    "prov_calatrava",
+    "prov_granada",
+    "prov_lisboa",
+    "prov_toledo",
+    "prov_villena"
+  ],
   "rivers": [
     "Segura",
     "Guadalquivir",
