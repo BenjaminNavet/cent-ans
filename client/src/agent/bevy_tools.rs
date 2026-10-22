@@ -61,7 +61,13 @@ impl Plugin for BevyToolsPlugin {
         if !app.is_plugin_added::<EntityCountDiagnosticsPlugin>() {
             app.add_plugins(EntityCountDiagnosticsPlugin::default());
         }
-        app.add_plugins((DiagnosticsOverlayPlugin, RenderDebugOverlayPlugin));
+        // `DefaultPlugins` already adds both once their Bevy features are on.
+        if !app.is_plugin_added::<DiagnosticsOverlayPlugin>() {
+            app.add_plugins(DiagnosticsOverlayPlugin);
+        }
+        if !app.is_plugin_added::<RenderDebugOverlayPlugin>() {
+            app.add_plugins(RenderDebugOverlayPlugin);
+        }
         app.insert_resource(RenderDebugOverlayKeybindings {
             enable_keybindings: requested.render,
             cycle_mode: KeyCode::F9,

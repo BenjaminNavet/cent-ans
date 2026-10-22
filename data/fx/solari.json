@@ -1,6 +1,6 @@
 {
   "_comment": "Essai bevy_solari (docs/wip/bevy-solari.md). Sans effet hors build `--features solari`. Désactivé par défaut : éclairage raytracé, GPU à ray queries requis.",
-  "enabled": false,
+  "enabled": true,
   "restir": false,
   "max_bounces": 2
 }
