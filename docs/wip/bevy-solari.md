@@ -117,3 +117,15 @@ exemples `shader/extended_material.rs` (`deferred_fragment_shader`) et `shader_a
    sans la feature Cargo `decals` (warning shader, pas de plantage dans l'essai).
 3. `enabled: true` est la valeur laissée dans `data/fx/solari.json` (reçue du commit f6f870711) ; sans effet hors build `--features solari`.
 4. Mesure fps au banc release : non faite (consigne).
+
+## solari-noir (22/10) : monde noir en bataille, CORRIGÉ
+
+Cause : la texture principale d'une vue est mise en cache par clé (cible, format, USAGES, msaa) (bevy_render
+`prepare_view_targets`/`main_texture_key`). La caméra de bataille recevait `STORAGE_BINDING` (+ Hdr, Msaa::Off) pour Solari,
+pas la caméra UI (HUD, order 0, sans effacement) : deux textures principales distinctes, le HUD recouvrait la cible avec
+sa propre texture (monde absent, fond (19,14,10)). Le même effet existait pour Hdr (déjà géré pour le bloom) et msaa.
+Correctif (`battle/scene/camera.rs`) : si Solari est actif, la caméra UI prend Hdr, Msaa::Off et
+`CameraMainTextureUsages + STORAGE_BINDING` pendant la bataille (rétablis à la sortie). `lighting.rs` : pas de SSAO/SMAA
+avec Solari. Vérifié par capture (monde, ciel, soldats visibles).
+Reste : bandes noires sur le sol (auto-ombrage par le sol grossier de substitution, pas de biais) ; pas d'EnvironmentMapLight
+(ciel non éclairant) ; `enabled` laissé à false dans solari.json.
