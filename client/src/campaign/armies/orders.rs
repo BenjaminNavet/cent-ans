@@ -208,6 +208,7 @@ pub fn hover_and_input(
     mut commands: MessageWriter<ArmyCommand>,
     mut war_asks: MessageWriter<AskWarDeclaration>,
     ui_scale: Res<bevy::ui::UiScale>,
+    mut click_guard: ResMut<crate::campaign::provinces::ProvinceClickGuard>,
 ) {
     let Some(cursor) = cursor_position(&window) else {
         return;
@@ -242,6 +243,10 @@ pub fn hover_and_input(
     let id = under.as_ref().and_then(|r| ArmyId::parse(&r.id));
     if hovered.0 != id {
         hovered.0 = id.clone();
+    }
+    if mouse.just_pressed(MouseButton::Left) {
+        // The release of this press must not also pick the province under the army.
+        click_guard.army_press = id.is_some();
     }
     if mouse.just_pressed(MouseButton::Left)
         && let Some(id) = id.clone()

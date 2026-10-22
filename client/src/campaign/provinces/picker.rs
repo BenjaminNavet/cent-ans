@@ -53,6 +53,9 @@ pub struct SelectProvince(pub Option<String>);
 #[derive(Resource, Default)]
 pub struct ProvinceClickGuard {
     pub blocked: bool,
+    /// The left press went to an army: its release must not also select the province (or the
+    /// town) under the army. Kept until that release, unlike `blocked`.
+    pub army_press: bool,
 }
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
@@ -200,6 +203,9 @@ fn handle_clicks(
             press.button = None;
             // A click on a window (pressed or released over it) never reaches the map behind.
             if std::mem::take(&mut press.over_ui) || over_ui {
+                continue;
+            }
+            if button == MouseButton::Left && std::mem::take(&mut guard.army_press) {
                 continue;
             }
             if blocked && button == MouseButton::Left {

@@ -8,7 +8,7 @@ root=${0:A:h:h}
 script=${1:?script} prefix=${2:?prefix} secs=${3:-60} every=${4:-5}
 mkdir -p "${prefix:h}"
 CENT_ANS_MUTE=1 CENT_ANS_NO_BRIEFING=${CENT_ANS_NO_BRIEFING:-1} "$root/client/target/release/cent-ans" \
-	--state MainMenu --visible-window --script "$script" > "$prefix.log" 2>&1 &
+	--state ${CENT_ANS_START_STATE:-MainMenu} --visible-window --script "$script" > "$prefix.log" 2>&1 &
 pid=$!
 # Window bounds lookup (compiled once); only the game window region is captured.
 helper=${TMPDIR:-/tmp}/cent_ans_window_id
@@ -25,6 +25,8 @@ n=0
 while (( n * every < secs )) && kill -0 $pid 2>/dev/null; do
 	osascript -e 'tell application "System Events" to set frontmost of (first process whose name is "cent-ans") to true' >/dev/null 2>&1
 	sleep 0.4
+	wid=$("$helper" cent-ans)
+	[[ -z $wid ]] && break
 	screencapture -x -R"${wid#* }" "$prefix-$(printf %02d $n).png"
 	sleep $every
 	n=$((n + 1))

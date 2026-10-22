@@ -16,6 +16,7 @@ pub mod banners;
 pub mod corpses;
 pub mod figures;
 pub mod fine_maps;
+pub mod follow;
 pub mod gaits;
 pub mod heraldry;
 pub mod instancing;
@@ -75,6 +76,7 @@ pub struct PoseFrames {
     pub scale: f64,
     prev: HashMap<u32, Vec<Pose>>,
     cur: HashMap<u32, Vec<Pose>>,
+    followers: follow::Followers,
 }
 
 impl PoseFrames {
@@ -93,14 +95,21 @@ impl PoseFrames {
             .is_some_and(|old| ticks > old && ticks - old <= 3);
         let old = std::mem::take(&mut self.cur);
         self.prev = if advanced { old } else { HashMap::new() };
+        // A jump of the clock (new battle, replay seek, long stall) puts every figure on its place.
+        let dt = match self.ticks {
+            Some(old) if advanced => (ticks - old) as f32 * sim_battle::DT as f32,
+            _ => 0.0,
+        };
+        let followers = &mut self.followers;
         self.cur = drawn_units(sim)
             .map(|unit| {
-                let poses = sim
+                let places: Vec<Pose> = sim
                     .soldier_poses(unit, scale)
                     .into_iter()
                     .map(|p| [p[0] as f32, p[1] as f32, p[2] as f32, p[3] as f32])
                     .collect();
-                (unit.id, poses)
+                let rigid = unit.on_wall || unit.climbing.is_some();
+                (unit.id, followers.follow(unit.id, &places, dt, rigid))
             })
             .collect();
         self.ticks = Some(ticks);
