@@ -165,6 +165,14 @@ pub struct Decoded {
 
 /// Decodes a PNG / JPEG file to RGBA8 and halves it down to [`MAX_SIZE`].
 pub fn decode(path: &Path) -> Option<Decoded> {
+    crate::agent::texture_census::timed(
+        format!("water_detail decode {}", path.display()),
+        |d: &Option<Decoded>| d.as_ref().map_or(0, |d| d.data.len()),
+        || decode_inner(path),
+    )
+}
+
+fn decode_inner(path: &Path) -> Option<Decoded> {
     let bytes = std::fs::read(path).ok()?;
     let extension = path.extension()?.to_str()?.to_ascii_lowercase();
     let image = Image::from_buffer(
@@ -209,6 +217,14 @@ fn repeat_sampler() -> ImageSampler {
 
 /// A mip-mapped, repeating GPU image of one or several layers (layer-major data).
 fn gpu_image(layers: &[&Decoded], srgb: bool) -> Image {
+    crate::agent::texture_census::timed(
+        format!("water_detail gpu_image {} layers", layers.len()),
+        |i: &Image| i.data.as_ref().map_or(0, Vec::len),
+        || gpu_image_inner(layers, srgb),
+    )
+}
+
+fn gpu_image_inner(layers: &[&Decoded], srgb: bool) -> Image {
     let size = layers[0].size;
     let levels = mip_levels(size);
     let format = if srgb {

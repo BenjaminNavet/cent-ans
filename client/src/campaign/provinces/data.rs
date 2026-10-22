@@ -115,6 +115,14 @@ impl ProvinceMap {
 
 /// Decodes `province_ids.png` into `(width, height, index per pixel)`.
 pub fn load_ids_png(path: &Path) -> Result<(u32, u32, Vec<u16>), String> {
+    crate::agent::texture_census::timed(
+        format!("provinces load_ids_png {}", path.display()),
+        |r: &Result<(u32, u32, Vec<u16>), String>| r.as_ref().map_or(0, |r| r.2.len() * 2),
+        || load_ids_png_inner(path),
+    )
+}
+
+fn load_ids_png_inner(path: &Path) -> Result<(u32, u32, Vec<u16>), String> {
     let file = std::fs::File::open(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let mut reader = png::Decoder::new(std::io::BufReader::new(file))
         .read_info()

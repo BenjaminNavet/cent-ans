@@ -274,6 +274,14 @@ fn srgb_to_linear(rgb: [f32; 3]) -> [f32; 3] {
 
 /// RGBA8 pixels of a shield file, resized to `ARMS_SIZE`² (nearest) when needed.
 pub fn load_layer(path: &Path) -> Option<Vec<u8>> {
+    crate::agent::texture_census::timed(
+        format!("heraldry load_layer {}", path.display()),
+        |r: &Option<Vec<u8>>| r.as_ref().map_or(0, Vec::len),
+        || load_layer_inner(path),
+    )
+}
+
+fn load_layer_inner(path: &Path) -> Option<Vec<u8>> {
     let file = std::fs::File::open(path).ok()?;
     let mut decoder = png::Decoder::new(std::io::BufReader::new(file));
     decoder.set_transformations(png::Transformations::EXPAND | png::Transformations::STRIP_16);
