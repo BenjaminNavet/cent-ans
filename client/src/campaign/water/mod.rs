@@ -286,6 +286,14 @@ impl Ctx<'_, '_, '_> {
 
 /// Reads a PNG as a GPU-only image (`None` if missing or unreadable).
 fn load_png(path: &Path, srgb: bool) -> Option<Image> {
+    crate::agent::texture_census::timed(
+        format!("water load_png {}", path.display()),
+        |i: &Option<Image>| i.as_ref().and_then(|i| i.data.as_ref()).map_or(0, Vec::len),
+        || load_png_inner(path, srgb),
+    )
+}
+
+fn load_png_inner(path: &Path, srgb: bool) -> Option<Image> {
     let bytes = std::fs::read(path).ok()?;
     match Image::from_buffer(
         &bytes,

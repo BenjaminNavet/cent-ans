@@ -161,6 +161,16 @@ pub(super) fn build_atlas_mips(
     mut mips: ResMut<AtlasMips>,
     mut images: ResMut<Assets<Image>>,
 ) {
+    let timer = crate::agent::texture_census::Timer::start();
+    build_atlas_mips_inner(&render, &mut mips, &mut images);
+    timer.finish_if(0.5, "vegetation build_atlas_mips (system)", 0);
+}
+
+fn build_atlas_mips_inner(
+    render: &VegRender,
+    mips: &mut AtlasMips,
+    images: &mut Assets<Image>,
+) {
     let handles = [
         (render.assets.atlas.clone(), true),
         (render.assets.normal.clone(), false),
