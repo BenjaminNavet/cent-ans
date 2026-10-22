@@ -33,6 +33,21 @@ pub struct Settings {
     pub upscale: String,
     /// `video/texture_quality`: `high` or `medium`.
     pub texture_quality: String,
+    // Optional post-effects (data/fx/postfx.json): `auto` follows the quality preset, `on`, `off`.
+    /// `video/fx_depth_of_field`.
+    pub fx_depth_of_field: String,
+    /// `video/fx_motion_blur`.
+    pub fx_motion_blur: String,
+    /// `video/fx_auto_exposure`.
+    pub fx_auto_exposure: String,
+    /// `video/fx_color_grading` (campaign camera; the battle grade owns the battle one).
+    pub fx_color_grading: String,
+    /// `video/fx_chromatic_aberration`.
+    pub fx_chromatic_aberration: String,
+    /// `video/fx_sharpening` (contrast adaptive sharpening).
+    pub fx_sharpening: String,
+    /// `video/fx_soft_shadows` (PCSS on the suns).
+    pub fx_soft_shadows: String,
     /// `interface/ui_size`: multiplies the automatic UI scale (`UiScale`).
     pub ui_size: f32,
     /// `interface/text_size`: multiplier of text sizes (exposed; the kit does not read it yet).
@@ -127,6 +142,13 @@ impl Default for Settings {
             view_distance: 1.0,
             upscale: "auto".into(),
             texture_quality: "high".into(),
+            fx_depth_of_field: "auto".into(),
+            fx_motion_blur: "auto".into(),
+            fx_auto_exposure: "auto".into(),
+            fx_color_grading: "auto".into(),
+            fx_chromatic_aberration: "auto".into(),
+            fx_sharpening: "auto".into(),
+            fx_soft_shadows: "auto".into(),
             ui_size: 1.0,
             text_size: 1.0,
             audio_master: 1.0,
