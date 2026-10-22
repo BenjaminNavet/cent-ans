@@ -210,6 +210,20 @@ impl Plugin for BattleCameraPlugin {
     }
 }
 
+#[cfg(feature = "solari")]
+type SolariActive<'w> = Option<Res<'w, super::solari::SolariSettings>>;
+#[cfg(not(feature = "solari"))]
+type SolariActive<'w> = Option<Res<'w, NoSolari>>;
+
+/// Never inserted: stands in for `SolariSettings` when the `solari` feature is off.
+#[cfg(not(feature = "solari"))]
+#[derive(Resource)]
+struct NoSolari;
+
+fn solari_active(solari: &SolariActive) -> bool {
+    solari.is_some()
+}
+
 /// The UI camera's clear colour and MSAA before the battle took it over, and whether the battle
 /// made it HDR.
 #[derive(Resource)]
@@ -225,16 +239,20 @@ fn release_ui_clear(
     mut commands: Commands,
     quality: Res<crate::settings::quality::RenderQuality>,
     lighting: Option<Res<super::lighting::LightingLook>>,
+    solari: SolariActive,
     mut ui_cameras: Query<
         (Entity, &mut Camera, &mut Msaa, Has<bevy::camera::Hdr>),
         With<crate::ui::kit::UiCamera>,
     >,
 ) {
     if let Ok((entity, mut camera, mut msaa, hdr)) = ui_cameras.single_mut() {
-        let make_hdr = !hdr && lighting.is_some_and(|look| look.bloom.enabled);
+        // Solari forces the battle camera HDR (`#[require(Hdr)]`), so the HUD camera must follow.
+        let battle_hdr = lighting.is_some_and(|look| look.bloom.enabled) || solari_active(&solari);
+        let make_hdr = !hdr && battle_hdr;
         commands.insert_resource(SavedUiClear(camera.clear_color, *msaa, make_hdr));
         camera.clear_color = ClearColorConfig::None;
-        *msaa = quality.msaa_battle;
+        // Solari forces the battle camera to Msaa::Off; the HUD camera must match it.
+        *msaa = if solari_active(&solari) { Msaa::Off } else { quality.msaa_battle };
         if make_hdr {
             commands
                 .entity(entity)
