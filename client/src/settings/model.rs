@@ -11,8 +11,9 @@ use serde::{Deserialize, Serialize};
 pub const PATH_ENV: &str = "CENT_ANS_SETTINGS_PATH";
 
 /// Window and graphics (`video/*`, `interface/ui_size`, `interface/text_size`).
-#[derive(Resource, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Resource, Debug, Clone, PartialEq, Serialize, Deserialize, Reflect)]
 #[serde(default)]
+#[reflect(Resource, Default)]
 pub struct Settings {
     // ---- Affichage ----
     /// `video/fullscreen` (windowed by default).
