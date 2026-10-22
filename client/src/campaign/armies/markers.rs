@@ -370,7 +370,7 @@ fn spawn_plate(commands: &mut Commands, view: &super::views::ArmyView) {
                 },
                 Text::new(plate_text(view.men, view.status)),
                 TextFont {
-                    font_size: bevy::text::FontSize::Px(13.0),
+                    font_size: bevy::text::FontSize::Px(14.0),
                     ..default()
                 },
                 TextColor(Color::srgb(0.16, 0.10, 0.05)),

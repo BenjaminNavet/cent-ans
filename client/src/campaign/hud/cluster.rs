@@ -13,15 +13,18 @@ const KIND_ORDER: [&str; 11] = [
     "idle_army",
     "idle_character",
     "research_idle",
-    "free_slot",
     "mission_due",
     "construction_done",
     "research_done",
+    "free_slot",
 ];
 /// Pills at most; the last one then gathers the rest under « Autres avis ».
 pub const MAX_BADGES: usize = 7;
 /// Kinds drawn in the danger colour.
 pub const DANGER_KINDS: [&str; 4] = ["chronicle_decision", "enemy_army", "siege", "debt"];
+
+/// Kinds that are mere suggestions (low priority): drawn discreetly, listed last.
+pub const QUIET_KINDS: [&str; 1] = ["free_slot"];
 
 /// Short label written on a pill.
 pub fn short_label(kind: &str) -> &'static str {
@@ -32,7 +35,7 @@ pub fn short_label(kind: &str) -> &'static str {
         "siege" => "Siège",
         "debt" => "Dette",
         "idle_army" => "Armée sans ordre",
-        "free_slot" => "Chantier libre",
+        "free_slot" => "Chantiers libres",
         "mission_due" => "Mission proche",
         "idle_character" => "Sans charge",
         "construction_done" => "Chantier fini",
@@ -86,6 +89,25 @@ pub struct Group {
 impl Group {
     pub fn danger(&self) -> bool {
         DANGER_KINDS.contains(&self.kind.as_str())
+    }
+
+    /// Low-priority suggestion (« N colonies sans chantier » and the like).
+    pub fn quiet(&self) -> bool {
+        QUIET_KINDS.contains(&self.kind.as_str())
+    }
+
+    /// Number shown in the cartouche: for the free-slot suggestion, the colony count carried by
+    /// the (single, core-made) alert text rather than the number of alerts.
+    pub fn display_count(&self) -> usize {
+        if self.kind == "free_slot"
+            && let Some(n) = self
+                .alerts
+                .iter()
+                .find_map(|a| a.text.split_whitespace().next()?.parse::<usize>().ok())
+        {
+            return n;
+        }
+        self.alerts.len()
     }
 
     pub fn blocking(&self) -> bool {
@@ -194,6 +216,19 @@ mod tests {
         assert_eq!(last.kind, "other");
         assert_eq!(last.alerts.len(), 3);
         assert_eq!(short_label("other"), "Autres avis");
+    }
+
+    #[test]
+    fn free_slot_is_quiet_last_and_counts_colonies() {
+        let mut slot = alert("f", "free_slot");
+        slot.text = "32 colonie(s) sans chantier en cours".to_owned();
+        let alerts = [slot, alert("r", "research_done"), alert("s", "siege")];
+        let groups = group_alerts(&alerts);
+        assert_eq!(groups.last().expect("groups").kind, "free_slot");
+        let quiet = groups.last().expect("groups");
+        assert!(quiet.quiet() && !quiet.danger());
+        assert_eq!(quiet.display_count(), 32);
+        assert!(!groups[0].quiet());
     }
 
     #[test]

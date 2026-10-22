@@ -287,7 +287,7 @@ pub fn sync_ghosts(
                     Text::new(""),
                     TextFont {
                         font: theme.font_title.clone(),
-                        font_size: 12.0.into(),
+                        font_size: 14.0.into(),
                         ..default()
                     },
                     TextColor(Color::NONE),

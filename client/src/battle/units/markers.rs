@@ -388,7 +388,7 @@ fn spawn_plate(
                     let star = plaque
                         .spawn((
                             Text::new("★"),
-                            TextFont::from_font_size(11.0),
+                            TextFont::from_font_size(14.0),
                             TextColor(GOLD),
                             Visibility::Hidden,
                             Node {
@@ -444,7 +444,7 @@ fn spawn_plate(
             let badges = root
                 .spawn((
                     Text::new(""),
-                    TextFont::from_font_size(11.0),
+                    TextFont::from_font_size(14.0),
                     TextColor(Color::WHITE),
                     Node {
                         position_type: PositionType::Absolute,

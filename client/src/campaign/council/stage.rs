@@ -71,7 +71,7 @@ pub fn spawn_stage(
                     },
                     Text::new("Charge vacante"),
                     TextFont {
-                        font_size: bevy::text::FontSize::Px(13.0),
+                        font_size: bevy::text::FontSize::Px(14.0),
                         ..default()
                     },
                     TextColor(Color::srgba(0.85, 0.8, 0.7, 0.7)),

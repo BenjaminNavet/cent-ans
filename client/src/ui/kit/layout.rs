@@ -41,6 +41,9 @@ pub enum FitZone {
     SideTall,
     /// Docked on the left under the advisor column's top, above the army strip.
     Left,
+    /// Docked at the bottom left, just above the army strip, leaving the advisor column (top
+    /// left) and the map centre free (tutorial card).
+    BottomLeft,
     /// Docked at the bottom, from the left edge to the bottom-right cluster.
     Bottom,
     /// Large window: under the top bar, the whole width and height.
@@ -87,6 +90,13 @@ pub fn zone_box(zone: FitZone, screen: Vec2, reserve: HudReserve) -> ZoneBox {
             top: Some(PANEL_TOP),
             bottom: None,
             max_height: Some((screen.y - PANEL_TOP - 80.0).max(200.0)),
+        },
+        FitZone::BottomLeft => ZoneBox {
+            left: Some(EDGE),
+            right: None,
+            top: None,
+            bottom: Some(EDGE + ARMY_STRIP_HEIGHT + GAP),
+            max_height: Some((screen.y * 0.5 - ARMY_STRIP_HEIGHT).max(160.0)),
         },
         FitZone::Bottom => ZoneBox {
             left: Some(EDGE),

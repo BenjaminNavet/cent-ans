@@ -454,8 +454,9 @@ pub const PILL_GAP: f32 = 4.0;
 const PILL_DISC: f32 = 17.0 * 0.8;
 
 /// Face of a pill: parchment, or red wax for a danger kind; lighter on hover.
-fn pill_face(danger: bool, hover: bool) -> Color {
+fn pill_face(danger: bool, quiet: bool, hover: bool) -> Color {
     match (danger, hover) {
+        (false, false) if quiet => style::PARCHMENT_DARK,
         (true, true) => style::WAX_LIGHT,
         (true, false) => style::WAX,
         (false, true) => style::PARCHMENT_LIGHT,
@@ -473,10 +474,13 @@ pub fn alert_pill(
     kind: &str,
     label: &str,
     count: usize,
-    danger: bool,
+    tone: AlertPill,
 ) -> impl Bundle {
+    let AlertPill { danger, quiet } = tone;
     let ink = if danger {
         style::PARCHMENT_LIGHT
+    } else if quiet {
+        style::INK_SOFT
     } else {
         style::INK
     };
@@ -485,7 +489,7 @@ pub fn alert_pill(
         Name::new(name.to_owned()),
         bevy::ui_widgets::Button,
         Hovered::default(),
-        AlertPill { danger },
+        tone,
         Node {
             width: Val::Px(PILL_WIDTH),
             height: Val::Px(PILL_HEIGHT),
@@ -494,7 +498,7 @@ pub fn alert_pill(
             border: UiRect::new(Val::Px(3.0), Val::Px(1.0), Val::Px(1.0), Val::Px(1.0)),
             ..default()
         },
-        BackgroundColor(pill_face(danger, false)),
+        BackgroundColor(pill_face(danger, quiet, false)),
         BorderColor {
             left: if danger { style::GOLD } else { style::RUBRIC },
             ..BorderColor::all(if danger {
@@ -561,7 +565,7 @@ pub fn alert_pill(
                 Pickable::IGNORE,
                 children![(
                     Text::new(count.to_string()),
-                    theme.text_font(false, false, 14.0),
+                    theme.text_font(false, false, 15.0),
                     TextColor(if danger {
                         style::WAX_DARK
                     } else {
@@ -578,11 +582,12 @@ pub fn alert_pill(
 #[derive(Component)]
 pub struct AlertPill {
     pub danger: bool,
+    pub quiet: bool,
 }
 
 pub fn pill_visuals(mut pills: Query<(&AlertPill, &Hovered, &mut BackgroundColor)>) {
     for (pill, hovered, mut face) in &mut pills {
-        face.set_if_neq(BackgroundColor(pill_face(pill.danger, hovered.get())));
+        face.set_if_neq(BackgroundColor(pill_face(pill.danger, pill.quiet, hovered.get())));
     }
 }
 

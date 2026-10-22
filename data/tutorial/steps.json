@@ -19,88 +19,88 @@
   "steps": {
     "intro": {
       "title": "{welcome}",
-      "text": "Nous sommes au printemps 1337. Votre faction : {faction}. Ce guide vous accompagne pendant les premiers tours : chaque étape donne un objectif, une flèche montre où agir, l’étape suivante s’ouvre dès que l’objectif est rempli.\n\n[b]{objectives_title}[/b] :\n{objectives}",
+      "text": "Printemps 1337, votre faction : {faction}. Chaque étape donne un objectif ; la suivante s’ouvre dès qu’il est rempli.\n\n[b]{objectives_title}[/b] :\n{objectives}",
       "objective": "Cliquez sur « Continuer ».",
       "target": "",
       "manual": true
     },
     "select_army": {
       "title": "Votre armée",
-      "text": "Les bannières sur la carte sont les armées. Cliquez (bouton gauche) sur la bannière de {army} : le bandeau d’ost s’ouvre en bas de l’écran avec ses unités ; à gauche, le sceau du chef montre son général, sa posture et ses points de mouvement.",
+      "text": "Les bannières sont les armées. Cliquez sur celle de {army} : le bandeau d’ost s’ouvre en bas de l’écran.",
       "objective": "Sélectionner {army}.",
       "target": "royal_army"
     },
     "move_army": {
       "title": "Donner un ordre de marche",
-      "text": "Armée sélectionnée, la bulle dorée au sol montre jusqu’où elle peut aller cette saison. Survolez le sol : le chemin s’affiche en vert pour ce tour, en rouge pour les tours suivants, avec son coût. Clic droit sur le sol : l’armée part aussitôt. Un clic droit sur une colonie y marche (siège d’une place ennemie), sur une armée ennemie l’attaque. Les grands fleuves ne se passent qu’aux ponts et aux gués.",
+      "text": "Armée choisie, la bulle dorée montre sa portée de la saison. Clic droit sur le sol : elle part aussitôt ; sur une colonie, elle y marche (siège) ; sur une armée ennemie, elle l’attaque.",
       "objective": "Déplacer une de vos armées (clic droit sur le sol).",
       "target": "royal_army"
     },
     "open_province": {
       "title": "Vos provinces",
-      "text": "Cliquez sur la ville de {capital} : son panneau montre la garnison, le recrutement et les bâtiments de la ville ; le bouton « Province » (ou un clic dans la campagne alentour) ouvre le panneau de province : propriétaire, population, mécontentement. Si une armée stationne devant la ville, un second clic au même endroit passe de l’armée à la ville.",
+      "text": "Cliquez sur la ville de {capital} : son panneau montre garnison, recrutement et bâtiments. Le bouton « Province » ouvre le panneau de la province.",
       "objective": "Ouvrir le panneau d’une de vos villes ou provinces.",
       "target": "capital"
     },
     "city_tab": {
       "title": "La ville",
-      "text": "Dans le panneau de la ville, l’onglet « Bâtiments » montre ses bâtiments et ce qu’on peut y construire ; dans le panneau de province, l’onglet « Ville » montre aussi les quatre classes (paysans, bourgeois, clergé, noblesse) avec leurs jauges et les ressources. Survolez une ligne pour l’infobulle détaillée.",
+      "text": "L’onglet « Bâtiments » de la ville (ou « Ville » de la province) liste ses bâtiments et les quatre classes. Survolez une ligne pour le détail.",
       "objective": "Ouvrir l’onglet « Bâtiments » de la ville (ou « Ville » de la province).",
       "target": "city_tab"
     },
     "build": {
       "title": "Construire",
-      "text": "Sous « Construire » (panneau de la ville) ou « Constructible » (panneau de province), chaque ligne est un bâtiment avec son coût et sa durée : un clic sur la ligne lance le chantier. Le coût est prélevé tout de suite ; un échafaudage sur la carte marque le chantier jusqu’à son achèvement. Chaque ville garde jusqu’à trois chantiers : le premier avance, les suivants attendent (payés à la mise en file, remboursés pour moitié si vous les annulez).",
+      "text": "Sous « Construire » (ou « Constructible »), un clic sur un bâtiment lance le chantier ; le coût est prélevé tout de suite. Trois chantiers au plus par ville.",
       "objective": "Lancer une construction dans une de vos villes.",
       "target": "buildable"
     },
     "research": {
       "title": "Les technologies",
-      "text": "La jauge de recherche de la barre du haut indique la technologie en cours. Ouvrez l’arbre (touche {key:map_toggle_tech} ou clic sur la jauge) et choisissez une technologie disponible : sans recherche, les points de la saison s’accumulent en réserve dans la limite d’un plafond, puis sont perdus.",
+      "text": "La jauge de recherche de la barre du haut indique la technologie en cours. Ouvrez l’arbre (touche T ou clic sur la jauge) : sans recherche, les points de la saison sont perdus.",
       "objective": "Choisir une recherche.",
       "target": "research",
       "modal_ok": true
     },
     "diplomacy": {
       "title": "La diplomatie",
-      "text": "Le panneau de diplomatie (bouton de la barre ou touche {key:map_toggle_diplomacy}) liste les puissances, leur attitude envers vous et ses raisons, les traités et la faveur pontificale. Avant chaque envoi, il indique si l’autre partie accepterait.",
+      "text": "Le panneau de diplomatie (barre du haut ou touche {key:map_toggle_diplomacy}) liste les puissances, leur attitude et les traités, et dit si l’autre partie accepterait.",
       "objective": "Ouvrir la diplomatie.",
       "target": "diplomacy"
     },
     "end_turn": {
       "title": "Finir le tour",
-      "text": "Un tour est une saison. Quand vos armées ont marché, cliquez sur la cloche « Fin de tour », en bas à droite (ou Entrée) : les autres puissances jouent l’une après l’autre, les sièges avancent, les villes produisent, et les marches trop longues pour une saison reprennent d’elles-mêmes au tour suivant.",
+      "text": "Un tour est une saison. Cliquez sur la cloche « Fin de tour », en bas à droite (ou Entrée) : les autres puissances jouent, les sièges avancent, les villes produisent.",
       "objective": "Terminer le tour.",
       "target": "end_turn"
     },
     "season_report": {
       "title": "Le rapport de saison",
-      "text": "Le rapport de saison résume ce qui vous concerne : batailles et sièges, diplomatie, cour, royaume, chronique, puis les nouvelles du monde. Un clic sur une ligne place la caméra sur l’événement. Fermez le rapport une fois lu.",
+      "text": "Le rapport de saison résume batailles, diplomatie, cour et royaume. Un clic sur une ligne place la caméra sur l’événement. Fermez-le une fois lu.",
       "objective": "Lire puis fermer le rapport de saison.",
       "target": "season_report"
     },
     "chronicle": {
       "title": "La chronique",
-      "text": "Les grands événements (historiques ou aléatoires) demandent une décision. Le bouton « Chronique (n) » indique combien attendent ; vous avez deux saisons pour choisir, sinon le conseil choisit à votre place. S’il n’y a rien pour l’instant, revenez-y plus tard et passez l’étape.",
+      "text": "Les grands événements demandent une décision ; le bouton « Chronique (n) » en compte les attentes. Sans choix en deux saisons, le conseil décide. Rien à décider ? Passez l’étape.",
       "objective": "Ouvrir la chronique sur un événement.",
       "target": "chronicle"
     },
     "tax": {
       "title": "L’impôt",
-      "text": "Cliquez sur l’écu de votre faction (en haut à gauche) : le panneau de faction détaille trésor, revenus, entretien et biens. Le taux d’imposition (Bas, Normal, Haut) change le revenu dès la saison suivante, mais un fardeau lourd attise le mécontentement.",
+      "text": "Cliquez sur l’écu de votre faction : le panneau détaille trésor, revenus et entretien. Le taux d’imposition (Bas, Normal, Haut) joue dès la saison suivante, mais un fardeau lourd attise le mécontentement.",
       "objective": "Changer le taux d’imposition.",
       "target": "tax"
     },
     "governor": {
       "title": "Nommer un gouverneur",
-      "text": "Ouvrez la cour (bouton de la barre ou touche {key:map_toggle_court}), choisissez un personnage puis « Nommer gouverneur » et une province. Sa compétence de gouvernance agit sur l’impôt, la construction et l’ordre public. Le bouton « Cour » du panneau de province filtre les gouverneurs possibles.",
+      "text": "Ouvrez la cour (barre du haut ou touche {key:map_toggle_court}), choisissez un personnage, « Nommer gouverneur », puis une province : sa compétence agit sur l’impôt et l’ordre public.",
       "objective": "Nommer un gouverneur.",
       "target": "governor",
       "modal_ok": true
     },
     "outro": {
       "title": "À vous de jouer",
-      "text": "Vous connaissez l’essentiel. L’encyclopédie (touche {key:encyclopedia_open} ou Menu → Encyclopédie) décrit chaque unité, bâtiment, technologie, trait et mécanique ; l’aide (F1) rappelle les commandes ; les objectifs (O) suivent votre progression. Bonne campagne !",
+      "text": "Vous connaissez l’essentiel. L’encyclopédie ({key:encyclopedia_open}), l’aide (F1) et les objectifs (O) vous guideront. Bonne campagne !",
       "objective": "Cliquez sur « Terminer ».",
       "target": "",
       "manual": true

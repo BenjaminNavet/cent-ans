@@ -581,7 +581,7 @@ pub fn sync_tokens(
                         Text::new(""),
                         TextFont {
                             font: theme.font_title.clone(),
-                            font_size: 12.0.into(),
+                            font_size: 14.0.into(),
                             ..default()
                         },
                         TextColor(Color::NONE),
@@ -610,7 +610,7 @@ pub fn sync_tokens(
                     Text::new(""),
                     TextFont {
                         font: theme.font_title.clone(),
-                        font_size: 13.0.into(),
+                        font_size: 14.0.into(),
                         ..default()
                     },
                     TextColor(Color::NONE),

@@ -241,7 +241,6 @@ impl Plugin for CampaignHudPlugin {
                     bar::launcher_visuals,
                     handle_clicks,
                     publish_reserve,
-                    yield_to_tutorial,
                     publish_label_obstacles,
                 )
                     .chain()
@@ -259,25 +258,6 @@ impl Plugin for CampaignHudPlugin {
                     .before(ProvincePickSet)
                     .run_if(in_state(AppState::Campaign)),
             );
-    }
-}
-
-/// The guided tutorial's card (`progress/tutorial.rs`, root `TutorialCard`) takes the top-left
-/// corner: the « Conseil » column steps aside while it is shown (both say what to do next).
-fn yield_to_tutorial(
-    roots: Query<&Name, (With<Node>, Without<ChildOf>)>,
-    mut column: Query<&mut Node, With<AdvisorColumn>>,
-) {
-    let tutorial = roots.iter().any(|name| name.as_str() == "TutorialCard");
-    let display = if tutorial {
-        Display::None
-    } else {
-        Display::Flex
-    };
-    for mut node in &mut column {
-        if node.display != display {
-            node.display = display;
-        }
     }
 }
 
@@ -570,7 +550,7 @@ fn update_fields(
                     style::INK
                 },
                 hud.economy.as_ref().map_or_else(
-                    || "[b]Trésor[/b]".to_owned(),
+                    || "[b]Trésor[/b]\nOr en caisse, en livres tournois.".to_owned(),
                     |economy| text::treasury_tooltip(economy, &hud.top_provinces),
                 ),
             ),
@@ -583,7 +563,7 @@ fn update_fields(
                 fr::color_of(top.net_income),
                 hud.economy
                     .as_ref()
-                    .map_or_else(|| "[b]Solde[/b]".to_owned(), text::budget_tooltip),
+                    .map_or_else(|| "[b]Solde par saison[/b]\nRecettes moins dépenses attendues à la prochaine saison.".to_owned(), text::budget_tooltip),
             ),
             HudField::Manpower => (
                 format!(
@@ -592,12 +572,12 @@ fn update_fields(
                     arrow(forecast.map(|f| &f.men))
                 ),
                 style::INK,
-                format!("[b]Hommes[/b]\n{men_tip}"),
+                format!("[b]Hommes disponibles[/b]\nRéserve de recrues de votre royaume : le nombre d’hommes que vos provinces peuvent encore lever.\n{men_tip}"),
             ),
             HudField::Prestige => (
                 format!("{}{}", top.prestige, arrow(forecast.map(|f| &f.prestige))),
                 style::INK,
-                format!("[b]Prestige[/b]\n{prestige_tip}"),
+                format!("[b]Prestige[/b]\nRenommée de votre couronne : elle pèse dans la diplomatie, et déclarer la guerre sans motif en coûte.\n{prestige_tip}"),
             ),
             HudField::Unrest => (
                 format!(
@@ -606,7 +586,7 @@ fn update_fields(
                     arrow(forecast.map(|f| &f.unrest))
                 ),
                 style::INK,
-                format!("[b]Troubles[/b] (moyenne des provinces)\n{unrest_tip}"),
+                format!("[b]Mécontentement moyen[/b] des provinces (plus bas, c’est mieux)\nÀ forte valeur, les provinces se révoltent et rapportent moins.\n{unrest_tip}"),
             ),
         };
         for child in children.iter() {
@@ -678,8 +658,11 @@ fn rebuild_alerts(
                     &format!("hud:alert:{}", group.kind),
                     &group.kind,
                     cluster::short_label(&group.kind),
-                    group.alerts.len(),
-                    group.danger(),
+                    group.display_count(),
+                    seal::AlertPill {
+                        danger: group.danger(),
+                        quiet: group.quiet(),
+                    },
                 ),
                 HudWidget,
                 AlertTarget(group.clone()),

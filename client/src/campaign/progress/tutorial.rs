@@ -8,7 +8,7 @@
 //! open province, Buildings tab, diplomacy, season report, chronicle) are decided here from the
 //! panels' public state.
 //!
-//! The card shows at the left of the screen (tier `Tutorial`): « Continuer » (manual steps),
+//! The card is a compact strip at the bottom left above the army strip (tier `Tutorial`), leaving the advisor column free; the historical advice is folded behind a button: « Continuer » (manual steps),
 //! « Passer l’étape », « Plus tard » (puts the guide aside, resumes on [`StartTutorial`]),
 //! « Passer le tutoriel ». It hides under the pause menu and the settings. Starts by itself on the
 //! first turns when `Settings::tutorial_enabled` and the guide was never finished in this session
@@ -57,7 +57,8 @@ use crate::ui::kit::widgets::{
 };
 use crate::ui::kit::{ButtonPressed, UiTheme, typed};
 
-const CARD_WIDTH: f32 = 380.0;
+/// A quarter of a 1280 px window: the card stays a compact strip at the bottom left.
+const CARD_WIDTH: f32 = 320.0;
 /// Seconds between two checks of the objective.
 const CHECK_INTERVAL: f32 = 0.25;
 /// Seconds a met objective stays on screen before the next step.
@@ -87,7 +88,7 @@ pub struct Tutorial {
     /// The Buildings tab of a province was opened since the step began.
     tab_buildings_seen: bool,
     root: Option<Entity>,
-    built_for: Option<(usize, bool, bool)>,
+    built_for: Option<(usize, bool, bool, bool)>,
     /// Steps completed by their objective, in order (dump).
     pub completed: Vec<String>,
     pub skipped: u32,
@@ -97,6 +98,8 @@ pub struct Tutorial {
     last_focus: String,
     /// The table of contents is open.
     pub toc_open: bool,
+    /// The « conseil historique » of the step is unfolded (folded by default: the card stays short).
+    pub advice_open: bool,
     /// The royal army of the player (the arrow and the camera aim at it).
     royal: Option<String>,
     /// The camera must move to the focus of the current step.
@@ -203,6 +206,7 @@ impl Tutorial {
         self.check_timer = 0.0;
         self.tab_buildings_seen = false;
         self.toc_open = false;
+        self.advice_open = false;
         self.focus_pending = true;
         if let (Some(data), Some(state)) = (&sim.data, &sim.state) {
             self.snapshot = tutorial_snapshot(state);
@@ -427,6 +431,10 @@ fn handle_buttons(
             tutorial.toc_open = !tutorial.toc_open;
             continue;
         }
+        if name == "advice" {
+            tutorial.advice_open = !tutorial.advice_open;
+            continue;
+        }
         if let Some(index) = name
             .strip_prefix("step:")
             .and_then(|i| i.parse::<usize>().ok())
@@ -550,7 +558,10 @@ fn rebuild(
         || settings_screen.is_some_and(|s| s.root.is_some())
         || modals.is_some_and(|m| m.is_busy());
     let want = tutorial.index.filter(|_| !covered);
-    let key = want.map(|i| (i, tutorial.done_timer.is_some(), tutorial.toc_open));
+    let key = want.map(|i| (i, tutorial.done_timer.is_some(),
+            tutorial.toc_open,
+            tutorial.advice_open,
+        ));
     if key == tutorial.built_for && (tutorial.root.is_some() == key.is_some()) {
         return;
     }
@@ -584,7 +595,7 @@ fn rebuild(
         &assets,
         &step,
         (index, total),
-        done,
+        (done, tutorial.advice_open),
         &titles,
     ));
 }
@@ -595,7 +606,7 @@ fn spawn(
     assets: &AssetServer,
     step: &TutorialStep,
     (index, total): (usize, usize),
-    done: bool,
+    (done, advice_open): (bool, bool),
     toc: &[String],
 ) -> Entity {
     let theme = theme.clone();
@@ -609,7 +620,7 @@ fn spawn(
                 position_type: PositionType::Absolute,
                 ..default()
             },
-            crate::ui::kit::layout::FitZone::Left,
+            crate::ui::kit::layout::FitZone::BottomLeft,
             TUTORIAL_Z,
         ))
         .with_children(|slot| {
@@ -666,11 +677,22 @@ fn spawn(
                         TextColor(if done { style::GOOD } else { style::RUBRIC }),
                     ));
                     if !step.advice.is_empty() {
-                        page.spawn(rich_text(
+                        if advice_open {
+                            page.spawn(rich_text(
+                                &theme,
+                                assets,
+                                &format!("[i]Conseil historique : {}[/i]", step.advice),
+                                &body,
+                            ));
+                        }
+                        page.spawn(button_small(
                             &theme,
-                            assets,
-                            &format!("[i]Conseil historique : {}[/i]", step.advice),
-                            &body,
+                            "tutorial:advice",
+                            if advice_open {
+                                "Masquer le conseil"
+                            } else {
+                                "Conseil historique"
+                            },
                         ));
                     }
                     page.spawn(Node {

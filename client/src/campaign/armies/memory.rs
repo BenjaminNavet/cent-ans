@@ -88,7 +88,7 @@ pub fn sync_labels(
             GlobalZIndex(-1),
             Text::new(label_text(seen.men)),
             TextFont {
-                font_size: bevy::text::FontSize::Px(13.0),
+                font_size: bevy::text::FontSize::Px(14.0),
                 ..default()
             },
             TextColor(LABEL_GREY),
