@@ -959,16 +959,19 @@ fn war_preview(
             allies: Vec::new(),
         };
     }
-    if state.has_truce(player, target) {
-        reasons.push((
-            "Trêve rompue : parjure (-40 auprès de tous)".to_owned(),
-            -40,
-        ));
-    } else if state.has_non_aggression(player, target) {
-        reasons.push((
-            "Pacte de non-agression rompu : parjure (-40 auprès de tous)".to_owned(),
-            -40,
-        ));
+    if let Some(event) = state.perjury_event_for_war(data, player, target) {
+        if let (Some(rule), Some(cost)) = (
+            data.diplomacy_rules.event(event),
+            sim_campaign::perjury::preview(state, data, event, player),
+        ) {
+            reasons.push((
+                format!(
+                    "{} ({} auprès de tous, {} tours)",
+                    rule.reason_fr, cost.opinion, cost.duration
+                ),
+                cost.opinion,
+            ));
+        }
     }
     match state.casus_belli(data, player, target) {
         Some(motive) => reasons.push((format!("Motif : {motive}"), 0)),

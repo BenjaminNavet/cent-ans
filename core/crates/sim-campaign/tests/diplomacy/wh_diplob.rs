@@ -420,7 +420,10 @@ fn non_aggression_pact_binds_like_a_truce() {
     // The AI no longer picks the signatory as a target.
     // Breaking it is perjury.
     let cost = state.declaration_prestige_cost(data, &fr, &ar);
-    assert_eq!(cost, sim_campaign::diplomacy::PERJURY_PRESTIGE);
+    assert_eq!(
+        cost,
+        data.diplomacy_rules.event("pact_broken").unwrap().prestige
+    );
     state
         .submit_order(data, Order::DeclareWar { target: ar.clone() })
         .unwrap();

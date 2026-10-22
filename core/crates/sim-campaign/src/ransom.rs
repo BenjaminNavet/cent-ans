@@ -555,6 +555,11 @@ pub struct ExecutionPreview {
     pub ransom_lost: i64,
     /// Trait the executioner's ruler takes (empty: none).
     pub ruler_trait: String,
+    /// M6: opinion every other lord adds when the captive was promised his
+    /// release on parole (perjury; 0 otherwise).
+    pub perjury_opinion: i32,
+    /// M6: prestige the executioner's ruler loses for that perjury.
+    pub perjury_prestige: i32,
 }
 
 /// Effects of executing `character` (numbers shown by the UI).
@@ -565,7 +570,27 @@ pub fn execution_preview(
 ) -> ExecutionPreview {
     let rules = &data.economy_rules.ransom.execution;
     let rank = captive_rank(state, character);
+    let perjury = state.characters[character]
+        .captor
+        .as_ref()
+        .filter(|_| {
+            matches!(
+                state.characters[character].ransom_terms,
+                Some(RansomTerms::Parole)
+            )
+        })
+        .and_then(|captor| {
+            crate::perjury::preview(
+                state,
+                data,
+                crate::perjury::CAPTIVE_EXECUTED_ON_PAROLE,
+                captor,
+            )
+        })
+        .unwrap_or_default();
     ExecutionPreview {
+        perjury_opinion: perjury.opinion,
+        perjury_prestige: perjury.prestige,
         prestige: rules.prestige_by_rank.get(rank.key()).copied().unwrap_or(0),
         victim_opinion: rules.victim_opinion,
         house_opinion: rules.house_opinion,
@@ -588,6 +613,11 @@ pub fn execute_captive(
 ) -> Result<(), RansomError> {
     let victim_faction = own_prisoner(state, faction, character)?;
     let preview = execution_preview(state, data, character);
+    // M6 (ADR 0721): the captor promised his release on parole.
+    let forsworn = matches!(
+        state.characters[character].ransom_terms,
+        Some(RansomTerms::Parole)
+    );
     // ADR 0326: killing a Christian prisoner is a sin the Church punishes.
     if let Some(rules) = data.religion_rules.as_ref() {
         if crate::religion::is_catholic(state, data, faction)
@@ -667,6 +697,14 @@ pub fn execute_captive(
                 rules.others_opinion_seasons,
             );
         }
+    }
+    if forsworn {
+        crate::perjury::record_event(
+            state,
+            data,
+            crate::perjury::CAPTIVE_EXECUTED_ON_PAROLE,
+            faction,
+        );
     }
     let executioner = data.faction_label(faction);
     state.pending_events.push(

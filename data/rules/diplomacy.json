@@ -36,5 +36,53 @@
   },
   "call_forecast": {
     "hesitate_floor": -20
-  }
+  },
+  "truce_window": 6,
+  "events": [
+    {
+      "id": "truce_broken_recent",
+      "severity": "major",
+      "reason_fr": "Parjure : trêve rompue",
+      "opinion": -25,
+      "duration": 20,
+      "prestige": -30,
+      "chivalry_prestige": -10
+    },
+    {
+      "id": "truce_broken",
+      "severity": "moderate",
+      "reason_fr": "Parjure : trêve ancienne rompue",
+      "opinion": -10,
+      "duration": 10,
+      "prestige": -15,
+      "chivalry_prestige": -5
+    },
+    {
+      "id": "pact_broken",
+      "severity": "moderate",
+      "reason_fr": "Parjure : pacte rompu",
+      "opinion": -10,
+      "duration": 10,
+      "prestige": -30,
+      "chivalry_prestige": -5
+    },
+    {
+      "id": "ally_attacked",
+      "severity": "major",
+      "reason_fr": "Parjure : serment trahi",
+      "opinion": -25,
+      "duration": 20,
+      "prestige": -30,
+      "chivalry_prestige": -10
+    },
+    {
+      "id": "captive_executed_on_parole",
+      "severity": "major",
+      "reason_fr": "Parjure : captif sur parole exécuté",
+      "opinion": -25,
+      "duration": 20,
+      "prestige": -20,
+      "chivalry_prestige": -10
+    }
+  ]
 }

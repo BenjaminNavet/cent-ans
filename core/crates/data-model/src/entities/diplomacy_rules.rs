@@ -50,6 +50,41 @@ pub struct CallForecastRules {
     pub hesitate_floor: i32,
 }
 
+/// Severity of a diplomatic event (M6, ADR 0721), after WH MAJOR / MODERATE.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum EventSeverity {
+    Major,
+    Moderate,
+}
+
+/// A named diplomatic event with a window (M6, ADR 0721): breaking a word
+/// writes this opinion modifier on every lord and costs the author prestige.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DiplomacyEvent {
+    pub id: String,
+    pub severity: EventSeverity,
+    /// Reason text written on the opinion modifier.
+    pub reason_fr: String,
+    /// Opinion change every other lord holds about the author (negative).
+    pub opinion: i32,
+    /// Turns (seasons) the opinion change lasts.
+    pub duration: u32,
+    /// Prestige change of the author's ruler (negative).
+    #[serde(default)]
+    pub prestige: i32,
+    /// Extra prestige lost when the author's chivalric order stands (the
+    /// knight forsworn); negative or zero.
+    #[serde(default)]
+    pub chivalry_prestige: i32,
+}
+
+/// Seasons since the signing within which breaking a truce is major.
+fn default_window() -> u32 {
+    6
+}
+
 /// Contents of `data/rules/diplomacy.json`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -67,11 +102,23 @@ pub struct DiplomacyRules {
     pub revoke_access: RevokeAccessRules,
     #[serde(default)]
     pub call_forecast: CallForecastRules,
+    /// Seasons since a truce was signed within which breaking it is the
+    /// recent-truce event (M6).
+    #[serde(default = "default_window")]
+    pub truce_window: u32,
+    /// Windowed diplomatic events (M6, ADR 0721).
+    #[serde(default)]
+    pub events: Vec<DiplomacyEvent>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
 
 impl DiplomacyRules {
+    /// The event `id`, if the data defines it.
+    pub fn event(&self, id: &str) -> Option<&DiplomacyEvent> {
+        self.events.iter().find(|e| e.id == id)
+    }
+
     /// Cap of `motive`, if any.
     pub fn opinion_cap(&self, motive: OpinionMotive) -> Option<i32> {
         self.opinion_caps.get(&motive).copied()

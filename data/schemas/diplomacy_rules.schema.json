@@ -83,6 +83,70 @@
         "hesitate_floor"
       ],
       "additionalProperties": false
+    },
+    "truce_window": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 40,
+      "description": "Saisons écoulées depuis la signature d'une trêve en deçà desquelles la rompre est l'événement majeur « trêve récente rompue » (M6, ADR 0721)."
+    },
+    "events": {
+      "type": "array",
+      "description": "Événements diplomatiques nommés à gravité (M6, ADR 0721) : modificateur d'opinion chez tous les seigneurs et prestige du souverain fautif.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "truce_broken_recent",
+              "truce_broken",
+              "pact_broken",
+              "ally_attacked",
+              "captive_executed_on_parole"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "major",
+              "moderate"
+            ]
+          },
+          "reason_fr": {
+            "type": "string",
+            "minLength": 1
+          },
+          "opinion": {
+            "type": "integer",
+            "minimum": -100,
+            "maximum": 0,
+            "description": "Variation d'opinion des autres seigneurs envers le fautif."
+          },
+          "duration": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Tours (saisons) pendant lesquels elle dure."
+          },
+          "prestige": {
+            "type": "integer",
+            "maximum": 0,
+            "description": "Prestige du souverain fautif."
+          },
+          "chivalry_prestige": {
+            "type": "integer",
+            "maximum": 0,
+            "description": "Prestige supplémentaire perdu si son ordre de chevalerie tient."
+          }
+        },
+        "required": [
+          "id",
+          "severity",
+          "reason_fr",
+          "opinion",
+          "duration"
+        ],
+        "additionalProperties": false
+      }
     }
   },
   "required": [

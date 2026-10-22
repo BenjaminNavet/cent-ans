@@ -55,7 +55,7 @@ fn trust(deal: &Deal, reasons: &mut ReasonList) {
         .filter(|m| {
             &m.with == proposer
                 && m.expires_turn > state.turn
-                && (m.reason_fr == diplomacy::PERJURY_REASON
+                && (crate::perjury::is_perjury_reason(&m.reason_fr)
                     || m.reason_fr == HOSTAGE_BETRAYAL_REASON)
         })
         .count() as i32;

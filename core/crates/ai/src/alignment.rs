@@ -11,7 +11,7 @@ use crate::salts;
 use data_model::{AiAlignment, FactionId, GameData, ProvinceId};
 use sim_campaign::diplomacy::{
     claim_stakes, war_ready, RelationKind, AGGRESSION_REASON, AT_WAR_REASON, DESERTION_WAR_SCORE,
-    GIFT_REASON, PERJURY_REASON,
+    GIFT_REASON,
 };
 use sim_campaign::negotiation::{evaluate_treaty_with, Article};
 use sim_campaign::plan_cache::PlanCache;
@@ -137,7 +137,7 @@ pub fn grievance(state: &CampaignState, faction: &FactionId, patron: &FactionId)
         f.modifiers
             .iter()
             .filter(|m| &m.with == patron && m.expires_turn > state.turn && m.value < 0)
-            .filter(|m| m.reason_fr != PERJURY_REASON && m.reason_fr != AGGRESSION_REASON)
+            .filter(|m| !sim_campaign::perjury::is_perjury_reason(&m.reason_fr) && m.reason_fr != AGGRESSION_REASON)
             .map(|m| m.value)
             .sum()
     })

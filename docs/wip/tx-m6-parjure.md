@@ -3,10 +3,6 @@
 Branche `tx/m6-parjure`, worktree `../gp-tx-m6-parjure`, ADR 0721.
 
 ## État
-- Squelette : ADR, ce fichier, module `perjury.rs` (stubs), tests `tx_m6_*` ignorés.
-
-## Prochaine étape
-1. Structs `DiplomacyEvent` dans `data-model/src/entities/diplomacy_rules.rs` + schéma + `data/rules/diplomacy.json`.
-2. `perjury::record_event` branché dans `war.rs` (remplace les constantes) ; `ally_attacked` ; exécution sous parole dans `ransom.rs`.
-3. Aperçu dans `treaty_explain.rs` / `declaration_prestige_cost` ; IA `diplomacy_eval.rs`.
-4. fmt, clippy, tests ; mesurer `wr_ai_diplo`.
+- Fait : table `events[]` + `truce_window` (data, schéma, data-model), `perjury.rs` (record_event, preview, fenêtre de trêve), branché dans `war.rs` (trêve récente/ancienne, pacte, lien juré), `ransom.rs` (exécution d'un captif promis sur parole), aperçu de guerre `game-api/diplomacy.rs`, garde IA (`ai.rs`). Tests `tx_m6_*` verts.
+- Reste : fmt, clippy, `cargo test --workspace`, wr_ai_diplo, ADR conséquences.
+- Non fait : UI client du coût de parjure à l'exécution (champs `perjury_*` dans `ExecutionPreview`, pas dans `ExecutionView`), `treaty_explain.rs` (traités, pas guerres).

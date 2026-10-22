@@ -12,6 +12,7 @@ mod lr11_bastion_peace;
 mod m5;
 mod tw_ai_camp;
 mod tw_m2b;
+mod tx_m6;
 mod wh_diploa;
 mod wh_diplob;
 mod wr_ai_diplo;

@@ -902,3 +902,40 @@ fn the_ai_executes_rarely_and_only_dangerous_unransomable_captives() {
     state.characters.get_mut(&victim).unwrap().prestige = 0;
     assert_eq!(count(&state, 400), 0);
 }
+
+#[test]
+fn tx_m6_executing_a_captive_promised_parole_is_perjury() {
+    let data = game_data();
+    let mut state = start_quiet(data, "fac_england", 1);
+    let england = fac("fac_england");
+    let scotland = fac("fac_scotland");
+    let victim = chr("chr_jean_de_normandie");
+    capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
+    state.characters.get_mut(&victim).unwrap().ransom_terms = Some(ransom::RansomTerms::Parole);
+    let preview = ransom::execution_preview(&state, data, &victim);
+    let rule = data
+        .diplomacy_rules
+        .event("captive_executed_on_parole")
+        .unwrap();
+    assert_eq!(preview.perjury_opinion, rule.opinion);
+    state
+        .submit_order(data, Order::ExecuteCaptive { character: victim })
+        .unwrap();
+    let perjury: i32 = state.factions[&scotland]
+        .modifiers
+        .iter()
+        .filter(|m| m.with == england && m.reason_fr == rule.reason_fr)
+        .map(|m| m.value)
+        .sum();
+    assert_eq!(perjury, rule.opinion);
+}
+
+#[test]
+fn tx_m6_executing_a_plain_captive_is_no_perjury() {
+    let data = game_data();
+    let mut state = start_quiet(data, "fac_england", 1);
+    let victim = chr("chr_jean_de_normandie");
+    capture(&mut state, data, "chr_jean_de_normandie", "fac_england");
+    let preview = ransom::execution_preview(&state, data, &victim);
+    assert_eq!((preview.perjury_opinion, preview.perjury_prestige), (0, 0));
+}

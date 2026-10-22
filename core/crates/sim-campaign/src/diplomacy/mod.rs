@@ -16,6 +16,7 @@ use serde::{Deserialize, Serialize};
 use crate::events::{EventKind, GameEvent};
 use crate::negotiation::{Article, Treaty};
 use crate::orders::Order;
+use crate::perjury;
 use crate::plan_cache::PlanCache;
 use crate::religion;
 use crate::state::CampaignState;
@@ -193,7 +194,7 @@ pub(crate) use league::update_league;
 pub use upkeep::loyalty_target;
 pub(crate) use upkeep::{on_line_extinct, resolve_diplomacy};
 pub use view::DiplomacyEntry;
-pub use war::{AGGRESSION_PRESTIGE, PERJURY_PRESTIGE};
+pub use war::AGGRESSION_PRESTIGE;
 
 mod ai;
 mod ai_pacts;

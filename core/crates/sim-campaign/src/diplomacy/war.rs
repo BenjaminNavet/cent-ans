@@ -2,8 +2,6 @@
 
 use super::*;
 
-/// Prestige the ruler loses declaring war in the middle of a truce.
-pub const PERJURY_PRESTIGE: i32 = -30;
 /// Prestige the ruler loses declaring war without a casus belli.
 pub const AGGRESSION_PRESTIGE: i32 = -20;
 
@@ -16,12 +14,34 @@ impl CampaignState {
         attacker: &FactionId,
         target: &FactionId,
     ) -> i32 {
-        if self.has_truce(attacker, target) || self.has_non_aggression(attacker, target) {
-            PERJURY_PRESTIGE
+        if let Some(event) = self.perjury_event_for_war(data, attacker, target) {
+            perjury::preview(self, data, event, attacker).map_or(0, |p| p.prestige)
         } else if self.casus_belli(data, attacker, target).is_none() {
             AGGRESSION_PRESTIGE
         } else {
             0
+        }
+    }
+
+    /// M6: the perjury event declaring war on `target` would commit (a
+    /// truce or pact broken, a sworn bond attacked), if any.
+    pub fn perjury_event_for_war(
+        &self,
+        data: &GameData,
+        attacker: &FactionId,
+        target: &FactionId,
+    ) -> Option<&'static str> {
+        if self.has_truce(attacker, target) {
+            Some(perjury::truce_break_event(self, data, attacker, target))
+        } else if self.has_non_aggression(attacker, target) {
+            Some(perjury::PACT_BROKEN)
+        } else if matches!(
+            self.relation(attacker, target),
+            RelationKind::Vassal | RelationKind::Suzerain | RelationKind::Alliance
+        ) {
+            Some(perjury::ALLY_ATTACKED)
+        } else {
+            None
         }
     }
 
@@ -50,6 +70,9 @@ impl CampaignState {
             return Err(DiplomacyError::Allied);
         }
         let truce_broken = self.has_truce(attacker, target);
+        let sworn_bond = !truce_broken
+            && !self.has_non_aggression(attacker, target)
+            && self.perjury_event_for_war(data, attacker, target) == Some(perjury::ALLY_ATTACKED);
         // WH `diplob`: a non-aggression pact binds like a truce.
         let pact_broken = !truce_broken && self.has_non_aggression(attacker, target);
         let casus_belli = self.casus_belli(data, attacker, target);
@@ -69,11 +92,11 @@ impl CampaignState {
                 "rupture du pacte de non-agression"
             }
             .to_owned();
-            for other in &others {
-                self.add_modifier(other, attacker, -40, PERJURY_REASON, 40);
-            }
+            let event = self
+                .perjury_event_for_war(data, attacker, target)
+                .expect("a broken truce or pact is a perjury event");
+            perjury::record_event(self, data, event, attacker);
             religion::change_favor(self, attacker, -30);
-            self.change_ruler_prestige(attacker, PERJURY_PRESTIGE);
             let bond = if truce_broken {
                 "la trêve"
             } else {
@@ -96,6 +119,9 @@ impl CampaignState {
                 }],
                 &text,
             );
+        } else if sworn_bond {
+            motive = "serment trahi".to_owned();
+            perjury::record_event(self, data, perjury::ALLY_ATTACKED, attacker);
         } else if casus_belli.is_none() {
             for other in &others {
                 self.add_modifier(other, attacker, -20, AGGRESSION_REASON, 40);

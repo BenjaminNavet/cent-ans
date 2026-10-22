@@ -472,6 +472,8 @@ fn war_target(
                 && !state.is_at_war(faction, id)
                 && !state.has_truce(faction, id)
                 && !state.has_non_aggression(faction, id)
+                // M6: the AI weighs the perjury it would commit and refrains.
+                && state.perjury_event_for_war(data, faction, id).is_none()
                 && (rested || main.as_ref() == Some(*id))
         })
         .filter_map(|(id, _)| {
