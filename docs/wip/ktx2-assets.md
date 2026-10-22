@@ -41,3 +41,11 @@ Statut : inventaire fait (2026-10-22), rien d'implémenté.
 - Piste moins coûteuse si on y revient : bake hors ligne des tableaux (`ktx create --layers`, UASTC + feature `basis-universal`)
   chargés à la place des bandes brutes quand le fichier existe, sans passer par `AssetMode::Processed`.
 - Décision : suspendu faute de gain mesuré ; aucun consommateur CPU modifié.
+
+## Mesure mémoire réelle, bataille Crécy (2026-10-22, `bench.sh mem-battle --bench-battle --offscreen`)
+- Empreinte physique du processus : médiane 6,5 Go, pic 7,5 Go (32 échantillons toutes les 2 s). Mémoire graphique
+  (IOAccelerator) 1,2 → 2,4 Go, relevée à 3,6 Go en pointe ; `MALLOC_LARGE` ~0,6 Go. Machine à 48 Go, aucun swap.
+- Temps d'image (charge machine 30-60, autres sessions : relatif seulement) : calm p50 34 ms / p95 47 / max 153 ;
+  melee p50 48 / p95 60 / p99 79, 146 images > 50 ms sur 421 ; 65 514 entités au maximum.
+- Conclusion : la VRAM n'est pas le goulot de la saccade (pas de swap) ; le coût vient du temps d'image CPU/GPU.
+  Les 2,4-3,6 Go graphiques restent élevés : les textures y pèsent, mais la compression ne règle pas la saccade.
