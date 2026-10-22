@@ -1,0 +1,10 @@
+{
+  "_comment": "Prototype bevy_solari en campagne (docs/wip/bevy-solari-campagne-proto.md). Sans effet hors build `--features solari`. Le terrain maillé CPU est remplacé par un proxy grossier éclairé en rayons ; GPU à ray queries requis.",
+  "enabled": true,
+  "terrain_proxy_triangles": 500000,
+  "albedo_from": "composed_map",
+  "flat_color": [0.28, 0.32, 0.18],
+  "restir": false,
+  "max_bounces": 2,
+  "sky_intensity": 3000.0
+}
