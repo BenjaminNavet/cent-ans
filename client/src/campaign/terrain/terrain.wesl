@@ -1120,36 +1120,44 @@ struct LayerAcc {
     normal: vec2<f32>,
 };
 
-// One layer at two scales (anti-repetition): tinted albedo + normal, weighted by w.
+// One layer at two scales (anti-repetition): tinted albedo + normal, weighted by w. `detail` is the
+// albedo detail strength and `fade` the normal one: when a term is 0 its taps would not contribute,
+// so they are skipped (explicit gradients: legal in non-uniform control flow).
 fn sample_layer(layer: u32, uv_a: vec2<f32>, uv_b: vec2<f32>, da: vec4<f32>, db: vec4<f32>, mix_b: f32,
-        tint: vec3<f32>, detail: f32, w: f32, acc: LayerAcc) -> LayerAcc {
+        tint: vec3<f32>, detail: f32, fade: f32, w: f32, acc: LayerAcc) -> LayerAcc {
     let li = i32(layer);
-    let ta = textureSampleGrad(bg_albedo, ground_sampler, uv_a, li, da.xy, da.zw).rgb;
-    let tb = textureSampleGrad(bg_albedo, ground_sampler, uv_b, li, db.xy, db.zw).rgb;
-    let t = mix(ta, tb, mix_b);
-    let na = textureSampleGrad(bg_normal, ground_sampler, uv_a, li, da.xy, da.zw).rg;
-    let nb = textureSampleGrad(bg_normal, ground_sampler, uv_b, li, db.xy, db.zw).rg;
-    let nm = mix(na, nb, mix_b);
-    var ratio = t / max(ground.means[layer].rgb, vec3<f32>(0.01));
-    // Detail mostly in luminance: no coloured reflections of the photos.
-    ratio = mix(vec3<f32>(luma(ratio)), ratio, 0.35);
-    let hue = mix(vec3<f32>(1.0), ground.hues[layer].rgb, ground.bg.w * clamp(detail, 0.0, 1.0));
     var out = acc;
-    out.albedo = out.albedo + w * tint * hue * mix(vec3<f32>(1.0), ratio, detail);
-    out.normal = out.normal + w * (nm * 2.0 - 1.0);
+    if (detail > 0.0) {
+        let ta = textureSampleGrad(bg_albedo, ground_sampler, uv_a, li, da.xy, da.zw).rgb;
+        let tb = textureSampleGrad(bg_albedo, ground_sampler, uv_b, li, db.xy, db.zw).rgb;
+        let t = mix(ta, tb, mix_b);
+        var ratio = t / max(ground.means[layer].rgb, vec3<f32>(0.01));
+        // Detail mostly in luminance: no coloured reflections of the photos.
+        ratio = mix(vec3<f32>(luma(ratio)), ratio, 0.35);
+        let hue = mix(vec3<f32>(1.0), ground.hues[layer].rgb, ground.bg.w * clamp(detail, 0.0, 1.0));
+        out.albedo = out.albedo + w * tint * hue * mix(vec3<f32>(1.0), ratio, detail);
+    } else {
+        out.albedo = out.albedo + w * tint;
+    }
+    if (fade > 0.0) {
+        let na = textureSampleGrad(bg_normal, ground_sampler, uv_a, li, da.xy, da.zw).rg;
+        let nb = textureSampleGrad(bg_normal, ground_sampler, uv_b, li, db.xy, db.zw).rg;
+        let nm = mix(na, nb, mix_b);
+        out.normal = out.normal + w * (nm * 2.0 - 1.0);
+    }
     return out;
 }
 
 // One role of the background, blended between the pixel biome (a) and its neighbour (b).
 fn sample_role(role: u32, ba: u32, bb: u32, wb: f32, uv_a: vec2<f32>, uv_b: vec2<f32>, da: vec4<f32>,
-        db: vec4<f32>, mix_b: f32, tint: vec3<f32>, detail: f32, w: f32, acc: LayerAcc) -> LayerAcc {
+        db: vec4<f32>, mix_b: f32, tint: vec3<f32>, detail: f32, fade: f32, w: f32, acc: LayerAcc) -> LayerAcc {
     let la = bg_layer(role, ba);
     let lb = bg_layer(role, bb);
     if (la == lb || wb <= ground.bg.z) {
-        return sample_layer(la, uv_a, uv_b, da, db, mix_b, tint, detail, w, acc);
+        return sample_layer(la, uv_a, uv_b, da, db, mix_b, tint, detail, fade, w, acc);
     }
-    let first = sample_layer(la, uv_a, uv_b, da, db, mix_b, tint, detail, w * (1.0 - wb), acc);
-    return sample_layer(lb, uv_a, uv_b, da, db, mix_b, tint, detail, w * wb, first);
+    let first = sample_layer(la, uv_a, uv_b, da, db, mix_b, tint, detail, fade, w * (1.0 - wb), acc);
+    return sample_layer(lb, uv_a, uv_b, da, db, mix_b, tint, detail, fade, w * wb, first);
 }
 
 // --- Close patchwork (CV1 terroirs, V2b parcels, ZG5b fine parcels) ---------------------------
@@ -1831,11 +1839,11 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     let dist_texels = textureSampleLevel(ab_dist, ab_dist_sampler, uv, 0.0).g * 255.0;
     let wb = 0.5 * (1.0 - smoothstep(0.0, ground.bg.y, dist_texels));
     var acc = LayerAcc(vec3<f32>(0.0), vec2<f32>(0.0));
-    if (w_grass > 0.01) { acc = sample_role(0u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.grass_tint, det, w_grass, acc); }
-    if (w_farm > 0.01) { acc = sample_role(1u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.farm_tint, det, w_farm, acc); }
-    if (w_forest > 0.01) { acc = sample_role(2u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_FOREST, det, w_forest, acc); }
-    if (w_rock > 0.01) { acc = sample_role(3u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_ROCK, det, w_rock, acc); }
-    if (w_heath > 0.01) { acc = sample_role(4u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_HEATH, det, w_heath, acc); }
+    if (w_grass > 0.01) { acc = sample_role(0u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.grass_tint, det, detail_fade, w_grass, acc); }
+    if (w_farm > 0.01) { acc = sample_role(1u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.farm_tint, det, detail_fade, w_farm, acc); }
+    if (w_forest > 0.01) { acc = sample_role(2u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_FOREST, det, detail_fade, w_forest, acc); }
+    if (w_rock > 0.01) { acc = sample_role(3u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_ROCK, det, detail_fade, w_rock, acc); }
+    if (w_heath > 0.01) { acc = sample_role(4u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_HEATH, det, detail_fade, w_heath, acc); }
     var col = acc.albedo / wsum;
     out.dn = acc.normal / wsum * ground.tiling.w * detail_fade;
     // Micro grain by dominant material (luminance only).
@@ -1847,9 +1855,11 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     if (w_rock > best) { best = w_rock; role = 3u; }
     if (w_heath > best) { best = w_heath; role = 4u; }
     let mlayer = ground.micro_layers[role / 4u][role % 4u];
-    let grain = textureSampleGrad(micro_albedo, ground_sampler, muv, i32(mlayer), mdx, mdy).rgb;
-    let g_ratio = luma(grain) / max(ground.micro_mean[mlayer / 4u][mlayer % 4u], 0.01);
-    col = col * mix(1.0, clamp(g_ratio, 0.4, 1.8), micro_k);
+    if (micro_k > 0.0) {
+        let grain = textureSampleGrad(micro_albedo, ground_sampler, muv, i32(mlayer), mdx, mdy).rgb;
+        let g_ratio = luma(grain) / max(ground.micro_mean[mlayer / 4u][mlayer % 4u], 0.01);
+        col = col * mix(1.0, clamp(g_ratio, 0.4, 1.8), micro_k);
+    }
     // GA4 macro variation of hue (fine octaves first) and luminance (wide octaves first), the
     // same 4 noise samples (ga_macro.gdshaderinc); the luminance part fades out with the footprint.
     if (ground.macro_amp.y > 0.0 || ground.macro_amp.x > 0.0) {
