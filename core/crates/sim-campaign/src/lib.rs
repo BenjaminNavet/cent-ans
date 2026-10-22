@@ -104,6 +104,7 @@ pub mod orders;
 pub mod papal_crusade;
 pub mod passage;
 pub mod path_plan;
+pub mod perjury;
 pub mod plague;
 pub mod plan_cache;
 pub mod population;
