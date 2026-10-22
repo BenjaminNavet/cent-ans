@@ -383,6 +383,7 @@ impl CampaignState {
             &data.river_crossing_rules,
             FORECAST_SEED,
         );
+        let fog = self.forecast_fog(data, request, attacker_has_player, defender_has_player);
         let player_attacks = attacker_has_player
             && (request.sortie
                 || attackers.iter().any(|id| {
@@ -412,6 +413,21 @@ impl CampaignState {
                 "{late} armée(s) alliée(s) rejoignent de loin avec leur mouvement restant"
             ));
         }
+        let blur = |value: f64, seed: u64| fog.map_or(value, |(spread, base)| {
+            value * crate::forecast_fog::fog_factor(base ^ seed, spread)
+        });
+        let odds = SideOdds {
+            win_chance: blur(odds.win_chance, 1).clamp(0.0, 1.0),
+            attacker_losses_pct: blur(odds.attacker_losses_pct, 2).clamp(0.0, 100.0),
+            defender_losses_pct: blur(odds.defender_losses_pct, 3).clamp(0.0, 100.0),
+            ..odds
+        };
+        if let Some((spread, _)) = fog {
+            modifiers.push(format!(
+                "Brouillard : prévision à ±{:.0} % près (renseignez-vous par éclaireurs ou espions)",
+                spread * 100.0
+            ));
+        }
         Some(BattleForecast {
             attacker_power: odds.attacker_power,
             defender_power: odds.defender_power,
@@ -438,6 +454,44 @@ impl CampaignState {
             lifts_siege,
             siege_place,
         })
+    }
+
+    /// ADR 0722: fog of the displayed odds. `Some((spread, seed))` when the
+    /// player faces an enemy, `None` (exact odds) otherwise (AI against AI,
+    /// allies on both sides, spread 0).
+    fn forecast_fog(
+        &self,
+        data: &GameData,
+        request: &BattleRequest,
+        attacker_has_player: bool,
+        defender_has_player: bool,
+    ) -> Option<(f64, u64)> {
+        if attacker_has_player == defender_has_player {
+            return None;
+        }
+        let enemy_lead = if attacker_has_player && !request.sortie {
+            &request.defender
+        } else {
+            &request.attacker
+        };
+        let (point, army) = if request.siege && attacker_has_player {
+            (data.settlement_point(&request.location)?, None)
+        } else {
+            let army = self.armies.get(enemy_lead)?;
+            (self.army_point(data, army), Some(army))
+        };
+        let knowledge = self.forecast_knowledge(data, point, army);
+        let spread = knowledge.spread(&data.auto_resolve.forecast_fog);
+        if spread <= 0.0 {
+            return None;
+        }
+        // Stable per battle and season: no flicker from one call to the next.
+        let mut seed = FORECAST_SEED ^ u64::from(self.season as u8);
+        for byte in request.location.as_str().bytes().chain(enemy_lead.as_str().bytes()) {
+            seed = seed.rotate_left(5) ^ u64::from(byte);
+            seed = seed.wrapping_mul(0x100_0000_01B3);
+        }
+        Some((spread, seed))
     }
 
     /// TW retreat: the player's army, attacked in a field battle, may fall
