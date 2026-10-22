@@ -6,5 +6,7 @@
   "leader_territory_share": { "min": 0.039, "max": 0.119, "status": "initialised" },
   "revolts_occupied_per_game": { "status": "to_initialise" },
   "rebel_takeovers_per_game": { "status": "to_initialise" },
-  "seasons_above_revolt_threshold_per_game": { "status": "to_initialise" }
+  "seasons_above_revolt_threshold_per_game": { "status": "to_initialise" },
+  "ai_refused_orders": { "status": "to_initialise" },
+  "ai_declined_proposals": { "status": "to_initialise" }
 }
