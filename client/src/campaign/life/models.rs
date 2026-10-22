@@ -299,6 +299,7 @@ pub fn apply_fades(
 #[cfg(test)]
 mod fade_tests {
     use super::*;
+    use bevy::ecs::change_detection::Tick;
     use std::time::Duration;
 
     fn app_with_fade(current: f32, target: f32) -> (App, Entity) {
