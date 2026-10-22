@@ -205,8 +205,7 @@ impl GrudgeRules {
     pub fn age_multiplier(&self, age: u32) -> f64 {
         self.age_tiers
             .iter()
-            .filter(|t| t.min_age <= age)
-            .next_back()
+            .rfind(|t| t.min_age <= age)
             .map_or(1.0, |t| t.multiplier)
     }
 }
