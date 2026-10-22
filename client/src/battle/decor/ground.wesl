@@ -14,6 +14,7 @@ import bevy_pbr::render::{
     forward_io::{VertexOutput, FragmentOutput},
     pbr_fragment::pbr_input_from_standard_material,
     pbr_functions::{apply_pbr_lighting, main_pass_post_lighting_processing},
+    decal::clustered::apply_decals,
     mesh_view_bindings::view,
 };
 
@@ -528,6 +529,9 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     let mud_gloss = clamp(wet + mud_trample * 0.7, 0.0, 1.0);
     let gloss_far = mix(0.38, 0.62, smoothstep(80.0, 300.0, view_dist));
     pbr_input.material.perceptual_roughness = mix(0.95, gloss_far, mud_gloss * (0.5 + 0.5 * w[L_MUD] + 0.3 * w[L_DIRT]));
+
+    // Clustered decals (lot decals): blood and mud traces; a no-op without the `decals` feature.
+    apply_decals(&pbr_input);
 
     var out: FragmentOutput;
     out.color = apply_pbr_lighting(pbr_input);
