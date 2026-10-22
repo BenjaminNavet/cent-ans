@@ -14,6 +14,7 @@
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::CameraMainTextureUsages;
 use bevy::camera::visibility::VisibilityRange;
+use bevy::material::OpaqueRendererMethod;
 use bevy::mesh::{Indices, Mesh, PrimitiveTopology, VertexAttributeValues};
 use bevy::pbr::{ExtendedMaterial, MaterialExtension};
 use bevy::platform::collections::HashMap;
@@ -24,6 +25,7 @@ use bevy::solari::prelude::{RaytracingMesh3d, SolariLighting};
 use serde::Deserialize;
 
 use crate::app::AppState;
+use crate::battle::decor::ground::GroundMaterial;
 use crate::battle::decor::wind::WindMaterial;
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::BattleCamera;
@@ -127,10 +129,14 @@ impl Plugin for SolariTrialPlugin {
                     light_camera,
                     no_shadow_maps,
                     substitute_ground,
-                    substitute_decor::<StandardMaterial>,
+                    substitute_standard,
                     substitute_decor::<SiegeStoneMaterial>,
                     substitute_decor::<BuildingAtlasMaterial>,
                     substitute_decor::<WindMaterial>,
+                    force_forward::<GroundMaterial>,
+                    force_forward::<SiegeStoneMaterial>,
+                    force_forward::<BuildingAtlasMaterial>,
+                    force_forward::<WindMaterial>,
                 )
                     .run_if(in_state(AppState::Battle)),
             )
@@ -162,17 +168,26 @@ fn light_camera(
 /// Base colour of a material (the `StandardMaterial` itself or the base of an extended one).
 trait BaseColor {
     fn base_color(&self) -> Color;
+    fn base_mut(&mut self) -> &mut StandardMaterial;
 }
 
 impl BaseColor for StandardMaterial {
     fn base_color(&self) -> Color {
         self.base_color
     }
+
+    fn base_mut(&mut self) -> &mut StandardMaterial {
+        self
+    }
 }
 
 impl<E: MaterialExtension> BaseColor for ExtendedMaterial<StandardMaterial, E> {
     fn base_color(&self) -> Color {
         self.base.base_color
+    }
+
+    fn base_mut(&mut self) -> &mut StandardMaterial {
+        &mut self.base
     }
 }
 
@@ -292,22 +307,70 @@ type Original<'a, M> = (
 /// Entities handled per frame by [`substitute_decor`] (keeps the first frames smooth).
 const PER_FRAME: usize = 1500;
 
-/// Gives every static decor entity of material `M` a ray-tracing substitute child. Far LODs
-/// (visibility range that starts later than 0) are skipped: the near one stands for the object.
-#[allow(clippy::too_many_arguments)]
+/// Extended-material variant of [`substitute_core`] (the base colour comes from `Assets<M>`).
 fn substitute_decor<M: Material + BaseColor>(
-    mut commands: Commands,
+    commands: Commands,
     settings: Res<SolariSettings>,
-    mut substitutes: ResMut<Substitutes>,
-    mut meshes: ResMut<Assets<Mesh>>,
+    substitutes: ResMut<Substitutes>,
+    meshes: ResMut<Assets<Mesh>>,
     materials: Res<Assets<M>>,
     mut standard: ResMut<Assets<StandardMaterial>>,
     originals: Query<Original<M>, Without<Proxied>>,
 ) {
+    substitute_core(
+        commands,
+        &settings,
+        substitutes,
+        meshes,
+        &mut standard,
+        &originals,
+        |handle| materials.get(handle).map(BaseColor::base_color),
+    );
+}
+
+/// `StandardMaterial` variant: the same asset store is read and written, so one borrow only.
+fn substitute_standard(
+    commands: Commands,
+    settings: Res<SolariSettings>,
+    substitutes: ResMut<Substitutes>,
+    meshes: ResMut<Assets<Mesh>>,
+    mut standard: ResMut<Assets<StandardMaterial>>,
+    originals: Query<Original<StandardMaterial>, Without<Proxied>>,
+) {
+    let colors: HashMap<_, _> = originals
+        .iter()
+        .filter_map(|(_, _, MeshMaterial3d(handle), _)| {
+            standard
+                .get(handle)
+                .map(|material| (handle.id(), material.base_color))
+        })
+        .collect();
+    substitute_core(
+        commands,
+        &settings,
+        substitutes,
+        meshes,
+        &mut standard,
+        &originals,
+        |handle| colors.get(&handle.id()).copied(),
+    );
+}
+
+/// Gives every static decor entity of material `M` a ray-tracing substitute child. Far LODs
+/// (visibility range that starts later than 0) are skipped: the near one stands for the object.
+fn substitute_core<M: Material>(
+    mut commands: Commands,
+    settings: &SolariSettings,
+    mut substitutes: ResMut<Substitutes>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    standard: &mut Assets<StandardMaterial>,
+    originals: &Query<Original<M>, Without<Proxied>>,
+    color_of: impl Fn(&Handle<M>) -> Option<Color>,
+) {
     for (entity, Mesh3d(mesh_handle), MeshMaterial3d(material_handle), range) in
         originals.iter().take(PER_FRAME)
     {
-        let Some(material) = materials.get(material_handle) else {
+        let Some(base_color) = color_of(material_handle) else {
             continue; // not loaded yet, retried next frame
         };
         commands.entity(entity).insert(Proxied);
@@ -344,7 +407,7 @@ fn substitute_decor<M: Material + BaseColor>(
             .materials
             .entry(key)
             .or_insert_with(|| {
-                let base = material.base_color().to_linear().to_vec4();
+                let base = base_color.to_linear().to_vec4();
                 let mixed = base * vertex_color;
                 standard.add(substitute_material(Color::linear_rgb(
                     mixed.x, mixed.y, mixed.z,
@@ -359,11 +422,9 @@ fn substitute_decor<M: Material + BaseColor>(
             Transform::default(),
         ));
     }
-    if substitutes.instances != substitutes.last_logged {
+    if originals.is_empty() && substitutes.instances != substitutes.last_logged {
         substitutes.last_logged = substitutes.instances;
-        if substitutes.instances.is_multiple_of(500) {
-            log_totals(&substitutes);
-        }
+        log_totals(&substitutes);
     }
 }
 
@@ -436,6 +497,27 @@ fn substitute_ground(
         DespawnOnExit(AppState::Battle),
     ));
     info!("solari: ground substitute, {triangles} triangles ({vertices} vertices)");
+}
+
+/// Solari makes the deferred renderer the default, and a deferred-resolved material is dropped
+/// from the main pass. The custom-shader materials (ground, wind foliage/grass, stone, building
+/// atlas) have no G-buffer output, so they are forced back to forward rendering: still visible,
+/// lit by the raster lights but not by Solari.
+fn force_forward<M: Material + BaseColor>(
+    mut events: MessageReader<AssetEvent<M>>,
+    mut materials: ResMut<Assets<M>>,
+) {
+    for event in events.read() {
+        let (AssetEvent::Added { id } | AssetEvent::Modified { id }) = event else {
+            continue;
+        };
+        let Some(mut material) = materials.get_mut(*id) else {
+            continue;
+        };
+        if material.base_mut().opaque_render_method != OpaqueRendererMethod::Forward {
+            material.base_mut().opaque_render_method = OpaqueRendererMethod::Forward;
+        }
+    }
 }
 
 fn no_shadow_maps(mut lights: Query<&mut DirectionalLight, Changed<DirectionalLight>>) {

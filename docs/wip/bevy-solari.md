@@ -43,3 +43,77 @@ de sonde, puis mesure au banc (aucun banc ne doit tourner).
   et lire la ligne `solari: ...` du log ; remettre `false` avant commit.
 - Mesure au banc : non faite (même raison). Attendu : sol, soldats et plantes hors TLAS (matériaux custom), donc
   gain visuel limité tant qu'ils ne sont pas portés vers `StandardMaterial` ; pas de débruiteur hors NVIDIA.
+
+## solari2 (22/10) : plantage « Mesh has been extracted » et entités de substitution
+
+Cause : `RaytracingMesh3d` partageait le `Handle<Mesh>` du rendu raster ; ces meshes n'ont pas `MAIN_WORLD`
+dans leurs `RenderAssetUsages`, leurs données quittent le monde principal après extraction, et le système
+`trace_standard_meshes` (accès aux attributs) paniquait. Ce système est supprimé.
+
+Correction (`client/src/battle/scene/solari.rs`) : entités de SUBSTITUTION.
+- Décor statique : pour chaque entité `Mesh3d` + `MeshMaterial3d<M>` avec `M` = `StandardMaterial`,
+  `SiegeStoneMaterial`, `BuildingAtlasMaterial`, `WindMaterial` (écorces/feuillages d'arbres), un ENFANT (même
+  transform, sans `Mesh3d`, donc invisible au raster) porte `RaytracingMesh3d(copie réduite)` +
+  `MeshMaterial3d<StandardMaterial>` de la couleur moyenne (couleur de base x moyenne des couleurs de sommet).
+  La copie ne garde que position/normale/UV0/tangente + indices u32 (format exigé par `is_mesh_raytracing_compatible`) avec
+  `MAIN_WORLD|RENDER_WORLD`. Cache par mesh source : les instances partagent le même BLAS. Les meshes déjà
+  sortis du monde principal (lecture `try_*` en erreur) sont ignorés (cachés comme `None`).
+- Les LOD lointains (`VisibilityRange` dont `start_margin.end > 0`) sont ignorés ; les soldats instanciés n'ont pas de
+  `Mesh3d` par entité et sont exclus.
+- Sol : grille grossière (`ground_step_m`, 12 m) construite depuis `Battlefield`, couleur de saison, entité séparée.
+- Budgets dans `data/fx/solari.json` (`max_triangles` 4 M, `max_instances` 40 000, `ground_step_m`) ; le total est
+  journalisé (`solari: N substitute instances, M distinct meshes, T triangles, S skipped`).
+
+### Piège signalé par l'étude vent : feuillage invisible
+
+`SolariLightingPlugin` impose `DefaultOpaqueRendererMethod::deferred()` ; un matériau résolu en différé est écarté
+de la passe principale (bevy_pbr material.rs ~1344-1395 : `update_cache(.., None); continue`), alpha-mask compris. Nos
+matériaux à shader forward perso (ground, wind, stone, atlas) n'écrivent pas dans le G-buffer, donc seraient
+INVISIBLES. Correctif appliqué : `force_forward::<M>` met `base.opaque_render_method = Forward` sur ces quatre types
+(sur les évènements `AssetEvent::Added/Modified`). Conséquence : ils restent visibles, éclairés par le raster (lumières
+sans ombres portées puisque `shadow_maps_enabled` est coupé), non éclairés par Solari ; ils servent seulement
+de géométrie aux rayons via les substituts. Résultat runtime : voir « Résultats » ci-dessous.
+
+### Ce qu'il faudrait pour que sol et végétation soient éclairés par Solari (non fait)
+
+Lecture : bevy_pbr 0.20 `deferred/functions.wesl` (`deferred_gbuffer_from_pbr_input`, `deferred_output`),
+exemples `shader/extended_material.rs` (`deferred_fragment_shader`) et `shader_advanced/deferred_raymarch.rs`.
+1. Retirer `force_forward` et laisser le défaut différé.
+2. Pour chaque `MaterialExtension` (GroundExtension, WindExtension, StoneExt, BuildingAtlasExt) : implémenter
+   `deferred_fragment_shader()` ; en WESL, construire le `PbrInput` (`pbr_input_from_standard_material`, puis
+   modifier `pbr_input.material.base_color` avec le splat/texture/teinte, normale, rugosité) et finir par
+   `deferred_output(in, pbr_input)` (au lieu de `apply_pbr_lighting` + `main_pass_post_lighting_processing` de
+   ground.wesl). Le fragment forward doit rester pour le chemin forward (`#ifdef PREPASS_PIPELINE` comme dans
+   l'exemple Bevy).
+3. Végétation (WindMaterial) : `enable_prepass()` est faux ; le passage différé passe par la prepass, donc il faut
+   `enable_prepass() = true` et fournir `prepass_vertex_shader()`/`deferred_vertex_shader()` qui appliquent le MÊME
+   déplacement de vent que le vertex forward (sinon feuillage figé et vecteurs de mouvement faux), plus
+   `prepass_fragment_shader()` pour l'alpha-mask (discard des feuilles) ; les impostors à `enable_prepass` faux restent
+   en forward ou doivent suivre le même schéma.
+4. Le G-buffer est compact : un seul réflectance monochrome, occlusion monochrome ; les effets du sol faits à la main
+   (neige, boue, humidité, splat 6 couches, brouillard de hauteur) doivent être ramenés dans `base_color`/rugosité/
+   émissif ; le brouillard et le grade restent post-traitement.
+5. Mesurer : le coût différé + RT sur milliers d'arbres (un BLAS par mesh de couronne) est le risque majeur.
+
+### Résultats (solari2, M4 Pro, build debug)
+
+- Plantage « Mesh has been extracted » : CORRIGÉ. `CENT_ANS_FEATURES=dev,solari`, `--state Battle --frames 400 --offscreen` :
+  400 images, sortie 0, dump écrit, aucune panique, sonde « ray-query GPU found ».
+- Substituts (bataille d'essai) : sol 13 400 triangles (6 868 sommets, pas 12 m) ; décor ~24 800 instances,
+  94 meshes distincts, ~94 500 triangles de substitution (0 ignoré par budget). Soldats exclus.
+- Conflit B0002 trouvé et corrigé en route (`Assets<StandardMaterial>` lu et écrit dans le même système).
+- Visibilité du feuillage avec `force_forward` : NON vérifiée visuellement (aucune capture permise) ; à contrôler par la session principale.
+
+### Points ouverts hors périmètre Solari (à traiter par la session principale)
+
+1. **Plantage Metal pré-existant sur la branche perf/bevy-par-iter, avec ou sans Solari** (testé `enabled:false`) :
+   « Too many bindings of type Samplers ... limit is 16, count was 19 » (GroundExtension 19, StoneExt 17,
+   BuildingAtlasExt) puis arrêt « Validation RenderError ». Cause : les features Cargo du lot pbr
+   (`pbr_anisotropy_texture`, `pbr_multi_layer_material_textures`, `pbr_specular_textures`, `pbr_transmission_textures`)
+   ajoutent des samplers au `StandardMaterial` de base ; Metal plafonne à 16. Vérifié : sans ces quatre
+   features (en gardant `experimental_pbr_pcss`, utilisé par le code), le client tourne. Je n'ai pas commité ce
+   changement de `client/Cargo.toml` (hors périmètre, lot pbr).
+2. `ground.wesl` : « module not found: bevy_pbr::render::decal::clustered » quand `battle_decals.json` est `enabled:true`
+   sans la feature Cargo `decals` (warning shader, pas de plantage dans l'essai).
+3. `enabled: true` est la valeur laissée dans `data/fx/solari.json` (reçue du commit f6f870711) ; sans effet hors build `--features solari`.
+4. Mesure fps au banc release : non faite (consigne).
