@@ -12,7 +12,7 @@ y committer ~630 Mo de KTX2 gonflerait l'historique à chaque retouche.
   de Bevy 0.20 (`AssetMode::Processed`) dans `imported_assets/`, gitignoré.
 - Encodeur : `CompressedImageSaver` de Bevy (feature `compressed_image_saver`, bibliothèque `ctt`, BC7 couleur,
   BC5 normales, mips générés). Pas d'outil externe (KTX-Software abandonné : pas de BC7 en 4.4).
-- Feature cargo `processed-assets` du client (`asset_processor`, `compressed_image_saver`, `ktx2`, `zstd`) ;
+- Feature cargo `processed-assets` du client (`asset_processor`, `compressed_image_saver`, `ktx2`, `zstd_rust`) ;
   plugin `asset_processing`. Le build `dev` garde les fichiers bruts (itération rapide, `file_watcher`) ;
   `tools/launch.sh` (profil release) active `processed-assets`.
 - Les normales demandent `is_normal_map` et un chargement linéaire : réglé par des `.meta` générés

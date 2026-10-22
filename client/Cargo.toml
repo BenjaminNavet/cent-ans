@@ -25,6 +25,10 @@ remote = ["bevy/bevy_remote"]
 # adds a "systems" section to the `--bench-map` report. See tools/bevy_bench/README.md.
 profile = ["dep:ecs_trace", "dep:tracing", "dep:tracing-subscriber"]
 
+# Processed assets (ADR 0724): images become BC7/BC5 KTX2 in `imported_assets/` at startup (cache, never
+# committed). Enabled by `tools/launch.sh`; the dev build keeps reading raw JPG/PNG.
+processed-assets = ["bevy/asset_processor", "bevy/compressed_image_saver", "bevy/ktx2", "bevy/zstd_rust"]
+
 [dependencies]
 # Renamed: Bevy derive macros would otherwise resolve `bevy_ecs` as a direct dependency.
 ecs_trace = { package = "bevy_ecs", version = "=0.20.0", optional = true, features = ["trace", "debug"] }
