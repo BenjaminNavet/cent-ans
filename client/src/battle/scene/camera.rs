@@ -252,11 +252,23 @@ fn release_ui_clear(
         commands.insert_resource(SavedUiClear(camera.clear_color, *msaa, make_hdr));
         camera.clear_color = ClearColorConfig::None;
         // Solari forces the battle camera to Msaa::Off; the HUD camera must match it.
-        *msaa = if solari_active(&solari) { Msaa::Off } else { quality.msaa_battle };
+        *msaa = if solari_active(&solari) {
+            Msaa::Off
+        } else {
+            quality.msaa_battle
+        };
         if make_hdr {
             commands
                 .entity(entity)
                 .insert((bevy::camera::Hdr, Tonemapping::None));
+        }
+        if solari_active(&solari) {
+            // The main texture is keyed by (target, format, usages, msaa): the HUD camera must
+            // match the battle camera's usages or it gets its own texture and hides the world.
+            commands.entity(entity).insert(
+                bevy::camera::CameraMainTextureUsages::default()
+                    .with(bevy::render::render_resource::TextureUsages::STORAGE_BINDING),
+            );
         }
     }
 }
@@ -271,6 +283,9 @@ fn restore_ui_clear(
     {
         camera.clear_color = saved.0;
         *msaa = saved.1;
+        commands
+            .entity(entity)
+            .insert(bevy::camera::CameraMainTextureUsages::default());
         if saved.2 {
             // Camera2d's default tonemapping is `Linear`.
             commands
