@@ -237,11 +237,12 @@ fn queue_shadow_batches(
     if crate::campaign::perf_switch::off("vegshadow") {
         return;
     }
+    let max_cascades = crate::campaign::perf_switch::value("VEG_CASCADES").map_or(usize::MAX, |v| v as usize);
     let mut seen = Vec::new();
     for (light, view) in &lights {
-        if !matches!(light, LightEntity::Directional { .. }) {
+        let LightEntity::Directional { cascade_index, .. } = light else {
             continue;
-        }
+        };
         let Some(phase) = phases.get_mut(&view.retained_view_entity) else {
             continue;
         };
@@ -252,6 +253,11 @@ fn queue_shadow_batches(
             .unwrap_or_default()
         {
             phase.remove(main);
+        }
+        // Trees cast into the first cascades only (`max_cascades`): far away their shadow is a
+        // few texels, for the cost of a full alpha-tested pass.
+        if *cascade_index >= max_cascades {
+            continue;
         }
         let mut added = Vec::new();
         for (entity, main_entity, batch) in &batches {
