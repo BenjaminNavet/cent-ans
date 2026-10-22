@@ -79,6 +79,8 @@ pub struct TerrainMaterial {
     pub look: super::look::LookParams,
     // Metal allows 16 samplers per fragment stage (material + view). fog_mask, wash and landuse
     // have the same linear clamp sampler as terroir, so the shader reads them with `terroir_sampler`.
+    // Likewise ab_dist, splat, coast_dist and wx_field (all linear, clamp-to-edge, read at mip 0):
+    // only colormap, ground (bg_albedo) and terroir keep a sampler (3 owned, 13 in total).
     /// Fog-of-war coverage (R8, `FogOfWar::mask`); unbound when the fog is off.
     #[texture(5)]
     pub fog_mask: Option<Handle<Image>>,
@@ -92,10 +94,8 @@ pub struct TerrainMaterial {
     pub bg_normal: Option<Handle<Image>>,
     /// R: biome A + 16 B, G: distance to the neighbour biome.
     #[texture(11)]
-    #[sampler(12)]
     pub ab_dist: Option<Handle<Image>>,
     #[texture(13)]
-    #[sampler(14)]
     pub splat: Option<Handle<Image>>,
     #[texture(15, dimension = "2d_array")]
     pub micro_albedo: Option<Handle<Image>>,
@@ -132,7 +132,6 @@ pub struct TerrainMaterial {
     pub gd: super::ground_detail::GdParams,
     /// Signed distance to the coast (R8, `coast_dist.png`, `(v - 128) / 2` px, > 0 on land).
     #[texture(28)]
-    #[sampler(29)]
     pub coast_dist: Option<Handle<Image>>,
     /// Slope-rule probe (`coast::bake_probe`, Rg8, half resolution), sampled with `coast_sampler`.
     #[texture(30)]
@@ -142,7 +141,6 @@ pub struct TerrainMaterial {
     pub coast_types: Option<Handle<Image>>,
     /// Per-province weather (`WeatherGround::field`, Rgba8: rain, snow, fog, storm).
     #[texture(32)]
-    #[sampler(33)]
     pub wx_field: Option<Handle<Image>>,
     /// Selected province (`WeatherGround::clear`, R8), sampled with `wx_sampler`.
     #[texture(34)]
@@ -213,6 +211,20 @@ impl Material for TerrainMaterial {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Metal allows 16 samplers per fragment stage and the forward view takes 10: the ground
+    /// material may own 4 at most (a 17th binding crashed the campaign at first render).
+    #[test]
+    fn terrain_shader_owns_few_samplers() {
+        let source = include_str!("terrain.wesl");
+        let declared = source.matches(": sampler;").count();
+        assert!(declared <= 4, "{declared} samplers in terrain.wesl");
+        let bound = include_str!("material.rs")
+            .lines()
+            .filter(|l| l.trim_start().starts_with("#[sampler("))
+            .count();
+        assert_eq!(bound, declared);
+    }
 
     #[test]
     fn sun_points_up_towards_the_scene_azimuth() {

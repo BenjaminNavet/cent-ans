@@ -141,9 +141,7 @@ struct GroundParams {
 @group(constants::MATERIAL_BIND_GROUP) @binding(9) var ground_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(10) var bg_normal: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(11) var ab_dist: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(12) var ab_dist_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(13) var splat: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(14) var splat_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(15) var micro_albedo: texture_2d_array<f32>;
 
 // Painted fields table (fields.rs): crops by biome / landscape, view and geo tuning.
@@ -228,11 +226,9 @@ struct TerrainExtras {
 @group(constants::MATERIAL_BIND_GROUP) @binding(27) var<uniform> extras: TerrainExtras;
 @group(constants::MATERIAL_BIND_GROUP) @binding(40) var<uniform> gd: GdParams;
 @group(constants::MATERIAL_BIND_GROUP) @binding(28) var coast_dist_tex: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(29) var coast_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(30) var coast_probe_tex: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(31) var coast_types_tex: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(32) var wx_field_tex: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(33) var wx_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(34) var wx_clear_tex: texture_2d<f32>;
 
 struct Vertex {
@@ -282,7 +278,7 @@ fn river_carve(xz: vec2<f32>, local: vec3<f32>) -> f32 {
     }
     // Signed distance to the bank (map px, negative in the bed), as in `map_cell`; an unbound
     // texture (white) reads as far from any river.
-    let sd = (textureSampleLevel(ab_dist, ab_dist_sampler, xz / params.map.xy, 0.0).a * 255.0 - 128.0) / 16.0;
+    let sd = (textureSampleLevel(ab_dist, terroir_sampler, xz / params.map.xy, 0.0).a * 255.0 - 128.0) / 16.0;
     return RIVER_CARVE_DEPTH * (1.0 - smoothstep(-0.3, RIVER_BANK_PX, sd)) * near;
 }
 
@@ -580,7 +576,7 @@ fn wx_at(p: vec2<f32>) -> vec4<f32> {
     if (extras.wx.x < 0.5) {
         return vec4<f32>(0.0);
     }
-    return wx_field(wx_field_tex, wx_sampler, p, params.map.xy);
+    return wx_field(wx_field_tex, terroir_sampler, p, params.map.xy);
 }
 
 // 1 outside the selected province, 0 inside (feathered); 1 without a selection.
@@ -588,7 +584,7 @@ fn wx_clear_at(p: vec2<f32>) -> f32 {
     if (extras.wx.y < 0.5) {
         return 1.0;
     }
-    return wx_selection_clear(wx_clear_tex, wx_sampler, p, params.map.xy);
+    return wx_selection_clear(wx_clear_tex, terroir_sampler, p, params.map.xy);
 }
 
 // Wet ground (slightly darker, TB6 `weather_wet_dim`) and fresh snow where it rains / snows
@@ -648,7 +644,7 @@ fn fw_glacier_apply(col: vec3<f32>, p: vec2<f32>, hc: f32, slope: f32, footprint
 
 // Signed distance to the coast (map px, > 0 on land) at `uv`.
 fn coast_px(uv: vec2<f32>) -> f32 {
-    return (textureSampleLevel(coast_dist_tex, coast_sampler, uv, 0.0).r * 255.0 - 128.0) / extras.coast.texel.z;
+    return (textureSampleLevel(coast_dist_tex, terroir_sampler, uv, 0.0).r * 255.0 - 128.0) / extras.coast.texel.z;
 }
 
 // Direction of the land (gradient of the coast distance), unit, in map px.
@@ -656,8 +652,8 @@ fn coast_to_land(uv: vec2<f32>) -> vec2<f32> {
     let ex = vec2<f32>(1.0 / extras.coast.texel.x, 0.0);
     let ey = vec2<f32>(0.0, 1.0 / extras.coast.texel.y);
     let cg = vec2<f32>(
-        textureSampleLevel(coast_dist_tex, coast_sampler, uv + ex, 0.0).r - textureSampleLevel(coast_dist_tex, coast_sampler, uv - ex, 0.0).r,
-        textureSampleLevel(coast_dist_tex, coast_sampler, uv + ey, 0.0).r - textureSampleLevel(coast_dist_tex, coast_sampler, uv - ey, 0.0).r);
+        textureSampleLevel(coast_dist_tex, terroir_sampler, uv + ex, 0.0).r - textureSampleLevel(coast_dist_tex, terroir_sampler, uv - ex, 0.0).r,
+        textureSampleLevel(coast_dist_tex, terroir_sampler, uv + ey, 0.0).r - textureSampleLevel(coast_dist_tex, terroir_sampler, uv - ey, 0.0).r);
     return cg / max(length(cg), 1e-5);
 }
 
@@ -665,7 +661,7 @@ fn coast_to_land(uv: vec2<f32>) -> vec2<f32> {
 // slow noise (no straight limit along the shore).
 fn coast_geology(p: vec2<f32>) -> vec4<f32> {
     let warp = (vec2<f32>(vnoise(p * 0.21), vnoise(p * 0.21 + vec2<f32>(37.0, 11.0))) - 0.5) * 10.0;
-    let g = textureSampleLevel(coast_types_tex, coast_sampler, (p + warp) / params.map.xy, 0.0);
+    let g = textureSampleLevel(coast_types_tex, terroir_sampler, (p + warp) / params.map.xy, 0.0);
     return vec4<f32>(smoothstep(vec3<f32>(0.3), vec3<f32>(0.7), g.rgb), g.a);
 }
 
@@ -729,7 +725,7 @@ fn coast_band(p: vec2<f32>, footprint: f32, hc: f32, world_y: f32, slope: f32, s
     if (coast < -0.3 && emerged <= 0.0) {
         return out;
     }
-    let probe = textureSampleLevel(coast_probe_tex, coast_sampler, uv, 0.0);
+    let probe = textureSampleLevel(coast_probe_tex, terroir_sampler, uv, 0.0);
     if (probe.g > 0.5) {
         return out;
     }
@@ -997,7 +993,7 @@ fn pm_mountain(p: vec2<f32>, cell: vec2<f32>, footprint: f32) -> vec3<f32> {
 fn pm_tree(p: vec2<f32>, cell: vec2<f32>, footprint: f32) -> vec3<f32> {
     let jitter = pm_hash2(cell + 11.0) - 0.5;
     let base = (cell + vec2<f32>(0.5, 0.8) + jitter * 0.35) * PM_TREE_CELL;
-    let sp = textureSampleLevel(splat, splat_sampler, base / params.map.xy, 0.0);
+    let sp = textureSampleLevel(splat, terroir_sampler, base / params.map.xy, 0.0);
     let forest = sp.b / max(sp.r + sp.g + sp.b + sp.a, 1e-3);
     if (forest < PM_TREE_MIN + (hash21(cell) - 0.5) * 0.25 || hash21(cell + 2.7) < 0.35 || pm_height(base) <= 0.0) {
         return vec3<f32>(0.0);
@@ -1071,7 +1067,7 @@ fn parchment_ground(base: vec3<f32>, n: vec3<f32>, altitude: f32, p: vec2<f32>, 
     }
 
     // Forests: green wash and small drawn trees (the cell and its southern row).
-    let sp = textureSampleLevel(splat, splat_sampler, uv, 0.0);
+    let sp = textureSampleLevel(splat, terroir_sampler, uv, 0.0);
     var forest_here = sp.b / max(sp.r + sp.g + sp.b + sp.a, 1e-3);
     if (ground.splat.x < 0.5) {
         let luma_base = dot(base, vec3<f32>(0.299, 0.587, 0.114));
@@ -1575,7 +1571,7 @@ fn fp_splat(s: vec4<f32>, p: vec2<f32>, footprint: f32) -> vec4<f32> {
     var w = vec2<f32>(vnoise(p * 0.9), vnoise(p * 0.9 + vec2<f32>(31.7, 11.3))) - 0.5;
     w = w + (vec2<f32>(vnoise(p * 3.7 + 5.1), vnoise(p * 3.7 + 17.9)) - 0.5) * 0.45;
     w = w + (vec2<f32>(vnoise(p * 14.0 + 2.3), vnoise(p * 14.0 + 8.1)) - 0.5) * 0.18;
-    let warped = textureSampleLevel(splat, splat_sampler, (p + w * 1.1) / params.map.xy, 0.0);
+    let warped = textureSampleLevel(splat, terroir_sampler, (p + w * 1.1) / params.map.xy, 0.0);
     return mix(s, warped, vis);
 }
 
@@ -1799,7 +1795,7 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     // Soil weights.
     var s = vec4<f32>(0.5, 0.3, 0.2, 0.0);
     if (ground.splat.x > 0.5) {
-        s = textureSampleLevel(splat, splat_sampler, uv, 0.0);
+        s = textureSampleLevel(splat, terroir_sampler, uv, 0.0);
         s = fp_splat(s, p, footprint);
     }
     s = s / max(s.r + s.g + s.b + s.a, 1e-3);
@@ -1833,7 +1829,7 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     let packed = u32(textureLoad(ab_dist, vec2<i32>(clamp(uv * dims, vec2<f32>(0.0), dims - 1.0)), 0).r * 255.0 + 0.5);
     let ba = clamp(packed % 16u, 1u, 14u);
     let bb = clamp(packed / 16u, 1u, 14u);
-    let dist_texels = textureSampleLevel(ab_dist, ab_dist_sampler, uv, 0.0).g * 255.0;
+    let dist_texels = textureSampleLevel(ab_dist, terroir_sampler, uv, 0.0).g * 255.0;
     let wb = 0.5 * (1.0 - smoothstep(0.0, ground.bg.y, dist_texels));
     var acc = LayerAcc(vec3<f32>(0.0), vec2<f32>(0.0));
     if (w_grass > 0.01) { acc = sample_role(0u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.grass_tint, det, detail_fade, w_grass, acc); }
@@ -1960,7 +1956,7 @@ fn map_cell(uv: vec2<f32>) -> MapCell {
     let dims = vec2<f32>(textureDimensions(ab_dist));
     let t = textureLoad(ab_dist, vec2<i32>(clamp(uv * dims, vec2<f32>(0.0), dims - 1.0)), 0);
     let packed = u32(t.r * 255.0 + 0.5);
-    let river = (textureSampleLevel(ab_dist, ab_dist_sampler, uv, 0.0).a * 255.0 - 128.0) / 16.0;
+    let river = (textureSampleLevel(ab_dist, terroir_sampler, uv, 0.0).a * 255.0 - 128.0) / 16.0;
     return MapCell(clamp(packed % 16u, 1u, 14u), u32(t.b * 255.0 + 0.5), river);
 }
 
