@@ -13,6 +13,7 @@ mod model;
 pub mod palette;
 pub mod postfx;
 pub mod quality;
+pub mod render_scale;
 mod rows;
 mod screen;
 
@@ -67,6 +68,7 @@ pub struct SettingsPlugin;
 
 impl Plugin for SettingsPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(render_scale::RenderScalePlugin);
         let path = Settings::file_path();
         let migrated = migrate::migrate_at_startup(&path);
         if let Some(migration) = &migrated {

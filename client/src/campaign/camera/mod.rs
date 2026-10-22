@@ -287,6 +287,7 @@ fn spawn_camera(
         Tonemapping::AgX,
         Transform::from_xyz(0.0, 100.0, 0.0),
         DespawnOnExit(AppState::Campaign),
+        crate::settings::render_scale::ScaledWorldCamera,
     ));
     if let Some(target) = target {
         camera.insert(RenderTarget::Image(target.0.clone().into()));

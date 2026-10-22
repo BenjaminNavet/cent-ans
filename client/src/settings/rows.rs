@@ -402,10 +402,9 @@ pub static ROWS: &[Row] = &[
 ];
 
 /// Rows kept in the table (and the file) but not shown: no Bevy consumer yet, so they would
-/// promise an effect the game does not have. `upscale`: MetalFX / FSR is not ported (see
-/// `quality.rs`). `dev_mode`: Godot's `Settings.is_dev()` has no reader either (no tool text is
+/// promise an effect the game does not have (`upscale` is applied by `render_scale.rs`). `dev_mode`: Godot's `Settings.is_dev()` has no reader either (no tool text is
 /// gated in either client). Remove from here when a consumer exists.
-pub const NO_EFFECT: &[&str] = &["upscale", "dev_mode"];
+pub const NO_EFFECT: &[&str] = &["dev_mode"];
 
 pub fn row(key: &str) -> Option<&'static Row> {
     ROWS.iter().find(|row| row.key == key)
