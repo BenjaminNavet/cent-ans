@@ -11,8 +11,9 @@ use serde::{Deserialize, Serialize};
 pub const PATH_ENV: &str = "CENT_ANS_SETTINGS_PATH";
 
 /// Window and graphics (`video/*`, `interface/ui_size`, `interface/text_size`).
-#[derive(Resource, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Resource, Debug, Clone, PartialEq, Serialize, Deserialize, Reflect)]
 #[serde(default)]
+#[reflect(Resource, Default)]
 pub struct Settings {
     // ---- Affichage ----
     /// `video/fullscreen` (windowed by default).
@@ -305,5 +306,21 @@ mod tests {
             ..Settings::default()
         };
         assert!((big.effective_ui_scale(1800.0) - 2.0).abs() < 1e-6);
+    }
+
+    /// `Settings` is inspectable through BRP: auto-registered, with its `Resource` reflection.
+    #[cfg(feature = "reflect-inspect")]
+    #[test]
+    fn settings_is_reflected_for_brp() {
+        let registry = bevy::ecs::reflect::AppTypeRegistry::new_with_derived_types();
+        let registry = registry.read();
+        let registration = registry
+            .get(std::any::TypeId::of::<Settings>())
+            .expect("Settings auto-registered");
+        assert!(
+            registration
+                .data::<bevy::ecs::reflect::ReflectResource>()
+                .is_some()
+        );
     }
 }

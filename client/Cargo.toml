@@ -18,12 +18,17 @@ path = "src/main.rs"
 
 [features]
 # Fast iterations: Bevy dynamic linking. The player binary is linked statically.
-dev = ["bevy/dynamic_linking", "bevy/file_watcher", "bevy/debug", "remote", "dep:bevy_brp_extras", "dep:bevy_egui", "dep:bevy_console", "dep:clap"]
+dev = ["bevy/dynamic_linking", "bevy/file_watcher", "bevy/debug", "remote", "reflect-inspect", "dep:bevy_brp_extras", "dep:bevy_egui", "dep:bevy_console", "dep:clap"]
 # Bevy Remote Protocol (HTTP, localhost) for live inspection by agents.
 remote = ["bevy/bevy_remote"]
 # Per-system timings (bevy_ecs tracing spans + our own subscriber layer, no Chrome/Tracy crate):
 # adds a "systems" section to the `--bench-map` report. See tools/bevy_bench/README.md.
 profile = ["dep:ecs_trace", "dep:tracing", "dep:tracing-subscriber"]
+
+# Lot misc (Bevy 0.20 features): types deriving `Reflect` register themselves (no `register_type`) and
+# Bevy's math/color types gain serde, so BRP (`world.get_resources`, `brp.sh`) can read and edit the
+# `Settings` resource live. Debug-only: pulled in by `dev`, never in the player binary.
+reflect-inspect = ["bevy/reflect_auto_register", "bevy/serialize"]
 
 # Processed assets (ADR 0724): images become BC7/BC5 KTX2 in `imported_assets/` at startup (cache, never
 # committed). Enabled by `tools/launch.sh`; the dev build keeps reading raw JPG/PNG.
