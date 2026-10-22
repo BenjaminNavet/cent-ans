@@ -1,0 +1,10 @@
+{
+  "description": "Pierre des remparts, tours et créneaux de siège (lot B7, `client/src/battle/siege/stone.rs`). Texture `castle_wall_varriation` (≈ 14 assises par motif) projetée en triplanaire monde : `repetitions_per_metre` 0,33 donne un motif de 3 m, des assises de ≈ 0,21 m et des blocs de 0,3 à 0,7 m (0,22 d'avant donnait des blocs de 0,5 à 1 m, trop gros pour un rempart). `stone` est la teinte d'un mur intact, `stone_dark` celle d'un mur battu (interpolation selon les points de vie).",
+  "repetitions_per_metre": 0.33,
+  "blend_sharpness": 4.0,
+  "normal_strength": 1.0,
+  "roughness": 0.92,
+  "reflectance": 0.3,
+  "stone": [0.95, 0.9, 0.8],
+  "stone_dark": [0.55, 0.52, 0.47]
+}
