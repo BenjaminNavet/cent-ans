@@ -128,13 +128,22 @@ pub struct AiMoveRecord {
 pub const AI_REFUSAL_SAMPLES: usize = 16;
 
 /// Counter of the AI orders the core refused (B1), never saved.
-#[derive(Debug, Clone, Default, PartialEq)]
+///
+/// Diagnostics only: it never takes part in state equality, so a state that
+/// went through a save and a load still equals the original.
+#[derive(Debug, Clone, Default)]
 pub struct AiRefusals {
     /// Orders the core refused: the planner proposed something illegal.
     pub count: u32,
     /// Treaty proposals the other side declined: a normal outcome, kept apart.
     pub declined: u32,
     pub samples: Vec<String>,
+}
+
+impl PartialEq for AiRefusals {
+    fn eq(&self, _other: &Self) -> bool {
+        true
+    }
 }
 
 /// Recording switch and tuning, set by the interface (never saved).

@@ -16,7 +16,7 @@ fn set(id: &str) -> SettlementId {
 }
 
 #[test]
-fn ai_factions_play_one_after_the_other_in_id_order() {
+fn ai_factions_play_one_after_the_other_in_a_seeded_order() {
     let data = game_data();
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
     // Living at the start of the turn: a faction destroyed during the turn
@@ -33,9 +33,15 @@ fn ai_factions_play_one_after_the_other_in_id_order() {
         Vec::new()
     });
     let played = played.into_inner();
+    // B1: the play order is shuffled by seed and turn (no first-mover bias),
+    // so only the set of factions is fixed, not its order.
+    let mut played_sorted = played.clone();
+    played_sorted.sort();
+    let mut expected_sorted = expected;
+    expected_sorted.sort();
     assert_eq!(
-        played, expected,
-        "every living AI faction, by id, not the player"
+        played_sorted, expected_sorted,
+        "every living AI faction plays once, not the player"
     );
 }
 
