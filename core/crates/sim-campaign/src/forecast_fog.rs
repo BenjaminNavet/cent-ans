@@ -7,7 +7,6 @@
 
 use data_model::{ForecastFogRules, GameData};
 
-
 use crate::state::{Army, CampaignState};
 
 /// What the viewer knows of the enemy side.
@@ -48,7 +47,10 @@ impl CampaignState {
         let ambush = &data.posture_rules.ambush;
         let px_per_km = f64::from(crate::march::px_per_km(data));
         let near = |other: [f32; 2], radius_km: f64| {
-            let (dx, dy) = (f64::from(other[0] - point[0]), f64::from(other[1] - point[1]));
+            let (dx, dy) = (
+                f64::from(other[0] - point[0]),
+                f64::from(other[1] - point[1]),
+            );
             (dx * dx + dy * dy).sqrt() / px_per_km <= radius_km
         };
         let spied = self.agents.agents.values().any(|agent| {

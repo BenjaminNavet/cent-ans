@@ -35,6 +35,18 @@ fn attacker_won(before: &CampaignState, after: &CampaignState, army: &ArmyId) ->
                 .sum::<u32>()
 }
 
+/// M5 (ADR 0722): these tests calibrate the exact odds, without the fog.
+fn exact_rules(data: &data_model::GameData) -> data_model::GameData {
+    let mut exact = data.clone();
+    exact.auto_resolve.forecast_fog = data_model::ForecastFogRules {
+        spread_unseen: 0.0,
+        spread_scouted: 0.0,
+        spread_spied: 0.0,
+        spread_spied_from_place: 0.0,
+    };
+    exact
+}
+
 #[test]
 fn forecast_matches_auto_resolution_frequency() {
     let data = game_data();
@@ -92,7 +104,9 @@ fn forecast_matches_auto_resolution_frequency() {
     assert!(cases.len() >= 20, "{} cases", cases.len());
     let mut total_gap = 0.0;
     for (state, attacker, name) in &cases {
-        let forecast = state.battle_forecast(data, 0).expect("forecast");
+        let forecast = state
+            .battle_forecast(&exact_rules(data), 0)
+            .expect("forecast");
         let wins = (0..SEEDS)
             .filter(|seed| {
                 let mut trial = state.clone();
@@ -163,7 +177,7 @@ fn chance_at_ratio(ratio: f64, mirror: bool) -> f64 {
         .debug_stage_battle(&attacker, &defender)
         .expect("stage");
     let chance = state
-        .battle_forecast(data, 0)
+        .battle_forecast(&exact_rules(data), 0)
         .expect("forecast")
         .attacker_win_chance;
     eprintln!("ratio {ratio} mirror={mirror}: {:.1} %", chance * 100.0);

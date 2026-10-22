@@ -17,6 +17,6 @@ mod tb_battle_history;
 mod tw_pursuit;
 mod tw_reinf;
 mod tw_retreat;
-mod tx_m5_prevision;
 mod tw_trans;
+mod tx_m5_prevision;
 mod ub1_forecast;

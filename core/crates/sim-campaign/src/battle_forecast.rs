@@ -413,9 +413,11 @@ impl CampaignState {
                 "{late} armée(s) alliée(s) rejoignent de loin avec leur mouvement restant"
             ));
         }
-        let blur = |value: f64, seed: u64| fog.map_or(value, |(spread, base)| {
-            value * crate::forecast_fog::fog_factor(base ^ seed, spread)
-        });
+        let blur = |value: f64, seed: u64| {
+            fog.map_or(value, |(spread, base)| {
+                value * crate::forecast_fog::fog_factor(base ^ seed, spread)
+            })
+        };
         let odds = SideOdds {
             win_chance: blur(odds.win_chance, 1).clamp(0.0, 1.0),
             attacker_losses_pct: blur(odds.attacker_losses_pct, 2).clamp(0.0, 100.0),
@@ -487,7 +489,12 @@ impl CampaignState {
         }
         // Stable per battle and season: no flicker from one call to the next.
         let mut seed = FORECAST_SEED ^ u64::from(self.season as u8);
-        for byte in request.location.as_str().bytes().chain(enemy_lead.as_str().bytes()) {
+        for byte in request
+            .location
+            .as_str()
+            .bytes()
+            .chain(enemy_lead.as_str().bytes())
+        {
             seed = seed.rotate_left(5) ^ u64::from(byte);
             seed = seed.wrapping_mul(0x100_0000_01B3);
         }
