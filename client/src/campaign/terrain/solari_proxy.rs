@@ -14,6 +14,7 @@
 //! - the campaign camera gets `SolariLighting` (+ HDR, depth/deferred/motion prepasses, MSAA off)
 //!   and a sky gradient `EnvironmentMapLight` (Solari ignores `AmbientLight`);
 //! - the sun keeps lighting (its shadow maps are replaced by ray queries and switched off).
+//!
 //! The proxy albedo is the composed colormap read again from disk at a coarse mip (one texel per
 //! BC1 block) or a flat colour. Rivers, sea, roads, vegetation, towns and armies keep their forward
 //! materials (the plugin default is switched back to forward) and stay out of the TLAS.
@@ -358,7 +359,7 @@ fn coarse_albedo(
     let end = offset + blocks_x * blocks_y * 8;
     let blocks = data.get(offset..end).ok_or("colormap mip out of range")?;
     let mut pixels = Vec::with_capacity(blocks_x * blocks_y * 4);
-    for block in blocks.chunks_exact(8) {
+    for block in blocks.as_chunks::<8>().0 {
         let c0 = rgb565(u16::from_le_bytes([block[0], block[1]]));
         let c1 = rgb565(u16::from_le_bytes([block[2], block[3]]));
         for channel in 0..3 {
@@ -546,14 +547,9 @@ fn build_proxy(
     state.entity = Some(entity);
 }
 
-/// Hides the CPU-meshed terrain nodes once the proxy stands in for them.
-fn hide_terrain_nodes(
-    state: Res<ProxyState>,
-    mut nodes: Query<&mut Visibility, With<MeshMaterial3d<TerrainMaterial>>>,
-) {
-    if state.entity.is_none() {
-        return;
-    }
+/// Hides the CPU-meshed terrain nodes for good (the proxy stands in for them; before it exists the
+/// map shows the clear colour rather than a forward terrain popping out).
+fn hide_terrain_nodes(mut nodes: Query<&mut Visibility, With<MeshMaterial3d<TerrainMaterial>>>) {
     for mut visibility in &mut nodes {
         if *visibility != Visibility::Hidden {
             *visibility = Visibility::Hidden;
@@ -646,7 +642,7 @@ mod tests {
     #[test]
     fn flat_proxy_faces_up_and_counts_triangles() {
         let (mesh, triangles) = build_proxy_mesh(100.0, 60.0, 2000, |_, _| 1.5);
-        assert!(triangles >= 1900 && triangles <= 2100, "{triangles}");
+        assert!((1900..=2100).contains(&triangles), "{triangles}");
         let Some(Indices::U32(indices)) = mesh.indices() else {
             panic!("u32 indices expected");
         };
@@ -656,7 +652,7 @@ mod tests {
         else {
             panic!("positions");
         };
-        for triangle in indices.chunks_exact(3) {
+        for triangle in indices.as_chunks::<3>().0 {
             let [a, b, c] = [0, 1, 2].map(|i| Vec3::from(positions[triangle[i] as usize]));
             assert!((b - a).cross(c - a).y > 0.0, "front face must look up");
         }
@@ -688,39 +684,19 @@ mod tests {
     }
 
     #[test]
-    fn coarse_albedo_takes_one_mean_texel_per_block_of_a_mip() {
-        // 8x8 level 0 (4 blocks) then 4x4 level 1 (1 block): red/blue ends of the 1-block level.
-        let mut data = vec![0u8; level_size(8, 8)];
+    fn coarse_albedo_takes_one_mean_texel_per_block_of_the_first_small_mip() {
+        // 4100 x 8 level 0 is 1025 blocks wide (above the cap), so the 2050 x 4 level 1 is read.
+        let mut data = vec![0u8; level_size(4100, 8)];
         let red: u16 = 31 << 11;
         let blue: u16 = 31;
-        data.extend_from_slice(&red.to_le_bytes());
-        data.extend_from_slice(&blue.to_le_bytes());
-        data.extend_from_slice(&[0; 4]);
-        // Width 8 blocks = 2, below the cap: level 0 is used (all black here).
-        let level0 = coarse_albedo(8, 8, true, &data).expect("level 0");
-        assert_eq!((level0.width, level0.height), (2, 2));
-        assert_eq!(&level0.data[..4], &[0, 0, 0, 255]);
-        let tail = coarse_albedo_at(&data, level_size(8, 8), 1, 1).expect("tail");
-        assert_eq!(&tail[..4], &[128, 0, 128, 255]);
-    }
-
-    /// Decodes `blocks_x * blocks_y` blocks starting at `offset` (test helper over the same maths).
-    fn coarse_albedo_at(
-        data: &[u8],
-        offset: usize,
-        blocks_x: usize,
-        blocks_y: usize,
-    ) -> Option<Vec<u8>> {
-        let blocks = data.get(offset..offset + blocks_x * blocks_y * 8)?;
-        let mut out = Vec::new();
-        for block in blocks.chunks_exact(8) {
-            let c0 = rgb565(u16::from_le_bytes([block[0], block[1]]));
-            let c1 = rgb565(u16::from_le_bytes([block[2], block[3]]));
-            for channel in 0..3 {
-                out.push(((c0[channel] + c1[channel]) * 0.5).round() as u8);
-            }
-            out.push(255);
+        for _ in 0..513 {
+            data.extend_from_slice(&red.to_le_bytes());
+            data.extend_from_slice(&blue.to_le_bytes());
+            data.extend_from_slice(&[0; 4]);
         }
-        Some(out)
+        let pixels = coarse_albedo(4100, 8, true, &data).expect("mip 1");
+        assert_eq!((pixels.width, pixels.height), (513, 1));
+        assert_eq!(&pixels.data[..4], &[128, 0, 128, 255]);
+        assert!(coarse_albedo(4100, 8, false, &data).is_err());
     }
 }

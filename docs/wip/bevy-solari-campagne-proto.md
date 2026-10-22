@@ -26,4 +26,14 @@ Réglage `data/fx/solari_campaign.json` (schéma `data/schemas/fx_solari_campaig
 
 ## État / vérifications
 
-Voir la fin du fichier (mise à jour au fil des commits).
+- Tests unitaires (4) : grille, orientation/normales, UV, décodage du mip grossier. Clippy `--features dev --all-targets` propre.
+- Exécution (debug, offscreen, `--state Campaign --frames 400`, M4 Pro) avec `enabled: true` : exit 0, aucune erreur
+  shader/validation, proxy de 500 340 triangles construit en ~10 ms, albédo 885 x 763 décodé en ~0,4 s, dump
+  `solari_campaign = {enabled, proxy_triangles 500340, camera_deferred true}`. Les nœuds du terrain sont masqués dès
+  le départ (sans quoi le pipeline forward de `TerrainMaterial` est créé).
+- `enabled: false` : exit 1, `Too many bindings of type Samplers ... count was 17` sur `opaque_mesh_pipeline`. PRÉEXISTANT
+  (reproduit avec `solari.json` aussi coupé, cf. `bevy-sol2.md`) ; le matériau fautif est très probablement
+  `TerrainMaterial` en forward (10 échantillonneurs propres) : avec Solari il n'est jamais dessiné et l'erreur disparaît.
+  Conséquence : la base de comparaison `enabled:false` ne tourne pas tant que ce blocage n'est pas levé.
+- Non vérifié : tout rendu (aucune capture), coût GPU, fidélité de l'albédo, bruit, comportement au zoom (rebuild).
+- Le worktree n'a pas `data/map/pyramid` : lien symbolique local vers le dépôt principal (exclu de git).
