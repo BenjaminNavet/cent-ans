@@ -49,3 +49,10 @@ Statut : inventaire fait (2026-10-22), rien d'implémenté.
   melee p50 48 / p95 60 / p99 79, 146 images > 50 ms sur 421 ; 65 514 entités au maximum.
 - Conclusion : la VRAM n'est pas le goulot de la saccade (pas de swap) ; le coût vient du temps d'image CPU/GPU.
   Les 2,4-3,6 Go graphiques restent élevés : les textures y pèsent, mais la compression ne règle pas la saccade.
+
+## Mesure campagne (2026-10-22, `bench.sh mem-map --offscreen`, charge machine 11-31)
+- pan (20 s) : p50 41 ms / p95 79 / p99 211 / max 1 843 ms, 72 images > 50 ms sur 392, pire 1 % = 0,9 fps.
+- descent (3 descentes) : p50 35 / p95 45 / p99 1 689 / max 2 014 ms, 28 images > 50 ms sur 681 : quelques gels de 1,7-2 s.
+- Mémoire : empreinte 7,4 Go médiane (3 relevés seulement), pic 8,9 Go ; mémoire graphique en hausse continue 2,8 → 3,7 Go
+  pendant le banc (streaming de pages de relief / textures, ou fuite : à vérifier avec un banc plus long).
+- Lecture : la saccade de campagne est faite de gels isolés (chargements sur le fil principal), pas d'un coût d'image moyen.
