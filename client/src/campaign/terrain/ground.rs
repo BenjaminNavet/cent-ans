@@ -458,7 +458,8 @@ pub fn load_pack(
         format!("campaign terrain load_pack {rel} high={high}"),
         |r: &Result<PackArrays, String>| {
             r.as_ref().map_or(0, |p| {
-                p.albedo.data.as_ref().map_or(0, Vec::len) + p.normal.data.as_ref().map_or(0, Vec::len)
+                p.albedo.data.as_ref().map_or(0, Vec::len)
+                    + p.normal.data.as_ref().map_or(0, Vec::len)
             })
         },
         || load_pack_inner(root, rel, high, with_normal),
@@ -576,7 +577,12 @@ fn load_pack_inner(
 fn load_sheet(root: &Path, res_path: &str) -> Result<Image, String> {
     crate::agent::texture_census::timed(
         format!("terrain sheet jpg {res_path}"),
-        |r: &Result<Image, String>| r.as_ref().ok().and_then(|i| i.data.as_ref()).map_or(0, Vec::len),
+        |r: &Result<Image, String>| {
+            r.as_ref()
+                .ok()
+                .and_then(|i| i.data.as_ref())
+                .map_or(0, Vec::len)
+        },
         || load_sheet_inner(root, res_path),
     )
 }

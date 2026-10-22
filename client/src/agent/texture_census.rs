@@ -51,7 +51,11 @@ pub fn record(name: impl Into<String>, started: Instant, bytes: usize) {
 }
 
 /// Runs `work` and records its duration under `name` (`bytes` measured on the result).
-pub fn timed<T>(name: impl Into<String>, bytes: impl FnOnce(&T) -> usize, work: impl FnOnce() -> T) -> T {
+pub fn timed<T>(
+    name: impl Into<String>,
+    bytes: impl FnOnce(&T) -> usize,
+    work: impl FnOnce() -> T,
+) -> T {
     let started = Instant::now();
     let out = work();
     record(name, started, bytes(&out));
@@ -174,11 +178,11 @@ fn dump_textures(world: &World) -> (String, Value) {
         }
         rows.push((gpu.max(cpu), row));
     }
-    rows.sort_by(|a, b| b.0.cmp(&a.0));
-    retained.sort_by(|a, b| b.0.cmp(&a.0));
+    rows.sort_by_key(|row| std::cmp::Reverse(row.0));
+    retained.sort_by_key(|row| std::cmp::Reverse(row.0));
     let by_prefix: Vec<Value> = {
         let mut list: Vec<_> = groups.iter().collect();
-        list.sort_by(|a, b| b.1.gpu.cmp(&a.1.gpu));
+        list.sort_by_key(|entry| std::cmp::Reverse(entry.1.gpu));
         list.into_iter()
             .map(|(name, t)| {
                 json!({
@@ -232,7 +236,11 @@ mod tests {
     #[test]
     fn rgba8_mip_chain_costs_a_third_more() {
         let mut image = Image::new_fill(
-            Extent3d { width: 4, height: 4, depth_or_array_layers: 2 },
+            Extent3d {
+                width: 4,
+                height: 4,
+                depth_or_array_layers: 2,
+            },
             TextureDimension::D2,
             &[0, 0, 0, 255],
             TextureFormat::Rgba8Unorm,
@@ -246,8 +254,14 @@ mod tests {
     #[test]
     fn categories_group_by_two_or_three_segments() {
         assert_eq!(category(None), "(procedural)");
-        assert_eq!(category(Some("textures/battle/tx/a.jpg".into())), "textures/battle/tx");
-        assert_eq!(category(Some("heraldry/banners/x.png".into())), "heraldry/banners");
+        assert_eq!(
+            category(Some("textures/battle/tx/a.jpg".into())),
+            "textures/battle/tx"
+        );
+        assert_eq!(
+            category(Some("heraldry/banners/x.png".into())),
+            "heraldry/banners"
+        );
         assert_eq!(category(Some("a.png".into())), "a.png");
     }
 }

@@ -166,11 +166,7 @@ pub(super) fn build_atlas_mips(
     timer.finish_if(0.5, "vegetation build_atlas_mips (system)", 0);
 }
 
-fn build_atlas_mips_inner(
-    render: &VegRender,
-    mips: &mut AtlasMips,
-    images: &mut Assets<Image>,
-) {
+fn build_atlas_mips_inner(render: &VegRender, mips: &mut AtlasMips, images: &mut Assets<Image>) {
     let handles = [
         (render.assets.atlas.clone(), true),
         (render.assets.normal.clone(), false),

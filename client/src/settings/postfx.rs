@@ -556,7 +556,7 @@ mod tests {
             .spawn((
                 Camera3d::default(),
                 BattleCamera,
-                Transform::from_xyz(0.0, 50.0, 0.0).looking_at(Vec3::X, Vec3::Y),
+                Transform::from_xyz(0.0, 50.0, 0.0).looking_at(Vec3::new(1.0, 50.0, 0.0), Vec3::Y),
             ))
             .id();
         let sun = app

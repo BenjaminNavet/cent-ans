@@ -299,7 +299,8 @@ fn gather(
         .iter()
         .next()
         .map_or(Vec3::new(0.0, 100.0, 0.0), |t| t.translation());
-    let near = |p: Vec2| camera_position.distance(Vec3::new(p.x, camera_position.y, p.y)) < LAY_DISTANCE;
+    let near =
+        |p: Vec2| camera_position.distance(Vec3::new(p.x, camera_position.y, p.y)) < LAY_DISTANCE;
     let sim = session.sim_mut();
     let now = sim.elapsed();
     let state = &mut *state;
@@ -369,7 +370,8 @@ fn gather(
                 state.pending.push(Request {
                     pos: pos + right * across - forward * depth as f32 * 0.3,
                     size: Vec2::new(side, side * 0.6),
-                    yaw: facing.sin().atan2(facing.cos()) - FRAC_PI_2 + (hash01(seed + 5) - 0.5) * 0.5,
+                    yaw: facing.sin().atan2(facing.cos()) - FRAC_PI_2
+                        + (hash01(seed + 5) - 0.5) * 0.5,
                     kind: DecalKind::Mud,
                 });
             }
@@ -585,8 +587,9 @@ mod tests {
     #[test]
     fn data_file_parses_and_is_off() {
         let root = crate::paths::find_root().expect("repo root");
-        let text = std::fs::read_to_string(crate::paths::data_dir(&root).join("fx/battle_decals.json"))
-            .expect("battle_decals.json");
+        let text =
+            std::fs::read_to_string(crate::paths::data_dir(&root).join("fx/battle_decals.json"))
+                .expect("battle_decals.json");
         let settings: DecalSettings = serde_json::from_str(&text).expect("valid settings");
         assert!(!settings.enabled, "decals stay off until measured");
     }
