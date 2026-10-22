@@ -106,7 +106,7 @@ mod tests {
     fn repository_bands_load() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
         let bands = load(&root).expect("bands");
-        assert_eq!(bands.len(), 5);
+        assert_eq!(bands.len(), METRIC_NAMES.len());
         assert!(bands.contains_key("revolts_per_game"));
     }
 

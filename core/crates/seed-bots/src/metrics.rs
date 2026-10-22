@@ -20,12 +20,15 @@ use serde::{Deserialize, Serialize};
 use sim_campaign::{CampaignState, EventKind, GameEvent};
 
 /// Names of the metrics, as keys of the bands file.
-pub const METRIC_NAMES: [&str; 5] = [
+pub const METRIC_NAMES: [&str; 8] = [
     "revolts_per_game",
     "bankruptcies_per_game",
     "war_turns_mean",
     "factions_eliminated",
     "leader_territory_share",
+    "revolts_occupied_per_game",
+    "rebel_takeovers_per_game",
+    "seasons_above_revolt_threshold_per_game",
 ];
 
 /// The metrics of one game.
@@ -41,17 +44,29 @@ pub struct GameMetrics {
     pub factions_eliminated: u32,
     /// Share (0-1) of the map owned by the biggest faction at the end.
     pub leader_territory_share: f64,
+    /// Revolts in a province held by a faction other than its owner (occupied).
+    pub revolts_occupied: u32,
+    /// Provinces handed to the rebels (`fac_rebels`).
+    pub rebel_takeovers: u32,
+    /// Province-seasons spent with the revolt counter running (unrest above the threshold).
+    pub seasons_above_revolt_threshold: u32,
 }
 
 impl GameMetrics {
     /// The values by metric name (same names as [`METRIC_NAMES`]).
-    pub fn values(&self) -> [(&'static str, f64); 5] {
+    pub fn values(&self) -> [(&'static str, f64); 8] {
         [
             (METRIC_NAMES[0], f64::from(self.revolts)),
             (METRIC_NAMES[1], f64::from(self.bankruptcies)),
             (METRIC_NAMES[2], self.war_turns_mean),
             (METRIC_NAMES[3], f64::from(self.factions_eliminated)),
             (METRIC_NAMES[4], self.leader_territory_share),
+            (METRIC_NAMES[5], f64::from(self.revolts_occupied)),
+            (METRIC_NAMES[6], f64::from(self.rebel_takeovers)),
+            (
+                METRIC_NAMES[7],
+                f64::from(self.seasons_above_revolt_threshold),
+            ),
         ]
     }
 }
@@ -59,6 +74,9 @@ impl GameMetrics {
 /// Watches a game turn by turn.
 pub struct MetricsTracker {
     revolts: u32,
+    revolts_occupied: u32,
+    rebel_takeovers: u32,
+    seasons_above_revolt_threshold: u32,
     bankruptcies: u32,
     turns: u32,
     /// War pairs in progress, with the turn they were first seen.
@@ -98,6 +116,9 @@ impl MetricsTracker {
     pub fn new(state: &CampaignState) -> Self {
         MetricsTracker {
             revolts: 0,
+            revolts_occupied: 0,
+            rebel_takeovers: 0,
+            seasons_above_revolt_threshold: 0,
             bankruptcies: 0,
             turns: 0,
             wars: BTreeMap::new(),
@@ -112,11 +133,19 @@ impl MetricsTracker {
         self.turns += 1;
         for event in events {
             match event.kind {
-                EventKind::Revolt => self.revolts += 1,
+                EventKind::Revolt => {
+                    self.revolts += 1;
+                    self.observe_revolt(state, event);
+                }
                 EventKind::Bankruptcy => self.bankruptcies += 1,
                 _ => {}
             }
         }
+        self.seasons_above_revolt_threshold += state
+            .provinces
+            .values()
+            .filter(|province| province.revolt_seasons > 0)
+            .count() as u32;
         let pairs = war_pairs(state);
         let ended: Vec<_> = self
             .wars
@@ -139,6 +168,26 @@ impl MetricsTracker {
         self.alive = alive;
     }
 
+    /// Splits a revolt event into garrison revolt (occupied or not) and rebel takeover.
+    fn observe_revolt(&mut self, state: &CampaignState, event: &GameEvent) {
+        let Some(province) = &event.province else {
+            return;
+        };
+        if event
+            .faction
+            .as_ref()
+            .is_some_and(|f| f.as_str() == "fac_rebels")
+        {
+            self.rebel_takeovers += 1;
+        } else if state
+            .province_owner(province)
+            .zip(event.faction.as_ref())
+            .is_some_and(|(owner, controller)| owner != controller)
+        {
+            self.revolts_occupied += 1;
+        }
+    }
+
     /// Closes the game and returns its metrics.
     pub fn finish(mut self, state: &CampaignState) -> GameMetrics {
         for (_, start) in std::mem::take(&mut self.wars) {
@@ -155,6 +204,9 @@ impl MetricsTracker {
             war_turns_mean,
             factions_eliminated: self.eliminated.len() as u32,
             leader_territory_share: leader_territory_share(state),
+            revolts_occupied: self.revolts_occupied,
+            rebel_takeovers: self.rebel_takeovers,
+            seasons_above_revolt_threshold: self.seasons_above_revolt_threshold,
         }
     }
 }
@@ -314,6 +366,7 @@ mod tests {
             war_turns_mean: war,
             factions_eliminated: 0,
             leader_territory_share: share,
+            ..Default::default()
         }
     }
 
