@@ -827,6 +827,8 @@ fn successful_agent_actions_count_for_missions() {
         deadline_turn: state.turn + 8,
         reward: data_model::MissionReward::default(),
         baseline: Vec::new(),
+        grudge: None,
+        failure_prestige: None,
     }];
     act(&mut state, &data, &id, AgentActionKind::Scout, Some(&enemy));
     assert_eq!(state.missions.active[0].progress, 1);

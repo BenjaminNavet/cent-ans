@@ -42,6 +42,13 @@ pub fn left_text(turns_left: u32) -> String {
     }
 }
 
+/// Line telling how old the avenged affront is (grudge missions, ADR 0720).
+fn grudge_note(age: Option<u32>) -> String {
+    age.map_or_else(String::new, |seasons| {
+        format!("\nRancune vieille de {seasons} saison(s) : la récompense croît avec l'âge.")
+    })
+}
+
 pub fn is_due(mission: &MissionView) -> bool {
     mission.turns_left <= DUE_TURNS
 }
@@ -175,10 +182,11 @@ fn rebuild_tracker(
             }
             for mission in &missions.active {
                 let tip = format!(
-                    "{}\n{}\nRécompense : {}{}",
+                    "{}\n{}\nRécompense : {}{}{}",
                     mission.objective,
                     mission.progress,
                     mission.reward,
+                    grudge_note(mission.grudge_age),
                     if mission.source.is_empty() {
                         String::new()
                     } else {
@@ -269,8 +277,12 @@ fn rebuild_offer(
                 win.spawn(separator(&theme));
                 win.spawn((
                     Text::new(format!(
-                        "{} — {} saisons\n{}\nRécompense : {}",
-                        candidate.title, candidate.duration, candidate.objective, candidate.reward
+                        "{} — {} saisons\n{}\nRécompense : {}{}",
+                        candidate.title,
+                        candidate.duration,
+                        candidate.objective,
+                        candidate.reward,
+                        grudge_note(candidate.grudge_age)
                     )),
                     theme.text_font(false, false, UiType::Body.size()),
                     TextColor(style::INK),

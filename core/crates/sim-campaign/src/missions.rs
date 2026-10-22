@@ -207,8 +207,11 @@ pub fn resolve_missions(state: &mut CampaignState, data: &GameData, events: &mut
     if state.missions.faction.as_ref() != Some(&player) {
         // New campaign, or a save of an older version: missions follow the
         // player's faction.
+        // Grudges noted before the first resolution are kept.
+        let grudges = std::mem::take(&mut state.missions.grudges);
         state.missions = MissionsState {
             faction: Some(player.clone()),
+            grudges,
             ..MissionsState::default()
         };
     }
@@ -258,7 +261,11 @@ pub fn resolve_missions(state: &mut CampaignState, data: &GameData, events: &mut
             Verdict::Ongoing => {
                 // ADR 0720: a grudge extinguished (peace, truce, place retaken
                 // by a third party) cancels its mission, without penalty.
-                if mission.grudge.as_ref().is_some_and(|g| !grudges::is_live(state, g)) {
+                if mission
+                    .grudge
+                    .as_ref()
+                    .is_some_and(|g| !grudges::is_live(state, g))
+                {
                     let text = format!(
                         "Mission annulée : {} (la rancune est éteinte). Aucune pénalité.",
                         mission.title

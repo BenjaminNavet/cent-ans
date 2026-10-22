@@ -6,9 +6,7 @@
 //! `grudge`). It is cancelled without penalty when the war ends or when the
 //! place falls to a third party. Only the player's faction keeps grudges.
 
-use data_model::{
-    FactionId, GameData, GrudgeKindRules, MissionReward, ProvinceId, SettlementId,
-};
+use data_model::{FactionId, GameData, GrudgeKindRules, MissionReward, ProvinceId, SettlementId};
 use serde::{Deserialize, Serialize};
 
 use crate::missions::Mission;
@@ -218,7 +216,12 @@ fn scale(value: f64, factor: f64) -> f64 {
 }
 
 /// The reward of a mission from `grudge`, scaled by its age.
-fn scaled_reward(data: &GameData, grudge: &Grudge, base: &MissionReward, turn: u32) -> MissionReward {
+fn scaled_reward(
+    data: &GameData,
+    grudge: &Grudge,
+    base: &MissionReward,
+    turn: u32,
+) -> MissionReward {
     let rules = &data.mission_rules.grudge;
     let age_factor = rules.age_multiplier(grudge.age(turn));
     let prestige_factor = if grudge.is_emblematic(data) {

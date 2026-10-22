@@ -12,8 +12,18 @@ fn prestige(state: &CampaignState) -> i32 {
 }
 
 fn make_war(state: &mut CampaignState, a: &str, b: &str) {
-    state.factions.get_mut(&fac(a)).unwrap().at_war_with.insert(fac(b));
-    state.factions.get_mut(&fac(b)).unwrap().at_war_with.insert(fac(a));
+    state
+        .factions
+        .get_mut(&fac(a))
+        .unwrap()
+        .at_war_with
+        .insert(fac(b));
+    state
+        .factions
+        .get_mut(&fac(b))
+        .unwrap()
+        .at_war_with
+        .insert(fac(a));
 }
 
 /// A French settlement that is not emblematic.
@@ -112,8 +122,18 @@ fn tx_m1_grudge_cancelled_on_peace_without_penalty() {
     let mission = candidates(&state, data).remove(0).1;
     state.missions.active = vec![mission];
     let before = prestige(&state);
-    state.factions.get_mut(&fac("fac_france")).unwrap().at_war_with.clear();
-    state.factions.get_mut(&fac("fac_england")).unwrap().at_war_with.clear();
+    state
+        .factions
+        .get_mut(&fac("fac_france"))
+        .unwrap()
+        .at_war_with
+        .clear();
+    state
+        .factions
+        .get_mut(&fac("fac_england"))
+        .unwrap()
+        .at_war_with
+        .clear();
     let mut events = Vec::new();
     resolve_missions(&mut state, data, &mut events);
     assert!(state.missions.active.is_empty());
@@ -163,5 +183,36 @@ fn tx_m1_failure_penalty_is_scaled_and_capped() {
     resolve_missions(&mut state, data, &mut events);
     assert!(state.missions.active.is_empty());
     assert_eq!(prestige(&state), before + expected);
-    assert_eq!(state.missions.grudges.len(), 1, "a failure keeps the grudge");
+    assert_eq!(
+        state.missions.grudges.len(),
+        1,
+        "a failure keeps the grudge"
+    );
+}
+
+#[test]
+fn tx_m1_a_raid_on_the_players_province_leaves_a_grudge() {
+    use sim_campaign::test_support::idle;
+    use sim_campaign::{ArmyPosition, Stance};
+    let data = game_data();
+    let mut state = start(data, "fac_france", 6);
+    make_war(&mut state, "fac_france", "fac_england");
+    let province = data_model::ProvinceId::new("prov_normandie").unwrap();
+    let city = state.province_city_id(&province).cloned().unwrap();
+    state.settlements.get_mut(&city).unwrap().controller = fac("fac_france");
+    let english = state
+        .armies
+        .iter()
+        .find(|(_, a)| a.faction == fac("fac_england"))
+        .map(|(id, _)| id.clone())
+        .unwrap();
+    let army = state.armies.get_mut(&english).unwrap();
+    army.position = ArmyPosition::Settlement(city);
+    army.stance = Stance::Raid;
+    state.end_turn_with(data, idle);
+    assert!(state
+        .missions
+        .grudges
+        .iter()
+        .any(|g| g.kind == GrudgeKind::RaidedProvince && g.culprit == fac("fac_england")));
 }

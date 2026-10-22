@@ -417,3 +417,24 @@ fn defaults_mirror_the_data_file() {
     );
     assert_eq!(data.capture_rules, data_model::CaptureRules::default());
 }
+
+#[test]
+fn tx_m1_losing_a_place_to_the_enemy_leaves_a_grudge_to_the_player_only() {
+    use crate::grudges::GrudgeKind;
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 7).unwrap();
+    at_war(&mut state, "fac_france", "fac_england");
+    let place = city(&state, "prov_normandie");
+    let mut events = Vec::new();
+    crate::siege::capture(&mut state, data, &place, &fac("fac_england"), &mut events);
+    let grudges = &state.missions.grudges;
+    assert_eq!(grudges.len(), 1);
+    assert_eq!(grudges[0].kind, GrudgeKind::LostSettlement);
+    assert_eq!(grudges[0].culprit, fac("fac_england"));
+    assert_eq!(grudges[0].settlement.as_ref(), Some(&place));
+    // An AI's loss is not remembered.
+    let guyenne = city(&state, "prov_guyenne");
+    state.settlements.get_mut(&guyenne).unwrap().controller = fac("fac_england");
+    crate::siege::capture(&mut state, data, &guyenne, &fac("fac_france"), &mut events);
+    assert_eq!(state.missions.grudges.len(), 1);
+}
