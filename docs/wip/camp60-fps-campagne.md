@@ -8,7 +8,16 @@ Branche `perf/camp60`, worktree `../gp-camp60` (données ignorées liées vers l
   descente p50 35 ms ; 573 meshes visibles (p50), 34 316 entités.
 - Seuil `perf_guard` actuel : panoramique p50 20 ms.
 
+## Mesures (panoramique d = 30, p50 ms ; machine peu chargée)
+Conditions du joueur : `CENT_ANS_VIEW_SIZE=3456x2234` + copie de son `settings.json` (`CENT_ANS_SETTINGS_PATH`, Ultra, plein écran).
+- Natif 3456×2234 : 101 ms (10 fps). Avec la mise à l'échelle auto (ADR 0740, 0,52) : 55 ms.
+- Goulot = GPU (profil : `submit_pending_command_buffers` 26 ms sur le fil de rendu ; Main 11 ms).
+- Bissection à l'échelle 0,52 : sans sol `tflat` 21 ; sans sol régional `tnoproc` 29 ; sans champs `tnofields` 39 ;
+  sans ombres 42 ; sans ombres d'arbres 48 ; sans arbres 50 ; post 54. Eau, provinces, villes, vie, armées, marqueurs : < 1 ms.
+- Outil : interrupteurs du shader du sol `CENT_ANS_PERF_OFF=t...` (liste `PERF_DEFS`, `terrain/material.rs`), `tshadow`.
+
 ## État
+- 23/10 0 h 40 : mise à l'échelle portée (ADR 0740, commit dc8361581). Bissection fine du shader du sol en cours.
 - 22/10 23 h 15 : en attente, à la demande du joueur, de la fin d'une autre session (game-project-79) qui fait de gros changements.
 
 - Partage avec game-project-79 (chantier Bevy/rendu) : elle cède la perf campagne. Ne pas toucher `campaign/terrain/`
