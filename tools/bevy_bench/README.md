@@ -47,6 +47,19 @@ La caméra est réécrite à chaque image avant le contrôleur : le parcours ne 
 (aussi `contact`, `sim_seconds_at_contact`, `regiments_at_end`, `entities_max`, `systems`).
 Porte ADR 0404 : lire `melee.frame_ms_p95` ≤ 25 ms.
 
+## Garde de performance (lot B5)
+
+    tools/bevy_bench/perf_guard.sh [map|battle|all] [--force]
+
+Lance `bench.sh` (muet, `--offscreen`, aucun focus) et compare les percentiles aux seuils de
+`perf_thresholds.json` (carte : panoramique d=30 p50/p95 ; bataille : Crécy calme/mêlée, mêlée p95 <= 25 ms,
+ADR 0404). Code 0 = ok, 1 = seuil dépassé ou banc en échec, 3 = sautée car charge > `max_load` (6) ;
+`--force` mesure quand même. Les seuils ne valent que sur machine calme.
+Réglage : `map_shadow_splits` (cascades du soleil de campagne) par préréglage dans `data/fx/render_quality.json` ;
+`CENT_ANS_MAP_CASCADES=n` force le nombre pour un A/B (`ab.sh map <étiquette> "CENT_ANS_MAP_CASCADES=4" ""`).
+Dans un worktree, lier les données ignorées (`data/map/pyramid`, `game/assets/models/dn`,
+`data/map/compose/derived`, `game/assets/textures/*/hi`) vers le dépôt principal, sinon le banc mesure une carte sans relief.
+
 ## Comparaison A/B
 
     tools/bevy_bench/ab.sh <map|battle> <étiquette> "<envA>" "<envB>" [paires=3]

@@ -1,0 +1,13 @@
+{
+  "_doc": "Seuils de tools/bevy_bench/perf_guard.sh (lot B5), en ms par image, fenetre masquee et muet. Mesures sur machine calme (charge < 6) ; les seuils laissent ~2x de marge sur le p50 mesure apres B5 pour ne pas declencher sur le bruit, mais attrapent le retour d'un cout de l'ordre de 28 ms (ombres d'impostors en 4 cascades a 8192, cf. docs/wip/bm-perf4.md). Les relever demande une justification dans le commit.",
+  "max_load": 6,
+  "map": {
+    "_doc": "Panoramique d=30 (bench.sh --bench-distance 30 --bench-pan-only), preset resolu automatiquement.",
+    "pan": {"p50": 20.0, "p95": 40.0}
+  },
+  "battle": {
+    "_doc": "Crecy defenseur ; ADR 0404 : melee p95 <= 25 ms.",
+    "calm": {"p50": 15.0},
+    "melee": {"p50": 15.0, "p95": 25.0}
+  }
+}
