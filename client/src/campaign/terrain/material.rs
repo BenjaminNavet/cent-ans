@@ -14,6 +14,17 @@ pub const SHADER_PATH: &str = "embedded://cent_ans_client/campaign/terrain/terra
 pub const SHADOW_SHADER_PATH: &str =
     "embedded://cent_ans_client/campaign/terrain/terrain_shadow.wesl";
 
+/// Dev bisection switches of the ground shader (`CENT_ANS_PERF_OFF`, `campaign/perf_switch.rs`):
+/// each one compiles a part of the fragment out (`PERF_<NAME>` shader def).
+const PERF_DEFS: [(&str, &str); 6] = [
+    ("tflat", "PERF_TFLAT"),
+    ("tnoproc", "PERF_TNOPROC"),
+    ("tnofields", "PERF_TNOFIELDS"),
+    ("tnocoast", "PERF_TNOCOAST"),
+    ("tnowx", "PERF_TNOWX"),
+    ("tnocloud", "PERF_TNOCLOUD"),
+];
+
 /// Uniform block of `terrain.wesl` (`TerrainParams`).
 #[derive(Clone, Copy, Debug, ShaderType)]
 pub struct TerrainParams {
@@ -204,6 +215,13 @@ impl Material for TerrainMaterial {
     ) -> Result<(), SpecializedMeshPipelineError> {
         // Skirts are two-sided quads.
         descriptor.primitive.cull_mode = None;
+        if let Some(fragment) = descriptor.fragment.as_mut() {
+            for (switch, def) in PERF_DEFS {
+                if crate::campaign::perf_switch::off(switch) {
+                    fragment.shader_defs.push(def.into());
+                }
+            }
+        }
         Ok(())
     }
 }

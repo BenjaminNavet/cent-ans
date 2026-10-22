@@ -34,8 +34,21 @@ use cli::Cli;
 use dump::{DumpAppExt, build_dump, dump_entities, dump_state};
 use script::{MouseButtonName, ScriptCommand, parse_script};
 
-/// Size of the offscreen render target (logical pixels = window size).
+/// Default size of the offscreen render target (logical pixels = window size).
 pub const VIEW_SIZE: (u32, u32) = (1280, 800);
+
+/// Size of the window / offscreen target: [`VIEW_SIZE`], or `CENT_ANS_VIEW_SIZE=<w>x<h>` (benches
+/// at the player's screen size, e.g. `3456x2234`).
+pub fn view_size() -> (u32, u32) {
+    std::env::var("CENT_ANS_VIEW_SIZE")
+        .ok()
+        .and_then(|text| {
+            let (w, h) = text.split_once('x')?;
+            Some((w.trim().parse().ok()?, h.trim().parse().ok()?))
+        })
+        .filter(|&(w, h): &(u32, u32)| w >= 64 && h >= 64)
+        .unwrap_or(VIEW_SIZE)
+}
 /// Frames a `click` waits for its target to exist before failing the run.
 const CLICK_RETRY_FRAMES: u32 = 300;
 /// `click_if` waits this long for the node before skipping it.
@@ -92,9 +105,10 @@ impl Plugin for AgentPlugin {
         }
         if cli.wants_offscreen() {
             let mut images = app.world_mut().resource_mut::<Assets<Image>>();
+            let (width, height) = view_size();
             let target = images.add(Image::new_target_texture(
-                VIEW_SIZE.0,
-                VIEW_SIZE.1,
+                width,
+                height,
                 TextureFormat::Rgba8UnormSrgb,
                 None,
             ));

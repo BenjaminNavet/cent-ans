@@ -369,6 +369,9 @@ pub fn update_lod(
                 DespawnOnExit(AppState::Campaign),
             ))
             .id();
+        if crate::campaign::perf_switch::off("tshadow") {
+            commands.entity(entity).insert(bevy::light::NotShadowCaster);
+        }
         lod.nodes.insert(
             added.key,
             Node {

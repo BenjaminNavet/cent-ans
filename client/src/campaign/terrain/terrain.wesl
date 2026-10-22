@@ -2290,6 +2290,10 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     }
     var n = normalize(in.normal);
     let base_albedo = albedo;
+    // Perf bisection (`CENT_ANS_PERF_OFF=tflat`): colour map only, flat light.
+    @if(PERF_TFLAT) {
+        return vec4<f32>(albedo * (params.ambient.rgb + params.sun_color.rgb * max(dot(n, params.sun_dir.xyz), 0.0)) * params.ambient.a, 1.0);
+    }
     // TS-T1: slope of the displayed (exaggerated) relief, the steeper of the interpolated normal
     // and of the triangle (the vertex normal of a coarse node is smoothed), and the crests
     // (divergence of the normal along the screen axes, per map px).
@@ -2305,7 +2309,11 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     let sun_vis = sun_shadow(in.world, n, in.clip.xy);
     let lit0 = max(dot(n, params.sun_dir.xyz), 0.0) * sun_vis;
     var forest_f = 0.0;
-    if (ground.bg.x > 0.5) {
+    var regional = ground.bg.x > 0.5;
+    @if(PERF_TNOPROC) {
+        regional = false;
+    }
+    if (regional) {
         // Regional ground (TX): the colormap gives the colour far away, the textured soil draws
         // close up (sg_apply of satellite_ground.gdshaderinc: share 0.45 at the closest, 1 far).
         let slope_m = length(in.slope_xz) / max(ground.micro.w, 1.0);
@@ -2321,7 +2329,11 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         }
         // Painted fields over the ground colour (after the colormap, like hb_apply).
         var dn = g.dn;
-        if (fields.v8.w > 0.5) {
+        var fields_on = fields.v8.w > 0.5;
+        @if(PERF_TNOFIELDS) {
+            fields_on = false;
+        }
+        if (fields_on) {
             let fo = fields_apply(in.world.xz, in.world.xz / params.map.xy, ground_footprint, land,
                 g.open_w, g.forest_w, g.rock_w, g.farm_share, slope_m, in.slope_xz, in.altitude, g.k_wild,
                 g.k_forest, painted);
@@ -2348,16 +2360,21 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     // DN-ME4 névés and glaciers, then the TB5 coast band (cliffs, beaches, swash).
     let slope_g = length(in.slope_xz) / max(ground.micro.w, 1.0);
     albedo = fw_glacier_apply(albedo, in.world.xz, in.altitude, slope_g, ground_footprint, land_g, disp_y, lit0);
-    let coast_out = coast_band(in.world.xz, ground_footprint, in.altitude, in.world.y, slope_g,
-        cover.snow, albedo, n);
-    albedo = coast_out.color;
-    n = coast_out.n;
-    albedo = weather_ground(albedo, in.altitude, in.world.xz, disp_y, ground_footprint, lit0, forest_f);
-    let to_eye = normalize(view.world_position - in.world);
-    albedo = weather_mist(albedo, in.world.xz, in.altitude, ground_footprint, 1.0 - abs(to_eye.y));
+    @if(!PERF_TNOCOAST) {
+        let coast_out = coast_band(in.world.xz, ground_footprint, in.altitude, in.world.y, slope_g,
+            cover.snow, albedo, n);
+        albedo = coast_out.color;
+        n = coast_out.n;
+    }
+    @if(!PERF_TNOWX) {
+        albedo = weather_ground(albedo, in.altitude, in.world.xz, disp_y, ground_footprint, lit0, forest_f);
+        let to_eye = normalize(view.world_position - in.world);
+        albedo = weather_mist(albedo, in.world.xz, in.altitude, ground_footprint, 1.0 - abs(to_eye.y));
+    }
     albedo = fog_of_war_veil(albedo, in.world.xz);
     // RV-C: fair-weather cumulus shadows (gone on the parchment).
     let area_px = sqrt(length(dpdx(in.world.xz)) * length(dpdy(in.world.xz)));
+    @if(!PERF_TNOCLOUD)
     albedo = albedo * cloud_shadow_light(in.world.xz, ground_footprint, area_px, 1.0 - look.weather.z);
     // Strategic view: fade to the parchment map (ADR 0124). Port of `pm_output`
     // (parchment_common.gdshaderinc): the paper goes mostly through the emission (unlit flat
