@@ -458,10 +458,8 @@ pub(super) fn update_shadows(
     stats.shadowless = shadowless;
 }
 
-/// Counts the draw batches of the maquette meshes twice a second.
+/// Counts the draw batches of the maquette meshes (run on demand by the dump).
 pub(super) fn batch_stats(
-    time: Res<Time>,
-    mut timer: Local<f32>,
     maquettes: Query<&Maquette>,
     pieces: Query<(
         &Mesh3d,
@@ -471,11 +469,6 @@ pub(super) fn batch_stats(
     )>,
     mut stats: ResMut<LodStats>,
 ) {
-    *timer += time.delta_secs();
-    if *timer < 0.5 {
-        return;
-    }
-    *timer = 0.0;
     let mut pairs: HashSet<(AssetId<Mesh>, bevy::asset::UntypedAssetId)> = HashSet::new();
     let mut count = 0;
     for m in &maquettes {

@@ -32,7 +32,7 @@ use std::collections::BTreeMap;
 use bevy::prelude::*;
 use serde_json::{Value, json};
 
-use crate::agent::dump::DumpAppExt;
+use crate::agent::dump::{DumpAppExt, DumpPrepare};
 use crate::app::AppState;
 use crate::paths;
 
@@ -91,6 +91,12 @@ impl Plugin for CampaignLifePlugin {
             .init_resource::<LifeStats>()
             .register_dump(dump_life)
             .add_systems(
+                DumpPrepare,
+                update_stats
+                    .run_if(in_state(AppState::Campaign))
+                    .run_if(resource_exists::<LifeData>),
+            )
+            .add_systems(
                 OnEnter(AppState::Campaign),
                 (
                     load_data,
@@ -144,7 +150,6 @@ impl Plugin for CampaignLifePlugin {
                         anim::write_herd_tags,
                         skin::update_skin,
                         models::apply_fades,
-                        update_stats,
                     ),
                 )
                     .chain()
@@ -198,9 +203,8 @@ fn reset(
     view.ready = false;
 }
 
+/// Dump-only counters (run on demand by [`DumpPrepare`], not every frame).
 fn update_stats(
-    time: Res<Time>,
-    mut timer: Local<f32>,
     mut stats: ResMut<LifeStats>,
     items: Query<(&stream::LifeItem, &models::Fade)>,
     beasts: Query<(), With<folk::Beast>>,
@@ -213,11 +217,6 @@ fn update_stats(
     animals: Query<&fauna::Animal>,
     binds: Query<(&anim::AnimBind, Option<&anim::AnimBound>)>,
 ) {
-    *timer -= time.delta_secs();
-    if *timer > 0.0 {
-        return;
-    }
-    *timer = 0.5;
     stats.live.clear();
     stats.visible.clear();
     for cat in Cat::ALL {

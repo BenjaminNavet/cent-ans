@@ -268,19 +268,107 @@ pub fn apply_fades(
 ) {
     let step = time.delta_secs() / FADE_SECONDS;
     for (entity, mut fade, mut transform, item) in &mut query {
+        // Read first, write only on change: a settled fade must not flag `Fade` or
+        // `Transform` as changed (transform propagation, render extraction).
         let t = fade.target;
-        if fade.current < t {
-            fade.current = (fade.current + step).min(t);
-        } else if fade.current > t {
-            fade.current = (fade.current - step).max(t);
+        let current = fade.current;
+        let next = if current < t {
+            (current + step).min(t)
+        } else if current > t {
+            (current - step).max(t)
+        } else {
+            current
+        };
+        if next != current {
+            fade.current = next;
         }
-        let eased = fade.current * fade.current * (3.0 - 2.0 * fade.current);
-        transform.scale = Vec3::splat(fade.base_scale * eased.max(1e-4));
-        if fade.target <= 0.0 && fade.current <= 0.0 {
+        let eased = next * next * (3.0 - 2.0 * next);
+        let scale = Vec3::splat(fade.base_scale * eased.max(1e-4));
+        if transform.scale != scale {
+            transform.scale = scale;
+        }
+        if t <= 0.0 && next <= 0.0 {
             if let Some(item) = item {
                 index.0.remove(&item.key);
             }
             commands.entity(entity).despawn();
         }
+    }
+}
+
+#[cfg(test)]
+mod fade_tests {
+    use super::*;
+    use bevy::ecs::change_detection::Tick;
+    use std::time::Duration;
+
+    fn app_with_fade(current: f32, target: f32) -> (App, Entity) {
+        let mut app = App::new();
+        app.init_resource::<Time>();
+        app.init_resource::<super::super::stream::LifeIndex>();
+        app.add_systems(Update, apply_fades);
+        let entity = app
+            .world_mut()
+            .spawn((
+                Fade {
+                    current,
+                    target,
+                    base_scale: 2.0,
+                },
+                Transform::default(),
+            ))
+            .id();
+        (app, entity)
+    }
+
+    fn step(app: &mut App, secs: f32) {
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(Duration::from_secs_f32(secs));
+        app.update();
+    }
+
+    /// (Fade changed, Transform changed) since `mark`.
+    fn changed_since(app: &App, entity: Entity, mark: Tick) -> (bool, bool) {
+        let world = app.world();
+        let this_run = world.read_change_tick();
+        let e = world.entity(entity);
+        let fade = e.get_ref::<Fade>().unwrap().last_changed();
+        let tf = e.get_ref::<Transform>().unwrap().last_changed();
+        (
+            fade.is_newer_than(mark, this_run),
+            tf.is_newer_than(mark, this_run),
+        )
+    }
+
+    #[test]
+    fn settled_fade_is_not_marked_changed() {
+        let (mut app, entity) = app_with_fade(1.0, 1.0);
+        step(&mut app, 0.016); // the first frame may write the scale once
+        let mark = app.world().read_change_tick();
+        step(&mut app, 0.016);
+        step(&mut app, 0.016);
+        assert_eq!(changed_since(&app, entity, mark), (false, false));
+    }
+
+    #[test]
+    fn running_fade_converges_as_before() {
+        let (mut app, entity) = app_with_fade(0.0, 1.0);
+        for _ in 0..10 {
+            step(&mut app, FADE_SECONDS / 4.0);
+        }
+        let fade = app.world().get::<Fade>(entity).unwrap();
+        assert_eq!(fade.current, 1.0);
+        let scale = app.world().get::<Transform>(entity).unwrap().scale;
+        assert!((scale - Vec3::splat(2.0)).length() < 1e-5);
+    }
+
+    #[test]
+    fn faded_out_root_despawns() {
+        let (mut app, entity) = app_with_fade(0.2, 0.0);
+        for _ in 0..4 {
+            step(&mut app, FADE_SECONDS);
+        }
+        assert!(app.world().get_entity(entity).is_err());
     }
 }

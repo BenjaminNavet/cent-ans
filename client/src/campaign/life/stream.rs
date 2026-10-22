@@ -259,7 +259,10 @@ pub fn update_targets(
             // Scenes set their own target (`scenes::scene_targets`).
             Cat::Bird | Cat::Scene => continue,
         };
-        fade.target = target;
+        // Read first: an unconditional write would flag every fade `Changed` each frame.
+        if fade.target != target {
+            fade.target = target;
+        }
     }
 }
 

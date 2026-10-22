@@ -124,6 +124,7 @@ fn probe_empty_meshes(world: &mut World, mut seen: Local<std::collections::HashS
 fn register_dump_method(app: &mut App) {
     use bevy::remote::{BrpResult, RemoteMethodSystemId, RemoteMethods};
     fn handler(In(_): In<Option<serde_json::Value>>, world: &mut World) -> BrpResult {
+        super::dump::prepare_dump(world);
         Ok(super::dump::build_dump(world))
     }
     let id = app.world_mut().register_system(handler);
