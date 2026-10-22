@@ -227,9 +227,9 @@ pub struct GroundExtension {
     pub albedo: Option<Handle<Image>>,
     #[texture(103, dimension = "2d_array")]
     pub normal: Option<Handle<Image>>,
-    /// Micro grain pack (`micro_ground`): albedo and normal arrays.
+    /// Micro grain pack (`micro_ground`): albedo and normal arrays (read with the albedo sampler,
+    /// same descriptor: Metal allows 16 samplers per stage).
     #[texture(105, dimension = "2d_array")]
-    #[sampler(106)]
     pub micro_albedo: Option<Handle<Image>>,
     #[texture(107, dimension = "2d_array")]
     pub micro_normal: Option<Handle<Image>>,
@@ -238,7 +238,6 @@ pub struct GroundExtension {
     pub decor_fields: Option<Handle<Image>>,
     /// R2 relief map (RGBA8): slope, hollow at 30 m, hollow at 90 m.
     #[texture(111)]
-    #[sampler(112)]
     pub relief: Option<Handle<Image>>,
     /// Trodden ground: the flattened-grass map of `flatten.rs` (R).
     #[texture(113)]
