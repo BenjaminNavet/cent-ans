@@ -70,7 +70,7 @@ fn default_ground_step() -> f32 {
 }
 
 fn default_ground_sink() -> f32 {
-    0.4
+    2.0
 }
 
 fn default_max_triangles() -> usize {
