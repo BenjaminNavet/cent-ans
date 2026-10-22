@@ -137,7 +137,10 @@ pub fn grievance(state: &CampaignState, faction: &FactionId, patron: &FactionId)
         f.modifiers
             .iter()
             .filter(|m| &m.with == patron && m.expires_turn > state.turn && m.value < 0)
-            .filter(|m| !sim_campaign::perjury::is_perjury_reason(&m.reason_fr) && m.reason_fr != AGGRESSION_REASON)
+            .filter(|m| {
+                !sim_campaign::perjury::is_perjury_reason(&m.reason_fr)
+                    && m.reason_fr != AGGRESSION_REASON
+            })
             .map(|m| m.value)
             .sum()
     })

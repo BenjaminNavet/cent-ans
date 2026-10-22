@@ -97,7 +97,8 @@ pub use entities::crusade::{
 pub use entities::diet::{Diet, DietRequirements, LentRule, WinterRule};
 pub use entities::difficulty::{DifficultyLevelData, DifficultyModifiers, DifficultyRules};
 pub use entities::diplomacy_rules::{
-    AttitudeBand, CallForecastRules, DiplomacyEvent, DiplomacyRules, EventSeverity, OpinionMotive, RevokeAccessRules,
+    AttitudeBand, CallForecastRules, DiplomacyEvent, DiplomacyRules, EventSeverity, OpinionMotive,
+    RevokeAccessRules,
 };
 pub use entities::economy_rules::{
     AiDemolition, EconomyRules, TaxBracket, TaxBrackets, TaxPerHead,
