@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "postfx.schema.json",
+  "title": "Post-effets optionnels",
+  "description": "Paramètres des post-effets Bevy optionnels (data/fx/postfx.json).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["depth_of_field", "motion_blur", "auto_exposure", "color_grading", "chromatic_aberration", "sharpening", "soft_shadows"],
+  "properties": {
+    "description": {"type": "string"},
+    "depth_of_field": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mode", "sensor_height", "aperture_f_stops", "max_circle_of_confusion_diameter", "max_depth"],
+      "properties": {
+        "mode": {"enum": ["gaussian", "bokeh"]},
+        "sensor_height": {"type": "number", "exclusiveMinimum": 0},
+        "aperture_f_stops": {"type": "number", "exclusiveMinimum": 0},
+        "max_circle_of_confusion_diameter": {"type": "number", "exclusiveMinimum": 0},
+        "max_depth": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "motion_blur": {
+      "type": "object", "additionalProperties": false,
+      "required": ["shutter_angle", "samples"],
+      "properties": {
+        "shutter_angle": {"type": "number", "minimum": 0, "maximum": 2},
+        "samples": {"type": "integer", "minimum": 1, "maximum": 8}
+      }
+    },
+    "auto_exposure": {
+      "type": "object", "additionalProperties": false,
+      "required": ["range_min_ev", "range_max_ev", "speed_brighten", "speed_darken"],
+      "properties": {
+        "range_min_ev": {"type": "number"},
+        "range_max_ev": {"type": "number"},
+        "speed_brighten": {"type": "number", "exclusiveMinimum": 0},
+        "speed_darken": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "color_grading": {
+      "type": "object", "additionalProperties": false,
+      "required": ["exposure", "temperature", "tint", "hue", "post_saturation", "saturation", "contrast", "gamma"],
+      "properties": {
+        "exposure": {"type": "number"},
+        "temperature": {"type": "number"},
+        "tint": {"type": "number"},
+        "hue": {"type": "number"},
+        "post_saturation": {"type": "number", "minimum": 0},
+        "saturation": {"type": "number", "minimum": 0},
+        "contrast": {"type": "number", "minimum": 0},
+        "gamma": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "chromatic_aberration": {
+      "type": "object", "additionalProperties": false,
+      "required": ["intensity", "max_samples"],
+      "properties": {
+        "intensity": {"type": "number", "minimum": 0, "maximum": 0.2},
+        "max_samples": {"type": "integer", "minimum": 2, "maximum": 32}
+      }
+    },
+    "sharpening": {
+      "type": "object", "additionalProperties": false,
+      "required": ["strength", "denoise"],
+      "properties": {
+        "strength": {"type": "number", "minimum": 0, "maximum": 1},
+        "denoise": {"type": "boolean"}
+      }
+    },
+    "soft_shadows": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sun_size"],
+      "properties": {"sun_size": {"type": "number", "exclusiveMinimum": 0}}
+    }
+  }
+}

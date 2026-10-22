@@ -185,6 +185,22 @@
           "type": "number",
           "exclusiveMinimum": 0
         },
+        "postfx": {
+          "type": "array",
+          "description": "Post-effets optionnels activés par ce préréglage (paramètres dans data/fx/postfx.json). Vide par défaut.",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "depth_of_field",
+              "motion_blur",
+              "auto_exposure",
+              "color_grading",
+              "chromatic_aberration",
+              "sharpening",
+              "soft_shadows"
+            ]
+          }
+        },
         "ssao": {
           "type": "boolean"
         },

@@ -161,6 +161,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "province.schema.json": ("provinces/*.json",),
     "relief_pyramid.schema.json": ("map/relief_pyramid.json",),
     "render_quality.schema.json": ("fx/render_quality.json",),
+    "postfx.schema.json": ("fx/postfx.json",),
     "ground_detail.schema.json": ("fx/ground_detail.json",),
     "fx_understory.schema.json": ("fx/understory.json",),
     "religion_rules.schema.json": ("rules/religion.json",),

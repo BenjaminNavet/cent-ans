@@ -47,6 +47,8 @@ pub struct Preset {
     pub relief_vertex_px: f32,
     /// Campaign relief: node budget before the quadtree coarsens (`relief_items`).
     pub relief_items: u32,
+    /// Optional post-effects this preset enables (`postfx`, ids of [`super::postfx::EFFECTS`]).
+    pub postfx: Vec<String>,
 }
 
 fn msaa_from(name: &str) -> Option<Msaa> {
@@ -76,6 +78,7 @@ impl Preset {
             battle_lod: 1.0,
             relief_vertex_px: 7.5,
             relief_items: 700,
+            postfx: Vec::new(),
         }
     }
 
@@ -97,6 +100,16 @@ impl Preset {
             battle_lod: number("battle_lod").unwrap_or(1.0) as f32,
             relief_vertex_px: number("relief_vertex_px").unwrap_or(7.5).clamp(1.0, 32.0) as f32,
             relief_items: number("relief_items").unwrap_or(700.0).clamp(50.0, 4000.0) as u32,
+            postfx: value
+                .get("postfx")
+                .and_then(Value::as_array)
+                .map(|ids| {
+                    ids.iter()
+                        .filter_map(Value::as_str)
+                        .map(str::to_owned)
+                        .collect()
+                })
+                .unwrap_or_default(),
         })
     }
 }
@@ -200,6 +213,8 @@ pub struct RenderQuality {
     pub veg_max_distance: f32,
     /// Multiplier of the camera far planes (`Settings::view_distance`).
     pub view_distance: f32,
+    /// Optional post-effects on or off (player setting over the preset, see `postfx`).
+    pub postfx: super::postfx::PostFxFlags,
 }
 
 /// Side of one cascade's shadow map. Godot's `shadow_atlas` is ONE atlas shared by the cascades
@@ -247,6 +262,7 @@ impl RenderQuality {
             model_shadow_distance: preset.model_shadow_distance,
             veg_max_distance: preset.veg_max_distance,
             view_distance: settings.view_distance.clamp(0.25, 2.0),
+            postfx: super::postfx::PostFxFlags::resolve(settings, &preset.postfx),
         }
     }
 }
