@@ -32,3 +32,10 @@ Captures : budget du CLAUDE.md relevé pour la nuit (travail visuel demandé) ; 
 3. Campagne : clics armée / ville confus quand les deux sont proches.
 Sous-agents : haiku par défaut, sonnet pour le plus difficile (pas d'Opus).
 Outil : `tools/playtest_window.sh script prefix secs interval` (fenêtre réelle ; le `shot` interne est noir sur la campagne, l'écran réel est correct).
+
+## Souris injectée (22/10, commit 52ad4f2a8)
+- Script client : `mouse x y`, `mouse_down|mouse_up <left|right|middle>`, `mouse_click x y [bouton]`, `mouse_drag <bouton> x1 y1 x2 y2 [pas]` (pixels logiques de la fenêtre). Pilote : `tools/playtest_window.sh`.
+- Bug plein écran trouvé : `UiScale` = 1,76 (0,99 en fenêtre) ; le rectangle jaune de sélection (nœud d'UI) était placé en pixels fenêtre bruts, donc décalé de ×1,76 par rapport à la sélection réelle. Corrigé (`update_drag_rect`).
+- Glisser droit (ligne de front) : aperçu des emplacements (rectangle + flèche de front par régiment, ligne tracée) ajouté ; l'ordre part avec largeur et orientation (déjà là). Reste à décider : sens exact de « clic gauche glissé » du joueur.
+- Vitesse : le bridage x0,45 d'approche (ADR 0184) ne vaut plus que pour les camps IA (`ai_enabled`) ; marche du joueur 0,55 -> 1,32 m/s ; virage du joueur x2 (`player_turn_factor`). Tests de bataille du cœur verts ; échecs campagne (sauvegarde/diplomatie) viennent de la fusion m6 d'autres sessions.
+- À tester ensuite : clic armée/ville à la souris sur la campagne, écran de résultat, sauvegarde/chargement.
