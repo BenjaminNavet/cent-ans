@@ -49,6 +49,236 @@
       "items": {
         "$ref": "#/$defs/template"
       }
+    },
+    "grudge": {
+      "type": "object",
+      "description": "Rancunes datées (lot M1, ADR 0720) : missions ancrées dans un affront subi ; récompense multipliée par l'ancienneté (en tours = saisons). {cible} = lieu, {auteur} = faction fautive.",
+      "properties": {
+        "max_grudges": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "age_tiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "min_age": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "multiplier": {
+                "type": "number",
+                "minimum": 0.1,
+                "maximum": 5
+              }
+            },
+            "required": [
+              "min_age",
+              "multiplier"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "emblematic_settlements": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/snake_id"
+          },
+          "description": "Places emblématiques (ids de place) : leur perte pèse emblematic_prestige_multiplier en prestige."
+        },
+        "emblematic_prestige_multiplier": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "failure_multiplier_cap": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "lost_settlement": {
+          "type": "object",
+          "properties": {
+            "weight": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "goal": {
+              "enum": [
+                "control",
+                "hold",
+                "build",
+                "treaty",
+                "count"
+              ]
+            },
+            "counter": {
+              "enum": [
+                "battle_won",
+                "units_recruited",
+                "agent_actions",
+                "marriages",
+                "ransoms"
+              ]
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 3,
+              "maximum": 24
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "objective": {
+              "type": "string",
+              "minLength": 1
+            },
+            "progress": {
+              "type": "string"
+            },
+            "reward": {
+              "$ref": "#/$defs/reward"
+            }
+          },
+          "required": [
+            "weight",
+            "goal",
+            "duration",
+            "title",
+            "objective",
+            "reward"
+          ],
+          "additionalProperties": false
+        },
+        "defeated_army": {
+          "type": "object",
+          "properties": {
+            "weight": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "goal": {
+              "enum": [
+                "control",
+                "hold",
+                "build",
+                "treaty",
+                "count"
+              ]
+            },
+            "counter": {
+              "enum": [
+                "battle_won",
+                "units_recruited",
+                "agent_actions",
+                "marriages",
+                "ransoms"
+              ]
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 3,
+              "maximum": 24
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "objective": {
+              "type": "string",
+              "minLength": 1
+            },
+            "progress": {
+              "type": "string"
+            },
+            "reward": {
+              "$ref": "#/$defs/reward"
+            }
+          },
+          "required": [
+            "weight",
+            "goal",
+            "duration",
+            "title",
+            "objective",
+            "reward"
+          ],
+          "additionalProperties": false
+        },
+        "raided_province": {
+          "type": "object",
+          "properties": {
+            "weight": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "goal": {
+              "enum": [
+                "control",
+                "hold",
+                "build",
+                "treaty",
+                "count"
+              ]
+            },
+            "counter": {
+              "enum": [
+                "battle_won",
+                "units_recruited",
+                "agent_actions",
+                "marriages",
+                "ransoms"
+              ]
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 3,
+              "maximum": 24
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "objective": {
+              "type": "string",
+              "minLength": 1
+            },
+            "progress": {
+              "type": "string"
+            },
+            "reward": {
+              "$ref": "#/$defs/reward"
+            }
+          },
+          "required": [
+            "weight",
+            "goal",
+            "duration",
+            "title",
+            "objective",
+            "reward"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "max_grudges",
+        "age_tiers",
+        "emblematic_prestige_multiplier",
+        "failure_multiplier_cap",
+        "lost_settlement",
+        "defeated_army",
+        "raided_province",
+        "emblematic_settlements"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

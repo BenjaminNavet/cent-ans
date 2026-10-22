@@ -373,6 +373,7 @@ pub(crate) fn on_captured(
     previous: &FactionId,
     events: &mut Vec<GameEvent>,
 ) {
+    crate::grudges::note_settlement_lost(state, data, settlement, captor, previous);
     let armies: Vec<ArmyId> = state
         .armies
         .iter()

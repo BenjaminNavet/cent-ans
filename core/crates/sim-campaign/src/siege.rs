@@ -1568,6 +1568,7 @@ pub(crate) fn resolve_raids(
             .saturating_add(raid.devastation)
             .min(100);
         province.unrest = province.unrest.saturating_add(raid.unrest).min(100);
+        crate::grudges::note_province_raided(state, data, &faction, &province_id);
         if let Some(faction_state) = state.factions.get_mut(&faction) {
             faction_state.treasury += loot;
         }

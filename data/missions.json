@@ -324,5 +324,80 @@
       },
       "source": "Traité d'Arras (21 septembre 1435)."
     }
-  ]
+  ],
+  "grudge": {
+    "max_grudges": 12,
+    "age_tiers": [
+      {
+        "min_age": 0,
+        "multiplier": 1.0
+      },
+      {
+        "min_age": 8,
+        "multiplier": 1.5
+      },
+      {
+        "min_age": 16,
+        "multiplier": 1.5
+      },
+      {
+        "min_age": 24,
+        "multiplier": 2.0
+      },
+      {
+        "min_age": 32,
+        "multiplier": 2.0
+      }
+    ],
+    "emblematic_settlements": [
+      "set_calais",
+      "set_bordeaux",
+      "set_reims",
+      "set_paris",
+      "set_rouen",
+      "set_orleans"
+    ],
+    "emblematic_prestige_multiplier": 2.0,
+    "failure_multiplier_cap": 1.5,
+    "lost_settlement": {
+      "weight": 3,
+      "goal": "control",
+      "duration": 10,
+      "title": "Reprendre {cible}",
+      "objective": "Reprenez {cible}, qui nous fut ravie par {auteur}.",
+      "reward": {
+        "gold": 600,
+        "prestige": 12,
+        "public_order": 8
+      },
+      "progress": "tenue par {holder}"
+    },
+    "defeated_army": {
+      "weight": 4,
+      "goal": "count",
+      "counter": "battle_won",
+      "duration": 8,
+      "title": "Venger la défaite de {cible}",
+      "objective": "Lavez l'affront de {cible} : remportez {n} bataille(s) contre nos ennemis, {auteur} en tête.",
+      "progress": "{done}/{n} victoire(s)",
+      "reward": {
+        "gold": 400,
+        "prestige": 10
+      }
+    },
+    "raided_province": {
+      "weight": 2,
+      "goal": "count",
+      "counter": "battle_won",
+      "duration": 8,
+      "title": "Châtier la chevauchée en {cible}",
+      "objective": "{auteur} a ravagé {cible} : remportez {n} bataille(s) contre nos ennemis.",
+      "progress": "{done}/{n} victoire(s)",
+      "reward": {
+        "gold": 300,
+        "prestige": 6,
+        "public_order": 8
+      }
+    }
+  }
 }

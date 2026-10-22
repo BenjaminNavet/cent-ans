@@ -125,6 +125,8 @@ fn give_mission(state: &mut CampaignState, template: &str) {
         deadline_turn: state.turn + 10,
         reward: t.reward.clone(),
         baseline: Vec::new(),
+        grudge: None,
+        failure_prestige: None,
     }];
 }
 

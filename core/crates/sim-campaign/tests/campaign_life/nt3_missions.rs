@@ -47,6 +47,8 @@ fn mission(state: &CampaignState, template: &str, deadline_turn: u32) -> Mission
             free_unit: true,
         },
         baseline: Vec::new(),
+        grudge: None,
+        failure_prestige: None,
     }
 }
 

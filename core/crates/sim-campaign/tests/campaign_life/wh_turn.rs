@@ -180,6 +180,8 @@ fn a_succeeding_faction_mission_is_remembered() {
         deadline_turn: state.turn + 10,
         reward: template.reward.clone(),
         baseline: Vec::new(),
+        grudge: None,
+        failure_prestige: None,
     }];
     let owner = state.province_controller(&target).cloned().unwrap();
     assert_ne!(owner, player);

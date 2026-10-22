@@ -26,6 +26,8 @@ pub struct MissionRules {
     #[serde(default = "default_offer_expiry")]
     pub offer_expiry_turns: u32,
     pub templates: Vec<MissionTemplate>,
+    /// Dated grudges (ADR 0720).
+    pub grudge: GrudgeRules,
 }
 
 crate::bundled_rules!(MissionRules, "missions.json", default);
@@ -147,6 +149,68 @@ fn one() -> u32 {
     1
 }
 
+/// Dated grudges (ADR 0720): missions anchored in an affront suffered.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GrudgeRules {
+    /// Grudges kept at most (the oldest are forgotten first).
+    pub max_grudges: u32,
+    /// Age tiers, ascending: the last tier whose `min_age` (turns = seasons)
+    /// is reached gives the reward multiplier.
+    pub age_tiers: Vec<GrudgeAgeTier>,
+    /// Emblematic places: losing one weighs more in prestige.
+    pub emblematic_settlements: Vec<crate::SettlementId>,
+    /// Prestige multiplier when the place lost is emblematic.
+    pub emblematic_prestige_multiplier: f64,
+    /// Failure penalty = `failure_prestige` x tier multiplier, capped at this.
+    pub failure_multiplier_cap: f64,
+    /// Lost settlement.
+    pub lost_settlement: GrudgeKindRules,
+    /// Army of ours defeated.
+    pub defeated_army: GrudgeKindRules,
+    /// Province of ours raided.
+    pub raided_province: GrudgeKindRules,
+}
+
+/// One age tier of a grudge.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GrudgeAgeTier {
+    pub min_age: u32,
+    pub multiplier: f64,
+}
+
+/// How one kind of grudge becomes a mission.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GrudgeKindRules {
+    /// Weight in the offer's draw (like a template's).
+    pub weight: u32,
+    pub goal: MissionGoal,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub counter: Option<MissionCounter>,
+    pub duration: u32,
+    /// `{cible}` = place or province, `{auteur}` = faction at fault.
+    pub title: String,
+    pub objective: String,
+    /// Progress label of a `count` goal ({done}, {n}).
+    #[serde(default)]
+    pub progress: String,
+    /// Reward at age multiplier 1.
+    pub reward: MissionReward,
+}
+
+impl GrudgeRules {
+    /// Reward multiplier for a grudge `age` turns old.
+    pub fn age_multiplier(&self, age: u32) -> f64 {
+        self.age_tiers
+            .iter()
+            .filter(|t| t.min_age <= age)
+            .next_back()
+            .map_or(1.0, |t| t.multiplier)
+    }
+}
+
 /// What a success brings.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -174,6 +238,10 @@ mod tests {
         let rules = MissionRules::default();
         assert!((1..=2).contains(&rules.max_active));
         assert!(rules.templates.len() >= 6);
+        let g = &rules.grudge;
+        assert!(g.age_tiers.windows(2).all(|w| w[0].min_age < w[1].min_age));
+        assert!((g.age_multiplier(0) - 1.0).abs() < 1e-9);
+        assert!(g.age_multiplier(40) >= g.age_multiplier(10));
         let mut ids = std::collections::BTreeSet::new();
         for t in &rules.templates {
             assert!(ids.insert(&t.id), "{}", t.id);

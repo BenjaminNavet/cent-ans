@@ -19,6 +19,7 @@ use data_model::{
 use serde::{Deserialize, Serialize};
 
 use crate::events::{EventKind, GameEvent};
+use crate::grudges::{self, Grudge};
 use crate::rng::CampaignRng;
 use crate::state::{CampaignState, Season, Unit};
 
@@ -44,6 +45,9 @@ pub struct MissionsState {
     /// WR turn (ADR 0304): the offer awaiting the player's choice.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub offer: Option<MissionOffer>,
+    /// Affronts remembered, feeding the offers (ADR 0720).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub grudges: Vec<Grudge>,
 }
 
 /// An offer of several candidate missions: the player picks one
@@ -99,6 +103,12 @@ pub struct Mission {
     /// `treaty`: the faction's treaties when the mission was given.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub baseline: Vec<String>,
+    /// The grudge this mission avenges (ADR 0720).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grudge: Option<Grudge>,
+    /// Prestige lost on failure, overriding the global one (grudges).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub failure_prestige: Option<i32>,
 }
 
 key_enum! {
@@ -143,6 +153,9 @@ pub struct MissionView {
     /// Historical note of a faction mission.
     #[serde(default)]
     pub source: String,
+    /// Seasons since the affront this mission avenges (grudge missions).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grudge_age: Option<u32>,
 }
 
 /// One candidate of the pending offer, for the choice window.
@@ -160,6 +173,9 @@ pub struct OfferCandidateView {
     pub source: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub province: Option<ProvinceId>,
+    /// Seasons since the affront this mission avenges (grudge missions).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grudge_age: Option<u32>,
 }
 
 /// The pending offer as shown to the player.
@@ -208,6 +224,9 @@ pub fn resolve_missions(state: &mut CampaignState, data: &GameData, events: &mut
                 if !state.missions.done.contains(&mission.template) {
                     state.missions.done.push(mission.template.clone());
                 }
+                if let Some(grudge) = &mission.grudge {
+                    state.missions.grudges.retain(|g| g != grudge);
+                }
                 apply_reward(state, data, &player, &mission);
                 let text = format!(
                     "Mission accomplie : {}. Récompense : {}.",
@@ -224,7 +243,9 @@ pub fn resolve_missions(state: &mut CampaignState, data: &GameData, events: &mut
                 );
             }
             Verdict::Failure(reason) => {
-                let penalty = data.mission_rules.failure_prestige;
+                let penalty = mission
+                    .failure_prestige
+                    .unwrap_or(data.mission_rules.failure_prestige);
                 if penalty != 0 {
                     state.change_ruler_prestige(&player, penalty);
                 }
@@ -234,10 +255,23 @@ pub fn resolve_missions(state: &mut CampaignState, data: &GameData, events: &mut
                 }
                 close(state, &player, &mission, NoticeKind::Failed, text, events);
             }
-            Verdict::Ongoing => kept.push(mission),
+            Verdict::Ongoing => {
+                // ADR 0720: a grudge extinguished (peace, truce, place retaken
+                // by a third party) cancels its mission, without penalty.
+                if mission.grudge.as_ref().is_some_and(|g| !grudges::is_live(state, g)) {
+                    let text = format!(
+                        "Mission annulée : {} (la rancune est éteinte). Aucune pénalité.",
+                        mission.title
+                    );
+                    close(state, &player, &mission, NoticeKind::Expired, text, events);
+                } else {
+                    kept.push(mission);
+                }
+            }
         }
     }
     state.missions.active = kept;
+    grudges::prune(state);
     expire_offer(state, events);
     offer_mission(state, data, &player, events);
 }
@@ -589,23 +623,40 @@ fn offer_mission(
         .map(|t| (t, candidates(state, data, player, t)))
         .filter(|(_, c)| !c.is_empty())
         .collect();
+    let mut grudge_pool = grudges::candidates(state, data);
     let mut rng = mission_rng(state.seed, turn);
     let mut built = Vec::new();
-    while built.len() < rules.offer_candidates.max(1) as usize && !pool.is_empty() {
-        let total: u32 = pool.iter().map(|(t, _)| t.weight.max(1)).sum();
+    while built.len() < rules.offer_candidates.max(1) as usize
+        && !(pool.is_empty() && grudge_pool.is_empty())
+    {
+        let total: u32 = pool.iter().map(|(t, _)| t.weight.max(1)).sum::<u32>()
+            + grudge_pool.iter().map(|(w, _)| *w).sum::<u32>();
         let mut roll = rng.below(total);
-        let at = pool
-            .iter()
-            .position(|(t, _)| {
-                let w = t.weight.max(1);
-                if roll < w {
-                    true
-                } else {
-                    roll -= w;
-                    false
-                }
-            })
-            .unwrap_or(0);
+        let at = pool.iter().position(|(t, _)| {
+            let w = t.weight.max(1);
+            if roll < w {
+                true
+            } else {
+                roll -= w;
+                false
+            }
+        });
+        let Some(at) = at else {
+            // Past the templates: the roll lands on a grudge (ADR 0720).
+            let at = grudge_pool
+                .iter()
+                .position(|(w, _)| {
+                    if roll < *w {
+                        true
+                    } else {
+                        roll -= *w;
+                        false
+                    }
+                })
+                .unwrap_or(0);
+            built.push(grudge_pool.remove(at).1);
+            continue;
+        };
         let (template, targets) = pool.remove(at);
         let target = targets[rng.below(targets.len() as u32) as usize].clone();
         built.push(build_mission(state, template, &target, turn));
@@ -669,6 +720,8 @@ fn build_mission(
         } else {
             Vec::new()
         },
+        grudge: None,
+        failure_prestige: None,
     }
 }
 
@@ -883,6 +936,26 @@ fn progress_of(state: &CampaignState, data: &GameData, mission: &Mission) -> (St
     let (done, of) = measure(state, &state.player_faction, mission);
     let done = done.min(of);
     let ratio = f64::from(done) / f64::from(of.max(1));
+    if let Some(grudge) = &mission.grudge {
+        let label = match grudge.kind {
+            grudges::GrudgeKind::LostSettlement => &data.mission_rules.grudge.lost_settlement,
+            grudges::GrudgeKind::DefeatedArmy => &data.mission_rules.grudge.defeated_army,
+            grudges::GrudgeKind::RaidedProvince => &data.mission_rules.grudge.raided_province,
+        };
+        let holder = mission
+            .province
+            .as_ref()
+            .and_then(|p| state.province_controller(p))
+            .map_or_else(|| "personne".to_owned(), |h| data.faction_name(h));
+        return (
+            label
+                .progress
+                .replace("{holder}", &holder)
+                .replace("{done}", &done.to_string())
+                .replace("{n}", &of.to_string()),
+            ratio,
+        );
+    }
     let Some(template) = data
         .mission_rules
         .templates
@@ -930,6 +1003,7 @@ impl CampaignState {
                 MissionView {
                     faction_mission: template.is_some_and(|t| t.faction.is_some()),
                     source: template.map(|t| t.source.clone()).unwrap_or_default(),
+                    grudge_age: m.grudge.as_ref().map(|g| g.age(self.turn)),
                     id: m.id,
                     kind: m.template.clone(),
                     title: m.title.clone(),
@@ -969,6 +1043,7 @@ impl CampaignState {
                         faction_mission: template.is_some_and(|t| t.faction.is_some()),
                         source: template.map(|t| t.source.clone()).unwrap_or_default(),
                         province: m.province.clone(),
+                        grudge_age: m.grudge.as_ref().map(|g| g.age(self.turn)),
                     }
                 })
                 .collect(),
