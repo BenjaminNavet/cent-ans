@@ -524,6 +524,10 @@ mod tests {
         for (key, figure) in &manifest.figures {
             let (kind, variant) = key.rsplit_once('_').expect("kind_variant key");
             let variant: u32 = variant.parse().expect("variant");
+            // Standards and other props have their own rigs and no soldier style.
+            if !matches!(kind, "infantry" | "archer" | "cavalry") {
+                continue;
+            }
             let style = style_of(figure.style.as_deref(), kind, variant);
             let rig = manifest.rig(&figure.rig).expect("rig of figure");
             let clips = rig.clips();
