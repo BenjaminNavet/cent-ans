@@ -103,6 +103,7 @@ fn main() -> ExitCode {
             flow::FlowPlugin,
         ))
         .add_plugins(fx::FlipbookPlugin)
+        .add_plugins(solari_trial())
         .add_plugins(fx::ModelMipsPlugin)
         .add_plugins(campaign::perf_switch::PerfSwitchPlugin)
         .insert_resource(cli);
@@ -110,4 +111,20 @@ fn main() -> ExitCode {
         AppExit::Success => ExitCode::SUCCESS,
         AppExit::Error(_) => ExitCode::FAILURE,
     }
+}
+
+/// `bevy_solari` trial (feature `solari`, `data/fx/solari.json`).
+#[cfg(feature = "solari")]
+fn solari_trial() -> battle::scene::solari::SolariTrialPlugin {
+    battle::scene::solari::SolariTrialPlugin
+}
+
+/// Without the feature the trial is a no-op plugin.
+#[cfg(not(feature = "solari"))]
+fn solari_trial() -> impl Plugin {
+    struct Nothing;
+    impl Plugin for Nothing {
+        fn build(&self, _app: &mut App) {}
+    }
+    Nothing
 }
