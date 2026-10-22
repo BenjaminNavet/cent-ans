@@ -17,6 +17,10 @@ Conditions du joueur : `CENT_ANS_VIEW_SIZE=3456x2234` + copie de son `settings.j
 - Outil : interrupteurs du shader du sol `CENT_ANS_PERF_OFF=t...` (liste `PERF_DEFS`, `terrain/material.rs`), `tshadow`.
 
 ## État
+- 23/10 1 h 30 : SMAA au lieu du MSAA sur la carte (ADR 0741, 1be8b2d71) : Ultra joueur 55-62 → 45,8 ms.
+  Trace Metal (xctrace) : passe opaque ≈ 35 ms de fragment (shader du sol), 4 cascades d'ombre ≈ 13 ms,
+  pas de passe fantôme. Densité du relief (RELIEF_PX 6 → 24) : ~0 ms sur le shader plat.
+  En cours : leviers d'ombres (`CENT_ANS_SHADOW_SIZE`, `CENT_ANS_MAP_CASCADES`).
 - 23/10 0 h 40 : mise à l'échelle portée (ADR 0740, commit dc8361581). Bissection fine du shader du sol en cours.
 - 22/10 23 h 15 : en attente, à la demande du joueur, de la fin d'une autre session (game-project-79) qui fait de gros changements.
 
@@ -29,6 +33,6 @@ Conditions du joueur : `CENT_ANS_VIEW_SIZE=3456x2234` + copie de son `settings.j
   `rsync -a --ignore-existing <principal>/game/assets/ game/assets/` ; tuer le client par son pid ; `CARGO_INCREMENTAL=0`.
 
 ## Prochaine étape
-1. Rebaser sur main une fois l'autre session finie.
-2. Banc de référence + banc profilé (`BENCH_FEATURES=profile`) : CPU ou GPU ?
-3. A/B `CENT_ANS_PERF_OFF=...` par famille pour chiffrer le GPU.
+1. Ombres de la carte (taille de carte d'ombre, cascades, ombres des arbres).
+2. Shader du sol : sauter les termes invisibles selon l'empreinte au sol (champs loin), puis micro-optimisations.
+3. Une capture de contrôle (SMAA, ombres), puis fusion dans main (worktree dédié, ff-only), ADR 0740/0741 dans INDEX.
