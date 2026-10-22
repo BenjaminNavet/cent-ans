@@ -1,16 +1,22 @@
-# Produire les animations — mode d'emploi
+# Produire les animations — mode d'emploi (chaîne Bevy)
 
-Comment les animations du jeu ont été produites, et comment en refaire. Décisions : ADR 0187
-(une source par famille), 0188 (bêtes en shader), 0189 (vidéos libres). Historique détaillé :
-`docs/wip/nt12-mocap.md`, `nt13-video-mocap.md`, `nt14-video-set2.md`, `fa3-anim.md`, `as*.md`,
-`as8*.md`.
+Comment les animations du jeu sont produites, et comment en refaire. Le client est en Bevy
+(ADR 0357) ; le client Godot est retiré (ADR 0366) : les anciens chemins `game/scripts/`,
+`game/shaders/`, `AnimationPlayer` et les tests `.gd` n'existent plus. Les recettes Blender et
+Python ci-dessous restent valides. Décisions : ADR 0187 (une source par famille), 0188 (bêtes en
+shader de sommets), 0189 (vidéos libres), 0014 (figurines skinnées, animations cuites en texture
+d'os), 0239 (manifeste skinné cuit hors ligne). Historique détaillé : `docs/wip/nt12-mocap.md`,
+`nt13-video-mocap.md`, `nt14-video-set2.md`, `fa3-anim.md`, `as*.md`, `as8*.md`.
 
 ## Principes
 - **Tout est local et gratuit.** Aucune animation ne vient d'un service payant (fal.ai, Meshy…).
-- **Une seule chaîne pour les personnages** : rig Quaternius/MakeHuman → clips Blender → texture
-  d'os → `MultiMesh`. Pas d'`AnimationPlayer` ni de `Skeleton3D` dans le jeu.
-- **Le reste est procédural** (shaders de sommets, GDScript), avec des réglages dans `data/fx/*.json`
-  validés par `data/schemas/`. Les valeurs y portent un bloc `source` quand elles sont mesurées.
+- **Les personnages sont cuits hors du jeu** : rig Quaternius / MakeHuman → clips Blender → manifeste
+  `manifest_merged.json` et texture d'os. Le client ne lit pas de graphe d'animation : la mêlée, la
+  marche et les réactions sont évaluées sur le GPU, dans le vertex shader, à partir de la texture d'os
+  et de l'heure de chaque soldat.
+- **Le reste est procédural** (shaders de sommets `.wesl`, systèmes Rust), avec des réglages dans
+  `data/fx/*.json`, validés par `data/schemas/`. Les valeurs y portent un bloc `source` quand elles
+  sont mesurées.
 - **Vidéos jamais dans le dépôt** : `~/dev/cent-ans-mocap-src/video/` (tournages du joueur) et
   `video/free/<famille>/` (Commons, un `LICENSE.txt` par fichier). Seuls les clips cuits, les
   courbes mesurées et les scripts sont versionnés.
@@ -34,6 +40,28 @@ dans `CREDITS.md`. Une courbe dérivée de CC BY-SA vit **dans son propre fichie
 mêlée à un fichier de réglages commun (ex. `data/fx/trebuchet_swing_curve.json`,
 `data/fx/camp_horse_motion.json`).
 
+## Où ça vit dans le client Bevy
+
+Chemins sous `client/src/` (code) et `game/assets/` (données cuites, racine d'assets du client).
+
+| Besoin | Code Rust | Shader `.wesl` | Réglages `data/fx/` |
+|---|---|---|---|
+| Figurines de bataille : famille × état → clips | `battle/units/anim.rs` (table, modes `Loop` / `Cycle` / `Volley` / `Pick`) | `battle/units/skinned.wesl` (lecture de la texture d'os, réaction aux coups) | `battle_animation.json` |
+| Batches skinnés, chargement du manifeste | `battle/units/skinned.rs`, `battle/units/figures.rs` (`models/battle_skinned/manifest_merged.json`) | idem | — |
+| Allures de cavalerie (pas, trot, galop, virages) | `battle/units/gaits.rs` | idem | `battle_animation.json` (`cavalry_gaits`) |
+| Cadences de lecture, sang, membres | `battle/units/corpses.rs`, `battle/decor/gore.rs`, `battle/decor/blood.rs` | — | `battle_gore.json` |
+| Engins de siège (trébuchet, bélier, bombarde) | `battle/siege/engines.rs`, `battle/siege/animation.rs`, `battle/siege/fx.rs` | — | `trebuchet_swing_curve.json`, `siege_engines.json`, `siege_fx.json` |
+| Servants des engins | `battle/siege/crew.rs` (mode `Pick`) | `battle/units/skinned.wesl` | `siege_engines.json` |
+| Chevaux attachés du camp | `battle/decor/camp_horse.rs` | `battle/decor/camp_horse.wesl`, `camp_horse_pose.wesl`, `camp_horse_shadow.wesl` | `camp_horse_motion.json`, `animal_motion.json` |
+| Bêtes, charrettes, troupeaux de la carte vivante | `campaign/life/anim.rs`, `campaign/life/motion.rs` | `campaign/life/anim.wesl`, `anim_pose.wesl`, `anim_shadow.wesl` | `animal_motion.json`, `animal_motion_measured.json` |
+| Armées sur la carte (cadence des figurines) | `campaign/armies/skinned.rs`, `campaign/armies/standard.rs` | — | `campaign_army_walk.json` |
+| Drapeaux, voiles | `campaign/armies/` | `campaign/armies/shaders/flag.wesl`, `sail.wesl` | — |
+| Feu, flipbooks | `fx/` | `fx/flipbook.wesl` | `fire_flipbooks.json`, `map_fire_wind.json` |
+| Vent, arbres, herbe | `battle/decor/wind.rs`, `campaign/vegetation/` | `battle/decor/wind.wesl`, `campaign/vegetation/billboard.wesl` | `battle_decor_look.json`, `understory.json` |
+
+Les commentaires `//!` de plusieurs modules citent encore le script Godot d'origine (« port de … »)
+et la liste des parties « non portées ». Ils servent de trace de provenance, pas d'état du code.
+
 ## Recettes par famille
 
 ### Gestes humains de combat (NT13/NT14) — défaut actuel
@@ -50,8 +78,9 @@ mêlée à un fichier de réglages commun (ex. `data/fx/trebuchet_swing_curve.js
    avec `measure FICHIER` (compare tournage / keyframé / CMU), `bake-melee` (cuit le défaut
    `melee/`), `render DIR [clips]` puis `contact_sheet.py` pour les planches.
 7. Fusion : `uv run --project tools python tools/cent_ans_tools/bake_skinned_manifest.py` régénère
-   `battle_skinned/manifest_merged.json` (mêlée + clips FA3 `default` + figurines GA3), chargé tel quel
-   par `BattleSkinned` ; à relancer après tout recuit de `melee/`, `fa3_anim/` ou des manifestes fins.
+   `game/assets/models/battle_skinned/manifest_merged.json` (mêlée + clips FA3 `default` + figurines
+   GA3), chargé tel quel par `battle/units/figures.rs` ; à relancer après tout recuit de `melee/`,
+   `fa3_anim/` ou des manifestes fins.
 
 Essai AS8a : les vidéos de reconstitution Commons donnent des pieds qui glissent (0,36–0,47 m,
 caméra à la main, jambes cachées par l'armure). Clips `vf_` non versionnés ; ils se recuisent hors
@@ -69,42 +98,53 @@ fusionnés, les autres restent cuits mais inutilisés). Les essais CMU (`--mocap
    `uv run tools/video_mocap/track_quadruped.py fit KEYPOINTS.json GAIT OUT.json`.
 4. Table versionnée : `tools/video_mocap/export_horse_gaits.py` →
    `tools/blender_scripts/data/horse_gaits_free.json` (+ `SOURCE.md`).
-5. Clips : `battle_skinned_gaits.py` (`horse_trot_free`, `gallop_free` ; réglages `FREE_*`) ;
-   recuit fin `battle_fine.py -- rigs`, grossier `as8b_rebake_coarse.py`.
+5. Clips : `tools/blender_scripts/battle_skinned_gaits.py` (`horse_trot_free`, `gallop_free` ;
+   réglages `FREE_*`) ; recuit fin `battle_fine.py -- rigs`, grossier `as8b_rebake_coarse.py`.
    `AS8B_LEGACY=1` rétablit les clips AS3.
 6. Mesures : `blender -b --factory-startup --python tools/blender_scripts/as8b_measure.py -- c_trot c_gallop`.
 7. Cadences de lecture : `data/fx/battle_gore.json` ; seuils d'allure : `data/fx/battle_animation.json`
-   (`cavalry_gaits`).
+   (`cavalry_gaits`, lus par `battle/units/gaits.rs`).
 
 Reste keyframé : pas (`c_walk`), cheval sans cavalier (`c_fall`).
 
 ### Bêtes et charrettes de campagne, chevaux du camp (AS1 → AS8c) — shader + mesures
-- Rendu : `game/shaders/animal_motion.gdshaderinc`, `camp_horse.gdshader`, `folk_prop.gdshader`,
-  piloté par `game/scripts/visual/animal_motion.gd`.
+- Rendu : `campaign/life/anim.wesl` (sommets, pas et cahots lus dans `animal_motion.json`) ;
+  chevaux attachés : `battle/decor/camp_horse.wesl`.
 - Mesures : `uv run tools/video_mocap/measure_motion.py sheet|track|analyse …` (suivi optique de
   points posés), chaîne complète `uv run tools/video_mocap/as8c_measure.py` →
   `data/fx/animal_motion_measured.json` et `data/fx/camp_horse_motion.json` (valeurs Rama, CC BY-SA).
 - Réglages : `data/fx/animal_motion.json` (tables de pas `swing_lut`/`lift_lut`, raies de cahot
-  `jolt_lines`, bloc `source` qui distingue mesuré et supposé).
+  `jolt_lines`, bloc `source` qui distingue mesuré et supposé ; `enabled` coupe l'effet).
 
 ### Engins, feu, herbe, drapeaux (AS4/AS5 → AS8d)
 - Mesures : `uv run tools/video_mocap/measure_motion_fx.py trebuchet|winch|swing-lut|cannon|grass|flag|flame …`
   (détail et limites : `docs/research/as8d-mesures.md`).
-- Trébuchet : courbe du bras `data/fx/trebuchet_swing_curve.json` lue par `siege_engines_fx.gd`
-  (repli sur la courbe procédurale si absent). Servants : `siege_crew_fx.gd`, `data/fx/siege_engines.json`.
-- Feu : `life_flame.gdshader` (`fire.flicker_hz`), planche optionnelle
-  `game/assets/textures/fx/flame_flipbook_video.png` (`fire.flipbook` dans `data/fx/map_fire_wind.json`).
-- Bannières, arbres, vent : `maquette_banner.gdshader`, `map_banner.gdshader`,
-  `battle_tree_impostor.gdshader`, `campaign_wind.gdshaderinc`.
+- Trébuchet : courbe du bras `data/fx/trebuchet_swing_curve.json`, appliquée aux nœuds nommés des
+  modèles par `battle/siege/engines.rs` (repli sur la courbe procédurale si absente). Servants :
+  `battle/siege/crew.rs`, réglages `data/fx/siege_engines.json`.
+- Feu : `fx/flipbook.wesl`, cadence `data/fx/fire_flipbooks.json` ; planche optionnelle
+  `game/assets/textures/fx/flame_flipbook_video.png`.
+- Bannières, arbres, vent : `campaign/markers/banner.wesl`, `battle/decor/wind.wesl`,
+  `campaign/vegetation/billboard.wesl`.
 
 ### Armées sur la carte (AS2)
-Cadence des figurines liée à la vitesse : `army_figures.gd`, `data/fx/campaign_army_walk.json`.
+Cadence des figurines liée à la vitesse : `campaign/armies/skinned.rs`, `data/fx/campaign_army_walk.json`.
 
 ## Vérifier
-Tests headless `game/tests/as1_test.gd` … `as8d_test.gd`, `an1b_clips_test.gd`, `smoke.gd` ;
-schémas : `uv run --project tools pytest`. Client Bevy (captures) uniquement via
-`client/run_bg.sh` (muet, hors écran).
+- Tests unitaires du client (mapping état → clips, allures, servants, bêtes) :
+  `cd client && source sccache-env.sh && cargo test --features dev` (sans `CENT_ANS_MUTE`, le test
+  audio échoue muet ; voir `CLAUDE.md`).
+- Smoke : `CENT_ANS_MUTE=1 client/tests/smoke.sh`.
+- Schémas des réglages `data/fx/` et scripts Python : `uv run --project tools pytest`.
+- Captures et dumps : **uniquement** via `client/run_bg.sh` avec `CENT_ANS_MUTE=1` et `--offscreen`
+  (fenêtre masquée, muet). Options `--dump-state` et `--shot` : `client/README.md`. Jamais le binaire
+  lancé en direct avec une fenêtre.
 
 ## Ce qui manque encore
-Bombarde, mangonneau, porteurs de pierres, cheval attaché, pas du cheval : aucune vidéo libre
-exploitable ; procédural ou tournage du joueur (AS6).
+- Aucune vidéo libre exploitable pour la bombarde, le mangonneau, les porteurs de pierres, le cheval
+  attaché, ni pour le pas du cheval (`c_walk`) et la chute sans cavalier (`c_fall`) : procédural ou
+  tournage du joueur (AS6).
+- Pas de test qui vérifie, pour chaque famille et chaque état, qu'un clip existe dans le manifeste
+  cuit : un nom absent retombe silencieusement sur le repli.
+- Effets au sol et aux impacts non portés (mottes sous les sabots, étincelles sur armure) : voir
+  `docs/wip/nuit-critiques/animation-vfx.md`.

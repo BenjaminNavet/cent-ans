@@ -1,76 +1,76 @@
-# État de l'application
+# État du projet
 
-Dernière mise à jour : 2026-10-09 (synthèse rédigée le 2026-09-24 ; historique dans `docs/archive/status-historique.md`).
+Dernière mise à jour : 2026-10-22. Référence : branche `main` (a8effdd93). Historique jalon par jalon
+jusqu'à M10 / F1-F9 / G1-G5 : `docs/archive/status-historique.md` ; feuille de route : `docs/roadmap.md`.
 
-## Où en est-on
-- **Jeu complet et finalisé** : campagne 1337-1453 (1477 pour la Bourgogne) jouable de bout en bout avec les
-  trois factions, 29 factions au total, 117 événements de chronique dont des chaînes, IA qui mène une vraie
-  guerre de Cent Ans (France-Angleterre en guerre 54-76 % du siècle, 3 à 8 phases, alliances historiques),
-  batailles et sièges 3D avec phase de déploiement, rendu semi-réaliste, icônes et infobulles partout, menu
-  illustré, réglages, sauvegardes automatiques, rapport de saison, alertes, tutoriel, encyclopédie (L), codex
-  historique (K), manuel (`docs/manuel.md`), crédits, export macOS vérifié (`tools/export_macos.sh`).
-- **Victoire** : tous les objectifs historiques tenus `hold_turns` saisons d'affilée (France 20, Angleterre et
-  Bourgogne 12). Sonde : `cargo run --release -p ai --example playthrough [graine]`.
-- **Qualité** : 310 tests Rust, 87 tests Python, smoke Bevy (`client/tests/smoke.sh`), clippy propre.
-- **Art** : 88/88 portraits, 117/117 miniatures de chronique (bandeau de la fenêtre de chronique,
-  `cent-ans assets event-art`), 116 illustrations de l'encyclopédie (unités, bâtiments, technologies,
-  factions, `cent-ans assets illustrations`), miniature en tête des 231 fiches du Codex (84 générées par
-  `cent-ans assets codex-art`, les autres reprennent l'image de leur `entity` ; capture
-  `docs/img/codex-window.png`) ; 19,20 $ dépensés sur 50 $ (`docs/budget.md`).
-- **Reste** : écarts d'équilibrage documentés plus bas (tableaux F4, G2, G4, G5) ; G5 : voisinage réel
-  (graphe de la carte), 4 grandes factions en vie en 1400 sur 40/40 graines.
-- Plan et suivi de la finalisation : `docs/design/v2-finalisation.md`, `docs/archive/chantiers.md`.
-- Design validé : `docs/design/2026-09-23-cent-ans-design.md`.
+## En bref
+- **Jeu** : campagne 1337-1453 (1477 pour la Bourgogne) jouable de bout en bout ; batailles et sièges en 3D,
+  arbitrage automatique des batailles navales (pas de combat naval 3D, décision du joueur) ; sauvegardes,
+  tutoriel, encyclopédie, codex, manuel (`docs/manuel.md`, raccourcis § 15 alignés sur le code le 22/10).
+- **Client** : **Bevy 0.20** (ADR 0357). Le client Godot et le pont GDExtension sont retirés (ADR 0366,
+  fusion du 2026-10-17 dans `main`). Lancement : `tools/launch.sh` (ADR 0362) ; sous Windows, lanceur
+  `Lancer Cent Ans.exe` (ADR 0153).
+- **Noyau** : Rust dans `core/` (crates `ai`, `data-model`, `game-api`, `relief-lod`, `seed-bots`,
+  `sim-battle`, `sim-campaign`, `vegetation`). Les règles de jeu y vivent ; `client/` ne fait que rendu,
+  UI et entrées.
+- **Dépôt** : `main` est **996 commits devant `origin/main`** (dernier push le 2026-10-14). Le joueur a
+  interdit le push ; aucune sauvegarde distante à ce jour.
+- **Playtest** : 7 testeurs le 2026-10-17, 11 lots de correctifs fusionnés (`docs/wip/fix-playtest-1017.md`
+  pour les restes). La nuit de playtest du 2026-10-22 (`docs/wip/nuit-playtest-2026-10-22.md`) n'a pas
+  encore de constats.
+- **Critères de sortie** : aucun. Il n'existe pas encore de définition écrite d'une version jouable.
 
-## Ce qui fonctionne
-Journal détaillé jalon par jalon (M1-M10, F1-F9, G1-G5, sessions suivantes) : `docs/archive/status-historique.md`. Vue d'ensemble du code : `docs/architecture.md`. Décisions : `docs/decisions/INDEX.md`. Chantiers récents : `docs/wip/`.
+## Budget (à décider par le joueur)
+- **Dépensé : 136,39 $** (OpenRouter 59,82 $ ; fal.ai 76,57 $), d'après `cent-ans budget summary` lancé le
+  2026-10-22 sur `docs/budget.md`.
+- **Plafond v1 de 50 $ : dépassé, environ 2,7 fois.** Le plafond d'origine n'a pas été relevé ; les
+  dépenses ont été approuvées par enveloppes nommées. Un plafond global révisé doit être fixé par le joueur.
+- La synthèse en tête de `docs/budget.md` (2026-10-09, 117,39 $) n'est plus à jour : elle omet notamment
+  TX (11,82 $) et le banc Meshy MX (6,90 $). À régénérer.
+- Crédits Meshy (abonnement, hors plafond) : solde de **125 crédits** d'après le journal du 2026-10-14.
+
+## Chantiers récents (2026-10-13 → 2026-10-22)
+
+| Chantier | État | Où lire |
+|---|---|---|
+| Migration Bevy (dépôt Godot retiré) | fusionné dans `main` le 17/10, non poussé | ADR 0357, 0362, 0366 |
+| Playtest 17/10 : correctifs | 11 lots fusionnés | `docs/wip/fix-playtest-1017.md` |
+| Qualité visuelle (VQ) | 8 lots fusionnés le 17/10 ; cible 40 i/s en ultra **non atteinte** et non remesurée depuis | `docs/wip/vq-qualite-visuelle.md` |
+| Seed bots | ADR 0348 fusionné le 13/10 ; correctifs ADR 0350 ; métriques de révoltes le 22/10 | ADR 0348, `docs/wip/seed-bots.md` |
+| Choc des charges en données | ADR 0711 fusionné le 20/10 ; paramètres « neutres » tant que le rééquilibrage IA n'est pas fait | ADR 0711, `docs/wip/choc-charges.md` |
+| Style Total War (TS) | lots T1 à T8 fusionnés le 20/10 ; T9 et T10 cités dans les notes, état à recouper | `docs/wip/ts-style-total-war.md` |
+| Refonte des systèmes | lot 1 A fait (mesure des révoltes) ; mêlée, économie et IA de campagne non commencées | `docs/wip/refonte-systemes.md` |
+| Branches `bl/*` (backlog) | en pause depuis le 17/10, hors `main` ; tri ou abandon à décider | `docs/wip/bl-backlog.md` (branche `bl/integ`) |
+| Meshy MX | vagues 11-13 dans `main` ; publication des modèles bloquée | `docs/wip/mx-meshy.md` |
+| Portage Windows | code fait (ADR 0087, 0153) ; essai sur un vrai PC restant | `docs/wip/windows.md` |
+| Critiques de nuit (22/10) | 12 rapports par rôle et une synthèse | `docs/wip/nuit-critiques/SYNTHESE.md` |
 
 ## Limites connues
-- F2 : `GameDataStore` n'expose pas les définitions d'unités, bâtiments, ressources et technologies ;
-  les infobulles lisent ces JSON de `data/` via `GameCatalog` (affichage seul ; coûts effectifs,
-  disponibilités et refus viennent de `CampaignSim`). À remplacer par des accesseurs Rust
-  (`get_unit_type`, `get_building`, `get_resource`). Forces/faiblesses d'unité : statistiques à
-  ±30 % de la moyenne des types d'unités (heuristique d'affichage). Les infobulles des traits
-  n'ont qu'une icône par catégorie, celles des compétences une par branche.
-- M10 assets : les images générées sont des JPEG/PNG chargés à la volée (`PortraitLoader.load_texture`) ;
-  tout le jeu fonctionne sans elles (écu de faction ou bandeau masqué en repli).
-- M10 assets : headless, `AudioDirector` charge les flux sans les jouer (le pilote factice fuit les lectures OGG).
-- `get_faction_summary` renvoie 0 pour projected_income/upkeep avant le premier tour (champs mis en cache en fin de tour) ; l'interface utilise `get_faction_economy` qui calcule à la volée.
-- Équilibrage (M10) : frais de cour et d'administration = 8 % du revenu + 1 % par province (plafond 35 %) + 3 % du trésor au-delà de huit saisons de revenu (F4 : 20 % au-delà de six saisons) ; débarquement en terre hostile (mouvement épuisé, −5 % d'hommes, −10 l'hiver, −10 de moral) ; l'IA n'envahit par mer que les provinces qu'elle revendique, rembourse ses dettes en 20 tours (licenciements groupés, tribut compris) ; les guerres contre une faction disparue prennent fin. Sur 5 graines × 464 tours : l'Angleterre survit partout (revenu ×2 à ×3), la France domine, l'Empire garde un trésor élevé (≈ 15 saisons de revenu) : à surveiller.
-- L'IA minimale recrute une unité par tour et thésaurise ; l'IA complète est M9.
-- La population ne varie pas encore (M3).
-- Factions manquantes (Anjou-Provence, Grenade, Hollande-Hainaut, Brabant, Gueldre, Venise, Florence…) remplacées par la faction la plus proche, voir `docs/design/provinces-1337.md`.
-- L'addon Blender MCP exige Blender ouvert en mode graphique ; le fallback headless est `tools/cent_ans_tools/blender.py`.
-
-- L'IA ne propose pas encore de mariages (M9).
-- M5 : l'IA diplomatique est volontairement prudente (peu de déclarations de guerre) ; la guerre de Cent Ans peut se conclure tôt par une paix blanche. Les noms des maisons générées viennent de la capitale ; le Portugal n'a pas de liste de prénoms dédiée.
-- M6 : le mock GDScript n'a pas de technologies.
-- F1 : l'interface n'affiche pas encore la ventilation par classe des effets (exposée par le pont :
-  `effects.by_class`).
-- G1 : la bataille 3D applique désormais les bonus des technologies de chaque camp (moral, mêlée, tir,
-  armure, par catégorie d'unité) en plus de ceux des bâtiments de la province de levée dans `battle_setup`
-  (`docs/archive/chantiers.md`) ; l'IA ne libère jamais un captif contre rançon d'elle-même
-  (elle paie, ou libère sur parole les simples chevaliers). Pas de faction Danemark : l'achat du Jutland
-  (`evt_valdemar_iv`) reste sans cession. Le plafond de recrutement (G1) limite l'IA à 3 levées par tour
-  dans sa capitale et 2 ailleurs (hors bâtiments) : trésors à resurveiller avec `century_probe`.
-- Les mariages ne sont pas inscrits au journal de la simulation (ordres immédiats) : l'interface affiche un message ; l'IA ne marie encore personne (M5).
-- Batailles (M7) : pas de collisions entre régiments amis ; ligne de vue simplifiée (relief, forêts) ; les engins de siège tirent comme des archers lourds en bataille rangée.
-- Sièges 3D (M8) : pas de vrai cheminement (les ordres contournent une seule ouverture à la fois ; un
-  ordre à travers la ville entière peut longer un mur) ; les murs bloquent par le centre des régiments,
-  leurs rectangles peuvent déborder sur la maçonnerie ; tours de la muraille décoratives (pas de tir
-  depuis les tours) ; bélier implicite pour tout assiégeant ; pas de sortie de la garnison pendant la
-  bataille ; maisons décoratives (pas d'obstacle). Les assauts d'IA sont courts (3-6 min) face à une
-  petite garnison.
-- IA de bataille (M9) : pas de manœuvre d'encerclement coordonnée ni d'usage du relief en attaque ;
-  l'IA ne change pas de formation (schiltron) d'elle-même.
-
-- M10 : les événements globaux (Peste noire, Constance) attendent le choix du joueur : la vague de peste
-  ne démarre qu'une fois la décision prise (ou expirée). La folie vise Charles VI : si la chronologie
-  diverge (Charles V non marié à Jeanne de Bourbon, Charles VI mort ou ne régnant pas en 1392-1394), elle
-  n'a pas lieu. Brétigny garde le repli « Poitiers a eu lieu » quand Jean II n'est plus captif.
+- **Performance** : la cible de 40 i/s en qualité ultra n'est pas atteinte (playtest du 17/10). La mesure
+  du lot VQ a été faite sur un banc non silencieux ; à refaire sur un banc `--offscreen` reproductible.
+- **Équilibrage** : écarts ouverts documentés (trésor de l'Empire, France dominante). Les révoltes sont
+  sous la cible (≈ 2,7 par partie, mesures de 0 à 4,3 selon les bots, bruit élevé). Aucune ligne de base
+  seed-bots n'est figée avant la refonte.
+- **Sauvegardes** : la version est écrite mais jamais contrôlée au chargement, et il n'existe pas encore de
+  migration (`core/crates/game-api/src/saves.rs`). Un changement de `CampaignState` rendrait les anciennes
+  sauvegardes fragiles.
+- **Intégration continue** : `client-bevy.yml` ne tourne que sur PR et à la demande ; les tests Python,
+  `clippy` et `fmt` ne sont pas lancés en CI.
+- **Données** : une partie des constantes de règles reste codée en dur dans `core/` (sièges, IA) ; les
+  schémas `data/schemas/` ne sont pas vérifiés par le code Rust au chargement.
+- **Interface** : barre du haut sans libellés, guide du tutoriel qui masque la carte, alertes non
+  hiérarchisées (critique UI/UX du 22/10).
+- **Animation et effets** : pas de mottes sous les sabots, pas d'étincelles d'impact, pas de test de
+  couverture des clips (`docs/animation.md`, § « Ce qui manque encore »).
+- **Documentation** : `docs/manuel.md` § 16 (Crédits) cite encore le moteur Godot.
+- **Tests** : les chiffres du 09/10 (310 tests Rust, 87 tests Python) n'ont pas été recomptés.
+- Les limites des jalons M1-M10 (factions de remplacement, mariages de l'IA, sièges sans sortie de
+  garnison, etc.) sont dans `docs/archive/status-historique.md`.
 
 ## Commandes
-- Build + tests : voir `CLAUDE.md`.
-- Budget : `cd tools && uv run cent-ans budget show` (dépensé : 0,00 $ / 50 $).
-
-> Note RX (ADR 0246) : les sondes `century_probe`, `balance_probe`, `ia_quality_probe`, `ai_duel_probe` ont été supprimées (`c2308153d`) ; la mesure de campagne se fait désormais avec `cargo run --release -p ai --example campaign_probe` (ADR 0246).
+- Lancer le jeu : `tools/launch.sh` (essai à blanc : `tools/launch.sh --dry-run`).
+- Tests : `cd core && cargo test --workspace` ; `cd client && cargo test --features dev` ;
+  `CENT_ANS_MUTE=1 client/tests/smoke.sh` ; `uv run --project tools pytest`.
+- Budget : `uv run --project tools cent-ans budget summary`.
+- Seed bots : `cd core && cargo run --profile seed-bots -p seed-bots -- run --quick` (ADR 0348).
+- Règles de travail et commandes complètes : `CLAUDE.md`, `client/README.md`.

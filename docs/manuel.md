@@ -61,9 +61,9 @@ Survolez n'importe quelle icône : les infobulles donnent coûts, effets, prére
 - **Entrée** ou cloche **Fin de tour** (en bas à droite) : votre tour est clos ; chaque faction IA joue ensuite le sien, l'une
   après l'autre, puis la saison s'écoule (économie, sièges, population, événements).
 - **Échap** : désélectionner, puis menu pause (sauvegarder, charger, réglages, aide, menu principal).
-- **Modes de carte** : M mécontentement, N diplomatie, R religion ; F12 capture d'écran.
+- **Modes de carte** : Maj+M mécontentement, N diplomatie, R religion ; F12 capture d'écran (§ 15).
 - **Barre du haut** : trésor, revenu de la saison et prévision, date, recherche en cours, boutons
-  Diplomatie (P), Chronique, Cour (C), Technologies (T), Objectifs (O), Menu.
+  Diplomatie (F3), Chronique (F5), Cour (C), Technologies (F4), Objectifs (O), Menu.
 - **Journal** (en haut à gauche, avec les avis) et **rapport de saison** en fin de tour : batailles, prises, déclarations,
   morts et naissances, constructions et recherches achevées ; un clic centre la caméra.
 - **Alertes** (à droite) : armée ennemie à la frontière, siège, dette, recherche inactive, bâtiment
@@ -354,7 +354,7 @@ contre rançon.
 
 ## 10. Diplomatie et religion
 
-Le panneau **Diplomatie** (P) montre l'attitude de chaque faction et ses raisons (intérêts, menace,
+Le panneau **Diplomatie** (F3) montre l'attitude de chaque faction et ses raisons (intérêts, menace,
 parenté, religion, historique) ; avant d'envoyer une proposition, il indique si elle serait acceptée et
 pourquoi.
 
@@ -372,7 +372,7 @@ Bourgogne suit le plus fort.
 
 ## 11. Technologies
 
-Deux arbres, **militaire** et **civil**, plus la **médecine** (T). Les points de recherche viennent de la
+Deux arbres, **militaire** et **civil**, plus la **médecine** (fenêtre Technologies, F4). Les points de recherche viennent de la
 base du royaume, des universités, monastères et scriptoria, et du dirigeant. Chaque technologie a une date
 historique : la rechercher plus de vingt ans en avance coûte 25 % de plus. Arc long, plates, bombardes,
 compagnies d'ordonnance ; moulins, comptabilité en partie double, lettres de change, imprimerie…
@@ -401,16 +401,82 @@ victoire ; perdre toutes ses terres, la défaite. À l'échéance, la campagne s
 
 ## 15. Raccourcis clavier (carte)
 
+Ces touches sont celles de la carte de campagne par défaut. Elles se réassignent dans Réglages, écran
+« Commandes » ; une touche déjà prise est échangée avec l'action concernée. Les raccourcis de bataille
+(section « Bataille » de cet écran) ne figurent pas ici. Source : `client/src/settings/keymap.rs`.
+
+### Caméra
+
 | Touche | Action |
 |---|---|
-| W A S D / flèches, Q / E, molette | caméra |
-| F2 | défilement par les bords |
-| Entrée | fin du tour |
-| Échap | désélectionner, menu pause |
-| C / T / P / O | cour / technologies / diplomatie / objectifs |
-| M / N / R | modes mécontentement / diplomatie / religion |
-| L / K | encyclopédie / codex |
-| F1 / F12 | aide / capture d'écran |
+| W / ↑, A / ←, S / ↓, D / → | avancer, aller à gauche, reculer, aller à droite |
+| Q / E | tourner à gauche / à droite |
+| Molette | zoom (non réassignable) |
+| Bouton central glissé | déplacer la vue (non réassignable) |
+| ScrollLock | défilement par les bords, oui / non |
+
+### Partie
+
+| Touche | Action |
+|---|---|
+| Entrée (ou Entrée du pavé) | finir la saison, avec confirmation selon le réglage |
+| Maj+Entrée | finir la saison sans confirmation |
+| Échap | fermer la fenêtre du dessus, puis menu pause |
+| F6 / F9 | sauvegarde rapide / chargement rapide |
+| F10 | réglages |
+| F11 | plein écran / fenêtré |
+| F12 | capture d'écran |
+
+### Fenêtres
+
+| Touche | Action |
+|---|---|
+| C | cour et personnages |
+| F4 | technologies |
+| F5 | chronique |
+| F3 | diplomatie et religion |
+| O | objectifs |
+| G | agents |
+| U | mes unités (armées et agents) |
+| B | colonies (revenus, chantiers, menaces) |
+| J | conseil du royaume (charges et conseils) |
+| M | économie (recettes, commerce, monnaie) |
+| K | codex (histoire et règles) |
+| L | codex, onglet Règles |
+| F1 | aide et raccourcis |
+
+Le panneau de faction n'a pas de raccourci.
+
+### Filtres de carte
+
+| Touche | Action |
+|---|---|
+| F | menu des filtres (richesse, population, loyauté…) |
+| Maj+M | mécontentement |
+| N | carte diplomatique |
+| R | carte religieuse |
+| V | routes commerciales |
+| I | économie, onglet Commerce |
+
+### Armées et colonies
+
+| Touche | Action |
+|---|---|
+| Tab / Maj+Tab | armée inactive suivante / précédente |
+| Ctrl+Tab | colonie suivante |
+| Début | aller à la capitale |
+| . | centrer sur l'armée sélectionnée |
+| Y | suivre l'armée sélectionnée |
+| X | séparer les régiments choisis |
+| H | laisser les régiments choisis en garnison |
+| 1 à 6 | postures : normale, chevauchée, siège, embuscade, marche forcée, camp retranché |
+
+### Maintenir une touche
+
+| Touche | Action |
+|---|---|
+| T (maintenue) | garder ouverte une bulle ou une infobulle |
+| Alt (maintenue) | explorer les infobulles en chaîne |
 
 ## 16. Crédits
 
