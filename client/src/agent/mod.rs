@@ -335,6 +335,7 @@ fn drive(world: &mut World) {
                 return;
             }
             ScriptCommand::Dump(path) => {
+                dump::prepare_dump(world);
                 let text = serde_json::to_string_pretty(&build_dump(world)).unwrap_or_default();
                 if let Err(message) = write_file(&path, text.as_bytes()) {
                     fatal(world, &message);

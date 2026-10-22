@@ -1,7 +1,19 @@
 //! `--dump-state` sections. Each plugin contributes a JSON section by registering a function.
 
+use bevy::ecs::schedule::ScheduleLabel;
 use bevy::prelude::*;
 use serde_json::{Map, Value};
+
+/// Schedule run just before a dump is built: it refreshes the statistics that only the dump
+/// reads (they used to be recomputed every frame in `Update`). Plugins add their systems with
+/// `app.add_systems(DumpPrepare, ...)`; the schedule never runs in normal play.
+#[derive(ScheduleLabel, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct DumpPrepare;
+
+/// Runs [`DumpPrepare`] (a no-op when no plugin registered a system for it).
+pub fn prepare_dump(world: &mut World) {
+    let _ = world.try_run_schedule(DumpPrepare);
+}
 
 /// A dump section: reads the world, returns `(section name, JSON)`.
 pub type DumpFn = fn(&World) -> (String, Value);
