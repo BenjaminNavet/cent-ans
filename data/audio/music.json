@@ -3,10 +3,7 @@
     "campaign": {
       "primary": [
         "assets/third_party/music/wikimedia/tomsinska_prelude.mp3",
-        "assets/third_party/music/wikimedia/tomsinska_cest_mon_amy.mp3",
-        "assets/third_party/music/wikimedia/kapsberger_capona.mp3",
-        "assets/third_party/music/wikimedia/greensleeves_juglaresa.mp3",
-        "assets/third_party/music/wikimedia/cabezon_duviensela.mp3"
+        "assets/third_party/music/wikimedia/tomsinska_cest_mon_amy.mp3"
       ],
       "fallback": [
         "assets/third_party/music/ars_nova/souvent_souspire.ogg",
@@ -26,9 +23,7 @@
     "campaign_france": {
       "primary": [
         "assets/third_party/music/wikimedia/tomsinska_prelude.mp3",
-        "assets/third_party/music/wikimedia/tomsinska_cest_mon_amy.mp3",
-        "assets/third_party/music/wikimedia/moulinie_fantasia_violes.mp3",
-        "assets/third_party/music/wikimedia/kapsberger_capona.mp3"
+        "assets/third_party/music/wikimedia/tomsinska_cest_mon_amy.mp3"
       ],
       "fallback": [
         "assets/third_party/music/ars_nova/souvent_souspire.ogg",
@@ -84,10 +79,8 @@
     },
     "campaign_italy": {
       "primary": [
-        "assets/third_party/music/wikimedia/kapsberger_capona.mp3",
         "assets/third_party/music/wikimedia/tomsinska_prelude.mp3",
         "assets/third_party/music/wikimedia/tomsinska_cest_mon_amy.mp3",
-        "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3",
         "assets/third_party/music/ars_nova/faenza_bel_fiore_danca.ogg"
       ],
       "fallback": [
@@ -275,7 +268,6 @@
     "assets/third_party/music/wikimedia/greensleeves_juglaresa.mp3": -1.0,
     "assets/third_party/music/wikimedia/huseyni_saz_semai.mp3": 0.5,
     "assets/third_party/music/wikimedia/istikhbar_mezmoum.mp3": -0.5,
-    "assets/third_party/music/wikimedia/kapsberger_capona.mp3": -2.0,
     "assets/third_party/music/wikimedia/landini_ecco_la_primavera.mp3": 0.5,
     "assets/third_party/music/wikimedia/landini_si_dolce_non_sono.mp3": 0.5,
     "assets/third_party/music/wikimedia/machaut_douce_dame_jolie.mp3": 0.5,

@@ -98,7 +98,7 @@ page par page (domaine public, CC0, CC BY ou CC BY-SA — jamais NC ni ND).
 - Francesco Landini, « Ecco la primavera » et « Si dolce non sono » (XIVe s.) — réalisations MIDI,
   Tetraktys, domaine public.
 - « Deo gracias Anglia » (Agincourt Carol, anonyme, après 1415) — réalisation instrumentale,
-  domaine public.
+  domaine public (*non jouée : aucune playlist, fichier conservé*).
 - « Sumer is Icumen In » (rota anglaise, XIIIe s.) — Brandtnight2000, CC BY-SA 4.0.
 - Gilles Binchois, « Triste plaisir » et « Dueil angoisseux » (XVe s.) — réalisations MIDI,
   Tetraktys, CC BY 3.0.
@@ -113,19 +113,23 @@ Sources détaillées (URL, licence exacte, traitement) :
 Musique calme de la carte de campagne et de la cour : enregistrements réels sur instruments
 anciens, sans voix ni synthétiseur. Licence vérifiée page par page via l'API Commons.
 
-- Anonyme, Prélude et « C'est mon amy » ; Adrian Le Roy, Bransles et « Je n'ay point plus
-  d'affection » — Magdalena Tomsińska, luth (Collegium Vocale Bydgoszcz), CC BY 3.0.
+- Anonyme, Prélude et « C'est mon amy » — Magdalena Tomsińska, luth (Collegium Vocale Bydgoszcz),
+  CC BY 3.0. Adrian Le Roy, Bransles et « Je n'ay point plus d'affection » — même source, CC BY 3.0
+  (*non jouées : retirées des playlists, fichiers conservés*).
 - J. S. Bach, Sarabande et Allemande BWV 996, Sarabande BWV 997, Prélude BWV 998 — Martha
-  Goldstein, luth-clavecin (Lautenwerk), CC BY-SA 2.0.
+  Goldstein, luth-clavecin (Lautenwerk), CC BY-SA 2.0 (*non jouées : retirées des playlists,
+  fichiers conservés*).
 - Tobias Hume, « Captaine Hume's Pavan » et « Love's Farewell » (1605) — Phillip W. Serna, viole
-  de gambe, CC BY-SA 3.0. Étienne Moulinié, Fantaisie à 4 (1639) — Phillip W. Serna, violes,
-  CC BY-SA 4.0.
+  de gambe, CC BY-SA 3.0 (*non jouées : retirées des playlists, fichiers conservés*). Étienne
+  Moulinié, Fantaisie à 4 (1639) — Phillip W. Serna, violes, CC BY-SA 4.0.
 - Orlando Gibbons, Pavane MB 16 — David Joseph Stith, clavecin, CC0.
 - « Greensleeves » — Emilio Villalba et Sara Marina (*La Pequeña Juglaresa*, 2020), CC BY 3.0.
 - Alonso Mudarra, pièces pour vihuela (1546) — José Miguel Moreno (Jornadas de Guitarra de
-  Valencia), CC BY 3.0 ; « Tiento para harpa » — Metzner, CC BY-SA 3.0.
+  Valencia), CC BY 3.0 ; « Tiento para harpa » — Metzner, CC BY-SA 3.0 (*non jouées : retirées des
+  playlists, fichiers conservés*).
 - Antonio de Cabezón, « Duviensela » — Joan Benson, clavicorde, CC BY-SA 2.0.
-- G. G. Kapsberger, « Capona » (1640) — Y. Nagai (théorbe) et K. Mieno (orgue), CC BY-SA 3.0.
+- G. G. Kapsberger, « Capona » (1640) — Y. Nagai (théorbe) et K. Mieno (orgue), CC BY-SA 3.0 (*non
+  jouée : retirée des playlists, fichier conservé*).
 
 Sources détaillées : `game/assets/third_party/music/wikimedia/SOURCE.md`.
 
@@ -142,7 +146,8 @@ Licence vérifiée page par page (domaine public ou CC0) ; extraits coupés à 1
   des XVIe-XVIIe s. : *postérieures à la période*, mais d'une tradition déjà vivante au XIVe s.
 - Musik des Orients (Hornbostel, Berlin, 1931 ; Congrès de musique arabe du Caire) : chant d'art
   en maqam Sika (Égypte), maqam Mezmum (Tunisie), Bachraf Kuzum en maqam Hijaz (Égypte) — domaine
-  public. Répertoires d'époque moderne, enregistrés en 1931 : *postérieurs à la période*.
+  public. Répertoires d'époque moderne, enregistrés en 1931 : *postérieurs à la période* ; non
+  jouées (retirées des playlists, fichiers conservés).
 - « Istikhbar Mezmoum », Lazaar Ben Dali Yahia (Tlemcen, 1929) — domaine public. Tradition
   arabo-andalouse héritée d'al-Andalus, dans sa forme moderne.
 - Hüseyni saz semaisi, Hafız Kemal Bey (kemençe) et Hayriye Hanım (oud) — domaine public.
