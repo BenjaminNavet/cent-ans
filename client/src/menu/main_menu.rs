@@ -11,6 +11,7 @@ use bevy::state::state_scoped::DespawnOnExit;
 use bevy::ui::InteractionDisabled;
 
 use super::battles::{BattleScreen, OpenBattleScreen};
+use super::music_credits;
 use super::saves::{GameLoaded, OpenSaveDialog, SaveDir, SaveMode, load_into};
 use super::{MenuData, MenuOverlay, OpenSettings, menu_button, spawn_backdrop, spawn_overlay};
 use crate::app::AppState;
@@ -277,14 +278,20 @@ fn spawn_battles(commands: &mut Commands, theme: &UiTheme) {
     ));
 }
 
-/// Credits: `CREDITS.md` of the repository root, simple Markdown turned into plain lines.
+/// Credits: `CREDITS.md` of the repository root, simple Markdown turned into plain lines, then the
+/// music attributions of `data/audio/credits.json` (`music_credits`, CC BY obligations).
 fn spawn_credits(commands: &mut Commands, theme: &UiTheme) {
-    let text = paths::find_root()
-        .ok()
+    let root = paths::find_root().ok();
+    let text = root
+        .as_ref()
         .and_then(|root| std::fs::read_to_string(root.join("CREDITS.md")).ok())
         .unwrap_or_else(|| {
             "Cent Ans — Benjamin Navet\nDéveloppé avec l'aide d'agents Claude.".into()
         });
+    let music = root
+        .as_ref()
+        .map(|root| music_credits::load(&paths::data_dir(root)))
+        .unwrap_or_default();
     let (overlay, panel) = spawn_overlay(commands, theme, "Credits", "Crédits", 760.0, 0);
     commands
         .entity(overlay)
@@ -307,6 +314,13 @@ fn spawn_credits(commands: &mut Commands, theme: &UiTheme) {
             continue;
         }
         commands.spawn((typed(theme, &content, variation), ChildOf(list)));
+    }
+    if !music.is_empty() {
+        commands.spawn((typed(theme, "Musique", UiType::Heading), ChildOf(list)));
+        for credit in &music {
+            let line = music_credits::credit_line(credit);
+            commands.spawn((typed(theme, &line, UiType::Body), ChildOf(list)));
+        }
     }
     commands.spawn((
         button_captioned(theme, "overlay:close", "Fermer"),

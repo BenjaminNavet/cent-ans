@@ -149,6 +149,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "movement_rules.schema.json": ("movement/rules.json",),
     "navigable_rivers.schema.json": ("movement/rivers.json",),
     "music.schema.json": ("audio/music.json",),
+    "audio_credits.schema.json": ("audio/credits.json",),
     "naval_fleets.schema.json": ("naval/fleets.json",),
     "naval_rules.schema.json": ("naval/rules.json",),
     "naval_ship_names.schema.json": ("naval/ship_names.json",),

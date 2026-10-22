@@ -28,6 +28,7 @@ pub mod faction_select;
 pub mod front_end;
 pub mod historical;
 pub mod main_menu;
+pub mod music_credits;
 pub mod pause;
 pub mod presets;
 pub mod save_extras;
