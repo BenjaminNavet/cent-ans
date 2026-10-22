@@ -31,3 +31,13 @@ Statut : inventaire fait (2026-10-22), rien d'implémenté.
 - Constat : seulement ~10 Mo de textures sûres (voir ADR). Rien n'est lancé en mode `Processed`, non testé à l'exécution.
 - Suite possible : (a) abandonner KTX2 ; (b) adapter les consommateurs CPU (cuire mips/atlas hors ligne, ordre : ground.rs,
   water/detail.rs, vegetation/mips.rs, towns/atlas) ; (c) ne compresser que `models/` (glb) si `fx/model_mips.rs` est adapté.
+
+## Mesure du gain réel (2026-10-22, option 2 examinée puis suspendue)
+- Le chiffre « ~5,9 Go de VRAM » pour `textures/battle/tx` additionnait les 14 biomes ; une bataille ne charge qu'un pack
+  (`load_pack`) : albedo + normales, bandes de 13 couches 1024² (1024×13312), soit ~18 Mo RGBA8+mips chacune.
+  Gain BC7 par bataille ≈ 30-40 Mo, sur une machine à mémoire unifiée : marginal.
+- Même raisonnement pour la campagne (terrain/hi, vegetation) : un pack à la fois. Seule la mesure de la mémoire GPU réelle
+  (outil Metal, pas de dump actuel) pourrait justifier le chantier.
+- Piste moins coûteuse si on y revient : bake hors ligne des tableaux (`ktx create --layers`, UASTC + feature `basis-universal`)
+  chargés à la place des bandes brutes quand le fichier existe, sans passer par `AssetMode::Processed`.
+- Décision : suspendu faute de gain mesuré ; aucun consommateur CPU modifié.
