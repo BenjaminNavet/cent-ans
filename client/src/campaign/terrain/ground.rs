@@ -454,6 +454,24 @@ pub fn load_pack(
     high: bool,
     with_normal: bool,
 ) -> Result<PackArrays, String> {
+    crate::agent::texture_census::timed(
+        format!("campaign terrain load_pack {rel} high={high}"),
+        |r: &Result<PackArrays, String>| {
+            r.as_ref().map_or(0, |p| {
+                p.albedo.data.as_ref().map_or(0, Vec::len)
+                    + p.normal.data.as_ref().map_or(0, Vec::len)
+            })
+        },
+        || load_pack_inner(root, rel, high, with_normal),
+    )
+}
+
+fn load_pack_inner(
+    root: &Path,
+    rel: &str,
+    high: bool,
+    with_normal: bool,
+) -> Result<PackArrays, String> {
     let base = read_json(&root.join("data").join(rel))?;
     let hi_rel = rel
         .rsplit_once('.')
@@ -557,6 +575,19 @@ pub fn load_pack(
 }
 
 fn load_sheet(root: &Path, res_path: &str) -> Result<Image, String> {
+    crate::agent::texture_census::timed(
+        format!("terrain sheet jpg {res_path}"),
+        |r: &Result<Image, String>| {
+            r.as_ref()
+                .ok()
+                .and_then(|i| i.data.as_ref())
+                .map_or(0, Vec::len)
+        },
+        || load_sheet_inner(root, res_path),
+    )
+}
+
+fn load_sheet_inner(root: &Path, res_path: &str) -> Result<Image, String> {
     let rel = res_path.strip_prefix("res://").unwrap_or(res_path);
     let path = root.join("game").join(rel);
     let bytes = std::fs::read(&path).map_err(|e| format!("{}: {e}", path.display()))?;
@@ -573,6 +604,14 @@ fn load_sheet(root: &Path, res_path: &str) -> Result<Image, String> {
 
 /// Decodes an 8-bit PNG into `(width, height, channels, bytes)` (grayscale 1, RGBA 4).
 fn decode_png8(path: &Path) -> Result<(usize, usize, usize, Vec<u8>), String> {
+    crate::agent::texture_census::timed(
+        format!("terrain decode_png8 {}", path.display()),
+        |r: &Result<(usize, usize, usize, Vec<u8>), String>| r.as_ref().map_or(0, |r| r.3.len()),
+        || decode_png8_inner(path),
+    )
+}
+
+fn decode_png8_inner(path: &Path) -> Result<(usize, usize, usize, Vec<u8>), String> {
     let file = File::open(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let mut reader = png::Decoder::new(BufReader::new(file))
         .read_info()

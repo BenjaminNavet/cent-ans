@@ -536,12 +536,10 @@ pub fn draw_ghosts(
     selection: Res<BattleSelection>,
     views: Res<super::input::BattleViews>,
     gesture: Res<Gesture>,
-    cameras: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
+    camera: Single<(&Camera, &GlobalTransform), With<BattleCamera>>,
 ) {
     let Some(player) = session.player else { return };
-    let Ok((camera, transform)) = cameras.single() else {
-        return;
-    };
+    let (camera, transform) = *camera;
     let eye = transform.translation();
     let zone = deployment.zones.first().copied();
     let sim = session.sim_mut();

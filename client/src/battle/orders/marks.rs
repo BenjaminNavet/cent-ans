@@ -104,7 +104,13 @@ pub struct Waypoints {
     pub routes: RouteCache,
 }
 
+/// Screen label of a waypoint; the node, hidden visibility and pick-through come with it.
 #[derive(Component)]
+#[require(
+    Node = Node { position_type: PositionType::Absolute, ..default() },
+    Visibility = Visibility::Hidden,
+    Pickable = Pickable::IGNORE,
+)]
 pub struct WaypointLabel(pub usize);
 
 /// Draws the legs of the queued orders, the arrival ghosts and fills [`Waypoints`].
@@ -244,7 +250,7 @@ pub fn update_labels(
     waypoints: Res<Waypoints>,
     theme: Res<UiTheme>,
     ui_scale: Res<bevy::ui::UiScale>,
-    cameras: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
+    camera: Single<(&Camera, &GlobalTransform), With<BattleCamera>>,
     mut labels: Query<(
         Entity,
         &WaypointLabel,
@@ -253,25 +259,17 @@ pub fn update_labels(
         &mut Visibility,
     )>,
 ) {
-    let Ok((camera, transform)) = cameras.single() else {
-        return;
-    };
+    let (camera, transform) = *camera;
     let have = labels.iter().count();
     for index in have..waypoints.labels.len() {
         commands.spawn((
             Name::new("WaypointLabel"),
             WaypointLabel(index),
-            Node {
-                position_type: PositionType::Absolute,
-                ..default()
-            },
             Text::new(""),
             theme.text_font(true, false, 22.0),
             TextColor(Color::srgb(1.0, 0.95, 0.75)),
             TextShadow::default(),
-            Visibility::Hidden,
             GlobalZIndex(UiTier::Hud.z() - 1),
-            Pickable::IGNORE,
             DespawnOnExit(crate::app::AppState::Battle),
         ));
     }

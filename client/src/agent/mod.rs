@@ -6,12 +6,15 @@
 
 pub mod bench;
 pub mod bench_battle;
+#[cfg(feature = "dev")]
+pub mod bevy_tools;
 pub mod cli;
 pub mod devtools;
 pub mod dump;
 pub mod perf_probe;
 pub mod profile;
 pub mod script;
+pub mod texture_census;
 
 use std::collections::VecDeque;
 use std::path::Path;
@@ -113,6 +116,7 @@ impl Plugin for AgentPlugin {
         .add_systems(Last, drive)
         .add_systems(Update, hide_named);
         app.add_plugins(perf_probe::PerfProbePlugin);
+        app.add_plugins(texture_census::TextureCensusPlugin);
         bench::add(app, cli);
         // With `dev`, BrpExtrasPlugin (devtools) installs the same transport with a chosen port.
         #[cfg(all(feature = "remote", not(feature = "dev")))]

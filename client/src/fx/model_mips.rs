@@ -101,10 +101,16 @@ fn generate_queued_mips(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<I
             continue;
         }
         budget -= 1;
+        let started = std::time::Instant::now();
         if let Some(mut image) = images.get_mut(id)
             && add_mips(&mut image)
         {
             queue.done += 1;
+            crate::agent::texture_census::record(
+                format!("model_mips {}x{}", image.width(), image.height()),
+                started,
+                image.data.as_ref().map_or(0, Vec::len),
+            );
         }
     }
 }

@@ -11,11 +11,13 @@
 //! - [`ford`]: spray, wakes and entry bursts of the regiments in water;
 //! - [`flash`]: bombard muzzle flash (sprites and a short point light);
 //! - [`impact`]: ember sparks where melee blows land (lot B2);
+//! - [`decals`]: clustered decals of blood and mud on the ground (lot decals, off by default);
 //! - [`siege_lights`]: point lights over the burning houses and gate of a siege.
 //!
 //! Not ported: the clods thrown by the hooves (`Clods` pool).
 
 pub mod campfires;
+pub mod decals;
 pub mod dust;
 pub mod flash;
 pub mod ford;
@@ -43,6 +45,7 @@ impl Plugin for BattleEffectsPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
             campfires::CampfirePlugin,
+            decals::DecalsPlugin,
             dust::DustPlugin,
             glow::GlowPlugin,
             trail::TrailPlugin,

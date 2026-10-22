@@ -152,14 +152,14 @@ pub fn help_text(settings: Option<&crate::settings::Settings>, keymap: &KeyMap) 
 
 fn spawn(
     mut commands: Commands,
-    roots: Query<Entity, With<BattleHudRoot>>,
+    root: Single<Entity, With<BattleHudRoot>>,
     existing: Query<(), With<HelpPanel>>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
     settings: Option<Res<crate::settings::Settings>>,
     keymap: Res<KeyMap>,
 ) {
-    let Ok(root) = roots.single() else { return };
+    let root = *root;
     if !existing.is_empty() {
         return;
     }

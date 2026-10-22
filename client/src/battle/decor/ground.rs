@@ -610,6 +610,18 @@ pub fn pack16(values: &[f32], fill: f32) -> [Vec4; 4] {
 /// Rearranges a `cols` x `rows` grid of square layers into a vertical strip (layers one under the
 /// other, row by row as Godot slices them), so `strip_to_array` can turn it into an array.
 pub fn grid_to_strip(image: &mut Image, cols: u32, rows: u32) -> bool {
+    let started = std::time::Instant::now();
+    let name = format!(
+        "grid_to_strip {}x{} ({cols}x{rows})",
+        image.width(),
+        image.height()
+    );
+    let ok = grid_to_strip_inner(image, cols, rows);
+    crate::agent::texture_census::record(name, started, image.data.as_ref().map_or(0, Vec::len));
+    ok
+}
+
+fn grid_to_strip_inner(image: &mut Image, cols: u32, rows: u32) -> bool {
     if cols <= 1 {
         return true;
     }
@@ -974,6 +986,18 @@ pub fn mip_count(size: u32) -> u32 {
 /// Turns a loaded strip into a repeating, mip-mapped, anisotropic 2D array (layers stay apart, no
 /// seam from the atlas). Returns false when the image does not have the expected shape.
 pub fn strip_to_array(image: &mut Image, layers: u32, anisotropy: u16) -> bool {
+    let started = std::time::Instant::now();
+    let name = format!(
+        "strip_to_array {}x{} ({layers} layers)",
+        image.width(),
+        image.height()
+    );
+    let ok = strip_to_array_inner(image, layers, anisotropy);
+    crate::agent::texture_census::record(name, started, image.data.as_ref().map_or(0, Vec::len));
+    ok
+}
+
+fn strip_to_array_inner(image: &mut Image, layers: u32, anisotropy: u16) -> bool {
     use bevy::image::{ImageAddressMode, ImageFilterMode, ImageSampler, ImageSamplerDescriptor};
     let Some(data) = image.data.take() else {
         return false;
@@ -1128,6 +1152,7 @@ fn pbr_input_from_standard_material(in: VertexOutput, f: bool) -> PbrInput {
 }
 fn apply_pbr_lighting(p: PbrInput) -> vec4<f32> { return p.material.base_color * dot(p.N, vec3<f32>(0.0, 1.0, 0.0)); }
 fn main_pass_post_lighting_processing(p: PbrInput, c: vec4<f32>) -> vec4<f32> { return c; }
+fn apply_decals(p: ptr<function, PbrInput>) {}
 "#;
         let wgsl = format!(
             "{stubs}{}",

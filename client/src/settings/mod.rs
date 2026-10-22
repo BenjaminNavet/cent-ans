@@ -11,6 +11,7 @@ pub mod keymap;
 pub mod migrate;
 mod model;
 pub mod palette;
+pub mod postfx;
 pub mod quality;
 mod rows;
 mod screen;
@@ -92,6 +93,9 @@ impl Plugin for SettingsPlugin {
             path.display(),
             if path.exists() { "loaded" } else { "defaults" }
         );
+        if let Some(params) = postfx::PostFxParams::load() {
+            app.insert_resource(params);
+        }
         app.insert_resource(loaded)
             .insert_resource(SettingsFile {
                 path,
@@ -104,6 +108,7 @@ impl Plugin for SettingsPlugin {
             .insert_resource(quality_presets)
             .insert_resource(initial_quality)
             .init_resource::<DirectionalLightShadowMap>()
+            .init_resource::<postfx::PostFxReport>()
             .init_resource::<SettingsScreen>()
             .init_resource::<AudioSettings>()
             .init_resource::<ReduceMotion>()
@@ -136,11 +141,18 @@ impl Plugin for SettingsPlugin {
                         quality::apply_shadows,
                         quality::apply_view_distance,
                     ),
+                    (
+                        postfx::apply_camera_effects,
+                        postfx::sync_ui_camera_hdr,
+                        postfx::apply_soft_shadows,
+                        postfx::report,
+                    ),
                     report_applied,
                 )
                     .chain(),
             )
-            .register_dump(dump_settings);
+            .register_dump(dump_settings)
+            .register_dump(postfx::dump);
     }
 }
 

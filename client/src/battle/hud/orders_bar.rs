@@ -384,7 +384,7 @@ fn wax_image(wax: Color) -> Image {
 #[allow(clippy::too_many_arguments)]
 fn spawn(
     mut commands: Commands,
-    roots: Query<Entity, With<BattleHudRoot>>,
+    root: Single<Entity, With<BattleHudRoot>>,
     slots: Query<(Entity, &super::geometry::HudSlot)>,
     existing: Query<(), With<SealNode>>,
     mut session: ResMut<BattleSession>,
@@ -394,7 +394,7 @@ fn spawn(
     assets: Res<AssetServer>,
     mut images: ResMut<Assets<Image>>,
 ) {
-    let Ok(root) = roots.single() else { return };
+    let root = *root;
     if !existing.is_empty() {
         return;
     }
