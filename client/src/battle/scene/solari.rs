@@ -52,7 +52,7 @@ impl SolariSettings {
 
 /// Wgpu features Solari needs that the default high-performance adapter lacks (empty = supported).
 pub fn missing_features() -> Result<String, String> {
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::default());
+    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::new_without_display_handle());
     let adapter = bevy::tasks::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
         power_preference: wgpu::PowerPreference::HighPerformance,
         ..default()
@@ -116,18 +116,17 @@ fn light_camera(
     }
 }
 
+type Untraced = (
+    With<MeshMaterial3d<StandardMaterial>>,
+    Without<RaytracingMesh3d>,
+);
+
 /// Solari needs UV0, tangents and `u32` indices on every traced mesh (same fix-ups as Bevy's
 /// `solari` example).
 fn trace_standard_meshes(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    entities: Query<
-        (Entity, &Mesh3d),
-        (
-            With<MeshMaterial3d<StandardMaterial>>,
-            Without<RaytracingMesh3d>,
-        ),
-    >,
+    entities: Query<(Entity, &Mesh3d), Untraced>,
 ) {
     for (entity, Mesh3d(handle)) in &entities {
         let Some(mut mesh) = meshes.get_mut(handle) else {
