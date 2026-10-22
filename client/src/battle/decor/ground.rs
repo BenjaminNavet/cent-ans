@@ -249,6 +249,12 @@ impl MaterialExtension for GroundExtension {
     fn fragment_shader() -> ShaderRef {
         "embedded://cent_ans_client/battle/decor/ground.wesl".into()
     }
+
+    /// The same file also writes the G-buffer (`PREPASS_PIPELINE`) when Solari makes the deferred
+    /// renderer the default: one shared material computation, two render paths.
+    fn deferred_fragment_shader() -> ShaderRef {
+        "embedded://cent_ans_client/battle/decor/ground.wesl".into()
+    }
 }
 
 pub type GroundMaterial = ExtendedMaterial<StandardMaterial, GroundExtension>;
@@ -662,6 +668,14 @@ pub struct PendingGrid {
 #[derive(Resource, Default, Debug)]
 pub struct PendingGrids(pub Vec<PendingGrid>);
 
+/// The ground arrays (albedo 73 MiB, normals, micro grain ~85 MiB with mips) are only read by the
+/// GPU: with `RENDER_WORLD` only, Bevy moves the pixels out of the main world at upload instead of
+/// keeping a second copy in RAM. No CPU consumer reads them (the ground has no CPU sampler; the
+/// siege backdrop and the town atlas use `strip_to_array` on their own images and are untouched).
+fn drop_cpu_copy(image: &mut Image) {
+    image.asset_usage = RenderAssetUsages::RENDER_WORLD;
+}
+
 fn convert_grids(
     mut commands: Commands,
     mut pending: ResMut<PendingGrids>,
@@ -675,6 +689,9 @@ fn convert_grids(
         let (cols, rows) = grid.grid;
         let ok = grid_to_strip(&mut image, cols, rows)
             && strip_to_array(&mut image, cols * rows, grid.anisotropy);
+        if ok {
+            drop_cpu_copy(&mut image);
+        }
         if let Some(stats) = stats.as_mut() {
             stats.micro_arrays += usize::from(ok);
         }
@@ -1044,6 +1061,9 @@ fn convert_strips(
             return true;
         };
         let ok = strip_to_array(&mut image, strip.layers, strip.anisotropy);
+        if ok {
+            drop_cpu_copy(&mut image);
+        }
         if let Some(stats) = stats.as_mut() {
             stats.arrays_converted += usize::from(ok);
             stats.mip_levels = stats
@@ -1128,9 +1148,31 @@ mod tests {
         assert_eq!(smooth(1.0, 0.0, -1.0), 1.0);
     }
 
-    /// `ground.wesl` validates (naga) once Bevy's imports are replaced by stubs.
-    #[test]
-    fn ground_shader_validates() {
+    /// Resolves the `@if(PREPASS_PIPELINE)` / `@if(!PREPASS_PIPELINE)` single-statement lines of
+    /// the WESL source for one render path (what Bevy's shader-def preprocessing does).
+    fn resolve_path(source: &str, deferred: bool) -> String {
+        let mut out = String::new();
+        let mut keep_next: Option<bool> = None;
+        for line in source.lines() {
+            let trimmed = line.trim();
+            if let Some(cond) = trimmed
+                .strip_prefix("@if(")
+                .and_then(|rest| rest.strip_suffix(')'))
+            {
+                let negated = cond.starts_with('!');
+                assert_eq!(cond.trim_start_matches('!'), "PREPASS_PIPELINE");
+                keep_next = Some(deferred != negated);
+                continue;
+            }
+            if keep_next.take().unwrap_or(true) {
+                out.push_str(line);
+            }
+            out.push('\n');
+        }
+        out
+    }
+
+    fn validate_ground_shader(deferred: bool) {
         let source = include_str!("ground.wesl");
         let body_start = source.find("struct GroundParams").unwrap();
         let stubs = r#"
@@ -1141,7 +1183,7 @@ struct VertexOutput {
     @location(2) uv_b: vec2<f32>,
     @location(3) color: vec4<f32>,
 };
-struct FragmentOutput { @location(0) color: vec4<f32>, };
+struct FragmentOutput { @location(0) color: vec4<f32>, @location(1) deferred: vec4<u32>, };
 struct Mat { base_color: vec4<f32>, perceptual_roughness: f32, };
 struct PbrInput { material: Mat, world_normal: vec3<f32>, N: vec3<f32>, };
 struct View { world_position: vec3<f32>, };
@@ -1151,11 +1193,15 @@ fn pbr_input_from_standard_material(in: VertexOutput, f: bool) -> PbrInput {
 }
 fn apply_pbr_lighting(p: PbrInput) -> vec4<f32> { return p.material.base_color * dot(p.N, vec3<f32>(0.0, 1.0, 0.0)); }
 fn main_pass_post_lighting_processing(p: PbrInput, c: vec4<f32>) -> vec4<f32> { return c; }
+fn deferred_output(in: VertexOutput, p: PbrInput) -> FragmentOutput {
+    return FragmentOutput(p.material.base_color, vec4<u32>(0u));
+}
 fn apply_decals(p: ptr<function, PbrInput>) {}
 "#;
         let wgsl = format!(
             "{stubs}{}",
-            source[body_start..].replace("constants::MATERIAL_BIND_GROUP", "2")
+            resolve_path(&source[body_start..], deferred)
+                .replace("constants::MATERIAL_BIND_GROUP", "2")
         );
         let module = naga::front::wgsl::parse_str(&wgsl)
             .unwrap_or_else(|e| panic!("{}", e.emit_to_string(&wgsl)));
@@ -1165,6 +1211,18 @@ fn apply_decals(p: ptr<function, PbrInput>) {}
         )
         .validate(&module)
         .unwrap_or_else(|e| panic!("{e:?}"));
+    }
+
+    /// `ground.wesl` validates (naga) once Bevy's imports are replaced by stubs, on the forward
+    /// path and on the deferred one (G-buffer output, Solari).
+    #[test]
+    fn ground_shader_validates() {
+        validate_ground_shader(false);
+    }
+
+    #[test]
+    fn ground_shader_validates_deferred() {
+        validate_ground_shader(true);
     }
 
     #[test]
