@@ -8,5 +8,12 @@
 - `decor/ground.wesl` appelle `apply_decals` avant l'éclairage (les décals ne sont pas appliqués par `pbr_input_from_standard_material`).
 - Dump section `decals` (count, slots, capacity, laid, recycled, dropped, feature_compiled). Tests unitaires : pool, durée de vie, fondu.
 
+## Vérifications
+- `cargo fmt` + `cargo clippy --features dev --all-targets -- -D warnings` : OK (sans la feature `decals`).
+- `cargo test --features dev decals` : NON exécuté, disque plein (175 Mo libres) lors de l'édition de liens.
+
 ## Prochaine étape
-- Compiler/clippy/test (en attente du banc), bench avant/après, puis décider du défaut.
+1. Libérer du disque, relancer `cargo test --features dev decals` puis la suite complète.
+2. Compiler avec `--features decals` (vérifier que le shader du sol compile avec `apply_decals`).
+3. Bench `tools/bevy_bench/bench.sh decals --bench-battle --offscreen` avant/après (feature + `enabled: true`), puis décider du défaut.
+4. Dump `decals` : vérifier le compte en bataille avec `enabled: true`.
