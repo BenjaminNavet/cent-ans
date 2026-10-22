@@ -47,6 +47,10 @@ pub enum CaptureOutcome {
     /// « Raser »: little gold, the place loses a level or becomes a ruin,
     /// heavy diplomatic malus.
     Raze => "raze",
+    /// « Remettre la place » (M2): a feudal gift to an ally or vassal.
+    Gift => "gift",
+    /// « Libérer la place » (M2): back to its rightful holder.
+    Liberate => "liberate",
 }
 }
 
@@ -58,6 +62,8 @@ impl CaptureOutcome {
             CaptureOutcome::Ransom => "Mettre la place à rançon",
             CaptureOutcome::Sack => "Livrer la place au pillage",
             CaptureOutcome::Raze => "Raser et brûler la place",
+            CaptureOutcome::Gift => "Remettre la place à un allié",
+            CaptureOutcome::Liberate => "Libérer la place",
         }
     }
 
@@ -67,6 +73,8 @@ impl CaptureOutcome {
             CaptureOutcome::Ransom => scores.ransom,
             CaptureOutcome::Sack => scores.sack,
             CaptureOutcome::Raze => scores.raze,
+            CaptureOutcome::Gift => scores.gift,
+            CaptureOutcome::Liberate => scores.liberate,
         }
     }
 }
@@ -94,9 +102,21 @@ pub struct CaptureState {
     pub pending: Vec<PendingCapture>,
     #[serde(default)]
     pub next_id: u32,
+    /// M2: banditry after a sack or a raze, by province.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub banditry: BTreeMap<ProvinceId, Banditry>,
     /// Razed places left in ruins, until the given turn (exclusive).
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub ruins: BTreeMap<SettlementId, u32>,
+}
+
+/// Temporary extra devastation of a province after a sack or a raze (M2).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Banditry {
+    /// Devastation points to take back at the end.
+    pub points: u8,
+    /// Turn at which the banditry ends (exclusive).
+    pub until: u32,
 }
 
 /// Why a `choose_capture_outcome` order was refused.
@@ -108,6 +128,8 @@ pub enum CaptureError {
     PlaceLost,
     #[error("impossible de raser cette place : {0}")]
     RazeForbidden(String),
+    #[error("impossible de céder cette place : {0}")]
+    CessionForbidden(String),
 }
 
 /// Figures of one outcome for one place (the preview shown to the player,
@@ -125,6 +147,9 @@ pub struct CaptureEffects {
     /// Heads lost (estimate at the preview).
     pub population_lost: u64,
     pub devastation: u8,
+    /// M2: temporary devastation of the banditry (included in `devastation`).
+    pub banditry_devastation: u8,
+    pub banditry_turns: u32,
     pub buildings_lost: Vec<BuildingId>,
     /// Fortification levels lost (raze).
     pub fortification_loss: u8,
@@ -136,6 +161,13 @@ pub struct CaptureEffects {
     pub papal_favor: i32,
     pub victim_opinion: i32,
     pub others_opinion: i32,
+    /// M2 (gift, liberate): opinion of the beneficiary (the recipient, or
+    /// the former holder) towards the giver.
+    pub recipient_opinion: i32,
+    /// M2 (liberate): opinion of the beneficiary's allies.
+    pub allies_opinion: i32,
+    /// M2 (liberate): prestige of the giver's ruler.
+    pub prestige: i32,
 }
 
 /// One choice of a pending capture, for the UI.
@@ -150,6 +182,12 @@ pub struct CaptureOptionView {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
     pub effects: CaptureEffects,
+    /// M2 (gift, liberate): the beneficiary proposed by default.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recipient: Option<FactionId>,
+    /// M2 (gift): every faction the place can be given to.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub recipients: Vec<FactionId>,
 }
 
 /// A pending capture, for the UI.
@@ -184,13 +222,43 @@ fn is_city(state: &CampaignState, settlement: &SettlementId) -> bool {
         .is_some_and(|s| state.province_city_id(&s.province) == Some(settlement))
 }
 
-/// Unrest of the occupation (applied by every capture).
+/// M2: the culture of the place's province is not the controller's (language,
+/// customary law): the occupation stirs more unrest.
+pub fn is_foreign_culture(state: &CampaignState, data: &GameData, settlement: &SettlementId) -> bool {
+    let Some(place) = state.settlements.get(settlement) else {
+        return false;
+    };
+    let province_culture = data.provinces.get(&place.province).map(|p| &p.culture);
+    let faction_culture = data.factions.get(&place.controller).map(|f| &f.culture);
+    province_culture.is_some() && faction_culture.is_some() && province_culture != faction_culture
+}
+
+/// Extra unrest of a foreign culture for `outcome`.
+fn foreign_extra(data: &GameData, outcome: CaptureOutcome) -> u8 {
+    let extra = &data.capture_rules.foreign_culture_extra;
+    match outcome {
+        CaptureOutcome::Occupy => extra.occupy,
+        CaptureOutcome::Ransom => extra.ransom,
+        CaptureOutcome::Sack => extra.sack,
+        CaptureOutcome::Raze => extra.raze,
+        CaptureOutcome::Gift | CaptureOutcome::Liberate => 0,
+    }
+}
+
+/// Unrest of the occupation (applied by every capture): the base of the
+/// kind of place plus, for a foreign culture, `foreign_culture_extra.occupy`.
 pub fn occupation_unrest(state: &CampaignState, data: &GameData, settlement: &SettlementId) -> u8 {
     let occupy = &data.capture_rules.occupy;
-    if is_city(state, settlement) {
+    let base = if is_city(state, settlement) {
         occupy.unrest_city
     } else {
         occupy.unrest_place
+    };
+    if is_foreign_culture(state, data, settlement) {
+        base.saturating_add(foreign_extra(data, CaptureOutcome::Occupy))
+            .min(100)
+    } else {
+        base
     }
 }
 
@@ -227,6 +295,7 @@ fn outcome_rules(rules: &CaptureRules, outcome: CaptureOutcome) -> Option<&Outco
         CaptureOutcome::Ransom => Some(&rules.ransom),
         CaptureOutcome::Sack => Some(&rules.sack),
         CaptureOutcome::Raze => Some(&rules.raze.effects),
+        CaptureOutcome::Gift | CaptureOutcome::Liberate => None,
     }
 }
 
@@ -242,6 +311,24 @@ pub fn preview(
     let Some(place) = state.settlements.get(settlement) else {
         return CaptureEffects::default();
     };
+    match outcome {
+        // Neither a gift nor a liberation stirs unrest: the occupation's is undone.
+        CaptureOutcome::Gift => {
+            return CaptureEffects {
+                recipient_opinion: rules.gift.recipient_opinion,
+                ..CaptureEffects::default()
+            };
+        }
+        CaptureOutcome::Liberate => {
+            return CaptureEffects {
+                recipient_opinion: rules.liberate.former_holder_opinion,
+                allies_opinion: rules.liberate.allies_opinion,
+                prestige: rules.liberate.prestige,
+                ..CaptureEffects::default()
+            };
+        }
+        _ => {}
+    }
     let Some(effects) = outcome_rules(rules, outcome) else {
         return CaptureEffects {
             unrest: occupation,
@@ -257,7 +344,13 @@ pub fn preview(
     });
     let gold =
         ((income * effects.gold_income_share).max(effects.min_gold as f64) * share).round() as i64;
-    let extra_unrest = scaled_u8(effects.extra_unrest, share);
+    // The occupation already counts `foreign_culture_extra.occupy`.
+    let foreign = if is_foreign_culture(state, data, settlement) {
+        foreign_extra(data, outcome).saturating_sub(foreign_extra(data, CaptureOutcome::Occupy))
+    } else {
+        0
+    };
+    let extra_unrest = scaled_u8(effects.extra_unrest.saturating_add(foreign), share);
     let population_percent = (f64::from(effects.population_percent) * share).round() as i32;
     let population_lost = (heads as f64 * f64::from(-population_percent.min(0)) / 100.0) as u64;
     let lost = (effects.buildings_destroyed as usize).min(place.buildings.len());
@@ -274,13 +367,22 @@ pub fn preview(
     } else {
         (0, false, 0)
     };
+    let banditry_devastation = scaled_u8(effects.banditry_devastation, share);
     CaptureEffects {
         gold,
         unrest: occupation.saturating_add(extra_unrest).min(100),
         extra_unrest,
         population_percent,
         population_lost,
-        devastation: scaled_u8(effects.devastation, share),
+        devastation: scaled_u8(effects.devastation, share)
+            .saturating_add(banditry_devastation)
+            .min(100),
+        banditry_devastation,
+        banditry_turns: if banditry_devastation > 0 {
+            effects.banditry_turns
+        } else {
+            0
+        },
         buildings_lost,
         fortification_loss,
         becomes_ruin,
@@ -290,6 +392,7 @@ pub fn preview(
         papal_favor: effects.papal_favor,
         victim_opinion: effects.victim_opinion,
         others_opinion: effects.others_opinion,
+        ..CaptureEffects::default()
     }
 }
 
@@ -310,6 +413,12 @@ pub fn describe(data: &GameData, effects: &CaptureEffects, previous: &FactionId)
     }
     if effects.devastation > 0 {
         lines.push(format!("Dévastation +{}", effects.devastation));
+    }
+    if effects.banditry_devastation > 0 {
+        lines.push(format!(
+            "dont banditisme +{} pendant {} saisons",
+            effects.banditry_devastation, effects.banditry_turns
+        ));
     }
     if !effects.buildings_lost.is_empty() {
         let names: Vec<String> = effects
@@ -363,6 +472,107 @@ pub fn describe(data: &GameData, effects: &CaptureEffects, previous: &FactionId)
     lines.join("\n")
 }
 
+/// Living, real factions other than `captor` (the rebels are no one's heir).
+fn is_candidate(state: &CampaignState, captor: &FactionId, faction: &FactionId) -> bool {
+    let rebels = FactionId::new(REBELS_FACTION).ok();
+    faction != captor
+        && Some(faction) != rebels.as_ref()
+        && state.factions.get(faction).is_some_and(|f| f.alive)
+        && !state.is_at_war(captor, faction)
+}
+
+/// M2: an ally (or suzerain, or vassal) of `captor` with an army on the
+/// place, a joint siege (`None` when no such army).
+fn allied_on_place(
+    state: &CampaignState,
+    settlement: &SettlementId,
+    captor: &FactionId,
+) -> Option<FactionId> {
+    state
+        .armies
+        .values()
+        .filter(|a| a.settlement() == Some(settlement))
+        .map(|a| &a.faction)
+        .find(|f| is_candidate(state, captor, f) && state.is_allied(captor, f))
+        .cloned()
+}
+
+/// M2: the factions `settlement` can be given to (« Remettre »): allies and
+/// vassals, at peace with `captor`; those standing on the place come first.
+pub fn gift_recipients(
+    state: &CampaignState,
+    settlement: &SettlementId,
+    captor: &FactionId,
+) -> Vec<FactionId> {
+    let mut out: Vec<FactionId> = state
+        .factions
+        .keys()
+        .filter(|f| is_candidate(state, captor, f) && state.is_allied(captor, f))
+        .cloned()
+        .collect();
+    if let Some(present) = allied_on_place(state, settlement, captor) {
+        out.retain(|f| f != &present);
+        out.insert(0, present);
+    }
+    out
+}
+
+/// M2: the rightful holder `settlement` can be given back to (« Libérer »):
+/// its de jure owner when that is neither the captor nor an enemy.
+pub fn liberation_recipient(
+    state: &CampaignState,
+    settlement: &SettlementId,
+    captor: &FactionId,
+) -> Option<FactionId> {
+    let owner = &state.settlements.get(settlement)?.owner;
+    is_candidate(state, captor, owner).then(|| owner.clone())
+}
+
+/// Default beneficiary of a cession (`None` for other outcomes or when no
+/// one qualifies).
+fn default_recipient(
+    state: &CampaignState,
+    settlement: &SettlementId,
+    captor: &FactionId,
+    outcome: CaptureOutcome,
+) -> Option<FactionId> {
+    match outcome {
+        CaptureOutcome::Gift => gift_recipients(state, settlement, captor)
+            .into_iter()
+            .next(),
+        CaptureOutcome::Liberate => liberation_recipient(state, settlement, captor),
+        _ => None,
+    }
+}
+
+/// Why `outcome` cannot go to `recipient` (`None`: it can).
+fn cession_refusal(
+    state: &CampaignState,
+    settlement: &SettlementId,
+    captor: &FactionId,
+    outcome: CaptureOutcome,
+    recipient: Option<&FactionId>,
+) -> Option<String> {
+    let allowed = match outcome {
+        CaptureOutcome::Gift => {
+            let list = gift_recipients(state, settlement, captor);
+            if list.is_empty() {
+                return Some("aucun allié ni vassal à qui la remettre".to_owned());
+            }
+            list
+        }
+        CaptureOutcome::Liberate => match liberation_recipient(state, settlement, captor) {
+            Some(owner) => vec![owner],
+            None => return Some("aucun tenant de droit à qui la rendre".to_owned()),
+        },
+        _ => return None,
+    };
+    match recipient {
+        Some(r) if !allowed.contains(r) => Some("ce bénéficiaire ne convient pas".to_owned()),
+        _ => None,
+    }
+}
+
 /// Called by [`crate::siege::capture`] once `settlement` is handed over to
 /// `captor`: the player gets a pending choice, an AI decides at once.
 pub(crate) fn on_captured(
@@ -400,7 +610,7 @@ pub(crate) fn on_captured(
     }
     let outcome = ai_choice(state, data, settlement, captor);
     apply_outcome(
-        state, data, settlement, captor, previous, &armies, outcome, events,
+        state, data, settlement, captor, previous, &armies, outcome, None, events,
     );
 }
 
@@ -438,9 +648,20 @@ pub fn ai_choice(
         bonuses.push(ai.exposed_bonus);
     }
     let raze_allowed = raze_refusal(state, data, settlement).is_none();
+    let can_gift = !gift_recipients(state, settlement, captor).is_empty();
+    let can_liberate = liberation_recipient(state, settlement, captor).is_some();
+    if can_gift && allied_on_place(state, settlement, captor).is_some() {
+        bonuses.push(ai.allied_present_bonus);
+    }
+    if can_liberate {
+        bonuses.push(ai.liberate_bonus);
+    }
     let mut best = (CaptureOutcome::Occupy, i32::MIN);
     for outcome in CaptureOutcome::ALL {
-        if outcome == CaptureOutcome::Raze && !raze_allowed {
+        if (outcome == CaptureOutcome::Raze && !raze_allowed)
+            || (outcome == CaptureOutcome::Gift && !can_gift)
+            || (outcome == CaptureOutcome::Liberate && !can_liberate)
+        {
             continue;
         }
         let score: i32 = bonuses.iter().map(|b| outcome.score(b)).sum();
@@ -461,9 +682,14 @@ pub(crate) fn apply_outcome(
     previous: &FactionId,
     armies: &[ArmyId],
     outcome: CaptureOutcome,
+    recipient: Option<&FactionId>,
     events: &mut Vec<GameEvent>,
 ) {
     if outcome == CaptureOutcome::Occupy {
+        return;
+    }
+    if matches!(outcome, CaptureOutcome::Gift | CaptureOutcome::Liberate) {
+        apply_cession(state, data, settlement, captor, outcome, recipient, events);
         return;
     }
     let outcome =
@@ -505,6 +731,18 @@ pub(crate) fn apply_outcome(
             .devastation
             .saturating_add(effects.devastation)
             .min(100);
+        if effects.banditry_devastation > 0 {
+            let entry = state
+                .captures
+                .banditry
+                .entry(province_id.clone())
+                .or_insert(Banditry {
+                    points: 0,
+                    until: 0,
+                });
+            entry.points = entry.points.saturating_add(effects.banditry_devastation);
+            entry.until = entry.until.max(state.turn + effects.banditry_turns);
+        }
         if effects.population_percent != 0 {
             let factor = f64::from((100 + effects.population_percent).max(0)) / 100.0;
             for class in [
@@ -597,6 +835,91 @@ pub(crate) fn apply_outcome(
     );
 }
 
+/// M2: « Remettre » / « Libérer »: the place goes (owner and controller) to
+/// the beneficiary, the occupation's unrest is undone. Without a valid
+/// beneficiary the place is simply occupied.
+fn apply_cession(
+    state: &mut CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    captor: &FactionId,
+    outcome: CaptureOutcome,
+    recipient: Option<&FactionId>,
+    events: &mut Vec<GameEvent>,
+) {
+    if cession_refusal(state, settlement, captor, outcome, recipient).is_some() {
+        return;
+    }
+    let Some(beneficiary) = recipient
+        .cloned()
+        .or_else(|| default_recipient(state, settlement, captor, outcome))
+    else {
+        return;
+    };
+    let rules = &data.capture_rules;
+    let occupation = occupation_unrest(state, data, settlement);
+    let Some(place) = state.settlements.get_mut(settlement) else {
+        return;
+    };
+    let province_id = place.province.clone();
+    let kind = place.kind;
+    place.owner = beneficiary.clone();
+    place.hand_over(&beneficiary);
+    place.garrison.clear();
+    if let Some(province) = state.provinces.get_mut(&province_id) {
+        province.unrest = province.unrest.saturating_sub(occupation);
+    }
+    let place_name = data.settlement_name(settlement);
+    let (opinion, turns, reason) = match outcome {
+        CaptureOutcome::Gift => (
+            rules.gift.recipient_opinion,
+            rules.gift.opinion_turns,
+            format!("A remis {place_name}"),
+        ),
+        _ => (
+            rules.liberate.former_holder_opinion,
+            rules.liberate.opinion_turns,
+            format!("A libéré {place_name}"),
+        ),
+    };
+    if opinion != 0 {
+        state.add_modifier(&beneficiary, captor, opinion, &reason, turns);
+    }
+    let who = data.faction_name(captor);
+    let to = data.faction_name(&beneficiary);
+    let place_label = if kind == SettlementKind::City {
+        data.province_name(&province_id)
+    } else {
+        place_name.clone()
+    };
+    let text = if outcome == CaptureOutcome::Gift {
+        format!("{who} remet {place_label} à {to}, en don féodal.")
+    } else {
+        let allies: Vec<FactionId> = state
+            .factions
+            .keys()
+            .filter(|f| {
+                *f != captor
+                    && **f != beneficiary
+                    && state.factions[*f].alive
+                    && state.is_allied(f, &beneficiary)
+            })
+            .cloned()
+            .collect();
+        for ally in allies {
+            state.add_modifier(&ally, captor, rules.liberate.allies_opinion, &reason, turns);
+        }
+        state.change_ruler_prestige(captor, rules.liberate.prestige);
+        crate::grudges::forget_settlement(state, settlement);
+        format!("{who} libère {place_label} et la rend à {to}.")
+    };
+    events.push(
+        GameEvent::new(EventKind::ProvinceCaptured, text)
+            .province(&province_id)
+            .faction(captor),
+    );
+}
+
 impl CampaignState {
     /// Captures waiting for `faction`'s choice, for the UI.
     pub fn capture_decision_views(
@@ -618,10 +941,42 @@ impl CampaignState {
                     .into_iter()
                     .map(|outcome| {
                         let effects = preview(self, data, &pending.settlement, outcome);
-                        let reason = (outcome == CaptureOutcome::Raze)
-                            .then(|| refusal.clone())
-                            .flatten();
+                        let cession = cession_refusal(
+                            self,
+                            &pending.settlement,
+                            &pending.faction,
+                            outcome,
+                            None,
+                        );
+                        let reason = match outcome {
+                            CaptureOutcome::Raze => refusal.clone(),
+                            CaptureOutcome::Gift | CaptureOutcome::Liberate => cession,
+                            _ => None,
+                        };
+                        let recipient = default_recipient(
+                            self,
+                            &pending.settlement,
+                            &pending.faction,
+                            outcome,
+                        );
+                        let recipients = if outcome == CaptureOutcome::Gift {
+                            gift_recipients(self, &pending.settlement, &pending.faction)
+                        } else {
+                            Vec::new()
+                        };
                         let mut effects_text = describe(data, &effects, &pending.previous);
+                        if let (Some(to), true) = (&recipient, reason.is_none()) {
+                            let line = if outcome == CaptureOutcome::Gift {
+                                format!("Remise à {} (troubles annulés)", data.faction_name(to))
+                            } else {
+                                format!(
+                                    "Rendue à {} (troubles annulés, rancune oubliée, prestige {:+})",
+                                    data.faction_name(to),
+                                    effects.prestige
+                                )
+                            };
+                            effects_text = format!("{line}\nAttitude de {} {:+}", data.faction_name(to), effects.recipient_opinion);
+                        }
                         if outcome == CaptureOutcome::Occupy {
                             effects_text = format!(
                                 "La place change de mains, sans plus.\n{effects_text} (déjà compté)"
@@ -634,6 +989,8 @@ impl CampaignState {
                             allowed: reason.is_none(),
                             reason,
                             effects,
+                            recipient,
+                            recipients,
                         }
                     })
                     .collect();
@@ -676,6 +1033,7 @@ impl CampaignState {
         faction: &FactionId,
         decision: u32,
         outcome: CaptureOutcome,
+        recipient: Option<FactionId>,
     ) -> Result<(), CaptureError> {
         let position = self
             .captures
@@ -697,6 +1055,11 @@ impl CampaignState {
                 return Err(CaptureError::RazeForbidden(reason));
             }
         }
+        if let Some(reason) =
+            cession_refusal(self, &settlement, faction, outcome, recipient.as_ref())
+        {
+            return Err(CaptureError::CessionForbidden(reason));
+        }
         let pending = self.captures.pending.remove(position);
         let mut events = Vec::new();
         apply_outcome(
@@ -707,6 +1070,7 @@ impl CampaignState {
             &pending.previous,
             &pending.armies,
             outcome,
+            recipient.as_ref(),
             &mut events,
         );
         for event in events {
@@ -722,6 +1086,20 @@ pub(crate) fn resolve_unanswered(state: &mut CampaignState) {
     state.captures.pending.clear();
     let turn = state.turn;
     state.captures.ruins.retain(|_, until| *until > turn);
+    // M2: the banditry ends, taking its devastation back.
+    let ended: Vec<(ProvinceId, Banditry)> = state
+        .captures
+        .banditry
+        .iter()
+        .filter(|(_, b)| b.until <= turn)
+        .map(|(p, b)| (p.clone(), *b))
+        .collect();
+    for (province, banditry) in ended {
+        state.captures.banditry.remove(&province);
+        if let Some(p) = state.provinces.get_mut(&province) {
+            p.devastation = p.devastation.saturating_sub(banditry.points);
+        }
+    }
 }
 
 /// Tests and headless UI checks only: `faction` takes `settlement` at once

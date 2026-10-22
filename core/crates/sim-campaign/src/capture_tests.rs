@@ -83,7 +83,7 @@ fn english_setup(data: &GameData, place: &SettlementId) -> CampaignState {
 }
 
 #[test]
-fn player_capture_opens_a_decision_with_four_priced_choices() {
+fn player_capture_opens_a_decision_with_six_priced_choices() {
     let data = game_data();
     let guyenne = city(
         &CampaignState::new_1337(data, fac("fac_france"), 7).unwrap(),
@@ -131,7 +131,7 @@ fn occupy_adds_nothing_to_the_occupation() {
     assert_eq!(
         occupied_unrest,
         unrest_before
-            .saturating_add(data.capture_rules.occupy.unrest_city)
+            .saturating_add(crate::capture::occupation_unrest(&state, data, &guyenne))
             .min(100)
     );
     state
@@ -140,6 +140,7 @@ fn occupy_adds_nothing_to_the_occupation() {
             Order::ChooseCaptureOutcome {
                 decision: id,
                 outcome: CaptureOutcome::Occupy,
+                recipient: None,
             },
         )
         .unwrap();
@@ -163,7 +164,7 @@ fn ransom_pays_the_previewed_gold_and_stirs_unrest() {
     let unrest = state.provinces[&province].unrest;
     let buildings = state.settlements[&guyenne].buildings.len();
     state
-        .choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Ransom)
+        .choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Ransom, None)
         .unwrap();
     assert_eq!(
         state.factions[&fac("fac_france")].treasury,
@@ -202,7 +203,7 @@ fn sack_takes_gold_people_and_a_building_and_hardens_the_troops() {
     let favor = state.factions[&fac("fac_france")].papal_favor;
     let treasury = state.factions[&fac("fac_france")].treasury;
     state
-        .choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Sack)
+        .choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Sack, None)
         .unwrap();
     assert_eq!(
         state.factions[&fac("fac_france")].treasury,
@@ -235,7 +236,7 @@ fn raze_is_refused_on_cities_and_emblematic_places() {
     );
     let mut state = english_setup(data, &guyenne);
     let id = french_capture(&mut state, data, &guyenne);
-    let refused = state.choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Raze);
+    let refused = state.choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Raze, None);
     assert!(matches!(refused, Err(CaptureError::RazeForbidden(_))));
     // The question is still open.
     assert_eq!(state.captures.pending.len(), 1);
@@ -246,7 +247,7 @@ fn raze_is_refused_on_cities_and_emblematic_places() {
     let view = &state.capture_decision_views(data, &fac("fac_france"))[0];
     assert!(!view.options[3].allowed);
     assert!(matches!(
-        state.choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Raze),
+        state.choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Raze, None),
         Err(CaptureError::RazeForbidden(_))
     ));
 }
@@ -261,7 +262,7 @@ fn raze_costs_a_level_or_leaves_a_ruin() {
     assert!(level >= 2);
     let id = french_capture(&mut state, data, &montlhery);
     state
-        .choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Raze)
+        .choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Raze, None)
         .unwrap();
     let place = &state.settlements[&montlhery];
     assert_eq!(place.fortification_level, level - 1);
@@ -279,7 +280,7 @@ fn raze_costs_a_level_or_leaves_a_ruin() {
     let mut state = english_setup(data, &royaumont);
     let id = french_capture(&mut state, data, &royaumont);
     state
-        .choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Raze)
+        .choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Raze, None)
         .unwrap();
     assert!(crate::capture::is_ruined(&state, &royaumont));
     assert_eq!(state.settlements[&royaumont].fortification_level, 0);
@@ -319,7 +320,7 @@ fn unanswered_captures_are_simply_occupied() {
     let id = french_capture(&mut state, data, &guyenne);
     state.settlements.get_mut(&guyenne).unwrap().controller = fac("fac_england");
     assert_eq!(
-        state.choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Sack),
+        state.choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Sack, None),
         Err(CaptureError::PlaceLost)
     );
 }

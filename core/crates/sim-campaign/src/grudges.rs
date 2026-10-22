@@ -194,6 +194,15 @@ pub(crate) fn is_live(state: &CampaignState, grudge: &Grudge) -> bool {
     }
 }
 
+/// M2 (ADR 0723): the player liberated `settlement`, the affront it
+/// recalls is settled; its grudges are forgotten without penalty.
+pub(crate) fn forget_settlement(state: &mut CampaignState, settlement: &SettlementId) {
+    state
+        .missions
+        .grudges
+        .retain(|g| g.settlement.as_ref() != Some(settlement));
+}
+
 /// Forgets the grudges that are no longer live (no penalty).
 pub(crate) fn prune(state: &mut CampaignState) {
     let kept: Vec<Grudge> = std::mem::take(&mut state.missions.grudges)

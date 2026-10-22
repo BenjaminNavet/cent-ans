@@ -359,6 +359,7 @@ fn court(view: &BotView, data: &GameData, out: &mut Vec<Candidate>) {
                 Order::ChooseCaptureOutcome {
                     decision: capture.id,
                     outcome: option.outcome,
+                    recipient: option.recipient.clone(),
                 },
             );
         }

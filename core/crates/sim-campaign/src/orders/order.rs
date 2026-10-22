@@ -494,6 +494,9 @@ pub enum Order {
     ChooseCaptureOutcome {
         decision: u32,
         outcome: crate::capture::CaptureOutcome,
+        /// M2: beneficiary of a gift (`None`: the default one).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        recipient: Option<FactionId>,
     },
     // ----- TW2-T3: mercenary companies (`mercenaries.rs`) --------------------
     /// `army` hires a company of `unit` from the reserve of the region it
