@@ -1,0 +1,71 @@
+{
+  "id": "evt_toison_d_or",
+  "title": "L’ordre de la Toison d’or",
+  "text": "À Bruges, pour son mariage avec Isabelle de Portugal, Philippe le Bon fonde un ordre de chevalerie de trente et un chevaliers sous le patronage de saint André et de la toison de Jason. Le collier d’or et de silex s’orne d’un briquet et d’une pierre à feu : c’est la devise de la maison de Bourgogne.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1430,
+      "season": "winter"
+    },
+    "until_year": 1431,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_burgundy"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Fonder l’ordre en grande pompe",
+      "effects": [
+        {
+          "type": "found_chivalric_order",
+          "order": "ord_golden_fleece"
+        },
+        {
+          "type": "treasury",
+          "amount": -3000
+        },
+        {
+          "type": "prestige",
+          "amount": 12
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_flanders",
+          "amount": 8,
+          "reason": "Fêtes de Bruges"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Remettre la fondation et réserver la dépense à la guerre",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 500
+        },
+        {
+          "type": "prestige",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1430-01-10"
+  },
+  "sources": [
+    "Ordre de la Toison d'or",
+    "Richard Vaughan, Philip the Good, Longman, 1970"
+  ]
+}

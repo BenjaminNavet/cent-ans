@@ -1,0 +1,101 @@
+{
+  "id": "evt_flagellants",
+  "title": "Des flagellants sur la route",
+  "text": "Une procession d’hommes torse nu, armés de fouets à pointes, entre dans la ville en chantant des cantiques. Ils annoncent la fin des temps ; la foule les suit, les clercs s’inquiètent.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 90,
+    "conditions": [
+      {
+        "type": "year_between",
+        "from": 1347,
+        "to": 1400
+      },
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic"
+          },
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic_rome"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Les laisser prêcher puis les chasser",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": 3
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 2
+        },
+        {
+          "type": "health",
+          "province": "all",
+          "amount": -1
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Fermer les portes de la ville",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -200
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 3
+        },
+        {
+          "type": "piety",
+          "amount": -1
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Les accueillir et les nourrir",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -400
+        },
+        {
+          "type": "piety",
+          "amount": 6
+        },
+        {
+          "type": "health",
+          "province": "all",
+          "amount": -4
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Flagellants",
+    "Norman Cohn, Les Fanatiques de l'Apocalypse, 1957"
+  ]
+}

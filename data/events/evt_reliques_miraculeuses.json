@@ -4,7 +4,22 @@
   "text": "Un ossement trouvé sous l’autel d’une chapelle en ruine passe pour celui d’un saint. On dit que des boiteux ont marché et les fidèles affluent avec des cierges.",
   "kind": "random",
   "trigger": {
-    "mean_time_to_happen": 90
+    "mean_time_to_happen": 90,
+    "conditions": [
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic"
+          },
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic_rome"
+          }
+        ]
+      }
+    ]
   },
   "scope": {
     "type": "province"

@@ -1,0 +1,73 @@
+{
+  "id": "evt_shrewsbury",
+  "title": "La bataille de Shrewsbury",
+  "text": "Les Percy, qui avaient fait le roi, se soulèvent contre Henri IV : Hotspur est tué dans la plaine de Shrewsbury, son oncle Worcester est décapité. C’est la première bataille où des archers anglais se tirent dessus à bout portant.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1403,
+      "season": "summer"
+    },
+    "until_year": 1404,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Châtier les chefs et confisquer les terres des Percy",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 2200
+        },
+        {
+          "type": "prestige",
+          "amount": 6
+        },
+        {
+          "type": "unrest",
+          "province": "prov_yorkshire",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Pardonner au comte de Northumberland, resté dans le Nord",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "prov_yorkshire",
+          "amount": -3
+        },
+        {
+          "type": "prestige",
+          "amount": -2
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_scotland",
+          "amount": -5,
+          "reason": "Percy ménagés"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1403-07-21"
+  },
+  "sources": [
+    "Bataille de Shrewsbury",
+    "Chris Given-Wilson, Henry IV, Yale UP, 2016"
+  ]
+}

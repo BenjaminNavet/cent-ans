@@ -1,0 +1,91 @@
+{
+  "id": "evt_mort_de_philippe_le_hardi",
+  "title": "La mort de Philippe le Hardi",
+  "text": "Le duc de Bourgogne meurt à Hal, laissant de lourdes dettes : sa veuve Marguerite de Flandre renonce à la succession mobilière pour éviter de les payer, selon la coutume, en déposant sa ceinture et ses clefs sur le cercueil. Son fils Jean prend le titre de duc.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1404,
+      "season": "spring"
+    },
+    "until_year": 1405,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_burgundy"
+  },
+  "options": [
+    {
+      "text": "Honorer toutes les dettes de la maison",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -3500
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "unrest",
+          "province": "prov_flandre",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Abandonner la succession mobilière comme le veut la coutume",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 1500
+        },
+        {
+          "type": "prestige",
+          "amount": -4
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_flanders",
+          "amount": -5,
+          "reason": "Ceinture sur le cercueil"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Lever une aide extraordinaire sur la Flandre",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 3000
+        },
+        {
+          "type": "unrest",
+          "province": "prov_flandre",
+          "amount": 9
+        },
+        {
+          "type": "wealth",
+          "province": "prov_flandre",
+          "amount": -4
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1404-04-27"
+  },
+  "sources": [
+    "Philippe le Hardi",
+    "Richard Vaughan, Philip the Bold, Longman, 1962"
+  ]
+}

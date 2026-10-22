@@ -1,0 +1,97 @@
+{
+  "id": "evt_concile_de_pise",
+  "title": "Le concile de Pise",
+  "text": "Las des deux papes qui s’excommunient, des cardinaux des deux obédiences convoquent un concile à Pise. Il dépose Grégoire XII et Benoît XIII et élit Alexandre V ; mais les déposés refusent de s’incliner et la chrétienté compte désormais trois papes.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1409,
+      "season": "spring"
+    },
+    "until_year": 1410,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      },
+      {
+        "type": "schism",
+        "active": true
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Envoyer des prélats au concile et suivre Alexandre V",
+      "effects": [
+        {
+          "type": "papal_favor",
+          "amount": 12
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        },
+        {
+          "type": "treasury",
+          "amount": -500
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Rester fidèle à Benoît XIII d’Avignon",
+      "effects": [
+        {
+          "type": "papal_favor",
+          "amount": -8
+        },
+        {
+          "type": "prestige",
+          "amount": -4
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_papacy",
+          "amount": -10,
+          "reason": "Fidélité à Avignon"
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Soustraire le royaume à toute obédience",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": -8
+        },
+        {
+          "type": "treasury",
+          "amount": 600
+        },
+        {
+          "type": "prestige",
+          "amount": 3
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1409-06-26"
+  },
+  "sources": [
+    "Concile de Pise",
+    "Noël Valois, La France et le Grand Schisme d'Occident"
+  ]
+}

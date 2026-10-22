@@ -1,0 +1,83 @@
+{
+  "id": "evt_achat_de_namur",
+  "title": "L’achat du comté de Namur",
+  "text": "Jean III de Namur, criblé de dettes et sans héritier, vend son comté au duc de Bourgogne pour cent trente-deux mille couronnes d’or, en gardant l’usufruit sa vie durant. À sa mort, le comté de Namur rejoint les terres bourguignonnes.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1429,
+      "season": "winter"
+    },
+    "until_year": 1430,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_namur",
+        "province": "prov_namur"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_burgundy"
+  },
+  "map_scene": "fair",
+  "options": [
+    {
+      "text": "Acheter Namur au comte pour 13 000 livres",
+      "effects": [
+        {
+          "type": "transfer_province",
+          "province": "prov_namur",
+          "from": "fac_namur",
+          "price": 13000
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_namur",
+          "amount": 15,
+          "reason": "Vente du comté"
+        }
+      ],
+      "ai_weight": 3,
+      "requires": [
+        {
+          "type": "treasury_above",
+          "amount": 13000
+        }
+      ],
+      "requires_reason": "Exige 13 000 livres au trésor."
+    },
+    {
+      "text": "Se contenter d’une alliance matrimoniale avec le comte",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_namur",
+          "amount": 20,
+          "reason": "Alliance matrimoniale"
+        },
+        {
+          "type": "prestige",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1429-01-23"
+  },
+  "sources": [
+    "Jean III de Namur",
+    "Richard Vaughan, Philip the Good, Longman, 1970"
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "id": "evt_predicateur_lollard",
+  "title": "Un prédicateur lollard",
+  "text": "Un clerc pauvre, vêtu de bure, lit l’Évangile en anglais sur le marché et dénonce le luxe des prélats. Les artisans l’écoutent, le curé crie à l’hérésie.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 70,
+    "conditions": [
+      {
+        "type": "year_between",
+        "from": 1381,
+        "to": 1430
+      },
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "controls",
+            "faction": "fac_england",
+            "province": "prov_middlesex"
+          },
+          {
+            "type": "controls",
+            "faction": "fac_england",
+            "province": "prov_kent"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Laisser l’évêque le faire arrêter",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": 4
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 4
+        },
+        {
+          "type": "papal_favor",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Protéger discrètement le prédicateur",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": -3
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -3
+        },
+        {
+          "type": "papal_favor",
+          "amount": -4
+        },
+        {
+          "type": "prestige",
+          "amount": 1
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Lui faire écrire ses sermons pour les examiner",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -300
+        },
+        {
+          "type": "piety",
+          "amount": 1
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -1
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Lollards",
+    "Anne Hudson, The Premature Reformation, Oxford, 1988"
+  ]
+}

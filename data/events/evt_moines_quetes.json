@@ -4,7 +4,22 @@
   "text": "Des frères mendiants parcourent la province, besace au flanc, et prêchent au pied des croix de carrefour. Ils demandent des aumônes pour leur couvent et promettent des prières aux généreux.",
   "kind": "random",
   "trigger": {
-    "mean_time_to_happen": 70
+    "mean_time_to_happen": 70,
+    "conditions": [
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic"
+          },
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic_rome"
+          }
+        ]
+      }
+    ]
   },
   "scope": {
     "type": "province"

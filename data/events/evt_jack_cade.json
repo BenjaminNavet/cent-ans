@@ -1,0 +1,90 @@
+{
+  "id": "evt_jack_cade",
+  "title": "La révolte de Jack Cade",
+  "text": "Après la perte de la Normandie, les hommes du Kent marchent sur Londres derrière un certain Jack Cade, qui se dit Mortimer. Ils demandent la tête des conseillers du roi ; ils sont dispersés à coups de pardons non tenus.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1450,
+      "season": "summer"
+    },
+    "until_year": 1451,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "faction": "fac_england",
+    "province": "prov_kent"
+  },
+  "map_scene": "revolt",
+  "options": [
+    {
+      "text": "Écraser la rébellion et pendre les meneurs",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "prov_kent",
+          "amount": 8
+        },
+        {
+          "type": "prestige",
+          "amount": 3
+        },
+        {
+          "type": "devastation",
+          "province": "prov_kent",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Promettre des pardons généraux, quitte à les violer",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "prov_kent",
+          "amount": -7
+        },
+        {
+          "type": "prestige",
+          "amount": -4
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Livrer un conseiller impopulaire à la colère du peuple",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "prov_kent",
+          "amount": -9
+        },
+        {
+          "type": "prestige",
+          "amount": -6
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_lancaster",
+          "amount": -8,
+          "reason": "Conseiller sacrifié"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1450-06"
+  },
+  "sources": [
+    "Révolte de Jack Cade",
+    "I. M. W. Harvey, Jack Cade's Rebellion of 1450, Oxford, 1991"
+  ]
+}

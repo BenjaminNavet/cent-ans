@@ -1,0 +1,97 @@
+{
+  "id": "evt_mort_d_henri_v",
+  "title": "La mort d’Henri V",
+  "text": "Henri V meurt de dysenterie à Vincennes, à trente-cinq ans, sans avoir régné deux mois en France. Son fils, Henri VI, n’a que neuf mois : le duc de Bedford sera régent de France, le duc de Gloucester protecteur d’Angleterre.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1422,
+      "season": "summer"
+    },
+    "until_year": 1423,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Confirmer Bedford régent et poursuivre la conquête",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 4
+        },
+        {
+          "type": "treasury",
+          "amount": -1500
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": 10,
+          "reason": "Bedford, beau-frère de Philippe"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser Gloucester gouverner seul",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 4
+        },
+        {
+          "type": "prestige",
+          "amount": -4
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": -15,
+          "reason": "Ambitions de Gloucester"
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Réduire l’armée d’occupation pour alléger l’impôt",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 1500
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -4
+        },
+        {
+          "type": "prestige",
+          "amount": -7
+        },
+        {
+          "type": "devastation",
+          "province": "prov_normandie",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1422-08-31"
+  },
+  "sources": [
+    "Henri V d'Angleterre",
+    "Christopher Allmand, Henry V, Yale UP, 1992"
+  ]
+}

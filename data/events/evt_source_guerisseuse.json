@@ -4,7 +4,22 @@
   "text": "Une source, près d’un vieux chêne, passe pour guérir les fièvres et les yeux malades. Des pèlerins de trois évêchés y viennent, et le curé se plaint de ces dévotions sans messe.",
   "kind": "random",
   "trigger": {
-    "mean_time_to_happen": 90
+    "mean_time_to_happen": 90,
+    "conditions": [
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic"
+          },
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic_rome"
+          }
+        ]
+      }
+    ]
   },
   "scope": {
     "type": "province"

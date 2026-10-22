@@ -1,0 +1,74 @@
+{
+  "id": "evt_heritage_du_brabant",
+  "title": "L’héritage du Brabant",
+  "text": "Le duc Philippe de Brabant, cousin du duc de Bourgogne, meurt sans enfants. Les États de Brabant et de Limbourg reconnaissent Philippe le Bon comme héritier, malgré les prétentions de sa cousine Marguerite et des prétendants impériaux.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1430,
+      "season": "autumn"
+    },
+    "until_year": 1431,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_brabant",
+        "province": "prov_brabant"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_burgundy"
+  },
+  "options": [
+    {
+      "text": "Faire reconnaître les droits bourguignons par les États",
+      "effects": [
+        {
+          "type": "transfer_province",
+          "province": "prov_brabant",
+          "from": "fac_brabant"
+        },
+        {
+          "type": "prestige",
+          "amount": 8
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_empire",
+          "amount": -12,
+          "reason": "Annexion du Brabant"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Laisser l’héritage à la branche cadette",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_brabant",
+          "amount": 15,
+          "reason": "Héritage respecté"
+        },
+        {
+          "type": "prestige",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 0
+    }
+  ],
+  "historical_date": {
+    "value": "1430-08-04"
+  },
+  "sources": [
+    "Philippe de Saint-Pol",
+    "Richard Vaughan, Philip the Good, Longman, 1970"
+  ]
+}

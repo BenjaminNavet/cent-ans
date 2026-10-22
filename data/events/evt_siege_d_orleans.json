@@ -1,0 +1,107 @@
+{
+  "id": "evt_siege_d_orleans",
+  "title": "Le siège d’Orléans",
+  "text": "Le comte de Salisbury a mis le siège devant Orléans, clef de la Loire ; il y est tué par un boulet, et les Anglais s’enferment dans leurs bastilles autour de la ville. Les Orléanais tiennent, mais l’argent et les vivres manquent, et le dauphin hésite à bouger.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1428,
+      "season": "autumn"
+    },
+    "until_year": 1429,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      },
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "faction": "fac_france",
+    "province": "prov_touraine"
+  },
+  "map_scene": "siege",
+  "options": [
+    {
+      "text": "Lever des vivres et des hommes dans toute la vallée de la Loire",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -1500
+        },
+        {
+          "type": "unrest",
+          "province": "prov_touraine",
+          "amount": -5
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "devastation",
+          "province": "prov_touraine",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Traiter avec Philippe de Bourgogne pour qu’il reprenne ses troupes",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": 15,
+          "reason": "Orléans remis en dépôt"
+        },
+        {
+          "type": "prestige",
+          "amount": -8
+        },
+        {
+          "type": "treasury",
+          "amount": -400
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Ouvrir les portes et négocier une capitulation honorable",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 1200
+        },
+        {
+          "type": "prestige",
+          "amount": -18
+        },
+        {
+          "type": "unrest",
+          "province": "prov_touraine",
+          "amount": 12
+        },
+        {
+          "type": "devastation",
+          "province": "prov_touraine",
+          "amount": 8
+        }
+      ],
+      "ai_weight": 0
+    }
+  ],
+  "historical_date": {
+    "value": "1428-10-12"
+  },
+  "sources": [
+    "Siège d'Orléans",
+    "Philippe Contamine, Jeanne d'Arc, 1994"
+  ]
+}

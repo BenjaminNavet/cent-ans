@@ -4,7 +4,22 @@
   "text": "Une troupe de pèlerins en route pour Compostelle s’est arrêtée dans la province : plusieurs sont fiévreux et l’on craint qu’ils ne répandent le mal. L’hôpital du bourg est plein.",
   "kind": "random",
   "trigger": {
-    "mean_time_to_happen": 70
+    "mean_time_to_happen": 70,
+    "conditions": [
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic"
+          },
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic_rome"
+          }
+        ]
+      }
+    ]
   },
   "scope": {
     "type": "province"

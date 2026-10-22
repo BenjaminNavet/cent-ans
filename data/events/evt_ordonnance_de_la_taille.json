@@ -1,0 +1,95 @@
+{
+  "id": "evt_ordonnance_de_la_taille",
+  "title": "L’ordonnance d’Orléans",
+  "text": "Réunis à Orléans, les États généraux de langue d’oïl acceptent que le roi lève la taille sans les consulter et qu’il ait seul le droit d’entretenir des gens de guerre. Les capitaines se plaignent, mais la monarchie tient enfin les moyens d’une armée permanente.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1439,
+      "season": "autumn"
+    },
+    "until_year": 1440,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Instituer la taille permanente et réserver l’armée au roi",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 3000
+        },
+        {
+          "type": "prestige",
+          "amount": 8
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 7
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": -8,
+          "reason": "Monopole royal des armes"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Maintenir l’ancien système des aides votées",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -4
+        },
+        {
+          "type": "treasury",
+          "amount": 300
+        },
+        {
+          "type": "prestige",
+          "amount": -4
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Compromis : taille limitée à la durée de la guerre",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 1500
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 2
+        },
+        {
+          "type": "prestige",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1439-11-02"
+  },
+  "sources": [
+    "Ordonnance d'Orléans (1439)",
+    "Philippe Contamine, Guerre, État et société à la fin du Moyen Âge, 1972"
+  ]
+}

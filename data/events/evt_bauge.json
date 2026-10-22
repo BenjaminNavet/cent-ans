@@ -1,0 +1,83 @@
+{
+  "id": "evt_bauge",
+  "title": "La victoire de Baugé",
+  "text": "Le duc de Clarence, frère du roi Henri V, charge sans attendre ses archers sur les Franco-Écossais du maréchal de La Fayette et du comte de Buchan. Il est tué avec une partie de sa noblesse : c’est la première grande défaite anglaise depuis longtemps et le dauphin Charles y gagne un peu de crédit.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1421,
+      "season": "spring"
+    },
+    "until_year": 1422,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      },
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Exploiter la victoire et rappeler les Écossais",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 12
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_scotland",
+          "amount": 15,
+          "reason": "Vainqueurs de Baugé"
+        },
+        {
+          "type": "treasury",
+          "amount": -700
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -4
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Négocier la rançon des prisonniers anglais",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 1800
+        },
+        {
+          "type": "prestige",
+          "amount": 3
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -5,
+          "reason": "Prisonniers de Baugé"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1421-03-22"
+  },
+  "sources": [
+    "Bataille de Baugé",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

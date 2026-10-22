@@ -1,0 +1,92 @@
+{
+  "id": "evt_mort_de_charles_vi",
+  "title": "Mort de Charles VI",
+  "text": "Charles VI meurt à l’hôtel Saint-Pol, deux mois après Henri V. Le petit Henri VI est proclamé roi de France et d’Angleterre à Paris ; à Bourges, le « roi de Bourges » prend le titre de Charles VII et ne possède plus que les pays de la Loire.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1422,
+      "season": "autumn"
+    },
+    "until_year": 1423,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Se proclamer roi sans attendre le sacre",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -3
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -15,
+          "reason": "Contestation du traité de Troyes"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Réunir les États du Midi pour financer la reconquête",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 1800
+        },
+        {
+          "type": "prestige",
+          "amount": 3
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 4
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Prendre pour conseillers les Armagnacs et durcir la guerre",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": -15,
+          "reason": "Dauphin armagnac"
+        },
+        {
+          "type": "prestige",
+          "amount": 4
+        },
+        {
+          "type": "treasury",
+          "amount": -600
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1422-10-21"
+  },
+  "sources": [
+    "Charles VI de France",
+    "Colette Beaune, Naissance de la nation France, 1985"
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "id": "evt_praguerie",
+  "title": "La Praguerie",
+  "text": "Mécontents de perdre leurs bandes, des princes, Bourbon, Alençon, Dunois et jusqu’au jeune dauphin Louis, se soulèvent contre l’ordonnance royale. Le roi marche sur le Poitou, les capitaines se dispersent, et le dauphin vient à résipiscence.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1440,
+      "season": "spring"
+    },
+    "until_year": 1441,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      },
+      {
+        "type": "fired",
+        "event": "evt_ordonnance_de_la_taille"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "map_scene": "revolt",
+  "options": [
+    {
+      "text": "Réprimer par les armes les seigneurs révoltés",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "prov_poitou",
+          "amount": 6
+        },
+        {
+          "type": "devastation",
+          "province": "prov_poitou",
+          "amount": 5
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_bourbon",
+          "amount": -15,
+          "reason": "Praguerie"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Pardonner aux princes contre promesse de soumission",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -3
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_bourbon",
+          "amount": 12,
+          "reason": "Pardon de la Praguerie"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_alencon",
+          "amount": 12,
+          "reason": "Pardon de la Praguerie"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Acheter les capitaines avec des pensions",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -3
+        },
+        {
+          "type": "prestige",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1440-02"
+  },
+  "sources": [
+    "Praguerie",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

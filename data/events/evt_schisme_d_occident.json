@@ -1,0 +1,107 @@
+{
+  "id": "evt_schisme_d_occident",
+  "title": "Le Grand Schisme d’Occident",
+  "text": "À Rome, la foule a exigé « un Romain, ou au moins un Italien » ; les cardinaux ont élu Urbain VI, puis, jugeant leur choix forcé, se sont réunis à Fondi pour élire Clément VII, qui s’installe à Avignon. La chrétienté est coupée en deux obédiences, et chaque prince doit choisir son pape.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1378,
+      "season": "autumn"
+    },
+    "until_year": 1380,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Reconnaître Clément VII d’Avignon",
+      "effects": [
+        {
+          "type": "papal_favor",
+          "amount": 15
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -15,
+          "reason": "Obédience avignonnaise"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_papacy",
+          "amount": 10,
+          "reason": "Obédience avignonnaise"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Reconnaître Urbain VI de Rome",
+      "effects": [
+        {
+          "type": "papal_favor",
+          "amount": -10
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 15,
+          "reason": "Obédience romaine"
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Réunir un concile et refuser de choisir",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": -5
+        },
+        {
+          "type": "prestige",
+          "amount": 8
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -3
+        },
+        {
+          "type": "treasury",
+          "amount": -600
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1378-09-20"
+  },
+  "sources": [
+    "Grand Schisme d'Occident",
+    "Noël Valois, La France et le Grand Schisme d'Occident, 1896-1902",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "id": "evt_traite_de_delft",
+  "title": "Jacqueline de Bavière et le Hainaut",
+  "text": "Comtesse de Hainaut, de Hollande et de Zélande, Jacqueline de Bavière est vaincue par son cousin Philippe le Bon à la paix de Delft. Elle le reconnaît pour héritier, puis, après un mariage secret, renonce à ses comtés en sa faveur.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1433,
+      "season": "spring"
+    },
+    "until_year": 1434,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_hainaut",
+        "province": "prov_hainaut"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_burgundy"
+  },
+  "options": [
+    {
+      "text": "Exiger l’abdication de Jacqueline",
+      "effects": [
+        {
+          "type": "transfer_province",
+          "province": "prov_hainaut",
+          "from": "fac_hainaut"
+        },
+        {
+          "type": "prestige",
+          "amount": 6
+        },
+        {
+          "type": "unrest",
+          "province": "prov_hainaut",
+          "amount": 4
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Respecter ses droits en échange d’un hommage solennel",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_hainaut",
+          "amount": 18,
+          "reason": "Hommage de Jacqueline"
+        },
+        {
+          "type": "prestige",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1433-04-12"
+  },
+  "sources": [
+    "Jacqueline de Bavière",
+    "Richard Vaughan, Philip the Good, Longman, 1970"
+  ]
+}

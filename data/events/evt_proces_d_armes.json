@@ -4,30 +4,54 @@
   "text": "À la montre de l’armée, un [[cdx_herauts|héraut]] remarque que deux chevaliers portent exactement le même écu. Chacun jure que ses ancêtres l’arboraient avant ceux de l’autre, et menace de régler l’affaire l’épée à la main. Or un [[cdx_blason|blason]] est une identité : le porter à deux, c’est usurper l’honneur d’un lignage. En Angleterre, l’affaire [[cdx_scrope_grosvenor|Scrope contre Grosvenor]], de 1385 à 1390, occupe cinq ans la cour de chevalerie et fait témoigner des centaines de gens, dont le poète Chaucer.",
   "kind": "random",
   "trigger": {
-    "mean_time_to_happen": 150
+    "mean_time_to_happen": 150,
+    "conditions": [
+      {
+        "type": "year_between",
+        "from": 1337,
+        "to": 1450
+      }
+    ]
   },
-  "scope": { "type": "faction" },
+  "scope": {
+    "type": "faction"
+  },
   "options": [
     {
       "text": "Réunir hérauts et témoins, et juger selon les armoriaux",
       "effects": [
-        { "type": "treasury", "amount": -400 },
-        { "type": "prestige", "amount": 3 }
+        {
+          "type": "treasury",
+          "amount": -400
+        },
+        {
+          "type": "prestige",
+          "amount": 3
+        }
       ],
       "ai_weight": 2
     },
     {
       "text": "Imposer une brisure au plus jeune lignage",
       "effects": [
-        { "type": "prestige", "amount": 1 }
+        {
+          "type": "prestige",
+          "amount": 1
+        }
       ],
       "ai_weight": 2
     },
     {
       "text": "Les laisser vider la querelle en champ clos",
       "effects": [
-        { "type": "prestige", "amount": 2 },
-        { "type": "piety", "amount": -2 }
+        {
+          "type": "prestige",
+          "amount": 2
+        },
+        {
+          "type": "piety",
+          "amount": -2
+        }
       ],
       "ai_weight": 1
     }

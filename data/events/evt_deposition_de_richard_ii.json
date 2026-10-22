@@ -1,0 +1,97 @@
+{
+  "id": "evt_deposition_de_richard_ii",
+  "title": "La déposition de Richard II",
+  "text": "Henri de Bolingbroke, exilé en France, revient en Angleterre avec une poignée d’hommes pendant que le roi guerroie en Irlande. Richard II, abandonné par les siens, abdique à la Tour de Londres ; le Parlement acclame Bolingbroke sous le nom d’Henri IV, premier roi de la maison de Lancastre.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1399,
+      "season": "autumn"
+    },
+    "until_year": 1400,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Soutenir Henri de Lancastre",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 6
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_lancaster",
+          "amount": 25,
+          "reason": "Couronnement d’Henri IV"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 4
+        },
+        {
+          "type": "treasury",
+          "amount": 1200
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Rester fidèle à Richard et à ses cousins d’York",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 12
+        },
+        {
+          "type": "prestige",
+          "amount": -8
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_lancaster",
+          "amount": -25,
+          "reason": "Fidélité à Richard II"
+        }
+      ],
+      "ai_weight": 0
+    },
+    {
+      "text": "Négocier une régence au nom du jeune comte de March",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 5
+        },
+        {
+          "type": "prestige",
+          "amount": -2
+        },
+        {
+          "type": "treasury",
+          "amount": -500
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1399-09-30"
+  },
+  "sources": [
+    "Richard II d'Angleterre",
+    "Chris Given-Wilson, Henry IV, Yale UP, 2016"
+  ]
+}

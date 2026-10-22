@@ -1,0 +1,94 @@
+{
+  "id": "evt_mort_d_edouard_iii",
+  "title": "La mort d’Édouard III",
+  "text": "Le vieux roi s’éteint à Sheen, abandonné de ses courtisans et dominé par sa maîtresse Alice Perrers. Son petit-fils Richard, dix ans, monte sur le trône : le prince Noir est mort avant lui, et le royaume est aux mains de ses oncles.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1377,
+      "season": "summer"
+    },
+    "until_year": 1378,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Instituer un conseil de régence sans les oncles",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -4
+        },
+        {
+          "type": "prestige",
+          "amount": 3
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_lancaster",
+          "amount": -15,
+          "reason": "Écarté de la régence"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Confier la régence à Jean de Gand",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 6
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_lancaster",
+          "amount": 20,
+          "reason": "Régent du royaume"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Lever une aide extraordinaire pour la guerre de France",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 2500
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        },
+        {
+          "type": "wealth",
+          "province": "all",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1377-06-21"
+  },
+  "sources": [
+    "Édouard III d'Angleterre",
+    "W. M. Ormrod, Edward III, Yale UP, 2011"
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "id": "evt_ecorcheurs_de_passage",
+  "title": "Les écorcheurs",
+  "text": "Les bandes licenciées après la trêve vivent sur le pays : elles dépouillent jusqu’à la chemise, d’où leur nom. Les paysans se cachent dans les églises fortifiées et les souterrains, et les marchands n’osent plus sortir.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 60,
+    "conditions": [
+      {
+        "type": "year_between",
+        "from": 1435,
+        "to": 1450
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "map_scene": "devastation",
+  "options": [
+    {
+      "text": "Payer les capitaines pour qu’ils quittent la province",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -1200
+        },
+        {
+          "type": "devastation",
+          "province": "all",
+          "amount": -2
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Armer les villageois et pendre les prisonniers",
+      "effects": [
+        {
+          "type": "devastation",
+          "province": "all",
+          "amount": 4
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 3
+        },
+        {
+          "type": "prestige",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser faire : la guerre nourrit la guerre",
+      "effects": [
+        {
+          "type": "devastation",
+          "province": "all",
+          "amount": 8
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 8
+        },
+        {
+          "type": "wealth",
+          "province": "all",
+          "amount": -5
+        },
+        {
+          "type": "population",
+          "province": "all",
+          "percent": -2
+        }
+      ],
+      "ai_weight": 0
+    }
+  ],
+  "sources": [
+    "Écorcheurs (guerre de Cent Ans)",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

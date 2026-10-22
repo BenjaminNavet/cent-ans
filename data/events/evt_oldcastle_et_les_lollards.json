@@ -1,0 +1,99 @@
+{
+  "id": "evt_oldcastle_et_les_lollards",
+  "title": "Sir John Oldcastle et les lollards",
+  "text": "Sir John Oldcastle, chevalier favori d’Henri V, est condamné comme hérétique lollard puis s’évade de la Tour. Il lève des insurgés près de Londres ; le statut De heretico comburendo s’abat sur les prédicateurs wycliffistes.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1414,
+      "season": "winter"
+    },
+    "until_year": 1415,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "map_scene": "revolt",
+  "options": [
+    {
+      "text": "Poursuivre les lollards par les bûchers",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": 8
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 7
+        },
+        {
+          "type": "prestige",
+          "amount": 3
+        },
+        {
+          "type": "papal_favor",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Pourchasser seulement les meneurs et ménager les prédicateurs",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -2
+        },
+        {
+          "type": "piety",
+          "amount": 2
+        },
+        {
+          "type": "prestige",
+          "amount": 1
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Confisquer les biens d’Église qui nourrissent la contestation",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 2500
+        },
+        {
+          "type": "piety",
+          "amount": -8
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 4
+        },
+        {
+          "type": "papal_favor",
+          "amount": -8
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1414-01-10"
+  },
+  "sources": [
+    "John Oldcastle",
+    "Lollards",
+    "Anne Hudson, The Premature Reformation, Oxford, 1988"
+  ]
+}

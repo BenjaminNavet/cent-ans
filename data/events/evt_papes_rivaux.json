@@ -1,0 +1,96 @@
+{
+  "id": "evt_papes_rivaux",
+  "title": "Deux bulles contradictoires",
+  "text": "Un messager d’Avignon et un autre de Rome arrivent le même jour avec des bulles contraires : l’un lève une décime, l’autre excommunie ceux qui l’ont payée. Les curés ne savent plus qui obéir.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 60,
+    "conditions": [
+      {
+        "type": "schism",
+        "active": true
+      },
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic"
+          },
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic_rome"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Payer la décime au pape que l’on reconnaît",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -700
+        },
+        {
+          "type": "papal_favor",
+          "amount": 8
+        },
+        {
+          "type": "piety",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Garder l’argent en attendant que l’Église décide",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 500
+        },
+        {
+          "type": "papal_favor",
+          "amount": -6
+        },
+        {
+          "type": "piety",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Saisir les revenus du clergé au nom du roi",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 1500
+        },
+        {
+          "type": "papal_favor",
+          "amount": -10
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 4
+        },
+        {
+          "type": "prestige",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Grand Schisme d'Occident",
+    "Noël Valois, La France et le Grand Schisme d'Occident"
+  ]
+}

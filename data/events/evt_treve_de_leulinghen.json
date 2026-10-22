@@ -1,0 +1,88 @@
+{
+  "id": "evt_treve_de_leulinghen",
+  "title": "La trêve de Leulinghen",
+  "text": "Après des années de pourparlers sous les tentes de Leulinghen, entre Calais et Boulogne, Richard II et Charles VI signent une trêve de vingt-huit ans. Elle sera scellée par le mariage du roi d’Angleterre, veuf, avec la petite Isabelle de France, âgée de sept ans.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1396,
+      "season": "autumn"
+    },
+    "until_year": 1397,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      },
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Signer la trêve et épouser Isabelle de France",
+      "effects": [
+        {
+          "type": "peace",
+          "a": "fac_england",
+          "b": "fac_france"
+        },
+        {
+          "type": "prestige",
+          "amount": 4
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 20,
+          "reason": "Mariage d’Isabelle"
+        },
+        {
+          "type": "treasury",
+          "amount": -1000
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Refuser : les Lancastre veulent poursuivre la guerre",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_lancaster",
+          "amount": 15,
+          "reason": "Parti de la guerre"
+        },
+        {
+          "type": "prestige",
+          "amount": -2
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1396-10-29"
+  },
+  "sources": [
+    "Trêve de Leulinghen",
+    "Nigel Saul, Richard II, Yale UP, 1997"
+  ]
+}

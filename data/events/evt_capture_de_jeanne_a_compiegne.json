@@ -1,0 +1,108 @@
+{
+  "id": "evt_capture_de_jeanne_a_compiegne",
+  "title": "La prise de Jeanne devant Compiègne",
+  "text": "Au cours d’une sortie devant Compiègne, la Pucelle est tirée de son cheval par un archer du Bâtard de Wandomme, et passe aux mains du seigneur de Luxembourg, vassal de Bourgogne. Les Anglais veulent la lui racheter ; l’Église et l’Université de Paris s’en mêlent.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1430,
+      "season": "spring"
+    },
+    "until_year": 1431,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      },
+      {
+        "type": "fired",
+        "event": "evt_jeanne_d_arc"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_burgundy"
+  },
+  "options": [
+    {
+      "text": "La livrer aux Anglais contre dix mille livres",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 10000
+        },
+        {
+          "type": "prestige",
+          "amount": -8
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 20,
+          "reason": "Jeanne livrée"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -25,
+          "reason": "Jeanne vendue"
+        },
+        {
+          "type": "piety",
+          "amount": -6
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "La garder et négocier avec Charles VII",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 12,
+          "reason": "Jeanne ménagée"
+        },
+        {
+          "type": "prestige",
+          "amount": 3
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -12,
+          "reason": "Jeanne non livrée"
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "L’échanger contre un prisonnier de haut rang",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 2
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 5,
+          "reason": "Échange de prisonniers"
+        },
+        {
+          "type": "treasury",
+          "amount": 1500
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1430-05-23"
+  },
+  "sources": [
+    "Jeanne d'Arc",
+    "Philippe Contamine, Jeanne d'Arc, 1994"
+  ]
+}

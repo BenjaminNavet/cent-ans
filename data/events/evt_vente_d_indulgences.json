@@ -1,0 +1,97 @@
+{
+  "id": "evt_vente_d_indulgences",
+  "title": "Une vente d’indulgences",
+  "text": "Un quêteur du pape arrive avec des brevets d’indulgence plénière à vendre à prix fixe, pour financer une croisade. Le curé le soupçonne de garder la moitié de la somme.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 100,
+    "conditions": [
+      {
+        "type": "year_between",
+        "from": 1378,
+        "to": 1450
+      },
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic"
+          },
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic_rome"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Autoriser la vente contre une part du produit",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 900
+        },
+        {
+          "type": "papal_favor",
+          "amount": 5
+        },
+        {
+          "type": "piety",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Interdire la vente sur les terres du prince",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": 3
+        },
+        {
+          "type": "papal_favor",
+          "amount": -6
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Confisquer la quête au profit des fortifications",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 400
+        },
+        {
+          "type": "papal_favor",
+          "amount": -8
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 4
+        },
+        {
+          "type": "prestige",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Jacques Chiffoleau, La Comptabilité de l'au-delà, 1980"
+  ]
+}

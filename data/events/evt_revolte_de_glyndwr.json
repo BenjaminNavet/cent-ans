@@ -1,0 +1,97 @@
+{
+  "id": "evt_revolte_de_glyndwr",
+  "title": "La révolte d’Owain Glyndwr",
+  "text": "Dépossédé par le seigneur de Ruthin, Owain Glyndwr se fait proclamer prince de Galles. Ses bandes brûlent les bourgs anglais, et les Gallois qui étudiaient à Oxford ou travaillaient aux champs rentrent se battre sous son drapeau.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1400,
+      "season": "autumn"
+    },
+    "until_year": 1403,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "faction": "fac_england",
+    "province": "prov_gwynedd"
+  },
+  "map_scene": "revolt",
+  "options": [
+    {
+      "text": "Envoyer une armée écraser les rebelles dans leurs montagnes",
+      "effects": [
+        {
+          "type": "devastation",
+          "province": "prov_gwynedd",
+          "amount": 8
+        },
+        {
+          "type": "unrest",
+          "province": "prov_gwynedd",
+          "amount": 6
+        },
+        {
+          "type": "treasury",
+          "amount": -1500
+        },
+        {
+          "type": "prestige",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Négocier avec Glyndwr un pardon partiel",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "prov_gwynedd",
+          "amount": -6
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "treasury",
+          "amount": -300
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Édicter les lois pénales contre les Gallois",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "prov_gwynedd",
+          "amount": 14
+        },
+        {
+          "type": "wealth",
+          "province": "prov_gwynedd",
+          "amount": -5
+        },
+        {
+          "type": "treasury",
+          "amount": 500
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1400-09-16"
+  },
+  "sources": [
+    "Owain Glyndŵr",
+    "R. R. Davies, The Revolt of Owain Glyn Dŵr, Oxford, 1995"
+  ]
+}

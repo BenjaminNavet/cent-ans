@@ -1,0 +1,102 @@
+{
+  "id": "evt_mort_de_charles_v",
+  "title": "La mort de Charles le Sage",
+  "text": "Le roi Charles V s’éteint à Beauté-sur-Marne, laissant un fils de onze ans et un royaume redressé. Sur son lit de mort, il ordonne de supprimer les fouages, dont le poids a ranimé les rancunes ; ses frères, Anjou, Berry et Bourgogne, se disputent déjà la régence.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1380,
+      "season": "autumn"
+    },
+    "until_year": 1381,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Respecter ses dernières volontés : abolir les fouages",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -8
+        },
+        {
+          "type": "treasury",
+          "amount": -1500
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": 5,
+          "reason": "Régence partagée"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Maintenir l’impôt pour entretenir l’armée",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 1200
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Laisser les oncles gouverner à leur guise",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_burgundy",
+          "amount": 20,
+          "reason": "Régence des oncles"
+        },
+        {
+          "type": "treasury",
+          "amount": -800
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 4
+        },
+        {
+          "type": "wealth",
+          "province": "all",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1380-09-16"
+  },
+  "sources": [
+    "Charles V de France",
+    "Françoise Autrand, Charles V, Fayard, 1994"
+  ]
+}

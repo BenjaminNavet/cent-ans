@@ -16,7 +16,7 @@
   "map_scene": "plague",
   "options": [
     {
-      "text": "Que Dieu ait pitié de nous",
+      "text": "Que Dieu ait pitié de nous : processions et pénitences",
       "effects": [
         {
           "type": "plague_wave",
@@ -26,6 +26,79 @@
         {
           "type": "piety",
           "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 4
+        },
+        {
+          "type": "health",
+          "province": "all",
+          "amount": -6
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Fermer les ports et isoler les malades, comme à Raguse",
+      "effects": [
+        {
+          "type": "plague_wave",
+          "from_year": 1347,
+          "to_year": 1350
+        },
+        {
+          "type": "health",
+          "province": "all",
+          "amount": 8
+        },
+        {
+          "type": "wealth",
+          "province": "all",
+          "amount": -6
+        },
+        {
+          "type": "treasury",
+          "amount": -1200
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Protéger les Juifs accusés d’avoir empoisonné les puits, comme le demande le pape",
+      "effects": [
+        {
+          "type": "plague_wave",
+          "from_year": 1347,
+          "to_year": 1350
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 6
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "papal_favor",
+          "amount": 10
+        },
+        {
+          "type": "piety",
+          "amount": -4
+        },
+        {
+          "type": "health",
+          "province": "all",
+          "amount": -3
         }
       ],
       "ai_weight": 1
@@ -37,6 +110,7 @@
   "sources": [
     "Peste noire",
     "Jean Favier, La Guerre de Cent Ans, ch. « La peste »",
-    "Ole J. Benedictow, The Black Death 1346-1353, Boydell, 2004"
+    "Ole J. Benedictow, The Black Death 1346-1353, Boydell, 2004",
+    "Bulle Quamvis perfidiam de Clément VI (6 juillet 1348)"
   ]
 }

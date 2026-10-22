@@ -1,0 +1,83 @@
+{
+  "id": "evt_cheval_de_bataille",
+  "title": "Un destrier d’exception",
+  "text": "Un maquignon de Bretagne présente un grand étalon, dressé à la charge, qui vaut le prix d’un petit fief. Les écuyers se bousculent pour l’essayer.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 100,
+    "conditions": [
+      {
+        "type": "year_between",
+        "from": 1337,
+        "to": 1415
+      },
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic"
+          },
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic_rome"
+          },
+          {
+            "type": "religion_is",
+            "religion": "rel_orthodox"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "L’acheter pour les écuries du seigneur",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -900
+        },
+        {
+          "type": "prestige",
+          "amount": 4
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Le faire acheter par un capitaine de la maison",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -300
+        },
+        {
+          "type": "prestige",
+          "amount": 1
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Refuser : mieux vaut payer la solde",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 200
+        },
+        {
+          "type": "prestige",
+          "amount": -1
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Philippe Contamine, La Guerre au Moyen Âge, PUF, 1980"
+  ]
+}

@@ -4,7 +4,22 @@
   "text": "Une statue de la Vierge aurait pleuré, un aveugle recouvré la vue devant les reliques d’un saint. Les [[cdx_pelerinage|pèlerins]] affluent de toute la contrée.",
   "kind": "random",
   "trigger": {
-    "mean_time_to_happen": 80
+    "mean_time_to_happen": 80,
+    "conditions": [
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic"
+          },
+          {
+            "type": "religion_is",
+            "religion": "rel_catholic_rome"
+          }
+        ]
+      }
+    ]
   },
   "scope": {
     "type": "province"

@@ -1,0 +1,99 @@
+{
+  "id": "evt_sacre_d_henri_vi",
+  "title": "Le sacre d’Henri VI à Paris",
+  "text": "À dix ans, Henri VI est couronné roi de France à Notre-Dame par le cardinal de Winchester, à défaut de pouvoir l’être à Reims. Le banquet est médiocre, les Parisiens s’en plaignent : le prestige n’est pas à la hauteur de la dépense.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1431,
+      "season": "winter"
+    },
+    "until_year": 1432,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      },
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Célébrer le sacre en grande pompe",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2500
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_ile_de_france",
+          "amount": -4
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Économiser : un couronnement discret",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -600
+        },
+        {
+          "type": "prestige",
+          "amount": 2
+        },
+        {
+          "type": "unrest",
+          "province": "prov_ile_de_france",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Fonder une université à Caen pour s’attacher les clercs",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -1200
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "piety",
+          "amount": 4
+        },
+        {
+          "type": "wealth",
+          "province": "prov_normandie",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1431-12-16"
+  },
+  "sources": [
+    "Henri VI d'Angleterre",
+    "Bertram Wolffe, Henry VI, Yale UP, 1981"
+  ]
+}

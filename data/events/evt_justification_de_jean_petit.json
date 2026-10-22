@@ -1,0 +1,98 @@
+{
+  "id": "evt_justification_de_jean_petit",
+  "title": "La justification de Jean Petit",
+  "text": "Quelques mois après le meurtre du duc d’Orléans rue Vieille-du-Temple, le docteur Jean Petit plaide devant le roi pour le duc de Bourgogne : c’était, dit-il, un tyran, et il était licite de le tuer. L’Université applaudit, les Orléans jurent vengeance.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1408,
+      "season": "spring"
+    },
+    "until_year": 1409,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_burgundy"
+      },
+      {
+        "type": "fired",
+        "event": "evt_armagnacs_bourguignons"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_burgundy"
+  },
+  "options": [
+    {
+      "text": "Faire plaider hautement la thèse du tyrannicide",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -15,
+          "reason": "Apologie du meurtre d’Orléans"
+        },
+        {
+          "type": "unrest",
+          "province": "prov_flandre",
+          "amount": -4
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Obtenir le pardon royal de Chartres contre argent",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 8,
+          "reason": "Paix de Chartres"
+        },
+        {
+          "type": "prestige",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Quitter Paris et se retirer en Flandre",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "prov_flandre",
+          "amount": -3
+        },
+        {
+          "type": "prestige",
+          "amount": -6
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -5,
+          "reason": "Départ du duc"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1408-03-08"
+  },
+  "sources": [
+    "Jean Petit (théologien)",
+    "Bertrand Schnerb, Jean sans Peur, Payot, 2005"
+  ]
+}
