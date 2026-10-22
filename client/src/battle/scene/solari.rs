@@ -146,6 +146,9 @@ impl Plugin for SolariTrialPlugin {
                     .run_if(in_state(AppState::Battle)),
             )
             .add_systems(OnExit(AppState::Battle), reset_substitutes);
+        if let Some(render_app) = app.get_sub_app_mut(bevy::render::RenderApp) {
+            render_app.add_systems(bevy::render::Render, debug_render.in_set(bevy::render::RenderSystems::Cleanup));
+        }
     }
 }
 
@@ -173,6 +176,10 @@ fn light_camera(
     cameras: Query<Entity, (With<BattleCamera>, Without<SolariLighting>)>,
 ) {
     for entity in &cameras {
+        if std::env::var("CENT_ANS_SOLDBG").as_deref() == Ok("nolight") {
+            commands.entity(entity).insert((Msaa::Off, bevy::camera::Hdr, bevy::core_pipeline::prepass::DeferredPrepass, bevy::core_pipeline::prepass::DepthPrepass, bevy::core_pipeline::prepass::MotionVectorPrepass));
+            continue;
+        }
         commands.entity(entity).insert((
             SolariLighting {
                 restir: settings.restir,
@@ -549,5 +556,20 @@ fn no_shadow_maps(mut lights: Query<&mut DirectionalLight, Changed<DirectionalLi
         if light.shadow_maps_enabled {
             light.shadow_maps_enabled = false;
         }
+    }
+}
+
+fn debug_render(
+    bindings: Res<bevy::solari::scene::RaytracingSceneBindings>,
+    views: Query<(&SolariLighting, &bevy::render::view::ViewTarget)>,
+    mut frame: Local<u32>,
+) {
+    *frame += 1;
+    if *frame % 60 == 0 {
+        info!(
+            "solari-dbg: bind_group {} views {}",
+            bindings.bind_group.is_some(),
+            views.iter().count()
+        );
     }
 }

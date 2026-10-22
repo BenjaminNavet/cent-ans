@@ -211,16 +211,16 @@ impl Plugin for BattleCameraPlugin {
 }
 
 #[cfg(feature = "solari")]
-type SolariActive<'w> = Option<Res<'w, super::solari::SolariSettings>>;
+pub(super) type SolariActive<'w> = Option<Res<'w, super::solari::SolariSettings>>;
 #[cfg(not(feature = "solari"))]
-type SolariActive<'w> = Option<Res<'w, NoSolari>>;
+pub(super) type SolariActive<'w> = Option<Res<'w, NoSolari>>;
 
 /// Never inserted: stands in for `SolariSettings` when the `solari` feature is off.
 #[cfg(not(feature = "solari"))]
 #[derive(Resource)]
 struct NoSolari;
 
-fn solari_active(solari: &SolariActive) -> bool {
+pub(super) fn solari_active(solari: &SolariActive) -> bool {
     solari.is_some()
 }
 

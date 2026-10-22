@@ -440,11 +440,16 @@ fn ssao_follows_msaa(
     look: Res<LightingLook>,
     quality: Option<Res<crate::settings::quality::RenderQuality>>,
     mut state: ResMut<SkyLightState>,
+    solari: super::camera::SolariActive,
     cameras: Query<(Entity, &Msaa, Has<ScreenSpaceAmbientOcclusion>), With<Lit>>,
 ) {
     let preset = quality.as_ref().is_none_or(|q| q.ssao_battle);
     for (camera, msaa, has_ssao) in &cameras {
-        let want = look.ssao.enabled && preset && *msaa == Msaa::Off;
+        // Solari replaces ambient occlusion with ray-traced GI.
+        let want = look.ssao.enabled
+            && preset
+            && *msaa == Msaa::Off
+            && !super::camera::solari_active(&solari);
         if want && !has_ssao {
             // The preset's level when there is one ("high"/"ultra" cost more), else the data file's.
             let level = quality
