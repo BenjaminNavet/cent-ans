@@ -39,3 +39,7 @@ Outil : `tools/playtest_window.sh script prefix secs interval` (fenêtre réelle
 - Glisser droit (ligne de front) : aperçu des emplacements (rectangle + flèche de front par régiment, ligne tracée) ajouté ; l'ordre part avec largeur et orientation (déjà là). Reste à décider : sens exact de « clic gauche glissé » du joueur.
 - Vitesse : le bridage x0,45 d'approche (ADR 0184) ne vaut plus que pour les camps IA (`ai_enabled`) ; marche du joueur 0,55 -> 1,32 m/s ; virage du joueur x2 (`player_turn_factor`). Tests de bataille du cœur verts ; échecs campagne (sauvegarde/diplomatie) viennent de la fusion m6 d'autres sessions.
 - À tester ensuite : clic armée/ville à la souris sur la campagne, écran de résultat, sauvegarde/chargement.
+
+## Clic armée / ville à la souris (22/10, vérifié)
+`mouse_click` sur le fanion d'armée près de Paris : l'armée est sélectionnée et le panneau de province reste fermé ; un clic juste en dessous (Paris) ouvre la province, l'armée reste sélectionnée. Le correctif `army_press` fonctionne.
+Reste : écran de résultat, sauvegarde/chargement, tutoriel, siège, collisions, contraste du menu.
