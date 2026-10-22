@@ -304,3 +304,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0596 | [La météo « brouillard » de campagne rend la brume visible](0596-meteo-brouillard-brume-visible.md) | accepté |
 | 0710 | [La carte de campagne vise l'atmosphère de Total War](0710-style-total-war-campagne.md) | accepté |
 | 0711 | [Le choc des charges est un modèle en données (élan, poids, arc-boutement, paliers)](0711-choc-des-charges-en-donnees.md) | accepté |
+| 0720 | [Rancunes datées : des missions ancrées dans un affront subi](0720-rancunes-datees.md) | accepté |
