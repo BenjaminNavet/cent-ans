@@ -33,6 +33,20 @@ Conditions du joueur : `CENT_ANS_VIEW_SIZE=3456x2234` + copie de son `settings.j
   `rsync -a --ignore-existing <principal>/game/assets/ game/assets/` ; tuer le client par son pid ; `CARGO_INCREMENTAL=0`.
 
 ## Prochaine étape
-1. Ombres de la carte (taille de carte d'ombre, cascades, ombres des arbres).
-2. Shader du sol : sauter les termes invisibles selon l'empreinte au sol (champs loin), puis micro-optimisations.
-3. Une capture de contrôle (SMAA, ombres), puis fusion dans main (worktree dédié, ff-only), ADR 0740/0741 dans INDEX.
+Chantier en cours : **cache du sol par nœud** (ADR 0742 à écrire).
+- Mesures : le bloc régional du shader (ground_proc + fields_apply + gd_macro + canopée) coûte ~20 ms
+  sur 45 à d=30 ; à d=150 le terrain plat tombe à 7,4 ms contre 32,5. Leviers d'ombre mesurés mais
+  non retenus (coût visuel) : carte 2048 (−5 ms), arbres 1 cascade (−7,5), 2 cascades (−7).
+- Principe : chaque nœud du quadtree (64 ou 32 quads) reçoit une couche d'un atlas
+  `texture_2d_array` (albedo Rgba8UnormSrgb + forêt en alpha, dn Rg16Float), N×N texels (Ultra 320).
+  Le bloc régional y est cuit une fois (passe render-world `ground_cache.rs`, même `terrain.wesl`,
+  points d'entrée `bake_vertex` / `bake_fragment`, empreinte = taille d'un texel, groupes 0-2 vides,
+  groupe 3 = bind group du matériau). Couche et uv du nœud dans `morph.z/w` (COLOR).
+- Le shader principal, compilé avec `GROUND_CACHE` (clé `bind_group_data`), lit le cache au lieu
+  de calculer le bloc régional. Un nœud ne s'affiche qu'une fois cuit (mécanisme `retiring`).
+- Invalidation : hachage des uniformes lus par le bloc (saison, sol, champs, gd) → recuisson de
+  tous les nœuds, budget de quelques nœuds par image.
+- Préréglage : clé `map_ground_cache` (texels par côté, 0 = calcul direct).
+Étapes : (1) fonction `regional_ground` commune, sans changement visuel ; (2) atlas + gestion
+des couches + morph ; (3) passe de cuisson ; (4) lecture dans le shader ; (5) invalidation ;
+(6) mesures d=30/150/500 ; (7) capture de contrôle, fusion, ADR 0740/0741/0742 dans INDEX.
