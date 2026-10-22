@@ -1796,7 +1796,9 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     var s = vec4<f32>(0.5, 0.3, 0.2, 0.0);
     if (ground.splat.x > 0.5) {
         s = textureSampleLevel(splat, terroir_sampler, uv, 0.0);
-        s = fp_splat(s, p, footprint);
+        @if(!PERF_TNOFPSPLAT) {
+            s = fp_splat(s, p, footprint);
+        }
     }
     s = s / max(s.r + s.g + s.b + s.a, 1e-3);
     // CV1 terroirs: finages of the settlements (fields, pasture ring).
@@ -1832,11 +1834,15 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     let dist_texels = textureSampleLevel(ab_dist, terroir_sampler, uv, 0.0).g * 255.0;
     let wb = 0.5 * (1.0 - smoothstep(0.0, ground.bg.y, dist_texels));
     var acc = LayerAcc(vec3<f32>(0.0), vec2<f32>(0.0));
-    if (w_grass > 0.01) { acc = sample_role(0u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.grass_tint, det, detail_fade, w_grass, acc); }
-    if (w_farm > 0.01) { acc = sample_role(1u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.farm_tint, det, detail_fade, w_farm, acc); }
-    if (w_forest > 0.01) { acc = sample_role(2u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_FOREST, det, detail_fade, w_forest, acc); }
-    if (w_rock > 0.01) { acc = sample_role(3u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_ROCK, det, detail_fade, w_rock, acc); }
-    if (w_heath > 0.01) { acc = sample_role(4u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_HEATH, det, detail_fade, w_heath, acc); }
+    var role_min = 0.01;
+    @if(PERF_TONEROLE) {
+        role_min = max(max(w_grass, w_farm), max(max(w_forest, w_rock), w_heath)) - 1e-4;
+    }
+    if (w_grass > role_min) { acc = sample_role(0u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.grass_tint, det, detail_fade, w_grass, acc); }
+    if (w_farm > role_min) { acc = sample_role(1u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.farm_tint, det, detail_fade, w_farm, acc); }
+    if (w_forest > role_min) { acc = sample_role(2u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_FOREST, det, detail_fade, w_forest, acc); }
+    if (w_rock > role_min) { acc = sample_role(3u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_ROCK, det, detail_fade, w_rock, acc); }
+    if (w_heath > role_min) { acc = sample_role(4u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_HEATH, det, detail_fade, w_heath, acc); }
     var col = acc.albedo / wsum;
     out.dn = acc.normal / wsum * ground.tiling.w * detail_fade;
     // Micro grain by dominant material (luminance only).
@@ -1848,14 +1854,22 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     if (w_rock > best) { best = w_rock; role = 3u; }
     if (w_heath > best) { best = w_heath; role = 4u; }
     let mlayer = ground.micro_layers[role / 4u][role % 4u];
-    if (micro_k > 0.0) {
+    var micro_on = micro_k > 0.0;
+    @if(PERF_TNOMICRO) {
+        micro_on = false;
+    }
+    if (micro_on) {
         let grain = textureSampleGrad(micro_albedo, ground_sampler, muv, i32(mlayer), mdx, mdy).rgb;
         let g_ratio = luma(grain) / max(ground.micro_mean[mlayer / 4u][mlayer % 4u], 0.01);
         col = col * mix(1.0, clamp(g_ratio, 0.4, 1.8), micro_k);
     }
     // GA4 macro variation of hue (fine octaves first) and luminance (wide octaves first), the
     // same 4 noise samples (ga_macro.gdshaderinc); the luminance part fades out with the footprint.
-    if (ground.macro_amp.y > 0.0 || ground.macro_amp.x > 0.0) {
+    var macro_on = ground.macro_amp.y > 0.0 || ground.macro_amp.x > 0.0;
+    @if(PERF_TNOMACRO) {
+        macro_on = false;
+    }
+    if (macro_on) {
         let mo = vec4<f32>(vnoise(p / ground.macro_periods.x + vec2<f32>(3.1, 7.7)),
             vnoise(p / ground.macro_periods.y + vec2<f32>(11.3, 1.9)),
             vnoise(p / ground.macro_periods.z + vec2<f32>(5.3, 17.2)),
@@ -1879,9 +1893,11 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     col = mix(col, TRACK_COLOR * (0.9 + 0.2 * macro_n), v2.track * farm_open * 0.85);
     col = mix(col, HEDGE_COLOR, v2.hedge * farm_open * 0.55);
     // ZG5b fine parcels in metres (valley / site views).
-    let fp = fp_parcels(p, footprint, grad, slope, altitude, s, lu, terroir, farm_open, w_forest / wsum, col);
-    col = fp.color;
-    out.dn = out.dn + fp.dn;
+    @if(!PERF_TNOFP) {
+        let fp = fp_parcels(p, footprint, grad, slope, altitude, s, lu, terroir, farm_open, w_forest / wsum, col);
+        col = fp.color;
+        out.dn = out.dn + fp.dn;
+    }
     out.color = col;
     out.open_w = (w_grass + w_farm + w_heath) / wsum;
     out.forest_w = w_forest / wsum;
@@ -2128,7 +2144,11 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
         presence = presence * relief_k;
     }
     let farm_frac = clamp(max(farm_share, fields.v4.w) * presence, 0.0, 1.0);
-    if (w_far > 0.001) {
+    var far_on = w_far > 0.001;
+    @if(PERF_TNOFAR) {
+        far_on = false;
+    }
+    if (far_on) {
         let far_col = hb_far_patch(uu, footprint, footprint / cell_px, row, h_dom, vine_k, meadow_k);
         col = mix(col, hb_relative(col, far_col), w_far * open_w * farm_frac);
     }
@@ -2136,7 +2156,10 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
     if (w_bare <= 0.001) {
         return out;
     }
-    let has_tex = fields.tex_flags.z > 0.5 && fields.rows_e[row].w > 0.5;
+    var has_tex = fields.tex_flags.z > 0.5 && fields.rows_e[row].w > 0.5;
+    @if(PERF_TNOHBTEX) {
+        has_tex = false;
+    }
     let sw = season.weights;
     // Unfarmed parcel: the two wild soils of the row, mixed by a slow noise.
     let wild_mix = smoothstep(0.35, 0.65, vnoise(p * 0.35 + 3.7));
@@ -2210,6 +2233,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
                 let grain_l = clamp(luma(open_col) / max(luma(mean), 1e-3), 0.7, 1.35);
                 open_col = mix(open_col, far_col * grain_l, patch_k);
             }
+            @if(!PERF_TNOGDK)
             gd_k = gd_parcel_k(gd, open_col, p, parcel.id, field_ang, cls, footprint, mpp, season.weights,
                 parcel.edge * cell_px * mpp, hedge_k);
             // Hedges and banks on the edges of the cultivated parcels.
@@ -2306,7 +2330,10 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     let curv = dot(dnx, dwx) / max(dot(dwx, dwx), 1e-8) + dot(dny, dwy) / max(dot(dwy, dwy), 1e-8);
     let crest = clamp(curv * season.rock_light.w, 0.0, 1.0);
     // Sun term of the geometric normal (snow tint, rock contrast), the shadow fetched once.
-    let sun_vis = sun_shadow(in.world, n, in.clip.xy);
+    var sun_vis = 1.0;
+    @if(!PERF_TNOSUN) {
+        sun_vis = sun_shadow(in.world, n, in.clip.xy);
+    }
     let lit0 = max(dot(n, params.sun_dir.xyz), 0.0) * sun_vis;
     var forest_f = 0.0;
     var regional = ground.bg.x > 0.5;
@@ -2340,6 +2367,7 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
             painted = fo.color;
             dn = dn + fo.dn;
         }
+        @if(!PERF_TNOGDMACRO)
         painted = gd_macro(gd, painted, in.world.xz, ground_footprint, land, g.open_w);
         albedo = mix(base_albedo, painted, land);
         n = normalize(vec3<f32>(n.x + dn.x * land, n.y, n.z - dn.y * land));

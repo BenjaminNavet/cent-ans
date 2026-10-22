@@ -16,13 +16,23 @@ pub const SHADOW_SHADER_PATH: &str =
 
 /// Dev bisection switches of the ground shader (`CENT_ANS_PERF_OFF`, `campaign/perf_switch.rs`):
 /// each one compiles a part of the fragment out (`PERF_<NAME>` shader def).
-const PERF_DEFS: [(&str, &str); 6] = [
+const PERF_DEFS: [(&str, &str); 16] = [
     ("tflat", "PERF_TFLAT"),
     ("tnoproc", "PERF_TNOPROC"),
     ("tnofields", "PERF_TNOFIELDS"),
     ("tnocoast", "PERF_TNOCOAST"),
     ("tnowx", "PERF_TNOWX"),
     ("tnocloud", "PERF_TNOCLOUD"),
+    ("tnofp", "PERF_TNOFP"),
+    ("tnofpsplat", "PERF_TNOFPSPLAT"),
+    ("tonerole", "PERF_TONEROLE"),
+    ("tnomacro", "PERF_TNOMACRO"),
+    ("tnomicro", "PERF_TNOMICRO"),
+    ("tnofar", "PERF_TNOFAR"),
+    ("tnogdk", "PERF_TNOGDK"),
+    ("tnohbtex", "PERF_TNOHBTEX"),
+    ("tnosun", "PERF_TNOSUN"),
+    ("tnogdmacro", "PERF_TNOGDMACRO"),
 ];
 
 /// Uniform block of `terrain.wesl` (`TerrainParams`).
