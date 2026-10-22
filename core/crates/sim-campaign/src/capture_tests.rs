@@ -236,7 +236,8 @@ fn raze_is_refused_on_cities_and_emblematic_places() {
     );
     let mut state = english_setup(data, &guyenne);
     let id = french_capture(&mut state, data, &guyenne);
-    let refused = state.choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Raze, None);
+    let refused =
+        state.choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Raze, None);
     assert!(matches!(refused, Err(CaptureError::RazeForbidden(_))));
     // The question is still open.
     assert_eq!(state.captures.pending.len(), 1);
@@ -438,4 +439,233 @@ fn tx_m1_losing_a_place_to_the_enemy_leaves_a_grudge_to_the_player_only() {
     state.settlements.get_mut(&guyenne).unwrap().controller = fac("fac_england");
     crate::siege::capture(&mut state, data, &guyenne, &fac("fac_france"), &mut events);
     assert_eq!(state.missions.grudges.len(), 1);
+}
+
+fn ally(state: &mut CampaignState, a: &str, b: &str) {
+    state
+        .factions
+        .get_mut(&fac(a))
+        .unwrap()
+        .allies
+        .insert(fac(b));
+    state
+        .factions
+        .get_mut(&fac(b))
+        .unwrap()
+        .allies
+        .insert(fac(a));
+}
+
+fn guyenne_taken() -> (CampaignState, SettlementId, u32) {
+    let data = game_data();
+    let probe = CampaignState::new_1337(data, fac("fac_france"), 7).unwrap();
+    let guyenne = city(&probe, "prov_guyenne");
+    let mut state = english_setup(data, &guyenne);
+    let id = french_capture(&mut state, data, &guyenne);
+    (state, guyenne, id)
+}
+
+#[test]
+fn tx_m2_foreign_culture_adds_unrest_to_every_outcome() {
+    let data = game_data();
+    let (mut state, guyenne, _) = guyenne_taken();
+    let rules = &data.capture_rules;
+    assert!(crate::capture::is_foreign_culture(&state, data, &guyenne));
+    assert_eq!(
+        crate::capture::occupation_unrest(&state, data, &guyenne),
+        rules.occupy.unrest_city + rules.foreign_culture_extra.occupy
+    );
+    let foreign_sack = preview(&state, data, &guyenne, CaptureOutcome::Sack).unwrap_unrest();
+    // The same place held by a native lord stirs less.
+    let owner_culture = data.provinces[&state.settlements[&guyenne].province]
+        .culture
+        .clone();
+    let native = data
+        .factions
+        .iter()
+        .find(|(id, f)| f.culture == owner_culture && state.factions.contains_key(*id))
+        .map(|(id, _)| id.clone())
+        .expect("a faction of the culture");
+    state.settlements.get_mut(&guyenne).unwrap().controller = native;
+    assert!(!crate::capture::is_foreign_culture(&state, data, &guyenne));
+    let native_sack = preview(&state, data, &guyenne, CaptureOutcome::Sack).unwrap_unrest();
+    assert_eq!(foreign_sack - native_sack, rules.foreign_culture_extra.sack);
+}
+
+trait UnrestOf {
+    fn unwrap_unrest(&self) -> u8;
+}
+impl UnrestOf for crate::capture::CaptureEffects {
+    fn unwrap_unrest(&self) -> u8 {
+        self.unrest
+    }
+}
+
+#[test]
+fn tx_m2_sack_leaves_a_banditry_that_ends() {
+    let data = game_data();
+    let (mut state, guyenne, id) = guyenne_taken();
+    let province = state.settlements[&guyenne].province.clone();
+    let before = state.provinces[&province].devastation;
+    let effects = preview(&state, data, &guyenne, CaptureOutcome::Sack);
+    assert!(effects.banditry_devastation > 0 && effects.banditry_turns > 0);
+    state
+        .choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Sack, None)
+        .unwrap();
+    let after = state.provinces[&province].devastation;
+    assert_eq!(after, before.saturating_add(effects.devastation).min(100));
+    let banditry = state.captures.banditry[&province];
+    assert_eq!(banditry.until, state.turn + effects.banditry_turns);
+    // Not over yet.
+    crate::capture::resolve_unanswered(&mut state);
+    assert!(state.captures.banditry.contains_key(&province));
+    state.turn = banditry.until;
+    crate::capture::resolve_unanswered(&mut state);
+    assert!(state.captures.banditry.is_empty());
+    assert_eq!(
+        state.provinces[&province].devastation,
+        after.saturating_sub(banditry.points)
+    );
+}
+
+#[test]
+fn tx_m2_gift_hands_the_place_to_an_ally_without_unrest() {
+    let data = game_data();
+    let (mut state, guyenne, id) = guyenne_taken();
+    let province = state.settlements[&guyenne].province.clone();
+    let unrest_before = state.provinces[&province].unrest;
+    let occupation = crate::capture::occupation_unrest(&state, data, &guyenne);
+    ally(&mut state, "fac_france", "fac_aragon");
+    // An enemy is no recipient.
+    let enemy = state.choose_capture_outcome(
+        data,
+        &fac("fac_france"),
+        id,
+        CaptureOutcome::Gift,
+        Some(fac("fac_england")),
+    );
+    assert!(matches!(enemy, Err(CaptureError::CessionForbidden(_))));
+    let view = &state.capture_decision_views(data, &fac("fac_france"))[0];
+    let gift = view
+        .options
+        .iter()
+        .find(|o| o.outcome == CaptureOutcome::Gift)
+        .unwrap();
+    assert!(gift.allowed);
+    assert!(gift.recipients.contains(&fac("fac_aragon")));
+    state
+        .choose_capture_outcome(
+            data,
+            &fac("fac_france"),
+            id,
+            CaptureOutcome::Gift,
+            Some(fac("fac_aragon")),
+        )
+        .unwrap();
+    let place = &state.settlements[&guyenne];
+    assert_eq!(place.owner, fac("fac_aragon"));
+    assert_eq!(place.controller, fac("fac_aragon"));
+    assert_eq!(
+        state.provinces[&province].unrest,
+        unrest_before.saturating_sub(occupation)
+    );
+    assert!(state.factions[&fac("fac_aragon")]
+        .modifiers
+        .iter()
+        .any(
+            |m| m.with == fac("fac_france") && m.value == data.capture_rules.gift.recipient_opinion
+        ));
+    assert!(state.captures.pending.is_empty());
+}
+
+#[test]
+fn tx_m2_liberate_returns_the_place_and_forgets_the_grudge() {
+    use crate::grudges::{Grudge, GrudgeKind};
+    let data = game_data();
+    let (mut state, guyenne, id) = guyenne_taken();
+    // Held in right by a third party at peace with France; England is at fault.
+    state.settlements.get_mut(&guyenne).unwrap().owner = fac("fac_aragon");
+    let view = &state.capture_decision_views(data, &fac("fac_france"))[0];
+    let liberate = view
+        .options
+        .iter()
+        .find(|o| o.outcome == CaptureOutcome::Liberate)
+        .unwrap();
+    assert!(liberate.allowed, "{:?}", liberate.reason);
+    assert_eq!(liberate.recipient, Some(fac("fac_aragon")));
+    state.missions.grudges.push(Grudge {
+        kind: GrudgeKind::LostSettlement,
+        culprit: fac("fac_england"),
+        settlement: Some(guyenne.clone()),
+        province: None,
+        turn: 0,
+    });
+    ally(&mut state, "fac_aragon", "fac_portugal");
+    let prestige = |s: &CampaignState| {
+        let ruler = s.factions[&fac("fac_france")].ruler.clone().unwrap();
+        s.characters[&ruler].prestige
+    };
+    let prestige_before = prestige(&state);
+    state
+        .choose_capture_outcome(data, &fac("fac_france"), id, CaptureOutcome::Liberate, None)
+        .unwrap();
+    assert!(state.missions.grudges.is_empty());
+    assert_eq!(state.settlements[&guyenne].controller, fac("fac_aragon"));
+    assert_eq!(
+        prestige(&state) - prestige_before,
+        data.capture_rules.liberate.prestige
+    );
+    let rules = &data.capture_rules.liberate;
+    let opinion = |holder: &str| {
+        state.factions[&fac(holder)]
+            .modifiers
+            .iter()
+            .find(|m| m.with == fac("fac_france"))
+            .map(|m| m.value)
+    };
+    assert_eq!(opinion("fac_aragon"), Some(rules.former_holder_opinion));
+    assert_eq!(opinion("fac_portugal"), Some(rules.allies_opinion));
+}
+
+#[test]
+fn tx_m2_ai_gives_to_an_ally_beside_it_and_liberates_a_peaceful_owner() {
+    let data = game_data();
+    let (mut state, guyenne, _) = guyenne_taken();
+    // England captured: poor, an allied army stands on the place.
+    state.settlements.get_mut(&guyenne).unwrap().controller = fac("fac_england");
+    state.settlements.get_mut(&guyenne).unwrap().owner = fac("fac_france");
+    for faction in ["fac_england", "fac_scotland"] {
+        let f = state.factions.get_mut(&fac(faction)).unwrap();
+        f.at_war_with.remove(&fac("fac_england"));
+        f.at_war_with.remove(&fac("fac_scotland"));
+    }
+    ally(&mut state, "fac_england", "fac_scotland");
+    assert_ne!(
+        ai_choice(&state, data, &guyenne, &fac("fac_england")),
+        CaptureOutcome::Gift
+    );
+    army_on(&mut state, data, "fac_scotland", &guyenne);
+    assert_eq!(
+        ai_choice(&state, data, &guyenne, &fac("fac_england")),
+        CaptureOutcome::Gift
+    );
+    // Without the ally, a rightful owner at peace gets the place back.
+    state.armies.retain(|_, a| a.faction != fac("fac_scotland"));
+    state
+        .factions
+        .get_mut(&fac("fac_england"))
+        .unwrap()
+        .allies
+        .clear();
+    state
+        .factions
+        .get_mut(&fac("fac_scotland"))
+        .unwrap()
+        .allies
+        .clear();
+    state.settlements.get_mut(&guyenne).unwrap().owner = fac("fac_aragon");
+    assert_eq!(
+        ai_choice(&state, data, &guyenne, &fac("fac_england")),
+        CaptureOutcome::Liberate
+    );
 }

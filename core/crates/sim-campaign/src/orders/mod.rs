@@ -409,9 +409,7 @@ impl CampaignState {
                 decision,
                 outcome,
                 recipient,
-            } => {
-                Ok(self.choose_capture_outcome(data, faction, decision, outcome, recipient)?)
-            }
+            } => Ok(self.choose_capture_outcome(data, faction, decision, outcome, recipient)?),
             Order::HireMercenary { army, unit } => {
                 self.order_hire_mercenary(data, faction, &army, &unit)
             }

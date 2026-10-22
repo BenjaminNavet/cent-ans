@@ -223,6 +223,12 @@ fn handle_buttons(
         let Some(data) = sim.data.clone() else {
             continue;
         };
+        // M2: a gift or a liberation goes to the beneficiary the view proposes.
+        let recipient = pending(&sim)
+            .into_iter()
+            .find(|view| view.id == capture.id)
+            .and_then(|view| view.options.into_iter().find(|o| o.outcome == outcome))
+            .and_then(|option| option.recipient);
         let Some(state) = sim.state.as_mut() else {
             continue;
         };
@@ -231,6 +237,7 @@ fn handle_buttons(
             Order::ChooseCaptureOutcome {
                 decision: capture.id,
                 outcome,
+                recipient,
             },
         ) {
             Ok(_) => {

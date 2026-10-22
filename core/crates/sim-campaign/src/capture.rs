@@ -224,7 +224,11 @@ fn is_city(state: &CampaignState, settlement: &SettlementId) -> bool {
 
 /// M2: the culture of the place's province is not the controller's (language,
 /// customary law): the occupation stirs more unrest.
-pub fn is_foreign_culture(state: &CampaignState, data: &GameData, settlement: &SettlementId) -> bool {
+pub fn is_foreign_culture(
+    state: &CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+) -> bool {
     let Some(place) = state.settlements.get(settlement) else {
         return false;
     };
@@ -1011,7 +1015,7 @@ impl CampaignState {
                         "La place de {settlement_name} ({province_name}) est tombée ; ses \
                          défenseurs, qui tenaient pour {previous_name}, attendent votre bon \
                          plaisir. Vos capitaines demandent quel sort lui réserver : l'occuper \
-                         telle quelle, en tirer rançon, la livrer au pillage ou la raser. \
+                         telle quelle, en tirer rançon, la livrer au pillage, la raser, la remettre à un allié ou la libérer. \
                          Sans ordre avant la fin de la saison, on l'occupera.\n\n{reminder}"
                     ),
                     settlement_name,
