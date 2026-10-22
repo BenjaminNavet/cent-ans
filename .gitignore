@@ -64,3 +64,12 @@ game/assets/models/**/*_Image_[0-9]*.png
 
 # CC CD : masques dérivés de l'érosion (geo compose-erode), régénérables
 data/map/compose/derived/
+
+# Résidus Godot : le client Godot a été retiré (ADR 0366), rien ne lit ces fichiers.
+# game/bin : bibliothèques GDExtension compilées ; game/shaders et game/tests : résidus
+# non suivis (le .gd de game/tests reste visible pour décision) ; *.import et *.uid :
+# métadonnées écrites par l'import Godot, régénérées ou orphelines.
+game/bin/
+game/shaders/
+game/**/*.import
+game/**/*.uid

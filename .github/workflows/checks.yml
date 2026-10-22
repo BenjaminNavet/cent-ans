@@ -1,0 +1,69 @@
+# Contrôles de hygiène (CLAUDE.md) : formatage et lint Rust du coeur, suite pytest des outils
+# Python et validation des schémas de données. Déclenché sur chaque PR et sur chaque push vers
+# main (les contrôles ne doivent pas dépendre d'une revue de PR pour tourner). Les jobs existants
+# (client-bevy, seed-bots, windows) ne sont pas modifiés.
+name: checks
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths-ignore: ["docs/**"]
+  pull_request:
+    paths-ignore: ["docs/**"]
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: core
+
+      - name: Format (cargo fmt --check)
+        working-directory: core
+        run: cargo fmt --all -- --check
+
+      - name: Lint (clippy -D warnings)
+        working-directory: core
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: tools/uv.lock
+
+      - name: Installation des dépendances (uv.lock figé)
+        working-directory: tools
+        run: uv sync --frozen
+
+      # Validation des données contre data/schemas/ : tests dédiés, lancés en premier pour
+      # que l'échec de schéma se lise sans attendre la suite complète.
+      - name: Validation des schémas
+        working-directory: tools
+        run: uv run pytest -q -k schema
+
+      - name: Suite pytest (outils)
+        working-directory: tools
+        run: uv run pytest -q
