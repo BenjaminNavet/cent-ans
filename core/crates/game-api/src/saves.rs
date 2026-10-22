@@ -13,8 +13,13 @@ use data_model::GameData;
 use serde::{Deserialize, Serialize};
 use sim_campaign::CampaignState;
 
-/// Version of the wrapper (`SAVE_VERSION` of `sim_facade.gd`).
+/// Version of the wrapper (not of the campaign state, which has its own `STATE_VERSION`).
+/// Raise it together with a new entry in [`WRAPPER_MIGRATIONS`].
 pub const SAVE_VERSION: u32 = 1;
+
+/// Migration chain of the wrapper: entry `i` upgrades a wrapper of version `i + 1` to `i + 2`
+/// (operates on the raw JSON object). Empty while [`SAVE_VERSION`] is 1.
+const WRAPPER_MIGRATIONS: &[fn(&mut serde_json::Value)] = &[];
 /// Prefix of the rotating autosaves (`auto_1..5`, `auto_battle`).
 pub const AUTOSAVE_PREFIX: &str = "auto_";
 
@@ -58,16 +63,68 @@ pub struct SaveMeta {
     pub path: String,
 }
 
-/// Godot's `String.validate_filename`: forbidden characters become `_`.
+/// Longest file stem kept (bytes), leaving room for `.meta.json` under the 255-byte limit.
+const MAX_STEM_BYTES: usize = 120;
+/// Stem used when the name is empty once cleaned.
+const FALLBACK_STEM: &str = "sans_nom";
+
+/// File stem of a slot name: forbidden characters become `_`, control characters are dropped,
+/// and the result is never empty, `.`/`..`, a Windows reserved device name, longer than
+/// [`MAX_STEM_BYTES`] or ending with a dot or a space.
+///
+/// Distinct names may still share a stem (`a:b` and `a/b`); see [`stem_is_lossy`].
 pub fn file_stem(save_name: &str) -> String {
-    save_name
+    let mut stem: String = save_name
         .trim()
         .chars()
+        .filter(|c| !c.is_control())
         .map(|c| match c {
             ':' | '/' | '\\' | '?' | '*' | '"' | '|' | '%' | '<' | '>' => '_',
             other => other,
         })
-        .collect()
+        .collect();
+    while stem.len() > MAX_STEM_BYTES {
+        stem.pop();
+    }
+    let kept = stem.trim_end_matches(['.', ' ']).len();
+    stem.truncate(kept);
+    let device = stem.split('.').next().unwrap_or("").to_ascii_uppercase();
+    let reserved = matches!(device.as_str(), "CON" | "PRN" | "AUX" | "NUL")
+        || (device.len() == 4
+            && (device.starts_with("COM") || device.starts_with("LPT"))
+            && device.as_bytes()[3].is_ascii_digit());
+    if stem.is_empty() {
+        FALLBACK_STEM.to_owned()
+    } else if reserved {
+        format!("_{stem}")
+    } else {
+        stem
+    }
+}
+
+/// Whether the name is altered by [`file_stem`] (another name could then land on the same file),
+/// so that a caller can warn before overwriting.
+pub fn stem_is_lossy(save_name: &str) -> bool {
+    file_stem(save_name) != save_name
+}
+
+/// Writes `text` to `path` atomically: a sibling temporary file is written and synced, then
+/// renamed over the target, so a crash leaves either the old or the new file, never a torn one.
+pub fn write_atomic(path: &Path, text: &str) -> std::io::Result<()> {
+    use std::io::Write;
+    let mut tmp_name = path.file_name().unwrap_or_default().to_os_string();
+    tmp_name.push(".tmp");
+    let tmp = path.with_file_name(tmp_name);
+    let result = (|| {
+        let mut file = std::fs::File::create(&tmp)?;
+        file.write_all(text.as_bytes())?;
+        file.sync_all()?;
+        std::fs::rename(&tmp, path)
+    })();
+    if result.is_err() {
+        let _ = std::fs::remove_file(&tmp);
+    }
+    result
 }
 
 pub fn save_path(dir: &Path, save_name: &str) -> PathBuf {
@@ -144,7 +201,7 @@ pub fn write_save_with_client(
     };
     let path = save_path(dir, save_name);
     let text = serde_json::to_string(&wrapper).map_err(|e| e.to_string())?;
-    std::fs::write(&path, text).map_err(|e| format!("{}: {e}", path.display()))?;
+    write_atomic(&path, &text).map_err(|e| format!("{}: {e}", path.display()))?;
     let meta = SaveMeta {
         name: file_stem(save_name),
         label: display_name(save_name),
@@ -157,13 +214,37 @@ pub fn write_save_with_client(
     };
     let meta_text = serde_json::to_string(&meta).map_err(|e| e.to_string())?;
     // The sheet is an optimisation: a failed write only makes the list read the wrapper.
-    let _ = std::fs::write(meta_path(dir, save_name), meta_text);
+    let _ = write_atomic(&meta_path(dir, save_name), &meta_text);
     Ok(path)
 }
 
 pub fn read_save(path: &Path) -> Result<SaveWrapper, String> {
     let text = std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
-    serde_json::from_str(&text).map_err(|e| format!("sauvegarde illisible : {e}"))
+    parse_wrapper(&text)
+}
+
+/// Parses a wrapper, refusing a newer version and running the migration chain on older ones.
+pub fn parse_wrapper(text: &str) -> Result<SaveWrapper, String> {
+    let damaged = |e: serde_json::Error| format!("sauvegarde abîmée ou illisible ({e})");
+    let mut value: serde_json::Value = serde_json::from_str(text).map_err(damaged)?;
+    let version = value
+        .get("version")
+        .and_then(serde_json::Value::as_u64)
+        .map_or(0, |v| u32::try_from(v).unwrap_or(u32::MAX));
+    if version > SAVE_VERSION {
+        return Err(format!(
+            "cette sauvegarde vient d'une version plus récente du jeu (format {version}, \
+             ce jeu lit jusqu'au format {SAVE_VERSION}) : mettez le jeu à jour pour la charger"
+        ));
+    }
+    // Version 0 is a wrapper written before the field existed: same layout as version 1.
+    for migrate in WRAPPER_MIGRATIONS
+        .iter()
+        .skip(version.saturating_sub(1) as usize)
+    {
+        migrate(&mut value);
+    }
+    serde_json::from_value(value).map_err(damaged)
 }
 
 /// Restores the campaign of a save file, with the same post-load fixes as `load_from_string`.
@@ -173,7 +254,12 @@ pub fn load_save(data: &GameData, path: &Path) -> Result<CampaignState, String> 
 
 /// The campaign of an already read wrapper, with the post-load fixes.
 pub fn load_state(data: &GameData, wrapper: &SaveWrapper) -> Result<CampaignState, String> {
-    let mut state = CampaignState::load_json(&wrapper.state).map_err(|e| e.to_string())?;
+    let mut state = CampaignState::load_json(&wrapper.state).map_err(|e| match e {
+        sim_campaign::CampaignError::Deserialize(detail) => {
+            format!("sauvegarde abîmée ou illisible ({detail})")
+        }
+        other => other.to_string(),
+    })?;
     sim_campaign::council::ensure_councils(&mut state, data);
     sim_campaign::march::unstick_field_armies(&mut state, data);
     Ok(state)
@@ -225,6 +311,7 @@ pub fn delete_save(dir: &Path, save_name: &str) {
         save_path(dir, save_name),
         meta_path(dir, save_name),
         dir.join(format!("{}.png", file_stem(save_name))),
+        dir.join(format!("{}.played", file_stem(save_name))),
     ] {
         let _ = std::fs::remove_file(path);
     }
@@ -280,6 +367,77 @@ mod tests {
             load_save(data, &path).unwrap().save_json(),
             state.save_json()
         );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn file_stem_is_never_empty_or_unsafe() {
+        for (raw, expected) in [
+            ("", "sans_nom"),
+            ("   ", "sans_nom"),
+            (".", "sans_nom"),
+            ("..", "sans_nom"),
+            ("fin.", "fin"),
+            ("a:b", "a_b"),
+            ("con", "_con"),
+            ("NUL.txt", "_NUL.txt"),
+            ("com1", "_com1"),
+            ("console", "console"),
+            ("partie 1.5", "partie 1.5"),
+            ("tab\tname", "tabname"),
+        ] {
+            assert_eq!(file_stem(raw), expected, "{raw:?}");
+        }
+        assert!(file_stem(&"é".repeat(300)).len() <= MAX_STEM_BYTES);
+        assert!(stem_is_lossy("a:b") && !stem_is_lossy("auto_1"));
+    }
+
+    #[test]
+    fn newer_wrapper_version_is_refused_in_french() {
+        let text = format!(r#"{{"version": {}, "state": "{{}}"}}"#, SAVE_VERSION + 1);
+        let error = parse_wrapper(&text).unwrap_err();
+        assert!(error.contains("version plus récente"), "{error}");
+        // Missing version (older wrapper) is accepted.
+        assert_eq!(parse_wrapper(r#"{"state": "{}"}"#).unwrap().version, 0);
+    }
+
+    #[test]
+    fn damaged_files_give_a_clear_message() {
+        let data = data_model::test_support::game_data();
+        let dir = std::env::temp_dir().join(format!("cent-ans-saves-bad-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        for (name, text) in [
+            ("empty", ""),
+            ("cut", r#"{"version":1,"state":"{\"sta"#),
+            ("blank_state", r#"{"version":1,"state":""}"#),
+        ] {
+            let path = dir.join(format!("{name}.json"));
+            std::fs::write(&path, text).unwrap();
+            let error = load_save(data, &path).unwrap_err();
+            assert!(error.contains("abîmée"), "{name}: {error}");
+        }
+        assert!(load_save(data, &dir.join("missing.json")).is_err());
+        assert!(list_saves(&dir.join("nope")).is_empty());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn atomic_write_replaces_without_leaving_a_temp_file() {
+        let dir =
+            std::env::temp_dir().join(format!("cent-ans-saves-atomic-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("x.json");
+        write_atomic(&path, "old").unwrap();
+        write_atomic(&path, "new").unwrap();
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), "new");
+        assert!(!dir.join("x.json.tmp").exists());
+        // A failure (target is a directory) keeps the old content and cleans the temp file.
+        let blocked = dir.join("d.json");
+        std::fs::create_dir(&blocked).unwrap();
+        assert!(write_atomic(&blocked, "x").is_err());
+        assert!(!dir.join("d.json.tmp").exists());
         let _ = std::fs::remove_dir_all(&dir);
     }
 

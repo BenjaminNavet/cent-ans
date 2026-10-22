@@ -150,6 +150,8 @@ pub struct TurnFlow {
     pub last_report_vignette: (String, String),
     /// Slot of the last rotating autosave (`auto_N`), `autosave_interval`.
     pub last_autosave: Option<String>,
+    /// Error of the last rotating autosave that failed (`None` once one succeeds again).
+    pub last_autosave_error: Option<String>,
 }
 
 /// Rotating autosave slots (`AUTOSAVE_SLOTS`, save_slots.gd).
@@ -173,6 +175,7 @@ fn autosave_after_turn(
     dir: &crate::menu::saves::SaveDir,
     sim: &Sim,
     flow: &mut TurnFlow,
+    toasts: &mut MessageWriter<ToastRequest>,
 ) {
     let Some(turn) = sim.state.as_ref().map(CampaignState::turn) else {
         return;
@@ -181,8 +184,17 @@ fn autosave_after_turn(
         return;
     };
     match crate::menu::saves::save_now(sim, &dir.0, &name) {
-        Ok(_) => flow.last_autosave = Some(name),
-        Err(message) => warn!("autosave {name}: {message}"),
+        Ok(_) => {
+            flow.last_autosave = Some(name);
+            flow.last_autosave_error = None;
+        }
+        Err(message) => {
+            warn!("autosave {name}: {message}");
+            toasts.write(ToastRequest::new(
+                "Sauvegarde automatique impossible : vérifiez l'espace disque et les droits du dossier de sauvegarde.",
+            ));
+            flow.last_autosave_error = Some(message);
+        }
     }
 }
 
@@ -466,7 +478,7 @@ pub fn poll_turn(
                 report::ReportPlan::Nothing => {}
             }
             if let (Some(settings), Some(dir)) = (settings.as_deref(), save_dir.as_deref()) {
-                autosave_after_turn(settings, dir, &sim, &mut flow);
+                autosave_after_turn(settings, dir, &sim, &mut flow, &mut toasts);
             }
             flow.last_events = events.clone();
             data_view.force_refresh();
