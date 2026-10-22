@@ -14,7 +14,7 @@ use serde_json::{Value, json};
 
 use super::CampaignSun;
 use crate::campaign::camera::rig::CampaignRig;
-use crate::settings::quality::SunBase;
+use crate::settings::quality::{RenderQuality, SunBase};
 
 #[derive(Resource, Debug, Clone, Copy, PartialEq)]
 pub struct ShadowTuning {
@@ -93,9 +93,15 @@ impl ShadowTuning {
 
     /// Far bounds of the cascades with the camera at `distance`.
     pub fn bounds(&self, distance: f32, near: f32) -> Vec<f32> {
+        self.bounds_capped(distance, near, self.cascades)
+    }
+
+    /// [`Self::bounds`] with at most `cap` cascades (the quality preset's `map_shadow_splits`: the
+    /// sun shadow cost is close to linear in the cascade count, see `docs/wip/bm-perf4.md`).
+    pub fn bounds_capped(&self, distance: f32, near: f32, cap: usize) -> Vec<f32> {
         let range = self.range(distance);
         CascadeShadowConfigBuilder {
-            num_cascades: self.cascades,
+            num_cascades: self.cascades.min(cap).max(1),
             minimum_distance: near.min(range * 0.5),
             maximum_distance: range,
             first_cascade_far_bound: (range * self.first_split).max(near * 1.01),
@@ -131,6 +137,7 @@ pub fn load_tuning(mut commands: Commands) {
 pub fn size_shadows(
     tuning: Res<ShadowTuning>,
     rig: Option<Res<CampaignRig>>,
+    quality: Option<Res<RenderQuality>>,
     mut state: ResMut<ShadowState>,
     mut suns: Query<(&mut SunBase, &mut CascadeShadowConfig), With<CampaignSun>>,
 ) {
@@ -141,7 +148,12 @@ pub fn size_shadows(
     let enabled = tuning.enabled(distance);
     // Same near plane as the camera rig (`CloseCameraProfile::near_plane`, 0.02 x distance).
     let near = (distance * 0.02).clamp(0.002, 1.0);
-    let bounds = tuning.bounds(distance, near);
+    // `CENT_ANS_MAP_CASCADES=n` forces the cap (A/B bench, `tools/bevy_bench/ab.sh`).
+    let cap = crate::campaign::perf_switch::value("MAP_CASCADES").map_or_else(
+        || quality.map_or(usize::MAX, |q| q.map_shadow_cascades),
+        |v| v as usize,
+    );
+    let bounds = tuning.bounds_capped(distance, near, cap);
     for (mut base, mut config) in &mut suns {
         if base.shadows != enabled {
             base.shadows = enabled;
@@ -189,6 +201,17 @@ pub fn dump(world: &World) -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn cascade_cap_shortens_the_bounds_and_keeps_the_range() {
+        let t = ShadowTuning::default();
+        let full = t.bounds(40.0, 0.8);
+        let capped = t.bounds_capped(40.0, 0.8, 2);
+        assert_eq!(full.len(), 4);
+        assert_eq!(capped.len(), 2);
+        assert!((full[3] - capped[1]).abs() < 1e-3);
+        assert_eq!(t.bounds_capped(40.0, 0.8, 0).len(), 1);
+    }
 
     #[test]
     fn range_follows_the_camera_and_stops_high_up() {

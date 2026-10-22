@@ -7,7 +7,12 @@
   "region": "irlande",
   "terrain": "hills",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_connacht",
+    "prov_desmond",
+    "prov_dublin",
+    "prov_ormond"
+  ],
   "rivers": [
     "Shannon",
     "Fergus"

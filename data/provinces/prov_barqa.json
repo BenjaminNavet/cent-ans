@@ -8,7 +8,10 @@
   "region": "maghreb",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_alexandria",
+    "prov_tripolitania"
+  ],
   "coastal": true,
   "rivers": [
     "Wadi Derna"

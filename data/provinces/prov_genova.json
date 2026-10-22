@@ -8,7 +8,12 @@
   "region": "italie_nord",
   "terrain": "mountains",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_firenze",
+    "prov_milano",
+    "prov_montferrat",
+    "prov_savoie"
+  ],
   "rivers": [
     "Polcevera",
     "Bisagno"

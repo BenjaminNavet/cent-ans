@@ -1,14 +1,25 @@
 {
   "id": "prov_agenais",
   "name": {
-    "display": "Agenais et Bazadais",
+    "display": "Agenais, Périgord et Quercy",
     "local": "Agenés",
     "local_language": "occitan"
   },
   "region": "aquitaine",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_albret",
+    "prov_armagnac",
+    "prov_barcelona",
+    "prov_bazadais",
+    "prov_bearn",
+    "prov_carcassonne",
+    "prov_guyenne",
+    "prov_pallars",
+    "prov_saintonge",
+    "prov_touraine"
+  ],
   "rivers": [
     "Garonne",
     "Lot",

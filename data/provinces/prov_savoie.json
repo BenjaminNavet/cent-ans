@@ -8,7 +8,16 @@
   "region": "provence_alpes",
   "terrain": "mountains",
   "climate": "mountain",
-  "neighbors": [],
+  "neighbors": [
+    "prov_beaucaire",
+    "prov_bourgogne",
+    "prov_genova",
+    "prov_milano",
+    "prov_montferrat",
+    "prov_provence",
+    "prov_saluzzo",
+    "prov_waldstatten"
+  ],
   "rivers": [
     "Isère",
     "Arc",

@@ -8,7 +8,10 @@
   "region": "rus_centre",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_kozelsk",
+    "prov_moscow"
+  ],
   "coastal": false,
   "rivers": [
     "Oka",

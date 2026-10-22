@@ -9,7 +9,10 @@
   "terrain": "plains",
   "climate": "oceanic",
   "neighbors": [
-    "prov_artois"
+    "prov_artois",
+    "prov_brabant",
+    "prov_flandre_wallonne",
+    "prov_hainaut"
   ],
   "rivers": [
     "Escaut",

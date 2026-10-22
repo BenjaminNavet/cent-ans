@@ -8,7 +8,11 @@
   "region": "empire_nord",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brandenburg",
+    "prov_holstein",
+    "prov_pomerania_wolgast"
+  ],
   "rivers": [
     "Warnow",
     "Elde"

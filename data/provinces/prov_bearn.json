@@ -8,7 +8,14 @@
   "region": "aquitaine",
   "terrain": "mountains",
   "climate": "mountain",
-  "neighbors": [],
+  "neighbors": [
+    "prov_agenais",
+    "prov_armagnac",
+    "prov_barcelona",
+    "prov_bazadais",
+    "prov_gascogne",
+    "prov_navarra"
+  ],
   "rivers": [
     "Gave de Pau",
     "Gave d'Oloron",

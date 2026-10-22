@@ -8,7 +8,15 @@
   "region": "languedoc",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bourbonnais",
+    "prov_bourgogne",
+    "prov_carcassonne",
+    "prov_comtat_venaissin",
+    "prov_provence",
+    "prov_savoie",
+    "prov_touraine"
+  ],
   "rivers": [
     "Rhône",
     "Gard",

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_siege_stone.schema.json",
+  "title": "Pierre des remparts de siège (lot B7)",
+  "description": "`data/art/siege_stone.json` : mappage triplanaire et teintes de la pierre des murs, tours et créneaux de siège.",
+  "type": "object",
+  "required": ["repetitions_per_metre", "blend_sharpness", "normal_strength", "roughness", "reflectance", "stone", "stone_dark"],
+  "additionalProperties": false,
+  "$defs": {
+    "rgb": {
+      "type": "array",
+      "items": { "type": "number", "minimum": 0, "maximum": 2 },
+      "minItems": 3,
+      "maxItems": 3
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "repetitions_per_metre": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 },
+    "blend_sharpness": { "type": "number", "minimum": 1, "maximum": 16 },
+    "normal_strength": { "type": "number", "minimum": 0, "maximum": 3 },
+    "roughness": { "type": "number", "minimum": 0, "maximum": 1 },
+    "reflectance": { "type": "number", "minimum": 0, "maximum": 1 },
+    "stone": { "$ref": "#/$defs/rgb" },
+    "stone_dark": { "$ref": "#/$defs/rgb" }
+  }
+}

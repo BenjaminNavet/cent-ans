@@ -9,8 +9,11 @@
   "terrain": "plains",
   "climate": "oceanic",
   "neighbors": [
+    "prov_alencon",
+    "prov_bretagne",
     "prov_ile_de_france",
-    "prov_bretagne"
+    "prov_poitou",
+    "prov_touraine"
   ],
   "rivers": [
     "Seine",

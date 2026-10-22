@@ -8,7 +8,12 @@
   "region": "balkans",
   "terrain": "hills",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_durazzo",
+    "prov_kosovo",
+    "prov_tarnovo",
+    "prov_thessalonica"
+  ],
   "coastal": false,
   "rivers": [
     "Crna",

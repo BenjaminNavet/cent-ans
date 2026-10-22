@@ -8,7 +8,16 @@
   "region": "rus_centre",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_beloozero",
+    "prov_kozelsk",
+    "prov_rostov",
+    "prov_ryazan",
+    "prov_smolensk",
+    "prov_suzdal",
+    "prov_tver",
+    "prov_yaroslavl"
+  ],
   "coastal": false,
   "rivers": [
     "Moskova",

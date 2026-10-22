@@ -8,7 +8,11 @@
   "region": "empire_nord",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brunswick",
+    "prov_holstein",
+    "prov_westphalia"
+  ],
   "rivers": [
     "Weser",
     "Leine",

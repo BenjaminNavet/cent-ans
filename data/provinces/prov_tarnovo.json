@@ -8,7 +8,15 @@
   "region": "balkans",
   "terrain": "hills",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_anchialos",
+    "prov_constantinople",
+    "prov_kosovo",
+    "prov_muntenia",
+    "prov_prilep",
+    "prov_thessalonica",
+    "prov_vidin"
+  ],
   "coastal": false,
   "rivers": [
     "Yantra",

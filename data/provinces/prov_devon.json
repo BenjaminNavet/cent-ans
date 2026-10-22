@@ -8,7 +8,11 @@
   "region": "angleterre_sud",
   "terrain": "hills",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_gwynedd",
+    "prov_middlesex",
+    "prov_yorkshire"
+  ],
   "rivers": [
     "Exe",
     "Parrett",

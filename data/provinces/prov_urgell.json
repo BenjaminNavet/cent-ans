@@ -8,7 +8,10 @@
   "region": "aragon",
   "terrain": "hills",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_barcelona",
+    "prov_ribagorca"
+  ],
   "coastal": false,
   "rivers": [
     "Sègre"

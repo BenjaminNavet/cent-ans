@@ -8,7 +8,10 @@
   "region": "iberie_sud",
   "terrain": "mountains",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_algeciras",
+    "prov_murcia"
+  ],
   "rivers": [
     "Genil",
     "Andarax",

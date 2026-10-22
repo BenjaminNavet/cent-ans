@@ -8,7 +8,13 @@
   "region": "italie_centre",
   "terrain": "plains",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bologna",
+    "prov_firenze",
+    "prov_napoli",
+    "prov_perugia",
+    "prov_urbino"
+  ],
   "rivers": [
     "Marecchia",
     "Tibre",

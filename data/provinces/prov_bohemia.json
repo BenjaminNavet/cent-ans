@@ -8,7 +8,17 @@
   "region": "empire_est",
   "terrain": "hills",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_austria",
+    "prov_glogow",
+    "prov_legnica",
+    "prov_meissen",
+    "prov_nuremberg",
+    "prov_oberbayern",
+    "prov_swidnica",
+    "prov_transdanubia_west",
+    "prov_upper_silesia"
+  ],
   "rivers": [
     "Vltava",
     "Elbe",

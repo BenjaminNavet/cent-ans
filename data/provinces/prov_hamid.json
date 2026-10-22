@@ -8,7 +8,11 @@
   "region": "anatolie",
   "terrain": "hills",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_karaman",
+    "prov_kutahya",
+    "prov_teke"
+  ],
   "coastal": false,
   "resources": [
     "res_fish",

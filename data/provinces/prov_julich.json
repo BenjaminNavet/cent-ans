@@ -8,7 +8,10 @@
   "region": "empire_rhin",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_cologne",
+    "prov_liege"
+  ],
   "rivers": [
     "Roer",
     "Rhin"

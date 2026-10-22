@@ -8,7 +8,9 @@
   "region": "italie_nord",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_milano"
+  ],
   "rivers": [
     "Tessin"
   ],

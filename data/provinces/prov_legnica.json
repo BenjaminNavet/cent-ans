@@ -8,7 +8,12 @@
   "region": "silesie",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bohemia",
+    "prov_glogow",
+    "prov_swidnica",
+    "prov_upper_silesia"
+  ],
   "rivers": [
     "Oder",
     "Kaczawa"

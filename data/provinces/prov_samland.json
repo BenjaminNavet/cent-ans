@@ -8,7 +8,10 @@
   "region": "prusse",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brest",
+    "prov_pomesania"
+  ],
   "rivers": [
     "Pregel",
     "Passarge",

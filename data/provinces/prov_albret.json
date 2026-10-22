@@ -8,7 +8,9 @@
   "region": "aquitaine",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_agenais"
+  ],
   "rivers": [
     "Baïse"
   ],

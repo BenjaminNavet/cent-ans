@@ -8,7 +8,15 @@
   "region": "balkans",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bosnia",
+    "prov_durazzo",
+    "prov_prilep",
+    "prov_ragusa",
+    "prov_syrmia",
+    "prov_tarnovo",
+    "prov_vidin"
+  ],
   "coastal": true,
   "rivers": [
     "Sitnica",

@@ -9,7 +9,15 @@
   "terrain": "plains",
   "climate": "oceanic",
   "neighbors": [
-    "prov_normandie"
+    "prov_artois",
+    "prov_bourbonnais",
+    "prov_bourgogne",
+    "prov_hainaut",
+    "prov_liege",
+    "prov_lorraine",
+    "prov_normandie",
+    "prov_ponthieu",
+    "prov_touraine"
   ],
   "rivers": [
     "Seine",

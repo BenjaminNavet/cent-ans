@@ -8,7 +8,14 @@
   "region": "france_est",
   "terrain": "hills",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_beaucaire",
+    "prov_bourbonnais",
+    "prov_ile_de_france",
+    "prov_lorraine",
+    "prov_savoie",
+    "prov_waldstatten"
+  ],
   "rivers": [
     "Saône",
     "Seine",

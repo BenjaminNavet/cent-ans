@@ -8,7 +8,10 @@
   "region": "aragon",
   "terrain": "mountains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_barcelona",
+    "prov_urgell"
+  ],
   "coastal": false,
   "rivers": [
     "Ésera"

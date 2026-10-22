@@ -8,7 +8,9 @@
   "region": "anatolie",
   "terrain": "mountains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_sivas"
+  ],
   "coastal": true,
   "ports": [
     "Trébizonde",

@@ -8,7 +8,11 @@
   "region": "portugal",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_galicia",
+    "prov_murcia",
+    "prov_toledo"
+  ],
   "rivers": [
     "Tage",
     "Mondego",

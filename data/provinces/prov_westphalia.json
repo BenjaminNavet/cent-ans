@@ -8,7 +8,15 @@
   "region": "empire_nord",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brunswick",
+    "prov_cologne",
+    "prov_gueldre",
+    "prov_hesse",
+    "prov_lower_saxony",
+    "prov_mainz",
+    "prov_utrecht"
+  ],
   "rivers": [
     "Ems",
     "Lippe",

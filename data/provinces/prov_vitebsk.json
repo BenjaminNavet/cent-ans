@@ -8,7 +8,15 @@
   "region": "lituanie",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_briansk",
+    "prov_livonia",
+    "prov_novgorod",
+    "prov_pskov",
+    "prov_riga_archbishopric",
+    "prov_smolensk",
+    "prov_vilnius"
+  ],
   "rivers": [
     "Dvina",
     "Kasplia",

@@ -8,7 +8,13 @@
   "region": "italie_nord",
   "terrain": "marsh",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bologna",
+    "prov_ferrara",
+    "prov_firenze",
+    "prov_milano",
+    "prov_verona"
+  ],
   "rivers": [
     "Mincio"
   ],

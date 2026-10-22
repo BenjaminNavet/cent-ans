@@ -8,7 +8,12 @@
   "region": "anatolie",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_constantinople",
+    "prov_karasi",
+    "prov_kutahya",
+    "prov_sivas"
+  ],
   "coastal": true,
   "rivers": [
     "Nilüfer",

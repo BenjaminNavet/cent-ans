@@ -8,7 +8,14 @@
   "region": "balkans",
   "terrain": "plains",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_attica",
+    "prov_constantinople",
+    "prov_durazzo",
+    "prov_epirus",
+    "prov_prilep",
+    "prov_tarnovo"
+  ],
   "coastal": true,
   "rivers": [
     "Axios",

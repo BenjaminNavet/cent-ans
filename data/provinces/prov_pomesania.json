@@ -8,7 +8,14 @@
   "region": "prusse",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brest",
+    "prov_lesser_poland",
+    "prov_plock",
+    "prov_pomerania_stettin",
+    "prov_samland",
+    "prov_warsaw"
+  ],
   "rivers": [
     "Nogat",
     "Vistule",

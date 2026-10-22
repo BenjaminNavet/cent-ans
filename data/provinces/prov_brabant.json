@@ -8,7 +8,15 @@
   "region": "pays_bas",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_cologne",
+    "prov_flandre",
+    "prov_gueldre",
+    "prov_hainaut",
+    "prov_liege",
+    "prov_namur",
+    "prov_utrecht"
+  ],
   "rivers": [
     "Escaut",
     "Dyle",

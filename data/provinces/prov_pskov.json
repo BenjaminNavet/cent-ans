@@ -8,7 +8,12 @@
   "region": "rus_nord",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_dorpat",
+    "prov_livonia",
+    "prov_novgorod",
+    "prov_vitebsk"
+  ],
   "coastal": false,
   "rivers": [
     "Velikaïa",

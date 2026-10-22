@@ -8,7 +8,12 @@
   "region": "rus_ouest",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_briansk",
+    "prov_moscow",
+    "prov_ryazan",
+    "prov_smolensk"
+  ],
   "coastal": false,
   "rivers": [
     "Oka",

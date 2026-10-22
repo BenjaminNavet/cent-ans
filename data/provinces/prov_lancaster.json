@@ -7,7 +7,9 @@
   "region": "angleterre_nord",
   "terrain": "hills",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_yorkshire"
+  ],
   "rivers": [
     "Lune",
     "Ribble"

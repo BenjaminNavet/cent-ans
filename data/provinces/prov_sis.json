@@ -8,7 +8,12 @@
   "region": "anatolie",
   "terrain": "mountains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_elbistan",
+    "prov_karaman",
+    "prov_sivas",
+    "prov_tripoli"
+  ],
   "coastal": true,
   "rivers": [
     "Ceyhan",

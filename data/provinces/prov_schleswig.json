@@ -8,7 +8,10 @@
   "region": "scandinavie",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_holstein",
+    "prov_sjaelland"
+  ],
   "rivers": [
     "Slien",
     "Ejder"

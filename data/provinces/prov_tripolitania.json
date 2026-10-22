@@ -8,7 +8,11 @@
   "region": "maghreb",
   "terrain": "steppe",
   "climate": "steppe",
-  "neighbors": [],
+  "neighbors": [
+    "prov_barqa",
+    "prov_bougie",
+    "prov_gabes"
+  ],
   "coastal": true,
   "rivers": [],
   "resources": [

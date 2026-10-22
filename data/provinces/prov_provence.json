@@ -8,7 +8,11 @@
   "region": "provence_alpes",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_beaucaire",
+    "prov_comtat_venaissin",
+    "prov_savoie"
+  ],
   "rivers": [
     "Rhône",
     "Durance",

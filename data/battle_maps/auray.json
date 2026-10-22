@@ -1,0 +1,363 @@
+{
+  "id": "auray",
+  "name": "Bataille d’Auray",
+  "date": "1364-09-29",
+  "year": 1364,
+  "summary": "29 septembre 1364. Charles de Blois assiège Auray ; Jean de Montfort, Chandos, Knolles, Calveley et Clisson viennent la secourir. Les deux armées s’alignent à pied sur la lande de Brec’h, entre le marais du Loch et les bois, les archers anglais en herse sur la pente et une réserve cachée sous Hugh Calveley. Du Guesclin heurte l’aile gauche, la bataille de Blois se rompt sur la réserve ; Charles de Blois est tué et la guerre de Succession de Bretagne s’achève.",
+  "province": "prov_bretagne",
+  "province_name": "Bretagne",
+  "terrain": "heath",
+  "season": "autumn",
+  "site": {
+    "lon": -2.97,
+    "lat": 47.68,
+    "bearing_deg": 90,
+    "place": "Brec’h (Champ des Martyrs, Auray)"
+  },
+  "field": {
+    "width_m": 2400,
+    "depth_m": 1600,
+    "line_gap_m": 700,
+    "zone_depth_m": 450,
+    "max_regiments_per_side": 160
+  },
+  "ground": "dry",
+  "weather": {
+    "start": "clear",
+    "label": "Matinée claire d’automne sur la lande, vent d’ouest"
+  },
+  "start_hour": 11.0,
+  "woods": [
+    {
+      "x": 150,
+      "z": 1400,
+      "radius": 120
+    },
+    {
+      "x": 2250,
+      "z": 1450,
+      "radius": 110
+    },
+    {
+      "x": 2300,
+      "z": 300,
+      "radius": 90
+    }
+  ],
+  "pools": [
+    {
+      "x": 300,
+      "z": 800,
+      "radius": 70
+    },
+    {
+      "x": 460,
+      "z": 900,
+      "radius": 45
+    }
+  ],
+  "mud": [
+    {
+      "x": 330,
+      "z": 700,
+      "radius": 90
+    }
+  ],
+  "streams": [
+    {
+      "kind": "brook",
+      "width": 5,
+      "points": [
+        [
+          -40,
+          920
+        ],
+        [
+          250,
+          860
+        ],
+        [
+          480,
+          960
+        ],
+        [
+          650,
+          1100
+        ],
+        [
+          700,
+          1300
+        ],
+        [
+          680,
+          1640
+        ]
+      ]
+    }
+  ],
+  "roads": [
+    {
+      "kind": "track",
+      "width": 4,
+      "points": [
+        [
+          -40,
+          1500
+        ],
+        [
+          900,
+          1470
+        ],
+        [
+          1700,
+          1440
+        ],
+        [
+          2440,
+          1400
+        ]
+      ]
+    }
+  ],
+  "obstacles": [
+    {
+      "kind": "hedge",
+      "a": [
+        1900,
+        680
+      ],
+      "b": [
+        2100,
+        700
+      ]
+    },
+    {
+      "kind": "hedge",
+      "a": [
+        2100,
+        700
+      ],
+      "b": [
+        2300,
+        690
+      ]
+    }
+  ],
+  "decor": {
+    "description": "La lande d’ajoncs et de bruyère de Brec’h, un marais de joncs à gauche, un bosquet de chênes à droite, le camp de siège de Blois devant Auray, le camp de Montfort sur la hauteur.",
+    "clear": true,
+    "items": [
+      {
+        "type": "camp",
+        "side": "defender",
+        "x": 1200,
+        "z": 1560,
+        "yaw": 3.14159,
+        "seed": 1364
+      },
+      {
+        "type": "camp",
+        "side": "attacker",
+        "x": 1300,
+        "z": 40,
+        "yaw": 0.0,
+        "seed": 29
+      },
+      {
+        "type": "hamlet",
+        "layout": "green",
+        "x": 2250,
+        "z": 150,
+        "yaw": 0.0,
+        "houses": 8,
+        "seed": 947
+      },
+      {
+        "type": "church",
+        "x": 2330,
+        "z": 90,
+        "yaw": 0.0
+      }
+    ]
+  },
+  "armies": {
+    "attacker": {
+      "faction": "fac_france",
+      "faction_name": "France",
+      "army": "Armée de Charles de Blois (parti français)",
+      "general": {
+        "name": "Charles de Blois, duc de Bretagne",
+        "regiment": 7,
+        "command": 4,
+        "character": "chr_charles_de_blois"
+      },
+      "regiments": [
+        {
+          "unit_type": "unit_gascon_crossbowmen",
+          "count": 3,
+          "soldiers": 110,
+          "x": 1200,
+          "z": 400,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 0,
+          "ammo": 20,
+          "label": "Arbalétriers gascons et espagnols de Blois"
+        },
+        {
+          "unit_type": "unit_men_at_arms_foot",
+          "count": 4,
+          "soldiers": 130,
+          "x": 700,
+          "z": 330,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 0,
+          "dismounted": true,
+          "experience": 4,
+          "label": "Bataille de Du Guesclin (hommes d’armes à pied)"
+        },
+        {
+          "unit_type": "unit_breton_knights",
+          "count": 4,
+          "soldiers": 120,
+          "x": 1250,
+          "z": 250,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 1,
+          "dismounted": true,
+          "label": "Bataille de Charles de Blois (chevaliers bretons à pied)"
+        },
+        {
+          "unit_type": "unit_men_at_arms_foot",
+          "count": 3,
+          "soldiers": 120,
+          "x": 1750,
+          "z": 270,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 1,
+          "label": "Bataille de Beaumanoir et de Rohan"
+        },
+        {
+          "unit_type": "unit_routiers",
+          "count": 2,
+          "soldiers": 110,
+          "x": 1200,
+          "z": 120,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 2,
+          "morale": 45,
+          "label": "Compagnies de l’arrière-garde"
+        }
+      ],
+      "waves": [
+        {
+          "label": "La bataille de Du Guesclin et les arbalétriers",
+          "assault": true
+        },
+        {
+          "label": "La bataille de Charles de Blois et de Beaumanoir",
+          "release_s": 150,
+          "after": 0,
+          "assault": true
+        },
+        {
+          "label": "L’arrière-garde des compagnies",
+          "release_s": 330,
+          "after": 1,
+          "assault": true
+        }
+      ]
+    },
+    "defender": {
+      "faction": "fac_england",
+      "faction_name": "Angleterre",
+      "army": "Armée de Jean de Montfort et de Chandos",
+      "general": {
+        "name": "Sir John Chandos",
+        "regiment": 3,
+        "command": 8
+      },
+      "regiments": [
+        {
+          "unit_type": "unit_longbowmen",
+          "count": 3,
+          "soldiers": 150,
+          "x": 1150,
+          "z": 1160,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 80,
+          "experience": 4,
+          "label": "Archers anglais de Chandos (herse sur la pente)"
+        },
+        {
+          "unit_type": "unit_english_retinue",
+          "count": 2,
+          "soldiers": 120,
+          "x": 1150,
+          "z": 1230,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 100,
+          "experience": 4,
+          "label": "Maison de sir John Chandos"
+        },
+        {
+          "unit_type": "unit_men_at_arms_foot",
+          "count": 4,
+          "soldiers": 130,
+          "x": 650,
+          "z": 1190,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 100,
+          "experience": 4,
+          "label": "Aile gauche de Clisson et de Knolles"
+        },
+        {
+          "unit_type": "unit_breton_knights",
+          "count": 3,
+          "soldiers": 120,
+          "x": 1750,
+          "z": 1180,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 100,
+          "dismounted": true,
+          "label": "Bretons de Jean de Montfort (aile droite)"
+        },
+        {
+          "unit_type": "unit_men_at_arms_foot",
+          "count": 2,
+          "soldiers": 130,
+          "x": 1000,
+          "z": 1500,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 700,
+          "experience": 5,
+          "label": "Réserve de Hugh Calveley (frappe le flanc)"
+        }
+      ]
+    }
+  },
+  "historical_winner": "defender",
+  "campaign": {
+    "from_year": 1341,
+    "to_year": 1365
+  },
+  "sources": [
+    "Froissart, Chroniques, livre I (éd. Luce, t. VI)",
+    "Michael Jones, Ducal Brittany 1364-1399 (1970)",
+    "Jonathan Sumption, The Hundred Years War, t. II : Trial by Fire (1999)"
+  ]
+}

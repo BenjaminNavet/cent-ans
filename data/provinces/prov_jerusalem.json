@@ -8,7 +8,11 @@
   "region": "levant",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_alexandria",
+    "prov_cairo",
+    "prov_tripoli"
+  ],
   "coastal": true,
   "rivers": [
     "Jourdain"

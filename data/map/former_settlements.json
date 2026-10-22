@@ -2072,16 +2072,6 @@
       "former_kind": "abbey"
     },
     {
-      "id": "set_bazas",
-      "name": "Bazas",
-      "province": "prov_guyenne",
-      "lonlat": [
-        -0.2167,
-        44.4333
-      ],
-      "former_kind": "town"
-    },
-    {
       "id": "set_cadillac",
       "name": "Cadillac",
       "province": "prov_guyenne",

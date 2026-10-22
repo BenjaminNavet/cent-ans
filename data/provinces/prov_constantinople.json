@@ -8,7 +8,13 @@
   "region": "balkans",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_anchialos",
+    "prov_bursa",
+    "prov_karasi",
+    "prov_tarnovo",
+    "prov_thessalonica"
+  ],
   "coastal": true,
   "rivers": [
     "Corne d'Or",

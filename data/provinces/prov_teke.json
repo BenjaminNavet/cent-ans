@@ -8,7 +8,12 @@
   "region": "anatolie",
   "terrain": "mountains",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_hamid",
+    "prov_karaman",
+    "prov_kutahya",
+    "prov_mentese"
+  ],
   "coastal": true,
   "rivers": [
     "Aksu"

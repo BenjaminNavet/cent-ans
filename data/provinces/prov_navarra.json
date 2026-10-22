@@ -8,7 +8,12 @@
   "region": "iberie_nord",
   "terrain": "mountains",
   "climate": "mountain",
-  "neighbors": [],
+  "neighbors": [
+    "prov_barcelona",
+    "prov_bearn",
+    "prov_galicia",
+    "prov_gascogne"
+  ],
   "rivers": [
     "Èbre",
     "Arga",

@@ -8,7 +8,12 @@
   "region": "empire_sud",
   "terrain": "mountains",
   "climate": "mountain",
-  "neighbors": [],
+  "neighbors": [
+    "prov_milano",
+    "prov_tirol",
+    "prov_venezia",
+    "prov_verona"
+  ],
   "rivers": [
     "Adige"
   ],

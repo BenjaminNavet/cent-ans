@@ -8,7 +8,10 @@
   "region": "grece",
   "terrain": "mountains",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_attica",
+    "prov_epirus"
+  ],
   "coastal": true,
   "rivers": [
     "Eurotas",

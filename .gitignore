@@ -73,3 +73,9 @@ game/bin/
 game/shaders/
 game/**/*.import
 game/**/*.uid
+
+# Asset processor cache (ADR 0724)
+imported_assets/
+
+# Bench, smoke and night-run outputs (hundreds of MB)
+out/

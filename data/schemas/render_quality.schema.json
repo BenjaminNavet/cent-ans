@@ -277,6 +277,7 @@
         "map_shadow_splits": {
           "enum": [
             2,
+            3,
             4
           ]
         },

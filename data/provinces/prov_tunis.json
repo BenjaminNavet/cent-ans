@@ -8,7 +8,10 @@
   "region": "maghreb",
   "terrain": "plains",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_bougie",
+    "prov_gabes"
+  ],
   "coastal": true,
   "rivers": [
     "Medjerda",

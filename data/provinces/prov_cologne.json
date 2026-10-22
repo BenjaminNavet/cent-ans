@@ -8,7 +8,17 @@
   "region": "empire_rhin",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_berg",
+    "prov_brabant",
+    "prov_cleve",
+    "prov_gueldre",
+    "prov_julich",
+    "prov_liege",
+    "prov_mainz",
+    "prov_trier",
+    "prov_westphalia"
+  ],
   "rivers": [
     "Rhin",
     "Ruhr",

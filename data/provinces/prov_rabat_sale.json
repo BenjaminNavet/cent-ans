@@ -8,7 +8,10 @@
   "region": "maghreb",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_fes",
+    "prov_tlemcen"
+  ],
   "coastal": true,
   "rivers": [
     "Bouregreg",

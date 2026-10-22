@@ -8,7 +8,9 @@
   "region": "anatolie",
   "terrain": "mountains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_sivas"
+  ],
   "coastal": true,
   "rivers": [
     "Gökırmak",

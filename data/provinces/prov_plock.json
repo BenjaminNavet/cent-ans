@@ -8,7 +8,12 @@
   "region": "mazovie",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_lesser_poland",
+    "prov_pomesania",
+    "prov_rawa",
+    "prov_warsaw"
+  ],
   "rivers": [
     "Vistule",
     "Skrwa"

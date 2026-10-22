@@ -8,7 +8,17 @@
   "region": "rus_nord",
   "terrain": "forest",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_beloozero",
+    "prov_dorpat",
+    "prov_finland",
+    "prov_harrien_wierland",
+    "prov_kostroma",
+    "prov_pskov",
+    "prov_smolensk",
+    "prov_tver",
+    "prov_vitebsk"
+  ],
   "coastal": true,
   "rivers": [
     "Volkhov",

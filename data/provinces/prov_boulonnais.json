@@ -8,7 +8,10 @@
   "region": "france_nord",
   "terrain": "hills",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_artois",
+    "prov_ponthieu"
+  ],
   "rivers": [
     "Liane",
     "Aa"

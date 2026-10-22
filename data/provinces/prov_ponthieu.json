@@ -8,7 +8,11 @@
   "region": "france_nord",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_artois",
+    "prov_boulonnais",
+    "prov_ile_de_france"
+  ],
   "rivers": [
     "Somme",
     "Authie"

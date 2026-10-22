@@ -8,7 +8,10 @@
   "region": "scandinavie",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_gotaland",
+    "prov_schleswig"
+  ],
   "rivers": [
     "Gudenå",
     "Limfjord"

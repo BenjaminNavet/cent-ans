@@ -8,7 +8,9 @@
   "region": "italie_centre",
   "terrain": "plains",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_firenze"
+  ],
   "rivers": [
     "Arno",
     "Serchio"

@@ -349,3 +349,7 @@ vassal du pape), `fac_hainaut` (Hainaut, Hollande), `fac_brabant`, `fac_guelders
 Seeland : interrègne danois), `fac_bohemia` (Bohême, Luxembourg ; Jean l'Aveugle), `fac_austria`, `fac_swiss`
 (Waldstätten, Berne). L'Empire garde 20 provinces. Florence et les Confédérés n'ont pas de dirigeant nommé : la
 simulation leur élit un chef au démarrage.
+
+## Mise à jour B3 (22/10, ADR 0730)
+
+Sur la carte composée (215 provinces) : `prov_guyenne` est scindée en `prov_guyenne` (Bordelais), `prov_bazadais` (capitale Bazas) et `prov_gascogne` (capitale Bayonne), toutes `fac_england` ; `prov_gwynedd` se nomme « Pays de Galles » ; `prov_lothian` est à `fac_scotland` (l’Angleterre en garde la revendication et le château d’Édimbourg jusqu’en 1341, voir `evt_reprise_d_edimbourg`) ; `prov_agenais` devient « Agenais, Périgord et Quercy ». Les lignes ci-dessus décrivent la grille d’origine avant composition.

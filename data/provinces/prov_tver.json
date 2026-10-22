@@ -8,7 +8,12 @@
   "region": "rus_centre",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_beloozero",
+    "prov_moscow",
+    "prov_novgorod",
+    "prov_smolensk"
+  ],
   "coastal": false,
   "rivers": [
     "Volga",

@@ -32,37 +32,6 @@
     ]
   },
   {
-    "id": "set_bayonne",
-    "province": "prov_guyenne",
-    "kind": "town",
-    "name": {
-      "display": "Bayonne",
-      "local": "Baiona",
-      "local_language": "gascon"
-    },
-    "lonlat": [
-      -1.4748,
-      43.4929
-    ],
-    "weight": 38,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_parish_church",
-      "bld_windmill",
-      "bld_port",
-      "bld_stone_walls",
-      "bld_muster_field"
-    ],
-    "port": true,
-    "description": "Port de l’Adour, principal arsenal naval du duché anglais d’Aquitaine, arme des navires pour le roi d’Angleterre.",
-    "sources": [
-      "Bayonne",
-      "Histoire de Bayonne"
-    ]
-  },
-  {
     "id": "set_libourne",
     "province": "prov_guyenne",
     "kind": "town",

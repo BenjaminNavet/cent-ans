@@ -8,7 +8,11 @@
   "region": "balkans",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_kosovo",
+    "prov_prilep",
+    "prov_thessalonica"
+  ],
   "coastal": true,
   "rivers": [
     "Shkumbin",

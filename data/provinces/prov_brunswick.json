@@ -8,7 +8,14 @@
   "region": "empire_nord",
   "terrain": "plains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_brandenburg",
+    "prov_hesse",
+    "prov_holstein",
+    "prov_lower_saxony",
+    "prov_meissen",
+    "prov_westphalia"
+  ],
   "rivers": [
     "Oker",
     "Ilmenau"

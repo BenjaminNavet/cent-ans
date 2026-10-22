@@ -1,0 +1,477 @@
+{
+  "id": "castillon",
+  "name": "Bataille de Castillon",
+  "date": "1453-07-17",
+  "year": 1453,
+  "summary": "17 juillet 1453. Jean Bureau a retranché son armée au bord de la Dordogne : fossé, talus, palissade et une trentaine de bouches à feu. Talbot, vieux capitaine de soixante-six ans, croit à une retraite française poussière dans l’air et lance son avant-garde sans attendre son infanterie. Les couleuvrines fauchent la colonne contre le fossé ; la cavalerie bretonne sort par le flanc. Talbot est tué, la Guyenne anglaise s’effondre, et la guerre de Cent Ans s’achève.",
+  "province": "prov_guyenne",
+  "province_name": "Guyenne",
+  "terrain": "marsh",
+  "season": "summer",
+  "site": {
+    "lon": 0.03,
+    "lat": 44.85,
+    "bearing_deg": 90,
+    "place": "Castillon-la-Bataille (Gironde)"
+  },
+  "field": {
+    "width_m": 2400,
+    "depth_m": 1600,
+    "line_gap_m": 700,
+    "zone_depth_m": 450,
+    "max_regiments_per_side": 160
+  },
+  "ground": "dry",
+  "weather": {
+    "start": "clear",
+    "label": "Chaleur de juillet ; la poussière de la route de Libourne"
+  },
+  "start_hour": 17.0,
+  "woods": [
+    {
+      "x": 150,
+      "z": 1350,
+      "radius": 100
+    },
+    {
+      "x": 2300,
+      "z": 300,
+      "radius": 90
+    }
+  ],
+  "mud": [
+    {
+      "x": 1700,
+      "z": 600,
+      "radius": 80
+    }
+  ],
+  "pools": [
+    {
+      "x": 1650,
+      "z": 1200,
+      "radius": 60
+    },
+    {
+      "x": 1800,
+      "z": 1280,
+      "radius": 50
+    },
+    {
+      "x": 400,
+      "z": 1100,
+      "radius": 45
+    }
+  ],
+  "streams": [
+    {
+      "kind": "tributary",
+      "width": 36,
+      "points": [
+        [
+          -40,
+          1560
+        ],
+        [
+          600,
+          1580
+        ],
+        [
+          1200,
+          1565
+        ],
+        [
+          1800,
+          1585
+        ],
+        [
+          2440,
+          1570
+        ]
+      ]
+    },
+    {
+      "kind": "brook",
+      "width": 6,
+      "points": [
+        [
+          2000,
+          -40
+        ],
+        [
+          1960,
+          400
+        ],
+        [
+          1900,
+          800
+        ],
+        [
+          1850,
+          1200
+        ],
+        [
+          1820,
+          1540
+        ]
+      ]
+    }
+  ],
+  "roads": [
+    {
+      "kind": "main",
+      "width": 6,
+      "points": [
+        [
+          -40,
+          640
+        ],
+        [
+          600,
+          640
+        ],
+        [
+          1100,
+          620
+        ],
+        [
+          2440,
+          600
+        ]
+      ]
+    }
+  ],
+  "obstacles": [
+    {
+      "kind": "ditch",
+      "a": [
+        820,
+        700
+      ],
+      "b": [
+        1600,
+        705
+      ]
+    },
+    {
+      "kind": "ditch",
+      "a": [
+        820,
+        700
+      ],
+      "b": [
+        830,
+        1100
+      ]
+    },
+    {
+      "kind": "ditch",
+      "a": [
+        1600,
+        705
+      ],
+      "b": [
+        1610,
+        1100
+      ]
+    },
+    {
+      "kind": "fence",
+      "a": [
+        850,
+        740
+      ],
+      "b": [
+        1580,
+        745
+      ]
+    },
+    {
+      "kind": "fence",
+      "a": [
+        860,
+        740
+      ],
+      "b": [
+        865,
+        1090
+      ]
+    },
+    {
+      "kind": "fence",
+      "a": [
+        1580,
+        745
+      ],
+      "b": [
+        1585,
+        1090
+      ]
+    }
+  ],
+  "decor": {
+    "description": "Le camp retranché de Jean Bureau dans la plaine alluviale de la Dordogne : fossé, talus et palissade, le parc d’artillerie au centre, la Lidoire à l’est, le prieuré de Saint-Laurent en arrière, les coteaux de vignes de Castillon.",
+    "clear": true,
+    "items": [
+      {
+        "type": "church",
+        "x": 2150,
+        "z": 1400,
+        "yaw": 0.0
+      },
+      {
+        "type": "hamlet",
+        "layout": "street",
+        "x": 2250,
+        "z": 1380,
+        "yaw": 0.0,
+        "houses": 10,
+        "seed": 1453
+      },
+      {
+        "type": "plot",
+        "kind": "vineyard",
+        "x": 1900,
+        "z": 300,
+        "length": 220,
+        "width": 90,
+        "yaw": 0.0
+      },
+      {
+        "type": "plot",
+        "kind": "vineyard",
+        "x": 2150,
+        "z": 450,
+        "length": 180,
+        "width": 80,
+        "yaw": 0.0
+      },
+      {
+        "type": "plot",
+        "kind": "meadow",
+        "x": 1200,
+        "z": 1300,
+        "length": 240,
+        "width": 130,
+        "yaw": 0.0
+      },
+      {
+        "type": "camp",
+        "side": "defender",
+        "x": 1250,
+        "z": 1050,
+        "yaw": 3.14159,
+        "seed": 1453
+      },
+      {
+        "type": "camp",
+        "side": "attacker",
+        "x": 200,
+        "z": 60,
+        "yaw": 0.0,
+        "seed": 17
+      }
+    ]
+  },
+  "armies": {
+    "attacker": {
+      "faction": "fac_england",
+      "faction_name": "Angleterre",
+      "army": "Armée du comte de Shrewsbury",
+      "general": {
+        "name": "John Talbot, comte de Shrewsbury",
+        "regiment": 0,
+        "command": 8
+      },
+      "regiments": [
+        {
+          "unit_type": "unit_english_retinue",
+          "count": 2,
+          "soldiers": 120,
+          "x": 600,
+          "z": 700,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 0,
+          "experience": 5,
+          "label": "Maison du comte de Shrewsbury (Talbot)"
+        },
+        {
+          "unit_type": "unit_men_at_arms_foot",
+          "count": 3,
+          "soldiers": 130,
+          "x": 560,
+          "z": 560,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 0,
+          "dismounted": true,
+          "experience": 4,
+          "label": "Hommes d’armes de l’avant-garde"
+        },
+        {
+          "unit_type": "unit_longbowmen",
+          "count": 3,
+          "soldiers": 150,
+          "x": 560,
+          "z": 450,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 0,
+          "experience": 3,
+          "label": "Archers de l’avant-garde"
+        },
+        {
+          "unit_type": "unit_men_at_arms_foot",
+          "count": 4,
+          "soldiers": 130,
+          "x": 350,
+          "z": 300,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 1,
+          "label": "Infanterie de Lisle et de Camoys (sous-estimée)"
+        },
+        {
+          "unit_type": "unit_longbowmen",
+          "count": 3,
+          "soldiers": 150,
+          "x": 350,
+          "z": 180,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 1,
+          "label": "Archers de Lisle"
+        },
+        {
+          "unit_type": "unit_gascon_crossbowmen",
+          "count": 3,
+          "soldiers": 110,
+          "x": 200,
+          "z": 120,
+          "facing_deg": 0,
+          "gap_m": 8,
+          "wave": 2,
+          "morale": 45,
+          "label": "Gascons de Bordeaux (Lesparre, Duras)"
+        }
+      ],
+      "waves": [
+        {
+          "label": "L’avant-garde de Talbot",
+          "assault": true
+        },
+        {
+          "label": "L’infanterie qui suit à la hâte",
+          "release_s": 150,
+          "after": 0,
+          "assault": true
+        },
+        {
+          "label": "Les Gascons de Bordeaux",
+          "release_s": 300,
+          "after": 1,
+          "assault": true
+        }
+      ]
+    },
+    "defender": {
+      "faction": "fac_france",
+      "faction_name": "France",
+      "army": "Armée de Jean Bureau",
+      "general": {
+        "name": "Jean Bureau, maître de l’artillerie",
+        "regiment": 0,
+        "command": 8
+      },
+      "regiments": [
+        {
+          "unit_type": "unit_culveriners",
+          "count": 5,
+          "soldiers": 25,
+          "x": 1250,
+          "z": 760,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 0,
+          "ammo": 60,
+          "label": "Couleuvrines du parc de Jean Bureau"
+        },
+        {
+          "unit_type": "unit_bombard",
+          "count": 2,
+          "soldiers": 25,
+          "x": 1100,
+          "z": 800,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 0,
+          "ammo": 40,
+          "label": "Bombardes du parc"
+        },
+        {
+          "unit_type": "unit_francs_archers",
+          "count": 3,
+          "soldiers": 140,
+          "x": 1000,
+          "z": 850,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 40,
+          "label": "Francs-archers du parc"
+        },
+        {
+          "unit_type": "unit_crossbowmen",
+          "count": 3,
+          "soldiers": 110,
+          "x": 1400,
+          "z": 850,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 40,
+          "label": "Arbalétriers du parc"
+        },
+        {
+          "unit_type": "unit_men_at_arms_foot",
+          "count": 3,
+          "soldiers": 120,
+          "x": 1200,
+          "z": 900,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 60,
+          "dismounted": true,
+          "label": "Hommes d’armes à pied derrière le fossé"
+        },
+        {
+          "unit_type": "unit_ordonnance_gendarmes",
+          "count": 3,
+          "soldiers": 110,
+          "x": 1900,
+          "z": 1100,
+          "facing_deg": 180,
+          "gap_m": 8,
+          "hold": true,
+          "leash_m": 800,
+          "experience": 4,
+          "label": "Cavalerie de Jean de Bretagne (contre-charge)"
+        }
+      ]
+    }
+  },
+  "historical_winner": "defender",
+  "campaign": {
+    "from_year": 1451,
+    "to_year": 1453
+  },
+  "sources": [
+    "Jean Chartier, Chronique de Charles VII",
+    "Thomas Basin, Histoire de Charles VII",
+    "Anne Curry, The Hundred Years War 1337-1453 (2003)"
+  ]
+}

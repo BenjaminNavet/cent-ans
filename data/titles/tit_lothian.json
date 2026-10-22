@@ -6,17 +6,17 @@
     "local": "Lowden",
     "local_language": "scots"
   },
-  "de_jure_liege": "tit_england",
+  "de_jure_liege": "tit_scotland",
   "de_jure_provinces": [
     "prov_lothian"
   ],
   "holder_1337": {
-    "faction": "fac_england",
+    "faction": "fac_scotland",
     "sources": [
       "Seconde guerre d'indépendance écossaise",
-      "Édouard Balliol",
-      "Édimbourg"
+      "Édimbourg",
+      "David II"
     ]
   },
-  "description": "Lothian et Marches cédés à Édouard III par Édouard Balliol (1334) ; titre attribué dans le jeu à Balliol et à ses alliés anglais."
+  "description": "Lothian et Marches, cédés à Édouard III par Édouard Balliol (1334) mais tenus par les gardiens du roi David II en 1337 (décision B3, ADR 0730) ; la garnison anglaise d’Édimbourg y est isolée."
 }

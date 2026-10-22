@@ -8,7 +8,9 @@
   "region": "aragon",
   "terrain": "plains",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_barcelona"
+  ],
   "coastal": false,
   "rivers": [
     "Arba"

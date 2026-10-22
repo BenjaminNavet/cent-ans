@@ -8,7 +8,15 @@
   "region": "italie_nord",
   "terrain": "marsh",
   "climate": "continental",
-  "neighbors": [],
+  "neighbors": [
+    "prov_austria",
+    "prov_bologna",
+    "prov_ferrara",
+    "prov_oberbayern",
+    "prov_tirol",
+    "prov_trent",
+    "prov_verona"
+  ],
   "rivers": [
     "Piave",
     "Brenta",

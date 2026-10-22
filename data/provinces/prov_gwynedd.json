@@ -1,14 +1,17 @@
 {
   "id": "prov_gwynedd",
   "name": {
-    "display": "Galles du Nord (Gwynedd)",
-    "local": "Gwynedd",
+    "display": "Pays de Galles",
+    "local": "Cymru",
     "local_language": "gallois"
   },
   "region": "galles",
   "terrain": "mountains",
   "climate": "oceanic",
-  "neighbors": [],
+  "neighbors": [
+    "prov_devon",
+    "prov_yorkshire"
+  ],
   "rivers": [
     "Conwy",
     "Dee",
@@ -105,7 +108,7 @@
   ],
   "fortification_level": 3,
   "base_supply": 3300,
-  "description": "Principauté de Galles (Gwynedd, Anglesey, Ceredigion) tenue par le roi depuis 1284, châteaux d’Édouard Ier (Caernarfon, Conwy, Harlech, Beaumaris) ; le titre de prince de Galles reste à conférer à Édouard de Woodstock (1343). Province composée : regroupe aussi Galles du Sud et Marches.",
+  "description": "Principauté de Galles (Gwynedd, Anglesey, Ceredigion) tenue par le roi depuis 1284, châteaux d’Édouard Ier (Caernarfon, Conwy, Harlech, Beaumaris) ; le titre de prince de Galles reste à conférer à Édouard de Woodstock (1343). Province composée de tout le pays : le Nord (Gwynedd, justiciat de Caernarfon) et le Sud (Deheubarth, Marches). Sa cité est Carmarthen, siège de l’Échiquier et de la chancellerie du Sud-Ouest galloise, tandis que les forteresses du Nord (Beaumaris, Harlech) en sont les lieux fortifiés.",
   "sources": [
     "Principauté de Galles",
     "Gwynedd",

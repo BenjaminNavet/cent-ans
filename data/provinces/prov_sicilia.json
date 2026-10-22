@@ -8,7 +8,9 @@
   "region": "italie_sud",
   "terrain": "hills",
   "climate": "mediterranean",
-  "neighbors": [],
+  "neighbors": [
+    "prov_napoli"
+  ],
   "rivers": [
     "Simeto",
     "Salso"
