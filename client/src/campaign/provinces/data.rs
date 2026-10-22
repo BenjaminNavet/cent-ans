@@ -171,10 +171,10 @@ pub(crate) mod tests {
     #[test]
     fn loads_all_provinces_and_raster() {
         let map = real_map();
-        assert_eq!(map.provinces().len(), 213);
+        assert_eq!(map.provinces().len(), 215);
         assert_eq!((map.width, map.height), (7080, 6104));
         let paris = map.index_of_id("prov_ile_de_france");
-        assert_eq!(paris, 79);
+        assert_eq!(paris, 81);
         assert_eq!(map.province(paris).unwrap().name, "Île-de-France");
     }
 

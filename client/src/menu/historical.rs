@@ -359,13 +359,35 @@ mod tests {
         let dir = paths::data_dir(&root);
         let maps = load_maps(&dir);
         let ids: Vec<&str> = maps.iter().map(|m| m.id.as_str()).collect();
-        assert_eq!(ids, ["crecy", "poitiers", "azincourt"]);
+        assert_eq!(
+            ids,
+            [
+                "crecy",
+                "poitiers",
+                "auray",
+                "azincourt",
+                "formigny",
+                "castillon"
+            ]
+        );
         let (game, _) = GameData::load(&dir).expect("game data");
         for map in &maps {
             let battle = to_custom(&game, &dir, map, "defender").expect(&map.id);
             assert_eq!(battle.player_side, "defender");
             assert_eq!(battle.year, Some(map.year));
-            assert_eq!(battle.terrain, "plains");
+            // Each map names its own ground (plains, heath, bocage, marsh...).
+            let raw: serde_json::Value = serde_json::from_str(
+                &std::fs::read_to_string(dir.join("battle_maps").join(format!("{}.json", map.id)))
+                    .expect(&map.id),
+            )
+            .expect(&map.id);
+            assert!(!battle.terrain.is_empty(), "{}", map.id);
+            assert_eq!(
+                Some(battle.terrain.as_str()),
+                raw["terrain"].as_str(),
+                "{}",
+                map.id
+            );
             assert!(!battle.hour.is_empty(), "{}", map.id);
             assert!(battle.attacker.units.len() > 5 && battle.defender.units.len() > 5);
             assert!(
