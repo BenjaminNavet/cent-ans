@@ -29,6 +29,8 @@ pub const LEVELS: [&str; 4] = ["low", "medium", "high", "ultra"];
 pub struct Preset {
     pub msaa: Msaa,
     pub map_msaa: Msaa,
+    /// Campaign map: SMAA post-pass instead of MSAA (`map_smaa`, ADR 0741).
+    pub map_smaa: bool,
     pub shadow_atlas: usize,
     pub shadow_splits: usize,
     /// Cascades of the campaign sun (`map_shadow_splits`).
@@ -66,6 +68,7 @@ impl Preset {
         Self {
             msaa: Msaa::Sample2,
             map_msaa: Msaa::Off,
+            map_smaa: true,
             shadow_atlas: 8192,
             shadow_splits: 4,
             map_shadow_splits: 4,
@@ -88,6 +91,10 @@ impl Preset {
         Some(Self {
             msaa: msaa_from(text("msaa")?)?,
             map_msaa: msaa_from(text("map_msaa")?)?,
+            map_smaa: value
+                .get("map_smaa")
+                .and_then(Value::as_bool)
+                .unwrap_or(false),
             shadow_atlas: number("shadow_atlas")? as usize,
             shadow_splits: number("shadow_splits")? as usize,
             map_shadow_splits: number("map_shadow_splits").map_or(4, |v| v as usize),
@@ -197,6 +204,8 @@ pub struct RenderQuality {
     /// Multiplier of the regiments' impostor distance (`battle_lod` of the preset).
     pub battle_lod: f32,
     pub msaa_campaign: Msaa,
+    /// SMAA on the campaign camera: the preset asks for it and the player forced no MSAA level.
+    pub smaa_campaign: bool,
     /// Campaign relief density of the preset (`relief_vertex_px`, `relief_items`).
     pub relief_vertex_px: f32,
     pub relief_items: u32,
@@ -251,6 +260,7 @@ impl RenderQuality {
             ssao_quality: preset.ssao_quality.clone(),
             battle_lod: preset.battle_lod,
             msaa_campaign: forced.unwrap_or(preset.map_msaa),
+            smaa_campaign: preset.map_smaa && forced.is_none(),
             relief_vertex_px: preset.relief_vertex_px,
             relief_items: preset.relief_items,
             shadows: settings.shadows,
