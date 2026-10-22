@@ -207,6 +207,42 @@ pub fn style_entry(style: &str, state: &str) -> Option<StyleEntry> {
     Some(e)
 }
 
+/// Every style known to [`style_entry`].
+pub const STYLES: [&str; 8] = [
+    "sword",
+    "militia",
+    "pike",
+    "bow",
+    "crossbow",
+    "lance",
+    "horse_bow",
+    "horse_javelin",
+];
+
+/// Every render state a style may know.
+pub const STATES: [&str; 20] = [
+    "idle",
+    "marching",
+    "running",
+    "charging",
+    "melee",
+    "melee_pikes",
+    "shooting",
+    "brace",
+    "routing",
+    "climbing",
+    "victory",
+    "trotting",
+    "turn_l",
+    "turn_r",
+    "trot_turn_l",
+    "trot_turn_r",
+    "rallied",
+    "wounded",
+    "dead",
+    "fallen",
+];
+
 /// Cavalry render states absent from the style fall back to the next simpler gait.
 pub fn gait_fallback(state: &str) -> Option<&'static str> {
     Some(match state {
@@ -474,6 +510,46 @@ mod tests {
         };
         assert_eq!(state_config("sword", &r, "marching", false, j).jitter, 0.03);
         assert_eq!(state_config("sword", &r, "idle", false, j).jitter, 0.07);
+    }
+
+    /// B2: every clip named by a style (set and fallback, every state) exists in the rig of
+    /// every figure of the merged manifest that uses the style.
+    #[test]
+    fn every_named_clip_exists_in_the_manifest_rigs() {
+        use crate::battle::units::figures::Manifest;
+        let root = crate::paths::find_root().expect("root");
+        let manifest = Manifest::load(&crate::paths::asset_root(&root)).expect("manifest");
+        let mut checked = 0;
+        let mut missing = Vec::new();
+        for (key, figure) in &manifest.figures {
+            let (kind, variant) = key.rsplit_once('_').expect("kind_variant key");
+            let variant: u32 = variant.parse().expect("variant");
+            let style = style_of(figure.style.as_deref(), kind, variant);
+            let rig = manifest.rig(&figure.rig).expect("rig of figure");
+            let clips = rig.clips();
+            for state in STATES {
+                let Some(entry) = style_entry(&style, state) else {
+                    continue;
+                };
+                for name in entry.set.iter().chain(entry.fallback) {
+                    checked += 1;
+                    if clips.get(name).is_none() {
+                        missing.push(format!("{key} ({style}/{state}): {name}"));
+                    }
+                }
+            }
+        }
+        missing.sort();
+        missing.dedup();
+        for style in STYLES {
+            assert!(style_entry(style, "idle").is_some(), "{style} has no idle");
+        }
+        assert!(checked > 100, "{checked} clip names checked");
+        assert!(
+            missing.is_empty(),
+            "clips absent from the manifest:\n{}",
+            missing.join("\n")
+        );
     }
 
     #[test]

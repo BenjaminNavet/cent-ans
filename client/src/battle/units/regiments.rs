@@ -177,6 +177,8 @@ pub struct RegimentContext<'w, 's> {
     quality: Option<Res<'w, crate::settings::quality::RenderQuality>>,
     heraldry: ResMut<'w, BattleHeraldry>,
     arms_atlas: ResMut<'w, ArmsAtlasHandle>,
+    impact: Option<Res<'w, crate::battle::effects::impact::ImpactSettings>>,
+    impacts: ResMut<'w, crate::battle::effects::impact::MeleeImpacts>,
 }
 
 fn side_index(side: SideId) -> usize {
@@ -304,6 +306,24 @@ fn build_params(
     params
 }
 
+/// Where a melee blow lands: half a metre from the figure nearest to the killers towards them,
+/// at `height` above the ground. `None` without figures or killers.
+fn contact_point(poses: &[[f32; 4]], killer: Option<Vec2>, height: f32) -> Option<Vec3> {
+    let killer = killer?;
+    let nearest = poses.iter().min_by(|a, b| {
+        let da = Vec2::new(a[0], a[2]).distance_squared(killer);
+        let db = Vec2::new(b[0], b[2]).distance_squared(killer);
+        da.total_cmp(&db)
+    })?;
+    let here = Vec2::new(nearest[0], nearest[2]);
+    let toward = (killer - here).normalize_or_zero() * 0.5;
+    Some(Vec3::new(
+        here.x + toward.x,
+        nearest[1] + height,
+        here.y + toward.y,
+    ))
+}
+
 /// Render state of a regiment: the simulation state, the victory pose and the cavalry
 /// rearing against pikes (`_shown_state`).
 fn shown_state(sim: &BattleSim, unit: &Unit, styles: &HashMap<u32, String>) -> &'static str {
@@ -382,7 +402,8 @@ pub fn update_regiments(
             .settings
             .as_ref()
             .map_or((1.0, 0), |s| (s.unit_size, s.max_figures));
-        frames.refresh(sim, ticks, unit_size, max_figures);
+        let engage = ctx.impact.as_ref().map_or(0.0, |i| i.engage.range_m);
+        frames.refresh(sim, ticks, unit_size, max_figures, engage);
     }
     let measure = regiments.measured != Some(ticks);
     let tick_dt = regiments
@@ -577,6 +598,18 @@ pub fn update_regiments(
                 &mut ctx.arms,
                 true,
             );
+            // Sparks where the blows land (B2): the figure nearest to the killers, steel on steel.
+            if let Some(impact) = ctx.impact.as_deref()
+                && impact
+                    .sparks
+                    .causes
+                    .iter()
+                    .any(|c| c == unit.loss_cause.key())
+                && let Some(contact) =
+                    contact_point(&regiment.last_poses, killer, impact.sparks.height_m)
+            {
+                ctx.impacts.push(contact, count);
+            }
             if regiment.clock - regiment.hit_clock >= ctx.library.fx.melee_hit.window_s {
                 regiment.hit_clock = regiment.clock;
                 regiment.params.set_hit_time(regiment.clock);

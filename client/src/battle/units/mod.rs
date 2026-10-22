@@ -14,6 +14,7 @@ pub mod anim;
 pub mod arms;
 pub mod banners;
 pub mod corpses;
+pub mod engage;
 pub mod figures;
 pub mod fine_maps;
 pub mod follow;
@@ -77,12 +78,21 @@ pub struct PoseFrames {
     prev: HashMap<u32, Vec<Pose>>,
     cur: HashMap<u32, Vec<Pose>>,
     followers: follow::Followers,
+    /// Figures turned towards an enemy figure at the last step (melee, lot B2).
+    pub engaged: usize,
 }
 
 impl PoseFrames {
     /// Reads the poses of the step `ticks`; the previous ones are kept for blending when the
     /// simulation advanced by a few steps only.
-    fn refresh(&mut self, sim: &BattleSim, ticks: u64, unit_size: f32, max_figures: u32) {
+    fn refresh(
+        &mut self,
+        sim: &BattleSim,
+        ticks: u64,
+        unit_size: f32,
+        max_figures: u32,
+        engage_range_m: f32,
+    ) {
         // A new battle restarts the clock: pick the scale again then, never mid-battle (the
         // head counts would change as men fall), as `battle_scene.gd` does once at the start.
         if self.scale <= 0.0 || self.ticks.is_some_and(|old| ticks < old) {
@@ -101,15 +111,26 @@ impl PoseFrames {
             _ => 0.0,
         };
         let followers = &mut self.followers;
-        self.cur = drawn_units(sim)
+        let mut places: HashMap<u32, Vec<Pose>> = drawn_units(sim)
             .map(|unit| {
                 let places: Vec<Pose> = sim
                     .soldier_poses(unit, scale)
                     .into_iter()
                     .map(|p| [p[0] as f32, p[1] as f32, p[2] as f32, p[3] as f32])
                     .collect();
+                (unit.id, places)
+            })
+            .collect();
+        // Melee (B2): the men in contact face the nearest enemy figure.
+        if engage_range_m > 0.0 {
+            let pairs = engage::pairs(sim, engage_range_m);
+            self.engaged = engage::face_nearest(&mut places, &pairs, engage_range_m);
+        }
+        self.cur = drawn_units(sim)
+            .filter_map(|unit| {
+                let places = places.remove(&unit.id)?;
                 let rigid = unit.on_wall || unit.climbing.is_some();
-                (unit.id, followers.follow(unit.id, &places, dt, rigid))
+                Some((unit.id, followers.follow(unit.id, &places, dt, rigid)))
             })
             .collect();
         self.ticks = Some(ticks);

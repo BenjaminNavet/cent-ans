@@ -10,6 +10,7 @@
 //! - [`trail`]: ribbon trails of the arrows in flight (`battle_projectile_trail.gdshader`);
 //! - [`ford`]: spray, wakes and entry bursts of the regiments in water;
 //! - [`flash`]: bombard muzzle flash (sprites and a short point light);
+//! - [`impact`]: ember sparks where melee blows land (lot B2);
 //! - [`siege_lights`]: point lights over the burning houses and gate of a siege.
 //!
 //! Not ported: the clods thrown by the hooves (`Clods` pool).
@@ -19,6 +20,7 @@ pub mod dust;
 pub mod flash;
 pub mod ford;
 pub mod glow;
+pub mod impact;
 pub mod siege_lights;
 pub mod trail;
 
@@ -46,6 +48,7 @@ impl Plugin for BattleEffectsPlugin {
             trail::TrailPlugin,
             ford::FordPlugin,
             flash::FlashPlugin,
+            impact::ImpactPlugin,
             siege_lights::SiegeLightsPlugin,
         ));
     }

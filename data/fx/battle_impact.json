@@ -1,0 +1,18 @@
+{
+  "description": "Mêlée lisible (lot B2) : orientation des soldats vers l'ennemi le plus proche au contact, et étincelles d'impact (braises du flipbook de feu existant) quand le cœur déclare des pertes de mêlée. Rendu seulement : qui frappe, qui tombe et pourquoi sont décidés par le cœur (sim-battle).",
+  "engage": {
+    "range_m": 7.0,
+    "min_men": 2
+  },
+  "sparks": {
+    "causes": ["melee", "charge", "pikes"],
+    "per_impact": 3,
+    "max_impacts_per_step": 4,
+    "lifetime_s": [0.25, 0.5],
+    "speed_m_s": [1.5, 4.5],
+    "size_m": [0.12, 0.28],
+    "height_m": 1.2,
+    "sprite_room": 600,
+    "min_interval_s": 0.12
+  }
+}

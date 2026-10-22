@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_battle_impact.schema.json",
+  "title": "Mêlée lisible : orientation et étincelles",
+  "description": "Fichier data/fx/battle_impact.json (lot B2) : orientation des soldats au contact et étincelles d'impact de mêlée. Rendu seulement.",
+  "type": "object",
+  "$defs": {
+    "range": { "type": "array", "items": { "type": "number", "minimum": 0 }, "minItems": 2, "maxItems": 2 }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "engage": {
+      "type": "object",
+      "properties": {
+        "range_m": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
+        "min_men": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["range_m", "min_men"],
+      "additionalProperties": false
+    },
+    "sparks": {
+      "type": "object",
+      "properties": {
+        "causes": { "type": "array", "items": { "type": "string" } },
+        "per_impact": { "type": "integer", "minimum": 0, "maximum": 12 },
+        "max_impacts_per_step": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "lifetime_s": { "$ref": "#/$defs/range" },
+        "speed_m_s": { "$ref": "#/$defs/range" },
+        "size_m": { "$ref": "#/$defs/range" },
+        "height_m": { "type": "number", "minimum": 0, "maximum": 4 },
+        "sprite_room": { "type": "integer", "minimum": 0, "maximum": 900 },
+        "min_interval_s": { "type": "number", "minimum": 0 }
+      },
+      "required": ["causes", "per_impact", "max_impacts_per_step", "lifetime_s", "speed_m_s", "size_m", "height_m", "sprite_room", "min_interval_s"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["engage", "sparks"],
+  "additionalProperties": false
+}
