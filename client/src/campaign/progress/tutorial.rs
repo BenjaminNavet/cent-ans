@@ -558,10 +558,14 @@ fn rebuild(
         || settings_screen.is_some_and(|s| s.root.is_some())
         || modals.is_some_and(|m| m.is_busy());
     let want = tutorial.index.filter(|_| !covered);
-    let key = want.map(|i| (i, tutorial.done_timer.is_some(),
+    let key = want.map(|i| {
+        (
+            i,
+            tutorial.done_timer.is_some(),
             tutorial.toc_open,
             tutorial.advice_open,
-        ));
+        )
+    });
     if key == tutorial.built_for && (tutorial.root.is_some() == key.is_some()) {
         return;
     }

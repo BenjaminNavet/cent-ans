@@ -65,7 +65,10 @@ mod tests {
     #[test]
     fn shipped_credits_load_and_cover_kevin_macleod() {
         let credits = load(&data_dir());
-        assert!(!credits.is_empty(), "data/audio/credits.json vide ou illisible");
+        assert!(
+            !credits.is_empty(),
+            "data/audio/credits.json vide ou illisible"
+        );
         let macleod: Vec<_> = credits
             .iter()
             .filter(|credit| credit.file.contains("kevin_macleod"))

@@ -587,7 +587,11 @@ pub struct AlertPill {
 
 pub fn pill_visuals(mut pills: Query<(&AlertPill, &Hovered, &mut BackgroundColor)>) {
     for (pill, hovered, mut face) in &mut pills {
-        face.set_if_neq(BackgroundColor(pill_face(pill.danger, pill.quiet, hovered.get())));
+        face.set_if_neq(BackgroundColor(pill_face(
+            pill.danger,
+            pill.quiet,
+            hovered.get(),
+        )));
     }
 }
 
