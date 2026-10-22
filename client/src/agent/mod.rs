@@ -29,7 +29,7 @@ use crate::app::AppState;
 use crate::ui::kit::ButtonPressed;
 use cli::Cli;
 use dump::{DumpAppExt, build_dump, dump_entities, dump_state};
-use script::{ScriptCommand, parse_script};
+use script::{MouseButtonName, ScriptCommand, parse_script};
 
 /// Size of the offscreen render target (logical pixels = window size).
 pub const VIEW_SIZE: (u32, u32) = (1280, 800);
@@ -169,6 +169,46 @@ fn send_key(world: &mut World, key_code: KeyCode, state: ButtonState) {
     });
 }
 
+/// Moves the pointer of the primary window (logical pixels) and tells the pointer consumers.
+fn send_mouse_move(world: &mut World, x: f32, y: f32) {
+    let mut windows =
+        world.query_filtered::<(Entity, &mut Window), With<bevy::window::PrimaryWindow>>();
+    let Some((entity, mut window)) = windows.iter_mut(world).next() else {
+        return;
+    };
+    let scale = window.resolution.scale_factor() as f64;
+    window.set_physical_cursor_position(Some(bevy::math::DVec2::new(
+        x as f64 * scale,
+        y as f64 * scale,
+    )));
+    let position = Vec2::new(x, y);
+    world.write_message(bevy::window::CursorMoved {
+        window: entity,
+        position,
+        delta: None,
+    });
+}
+
+/// A mouse button press or release, as the mouse would send it.
+fn send_mouse_button(world: &mut World, name: MouseButtonName, down: bool) {
+    let mut windows = world.query_filtered::<Entity, With<bevy::window::PrimaryWindow>>();
+    let window = windows.iter(world).next().unwrap_or(Entity::PLACEHOLDER);
+    let button = match name {
+        MouseButtonName::Left => MouseButton::Left,
+        MouseButtonName::Right => MouseButton::Right,
+        MouseButtonName::Middle => MouseButton::Middle,
+    };
+    world.write_message(bevy::input::mouse::MouseButtonInput {
+        button,
+        state: if down {
+            ButtonState::Pressed
+        } else {
+            ButtonState::Released
+        },
+        window,
+    });
+}
+
 /// One typed character, as the keyboard would send it (read by the kit text fields).
 fn send_char(world: &mut World, c: char) {
     let mut windows = world.query_filtered::<Entity, With<bevy::window::PrimaryWindow>>();
@@ -238,6 +278,14 @@ fn drive(world: &mut World) {
                 };
                 send_key(world, key, ButtonState::Pressed);
                 world.resource_mut::<AgentRun>().release.push(key);
+                return;
+            }
+            ScriptCommand::MouseMove(x, y) => {
+                send_mouse_move(world, x, y);
+                return;
+            }
+            ScriptCommand::MouseButton(button, down) => {
+                send_mouse_button(world, button, down);
                 return;
             }
             ScriptCommand::Type(text) => {

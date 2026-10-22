@@ -226,10 +226,27 @@ fn dump_orders(world: &World) -> (String, serde_json::Value) {
             json!({ "id": u.id, "type": u.unit_type, "x": u.pos.x, "z": u.pos.z, "facing": u.facing })
         })
     };
+    let mut window_query = world.try_query_filtered::<&Window, With<bevy::window::PrimaryWindow>>();
+    let mut camera_query =
+        world.try_query_filtered::<&Camera, With<crate::battle::scene::camera::BattleCamera>>();
+    let pointer = json!({
+        "window": window_query.as_mut().and_then(|q| q.iter(world).next()).map(|w| json!({
+            "logical": [w.width(), w.height()],
+            "physical": [w.physical_width(), w.physical_height()],
+            "scale_factor": w.scale_factor(),
+            "cursor": w.cursor_position().map(|p| [p.x, p.y]),
+        })),
+        "camera_viewport": camera_query.as_mut().and_then(|q| q.iter(world).next()).map(|c| json!({
+            "logical_viewport": c.logical_viewport_size().map(|s| [s.x, s.y]),
+            "physical_target": c.physical_target_size().map(|s| [s.x, s.y]),
+        })),
+        "ui_scale": world.get_resource::<UiScale>().map(|s| s.0),
+    });
     (
         "battle_orders".into(),
         json!({
             "active": true,
+            "pointer": pointer,
             "selection": selection.units,
             "selected": selection.units.iter().filter_map(unit_state).collect::<Vec<_>>(),
             "groups": groups.groups,

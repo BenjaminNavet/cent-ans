@@ -16,6 +16,7 @@
   "fatigue_speed_divisor": 200.0,
   "turn_rate_foot_deg_per_s": 15.0,
   "turn_rate_mounted_deg_per_s": 40.0,
+  "player_turn_factor": 2.0,
   "charge_distance_foot_m": 40.0,
   "charge_distance_cavalry_m": 120.0
 }

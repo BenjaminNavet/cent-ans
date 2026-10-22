@@ -83,6 +83,11 @@
       "exclusiveMinimum": 0,
       "description": "Vitesse de virage de l'infanterie (degrés par seconde)."
     },
+    "player_turn_factor": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Multiplicateur de virage d'un camp commandé par le joueur (l'IA garde la vitesse de base)."
+    },
     "turn_rate_mounted_deg_per_s": {
       "type": "number",
       "exclusiveMinimum": 0,

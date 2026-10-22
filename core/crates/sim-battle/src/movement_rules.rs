@@ -5,6 +5,10 @@
 
 use serde::{Deserialize, Serialize};
 
+fn default_player_turn_factor() -> f64 {
+    1.0
+}
+
 /// Contents of `data/rules/battle_movement.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -43,6 +47,9 @@ pub struct MovementRules {
     pub(crate) turn_rate_foot_deg_per_s: f64,
     /// Vitesse de virage de la cavalerie (degrés par seconde).
     pub(crate) turn_rate_mounted_deg_per_s: f64,
+    /// Multiplicateur de virage d'un camp que le joueur commande (l'IA garde la cadence de base).
+    #[serde(default = "default_player_turn_factor")]
+    pub(crate) player_turn_factor: f64,
     /// Distance de la cible sous laquelle l'infanterie en course charge (m).
     pub(crate) charge_distance_foot_m: f64,
     /// Distance de la cible sous laquelle la cavalerie en course charge (m).

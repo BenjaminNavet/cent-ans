@@ -36,6 +36,8 @@ const PREVIEW_INTERVAL_S: f32 = 0.1;
 const PREVIEW_MOVE_M: f32 = 5.0;
 /// Paths drawn for at most this many regiments (the core gives one path from the group centre
 /// above its own threshold).
+/// Footprints of a dragged formation: light gold, readable over grass and over the blue paths.
+const GHOST: Color = Color::srgba(1.0, 0.93, 0.62, 0.98);
 const RED: Color = Color::srgba(0.9, 0.12, 0.08, 0.95);
 
 /// Result of the live preview of the right button.
@@ -45,11 +47,23 @@ pub struct LivePreview {
     pub paths: Vec<Option<Vec<Vec3>>>,
     pub reachable: bool,
     pub active: bool,
+    /// Where each regiment will stand on arrival: footprint of the new formation.
+    pub ghosts: Vec<Option<Ghost>>,
     last_point: Vec2,
     last_facing: Option<f32>,
     last_width: f32,
     last_time: f32,
     pub computed: u32,
+}
+
+/// Footprint of a regiment at the end of its previewed order (centre, front direction, frontage
+/// and depth in metres).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Ghost {
+    pub centre: Vec2,
+    pub facing: f32,
+    pub width: f32,
+    pub depth: f32,
 }
 
 /// Counters of the layer, for the dump.
@@ -88,19 +102,61 @@ pub fn spawn_drag_rect(mut commands: Commands) {
     ));
 }
 
-pub fn update_drag_rect(gesture: Res<Gesture>, mut nodes: Query<&mut Node, With<DragRectNode>>) {
+pub fn update_drag_rect(
+    gesture: Res<Gesture>,
+    ui_scale: Res<UiScale>,
+    mut nodes: Query<&mut Node, With<DragRectNode>>,
+) {
     let Ok(mut node) = nodes.single_mut() else {
         return;
     };
     match gesture.drag_rect {
+        // The rectangle is in window pixels (the cursor's); interface pixels are scaled by
+        // `UiScale` (1.76 in full screen at 2624 px), so divide or it drifts from the selection.
         Some((min, max)) => {
+            let scale = ui_scale.0.max(0.01);
             node.display = Display::Flex;
-            node.left = Val::Px(min.x);
-            node.top = Val::Px(min.y);
-            node.width = Val::Px(max.x - min.x);
-            node.height = Val::Px(max.y - min.y);
+            node.left = Val::Px(min.x / scale);
+            node.top = Val::Px(min.y / scale);
+            node.width = Val::Px((max.x - min.x) / scale);
+            node.height = Val::Px((max.y - min.y) / scale);
         }
         None => node.display = Display::None,
+    }
+}
+
+/// Rectangle of `ghost` draped on the ground, with an arrow from the middle of its front.
+fn draw_ghost(
+    gizmos: &mut Gizmos<OrdersGizmos>,
+    field: &Battlefield,
+    ghost: &Ghost,
+    colour: Color,
+) {
+    let forward = Vec2::new(ghost.facing.sin(), ghost.facing.cos());
+    let right = Vec2::new(forward.y, -forward.x);
+    let (half_w, half_d) = (ghost.width * 0.5, ghost.depth * 0.5);
+    let corner =
+        |side: f32, front: f32| ghost.centre + right * (half_w * side) + forward * (half_d * front);
+    let corners = [
+        corner(-1.0, 1.0),
+        corner(1.0, 1.0),
+        corner(1.0, -1.0),
+        corner(-1.0, -1.0),
+    ];
+    let fill = colour.with_alpha(colour.alpha() * 0.9);
+    for i in 0..4 {
+        gizmos.linestrip(
+            ground_line(field, corners[i], corners[(i + 1) % 4], LIFT * 1.5),
+            if i == 0 { colour } else { fill },
+        );
+    }
+    // Front arrow.
+    let front = ghost.centre + forward * half_d;
+    let tip = front + forward * (half_d.max(3.0));
+    gizmos.linestrip(ground_line(field, front, tip, LIFT * 1.5), colour);
+    for side in [-1.0, 1.0] {
+        let wing = tip - forward * 1.6 + right * (side * 1.2);
+        gizmos.linestrip(ground_line(field, tip, wing, LIFT * 1.5), colour);
     }
 }
 
@@ -469,6 +525,27 @@ pub fn draw_overlay(
                         })
                     })
                     .collect();
+                live.ghosts = legs
+                    .iter()
+                    .map(|leg| {
+                        let path = leg.path.as_ref().ok()?;
+                        let (width, depth) = leg.extent?;
+                        let end = *path.last()?;
+                        let before = if path.len() > 1 {
+                            path[path.len() - 2]
+                        } else {
+                            leg.from
+                        };
+                        // Front: the dragged facing, else the way of the last leg of the path.
+                        let walked = (end.0 - before.0).atan2(end.1 - before.1) as f32;
+                        Some(Ghost {
+                            centre: Vec2::new(end.0 as f32, end.1 as f32),
+                            facing: facing.unwrap_or(walked),
+                            width: width as f32,
+                            depth: depth as f32,
+                        })
+                    })
+                    .collect();
                 live.reachable = live.paths.iter().any(Option::is_some);
                 live.last_point = point;
                 live.last_facing = facing;
@@ -480,6 +557,26 @@ pub fn draw_overlay(
             let colour = if live.reachable { color } else { RED };
             for path in live.paths.iter().flatten() {
                 gizmos.linestrip(path.iter().copied(), colour);
+            }
+            // The footprint each regiment will take (frontage x depth, front arrow), and the
+            // dragged line itself, like a drag-to-place formation in Total War.
+            for ghost in live.ghosts.iter().flatten() {
+                draw_ghost(
+                    &mut gizmos,
+                    sim.field(),
+                    ghost,
+                    if live.reachable { GHOST } else { RED },
+                );
+            }
+            if facing.is_some()
+                && let Some(ground) = cursor_ground
+            {
+                let a = Vec2::new(press.ground.x, press.ground.z);
+                let b = Vec2::new(ground.x, ground.z);
+                gizmos.linestrip(
+                    ground_line(sim.field(), a, b, LIFT * 1.5),
+                    if live.reachable { GHOST } else { RED },
+                );
             }
             if !live.reachable {
                 // Refused: a red cross where the order would end.
@@ -504,5 +601,6 @@ pub fn draw_overlay(
     } else {
         live.active = false;
         live.paths.clear();
+        live.ghosts.clear();
     }
 }

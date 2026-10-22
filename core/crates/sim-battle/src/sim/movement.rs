@@ -65,6 +65,9 @@ impl BattleSim {
             && !unit.running
             && unit.state != UnitState::Charging
             && pace.move_speed_factor != 1.0
+            // The slow approach paces the AI's advance only: a player's order is obeyed at the
+            // regiment's real speed (22/10: « les unités sont trop lentes à se déplacer »).
+            && self.ai_enabled[unit.side.index()]
             && self.approach_gap > pace.approach_range_m
         {
             speed *= pace.move_speed_factor;
@@ -142,6 +145,16 @@ impl BattleSim {
         degrees.to_radians() * DT
     }
 
+    /// Turn rate of `unit` in this battle: a side the player commands turns faster than the AI.
+    fn turn_rate_of(&self, unit: &Unit) -> f64 {
+        let factor = if self.ai_enabled[unit.side.index()] {
+            1.0
+        } else {
+            MovementRules::bundled().player_turn_factor
+        };
+        Self::turn_rate(unit) * factor
+    }
+
     /// Moves `index` towards `(tx, tz)`; returns the remaining distance.
     pub(super) fn advance(&mut self, index: usize, tx: f64, tz: f64, may_leave: bool) -> f64 {
         let unit = &self.units[index];
@@ -153,6 +166,7 @@ impl BattleSim {
         let dir = (dx / dist, dz / dist);
         let step = (self.speed(unit, dir) * DT).min(dist);
         let heading = angle_to(dx, dz);
+        let turn = self.turn_rate_of(unit);
         let (width, depth) = (self.field.width, self.field.depth);
         let from = (unit.x, unit.z);
         let to = (unit.x + dir.0 * step, unit.z + dir.1 * step);
@@ -164,7 +178,7 @@ impl BattleSim {
         unit.blocked_by = blocked;
         if blocked.is_some() || in_house {
             unit.run_up = 0.0;
-            unit.facing = turn_towards(unit.facing, heading, Self::turn_rate(unit) * 4.0);
+            unit.facing = turn_towards(unit.facing, heading, turn * 4.0);
             return dist;
         }
         unit.x = to.0;
@@ -176,7 +190,7 @@ impl BattleSim {
         let rate = if unit.state == UnitState::Routing {
             std::f64::consts::PI
         } else {
-            Self::turn_rate(unit) * 4.0
+            turn * 4.0
         };
         unit.facing = turn_towards(unit.facing, heading, rate);
         unit.still_time = 0.0;

@@ -216,9 +216,9 @@ fn distance_walked(match_speed: bool) -> (f64, f64) {
     };
     sim.apply_command(order, None).unwrap();
     let start: Vec<P> = sim.units().iter().map(|u| (u.x, u.z)).collect();
-    // L13b (ADR 0184): the approach pace is x0.45, the start-up loss of a
-    // regiment weighs more on 20 s: 60 s.
-    run(&mut sim, 60.0);
+    // ADR 0184: the x0.45 approach pace paces the AI only; a side the player orders (no AI
+    // here) walks at full speed, so 20 s are enough.
+    run(&mut sim, 20.0);
     let d = |id: usize| (sim.units()[id].x - start[id].0).hypot(sim.units()[id].z - start[id].1);
     (d(2), d(3))
 }
