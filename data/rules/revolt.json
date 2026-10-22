@@ -14,6 +14,8 @@
     "peasant_unit_type": "unit_goedendag_militia",
     "burgher_unit_type": "unit_urban_militia"
   },
+  "garrison_sortie_percent_per_ratio": 25.0,
+  "garrison_sortie_max_percent": 40.0,
   "rebel_siege_seasons": 3,
   "rebel_rout_percent": 30,
   "repression_tension": 20,

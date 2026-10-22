@@ -231,6 +231,7 @@ fn resolve_uprising(
         return;
     };
     let name = data.province_name(id);
+    harry_rebels(state, data, id, &uprising);
     let strength = state
         .armies
         .get(&uprising.army)
@@ -299,4 +300,31 @@ fn resolve_uprising(
         .province(id)
         .faction(&rebels),
     );
+}
+
+/// The city garrison harries the rebel army: it loses a share of its men
+/// each season, the larger the garrison relative to the rebels (the player
+/// or the AI can finish it, or let the city hold until it disperses).
+fn harry_rebels(state: &mut CampaignState, data: &GameData, id: &ProvinceId, uprising: &Uprising) {
+    let rules = &data.revolt_rules;
+    let garrison = state
+        .provinces
+        .get(id)
+        .and_then(|p| state.settlements.get(&p.city))
+        .map_or(0, |city| city.garrison_strength());
+    let Some(army) = state.armies.get_mut(&uprising.army) else {
+        return;
+    };
+    let rebels = army.total_strength();
+    if rebels == 0 || garrison == 0 {
+        return;
+    }
+    let ratio = f64::from(garrison) / f64::from(rebels);
+    let percent = (ratio * rules.garrison_sortie_percent_per_ratio)
+        .min(rules.garrison_sortie_max_percent)
+        .max(0.0);
+    for unit in &mut army.units {
+        let lost = (f64::from(unit.strength) * percent / 100.0).round() as u32;
+        unit.strength = unit.strength.saturating_sub(lost);
+    }
 }

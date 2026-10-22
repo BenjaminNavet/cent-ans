@@ -37,6 +37,11 @@ pub struct RevoltRules {
     /// Share of the city garrison lost to the uprising.
     pub garrison_loss_percent: u32,
     pub rebel_levy: RebelLevy,
+    /// The garrison of the city harries the rebels each season: percent of
+    /// the rebel strength lost per 1.0 of garrison-to-rebel strength ratio...
+    pub garrison_sortie_percent_per_ratio: f64,
+    /// ... up to this percent per season.
+    pub garrison_sortie_max_percent: f64,
     /// Seasons the rebel army must hold the province before the city falls.
     pub rebel_siege_seasons: u32,
     /// The rebel army disperses under this share of its raised strength.

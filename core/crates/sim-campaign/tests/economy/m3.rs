@@ -164,6 +164,14 @@ fn extreme_unrest_hands_the_province_to_the_rebels() {
         state.provinces.get_mut(&boulogne).unwrap().devastation = 95;
     }
     let rebels = fac("fac_rebels");
+    // No garrison to harry the rebel army.
+    let city_id = city(&state, "prov_normandie");
+    state
+        .settlements
+        .get_mut(&city_id)
+        .unwrap()
+        .garrison
+        .clear();
     let mut taken_by_rebels = false;
     // B4: a rebel army must first rise, then hold the province unopposed.
     let seasons =

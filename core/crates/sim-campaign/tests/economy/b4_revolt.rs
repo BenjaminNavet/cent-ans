@@ -138,6 +138,14 @@ fn an_unopposed_uprising_takes_the_city() {
     let rules = &data.revolt_rules;
     let (mut state, province) = occupied_normandy(304);
     let rebels = fac("fac_rebels");
+    // No garrison to harry the rebels.
+    let city_id = city(&state, "prov_normandie");
+    state
+        .settlements
+        .get_mut(&city_id)
+        .unwrap()
+        .garrison
+        .clear();
     let mut army = None;
     for _ in 0..rules.min_seasons_to_revolt() + rules.rebel_siege_seasons + 12 {
         set_all_unrest(&mut state, &province, 100);
@@ -170,4 +178,47 @@ fn a_province_without_the_new_fields_deserialises() {
     let back: sim_campaign::ProvinceState = serde_json::from_value(json).unwrap();
     assert_eq!(back.tension, 0);
     assert!(back.uprising.is_none());
+}
+
+/// A strong garrison wears the rebel army down season after season until
+/// it disperses: the revolt is put down without a rebel hand-over.
+#[test]
+fn a_strong_garrison_puts_the_revolt_down() {
+    let data = game_data();
+    let rules = &data.revolt_rules;
+    let (mut state, province) = occupied_normandy(306);
+    let rebels = fac("fac_rebels");
+    let city_id = city(&state, "prov_normandie");
+    for _ in 0..rules.min_seasons_to_revolt() + 10 {
+        set_all_unrest(&mut state, &province, 100);
+        state.end_turn_with(data, idle);
+        if state.provinces[&province].uprising.is_some() {
+            break;
+        }
+    }
+    let uprising = state.provinces[&province]
+        .uprising
+        .clone()
+        .expect("uprising");
+    // A garrison several times the rebels' strength.
+    let unit_type = data
+        .unit_types
+        .get(&data_model::UnitTypeId::new("unit_men_at_arms_foot").unwrap())
+        .unwrap();
+    let garrison = &mut state.settlements.get_mut(&city_id).unwrap().garrison;
+    garrison.clear();
+    for _ in 0..40 {
+        garrison.push(sim_campaign::Unit::fresh(unit_type));
+    }
+    let mut put_down = false;
+    for _ in 0..rules.rebel_siege_seasons + 1 {
+        state.end_turn_with(data, idle);
+        if state.provinces[&province].uprising.is_none() {
+            put_down = true;
+            break;
+        }
+    }
+    assert!(put_down, "the garrison disperses the rebels in time");
+    assert_ne!(state.province_controller(&province), Some(&rebels));
+    assert!(!state.armies.contains_key(&uprising.army));
 }

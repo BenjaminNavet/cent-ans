@@ -32,6 +32,10 @@ Le modèle d'EQ1 déclenchait une révolte après `revolt_seasons` (5) saisons c
 4. **Contre-jeu** : tant que l'armée rebelle tient, la tension ne monte plus ; le joueur (bataille
    3D) ou l'IA (résolution automatique) peut la combattre par le circuit habituel
    (`movement::fight`).
+   - La garnison de la ville harcèle l'armée rebelle chaque saison (`garrison_sortie_*` : perte en
+     proportion du rapport garnison / rebelles, plafonnée) : une ville tenue disperse seule les
+     rebelles, une ville vide ne le peut pas. C'est le contre-jeu de l'IA, qui sinon combat peu
+     les armées de `fac_rebels` ; le joueur peut abréger en les battant lui-même.
    - Armée détruite ou réduite sous `rebel_rout_percent` de l'effectif levé : **révolte matée**,
      tension ramenée à `repression_tension` au plus, troubles récents réduits de
      `repression_disorder_relief`, guerre avec les rebelles close.

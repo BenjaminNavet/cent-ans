@@ -26,9 +26,10 @@ sans armée ni bataille. Moins d'occupations depuis la règle de fatigue d'EQ6.
   (aggressor 4,3, random-legal 3,7, sailor 2,5, turtle 2, builder 1, diplomat 0) ; prises par les
   rebelles 0 à 1 ; saisons au-dessus du seuil 0 à 24 par partie. Reste : unifier la bande 3-15 / 4-10.
 - **B** : jauge de tension cumulée (monte au-dessus du seuil, redescend lentement) à la
-  place du compteur de saisons consécutives.
+  place du compteur de saisons consécutives. *Fait (B4, ADR 0731, `data/rules/revolt.json`).*
 - **C** : armée rebelle levée selon la richesse et la culture de la province ; la vaincre
-  (répression) rend de l'ordre.
+  (répression) rend de l'ordre. *Fait en partie (B4) : armée levée selon la population (paysans /
+  bourgeois), répression par bataille ou par la garnison ; richesse et culture restent à faire.*
 - **D** : choc d'ordre public ponctuel selon le sort réservé à une ville prise
   (occuper, piller, raser).
 - E (optionnel) : paliers d'humeur avec effets visibles.

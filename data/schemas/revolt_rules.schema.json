@@ -26,11 +26,13 @@
       "required": ["population_per_regiment", "min_regiments", "max_regiments", "peasant_unit_type", "burgher_unit_type"],
       "additionalProperties": false
     },
+    "garrison_sortie_percent_per_ratio": { "type": "number", "minimum": 0, "maximum": 100, "description": "La garnison de la ville harcèle les rebelles chaque saison : pourcentage de l'effectif rebelle perdu par point de rapport garnison / rebelles." },
+    "garrison_sortie_max_percent": { "type": "number", "minimum": 0, "maximum": 100, "description": "Plafond de ce pourcentage par saison." },
     "rebel_siege_seasons": { "type": "integer", "minimum": 1, "maximum": 20, "description": "Saisons pendant lesquelles l'armée rebelle doit tenir la province avant que la ville ne lui soit livrée." },
     "rebel_rout_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "L'armée rebelle est dispersée quand ses effectifs tombent sous cette part de l'effectif levé." },
     "repression_tension": { "type": "integer", "minimum": 0, "maximum": 255, "description": "Tension de la province une fois la révolte matée (au plus)." },
     "repression_disorder_relief": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Points de troubles récents (ProvinceState::unrest) ôtés par la répression." }
   },
-  "required": ["tension_max", "tension_rise_base", "tension_rise_per_point", "tension_decay", "warning_tensions", "tension_after_revolt", "garrison_loss_percent", "rebel_levy", "rebel_siege_seasons", "rebel_rout_percent", "repression_tension", "repression_disorder_relief"],
+  "required": ["tension_max", "tension_rise_base", "tension_rise_per_point", "tension_decay", "warning_tensions", "tension_after_revolt", "garrison_loss_percent", "rebel_levy", "garrison_sortie_percent_per_ratio", "garrison_sortie_max_percent", "rebel_siege_seasons", "rebel_rout_percent", "repression_tension", "repression_disorder_relief"],
   "additionalProperties": false
 }
