@@ -10,6 +10,8 @@ pub mod replay_bar;
 pub mod setup;
 #[cfg(feature = "solari")]
 pub mod solari;
+#[cfg(feature = "solari")]
+pub mod solari_soldiers;
 pub mod terrain;
 pub mod water;
 

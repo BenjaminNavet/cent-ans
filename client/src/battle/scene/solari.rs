@@ -59,6 +59,34 @@ pub struct SolariSettings {
     /// Substitute budget: traced instances.
     #[serde(default = "default_max_instances")]
     pub max_instances: usize,
+    /// Soldiers cast ray-traced shadows through box proxies (`solari_soldiers.rs`).
+    #[serde(default = "default_true")]
+    pub soldiers_in_tlas: bool,
+    /// Most soldier proxies alive in the acceleration structure (visible soldiers first).
+    #[serde(default = "default_proxy_budget")]
+    pub soldier_proxy_budget: usize,
+    /// Box (width x, height, depth z in metres) standing for a foot soldier.
+    #[serde(default = "default_foot_size")]
+    pub soldier_foot_size_m: [f32; 3],
+    /// Same for a horseman (horse and rider).
+    #[serde(default = "default_mounted_size")]
+    pub soldier_mounted_size_m: [f32; 3],
+}
+
+fn default_true() -> bool {
+    true
+}
+
+fn default_proxy_budget() -> usize {
+    4000
+}
+
+fn default_foot_size() -> [f32; 3] {
+    [0.55, 1.8, 0.4]
+}
+
+fn default_mounted_size() -> [f32; 3] {
+    [0.9, 2.4, 2.2]
 }
 
 fn default_bounces() -> u32 {
@@ -116,6 +144,7 @@ pub struct SolariTrialPlugin;
 impl Plugin for SolariTrialPlugin {
     fn build(&self, app: &mut App) {
         app.register_dump(dump_solari);
+        super::solari_soldiers::register(app);
         let Some(settings) = SolariSettings::load().filter(|settings| settings.enabled) else {
             return;
         };
@@ -137,6 +166,7 @@ impl Plugin for SolariTrialPlugin {
         }
         app.insert_resource(settings)
             .init_resource::<Substitutes>()
+            .init_resource::<super::solari_soldiers::SoldierProxies>()
             .add_systems(
                 Update,
                 (
@@ -153,7 +183,16 @@ impl Plugin for SolariTrialPlugin {
                 )
                     .run_if(in_state(AppState::Battle)),
             )
-            .add_systems(OnExit(AppState::Battle), reset_substitutes);
+            .add_systems(
+                Update,
+                super::solari_soldiers::sync_soldier_proxies
+                    .after(crate::battle::units::regiments::update_regiments)
+                    .run_if(in_state(AppState::Battle)),
+            )
+            .add_systems(
+                OnExit(AppState::Battle),
+                (reset_substitutes, super::solari_soldiers::reset_proxies),
+            );
     }
 }
 
@@ -287,7 +326,11 @@ fn reduced_copy(source: &Mesh) -> Option<(Mesh, Vec4)> {
 
 /// Mesh with exactly the attributes Solari accepts (position, normal, uv0, tangent) and `u32`
 /// indices, kept in both worlds.
-fn raytracing_mesh(positions: Vec<[f32; 3]>, normals: Vec<[f32; 3]>, indices: Vec<u32>) -> Mesh {
+pub(super) fn raytracing_mesh(
+    positions: Vec<[f32; 3]>,
+    normals: Vec<[f32; 3]>,
+    indices: Vec<u32>,
+) -> Mesh {
     let count = positions.len();
     Mesh::new(
         PrimitiveTopology::TriangleList,
