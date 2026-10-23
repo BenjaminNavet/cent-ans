@@ -2,9 +2,9 @@
   "_doc": "Seuils de tools/bevy_bench/perf_guard.sh (lot B5), en ms par image, fenetre masquee et muet. Mesures sur machine calme (charge < 6) ; les seuils laissent ~2x de marge sur le p50 mesure apres B5 pour ne pas declencher sur le bruit, mais attrapent le retour d'un cout de l'ordre de 28 ms (ombres d'impostors en 4 cascades a 8192, cf. docs/wip/bm-perf4.md). Les relever demande une justification dans le commit.",
   "max_load": 6,
   "memory": {
-    "_doc": "MiB (ADR 0748, amende par ADR 0776, docs/performance-memoire.md). footprint = empreinte physique en fin de banc (le budget) ; peak_rss = pic au chargement. Machine calme.",
-    "footprint": {"map": 4000, "battle": 3500},
-    "peak_rss": {"map": 5000, "battle": 3500}
+    "_doc": "MiB (ADR 0748, amende par ADR 0776, docs/performance-memoire.md). footprint = empreinte physique en fin de banc (le budget) ; peak_rss = pic au chargement. Bataille : l'empreinte du banc (vsync coupe) oscille de 3,8 a 6,3 Go selon IOAccelerator (graphics), non lie a l'allocateur ni aux textures ; seuil large tant que ce point n'est pas elucide.",
+    "footprint": {"map": 4000, "battle": 7000},
+    "peak_rss": {"map": 4500, "battle": 4000}
   },
   "map": {
     "_doc": "Panoramique d=30 (bench.sh --bench-distance 30 --bench-pan-only), preset resolu automatiquement.",

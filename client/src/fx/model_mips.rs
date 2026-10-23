@@ -47,7 +47,8 @@ impl Plugin for ModelMipsPlugin {
                     collect_compressed,
                 )
                     .chain(),
-            );
+            )
+            .add_systems(Last, capture_model_images);
     }
 }
 
@@ -58,9 +59,67 @@ pub struct MipQueue {
     /// Images that got a chain (dump probe).
     done: usize,
     /// Background BC1 encodes: image id and the finished chain (`None`: not compressible).
-    encoding: Vec<(AssetId<Image>, Task<Option<(Vec<u8>, UVec2)>>)>,
+    encoding: Vec<(AssetId<Image>, Task<Encoded>)>,
     /// Images stored as BC1 and dropped from RAM (dump probe).
     compressed: usize,
+}
+
+/// Result of a background encode.
+enum Encoded {
+    /// Block-compressed chain and the (possibly reduced) size of level 0.
+    Bc1(Vec<u8>, UVec2),
+    /// Translucent texels: the untouched RGBA8 pixels and their size, handed back.
+    Rgba(Vec<u8>, UVec2),
+}
+
+fn spawn_encode(data: Vec<u8>, w: usize, h: usize) -> Task<Encoded> {
+    AsyncComputeTaskPool::get().spawn(async move {
+        match bc1_chain(&data, w, h, MAX_MODEL_SIDE) {
+            Some((chain, size)) => Encoded::Bc1(chain, size),
+            None => Encoded::Rgba(data, UVec2::new(w as u32, h as u32)),
+        }
+    })
+}
+
+/// Whether the asset path is one of the models whose albedo is compressed.
+fn compressed_path(server: &AssetServer, id: AssetId<Image>) -> bool {
+    server.get_path(id).is_some_and(|p| {
+        COMPRESSED_PREFIXES
+            .iter()
+            .any(|prefix| p.path().starts_with(prefix))
+    })
+}
+
+/// Takes the pixels of a model albedo the moment its image is added, before the first upload: the
+/// image keeps a 4 x 4 grey placeholder until the background BC1 encode lands. The 16 MiB RGBA8
+/// texture is then never created on the GPU and its pixels are moved, not cloned.
+fn capture_model_images(
+    mut events: MessageReader<AssetEvent<Image>>,
+    mut queue: ResMut<MipQueue>,
+    mut images: ResMut<Assets<Image>>,
+    server: Res<AssetServer>,
+) {
+    for event in events.read() {
+        let AssetEvent::Added { id } = event else {
+            continue;
+        };
+        let compressible_path =
+            images.get(*id).is_some_and(compressible) && compressed_path(&server, *id);
+        if !compressible_path || !queue.seen.insert(*id) {
+            continue;
+        }
+        let Some(mut image) = images.get_mut(*id) else {
+            continue;
+        };
+        let (w, h) = (image.width() as usize, image.height() as usize);
+        let Some(data) = image.data.take() else {
+            continue;
+        };
+        image.texture_descriptor.size.width = 4;
+        image.texture_descriptor.size.height = 4;
+        image.data = Some(vec![128; 4 * 4 * 4]);
+        queue.encoding.push((*id, spawn_encode(data, w, h)));
+    }
 }
 
 impl MipQueue {
@@ -126,17 +185,11 @@ fn generate_queued_mips(
         }
         // Opaque baked albedo of the campaign models: chain + BC1 on a background thread.
         if compressible(image)
-            && server.get_path(id).is_some_and(|p| {
-                COMPRESSED_PREFIXES
-                    .iter()
-                    .any(|prefix| p.path().starts_with(prefix))
-            })
+            && compressed_path(&server, id)
             && let Some(data) = image.data.clone()
         {
             let (w, h) = (image.width() as usize, image.height() as usize);
-            let task = AsyncComputeTaskPool::get()
-                .spawn(async move { bc1_chain(&data, w, h, MAX_MODEL_SIDE) });
-            queue.encoding.push((id, task));
+            queue.encoding.push((id, spawn_encode(data, w, h)));
             continue;
         }
         budget -= 1;
@@ -168,7 +221,7 @@ fn collect_compressed(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<Ima
             continue;
         };
         match result {
-            Some((chain, size)) => {
+            Encoded::Bc1(chain, size) => {
                 let (w, h) = (size.x, size.y);
                 image.texture_descriptor.size.width = w;
                 image.texture_descriptor.size.height = h;
@@ -179,7 +232,10 @@ fn collect_compressed(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<Ima
                 image.asset_usage = RenderAssetUsages::RENDER_WORLD;
                 queue.compressed += 1;
             }
-            None => {
+            Encoded::Rgba(data, size) => {
+                image.texture_descriptor.size.width = size.x;
+                image.texture_descriptor.size.height = size.y;
+                image.data = Some(data);
                 if add_mips(&mut image) {
                     queue.done += 1;
                     // Translucent albedo stays RGBA8 but only on the GPU.
