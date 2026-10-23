@@ -2,7 +2,7 @@
   {
     "id": "set_polotsk",
     "province": "prov_vitebsk",
-    "kind": "city",
+    "kind": "town",
     "name": {
       "display": "Polotsk",
       "local": "Polatsk",
@@ -30,7 +30,7 @@
   {
     "id": "set_vitebsk",
     "province": "prov_vitebsk",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Vitebsk",
       "local": "Viciebsk",

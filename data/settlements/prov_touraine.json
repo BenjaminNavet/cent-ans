@@ -2,7 +2,7 @@
   {
     "id": "set_orleans",
     "province": "prov_touraine",
-    "kind": "city",
+    "kind": "town",
     "name": {
       "display": "Orléans",
       "local": "Orliens",
@@ -33,7 +33,7 @@
   {
     "id": "set_tours",
     "province": "prov_touraine",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Tours",
       "local": "Tors",

@@ -2,7 +2,7 @@
   {
     "id": "set_nidaros",
     "province": "prov_vestlandet",
-    "kind": "city",
+    "kind": "town",
     "name": {
       "display": "Nidaros",
       "local": "Niðaróss",
@@ -30,7 +30,7 @@
   {
     "id": "set_bergen",
     "province": "prov_vestlandet",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Bergen",
       "local": "Bjørgvin",

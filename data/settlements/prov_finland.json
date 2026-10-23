@@ -2,7 +2,7 @@
   {
     "id": "set_vyborg",
     "province": "prov_finland",
-    "kind": "city",
+    "kind": "town",
     "name": {
       "display": "Viborg",
       "local": "Viborg",
@@ -30,7 +30,7 @@
   {
     "id": "set_abo",
     "province": "prov_finland",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Turku",
       "local": "Åbo",

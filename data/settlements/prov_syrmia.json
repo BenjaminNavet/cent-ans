@@ -2,7 +2,7 @@
   {
     "id": "set_temesvar",
     "province": "prov_syrmia",
-    "kind": "city",
+    "kind": "town",
     "name": {
       "display": "Temesvár",
       "local": "Temesvár",
@@ -29,7 +29,7 @@
   {
     "id": "set_sremska_mitrovica",
     "province": "prov_syrmia",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Sremska Mitrovica",
       "local": "Szávaszentdemeter",
