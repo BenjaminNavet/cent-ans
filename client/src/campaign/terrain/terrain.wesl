@@ -230,6 +230,10 @@ struct TerrainExtras {
 @group(constants::MATERIAL_BIND_GROUP) @binding(31) var coast_types_tex: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(32) var wx_field_tex: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(34) var wx_clear_tex: texture_2d<f32>;
+// Ground cache (ADR 0742): one layer per relief node, the regional ground baked once
+// (rgb albedo, a forest share; rg normal offset), sampled with `terroir_sampler`.
+@group(constants::MATERIAL_BIND_GROUP) @binding(41) var cache_albedo: texture_2d_array<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(42) var cache_dn: texture_2d_array<f32>;
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
@@ -241,7 +245,8 @@ struct Vertex {
     @location(2) fields_a: vec2<f32>,
     // squash factor k, massif lift D (m)
     @location(3) fields_b: vec2<f32>,
-    // geomorph delta (m, parent level minus own), vertex spacing
+    // geomorph delta (m, parent level minus own), vertex spacing, ground cache layer (-1: none),
+    // packed node uv (`ui + 65 vi + 4225 q`, ui/vi in 64ths, quads = 64 >> q; `mesh.rs`)
     @location(5) morph: vec4<f32>,
 };
 
@@ -253,7 +258,20 @@ struct Varyings {
     @location(2) altitude: f32,
     // altitude gradient (m per map unit)
     @location(3) slope_xz: vec2<f32>,
+    // ground cache: node uv, layer (-1: none), world size of a cache texel
+    @location(4) cache: vec4<f32>,
 };
+
+// Ground cache coordinates of a vertex (ADR 0742): uv in the node, layer, texel size.
+fn cache_coords(morph: vec4<f32>) -> vec4<f32> {
+    let packed = morph.w;
+    let q = floor(packed / 4225.0);
+    let rest = packed - q * 4225.0;
+    let vi = floor(rest / 65.0);
+    let ui = rest - vi * 65.0;
+    let extent = morph.y * f32(64u >> u32(q));
+    return vec4<f32>(ui / 64.0, vi / 64.0, morph.z, extent / f32(constants::GC_TEXELS));
+}
 
 fn displayed_y(h: f32, fa: vec2<f32>, fb: vec2<f32>) -> f32 {
     let s = params.scale.x;
@@ -309,6 +327,7 @@ fn vertex(v: Vertex) -> Varyings {
     out.world = world.xyz;
     out.altitude = h;
     out.slope_xz = v.slope.xy;
+    out.cache = cache_coords(v.morph);
     out.clip = position_world_to_clip(world.xyz);
     // Displayed gradient: dY/dh of the exaggeration formula times the altitude gradient.
     let k = params.scale.z * v.fields_b.x;
@@ -2299,19 +2318,80 @@ fn sun_shadow(world: vec3<f32>, n: vec3<f32>, frag_xy: vec2<f32>) -> f32 {
     return shadows::fetch_directional_shadow(0u, wp, n, view_z, frag_xy);
 }
 
-@fragment
-fn fragment(in: Varyings) -> @location(0) vec4<f32> {
-    var albedo = vec3<f32>(0.10, 0.15, 0.06);
-    let k_proj_ground = view.clip_from_view[1][1] * view.viewport.w * 0.5;
-    let ground_footprint = distance(in.world, view.world_position) / max(k_proj_ground, 1.0);
+// Regional ground (TX + painted fields + close detail + forest floor and canopy) of a map point:
+// the costly, view-independent part of the ground colour, shared by the live fragment and the
+// ground-cache bake (ADR 0742). `dn` offsets the normal: n = normalize(n + (dn.x, 0, dn.y)).
+struct RegionalOut {
+    albedo: vec3<f32>,
+    dn: vec2<f32>,
+    forest_f: f32,
+};
+
+fn regional_ground(p: vec2<f32>, footprint: f32, altitude: f32, slope_xz: vec2<f32>, base_albedo: vec3<f32>) -> RegionalOut {
+    var albedo = base_albedo;
+    var forest_f = 0.0;
+    var nd = vec2<f32>(0.0);
+    // Regional ground (TX): the colormap gives the colour far away, the textured soil draws
+    // close up (sg_apply of satellite_ground.gdshaderinc: share 0.45 at the closest, 1 far).
+    let slope_m = length(slope_xz) / max(ground.micro.w, 1.0);
+    let g = ground_proc(p, p / params.map.xy, footprint, altitude, slope_m, slope_xz);
+    let land = smoothstep(0.0, 2.0, altitude);
+    var painted = g.color;
     if (params.map.w > 0.5) {
-        let cm_uv = in.world.xz / params.map.xy;
+        let far_w = smoothstep(0.05, 0.5, footprint);
+        let ratio = clamp(luma(g.color) / max(luma(base_albedo), 1e-3), 0.55, 1.6);
+        // TB1: the season shift of the land cover over the mean-season colour map.
+        let tinted = base_albedo * mix(1.0, ratio, 0.55 * (1.0 - far_w)) * pow(g.season_k, vec3<f32>(SG_SEASON_STRENGTH));
+        painted = mix(g.color, tinted, mix(0.45, 1.0, far_w));
+    }
+    // Painted fields over the ground colour (after the colormap, like hb_apply).
+    var dn = g.dn;
+    var fields_on = fields.v8.w > 0.5;
+    @if(PERF_TNOFIELDS) {
+        fields_on = false;
+    }
+    if (fields_on) {
+        let fo = fields_apply(p, p / params.map.xy, footprint, land,
+            g.open_w, g.forest_w, g.rock_w, g.farm_share, slope_m, slope_xz, altitude, g.k_wild,
+            g.k_forest, painted);
+        painted = fo.color;
+        dn = dn + fo.dn;
+    }
+    @if(!PERF_TNOGDMACRO)
+    painted = gd_macro(gd, painted, p, footprint, land, g.open_w);
+    albedo = mix(base_albedo, painted, land);
+    nd = nd + vec2<f32>(dn.x, -dn.y) * land;
+    // Forest crowns: relief and tone contrast of the canopy (0.45 bump, 0.35 contrast).
+    forest_f = g.forest_w * land;
+    // TS-T1: green-black ground under the forests.
+    albedo = albedo * mix(vec3<f32>(1.0), season.forest_floor.rgb, season.forest_floor.a * forest_f);
+    if (forest_f > 0.01) {
+        let cf = canopy_field(p, footprint);
+        nd = nd - cf.yz * 0.45 * forest_f;
+        albedo = albedo * (1.0 + 0.35 * forest_f * cf.x);
+    }
+    return RegionalOut(albedo, nd, forest_f);
+}
+
+// Colour map of the ground (with the dark masses of the regional ground).
+fn base_ground(p: vec2<f32>, footprint: f32) -> vec3<f32> {
+    var albedo = vec3<f32>(0.10, 0.15, 0.06);
+    if (params.map.w > 0.5) {
+        let cm_uv = p / params.map.xy;
         albedo = textureSample(colormap, colormap_sampler, cm_uv).rgb;
         let soft = textureSampleBias(colormap, colormap_sampler, cm_uv, ground.dark.z).rgb;
         if (ground.bg.x > 0.5) {
-            albedo = dark_masses(albedo, soft, in.world.xz, ground_footprint);
+            albedo = dark_masses(albedo, soft, p, footprint);
         }
     }
+    return albedo;
+}
+
+@fragment
+fn fragment(in: Varyings) -> @location(0) vec4<f32> {
+    let k_proj_ground = view.clip_from_view[1][1] * view.viewport.w * 0.5;
+    let ground_footprint = distance(in.world, view.world_position) / max(k_proj_ground, 1.0);
+    var albedo = base_ground(in.world.xz, ground_footprint);
     var n = normalize(in.normal);
     let base_albedo = albedo;
     // Perf bisection (`CENT_ANS_PERF_OFF=tflat`): colour map only, flat light.
@@ -2341,44 +2421,22 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         regional = false;
     }
     if (regional) {
-        // Regional ground (TX): the colormap gives the colour far away, the textured soil draws
-        // close up (sg_apply of satellite_ground.gdshaderinc: share 0.45 at the closest, 1 far).
-        let slope_m = length(in.slope_xz) / max(ground.micro.w, 1.0);
-        let g = ground_proc(in.world.xz, in.world.xz / params.map.xy, ground_footprint, in.altitude, slope_m, in.slope_xz);
-        let land = smoothstep(0.0, 2.0, in.altitude);
-        var painted = g.color;
-        if (params.map.w > 0.5) {
-            let far_w = smoothstep(0.05, 0.5, ground_footprint);
-            let ratio = clamp(luma(g.color) / max(luma(base_albedo), 1e-3), 0.55, 1.6);
-            // TB1: the season shift of the land cover over the mean-season colour map.
-            let tinted = base_albedo * mix(1.0, ratio, 0.55 * (1.0 - far_w)) * pow(g.season_k, vec3<f32>(SG_SEASON_STRENGTH));
-            painted = mix(g.color, tinted, mix(0.45, 1.0, far_w));
+        @if(GROUND_CACHE) {
+            // Baked once per node (ADR 0742); the clamp keeps the bilinear inside the layer.
+            let half_texel = 0.5 / f32(constants::GC_TEXELS);
+            let uv = clamp(in.cache.xy, vec2<f32>(half_texel), vec2<f32>(1.0 - half_texel));
+            let layer = i32(in.cache.z);
+            let a = textureSampleLevel(cache_albedo, terroir_sampler, uv, layer, 0.0);
+            let dn = textureSampleLevel(cache_dn, terroir_sampler, uv, layer, 0.0).xy;
+            albedo = a.rgb;
+            forest_f = a.a;
+            n = normalize(n + vec3<f32>(dn.x, 0.0, dn.y));
         }
-        // Painted fields over the ground colour (after the colormap, like hb_apply).
-        var dn = g.dn;
-        var fields_on = fields.v8.w > 0.5;
-        @if(PERF_TNOFIELDS) {
-            fields_on = false;
-        }
-        if (fields_on) {
-            let fo = fields_apply(in.world.xz, in.world.xz / params.map.xy, ground_footprint, land,
-                g.open_w, g.forest_w, g.rock_w, g.farm_share, slope_m, in.slope_xz, in.altitude, g.k_wild,
-                g.k_forest, painted);
-            painted = fo.color;
-            dn = dn + fo.dn;
-        }
-        @if(!PERF_TNOGDMACRO)
-        painted = gd_macro(gd, painted, in.world.xz, ground_footprint, land, g.open_w);
-        albedo = mix(base_albedo, painted, land);
-        n = normalize(vec3<f32>(n.x + dn.x * land, n.y, n.z - dn.y * land));
-        // Forest crowns: relief and tone contrast of the canopy (0.45 bump, 0.35 contrast).
-        forest_f = g.forest_w * land;
-        // TS-T1: green-black ground under the forests.
-        albedo = albedo * mix(vec3<f32>(1.0), season.forest_floor.rgb, season.forest_floor.a * forest_f);
-        if (forest_f > 0.01) {
-            let cf = canopy_field(in.world.xz, ground_footprint);
-            n = normalize(vec3<f32>(n.x - cf.y * 0.45 * forest_f, n.y, n.z - cf.z * 0.45 * forest_f));
-            albedo = albedo * (1.0 + 0.35 * forest_f * cf.x);
+        @if(!GROUND_CACHE) {
+            let r = regional_ground(in.world.xz, ground_footprint, in.altitude, in.slope_xz, base_albedo);
+            albedo = r.albedo;
+            forest_f = r.forest_f;
+            n = normalize(n + vec3<f32>(r.dn.x, 0.0, r.dn.y));
         }
     }
     let land_g = smoothstep(0.0, 2.0, in.altitude);
@@ -2446,4 +2504,42 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         color = mix(color, params.edge.rgb, haze);
     }
     return vec4<f32>(color, 1.0);
+}
+
+// Ground cache bake (ADR 0742, `ground_cache.rs`): the node mesh drawn flat over its cache layer,
+// one fragment per texel, the regional ground computed with the texel as footprint. The skirts
+// collapse onto the node edges.
+struct BakeVaryings {
+    @builtin(position) clip: vec4<f32>,
+    @location(0) xz: vec2<f32>,
+    @location(1) altitude: f32,
+    @location(2) slope_xz: vec2<f32>,
+    @location(3) texel: f32,
+};
+
+@vertex
+fn bake_vertex(v: Vertex) -> BakeVaryings {
+    let c = cache_coords(v.morph);
+    var out: BakeVaryings;
+    out.clip = vec4<f32>(c.x * 2.0 - 1.0, 1.0 - c.y * 2.0, 0.5, 1.0);
+    out.xz = v.position.xz;
+    out.altitude = v.position.y;
+    out.slope_xz = v.slope.xy;
+    out.texel = c.w;
+    return out;
+}
+
+struct BakeOut {
+    @location(0) albedo: vec4<f32>,
+    @location(1) dn: vec4<f32>,
+};
+
+@fragment
+fn bake_fragment(in: BakeVaryings) -> BakeOut {
+    let base = base_ground(in.xz, in.texel);
+    let r = regional_ground(in.xz, in.texel, in.altitude, in.slope_xz, base);
+    var out: BakeOut;
+    out.albedo = vec4<f32>(r.albedo, r.forest_f);
+    out.dn = vec4<f32>(r.dn, 0.0, 1.0);
+    return out;
 }

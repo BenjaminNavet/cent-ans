@@ -7,7 +7,7 @@ use bevy::prelude::*;
 use bevy::render::render_resource::{
     AsBindGroup, RenderPipelineDescriptor, ShaderType, SpecializedMeshPipelineError,
 };
-use bevy::shader::ShaderRef;
+use bevy::shader::{ShaderDefVal, ShaderRef};
 
 pub const SHADER_PATH: &str = "embedded://cent_ans_client/campaign/terrain/terrain.wesl";
 /// Shadow caster (prepass vertex) of the ground: displaced like the main pass.
@@ -87,7 +87,31 @@ pub fn sun_direction(elevation_deg: f32) -> Vec3 {
     )
 }
 
+/// Pipeline key of the ground: texels per side of the ground cache layers (0: live ground).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub struct TerrainMaterialKey {
+    pub cache_texels: u32,
+}
+
+impl From<&TerrainMaterial> for TerrainMaterialKey {
+    fn from(material: &TerrainMaterial) -> Self {
+        TerrainMaterialKey {
+            cache_texels: material.cache_texels,
+        }
+    }
+}
+
+/// `PERF_*` defs of the bisection switches turned off (`CENT_ANS_PERF_OFF`).
+pub fn perf_defs() -> Vec<ShaderDefVal> {
+    PERF_DEFS
+        .iter()
+        .filter(|(switch, _)| crate::campaign::perf_switch::off(switch))
+        .map(|(_, def)| (*def).into())
+        .collect()
+}
+
 #[derive(Asset, TypePath, AsBindGroup, Clone, Debug)]
+#[bind_group_data(TerrainMaterialKey)]
 pub struct TerrainMaterial {
     #[uniform(0)]
     pub params: TerrainParams,
@@ -166,6 +190,14 @@ pub struct TerrainMaterial {
     /// Selected province (`WeatherGround::clear`, R8), sampled with `wx_sampler`.
     #[texture(34)]
     pub wx_clear: Option<Handle<Image>>,
+    /// Ground cache atlas (ADR 0742, `ground_cache.rs`): baked regional albedo + forest share,
+    /// normal offset; one layer per relief node.
+    #[texture(41, dimension = "2d_array")]
+    pub cache_albedo: Option<Handle<Image>>,
+    #[texture(42, dimension = "2d_array")]
+    pub cache_dn: Option<Handle<Image>>,
+    /// Texels per side of a cache layer, 0 when the ground is computed live.
+    pub cache_texels: u32,
 }
 
 /// Uniform block `TerrainExtras` of `terrain.wesl` (binding 27).
@@ -221,15 +253,23 @@ impl Material for TerrainMaterial {
         _pipeline: &MaterialPipeline,
         descriptor: &mut RenderPipelineDescriptor,
         _layout: &MeshVertexBufferLayoutRef,
-        _key: MaterialPipelineKey<Self>,
+        key: MaterialPipelineKey<Self>,
     ) -> Result<(), SpecializedMeshPipelineError> {
         // Skirts are two-sided quads.
         descriptor.primitive.cull_mode = None;
+        // `terrain.wesl` also holds the ground-cache bake entry points: name the main ones.
+        descriptor.vertex.entry_point = Some("vertex".into());
         if let Some(fragment) = descriptor.fragment.as_mut() {
-            for (switch, def) in PERF_DEFS {
-                if crate::campaign::perf_switch::off(switch) {
-                    fragment.shader_defs.push(def.into());
-                }
+            fragment.entry_point = Some("fragment".into());
+        }
+        let texels = key.bind_group_data.cache_texels;
+        let texels_def = ShaderDefVal::UInt("GC_TEXELS".into(), texels.max(1));
+        descriptor.vertex.shader_defs.push(texels_def.clone());
+        if let Some(fragment) = descriptor.fragment.as_mut() {
+            fragment.shader_defs.extend(perf_defs());
+            fragment.shader_defs.push(texels_def);
+            if texels > 0 {
+                fragment.shader_defs.push("GROUND_CACHE".into());
             }
         }
         Ok(())

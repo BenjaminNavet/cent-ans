@@ -355,6 +355,7 @@ fn dump_settings(world: &World) -> (String, Value) {
                 "ssao_battle": quality.ssao_battle,
                 "msaa_campaign": format!("{:?}", quality.msaa_campaign),
                 "smaa_campaign": quality.smaa_campaign,
+                "ground_cache_texels": quality.ground_cache_texels,
                 "shadows": quality.shadows,
                 "shadow_map_size": quality.shadow_map_size,
                 "shadow_distance": quality.shadow_distance,

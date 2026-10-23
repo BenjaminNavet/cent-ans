@@ -31,6 +31,16 @@ pub struct NodeSpec {
     pub fine: i64,
     /// Skirt depth in world units (hides cracks between pages and levels).
     pub skirt: f32,
+    /// Ground cache layer of the node (ADR 0742, `ground_cache.rs`), -1 without cache.
+    pub cache_layer: i32,
+}
+
+/// Node uv packed in one exact float for the ground cache (`cache_coords` of `terrain.wesl`):
+/// `ui + 65 vi + 4225 q`, ui and vi in 64ths of the node side, quads = 64 >> q.
+pub fn pack_cache_uv(i: usize, j: usize, quads: u32) -> f32 {
+    let q = (64 / quads.clamp(1, 64)).trailing_zeros();
+    let step = (64 / quads.clamp(1, 64)) as usize;
+    (i * step + 65 * j * step) as f32 + 4225.0 * q as f32
 }
 
 /// Number of vertices and triangles of a patch.
@@ -85,7 +95,12 @@ pub fn build_node_mesh(spec: &NodeSpec, surface: &Surface, relief: &ReliefState)
             (0, 1) => 0.5 * (at_signed(ii, jj - 1) + at_signed(ii, jj + 1)),
             _ => 0.5 * (at_signed(ii - 1, jj - 1) + at_signed(ii + 1, jj + 1)),
         };
-        morphs.push([coarse - h, spec.spacing, 0.0, 0.0]);
+        morphs.push([
+            coarse - h,
+            spec.spacing,
+            spec.cache_layer as f32,
+            pack_cache_uv(i, j, spec.quads),
+        ]);
     };
     for j in 0..side {
         for i in 0..side {
@@ -210,6 +225,7 @@ mod tests {
             quads: 32,
             fine: -1,
             skirt: 0.5,
+            cache_layer: -1,
         };
         let mesh = build_node_mesh(&spec, &surface, &relief);
         let (vertices, triangles) = patch_counts(32);

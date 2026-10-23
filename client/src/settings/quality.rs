@@ -31,6 +31,9 @@ pub struct Preset {
     pub map_msaa: Msaa,
     /// Campaign map: SMAA post-pass instead of MSAA (`map_smaa`, ADR 0741).
     pub map_smaa: bool,
+    /// Campaign map: texels per side of a ground cache layer (`map_ground_cache`, ADR 0742),
+    /// 0 for the live ground.
+    pub map_ground_cache: u32,
     pub shadow_atlas: usize,
     pub shadow_splits: usize,
     /// Cascades of the campaign sun (`map_shadow_splits`).
@@ -69,6 +72,7 @@ impl Preset {
             msaa: Msaa::Sample2,
             map_msaa: Msaa::Off,
             map_smaa: true,
+            map_ground_cache: 0,
             shadow_atlas: 8192,
             shadow_splits: 4,
             map_shadow_splits: 4,
@@ -95,6 +99,7 @@ impl Preset {
                 .get("map_smaa")
                 .and_then(Value::as_bool)
                 .unwrap_or(false),
+            map_ground_cache: number("map_ground_cache").map_or(0, |v| v as u32),
             shadow_atlas: number("shadow_atlas")? as usize,
             shadow_splits: number("shadow_splits")? as usize,
             map_shadow_splits: number("map_shadow_splits").map_or(4, |v| v as usize),
@@ -206,6 +211,8 @@ pub struct RenderQuality {
     pub msaa_campaign: Msaa,
     /// SMAA on the campaign camera: the preset asks for it and the player forced no MSAA level.
     pub smaa_campaign: bool,
+    /// Ground cache of the campaign map: texels per layer side, 0 off (ADR 0742).
+    pub ground_cache_texels: u32,
     /// Campaign relief density of the preset (`relief_vertex_px`, `relief_items`).
     pub relief_vertex_px: f32,
     pub relief_items: u32,
@@ -261,6 +268,8 @@ impl RenderQuality {
             battle_lod: preset.battle_lod,
             msaa_campaign: forced.unwrap_or(preset.map_msaa),
             smaa_campaign: preset.map_smaa && forced.is_none(),
+            ground_cache_texels: crate::campaign::perf_switch::value("GROUND_CACHE")
+                .map_or(preset.map_ground_cache, |v| v as u32),
             relief_vertex_px: preset.relief_vertex_px,
             relief_items: preset.relief_items,
             shadows: settings.shadows,

@@ -11,6 +11,7 @@ use bevy::prelude::*;
 use relief_lod::{Config, Selector, V3, View};
 
 use super::decode::TileDecoder;
+use super::ground_cache::{BakeJob, GroundBakeQueue, GroundCache};
 use super::material::TerrainMaterial;
 use super::mesh::{NodeSpec, build_node_mesh, patch_counts};
 use super::pyramid::ReliefPyramid;
@@ -37,9 +38,20 @@ struct Node {
     /// Page of the last built mesh (`i64::MIN`: not built yet).
     built_fine: i64,
     triangles: usize,
+    /// Ground cache (ADR 0742): bake wanted / last bake done (0: never), cache generation of
+    /// the wanted bake, current mesh.
+    bake_ticket: u64,
+    baked_ticket: u64,
+    generation: u64,
+    mesh: Option<AssetId<Mesh>>,
 }
 
 impl Node {
+    /// Drawable: mesh built and, with a cache layer, baked once.
+    fn ready(&self) -> bool {
+        self.built_fine != i64::MIN && (self.spec.cache_layer < 0 || self.baked_ticket > 0)
+    }
+
     /// Footprint (min x, min z, max x, max z) in map units.
     fn rect(&self) -> (f32, f32, f32, f32) {
         let extent = self.spec.quads as f32 * self.spec.spacing;
@@ -75,6 +87,8 @@ pub struct TerrainLod {
     pub pending_builds: usize,
     /// Peak of nodes drawn at once.
     pub peak_nodes: usize,
+    /// Ground cache bakes still wanted (ADR 0742).
+    pub pending_bakes: usize,
 }
 
 impl TerrainLod {
@@ -114,6 +128,7 @@ impl TerrainLod {
             build_ms_last: 0.0,
             pending_builds: 0,
             peak_nodes: 0,
+            pending_bakes: 0,
         }
     }
 
@@ -146,7 +161,10 @@ impl TerrainLod {
 
     /// True when every wanted page is resident and nothing is being decoded or built.
     pub fn is_settled(&self) -> bool {
-        self.requested.is_empty() && self.missing_pages == 0 && self.pending_builds == 0
+        self.requested.is_empty()
+            && self.missing_pages == 0
+            && self.pending_builds == 0
+            && self.pending_bakes == 0
     }
 }
 
@@ -235,6 +253,8 @@ pub fn update_lod(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<TerrainMaterial>>,
     cameras: Query<(&Transform, &Projection, &Camera), With<CampaignCamera>>,
+    mut cache: Option<ResMut<GroundCache>>,
+    mut bake_queue: ResMut<GroundBakeQueue>,
 ) {
     // Dynamic vertical exaggeration, quantised with hysteresis (`TerrainBuilder.set_vertical_scale`).
     let scale = relief
@@ -332,8 +352,11 @@ pub fn update_lod(
     // Nodes removed (kept until replaced, see `retiring`) and added.
     for key in &update.removed {
         if let Some(node) = lod.nodes.remove(key) {
-            if node.built_fine == i64::MIN {
+            if !node.ready() {
                 commands.entity(node.entity).despawn();
+                if let Some(cache) = cache.as_mut() {
+                    cache.release(node.spec.cache_layer);
+                }
             } else {
                 lod.retiring.push((node, now));
             }
@@ -349,6 +372,7 @@ pub fn update_lod(
             quads: added.quads as u32,
             fine: -1,
             skirt,
+            cache_layer: cache.as_mut().map_or(-1, |c| c.alloc()),
         };
         let extent = added.quads * added.spacing;
         // Raw metres are in the y of the positions: the automatic bounding box would be wrong
@@ -379,6 +403,10 @@ pub fn update_lod(
                 spec,
                 built_fine: i64::MIN,
                 triangles: 0,
+                bake_ticket: 0,
+                baked_ticket: 0,
+                generation: 0,
+                mesh: None,
             },
         );
     }
@@ -405,21 +433,36 @@ pub fn update_lod(
             continue;
         };
         node.spec.fine = fine;
-        let mesh = build_node_mesh(&node.spec, &surface, &relief);
+        let mesh = meshes.add(build_node_mesh(&node.spec, &surface, &relief));
         node.built_fine = fine;
         node.triangles = patch_counts(node.spec.quads).1;
-        commands
-            .entity(node.entity)
-            .insert((Mesh3d(meshes.add(mesh)), Visibility::Visible));
+        node.mesh = Some(mesh.id());
+        match cache.as_mut() {
+            // Shown once baked (see `ready`); a rebuilt node keeps showing its last bake.
+            Some(cache) if node.spec.cache_layer >= 0 => {
+                node.bake_ticket = cache.ticket();
+                node.generation = cache.generation;
+                commands.entity(node.entity).insert(Mesh3d(mesh));
+            }
+            _ => {
+                commands
+                    .entity(node.entity)
+                    .insert((Mesh3d(mesh), Visibility::Visible));
+            }
+        }
         built += 1;
     }
     lod.pending_builds = lod.pending_builds.saturating_sub(built);
 
-    // Retired nodes go once no unbuilt node overlaps them any more (or after a delay).
+    if let Some(cache) = cache.as_mut() {
+        update_bakes(&mut commands, &mut lod, cache, &mut bake_queue);
+    }
+
+    // Retired nodes go once no unready node overlaps them any more (or after a delay).
     let unbuilt: Vec<_> = lod
         .nodes
         .values()
-        .filter(|n| n.built_fine == i64::MIN)
+        .filter(|n| !n.ready())
         .map(Node::rect)
         .collect();
     let retiring = std::mem::take(&mut lod.retiring);
@@ -429,10 +472,61 @@ pub fn update_lod(
             lod.retiring.push((node, since));
         } else {
             commands.entity(node.entity).despawn();
+            if let Some(cache) = cache.as_mut() {
+                cache.release(node.spec.cache_layer);
+            }
         }
     }
     lod.meshes_built += built as u64;
     lod.build_ms_last = started.elapsed().as_secs_f32() * 1000.0;
+}
+
+/// Ground cache bookkeeping of a frame (ADR 0742): bakes done, invalidation, next jobs.
+fn update_bakes(
+    commands: &mut Commands,
+    lod: &mut TerrainLod,
+    cache: &mut GroundCache,
+    queue: &mut GroundBakeQueue,
+) {
+    for (layer, ticket) in cache.take_done() {
+        cache.bakes_done += 1;
+        if let Some(node) = lod
+            .nodes
+            .values_mut()
+            .find(|n| n.spec.cache_layer == layer as i32 && n.bake_ticket == ticket)
+        {
+            if node.baked_ticket == 0 {
+                commands.entity(node.entity).insert(Visibility::Visible);
+            }
+            node.baked_ticket = ticket;
+        }
+    }
+    let generation = cache.generation;
+    let mut jobs = Vec::new();
+    for node in lod.nodes.values_mut() {
+        let Some(mesh) = node.mesh else {
+            continue;
+        };
+        if node.spec.cache_layer < 0 {
+            continue;
+        }
+        if node.generation != generation {
+            node.generation = generation;
+            node.bake_ticket = cache.ticket();
+        }
+        if node.baked_ticket != node.bake_ticket {
+            jobs.push((
+                node.baked_ticket == 0,
+                BakeJob {
+                    layer: node.spec.cache_layer as u32,
+                    ticket: node.bake_ticket,
+                    mesh,
+                },
+            ));
+        }
+    }
+    lod.pending_bakes = jobs.len();
+    super::ground_cache::publish_jobs(cache, queue, lod.material.id(), jobs);
 }
 
 /// Applies the relief density of the quality preset (`relief_vertex_px`, `relief_items`) to the
