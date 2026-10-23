@@ -889,13 +889,13 @@ fn poitiers_captures_the_king_and_bretigny_requires_it() {
 fn a_scheduled_event_fires_k_turns_later() {
     let data = game_data();
     let mut state = start(data, "fac_france", 43);
-    let jean = chr("chr_jean_de_normandie");
+    // The ransom event follows the captivity of the king, whoever he is.
     apply(
         &mut state,
         data,
         "fac_france",
         EventEffect::CaptureCharacter {
-            id: CharacterRef::Id(jean),
+            id: CharacterRef::Ruler,
             faction: None,
             captor: fac("fac_england"),
         },
