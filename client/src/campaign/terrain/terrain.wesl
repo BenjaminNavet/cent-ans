@@ -720,10 +720,10 @@ fn coast_px_smooth(uv: vec2<f32>, footprint: f32) -> f32 {
     let g1 = w2 + w3;
     let o0 = (i + vec2<f32>(0.5) + (-1.0 + w1 / g0)) / ts;
     let o1 = (i + vec2<f32>(0.5) + (1.0 + w3 / g1)) / ts;
-    let a = textureSampleLevel(coast_dist_tex, coast_sampler, vec2<f32>(o0.x, o0.y), 0.0).r;
-    let b = textureSampleLevel(coast_dist_tex, coast_sampler, vec2<f32>(o1.x, o0.y), 0.0).r;
-    let c = textureSampleLevel(coast_dist_tex, coast_sampler, vec2<f32>(o0.x, o1.y), 0.0).r;
-    let d = textureSampleLevel(coast_dist_tex, coast_sampler, vec2<f32>(o1.x, o1.y), 0.0).r;
+    let a = textureSampleLevel(coast_dist_tex, terroir_sampler, vec2<f32>(o0.x, o0.y), 0.0).r;
+    let b = textureSampleLevel(coast_dist_tex, terroir_sampler, vec2<f32>(o1.x, o0.y), 0.0).r;
+    let c = textureSampleLevel(coast_dist_tex, terroir_sampler, vec2<f32>(o0.x, o1.y), 0.0).r;
+    let d = textureSampleLevel(coast_dist_tex, terroir_sampler, vec2<f32>(o1.x, o1.y), 0.0).r;
     let r = g0.y * (g0.x * a + g1.x * b) + g1.y * (g0.x * c + g1.x * d);
     let smooth_c = (r * 255.0 - 128.0) / extras.coast.texel.z;
     return mix(smooth_c, raw, smoothstep(0.9, 1.8, footprint));
