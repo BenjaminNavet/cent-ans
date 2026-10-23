@@ -35,6 +35,9 @@ fn main() -> ExitCode {
 
     let mut bevy_app = App::new();
     // `data://` asset source: before `DefaultPlugins` (ADR 0363).
+    bevy_app.add_plugins(battle::decor::ground::KtxCacheSourcePlugin {
+        cache_dir: battle::decor::ground::cache_dir(&root),
+    });
     bevy_app.add_plugins(dataassets::DataSourcePlugin {
         data_dir: paths::data_dir(&root),
     });

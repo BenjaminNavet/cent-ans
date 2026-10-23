@@ -26,3 +26,10 @@ Suivre les deux lots en cours, puis : (a) benchs sur machine calme (réf, Solari
 - Disque : `CARGO_INCREMENTAL=0`, supprimer `client/target` des worktrees d'agents terminés.
 - Tuer les clients par pid (`pkill -f` ne marche pas).
 - Un seul banc release à la fois ; Mac/Metal d'abord (ADR/mémoire).
+
+## Mesures foule (23/10, release, machine calme sauf calme f_noshadow suspect, 1 passe chacune, mêlée Crécy)
+- Référence (préréglage ultra, battle_lod 2,0) : p50 24,1 ms / 41,4 fps.
+- `CENT_ANS_NO_FIGURE_SHADOWS=1` : 18,6 ms / 53,8 fps (les ombres des soldats coûtent ~5,5 ms en mêlée).
+- `CENT_ANS_BATTLE_LOD=0.55` (préréglage low) : 17,3 ms / 58,0 fps. `=2` : identique à la référence (déjà ultra).
+- Conclusion : le coût est la géométrie des soldats (LOD0/1 jusqu'à ~11 600 triangles) et leurs ombres, pas la logique (Update ~4 ms). Lots foule 1 (habillage allégé LOD2 + passe d'ombres) et 2 (culling par soldat) engagés.
+- Solari bataille : voir bevy-solari.md (mêlée 52 fps car cascades d'ombre coupées, soldats sans ombre).

@@ -440,11 +440,16 @@ fn ssao_follows_msaa(
     look: Res<LightingLook>,
     quality: Option<Res<crate::settings::quality::RenderQuality>>,
     mut state: ResMut<SkyLightState>,
+    solari: super::camera::SolariActive,
     cameras: Query<(Entity, &Msaa, Has<ScreenSpaceAmbientOcclusion>), With<Lit>>,
 ) {
     let preset = quality.as_ref().is_none_or(|q| q.ssao_battle);
     for (camera, msaa, has_ssao) in &cameras {
-        let want = look.ssao.enabled && preset && *msaa == Msaa::Off;
+        // Solari replaces ambient occlusion with ray-traced GI.
+        let want = look.ssao.enabled
+            && preset
+            && *msaa == Msaa::Off
+            && !super::camera::solari_active(&solari);
         if want && !has_ssao {
             // The preset's level when there is one ("high"/"ultra" cost more), else the data file's.
             let level = quality
@@ -572,6 +577,7 @@ fn build_sky_light(
     look: Res<LightingLook>,
     decor: Option<Res<DecorLook>>,
     atmosphere: Option<Res<AtmosphereState>>,
+    solari: super::camera::SolariActive,
     mut images: ResMut<Assets<Image>>,
     mut state: ResMut<SkyLightState>,
     cameras: Query<Entity, With<Lit>>,
@@ -641,7 +647,13 @@ fn build_sky_light(
         .then(|| images.add(cube_image(&pano, &background_params, sl.skybox_face_px.max(size)).0));
     let handle = images.add(cube);
     let energy = fog.ambient * sl.ambient_boost;
-    let env_intensity = look.unit() * energy * sl.sky_contribution;
+    // Solari reads no `AmbientLight`: the whole sky energy goes through the environment map.
+    let contribution = if super::camera::solari_active(&solari) {
+        1.0
+    } else {
+        sl.sky_contribution
+    };
+    let env_intensity = look.unit() * energy * contribution;
     let l = sl.ambient_lighten;
     let lighten = |c: f32| c + (1.0 - c) * l;
     let ambient = AmbientLight {
@@ -650,7 +662,7 @@ fn build_sky_light(
             lighten(fog.color[1]),
             lighten(fog.color[2]),
         ),
-        brightness: look.unit() * energy * (1.0 - sl.sky_contribution),
+        brightness: look.unit() * energy * (1.0 - contribution),
         ..default()
     };
     for camera in &cameras {

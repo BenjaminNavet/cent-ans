@@ -49,6 +49,10 @@ pub struct SolariSettings {
     /// Vertex spacing (m) of the coarse ground substitute.
     #[serde(default = "default_ground_step")]
     pub ground_step_m: f32,
+    /// The ground substitute is lowered by this much (m) below the lowest real height sampled around
+    /// each vertex, so the coarse grid never rises above the visible ground (self-shadow bands).
+    #[serde(default = "default_ground_sink")]
+    pub ground_sink_m: f32,
     /// Substitute budget: triangles over all distinct substitute meshes.
     #[serde(default = "default_max_triangles")]
     pub max_triangles: usize,
@@ -63,6 +67,10 @@ fn default_bounces() -> u32 {
 
 fn default_ground_step() -> f32 {
     12.0
+}
+
+fn default_ground_sink() -> f32 {
+    2.0
 }
 
 fn default_max_triangles() -> usize {
@@ -481,13 +489,37 @@ fn substitute_ground(
     let columns = ((field.width / step).round() as usize).max(1) + 1;
     let rows = ((field.depth / step).round() as usize).max(1) + 1;
     let height = |x: f64, z: f64| field.height(x, z) as f32;
+    // Lowest real height in the cell neighbourhood, minus the sink: the chords of the coarse grid
+    // then stay under the visible ground.
+    let half = step * 0.5;
+    let sink = settings.ground_sink_m;
+    let low_height = |x: f64, z: f64| {
+        let mut low = f32::MAX;
+        for (ox, oz) in [
+            (0.0, 0.0),
+            (half, 0.0),
+            (-half, 0.0),
+            (0.0, half),
+            (0.0, -half),
+            (half, half),
+            (half, -half),
+            (-half, half),
+            (-half, -half),
+        ] {
+            low = low.min(height(
+                (x + ox).clamp(0.0, field.width),
+                (z + oz).clamp(0.0, field.depth),
+            ));
+        }
+        low - sink
+    };
     let mut positions = Vec::with_capacity(columns * rows);
     let mut normals = Vec::with_capacity(columns * rows);
     for row in 0..rows {
         let z = (row as f64 * step).min(field.depth);
         for column in 0..columns {
             let x = (column as f64 * step).min(field.width);
-            positions.push([x as f32, height(x, z), z as f32]);
+            positions.push([x as f32, low_height(x, z), z as f32]);
             let dx = height((x + step).min(field.width), z) - height((x - step).max(0.0), z);
             let dz = height(x, (z + step).min(field.depth)) - height(x, (z - step).max(0.0));
             normals.push(

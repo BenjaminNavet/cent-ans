@@ -61,6 +61,8 @@ tracing = { version = "0.1", optional = true }
 tracing-subscriber = { version = "0.3", optional = true }
 bevy = { version = "=0.20.0", features = [
     "jpeg", "png", "webp", "mp3", "wav",
+    # KTX2 texture arrays of the battle ground (docs/wip/bevy-ktx2-array.md): UASTC + zstd, transcoded to BC7.
+    "ktx2", "zstd_c", "basis-universal",
     # pbr lot (docs/wip/bevy-pbr.md): PCSS soft shadows (`soft_shadows` post-effect in settings).
     # NOT enabled: pbr_anisotropy_texture, pbr_multi_layer_material_textures, pbr_specular_textures,
     # pbr_transmission_textures. Each adds sampler slots to StandardMaterial; with all four the ground,

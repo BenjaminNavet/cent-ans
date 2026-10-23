@@ -123,10 +123,34 @@ struct Pose {
     c: vec4<f32>,
 }
 
-fn bone_row(row: i32, idx: vec4<i32>, w: vec4<f32>) -> Pose {
+// Lighter skinning (foule1): set for the shadow cascades (`SHADOW_*` pipeline defs) and, with
+// `LITE_FAR`, for the farthest level of detail in colour (far_blend > 0). One animation frame (the
+// nearest, no interpolation), the current clip only (no fade from the previous one), bones of
+// weight below LITE_BONE_CUT dropped, no procedural lance. Roughly a third of the texture fetches.
+// Each part has its own switch (shader defs SHADOW_SINGLE_FRAME, SHADOW_BONE_CUT, SHADOW_NO_FADE,
+// SHADOW_NO_PROP; LITE_FAR sets all four).
+var<private> lite_frame: bool = false;
+var<private> lite_bones: bool = false;
+var<private> lite_fade: bool = false;
+var<private> lite_prop: bool = false;
+const LITE_BONE_CUT = 0.15;
+
+fn bone_row(row: i32, idx: vec4<i32>, w_in: vec4<f32>) -> Pose {
     var a = vec4<f32>(0.0);
     var b = vec4<f32>(0.0);
     var c = vec4<f32>(0.0);
+    var w = w_in;
+    if lite_bones {
+        var kept = 0.0;
+        for (var k = 0; k < 4; k++) {
+            if w[k] >= LITE_BONE_CUT {
+                kept += w[k];
+            } else {
+                w[k] = 0.0;
+            }
+        }
+        w = w / max(kept, 0.0001);
+    }
     for (var k = 0; k < 4; k++) {
         let wk = w[k];
         if wk > 0.0 {
@@ -166,6 +190,9 @@ fn clip_pose(clip: i32, t: f32, idx: vec4<i32>, w: vec4<f32>) -> Pose {
     let f = x - f0;
     let r0 = i32(cdef.x + f0);
     let r1 = i32(cdef.x + f1);
+    if lite_frame {
+        return bone_row(select(r0, r1, f >= 0.5), idx, w);
+    }
     var pose = bone_row(r0, idx, w);
     if f > 0.01 && r1 != r0 {
         let q = bone_row(r1, idx, w);
@@ -252,7 +279,7 @@ fn anim_pose(
         t = anim_time * speed * mix(1.0 - jit, 1.0 + jit, h.y) + h.z * 11.0;
     }
     var pose = clip_pose(clip, t, idx, w);
-    if blend_prev {
+    if blend_prev && !lite_fade {
         let q = clip_pose(prev_clip, prev_t, idx, w);
         pose = Pose(mix(q.a, pose.a, prev_k), mix(q.b, pose.b, prev_k), mix(q.c, pose.c, prev_k));
     }
@@ -263,6 +290,26 @@ fn anim_pose(
 fn vertex(in: Vertex) -> VertexOutput {
     var out: VertexOutput;
     let id = in.sidt.y;
+    @if(SHADOW_SINGLE_FRAME) {
+        lite_frame = true;
+    }
+    @if(SHADOW_BONE_CUT) {
+        lite_bones = true;
+    }
+    @if(SHADOW_NO_FADE) {
+        lite_fade = true;
+    }
+    @if(SHADOW_NO_PROP) {
+        lite_prop = true;
+    }
+    @if(LITE_FAR) {
+        if in.sidt.w > 0.001 {
+            lite_frame = true;
+            lite_bones = true;
+            lite_fade = true;
+            lite_prop = true;
+        }
+    }
     if params.extra.z > 0.0 {
         // Impostor: a quad standing on the soldier's feet, turned towards the camera.
         let to_cam = view.world_position - in.at_yaw.xyz;
@@ -305,7 +352,7 @@ fn vertex(in: Vertex) -> VertexOutput {
         params.cur.y, params.cur.w, params.timing.z, h, anim_time, in.extra.x, in.extra.z, in.extra.w, idx, in.weights,
     );
     let blend = clamp((anim_time - params.prev.w) / max(params.timing.x, 0.01), 0.0, 1.0);
-    if blend < 1.0 {
+    if blend < 1.0 && !lite_fade {
         let prev = anim_pose(
             params.prev_set[0], params.prev_set[1], params.prev.z, params.prev.x, params.jitter.y,
             params.prev.y, params.extra.x, params.extra.y, h, anim_time, in.extra.x, in.extra.z, in.extra.w, idx, in.weights,
@@ -318,7 +365,7 @@ fn vertex(in: Vertex) -> VertexOutput {
     var rest_pos = in.position;
     var rest_nrm = in.normal;
     var on_prop = 0.0;
-    if params.prop.x >= 0.0 && idx.x == i32(params.prop.x + 0.5) && in.weights.x > 0.99 {
+    if params.prop.x >= 0.0 && idx.x == i32(params.prop.x + 0.5) && in.weights.x > 0.99 && !lite_prop {
         on_prop = 1.0;
         let grip = params.prop_grip.xyz;
         let axis = params.prop_axis.xyz;
