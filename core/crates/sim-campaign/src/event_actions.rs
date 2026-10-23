@@ -297,9 +297,9 @@ pub(crate) fn marry(
         GameEvent::new(
             EventKind::Chronicle,
             format!(
-                "Mariage de {} et de {}.",
-                state.character_name(data, a),
-                state.character_name(data, b)
+                "Mariage {} et {}.",
+                crate::events::de(&state.character_name(data, a)),
+                crate::events::de(&state.character_name(data, b))
             ),
         )
         .faction(&faction),

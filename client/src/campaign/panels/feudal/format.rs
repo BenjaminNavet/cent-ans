@@ -81,8 +81,8 @@ fn felony_text(case: &FelonyRow, own: bool) -> String {
         )
     } else {
         format!(
-            "Félonie de {} ({}) : commise possible encore {}.",
-            case.vassal.name,
+            "Félonie {} ({}) : commise possible encore {}.",
+            crate::ui::kit::fr::de_place(&case.vassal.name),
             case.reason,
             turns(case.turns_left)
         )

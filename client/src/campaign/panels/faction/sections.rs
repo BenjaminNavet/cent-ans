@@ -408,8 +408,8 @@ pub fn feudal_lines(sheet: &FeudalSheet, duties: &DutiesView) -> Vec<(String, Co
     for case in &duties.felons {
         lines.push((
             format!(
-                "Félonie de {} ({}) : commise possible encore {}.",
-                case.vassal.name,
+                "Félonie {} ({}) : commise possible encore {}.",
+                crate::ui::kit::fr::de_place(&case.vassal.name),
                 case.reason,
                 count(i64::from(case.turns_left), "tour", "tours")
             ),
