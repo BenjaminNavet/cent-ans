@@ -175,6 +175,52 @@ pub fn densify(points: &[Vec2], step: f32) -> Vec<Vec2> {
     out
 }
 
+/// Shape of a dirt road (TERRAIN lot, ADR 0758): the computed road lines follow the pathfinding
+/// grid (stair steps, straight runs), so the near ribbon smooths them and adds a slow lateral
+/// wander, like a track worn by carts that follows the ground rather than a ruler. Ends stay
+/// pinned (roads join settlements and each other there). Pure geometry, same vertex count as a
+/// plain densified line (step 1 px), no cost per frame.
+pub fn wander(points: &[Vec2], step: f32, amplitude: f32, wavelength: f32) -> Vec<Vec2> {
+    let dense = densify(points, step);
+    let n = dense.len();
+    if n < 4 {
+        return dense;
+    }
+    // Moving average, two passes (about a triangle window of 2 * HALF + 1 samples), ends pinned
+    // by shrinking the window.
+    const HALF: usize = 5;
+    let mut smooth = dense.clone();
+    for _ in 0..2 {
+        let source = smooth.clone();
+        for (i, slot) in smooth.iter_mut().enumerate() {
+            let half = HALF.min(i).min(n - 1 - i);
+            let (lo, hi) = (i - half, i + half);
+            let sum: Vec2 = source[lo..=hi].iter().copied().sum();
+            *slot = sum / (hi - lo + 1) as f32;
+        }
+    }
+    // Lateral wander: two incommensurable sines, phase from the first point, faded in over
+    // `wavelength` from each end.
+    let seed = (points[0].x * 12.9898 + points[0].y * 78.233).sin() * 43758.547;
+    let phase = seed.fract().abs() * std::f32::consts::TAU;
+    let mut along = vec![0.0_f32; n];
+    for i in 1..n {
+        along[i] = along[i - 1] + smooth[i].distance(smooth[i - 1]);
+    }
+    let total = along[n - 1];
+    let k = std::f32::consts::TAU / wavelength.max(1.0);
+    let mut out = smooth.clone();
+    for i in 0..n {
+        let edge = along[i].min(total - along[i]) / wavelength.max(1.0);
+        let fade = edge.clamp(0.0, 1.0);
+        let fade = fade * fade * (3.0 - 2.0 * fade);
+        let wave = (along[i] * k + phase).sin() * 0.65 + (along[i] * k * 2.7 + phase * 1.7).sin() * 0.35;
+        let tangent = tangent_at(&smooth, i);
+        out[i] = smooth[i] + perp(tangent) * (wave * amplitude * fade);
+    }
+    out
+}
+
 /// Dirt ribbons (altitude in metres, see [`screen_ribbon`]) of constant `width`, vertices pushed out by half the width, `uv = (along, side)`.
 pub fn flat_ribbon(
     runs: &[(Vec<Vec2>, f32)],
@@ -210,6 +256,28 @@ pub fn flat_ribbon(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn wander_pins_ends_and_smooths_stair_steps() {
+        let steps: Vec<Vec2> = (0..20)
+            .flat_map(|i| {
+                let x = i as f32 * 4.0;
+                [Vec2::new(x, x * 0.5), Vec2::new(x + 2.0, x * 0.5)]
+            })
+            .collect();
+        let shaped = wander(&steps, 1.0, 0.4, 24.0);
+        assert_eq!(shaped.first(), steps.first());
+        assert_eq!(shaped.last(), steps.last());
+        // Smoother than the input: smaller turning angles on average.
+        let turn = |p: &[Vec2]| -> f32 {
+            p.windows(3)
+                .map(|w| (w[1] - w[0]).normalize_or_zero().dot((w[2] - w[1]).normalize_or_zero()))
+                .map(|d| 1.0 - d)
+                .sum::<f32>()
+                / (p.len() - 2) as f32
+        };
+        assert!(turn(&shaped) < turn(&densify(&steps, 1.0)));
+    }
     use crate::campaign::water::height::FlatGround;
 
     fn line() -> Vec<Vec2> {

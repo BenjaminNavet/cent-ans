@@ -1,15 +1,15 @@
 {
   "description": "Rendu des forêts de la carte de campagne (lot TS-T2, ADR 0710) : valeur et variété de la canopée, lisière nette, masse lointaine, givre d'hiver ; lot TS-T8 : arbres hors forêt amincis avec la distance, bosquets, clairières habitées. Lu par client/src/campaign/vegetation/look.rs.",
   "canopy": {
-    "value": 0.72,
-    "saturation": 1.3,
+    "value": 0.88,
+    "saturation": 1.2,
     "balance": [
-      0.86,
+      0.92,
       1.0,
-      0.78
+      0.8
     ],
-    "tree_value_spread": 0.22,
-    "stand_value_spread": 0.3,
+    "tree_value_spread": 0.3,
+    "stand_value_spread": 0.4,
     "stand_period_units": 26.0,
     "height_spread": 0.3,
     "height_period_units": 40.0,
@@ -102,11 +102,28 @@
       "max_factor": 6.0,
       "fov_deg": 45.0,
       "lod": 1,
-      "budget": {"low": 0, "medium": 8, "high": 20, "ultra": 40},
+      "budget": {
+        "low": 0,
+        "medium": 8,
+        "high": 20,
+        "ultra": 40
+      },
       "objects": {
-        "env_charcoal_kiln": {"model": "dn/buildings/env_charcoal_kiln", "size_m": 6.0, "fraction": 0.03},
-        "econ_charcoal_stack_burners": {"model": "dn/props/econ_charcoal_stack_burners", "size_m": 6.0, "fraction": 0.03},
-        "econ_timber_yard_logs": {"model": "dn/buildings/econ_timber_yard_logs", "size_m": 8.0, "fraction": 0.035}
+        "env_charcoal_kiln": {
+          "model": "dn/buildings/env_charcoal_kiln",
+          "size_m": 6.0,
+          "fraction": 0.03
+        },
+        "econ_charcoal_stack_burners": {
+          "model": "dn/props/econ_charcoal_stack_burners",
+          "size_m": 6.0,
+          "fraction": 0.03
+        },
+        "econ_timber_yard_logs": {
+          "model": "dn/buildings/econ_timber_yard_logs",
+          "size_m": 8.0,
+          "fraction": 0.035
+        }
       }
     }
   }

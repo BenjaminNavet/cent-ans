@@ -72,6 +72,9 @@ const RIBBON_STEP: f32 = 1.0;
 const RIVER_STEP: f32 = 2.0;
 const RIBBON_MAIN_WIDTH: f32 = 0.55;
 const RIBBON_WIDTH: f32 = 0.38;
+/// Lateral wander of the dirt-road ribbons (map px) and its wavelength (ADR 0758).
+const ROAD_WANDER_AMPLITUDE: f32 = 0.45;
+const ROAD_WANDER_WAVELENGTH: f32 = 22.0;
 const MAIN_ROAD_WIDTH: f32 = 0.5;
 /// Lake outline growth under the shore (`LakesRenderer.shore_overlap_px`).
 const LAKE_SHORE_OVERLAP: f32 = 3.0;
@@ -808,7 +811,7 @@ fn build_roads(
         .iter()
         .map(|r| {
             (
-                r.points.clone(),
+                ribbon::wander(&r.points, RIBBON_STEP, ROAD_WANDER_AMPLITUDE, ROAD_WANDER_WAVELENGTH),
                 if r.main {
                     RIBBON_MAIN_WIDTH
                 } else {
