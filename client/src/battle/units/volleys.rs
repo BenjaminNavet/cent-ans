@@ -133,10 +133,9 @@ fn kind_index(kind: MissileKind) -> Option<usize> {
 fn missile_mesh() -> Mesh {
     // A shaft along -Z ending at the origin (the tip), a head and fletching.
     let mut mesh =
-        Mesh::from(Cuboid::new(0.025, 0.025, 1.0)).translated_by(Vec3::new(0.0, 0.0, -0.5));
-    let head = Mesh::from(Cuboid::new(0.05, 0.05, 0.1)).translated_by(Vec3::new(0.0, 0.0, -0.04));
-    let fletch =
-        Mesh::from(Cuboid::new(0.07, 0.01, 0.16)).translated_by(Vec3::new(0.0, 0.0, -0.93));
+        Mesh::from(Cuboid::new(0.07, 0.07, 1.0)).translated_by(Vec3::new(0.0, 0.0, -0.5));
+    let head = Mesh::from(Cuboid::new(0.13, 0.13, 0.12)).translated_by(Vec3::new(0.0, 0.0, -0.04));
+    let fletch = Mesh::from(Cuboid::new(0.2, 0.03, 0.2)).translated_by(Vec3::new(0.0, 0.0, -0.93));
     mesh.merge(&head).expect("same layout");
     mesh.merge(&fletch).expect("same layout");
     mesh

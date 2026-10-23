@@ -20,9 +20,10 @@ use crate::battle::scene::camera::BattleCamera;
 use crate::battle::units::volleys::Volleys;
 
 /// `trail_alpha`, `trail_length` of the shader and the half width of the quad (`w`).
-const TRAIL_ALPHA: f32 = 0.45;
-const TRAIL_LENGTH_M: f32 = 5.0;
+const TRAIL_ALPHA: f32 = 0.7;
+const TRAIL_LENGTH_M: f32 = 7.0;
 const HALF_WIDTH_M: f32 = 0.03;
+const HALF_WIDTH_PER_M: f32 = 0.0025;
 /// Colour of the ribbon (`ALBEDO`).
 const TRAIL_COLOR: [f32; 3] = [0.86, 0.85, 0.8];
 
@@ -48,8 +49,9 @@ pub fn build_ribbons(
     for &(tip, dir) in tips {
         let to_camera = (camera - tip).normalize_or_zero();
         let across = (dir.cross(to_camera) + Vec3::Y * 1e-4).normalize_or_zero();
-        let widen = (camera.distance(tip) / 30.0).clamp(1.0, 7.0);
-        let half = across * HALF_WIDTH_M * widen;
+        // Wide enough to stay a few pixels thick at play distance (ADR 0773): ~0.25 % of the
+        // distance per side, at least the base width.
+        let half = across * (camera.distance(tip) * HALF_WIDTH_PER_M).clamp(HALF_WIDTH_M, 0.7);
         let tail = tip - dir * TRAIL_LENGTH_M;
         let base = positions.len() as u32;
         for p in [tip - half, tip + half, tail + half, tail - half] {
@@ -142,7 +144,7 @@ fn update_trail(
     stats.peak = stats.peak.max(tips.len());
     stats.widest_m = tips
         .iter()
-        .map(|(tip, _)| 2.0 * HALF_WIDTH_M * (camera.distance(*tip) / 30.0).clamp(1.0, 7.0))
+        .map(|(tip, _)| 2.0 * (camera.distance(*tip) * HALF_WIDTH_PER_M).clamp(HALF_WIDTH_M, 0.7))
         .fold(stats.widest_m, f32::max);
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
     mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
@@ -211,13 +213,13 @@ mod tests {
     }
 
     #[test]
-    fn the_ribbon_widens_with_the_distance_up_to_seven_times() {
+    fn the_ribbon_widens_with_the_distance_up_to_its_cap() {
         let width = |distance: f32| {
             let (p, _, _) = build_ribbons(&[(Vec3::ZERO, Vec3::X)], Vec3::new(0.0, 0.0, distance));
             (Vec3::from(p[1]) - Vec3::from(p[0])).length()
         };
-        assert!((width(20.0) - 0.06).abs() < 1e-4);
-        assert!((width(90.0) - 0.18).abs() < 1e-4);
-        assert!((width(1000.0) - 0.42).abs() < 1e-4);
+        assert!((width(10.0) - 0.06).abs() < 1e-4);
+        assert!((width(100.0) - 0.5).abs() < 1e-4);
+        assert!((width(1000.0) - 1.4).abs() < 1e-4);
     }
 }

@@ -249,7 +249,12 @@ impl Plugin for BattleCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (control_camera, follow_melee, follow_engagement, apply_camera)
+            (
+                control_camera,
+                follow_melee,
+                follow_engagement,
+                apply_camera,
+            )
                 .chain()
                 .run_if(in_state(AppState::Battle))
                 .run_if(resource_exists::<BattleSession>),
@@ -534,7 +539,7 @@ fn apply_camera(
 mod tests {
     #[test]
     fn engagement_is_the_densest_knot_of_fighters() {
-        use super::{engagement_centre, Vec2};
+        use super::{Vec2, engagement_centre};
         assert!(engagement_centre(&[]).is_none());
         let mut fighters = vec![Vec2::new(900.0, 900.0)];
         fighters.extend((0..5).map(|i| Vec2::new(100.0 + i as f32 * 10.0, 100.0)));
@@ -595,6 +600,8 @@ mod tests {
             distance,
             target_distance: distance,
             manual_pitch_deg: None,
+            idle_s: 0.0,
+            auto_follow: true,
             bounds: [0.0, 0.0, 1200.0, 800.0],
             last_pitch_deg: 6.0,
         }

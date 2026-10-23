@@ -6,11 +6,11 @@
   },
   "sparks": {
     "causes": ["melee", "charge", "pikes"],
-    "per_impact": 3,
-    "max_impacts_per_step": 4,
-    "lifetime_s": [0.25, 0.5],
+    "per_impact": 5,
+    "max_impacts_per_step": 6,
+    "lifetime_s": [0.3, 0.6],
     "speed_m_s": [1.5, 4.5],
-    "size_m": [0.12, 0.28],
+    "size_m": [0.22, 0.5],
     "height_m": 1.2,
     "sprite_room": 600,
     "min_interval_s": 0.12

@@ -226,7 +226,7 @@ fn update_dust(
         if !dust.enabled
             || !matches!(
                 unit.state,
-                UnitState::Marching | UnitState::Charging | UnitState::Routing
+                UnitState::Marching | UnitState::Charging | UnitState::Routing | UnitState::Melee
             )
         {
             continue;
