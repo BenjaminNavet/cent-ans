@@ -1,0 +1,10 @@
+{
+  "_comment": "Essai bevy_solari (docs/wip/bevy-solari.md). Sans effet hors build `--features solari`. Désactivé par défaut : éclairage raytracé, GPU à ray queries requis. Soldats : proxies d'ombre (docs/wip/bevy-solari-soldats.md).",
+  "enabled": false,
+  "restir": true,
+  "max_bounces": 2,
+  "soldiers_in_tlas": true,
+  "soldier_proxy_budget": 4000,
+  "soldier_foot_size_m": [0.55, 1.8, 0.4],
+  "soldier_mounted_size_m": [0.9, 2.4, 2.2]
+}

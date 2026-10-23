@@ -115,6 +115,14 @@ impl ProvinceMap {
 
 /// Decodes `province_ids.png` into `(width, height, index per pixel)`.
 pub fn load_ids_png(path: &Path) -> Result<(u32, u32, Vec<u16>), String> {
+    crate::agent::texture_census::timed(
+        format!("provinces load_ids_png {}", path.display()),
+        |r: &Result<(u32, u32, Vec<u16>), String>| r.as_ref().map_or(0, |r| r.2.len() * 2),
+        || load_ids_png_inner(path),
+    )
+}
+
+fn load_ids_png_inner(path: &Path) -> Result<(u32, u32, Vec<u16>), String> {
     let file = std::fs::File::open(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let mut reader = png::Decoder::new(std::io::BufReader::new(file))
         .read_info()
@@ -163,10 +171,10 @@ pub(crate) mod tests {
     #[test]
     fn loads_all_provinces_and_raster() {
         let map = real_map();
-        assert_eq!(map.provinces().len(), 213);
+        assert_eq!(map.provinces().len(), 216);
         assert_eq!((map.width, map.height), (7080, 6104));
         let paris = map.index_of_id("prov_ile_de_france");
-        assert_eq!(paris, 79);
+        assert_eq!(paris, 82);
         assert_eq!(map.province(paris).unwrap().name, "Île-de-France");
     }
 

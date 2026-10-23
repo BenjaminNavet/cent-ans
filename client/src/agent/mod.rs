@@ -6,12 +6,16 @@
 
 pub mod bench;
 pub mod bench_battle;
+#[cfg(feature = "dev")]
+pub mod bevy_tools;
 pub mod cli;
 pub mod devtools;
 pub mod dump;
+pub mod memory;
 pub mod perf_probe;
 pub mod profile;
 pub mod script;
+pub mod texture_census;
 
 use std::collections::VecDeque;
 use std::path::Path;
@@ -31,8 +35,21 @@ use cli::Cli;
 use dump::{DumpAppExt, build_dump, dump_entities, dump_state};
 use script::{MouseButtonName, ScriptCommand, parse_script};
 
-/// Size of the offscreen render target (logical pixels = window size).
+/// Default size of the offscreen render target (logical pixels = window size).
 pub const VIEW_SIZE: (u32, u32) = (1280, 800);
+
+/// Size of the window / offscreen target: [`VIEW_SIZE`], or `CENT_ANS_VIEW_SIZE=<w>x<h>` (benches
+/// at the player's screen size, e.g. `3456x2234`).
+pub fn view_size() -> (u32, u32) {
+    std::env::var("CENT_ANS_VIEW_SIZE")
+        .ok()
+        .and_then(|text| {
+            let (w, h) = text.split_once('x')?;
+            Some((w.trim().parse().ok()?, h.trim().parse().ok()?))
+        })
+        .filter(|&(w, h): &(u32, u32)| w >= 64 && h >= 64)
+        .unwrap_or(VIEW_SIZE)
+}
 /// Frames a `click` waits for its target to exist before failing the run.
 const CLICK_RETRY_FRAMES: u32 = 300;
 /// `click_if` waits this long for the node before skipping it.
@@ -89,9 +106,10 @@ impl Plugin for AgentPlugin {
         }
         if cli.wants_offscreen() {
             let mut images = app.world_mut().resource_mut::<Assets<Image>>();
+            let (width, height) = view_size();
             let target = images.add(Image::new_target_texture(
-                VIEW_SIZE.0,
-                VIEW_SIZE.1,
+                width,
+                height,
                 TextureFormat::Rgba8UnormSrgb,
                 None,
             ));
@@ -112,7 +130,8 @@ impl Plugin for AgentPlugin {
         .register_dump(dump_frame)
         .add_systems(Last, drive)
         .add_systems(Update, hide_named);
-        app.add_plugins(perf_probe::PerfProbePlugin);
+        app.add_plugins((perf_probe::PerfProbePlugin, memory::MemoryProbePlugin));
+        app.add_plugins(texture_census::TextureCensusPlugin);
         bench::add(app, cli);
         // With `dev`, BrpExtrasPlugin (devtools) installs the same transport with a chosen port.
         #[cfg(all(feature = "remote", not(feature = "dev")))]
@@ -331,6 +350,7 @@ fn drive(world: &mut World) {
                 return;
             }
             ScriptCommand::Dump(path) => {
+                dump::prepare_dump(world);
                 let text = serde_json::to_string_pretty(&build_dump(world)).unwrap_or_default();
                 if let Err(message) = write_file(&path, text.as_bytes()) {
                     fatal(world, &message);

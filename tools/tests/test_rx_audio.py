@@ -93,8 +93,8 @@ def test_faction_language_covers_the_voiced_cultures() -> None:
     assert by_faction["fac_castile"] == "oc"
     assert by_faction["fac_france"] == "fr"
     assert (
-        len(barks_languages.faction_cultures()) == 166
-    )  # CC C3: 11 factions retired with the composed map
+        len(barks_languages.faction_cultures()) == 167
+    )  # CC C3: 11 factions retired with the composed map; + fac_dauphine (ADR 0732)
 
 
 @pytest.mark.parametrize("culture", sorted(barks_languages.CULTURE_LANGUAGE))

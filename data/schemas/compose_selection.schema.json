@@ -27,7 +27,7 @@
           "id": {"type": "string", "pattern": "^prov_"},
           "merged_from": {"type": "array", "items": {"type": "string", "pattern": "^prov_"}, "minItems": 1, "maxItems": 5},
           "owner": {"type": "string", "pattern": "^fac_"},
-          "owners": {"type": "array", "items": {"type": "string", "pattern": "^fac_"}, "minItems": 2},
+          "owners": {"type": "array", "items": {"type": "string", "pattern": "^fac_"}, "minItems": 1},
           "region": {"type": "string"},
           "capital_settlement": {"type": ["string", "null"], "pattern": "^set_"},
           "settlements": {"type": "array", "items": {"type": "string", "pattern": "^set_"}}

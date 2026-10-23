@@ -2,7 +2,7 @@
   {
     "id": "set_malaga",
     "province": "prov_granada",
-    "kind": "city",
+    "kind": "town",
     "name": {
       "display": "Málaga",
       "local": "Malaqa",
@@ -35,7 +35,7 @@
   {
     "id": "set_grenade",
     "province": "prov_granada",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Grenade",
       "local": "Gharnata",

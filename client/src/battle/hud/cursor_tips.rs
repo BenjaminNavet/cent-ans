@@ -126,11 +126,11 @@ impl Plugin for CursorTipsPlugin {
 
 fn spawn_tips(
     mut commands: Commands,
-    roots: Query<Entity, With<BattleHudRoot>>,
+    root: Single<Entity, With<BattleHudRoot>>,
     tips: Query<(), With<CursorTip>>,
     theme: Res<UiTheme>,
 ) {
-    let Ok(root) = roots.single() else { return };
+    let root = *root;
     if !tips.is_empty() {
         return;
     }

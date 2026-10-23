@@ -53,7 +53,7 @@ use crate::ui::kit::modal::ModalQueue;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
 use crate::ui::kit::style::{self, UiTier, UiType};
 use crate::ui::kit::widgets::{
-    TabSelected, button_primary, button_small, caption, panel_sized, separator,
+    TabSelected, button_primary, button_small, caption, panel_sized, scroll_body, separator,
 };
 use crate::ui::kit::{ButtonPressed, UiTheme, typed};
 
@@ -132,12 +132,21 @@ pub fn plugin(app: &mut App) {
                 handle_buttons,
                 check_objective,
                 rebuild,
+                yield_band,
                 persist,
             )
                 .chain()
                 .run_if(in_state(AppState::Campaign)),
         )
-        .add_systems(OnExit(AppState::Campaign), close_on_exit);
+        .add_systems(
+            OnExit(AppState::Campaign),
+            (
+                close_on_exit,
+                |mut band: ResMut<crate::ui::advisor_band::AdvisorBand>| {
+                    band.suppressed = false;
+                },
+            ),
+        );
 }
 
 fn load_steps(mut tutorial: ResMut<Tutorial>) {
@@ -622,6 +631,7 @@ fn spawn(
             DespawnOnExit(AppState::Campaign),
             Node {
                 position_type: PositionType::Absolute,
+                flex_direction: FlexDirection::Column,
                 ..default()
             },
             crate::ui::kit::layout::FitZone::BottomLeft,
@@ -629,6 +639,7 @@ fn spawn(
         ))
         .with_children(|slot| {
             slot.spawn(panel_sized(&theme, CARD_WIDTH))
+                .queue(crate::ui::kit::widgets::shrinkable(150.0))
                 .with_children(|page| {
                     page.spawn(Node {
                         justify_content: JustifyContent::SpaceBetween,
@@ -642,63 +653,69 @@ fn spawn(
                         ));
                         header.spawn(button_small(&theme, "tutorial:toc", "☰ Étapes"));
                     });
-                    if !toc.is_empty() {
-                        page.spawn(Node {
-                            flex_direction: FlexDirection::Column,
-                            align_items: AlignItems::FlexStart,
-                            ..default()
-                        })
-                        .with_children(|list| {
-                            for (i, title) in toc.iter().enumerate() {
-                                let mark = match i.cmp(&index) {
-                                    std::cmp::Ordering::Less => "✔",
-                                    std::cmp::Ordering::Equal => "▸",
-                                    std::cmp::Ordering::Greater => " ",
-                                };
-                                list.spawn(button_small(
+                    // Scrolling body, fixed foot (ADR 0752): a long step scrolls, the buttons never
+                    // fall off the card or onto the army strip.
+                    page.spawn(scroll_body("TutorialBody"))
+                        .with_children(|inner| {
+                            if !toc.is_empty() {
+                                inner
+                                    .spawn(Node {
+                                        flex_direction: FlexDirection::Column,
+                                        align_items: AlignItems::FlexStart,
+                                        ..default()
+                                    })
+                                    .with_children(|list| {
+                                        for (i, title) in toc.iter().enumerate() {
+                                            let mark = match i.cmp(&index) {
+                                                std::cmp::Ordering::Less => "✔",
+                                                std::cmp::Ordering::Equal => "▸",
+                                                std::cmp::Ordering::Greater => " ",
+                                            };
+                                            list.spawn(button_small(
+                                                &theme,
+                                                &format!("tutorial:step:{i}"),
+                                                &format!("{mark} {}. {title}", i + 1),
+                                            ));
+                                        }
+                                    });
+                                inner.spawn(separator(&theme));
+                            }
+                            inner.spawn((
+                                Name::new("TutorialTitle"),
+                                typed(&theme, &step.title, UiType::Heading),
+                            ));
+                            inner.spawn(rich_text(&theme, assets, &step.text, &body));
+                            inner.spawn(separator(&theme));
+                            inner.spawn((
+                                Name::new("TutorialObjective"),
+                                Text::new(if done {
+                                    format!("✔ {}", step.objective)
+                                } else {
+                                    format!("Objectif : {}", step.objective)
+                                }),
+                                theme.text_font(true, false, UiType::Body.size()),
+                                TextColor(if done { style::GOOD } else { style::RUBRIC }),
+                            ));
+                            if !step.advice.is_empty() {
+                                if advice_open {
+                                    inner.spawn(rich_text(
+                                        &theme,
+                                        assets,
+                                        &format!("[i]Conseil historique : {}[/i]", step.advice),
+                                        &body,
+                                    ));
+                                }
+                                inner.spawn(button_small(
                                     &theme,
-                                    &format!("tutorial:step:{i}"),
-                                    &format!("{mark} {}. {title}", i + 1),
+                                    "tutorial:advice",
+                                    if advice_open {
+                                        "Masquer le conseil"
+                                    } else {
+                                        "Conseil historique"
+                                    },
                                 ));
                             }
                         });
-                        page.spawn(separator(&theme));
-                    }
-                    page.spawn((
-                        Name::new("TutorialTitle"),
-                        typed(&theme, &step.title, UiType::Heading),
-                    ));
-                    page.spawn(rich_text(&theme, assets, &step.text, &body));
-                    page.spawn(separator(&theme));
-                    page.spawn((
-                        Name::new("TutorialObjective"),
-                        Text::new(if done {
-                            format!("✔ {}", step.objective)
-                        } else {
-                            format!("Objectif : {}", step.objective)
-                        }),
-                        theme.text_font(true, false, UiType::Body.size()),
-                        TextColor(if done { style::GOOD } else { style::RUBRIC }),
-                    ));
-                    if !step.advice.is_empty() {
-                        if advice_open {
-                            page.spawn(rich_text(
-                                &theme,
-                                assets,
-                                &format!("[i]Conseil historique : {}[/i]", step.advice),
-                                &body,
-                            ));
-                        }
-                        page.spawn(button_small(
-                            &theme,
-                            "tutorial:advice",
-                            if advice_open {
-                                "Masquer le conseil"
-                            } else {
-                                "Conseil historique"
-                            },
-                        ));
-                    }
                     page.spawn(Node {
                         column_gap: Val::Px(6.0),
                         flex_wrap: FlexWrap::Wrap,
@@ -726,6 +743,15 @@ fn spawn(
                 });
         })
         .id()
+}
+
+/// The guide card owns the bottom-left zone while it is shown: the advisor band yields to it
+/// (ADR 0752, one narrator at a time).
+fn yield_band(tutorial: Res<Tutorial>, mut band: ResMut<crate::ui::advisor_band::AdvisorBand>) {
+    let shown = tutorial.root.is_some();
+    if band.suppressed != shown {
+        band.suppressed = shown;
+    }
 }
 
 fn dump(world: &World) -> (String, Value) {

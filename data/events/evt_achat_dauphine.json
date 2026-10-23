@@ -16,8 +16,8 @@
       },
       {
         "type": "controls",
-        "faction": "fac_empire",
-        "province": "prov_provence"
+        "faction": "fac_dauphine",
+        "province": "prov_dauphine"
       }
     ]
   },
@@ -30,13 +30,10 @@
       "text": "Payer le prix d’Humbert (traité de Romans)",
       "effects": [
         {
-          "type": "treasury",
-          "amount": -12000
-        },
-        {
-          "type": "transfer_province",
-          "province": "prov_provence",
-          "from": "fac_empire"
+          "type": "transfer_title",
+          "title": "tit_dauphine",
+          "from": "fac_dauphine",
+          "price": 12000
         },
         {
           "type": "prestige",

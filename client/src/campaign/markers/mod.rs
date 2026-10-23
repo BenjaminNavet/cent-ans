@@ -31,7 +31,7 @@ use bevy::ui::UiScale;
 use bevy::world_serialization::{WorldAssetRoot, WorldInstanceReady};
 use serde_json::{Value, json};
 
-use crate::agent::dump::DumpAppExt;
+use crate::agent::dump::{DumpAppExt, DumpPrepare};
 use crate::app::AppState;
 use crate::campaign::provinces::picker::SelectedProvince;
 use crate::campaign::terrain::surface::GroundHeight;
@@ -58,6 +58,13 @@ impl Plugin for CampaignMarkersPlugin {
             .init_resource::<lod::KitBanners>()
             .init_resource::<lod::LodStats>()
             .register_dump(dump_markers)
+            // Dump-only statistics: computed on demand, not every frame.
+            .add_systems(
+                DumpPrepare,
+                (lod::batch_stats, update_stats, probe_nearby)
+                    .run_if(|built: Option<Res<MarkersBuilt>>| built.is_some_and(|b| b.0))
+                    .run_if(in_state(AppState::Campaign)),
+            )
             .add_systems(OnExit(AppState::Campaign), reset_markers)
             .add_systems(
                 Update,
@@ -75,13 +82,10 @@ impl Plugin for CampaignMarkersPlugin {
                         update_range,
                         lod::fade_maquettes,
                         lod::update_shadows,
-                        lod::batch_stats,
                         update_shields,
                         update_labels,
                         signs::rescale_signs,
                         landmark_fallback,
-                        update_stats,
-                        probe_nearby,
                     )
                         .run_if(|built: Res<MarkersBuilt>| built.0),
                 )
@@ -1355,14 +1359,8 @@ fn probe_nearby(
     rendered: Query<&ViewVisibility, With<Mesh3d>>,
     ground: GroundHeight,
     mut stats: ResMut<MarkerStats>,
-    mut last: Local<f32>,
 ) {
     let Some(rig) = rig else { return };
-    *last += 1.0;
-    if *last < 10.0 {
-        return;
-    }
-    *last = 0.0;
     let focus = Vec2::new(rig.focus.x, rig.focus.z);
     let mut rows: Vec<(f32, Value)> = Vec::new();
     for (e, name, anchor, g, visible, maquette, dn) in &anchors {

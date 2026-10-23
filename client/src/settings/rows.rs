@@ -179,6 +179,27 @@ pub static ROWS: &[Row] = &[
     choice_s!(Display, texture_quality, "Qualité des textures",
         "Haute : sols et parcelles en 2k quand les paquets haute définition sont installés. Moyenne : paquets 1k seuls. Prise en compte au prochain chargement.",
         ["high" => "Haute", "medium" => "Moyenne"]),
+    choice_s!(Display, fx_depth_of_field, "Profondeur de champ",
+        "Flou des plans hors de la mise au point. Automatique : suit la qualité graphique (désactivé tant que non mesuré).",
+        ["auto" => "Automatique", "off" => "Désactivé", "on" => "Activé"]),
+    choice_s!(Display, fx_motion_blur, "Flou de mouvement",
+        "Traînée des objets et de la caméra en mouvement. Automatique : suit la qualité graphique (désactivé tant que non mesuré).",
+        ["auto" => "Automatique", "off" => "Désactivé", "on" => "Activé"]),
+    choice_s!(Display, fx_auto_exposure, "Exposition automatique",
+        "Adapte la luminosité à la scène, comme l’œil. Automatique : suit la qualité graphique (désactivé tant que non mesuré).",
+        ["auto" => "Automatique", "off" => "Désactivé", "on" => "Activé"]),
+    choice_s!(Display, fx_color_grading, "Étalonnage des couleurs",
+        "Réglage de contraste et de saturation de la carte (la bataille a son propre étalonnage). Automatique : suit la qualité graphique (désactivé tant que non mesuré).",
+        ["auto" => "Automatique", "off" => "Désactivé", "on" => "Activé"]),
+    choice_s!(Display, fx_chromatic_aberration, "Aberration chromatique",
+        "Frange colorée sur les bords de l’image. Automatique : suit la qualité graphique (désactivé tant que non mesuré).",
+        ["auto" => "Automatique", "off" => "Désactivé", "on" => "Activé"]),
+    choice_s!(Display, fx_sharpening, "Netteté adaptative",
+        "Accentue les détails sans durcir les contrastes. Automatique : suit la qualité graphique (désactivé tant que non mesuré).",
+        ["auto" => "Automatique", "off" => "Désactivé", "on" => "Activé"]),
+    choice_s!(Display, fx_soft_shadows, "Ombres douces",
+        "Pénombre qui s’élargit avec la distance à l’objet. Coûteux. Automatique : suit la qualité graphique (désactivé tant que non mesuré).",
+        ["auto" => "Automatique", "off" => "Désactivé", "on" => "Activé"]),
     choice_s!(Display, upscale, "Mise à l’échelle",
         "Calcule l’image 3D en plus petit puis l’agrandit : plus d’images par seconde, image un peu plus douce. L’interface reste nette.",
         ["auto" => "Automatique", "off" => "Désactivée", "quality" => "Qualité", "performance" => "Performance"]),
@@ -381,10 +402,9 @@ pub static ROWS: &[Row] = &[
 ];
 
 /// Rows kept in the table (and the file) but not shown: no Bevy consumer yet, so they would
-/// promise an effect the game does not have. `upscale`: MetalFX / FSR is not ported (see
-/// `quality.rs`). `dev_mode`: Godot's `Settings.is_dev()` has no reader either (no tool text is
+/// promise an effect the game does not have (`upscale` is applied by `render_scale.rs`). `dev_mode`: Godot's `Settings.is_dev()` has no reader either (no tool text is
 /// gated in either client). Remove from here when a consumer exists.
-pub const NO_EFFECT: &[&str] = &["upscale", "dev_mode"];
+pub const NO_EFFECT: &[&str] = &["dev_mode"];
 
 pub fn row(key: &str) -> Option<&'static Row> {
     ROWS.iter().find(|row| row.key == key)

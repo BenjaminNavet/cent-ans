@@ -3128,6 +3128,29 @@
    "name": "",
    "type": "road",
    "structure": "wood",
+   "river": "Rhône",
+   "road_type": "computed",
+   "px": [
+    2152.04,
+    4186.92
+   ],
+   "dir": [
+    0.4104,
+    0.9119
+   ],
+   "axis": [
+    0.4472,
+    -0.8944
+   ],
+   "width": 1.419,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_23",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
    "river": "Rhine",
    "road_type": "computed",
    "px": [
@@ -3147,7 +3170,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_23",
+   "id": "road_24",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3170,7 +3193,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_24",
+   "id": "road_25",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3193,7 +3216,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_25",
+   "id": "road_26",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3216,7 +3239,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_26",
+   "id": "road_27",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3239,7 +3262,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_27",
+   "id": "road_28",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3262,7 +3285,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_28",
+   "id": "road_29",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3285,7 +3308,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_29",
+   "id": "road_30",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3308,7 +3331,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_30",
+   "id": "road_31",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3331,7 +3354,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_31",
+   "id": "road_32",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3354,7 +3377,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_32",
+   "id": "road_33",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3377,7 +3400,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_33",
+   "id": "road_34",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3400,7 +3423,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_34",
+   "id": "road_35",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3423,7 +3446,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_35",
+   "id": "road_36",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3446,7 +3469,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_36",
+   "id": "road_37",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3469,7 +3492,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_37",
+   "id": "road_38",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3492,7 +3515,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_38",
+   "id": "road_39",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3515,7 +3538,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_39",
+   "id": "road_40",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3538,7 +3561,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_40",
+   "id": "road_41",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3561,7 +3584,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_41",
+   "id": "road_42",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3584,7 +3607,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_42",
+   "id": "road_43",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3607,7 +3630,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_43",
+   "id": "road_44",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3630,7 +3653,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_44",
+   "id": "road_45",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3653,7 +3676,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_45",
+   "id": "road_46",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3676,7 +3699,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_46",
+   "id": "road_47",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3699,7 +3722,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_47",
+   "id": "road_48",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3722,7 +3745,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_48",
+   "id": "road_49",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3745,7 +3768,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_49",
+   "id": "road_50",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3768,7 +3791,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_50",
+   "id": "road_51",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3791,7 +3814,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_51",
+   "id": "road_52",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3814,7 +3837,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_52",
+   "id": "road_53",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3837,7 +3860,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_53",
+   "id": "road_54",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3860,7 +3883,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_54",
+   "id": "road_55",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3883,7 +3906,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_55",
+   "id": "road_56",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3906,7 +3929,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_56",
+   "id": "road_57",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3929,7 +3952,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_57",
+   "id": "road_58",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3952,7 +3975,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_58",
+   "id": "road_59",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3975,7 +3998,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_59",
+   "id": "road_60",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -3998,7 +4021,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_60",
+   "id": "road_61",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4021,7 +4044,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_61",
+   "id": "road_62",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4044,7 +4067,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_62",
+   "id": "road_63",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4067,7 +4090,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_63",
+   "id": "road_64",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4090,7 +4113,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_64",
+   "id": "road_65",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4113,7 +4136,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_65",
+   "id": "road_66",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4136,7 +4159,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_66",
+   "id": "road_67",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4159,7 +4182,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_67",
+   "id": "road_68",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4182,7 +4205,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_68",
+   "id": "road_69",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4205,7 +4228,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_69",
+   "id": "road_70",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4228,7 +4251,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_70",
+   "id": "road_71",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4251,7 +4274,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_71",
+   "id": "road_72",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4274,7 +4297,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_72",
+   "id": "road_73",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4297,7 +4320,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_73",
+   "id": "road_74",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4320,7 +4343,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_74",
+   "id": "road_75",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4343,7 +4366,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_75",
+   "id": "road_76",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4366,7 +4389,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_76",
+   "id": "road_77",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4389,7 +4412,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_77",
+   "id": "road_78",
    "name": "",
    "type": "road",
    "structure": "stone",
@@ -4412,7 +4435,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_78",
+   "id": "road_79",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4435,7 +4458,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_79",
+   "id": "road_80",
    "name": "",
    "type": "road",
    "structure": "stone",
@@ -4458,7 +4481,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_80",
+   "id": "road_81",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4481,7 +4504,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_81",
+   "id": "road_82",
    "name": "",
    "type": "road",
    "structure": "stone",
@@ -4504,7 +4527,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_82",
+   "id": "road_83",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4527,7 +4550,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_83",
+   "id": "road_84",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4550,7 +4573,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_84",
+   "id": "road_85",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4573,7 +4596,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_85",
+   "id": "road_86",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4596,7 +4619,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_86",
+   "id": "road_87",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4619,7 +4642,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_87",
+   "id": "road_88",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4642,7 +4665,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_88",
+   "id": "road_89",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4665,7 +4688,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_89",
+   "id": "road_90",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4688,7 +4711,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_90",
+   "id": "road_91",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4711,7 +4734,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_91",
+   "id": "road_92",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4734,7 +4757,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_92",
+   "id": "road_93",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4757,7 +4780,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_93",
+   "id": "road_94",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4780,7 +4803,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_94",
+   "id": "road_95",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4803,7 +4826,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_95",
+   "id": "road_96",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4826,7 +4849,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_96",
+   "id": "road_97",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4849,7 +4872,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_97",
+   "id": "road_98",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4872,7 +4895,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_98",
+   "id": "road_99",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4895,7 +4918,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_99",
+   "id": "road_100",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4918,7 +4941,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_100",
+   "id": "road_101",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4941,7 +4964,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_101",
+   "id": "road_102",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4964,7 +4987,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_102",
+   "id": "road_103",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -4987,7 +5010,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_103",
+   "id": "road_104",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5010,7 +5033,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_104",
+   "id": "road_105",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5033,7 +5056,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_105",
+   "id": "road_106",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5056,7 +5079,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_106",
+   "id": "road_107",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5079,7 +5102,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_107",
+   "id": "road_108",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5102,7 +5125,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_108",
+   "id": "road_109",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5125,7 +5148,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_109",
+   "id": "road_110",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5148,7 +5171,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_110",
+   "id": "road_111",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5171,7 +5194,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_111",
+   "id": "road_112",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5194,7 +5217,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_112",
+   "id": "road_113",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5217,7 +5240,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_113",
+   "id": "road_114",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5240,7 +5263,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_114",
+   "id": "road_115",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5263,7 +5286,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_115",
+   "id": "road_116",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5286,7 +5309,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_116",
+   "id": "road_117",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5309,7 +5332,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_117",
+   "id": "road_118",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5332,7 +5355,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_118",
+   "id": "road_119",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5355,7 +5378,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_119",
+   "id": "road_120",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5378,7 +5401,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_120",
+   "id": "road_121",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5401,7 +5424,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_121",
+   "id": "road_122",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5424,7 +5447,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_122",
+   "id": "road_123",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5447,7 +5470,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_123",
+   "id": "road_124",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5470,7 +5493,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_124",
+   "id": "road_125",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5493,7 +5516,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_125",
+   "id": "road_126",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5516,7 +5539,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_126",
+   "id": "road_127",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5539,7 +5562,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_127",
+   "id": "road_128",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5562,7 +5585,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_128",
+   "id": "road_129",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5585,7 +5608,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_129",
+   "id": "road_130",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5608,7 +5631,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_130",
+   "id": "road_131",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5631,7 +5654,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_131",
+   "id": "road_132",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5654,7 +5677,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_132",
+   "id": "road_133",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5677,7 +5700,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_133",
+   "id": "road_134",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5700,7 +5723,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_134",
+   "id": "road_135",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5723,7 +5746,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_135",
+   "id": "road_136",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5746,7 +5769,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_136",
+   "id": "road_137",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5769,7 +5792,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_137",
+   "id": "road_138",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5792,7 +5815,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_138",
+   "id": "road_139",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5815,7 +5838,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_139",
+   "id": "road_140",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5838,7 +5861,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_140",
+   "id": "road_141",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5861,7 +5884,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_141",
+   "id": "road_142",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5884,7 +5907,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_142",
+   "id": "road_143",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5907,7 +5930,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_143",
+   "id": "road_144",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5930,7 +5953,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_144",
+   "id": "road_145",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5953,7 +5976,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_145",
+   "id": "road_146",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5976,7 +5999,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_146",
+   "id": "road_147",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -5999,7 +6022,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_147",
+   "id": "road_148",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6022,7 +6045,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_148",
+   "id": "road_149",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6045,7 +6068,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_149",
+   "id": "road_150",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6068,7 +6091,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_150",
+   "id": "road_151",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6091,7 +6114,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_151",
+   "id": "road_152",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6114,7 +6137,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_152",
+   "id": "road_153",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6137,7 +6160,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_153",
+   "id": "road_154",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6160,7 +6183,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_154",
+   "id": "road_155",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6183,7 +6206,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_155",
+   "id": "road_156",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6206,7 +6229,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_156",
+   "id": "road_157",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6229,7 +6252,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_157",
+   "id": "road_158",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6252,7 +6275,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_158",
+   "id": "road_159",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6275,7 +6298,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_159",
+   "id": "road_160",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6298,7 +6321,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_160",
+   "id": "road_161",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6321,7 +6344,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_161",
+   "id": "road_162",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6344,7 +6367,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_162",
+   "id": "road_163",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6367,7 +6390,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_163",
+   "id": "road_164",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6390,7 +6413,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_164",
+   "id": "road_165",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6413,7 +6436,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_165",
+   "id": "road_166",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6436,7 +6459,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_166",
+   "id": "road_167",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6459,7 +6482,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_167",
+   "id": "road_168",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6482,7 +6505,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_168",
+   "id": "road_169",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6505,7 +6528,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_169",
+   "id": "road_170",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6528,7 +6551,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_170",
+   "id": "road_171",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6551,7 +6574,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_171",
+   "id": "road_172",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6574,7 +6597,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_172",
+   "id": "road_173",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6597,7 +6620,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_173",
+   "id": "road_174",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6620,7 +6643,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_174",
+   "id": "road_175",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6643,7 +6666,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_175",
+   "id": "road_176",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6666,7 +6689,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_176",
+   "id": "road_177",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6689,7 +6712,30 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_177",
+   "id": "road_178",
+   "name": "",
+   "type": "road",
+   "structure": "wood",
+   "river": "Rhône",
+   "road_type": "computed",
+   "px": [
+    2150.069,
+    3748.069
+   ],
+   "dir": [
+    -0.262,
+    0.9651
+   ],
+   "axis": [
+    0.7071,
+    0.7071
+   ],
+   "width": 1.205,
+   "snapped": true,
+   "in_custom_zone": false
+  },
+  {
+   "id": "road_179",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6712,7 +6758,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_178",
+   "id": "road_180",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6735,7 +6781,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_179",
+   "id": "road_181",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6758,7 +6804,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_180",
+   "id": "road_182",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6781,7 +6827,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_181",
+   "id": "road_183",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6804,7 +6850,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_182",
+   "id": "road_184",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6827,7 +6873,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_183",
+   "id": "road_185",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6850,7 +6896,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_184",
+   "id": "road_186",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6873,7 +6919,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_185",
+   "id": "road_187",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6896,7 +6942,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_186",
+   "id": "road_188",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6919,7 +6965,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_187",
+   "id": "road_189",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6942,7 +6988,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_188",
+   "id": "road_190",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6965,7 +7011,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_189",
+   "id": "road_191",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -6988,7 +7034,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_190",
+   "id": "road_192",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7011,7 +7057,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_191",
+   "id": "road_193",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7034,7 +7080,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_192",
+   "id": "road_194",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7057,7 +7103,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_193",
+   "id": "road_195",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7080,7 +7126,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_194",
+   "id": "road_196",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7103,7 +7149,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_195",
+   "id": "road_197",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7126,7 +7172,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_196",
+   "id": "road_198",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7149,7 +7195,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_197",
+   "id": "road_199",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7172,7 +7218,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_198",
+   "id": "road_200",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7195,7 +7241,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_199",
+   "id": "road_201",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7218,7 +7264,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_200",
+   "id": "road_202",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7241,7 +7287,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_201",
+   "id": "road_203",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7264,7 +7310,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_202",
+   "id": "road_204",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7287,7 +7333,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_203",
+   "id": "road_205",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7310,7 +7356,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_204",
+   "id": "road_206",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7333,7 +7379,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_205",
+   "id": "road_207",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7356,7 +7402,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_206",
+   "id": "road_208",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7379,7 +7425,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_207",
+   "id": "road_209",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7402,7 +7448,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_208",
+   "id": "road_210",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7425,7 +7471,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_209",
+   "id": "road_211",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7448,7 +7494,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_210",
+   "id": "road_212",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7471,7 +7517,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_211",
+   "id": "road_213",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7494,7 +7540,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_212",
+   "id": "road_214",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7517,7 +7563,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_213",
+   "id": "road_215",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7540,7 +7586,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_214",
+   "id": "road_216",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7563,7 +7609,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_215",
+   "id": "road_217",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7586,7 +7632,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_216",
+   "id": "road_218",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7609,7 +7655,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_217",
+   "id": "road_219",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7632,7 +7678,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_218",
+   "id": "road_220",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7655,7 +7701,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_219",
+   "id": "road_221",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7678,7 +7724,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_220",
+   "id": "road_222",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7701,7 +7747,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_221",
+   "id": "road_223",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7724,7 +7770,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_222",
+   "id": "road_224",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7747,7 +7793,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_223",
+   "id": "road_225",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7770,7 +7816,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_224",
+   "id": "road_226",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7793,7 +7839,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_225",
+   "id": "road_227",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7816,7 +7862,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_226",
+   "id": "road_228",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7839,7 +7885,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_227",
+   "id": "road_229",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7862,7 +7908,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_228",
+   "id": "road_230",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7885,7 +7931,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_229",
+   "id": "road_231",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7908,7 +7954,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_230",
+   "id": "road_232",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7931,7 +7977,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_231",
+   "id": "road_233",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7954,7 +8000,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_232",
+   "id": "road_234",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -7977,7 +8023,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_233",
+   "id": "road_235",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8000,7 +8046,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_234",
+   "id": "road_236",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8023,7 +8069,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_235",
+   "id": "road_237",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8046,7 +8092,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_236",
+   "id": "road_238",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8069,7 +8115,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_237",
+   "id": "road_239",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8092,7 +8138,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_238",
+   "id": "road_240",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8115,7 +8161,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_239",
+   "id": "road_241",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8138,7 +8184,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_240",
+   "id": "road_242",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8161,7 +8207,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_241",
+   "id": "road_243",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8184,7 +8230,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_242",
+   "id": "road_244",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8207,7 +8253,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_243",
+   "id": "road_245",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8230,7 +8276,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_244",
+   "id": "road_246",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8253,7 +8299,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_245",
+   "id": "road_247",
    "name": "",
    "type": "road",
    "structure": "wood",
@@ -8276,7 +8322,7 @@
    "in_custom_zone": false
   },
   {
-   "id": "road_246",
+   "id": "road_248",
    "name": "",
    "type": "road",
    "structure": "wood",

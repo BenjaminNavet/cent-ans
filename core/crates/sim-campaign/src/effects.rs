@@ -268,9 +268,9 @@ impl CampaignState {
                 )
             }
             EventEffect::Marry { a, b } => format!(
-                "Mariage de {} et {}",
-                self.character_name(data, a),
-                self.character_name(data, b)
+                "Mariage {} et {}",
+                crate::events::de(&self.character_name(data, a)),
+                crate::events::de(&self.character_name(data, b))
             ),
         }
     }

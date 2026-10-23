@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "causes.schema.json",
+  "title": "Textes du journal des causes (ADR 0748)",
+  "description": "Phrases françaises du journal des causes : le cœur n'écrit que des clés et des nombres. Marqueurs : {lieu} (province), {sujet} (faction touchée), {acteur} (faction agissante), {de_lieu}, {de_sujet}, {de_acteur} (mêmes noms avec « de » élidé : « d’Angleterre »), {value} (valeur du facteur), {reason}, {summary}.",
+  "type": "object",
+  "required": ["ui", "kinds", "factors", "reasons"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "ui": {
+      "type": "object",
+      "description": "Libellés de l'interface (onglet, titres d'écrans, infobulles).",
+      "minProperties": 1,
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "kinds": {
+      "type": "object",
+      "description": "Phrase résumé par `CauseKind` et par point de vue du joueur : loss (il est touché), gain (il agit), other.",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "common.schema.json#/$defs/snake_id"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["other"],
+        "additionalProperties": false,
+        "properties": {
+          "loss": {"type": "string", "minLength": 1},
+          "gain": {"type": "string", "minLength": 1},
+          "other": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "factors": {
+      "type": "object",
+      "description": "Phrase par clé de facteur.",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "common.schema.json#/$defs/snake_id"},
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "reasons": {
+      "type": "object",
+      "description": "Raison nommée d'une décision de l'IA (doctrine ou objectif).",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "common.schema.json#/$defs/snake_id"},
+      "additionalProperties": {"type": "string", "minLength": 1}
+    }
+  }
+}

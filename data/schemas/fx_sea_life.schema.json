@@ -16,7 +16,9 @@
   ],
   "additionalProperties": false,
   "$defs": {
-    "rgb": {"$ref": "common.schema.json#/$defs/rgb3"},
+    "rgb": {
+      "$ref": "common.schema.json#/$defs/rgb3"
+    },
     "xy": {
       "type": "array",
       "items": {
@@ -153,7 +155,9 @@
             ],
             "additionalProperties": false,
             "properties": {
-              "id": {"$ref": "common.schema.json#/$defs/snake_id"},
+              "id": {
+                "$ref": "common.schema.json#/$defs/snake_id"
+              },
               "width_px": {
                 "type": "number",
                 "exclusiveMinimum": 0
@@ -261,6 +265,75 @@
         "min_screen_px": {
           "type": "number",
           "minimum": 0
+        }
+      }
+    },
+    "eau": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "EAU (ADR 0750) : couleurs par profondeur, moutons doux, lissage de la côte. Absent ou `enabled` faux : mer ME1 d'origine.",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "colors": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "shallow": {
+              "$ref": "#/$defs/rgb"
+            },
+            "mid": {
+              "$ref": "#/$defs/rgb"
+            },
+            "deep": {
+              "$ref": "#/$defs/rgb"
+            }
+          }
+        },
+        "depth_per_px_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "turquoise_saturation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "turquoise_edge_noise": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        "smooth_coast": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "swell_warp": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "surf_lace": {
+          "type": "number",
+          "minimum": 0.2,
+          "maximum": 4
+        },
+        "whitecaps": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "amount": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "scale": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
         }
       }
     }

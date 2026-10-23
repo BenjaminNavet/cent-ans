@@ -1,0 +1,46 @@
+{
+  "id": "chr_patrick_de_dunbar",
+  "name": {
+    "display": "Patrick de Dunbar",
+    "local": "Patrick of Dunbar",
+    "local_language": "scots"
+  },
+  "sex": "male",
+  "house": "Dunbar",
+  "faction": "fac_scotland",
+  "role": "noble",
+  "birth": {
+    "value": "1285",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1369",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Dunbar et de March"
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 4,
+    "court": 3
+  },
+  "traits": [
+    "trait_cautious"
+  ],
+  "piety": 50,
+  "family": {
+    "spouses": [
+      "chr_agnes_randolph"
+    ]
+  },
+  "starting_location": "prov_lothian",
+  "status": "at_court",
+  "description": "Neuvième comte de Dunbar et de March, époux d’Agnès Randolph ; il tient la marche d’Écosse tandis que sa femme défend Dunbar en 1338.",
+  "sources": [
+    "Patrick Dunbar, 9e comte de March"
+  ]
+}

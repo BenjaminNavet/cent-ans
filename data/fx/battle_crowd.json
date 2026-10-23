@@ -1,0 +1,24 @@
+{
+  "description": "Rendu de masse des soldats de bataille (lot foule1). Chaque optimisation a un interrupteur `enabled` ; les variables d’environnement CENT_ANS_CROWD=off, CENT_ANS_CROWD_CULL / _SHADOW_SKIN / _FAR_SKIN = 0|1 les surchargent (comparaisons A/B), CENT_ANS_CROWD_SHADOW_PARTS=single_frame,bone_cut,no_fade,no_prop ne garde que ces parties de l’habillage allégé des ombres. Lu par client/src/battle/units/crowd.rs.",
+  "cull": {
+    "enabled": true,
+    "margin_m": 8.0,
+    "foot_radius_m": 3.0,
+    "mounted_radius_m": 5.0,
+    "foot_centre_height_m": 2.0,
+    "mounted_centre_height_m": 2.5,
+    "shadow_height_m": 3.2,
+    "shadow_max_length_m": 70.0,
+    "min_sun_elevation": 0.12
+  },
+  "shadow_skin": {
+    "enabled": true,
+    "single_frame": true,
+    "bone_cut": true,
+    "no_fade": true,
+    "no_prop": true
+  },
+  "far_skin": {
+    "enabled": false
+  }
+}

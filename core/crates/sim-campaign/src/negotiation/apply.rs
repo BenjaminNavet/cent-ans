@@ -211,9 +211,9 @@ fn marry(
     state.add_capped_modifier(data, proposer, recipient, 15, MARRIAGE_REASON, 80);
     state.add_capped_modifier(data, recipient, proposer, 15, MARRIAGE_REASON, 80);
     let text = format!(
-        "Mariage de {} et de {}.",
-        state.character_name(data, character),
-        state.character_name(data, spouse)
+        "Mariage {} et {}.",
+        crate::events::de(&state.character_name(data, character)),
+        crate::events::de(&state.character_name(data, spouse))
     );
     state.push_order_event(GameEvent::new(EventKind::Marriage, text).faction(proposer));
     Ok(())

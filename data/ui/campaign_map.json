@@ -82,13 +82,13 @@
     "mask_shadow": 0.06,
     "mask_shadow_softness": 0.5,
     "mask_shadow_scale": 0.5,
-    "cumulus_shadow": 0.40, "cumulus_medium_scale": 0.3, "cumulus_medium_distance": [200, 500], "parchment_icon_cell_px": 300,
-    "cumulus_scale": 0.032,
+    "cumulus_shadow": 0.30, "cumulus_medium_scale": 0.3, "cumulus_medium_distance": [200, 500], "parchment_icon_cell_px": 300,
+    "cumulus_scale": 0.058,
     "cumulus_cover": [0.22, 0.5],
     "cumulus_cover_wet": 0.7,
-    "cumulus_edge": 0.10,
+    "cumulus_edge": 0.22,
     "cumulus_drift": 0.3,
-    "cumulus_tint": [0.94, 0.97, 1.06],
+    "cumulus_tint": [0.97, 0.98, 1.03],
     "cumulus_fade_px": [12, 4]
   },
   "forest_masses": {

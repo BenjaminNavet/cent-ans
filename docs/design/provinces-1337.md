@@ -91,7 +91,7 @@ Colonnes : id, nom d'affichage, capitale, propriétaire, suzerain, tenant, notes
 | id | Nom | Capitale | Propriétaire | Suzerain | Tenant | Notes |
 |---|---|---|---|---|---|---|
 | `prov_comtat_venaissin` | Comtat Venaissin et Avignon | Avignon | `fac_papacy` | — | — | Comtat Venaissin, terre pontificale depuis 1274. |
-| `prov_dauphine` | Dauphiné | Grenoble | `fac_empire` | `fac_empire` | — | Dauphiné de Viennois, terre d'Empire tenue par le dauphin Humbert II (maison de La Tour-du-Pin, faction à créer), en guerre contre la Savoie ; le transport à la France n'a lieu qu'en 1349. |
+| `prov_dauphine` | Dauphiné | Grenoble | `fac_dauphine` | `fac_empire` | `chr_humbert_ii_de_viennois` | Dauphiné de Viennois, terre d'Empire tenue par le dauphin Humbert II (maison de La Tour-du-Pin, `fac_dauphine`, ADR 0732), en guerre contre la Savoie ; le transport à la France n'a lieu qu'en 1349. |
 | `prov_provence` | Provence | Aix | `fac_empire` | `fac_empire` | — | Comté de Provence et de Forcalquier, terre d'Empire tenue par Robert d'Anjou, roi de Naples (faction angevine à créer ; fac_empire n'est ici que le suzerain nominal). |
 | `prov_savoie` | Savoie | Chambéry | `fac_savoy` | `fac_empire` | `chr_aymon_de_savoie` | Comté de Savoie, Bresse, Bugey, Genevois et Valais (évêché de Sion) : passes du Mont-Cenis et du Grand-Saint-Bernard. |
 
@@ -297,7 +297,7 @@ Les provinces ci-dessous sont attribuées à une faction de substitution ; leur 
 
 | Entité 1337 | Substitut actuel | Provinces concernées |
 |---|---|---|
-| Royaume de Naples / comté de Provence (Robert d'Anjou) | `fac_empire` | `prov_provence`, `prov_napoli` |
+| Royaume de Naples / comté de Provence (Robert d'Anjou) | `fac_dauphine` (ADR 0732) | `prov_provence`, `prov_napoli` |
 | Dauphiné de Viennois (Humbert II) | `fac_empire` | `prov_dauphine` |
 | Hainaut-Hollande-Zélande (Guillaume II d'Avesnes) | `fac_empire` | `prov_hainaut`, `prov_holland` |
 | Duché de Brabant (Jean III) | `fac_empire` | `prov_brabant` |

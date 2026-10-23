@@ -35,6 +35,9 @@ fn main() -> ExitCode {
 
     let mut bevy_app = App::new();
     // `data://` asset source: before `DefaultPlugins` (ADR 0363).
+    bevy_app.add_plugins(battle::decor::ground::KtxCacheSourcePlugin {
+        cache_dir: battle::decor::ground::cache_dir(&root),
+    });
     bevy_app.add_plugins(dataassets::DataSourcePlugin {
         data_dir: paths::data_dir(&root),
     });
@@ -44,7 +47,7 @@ fn main() -> ExitCode {
             .set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "Cent Ans".into(),
-                    resolution: WindowResolution::new(agent::VIEW_SIZE.0, agent::VIEW_SIZE.1)
+                    resolution: WindowResolution::new(agent::view_size().0, agent::view_size().1)
                         .with_scale_factor_override(1.0),
                     present_mode: PresentMode::AutoVsync,
                     // Never take the player's focus when an agent launches the client.
@@ -103,6 +106,7 @@ fn main() -> ExitCode {
             flow::FlowPlugin,
         ))
         .add_plugins(fx::FlipbookPlugin)
+        .add_plugins(solari_trial())
         .add_plugins(fx::ModelMipsPlugin)
         .add_plugins(campaign::perf_switch::PerfSwitchPlugin)
         .insert_resource(cli);
@@ -110,4 +114,20 @@ fn main() -> ExitCode {
         AppExit::Success => ExitCode::SUCCESS,
         AppExit::Error(_) => ExitCode::FAILURE,
     }
+}
+
+/// `bevy_solari` trial (feature `solari`, `data/fx/solari.json`).
+#[cfg(feature = "solari")]
+fn solari_trial() -> battle::scene::solari::SolariTrialPlugin {
+    battle::scene::solari::SolariTrialPlugin
+}
+
+/// Without the feature the trial is a no-op plugin.
+#[cfg(not(feature = "solari"))]
+fn solari_trial() -> impl Plugin {
+    struct Nothing;
+    impl Plugin for Nothing {
+        fn build(&self, _app: &mut App) {}
+    }
+    Nothing
 }

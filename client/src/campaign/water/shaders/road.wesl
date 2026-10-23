@@ -50,12 +50,23 @@ fn noise(p: vec2<f32>) -> f32 {
 
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
+    // ADR 0758: worn track. Width and wear drift slowly along the road, the centre is grassed
+    // over where the traffic is light, ruts wander, the edges dissolve into the grass.
     let side = abs(in.uv.y);
-    let n = noise(vec2<f32>(in.uv.x * 3.0, in.uv.y * 2.0));
-    let ruts = smoothstep(0.08, 0.0, abs(side - 0.45)) * 0.6;
+    let along = in.uv.x;
+    let n = noise(vec2<f32>(along * 3.0, in.uv.y * 2.0));
+    let slow = noise(vec2<f32>(along * 0.11, 3.7));
+    let wear = noise(vec2<f32>(along * 0.23, 11.3));
+    let rut_side = 0.42 + (noise(vec2<f32>(along * 0.4, 5.1)) - 0.5) * 0.14;
+    let ruts = smoothstep(0.11, 0.0, abs(side - rut_side)) * (0.35 + 0.5 * wear);
     var col = mix(params.dirt_color.rgb, params.rut_color.rgb, ruts);
-    col = mix(col, params.grass_edge.rgb, smoothstep(0.55, 1.0, side + (n - 0.5) * 0.3));
-    col = col * (0.9 + 0.2 * n);
-    let edge = 1.0 - smoothstep(0.7, 1.0, side + (n - 0.5) * 0.25);
-    return vec4<f32>(col, edge * params.alpha);
+    // Light traffic: grass and pebbles creep into the centre line.
+    let grassed = smoothstep(0.55, 0.15, wear) * 0.55 * smoothstep(0.0, 0.25, 0.5 - side);
+    col = mix(col, params.grass_edge.rgb, grassed);
+    col = mix(col, params.grass_edge.rgb, smoothstep(0.5, 1.0, side + (n - 0.5) * 0.35));
+    col = col * (0.86 + 0.28 * n);
+    let reach = 0.62 + 0.3 * slow;
+    let edge = 1.0 - smoothstep(reach - 0.22, reach + 0.3, side + (n - 0.5) * 0.3);
+    let thin = mix(0.55, 1.0, smoothstep(0.2, 0.6, wear + slow * 0.4));
+    return vec4<f32>(col, edge * thin * params.alpha);
 }

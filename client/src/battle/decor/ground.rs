@@ -227,19 +227,17 @@ pub struct GroundExtension {
     pub albedo: Option<Handle<Image>>,
     #[texture(103, dimension = "2d_array")]
     pub normal: Option<Handle<Image>>,
-    /// Micro grain pack (`micro_ground`): albedo and normal arrays.
+    /// Micro grain pack (`micro_ground`): albedo and normal arrays (read with the albedo sampler,
+    /// same descriptor: Metal allows 16 samplers per stage).
     #[texture(105, dimension = "2d_array")]
-    #[sampler(106)]
     pub micro_albedo: Option<Handle<Image>>,
     #[texture(107, dimension = "2d_array")]
     pub micro_normal: Option<Handle<Image>>,
     /// EP6 decor fields (RGBA8, nearest): kind / 8, yaw / pi, edge ramp, coverage.
     #[texture(109)]
-    #[sampler(110)]
     pub decor_fields: Option<Handle<Image>>,
     /// R2 relief map (RGBA8): slope, hollow at 30 m, hollow at 90 m.
     #[texture(111)]
-    #[sampler(112)]
     pub relief: Option<Handle<Image>>,
     /// Trodden ground: the flattened-grass map of `flatten.rs` (R).
     #[texture(113)]
@@ -248,6 +246,12 @@ pub struct GroundExtension {
 
 impl MaterialExtension for GroundExtension {
     fn fragment_shader() -> ShaderRef {
+        "embedded://cent_ans_client/battle/decor/ground.wesl".into()
+    }
+
+    /// The same file also writes the G-buffer (`PREPASS_PIPELINE`) when Solari makes the deferred
+    /// renderer the default: one shared material computation, two render paths.
+    fn deferred_fragment_shader() -> ShaderRef {
         "embedded://cent_ans_client/battle/decor/ground.wesl".into()
     }
 }
@@ -610,6 +614,18 @@ pub fn pack16(values: &[f32], fill: f32) -> [Vec4; 4] {
 /// Rearranges a `cols` x `rows` grid of square layers into a vertical strip (layers one under the
 /// other, row by row as Godot slices them), so `strip_to_array` can turn it into an array.
 pub fn grid_to_strip(image: &mut Image, cols: u32, rows: u32) -> bool {
+    let started = std::time::Instant::now();
+    let name = format!(
+        "grid_to_strip {}x{} ({cols}x{rows})",
+        image.width(),
+        image.height()
+    );
+    let ok = grid_to_strip_inner(image, cols, rows);
+    crate::agent::texture_census::record(name, started, image.data.as_ref().map_or(0, Vec::len));
+    ok
+}
+
+fn grid_to_strip_inner(image: &mut Image, cols: u32, rows: u32) -> bool {
     if cols <= 1 {
         return true;
     }
@@ -651,6 +667,14 @@ pub struct PendingGrid {
 #[derive(Resource, Default, Debug)]
 pub struct PendingGrids(pub Vec<PendingGrid>);
 
+/// The ground arrays (albedo 73 MiB, normals, micro grain ~85 MiB with mips) are only read by the
+/// GPU: with `RENDER_WORLD` only, Bevy moves the pixels out of the main world at upload instead of
+/// keeping a second copy in RAM. No CPU consumer reads them (the ground has no CPU sampler; the
+/// siege backdrop and the town atlas use `strip_to_array` on their own images and are untouched).
+fn drop_cpu_copy(image: &mut Image) {
+    image.asset_usage = RenderAssetUsages::RENDER_WORLD;
+}
+
 fn convert_grids(
     mut commands: Commands,
     mut pending: ResMut<PendingGrids>,
@@ -664,6 +688,9 @@ fn convert_grids(
         let (cols, rows) = grid.grid;
         let ok = grid_to_strip(&mut image, cols, rows)
             && strip_to_array(&mut image, cols * rows, grid.anisotropy);
+        if ok {
+            drop_cpu_copy(&mut image);
+        }
         if let Some(stats) = stats.as_mut() {
             stats.micro_arrays += usize::from(ok);
         }
@@ -753,25 +780,39 @@ pub fn build_ground_material(
     let mut normal = None;
     let pack = load_pack(data_dir, biome);
     let pack_loaded = pack.is_some();
-    let mut strips = Vec::new();
+    let mut sources = ArraySources::default();
     if let Some(pack) = pack {
         for (slot, layer) in params.layers.iter_mut().zip(&pack.layers) {
             *slot = *layer;
         }
-        let albedo_handle: Handle<Image> = assets.load(pack.albedo_path);
-        strips.push(PendingStrip {
-            handle: albedo_handle.clone(),
-            layers: pack.layers.len() as u32,
-            anisotropy: look.ground.anisotropy,
-        });
+        let layers = pack.layers.len() as u32;
+        let anisotropy = look.ground.anisotropy;
+        let albedo_handle = ground_array(
+            assets,
+            data_dir,
+            &mut sources,
+            ArraySpec {
+                slot: GroundSlot::Albedo,
+                path: pack.albedo_path,
+                srgb: true,
+                grid: (1, layers),
+                anisotropy,
+            },
+        );
         albedo = Some(albedo_handle);
         if let Some(path) = pack.normal_path {
-            let handle = load_linear(assets, path);
-            strips.push(PendingStrip {
-                handle: handle.clone(),
-                layers: pack.layers.len() as u32,
-                anisotropy: look.ground.anisotropy,
-            });
+            let handle = ground_array(
+                assets,
+                data_dir,
+                &mut sources,
+                ArraySpec {
+                    slot: GroundSlot::Normal,
+                    path,
+                    srgb: false,
+                    grid: (1, layers),
+                    anisotropy,
+                },
+            );
             params.detail.z = 1.0;
             normal = Some(handle);
         }
@@ -787,21 +828,25 @@ pub fn build_ground_material(
         None
     };
     if let Some(micro) = &micro {
-        let a: Handle<Image> = assets.load(micro.albedo_path.clone());
-        let n = load_linear(assets, micro.normal_path.clone());
-        let grids = vec![
-            PendingGrid {
-                handle: a.clone(),
-                grid: micro.grid,
-                anisotropy: look.ground.anisotropy,
-            },
-            PendingGrid {
-                handle: n.clone(),
-                grid: micro.grid,
-                anisotropy: look.ground.anisotropy,
-            },
-        ];
-        commands.insert_resource(PendingGrids(grids));
+        let spec = |slot, path: &String, srgb| ArraySpec {
+            slot,
+            path: path.clone(),
+            srgb,
+            grid: micro.grid,
+            anisotropy: look.ground.anisotropy,
+        };
+        let a = ground_array(
+            assets,
+            data_dir,
+            &mut sources,
+            spec(GroundSlot::MicroAlbedo, &micro.albedo_path, true),
+        );
+        let n = ground_array(
+            assets,
+            data_dir,
+            &mut sources,
+            spec(GroundSlot::MicroNormal, &micro.normal_path, false),
+        );
         params.micro.x = 1.0;
         params.micro_layer = pack16(&micro.layer_of, 0.0);
         params.micro_tile = pack16(&micro.tile_of, 0.5);
@@ -809,9 +854,7 @@ pub fn build_ground_material(
         micro_normal = Some(n);
     }
     params.micro.w = f32::from(u8::from(pack_loaded));
-    if !strips.is_empty() {
-        commands.insert_resource(PendingStrips(strips));
-    }
+    sources.insert_into(commands);
     let fields = bake_decor_fields(field);
     params.rect = fields.rect;
     let (relief_bytes, relief_rect) = bake_relief(field);
@@ -897,6 +940,9 @@ pub struct GroundStats {
     /// Micro grain pack bound, and its arrays converted.
     pub micro: bool,
     pub micro_arrays: usize,
+    /// Baked KTX2 arrays loaded, and the ones that fell back on the JPG strip.
+    pub ktx2_loaded: usize,
+    pub ktx2_fallback: usize,
     /// Decor-field texels per kind (0 = clear area), map size.
     pub decor_kinds: [usize; 7],
     pub decor_size: [usize; 2],
@@ -974,6 +1020,18 @@ pub fn mip_count(size: u32) -> u32 {
 /// Turns a loaded strip into a repeating, mip-mapped, anisotropic 2D array (layers stay apart, no
 /// seam from the atlas). Returns false when the image does not have the expected shape.
 pub fn strip_to_array(image: &mut Image, layers: u32, anisotropy: u16) -> bool {
+    let started = std::time::Instant::now();
+    let name = format!(
+        "strip_to_array {}x{} ({layers} layers)",
+        image.width(),
+        image.height()
+    );
+    let ok = strip_to_array_inner(image, layers, anisotropy);
+    crate::agent::texture_census::record(name, started, image.data.as_ref().map_or(0, Vec::len));
+    ok
+}
+
+fn strip_to_array_inner(image: &mut Image, layers: u32, anisotropy: u16) -> bool {
     use bevy::image::{ImageAddressMode, ImageFilterMode, ImageSampler, ImageSamplerDescriptor};
     let Some(data) = image.data.take() else {
         return false;
@@ -1010,6 +1068,275 @@ pub fn strip_to_array(image: &mut Image, layers: u32, anisotropy: u16) -> bool {
     true
 }
 
+/// Asset source holding the baked KTX2 arrays (`out/ktx2_cache/`, never committed; generated by
+/// `uv run --project tools cent-ans textures bake-ktx2`). Added before `DefaultPlugins`.
+pub const CACHE_SOURCE: &str = "ktx2cache";
+
+/// Set to disable the baked arrays and build the ground from the JPG strips (A/B comparison).
+pub const NO_KTX2_ENV: &str = "CENT_ANS_NO_KTX2";
+
+/// Directory of the baked arrays under the repository root.
+pub fn cache_dir(root: &Path) -> std::path::PathBuf {
+    root.join("out/ktx2_cache")
+}
+
+/// Registers the `ktx2cache://` asset source.
+pub struct KtxCacheSourcePlugin {
+    pub cache_dir: std::path::PathBuf,
+}
+
+impl Plugin for KtxCacheSourcePlugin {
+    fn build(&self, app: &mut App) {
+        use bevy::asset::io::{AssetSourceBuilder, AssetSourceId};
+        let dir = self.cache_dir.to_string_lossy().into_owned();
+        app.register_asset_source(
+            AssetSourceId::from(CACHE_SOURCE),
+            AssetSourceBuilder::platform_default(&dir, None),
+        );
+    }
+}
+
+/// Material slot an array is bound to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GroundSlot {
+    Albedo,
+    Normal,
+    MicroAlbedo,
+    MicroNormal,
+}
+
+/// One ground array to load: source strip (under the asset root), its layer grid and colour space.
+struct ArraySpec {
+    slot: GroundSlot,
+    path: String,
+    srgb: bool,
+    /// (columns, rows) of the strip / grid; `(1, n)` is a vertical strip.
+    grid: (u32, u32),
+    anisotropy: u16,
+}
+
+/// Repeating, mip-aware, anisotropic sampler of the ground arrays.
+fn array_sampler(anisotropy: u16) -> bevy::image::ImageSampler {
+    use bevy::image::{ImageAddressMode, ImageFilterMode, ImageSampler, ImageSamplerDescriptor};
+    ImageSampler::Descriptor(ImageSamplerDescriptor {
+        address_mode_u: ImageAddressMode::Repeat,
+        address_mode_v: ImageAddressMode::Repeat,
+        address_mode_w: ImageAddressMode::Repeat,
+        mag_filter: ImageFilterMode::Linear,
+        min_filter: ImageFilterMode::Linear,
+        mipmap_filter: ImageFilterMode::Linear,
+        anisotropy_clamp: anisotropy.max(1),
+        ..default()
+    })
+}
+
+/// A baked KTX2 array being loaded; the JPG strip is the fallback if it fails.
+#[derive(Debug, Clone)]
+struct PendingKtx {
+    handle: Handle<Image>,
+    slot: GroundSlot,
+    fallback_path: String,
+    srgb: bool,
+    grid: (u32, u32),
+    anisotropy: u16,
+    requested: std::time::Instant,
+}
+
+#[derive(Resource, Default, Debug)]
+struct PendingKtxs(Vec<PendingKtx>);
+
+/// Loads gathered while the material is built, turned into pending resources at the end.
+#[derive(Default)]
+struct ArraySources {
+    ktx: Vec<PendingKtx>,
+    strips: Vec<PendingStrip>,
+    grids: Vec<PendingGrid>,
+}
+
+impl ArraySources {
+    fn insert_into(self, commands: &mut Commands) {
+        if !self.ktx.is_empty() {
+            commands.insert_resource(PendingKtxs(self.ktx));
+        }
+        if !self.strips.is_empty() {
+            commands.insert_resource(PendingStrips(self.strips));
+        }
+        if !self.grids.is_empty() {
+            commands.insert_resource(PendingGrids(self.grids));
+        }
+    }
+}
+
+/// Path of the baked array of `path` in the cache, if the file exists and the cache is not disabled.
+fn baked_path(data_dir: &Path, path: &str) -> Option<String> {
+    if std::env::var_os(NO_KTX2_ENV).is_some() {
+        return None;
+    }
+    let relative = Path::new(path).with_extension("ktx2");
+    let root = data_dir.parent()?;
+    cache_dir(root)
+        .join(&relative)
+        .is_file()
+        .then(|| format!("{CACHE_SOURCE}://{}", relative.to_string_lossy()))
+}
+
+/// Starts loading a ground array: the baked KTX2 when the cache has it, else the JPG strip (converted
+/// on the CPU by `convert_strips` / `convert_grids`).
+fn ground_array(
+    assets: &AssetServer,
+    data_dir: &Path,
+    sources: &mut ArraySources,
+    spec: ArraySpec,
+) -> Handle<Image> {
+    let ArraySpec {
+        slot,
+        path,
+        srgb,
+        grid,
+        anisotropy,
+    } = spec;
+    if let Some(baked) = baked_path(data_dir, &path) {
+        let handle = load_baked(assets, baked, srgb, anisotropy);
+        sources.ktx.push(PendingKtx {
+            handle: handle.clone(),
+            slot,
+            fallback_path: path,
+            srgb,
+            grid,
+            anisotropy,
+            requested: std::time::Instant::now(),
+        });
+        return handle;
+    }
+    load_strip(assets, path, srgb, grid, anisotropy, sources)
+}
+
+/// KTX2 array: sampler set by the loader, pixels only on the GPU.
+fn load_baked(assets: &AssetServer, path: String, srgb: bool, anisotropy: u16) -> Handle<Image> {
+    assets
+        .load_builder()
+        .with_settings(move |settings: &mut bevy::image::ImageLoaderSettings| {
+            settings.is_srgb = srgb;
+            settings.sampler = array_sampler(anisotropy);
+            settings.asset_usage = RenderAssetUsages::RENDER_WORLD;
+        })
+        .load(path)
+}
+
+/// JPG strip, queued for the CPU conversion into a mip-mapped array.
+fn load_strip(
+    assets: &AssetServer,
+    path: String,
+    srgb: bool,
+    grid: (u32, u32),
+    anisotropy: u16,
+    sources: &mut ArraySources,
+) -> Handle<Image> {
+    let handle = if srgb {
+        assets.load(path)
+    } else {
+        load_linear(assets, path)
+    };
+    if grid.0 > 1 {
+        sources.grids.push(PendingGrid {
+            handle: handle.clone(),
+            grid,
+            anisotropy,
+        });
+    } else {
+        sources.strips.push(PendingStrip {
+            handle: handle.clone(),
+            layers: grid.1,
+            anisotropy,
+        });
+    }
+    handle
+}
+
+/// Follows the baked arrays: counts the loaded ones and, when one fails, binds the JPG strip to
+/// its slot instead (the old CPU path).
+#[allow(clippy::too_many_arguments)]
+fn poll_baked(
+    mut commands: Commands,
+    assets: Res<AssetServer>,
+    mut pending: ResMut<PendingKtxs>,
+    images: Res<Assets<Image>>,
+    mut materials: ResMut<Assets<GroundMaterial>>,
+    mut stats: Option<ResMut<GroundStats>>,
+    mut strips: Option<ResMut<PendingStrips>>,
+    mut grids: Option<ResMut<PendingGrids>>,
+) {
+    use bevy::asset::LoadState;
+    let mut fallback = ArraySources::default();
+    pending
+        .0
+        .retain(|ktx| match assets.load_state(&ktx.handle) {
+            LoadState::Loaded => {
+                let name = format!("ktx2 array load {:?}", ktx.slot);
+                let image = images.get(&ktx.handle);
+                let bytes = image.map_or(0, crate::agent::texture_census::gpu_bytes);
+                crate::agent::texture_census::record(name, ktx.requested, bytes);
+                if let Some(stats) = stats.as_mut() {
+                    stats.ktx2_loaded += 1;
+                    if let Some(image) = image {
+                        stats.mip_levels = stats
+                            .mip_levels
+                            .max(image.texture_descriptor.mip_level_count);
+                    }
+                }
+                false
+            }
+            LoadState::Failed(error) => {
+                warn!(
+                    "battle ground: baked array of {} failed ({error}), using the JPG strip",
+                    ktx.fallback_path
+                );
+                let handle = load_strip(
+                    &assets,
+                    ktx.fallback_path.clone(),
+                    ktx.srgb,
+                    ktx.grid,
+                    ktx.anisotropy,
+                    &mut fallback,
+                );
+                for (_, material) in materials.iter_mut() {
+                    let extension = &mut material.extension;
+                    let slot = match ktx.slot {
+                        GroundSlot::Albedo => &mut extension.albedo,
+                        GroundSlot::Normal => &mut extension.normal,
+                        GroundSlot::MicroAlbedo => &mut extension.micro_albedo,
+                        GroundSlot::MicroNormal => &mut extension.micro_normal,
+                    };
+                    if slot.as_ref() == Some(&ktx.handle) {
+                        *slot = Some(handle.clone());
+                    }
+                }
+                if let Some(stats) = stats.as_mut() {
+                    stats.ktx2_fallback += 1;
+                }
+                false
+            }
+            _ => true,
+        });
+    match strips.as_mut() {
+        Some(existing) => existing.0.append(&mut fallback.strips),
+        None if !fallback.strips.is_empty() => {
+            commands.insert_resource(PendingStrips(std::mem::take(&mut fallback.strips)));
+        }
+        None => {}
+    }
+    match grids.as_mut() {
+        Some(existing) => existing.0.append(&mut fallback.grids),
+        None if !fallback.grids.is_empty() => {
+            commands.insert_resource(PendingGrids(std::mem::take(&mut fallback.grids)));
+        }
+        None => {}
+    }
+    if pending.0.is_empty() {
+        commands.remove_resource::<PendingKtxs>();
+    }
+}
+
 fn convert_strips(
     mut commands: Commands,
     mut pending: ResMut<PendingStrips>,
@@ -1021,6 +1348,9 @@ fn convert_strips(
             return true;
         };
         let ok = strip_to_array(&mut image, strip.layers, strip.anisotropy);
+        if ok {
+            drop_cpu_copy(&mut image);
+        }
         if let Some(stats) = stats.as_mut() {
             stats.arrays_converted += usize::from(ok);
             stats.mip_levels = stats
@@ -1046,6 +1376,7 @@ impl Plugin for GroundPlugin {
             .add_systems(
                 Update,
                 (
+                    poll_baked.run_if(resource_exists::<PendingKtxs>),
                     convert_strips.run_if(resource_exists::<PendingStrips>),
                     convert_grids.run_if(resource_exists::<PendingGrids>),
                     bind_trample.run_if(resource_exists::<super::flatten::FlattenMap>),
@@ -1053,6 +1384,7 @@ impl Plugin for GroundPlugin {
             )
             .add_systems(OnExit(AppState::Battle), |mut commands: Commands| {
                 commands.remove_resource::<PendingGrids>();
+                commands.remove_resource::<PendingKtxs>();
             });
         crate::agent::dump::DumpAppExt::register_dump(app, dump_ground);
     }
@@ -1065,6 +1397,7 @@ fn dump_ground(world: &World) -> (String, serde_json::Value) {
         serde_json::json!(stats.map(|g| serde_json::json!({
             "biome": g.biome, "pack_loaded": g.pack_loaded, "arrays_converted": g.arrays_converted,
             "micro": g.micro, "micro_arrays": g.micro_arrays,
+            "ktx2_loaded": g.ktx2_loaded, "ktx2_fallback": g.ktx2_fallback,
             "decor_fields": {"size": g.decor_size, "clear": g.decor_kinds[0],
                 "ploughed": g.decor_kinds[1], "corn": g.decor_kinds[2], "meadow": g.decor_kinds[3],
                 "sown": g.decor_kinds[4], "vineyard": g.decor_kinds[5], "stubble": g.decor_kinds[6]},
@@ -1105,9 +1438,31 @@ mod tests {
         assert_eq!(smooth(1.0, 0.0, -1.0), 1.0);
     }
 
-    /// `ground.wesl` validates (naga) once Bevy's imports are replaced by stubs.
-    #[test]
-    fn ground_shader_validates() {
+    /// Resolves the `@if(PREPASS_PIPELINE)` / `@if(!PREPASS_PIPELINE)` single-statement lines of
+    /// the WESL source for one render path (what Bevy's shader-def preprocessing does).
+    fn resolve_path(source: &str, deferred: bool) -> String {
+        let mut out = String::new();
+        let mut keep_next: Option<bool> = None;
+        for line in source.lines() {
+            let trimmed = line.trim();
+            if let Some(cond) = trimmed
+                .strip_prefix("@if(")
+                .and_then(|rest| rest.strip_suffix(')'))
+            {
+                let negated = cond.starts_with('!');
+                assert_eq!(cond.trim_start_matches('!'), "PREPASS_PIPELINE");
+                keep_next = Some(deferred != negated);
+                continue;
+            }
+            if keep_next.take().unwrap_or(true) {
+                out.push_str(line);
+            }
+            out.push('\n');
+        }
+        out
+    }
+
+    fn validate_ground_shader(deferred: bool) {
         let source = include_str!("ground.wesl");
         let body_start = source.find("struct GroundParams").unwrap();
         let stubs = r#"
@@ -1118,20 +1473,28 @@ struct VertexOutput {
     @location(2) uv_b: vec2<f32>,
     @location(3) color: vec4<f32>,
 };
-struct FragmentOutput { @location(0) color: vec4<f32>, };
+struct FragmentOutput { @location(0) color: vec4<f32>, @location(1) deferred: vec4<u32>, };
 struct Mat { base_color: vec4<f32>, perceptual_roughness: f32, };
 struct PbrInput { material: Mat, world_normal: vec3<f32>, N: vec3<f32>, };
 struct View { world_position: vec3<f32>, };
 @group(0) @binding(0) var<uniform> view: View;
+struct DirectionalLight { direction_to_light: vec3<f32>, };
+struct Lights { n_directional_lights: u32, directional_lights: array<DirectionalLight, 4>, };
+@group(0) @binding(1) var<uniform> lights: Lights;
 fn pbr_input_from_standard_material(in: VertexOutput, f: bool) -> PbrInput {
     return PbrInput(Mat(vec4<f32>(1.0), 1.0), in.world_normal, in.world_normal);
 }
 fn apply_pbr_lighting(p: PbrInput) -> vec4<f32> { return p.material.base_color * dot(p.N, vec3<f32>(0.0, 1.0, 0.0)); }
 fn main_pass_post_lighting_processing(p: PbrInput, c: vec4<f32>) -> vec4<f32> { return c; }
+fn deferred_output(in: VertexOutput, p: PbrInput) -> FragmentOutput {
+    return FragmentOutput(p.material.base_color, vec4<u32>(0u));
+}
+fn apply_decals(p: ptr<function, PbrInput>) {}
 "#;
         let wgsl = format!(
             "{stubs}{}",
-            source[body_start..].replace("constants::MATERIAL_BIND_GROUP", "2")
+            resolve_path(&source[body_start..], deferred)
+                .replace("constants::MATERIAL_BIND_GROUP", "2")
         );
         let module = naga::front::wgsl::parse_str(&wgsl)
             .unwrap_or_else(|e| panic!("{}", e.emit_to_string(&wgsl)));
@@ -1141,6 +1504,18 @@ fn main_pass_post_lighting_processing(p: PbrInput, c: vec4<f32>) -> vec4<f32> { 
         )
         .validate(&module)
         .unwrap_or_else(|e| panic!("{e:?}"));
+    }
+
+    /// `ground.wesl` validates (naga) once Bevy's imports are replaced by stubs, on the forward
+    /// path and on the deferred one (G-buffer output, Solari).
+    #[test]
+    fn ground_shader_validates() {
+        validate_ground_shader(false);
+    }
+
+    #[test]
+    fn ground_shader_validates_deferred() {
+        validate_ground_shader(true);
     }
 
     #[test]

@@ -440,11 +440,16 @@ fn ssao_follows_msaa(
     look: Res<LightingLook>,
     quality: Option<Res<crate::settings::quality::RenderQuality>>,
     mut state: ResMut<SkyLightState>,
+    solari: super::camera::SolariActive,
     cameras: Query<(Entity, &Msaa, Has<ScreenSpaceAmbientOcclusion>), With<Lit>>,
 ) {
     let preset = quality.as_ref().is_none_or(|q| q.ssao_battle);
     for (camera, msaa, has_ssao) in &cameras {
-        let want = look.ssao.enabled && preset && *msaa == Msaa::Off;
+        // Solari replaces ambient occlusion with ray-traced GI.
+        let want = look.ssao.enabled
+            && preset
+            && *msaa == Msaa::Off
+            && !super::camera::solari_active(&solari);
         if want && !has_ssao {
             // The preset's level when there is one ("high"/"ultra" cost more), else the data file's.
             let level = quality
@@ -572,6 +577,7 @@ fn build_sky_light(
     look: Res<LightingLook>,
     decor: Option<Res<DecorLook>>,
     atmosphere: Option<Res<AtmosphereState>>,
+    solari: super::camera::SolariActive,
     mut images: ResMut<Assets<Image>>,
     mut state: ResMut<SkyLightState>,
     cameras: Query<Entity, With<Lit>>,
@@ -602,11 +608,16 @@ fn build_sky_light(
     let sl = &look.sky_light;
     let darken = |c: f32| c * (1.0 - sl.ground_darken);
     let params = SkyParams {
-        exposure: num(&wx["sky_luminance"], 0.6) / num(&sky["mean"], 1.0).max(0.05),
+        exposure: num(&wx["sky_luminance"], 0.6)
+            * num(
+                &rules["time_of_day"][key.0.as_str()]["sky_luminance_scale"],
+                1.0,
+            )
+            / num(&sky["mean"], 1.0).max(0.05),
         saturation: num(&wx["sky_saturation"], 1.0),
         tint: srgb3(rgb_of(&wx["sky_tint"])),
         haze_amount: num(&wx["haze"], 0.35),
-        haze_color: srgb3(fog.color),
+        haze_color: srgb3(atmosphere.air.tint(fog.color, weather)),
         ground_color: srgb3([darken(horizon[0]), darken(horizon[1]), darken(horizon[2])]),
         max_luminance: sl.max_luminance,
         horizon_floor: sl.horizon_floor,
@@ -641,7 +652,13 @@ fn build_sky_light(
         .then(|| images.add(cube_image(&pano, &background_params, sl.skybox_face_px.max(size)).0));
     let handle = images.add(cube);
     let energy = fog.ambient * sl.ambient_boost;
-    let env_intensity = look.unit() * energy * sl.sky_contribution;
+    // Solari reads no `AmbientLight`: the whole sky energy goes through the environment map.
+    let contribution = if super::camera::solari_active(&solari) {
+        1.0
+    } else {
+        sl.sky_contribution
+    };
+    let env_intensity = look.unit() * energy * contribution;
     let l = sl.ambient_lighten;
     let lighten = |c: f32| c + (1.0 - c) * l;
     let ambient = AmbientLight {
@@ -650,7 +667,7 @@ fn build_sky_light(
             lighten(fog.color[1]),
             lighten(fog.color[2]),
         ),
-        brightness: look.unit() * energy * (1.0 - sl.sky_contribution),
+        brightness: look.unit() * energy * (1.0 - contribution),
         ..default()
     };
     for camera in &cameras {
@@ -921,6 +938,10 @@ fn shadow_probe(
 pub fn dump(world: &World) -> (String, serde_json::Value) {
     let state = world.get_resource::<SkyLightState>();
     let look = world.get_resource::<LightingLook>();
+    let atmosphere = world.get_resource::<AtmosphereState>();
+    let clock = world
+        .get_resource::<BattleSession>()
+        .map(|session| (session.snapshot.start_hour, session.snapshot.hour));
     let mut cameras = 0;
     let mut env = 0;
     let mut ssao = 0;
@@ -942,6 +963,20 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
             "exposure_ev100": look.map(|l| l.exposure_ev100),
             "tonemapping": look.map(|l| l.tonemapping.clone()),
             "lit_cameras": cameras,
+            // Exact inputs of the light, comparable between two launches without a capture.
+            "inputs": serde_json::json!({
+                "start_hour": clock.map(|c| c.0),
+                "hour": clock.map(|c| c.1),
+                "phase": atmosphere.map(|a| a.phase.clone()),
+                "time_key": atmosphere.map(|a| a.time_key.clone()),
+                "weather": atmosphere.map(|a| a.weather.clone()),
+                "sun_illuminance": atmosphere.map(|a| a.sun_illuminance),
+                "sun_elevation_deg": atmosphere.map(|a| a.sun_elevation_deg),
+                "sun_azimuth_deg": atmosphere.map(|a| a.sun_azimuth_deg),
+                "fog_density": atmosphere.map(|a| a.fog_density),
+                "fixed_exposure_env": std::env::var(crate::settings::postfx::FROZEN_EXPOSURE_ENV).ok(),
+                "forced_hour_env": std::env::var(crate::battle::scene::HOUR_ENV).ok(),
+            }),
         "shadow_unclipped_depth": crate::battle::units::skinned::UNCLIPPED_DEPTH.load(std::sync::atomic::Ordering::Relaxed),
         "shadow_draws_total": crate::battle::units::skinned::SHADOW_DRAWS.load(std::sync::atomic::Ordering::Relaxed),
         "shadow_casters": crate::battle::units::skinned::SHADOW_CASTERS.load(std::sync::atomic::Ordering::Relaxed),
@@ -973,6 +1008,22 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
 mod tests {
     use super::*;
 
+    /// The real clock never enters the battle light (A/B captures, seed reproducibility).
+    #[test]
+    fn lighting_sources_do_not_read_the_clock() {
+        let clock = ["System", "Time"].concat();
+        let instant = ["Instant", "::now"].concat();
+        let entropy = ["from_", "entropy"].concat();
+        for (name, source) in [
+            ("lighting.rs", include_str!("lighting.rs")),
+            ("atmosphere.rs", include_str!("../decor/atmosphere.rs")),
+        ] {
+            for token in [&clock, &instant, &entropy] {
+                assert!(!source.contains(token.as_str()), "{name} reads {token}");
+            }
+        }
+    }
+
     fn rules() -> serde_json::Value {
         let root = paths::find_root().unwrap();
         let bytes = std::fs::read(paths::data_dir(&root).join("fx/atmosphere.json")).unwrap();
@@ -1000,10 +1051,10 @@ mod tests {
         let rules = rules();
         let (contrast, saturation, temperature, _) =
             combined_grade(&grades(&rules, "clear", "summer", "midday"));
-        // summer 1.03 * clear 1.14 * midday 1.02; saturation 1.04 * 1.04.
-        assert!((contrast - 1.03 * 1.14 * 1.02).abs() < 1e-4);
-        assert!((saturation - 1.04 * 1.04).abs() < 1e-4);
-        assert!((temperature - 0.23).abs() < 1e-4);
+        // summer 1.03 * clear 1.06 * midday 1.0; saturation 1.0 * 1.0 * 1.0 (ADR 0755).
+        assert!((contrast - 1.03 * 1.06).abs() < 1e-4);
+        assert!((saturation - 1.0).abs() < 1e-4);
+        assert!((temperature - 0.08).abs() < 1e-4);
     }
 
     #[test]
@@ -1058,7 +1109,7 @@ mod tests {
     #[test]
     fn grade_pass_keeps_per_channel_lift_and_gain() {
         let rules = rules();
-        let all = grades(&rules, "snow", "winter", "evening");
+        let all = grades(&rules, "snow", "winter", "dusk");
         let g = battle_grade(&all, 1.0);
         assert_eq!(g.global.x, 1.0);
         let used = [g.a, g.b, g.c].iter().filter(|u| u.scalars.w > 0.5).count();

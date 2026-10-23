@@ -5,6 +5,7 @@ mod df1_difficulty;
 mod f7_events;
 mod fk5_incidents;
 mod fk_map_scenes;
+mod hist_spouses;
 mod m10_events;
 mod m10_victory;
 mod m4;

@@ -1,0 +1,40 @@
+{
+  "id": "chr_beatriz_de_castilla",
+  "name": {
+    "display": "Béatrice de Castille",
+    "local": "Beatriz de Castela",
+    "local_language": "castillan"
+  },
+  "sex": "female",
+  "house": "Castille",
+  "faction": "fac_portugal",
+  "role": "consort",
+  "birth": {
+    "value": "1293",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1359-10-25"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 3,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 55,
+  "family": {
+    "spouses": [
+      "chr_afonso_iv"
+    ]
+  },
+  "starting_location": "prov_lisboa",
+  "status": "at_court",
+  "description": "Fille de Sanche IV de Castille, mariée en 1309 à Alphonse IV de Portugal ; mère de la reine Marie de Castille.",
+  "sources": [
+    "Béatrice de Castille (1293-1359)"
+  ]
+}

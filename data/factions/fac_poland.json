@@ -90,7 +90,7 @@
     "end_year": 1453,
     "short_end_year": 1380,
     "hold_turns": 8,
-    "summary": "Réunir la couronne de Pologne et tourner l'Ordre teutonique.",
+    "summary": "Réunir la couronne de Pologne et tourner l’Ordre teutonique.",
     "objectives": [
       {
         "id": "obj_pl_crown",
@@ -116,7 +116,7 @@
       },
       {
         "id": "obj_pl_pomerelia",
-        "title": "L'accès à la mer",
+        "title": "L’accès à la mer",
         "description": "La Poméranie de Gdansk (Pomérélie) doit revenir à la couronne.",
         "condition": {
           "kind": "control_all",

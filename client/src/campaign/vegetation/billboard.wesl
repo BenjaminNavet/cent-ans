@@ -283,7 +283,9 @@ fn foliage_season(albedo: vec3<f32>, cls: f32, seed: f32, leaves: f32, up: f32, 
     let alt = smoothstep(params.winter.x, max(params.winter.y, params.winter.x + 0.01), world_y);
     var winter: vec3<f32>;
     if broadleaf {
-        winter = mix(bare * mix(0.8, 1.2, leaves), params.frost.rgb, 0.45 * alt * smoothstep(0.4, 0.9, top));
+        // EAU (ADR 0750): rime on every broadleaf crown (more with altitude), so the winter wood
+        // reads grey-blue and frosted instead of brown blocks.
+        winter = mix(bare * mix(0.8, 1.2, leaves), params.frost.rgb, (0.38 + 0.4 * alt) * smoothstep(0.25, 0.85, top + 0.3 * up));
     } else if hedge {
         winter = mix(albedo, bare, 0.7);
     } else {

@@ -142,6 +142,7 @@ struct VegRender {
     running: Option<Running>,
     dirty: bool,
     last_focus: Vec2,
+    last_sort_origin: Vec2,
     last_density: f32,
     last_open_share: f32,
     last_model_radius: f32,
@@ -244,6 +245,12 @@ impl Plugin for CampaignVegetationPlugin {
                     clearing_life::stream_clearing_life,
                 )
                     .chain()
+                    .run_if(in_state(AppState::Campaign)),
+            )
+            .add_systems(
+                PostUpdate,
+                shadows::shadow_ranges
+                    .after(bevy::transform::TransformSystems::Propagate)
                     .run_if(in_state(AppState::Campaign)),
             );
     }
@@ -490,8 +497,16 @@ fn assemble_records(
     mut render: ResMut<VegRender>,
     world: Option<Res<VegWorld>>,
     quality: Option<Res<crate::settings::RenderQuality>>,
+    cameras: Query<&GlobalTransform, With<super::camera::CampaignCamera>>,
 ) {
     let Some(_world) = world else { return };
+    // The records are sorted from the camera's ground point (shadow cascades, `shadows.rs`).
+    let camera = cameras.iter().next().map_or(
+        Vec3::new(view.focus.x, view.distance, view.focus.y),
+        GlobalTransform::translation,
+    );
+    let sort_origin = camera.xz();
+    let lod1_distance = render::model_lod1_distance();
     let thinning = look::OpenThinning::new(
         &_world.0.look,
         view.distance,
@@ -508,7 +523,8 @@ fn assemble_records(
     let zone_changed = (view.model_radius > 0.0) != (render.last_model_radius > 0.0)
         || (view.model_radius - render.last_model_radius).abs() > 4.0;
     let models_changed = ready_models != render.last_ready_models;
-    if !(render.dirty || moved || density_changed || zone_changed || models_changed) {
+    let turned = sort_origin.distance(render.last_sort_origin) > (view.distance * 0.3).max(4.0);
+    if !(render.dirty || moved || density_changed || zone_changed || models_changed || turned) {
         return;
     }
     let trees: Vec<Arc<Vec<TreeInst>>> = tiles
@@ -545,12 +561,21 @@ fn assemble_records(
     let out = slot.clone();
     std::thread::spawn(move || {
         let started = std::time::Instant::now();
-        let mut assembled =
-            render::assemble(&trees, focus, model_radius, density, &thinning, &model_rows);
+        let mut assembled = render::assemble(
+            &trees,
+            focus,
+            model_radius,
+            density,
+            &thinning,
+            &model_rows,
+            camera,
+            lod1_distance,
+        );
         assembled.ms = started.elapsed().as_secs_f32() * 1000.0;
         *out.lock().expect("assembly slot") = Some(assembled);
     });
     render.last_focus = focus;
+    render.last_sort_origin = sort_origin;
     render.last_density = density;
     render.last_open_share = open_share;
     render.last_model_radius = model_radius;
@@ -600,8 +625,13 @@ fn apply_records(
     };
     let mut seen: HashSet<(u16, bool)> = HashSet::new();
     let season_weights = season.map_or(Vec4::new(1.0, 0.0, 0.0, 0.0), |s| s.weights);
+    let mut orders = assembled.orders;
     for (key, bytes) in assembled.batches {
-        let (row, model) = key;
+        let (key_row, model) = key;
+        // Near models past `MODEL_LOD1_DISTANCE` carry `FAR_MODEL_BIT` and draw their lod2 mesh.
+        let far_model = model && key_row & render::FAR_MODEL_BIT != 0;
+        let row = key_row & !render::FAR_MODEL_BIT;
+        let shadow_order = Arc::new(orders.remove(&key).unwrap_or_default());
         let species_id = world
             .0
             .species_ids
@@ -625,10 +655,14 @@ fn apply_records(
                 .models
                 .get(&row)
                 .and_then(|m| m.shadow_ready.clone());
-            let Some((mesh, texture)) =
+            let Some((lod1, texture)) =
                 render.assets.models.get(&row).and_then(|m| m.ready.clone())
             else {
                 continue;
+            };
+            let mesh = match (&shadow_mesh, far_model) {
+                (Some(lod2), true) => lod2.clone(),
+                _ => lod1,
             };
             seen.insert(key);
             match render
@@ -639,8 +673,10 @@ fn apply_records(
                 Some(mut batch) => {
                     batch.records = records;
                     batch.count = count;
+                    batch.mesh_handle = mesh;
                     batch.shadow_mesh = shadow_mesh;
                     batch.version = version;
+                    batch.shadow_order = shadow_order;
                 }
                 None => {
                     let gains = render
@@ -652,7 +688,10 @@ fn apply_records(
                     params.season = season_weights;
                     let entity = commands
                         .spawn((
-                            Name::new(format!("Trees{species_id}Model")),
+                            Name::new(format!(
+                                "Trees{species_id}Model{}",
+                                if far_model { "Far" } else { "" }
+                            )),
                             VegBatch {
                                 mesh_handle: mesh,
                                 records,
@@ -663,6 +702,7 @@ fn apply_records(
                                 params,
                                 version,
                                 params_version: 0,
+                                shadow_order,
                             },
                             DespawnOnExit(AppState::Campaign),
                         ))
@@ -683,6 +723,7 @@ fn apply_records(
                 batch.records = records;
                 batch.count = count;
                 batch.version = version;
+                batch.shadow_order = shadow_order;
             }
             None => {
                 let ratio = world
@@ -717,6 +758,7 @@ fn apply_records(
                             params,
                             version,
                             params_version: 0,
+                            shadow_order,
                         },
                         DespawnOnExit(AppState::Campaign),
                     ))
@@ -963,6 +1005,7 @@ fn update_wetlands(
                                 params,
                                 version: slot.versions[n],
                                 params_version: 0,
+                                shadow_order: default(),
                             },
                             DespawnOnExit(AppState::Campaign),
                         ))

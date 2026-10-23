@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_solari.schema.json",
+  "title": "Essai bevy_solari",
+  "description": "Fichier data/fx/solari.json : éclairage raytracé temps réel de la bataille (build avec la feature Cargo solari, GPU à ray queries). Désactivé par défaut. Rendu seulement.",
+  "type": "object",
+  "properties": {
+    "_comment": { "type": "string" },
+    "enabled": { "type": "boolean" },
+    "restir": { "type": "boolean" },
+    "max_bounces": { "type": "integer", "minimum": 1, "maximum": 8 },
+    "ground_step_m": { "type": "number", "minimum": 1 },
+    "max_triangles": { "type": "integer", "minimum": 1 },
+    "max_instances": { "type": "integer", "minimum": 1 },
+    "ground_sink_m": { "type": "number", "minimum": 0 },
+    "soldiers_in_tlas": { "type": "boolean", "description": "Les soldats projettent des ombres Solari via des proxies (boîtes) ; sans effet si enabled est faux." },
+    "soldier_proxy_budget": { "type": "integer", "minimum": 0, "description": "Nombre maximal de proxies de soldats dans la TLAS (visibles d'abord, puis ombre seule)." },
+    "soldier_foot_size_m": { "type": "array", "items": { "type": "number", "exclusiveMinimum": 0 }, "minItems": 3, "maxItems": 3, "description": "Boîte du fantassin : largeur x, hauteur, profondeur z (m)." },
+    "soldier_mounted_size_m": { "type": "array", "items": { "type": "number", "exclusiveMinimum": 0 }, "minItems": 3, "maxItems": 3, "description": "Boîte du cavalier monté (cheval + cavalier)." }
+  },
+  "required": ["enabled"],
+  "additionalProperties": false
+}

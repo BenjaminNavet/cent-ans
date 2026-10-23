@@ -1,0 +1,40 @@
+{
+  "id": "chr_marguerite_de_hainaut",
+  "name": {
+    "display": "Marguerite de Hainaut",
+    "local": "Margarete von Holland",
+    "local_language": "moyen haut-allemand"
+  },
+  "sex": "female",
+  "house": "Avesnes",
+  "faction": "fac_empire",
+  "role": "consort",
+  "birth": {
+    "value": "1311",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1356-06-23"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 3,
+    "court": 5
+  },
+  "traits": [
+    "trait_cultured"
+  ],
+  "piety": 55,
+  "family": {
+    "spouses": [
+      "chr_ludwig_iv"
+    ]
+  },
+  "starting_location": "prov_oberbayern",
+  "status": "at_court",
+  "description": "Fille de Guillaume Ier de Hainaut, mariée en 1324 à Louis IV de Bavière dont elle est la seconde épouse ; sœur de la reine Philippa d’Angleterre. Impératrice des Romains, elle hérite du Hainaut, de la Hollande et de la Zélande en 1345.",
+  "sources": [
+    "Marguerite II de Hainaut"
+  ]
+}

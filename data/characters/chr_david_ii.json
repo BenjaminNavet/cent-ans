@@ -41,5 +41,10 @@
   "description": "Fils de Robert Bruce, roi à 5 ans ; réfugié en France à [[cdx_chateau_gaillard|Château-Gaillard]] de mai 1334 à juin 1341, sous la protection de [[cdx_philippe_vi|Philippe VI]].",
   "sources": [
     "David II"
-  ]
+  ],
+  "family": {
+    "spouses": [
+      "chr_joan_of_the_tower"
+    ]
+  }
 }

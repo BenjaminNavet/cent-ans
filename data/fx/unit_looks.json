@@ -3,51 +3,186 @@
   "looks": {
     "unit_mamluk_cavalry": {
       "livery_share": 0.3,
-      "cloth": ["#e4dccb", "#a3261c", "#d1a13a", "#f0ece2"],
-      "coats": ["grey", "chestnut", "bay"]
+      "cloth": [
+        "#e4dccb",
+        "#a3261c",
+        "#d1a13a",
+        "#f0ece2"
+      ],
+      "coats": [
+        "grey",
+        "chestnut",
+        "bay"
+      ]
     },
     "unit_steppe_horse_archers": {
       "livery_share": 0.15,
-      "cloth": ["#7a6448", "#4b4034", "#2f3a4f", "#a08a62"],
-      "coats": ["dun", "bay", "black", "dun"]
+      "cloth": [
+        "#7a6448",
+        "#4b4034",
+        "#2f3a4f",
+        "#a08a62"
+      ],
+      "coats": [
+        "dun",
+        "bay",
+        "black",
+        "dun"
+      ]
     },
     "unit_akinci": {
       "livery_share": 0.2,
-      "cloth": ["#9b2d20", "#b7893a", "#e2dac6", "#5a4630"],
-      "coats": ["bay", "chestnut", "grey"]
+      "cloth": [
+        "#9b2d20",
+        "#b7893a",
+        "#e2dac6",
+        "#5a4630"
+      ],
+      "coats": [
+        "bay",
+        "chestnut",
+        "grey"
+      ]
     },
     "unit_yaya": {
       "livery_share": 0.25,
-      "cloth": ["#ece6d8", "#d9ceb4", "#a3342a", "#7b6a4c"]
+      "cloth": [
+        "#ece6d8",
+        "#d9ceb4",
+        "#a3342a",
+        "#7b6a4c"
+      ]
     },
     "unit_serbian_heavy_cavalry": {
       "livery_share": 0.8,
-      "cloth": ["#8e1f24", "#26335a", "#d8cdb2"],
-      "coats": ["black", "bay", "grey"]
+      "cloth": [
+        "#8e1f24",
+        "#26335a",
+        "#d8cdb2"
+      ],
+      "coats": [
+        "black",
+        "bay",
+        "grey"
+      ]
     },
     "unit_pronoiars": {
       "livery_share": 0.5,
-      "cloth": ["#5b2a4e", "#8e2a22", "#3d4a2c", "#cbb88c"],
-      "coats": ["bay", "chestnut", "grey"]
+      "cloth": [
+        "#5b2a4e",
+        "#8e2a22",
+        "#3d4a2c",
+        "#cbb88c"
+      ],
+      "coats": [
+        "bay",
+        "chestnut",
+        "grey"
+      ]
     },
     "unit_druzhina": {
       "livery_share": 0.45,
-      "cloth": ["#a1261f", "#23345c", "#3f5530", "#c9b58a"],
-      "coats": ["bay", "black", "chestnut"]
+      "cloth": [
+        "#a1261f",
+        "#23345c",
+        "#3f5530",
+        "#c9b58a"
+      ],
+      "coats": [
+        "bay",
+        "black",
+        "chestnut"
+      ]
     },
     "unit_lithuanian_light_cavalry": {
       "livery_share": 0.15,
-      "cloth": ["#6e6554", "#4a3f33", "#8c7a5b", "#3b3b36"],
-      "coats": ["dun", "bay", "dun", "black"]
+      "cloth": [
+        "#6e6554",
+        "#4a3f33",
+        "#8c7a5b",
+        "#3b3b36"
+      ],
+      "coats": [
+        "dun",
+        "bay",
+        "dun",
+        "black"
+      ]
     },
     "unit_teutonic_knights": {
       "livery_share": 0.2,
-      "cloth": ["#f1efe8", "#e6e3da"],
-      "coats": ["black", "bay", "grey"]
+      "cloth": [
+        "#f1efe8",
+        "#e6e3da"
+      ],
+      "coats": [
+        "black",
+        "bay",
+        "grey"
+      ]
     },
     "unit_almogavars": {
       "livery_share": 0.2,
-      "cloth": ["#6b5238", "#8a7556", "#d4c7a8", "#4c3d2c"]
+      "cloth": [
+        "#6b5238",
+        "#8a7556",
+        "#d4c7a8",
+        "#4c3d2c"
+      ]
+    },
+    "unit_longbowmen": {
+      "livery_share": 0.55,
+      "cloth": [
+        "#c9bea3",
+        "#8a7a58",
+        "#6b4a32",
+        "#7d8a6a"
+      ]
+    },
+    "unit_welsh_spearmen": {
+      "livery_share": 0.3,
+      "cloth": [
+        "#6d7a5a",
+        "#8c7a5a",
+        "#5a4a3a",
+        "#b0a68a"
+      ]
+    },
+    "unit_urban_militia": {
+      "livery_share": 0.4,
+      "cloth": [
+        "#a55a46",
+        "#7a6a52",
+        "#4f5f7a",
+        "#c4b89a"
+      ]
+    },
+    "unit_genoese_crossbowmen": {
+      "livery_share": 0.5,
+      "cloth": [
+        "#5c6e8c",
+        "#b8ad8e",
+        "#8a4a3a",
+        "#6d6a4a"
+      ]
+    },
+    "unit_men_at_arms_foot": {
+      "livery_share": 0.7,
+      "cloth": [
+        "#8a8070",
+        "#6a5a48",
+        "#9a8a68",
+        "#58606a"
+      ]
+    },
+    "unit_mounted_sergeants": {
+      "livery_share": 0.6,
+      "cloth": [
+        "#7a4a3a",
+        "#a09068",
+        "#4e5a6e",
+        "#6a6a58"
+      ]
     }
   }
 }

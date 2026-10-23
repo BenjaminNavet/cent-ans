@@ -335,7 +335,7 @@ fn chronicle_state_survives_save() {
     let loaded = CampaignState::load_json(&json).expect("loads");
     assert_eq!(loaded.chronicle, state.chronicle);
     assert_eq!(loaded.state_version, STATE_VERSION);
-    assert_eq!(STATE_VERSION, 9);
+    assert_eq!(STATE_VERSION, 10);
 }
 
 #[test]

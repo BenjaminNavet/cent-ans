@@ -12,6 +12,7 @@ mod c4_chains;
 mod c4_settlements;
 mod c5_settlement_panel;
 mod c5_trade;
+mod causes_journal;
 mod co_c_tier;
 mod dc3_province_effects;
 mod dc6b_weighted_sums;

@@ -309,3 +309,19 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0722 | [Brouillard de la prévision de bataille](0722-brouillard-de-la-prevision.md) | accepté |
 | 0723 | [Sort de la ville prise : culture, remise, libération, banditisme](0723-sort-de-la-ville-prise-culture-cession-liberation.md) | accepté |
 | 0731 | [Révoltes graduées et armée rebelle](0731-revoltes-graduees-et-armee-rebelle.md) | accepté |
+| 0740 | [Mise à l'échelle du monde 3D (Bevy)](0740-mise-a-l-echelle-du-monde-bevy.md) | accepté |
+| 0741 | [SMAA sur la carte de campagne au lieu du MSAA](0741-smaa-carte-au-lieu-du-msaa.md) | accepté |
+| 0742 | [Cache du sol par nœud de relief](0742-cache-du-sol-par-noeud.md) | accepté |
+| 0743 | [Ombres d'arbres découpées par cascade](0743-ombres-d-arbres-par-cascade.md) | accepté |
+| 0744 | [Modèles d'arbres proches en lod2 au-delà de 35 unités](0744-modeles-d-arbres-lod2-au-loin.md) | accepté |
+| 0746 | [Arbres proches moins chers : zone de modèles réduite et lod2 dès 15 unités](0746-arbres-proches-moins-chers.md) | accepté |
+| 0747 | [Carte d'ombre de la campagne à 2048 par cascade](0747-ombres-de-campagne-en-2048.md) | accepté |
+| 0732 | [Province du Dauphiné de Viennois](0732-province-du-dauphine.md) | accepté |
+| 0752 | [Bandeau Conseiller unique](0752-bandeau-conseiller-unique.md) | accepté |
+| 0753 | [Focus clavier et manette du kit UI](0753-focus-clavier-et-manette.md) | accepté |
+| 0755 | [Palette unique, six heures de bataille, voile de campagne réduit](0755-palette-unique-et-heures-de-bataille.md) | accepté |
+| 0750 | [Eau, côtes et neige de la campagne](0750-eau-cotes-neige-de-la-campagne.md) | accepté |
+| 0748 | [Budget mémoire du client Bevy](0748-budget-memoire.md) | accepté |
+| 0749 | [Puits d'argent : épargne progressive](0749-puits-d-argent-epargne-progressive.md) | accepté |
+| 0754 | [Journal des causes](0754-journal-des-causes.md) | accepté |
+| 0760 | [Masse et cadrage des armées en bataille](0760-masse-et-cadrage-des-armees-en-bataille.md) | accepté |

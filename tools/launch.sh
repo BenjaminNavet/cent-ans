@@ -237,6 +237,16 @@ check_linux_libraries() {
 }
 
 CLIENT_TARGET="${CARGO_TARGET_DIR:-$CLIENT/target}"
+# KTX2 arrays of the battle ground (docs/wip/bevy-ktx2-array.md): rebuilt only when a source texture or
+# the recipe changed (a few seconds when up to date). Never fatal: without `uv` or the `ktx` tool the
+# game keeps loading the JPG strips. CENT_ANS_NO_KTX2_BAKE=1 skips it.
+bake_ktx2() {
+    [[ -n "${CENT_ANS_NO_KTX2_BAKE:-}" ]] && return 0
+    if command -v uv >/dev/null; then
+        uv run --project tools cent-ans textures bake-ktx2 --auto ||
+            say "Cache KTX2 non mis à jour (le jeu garde les textures JPG)."
+    fi
+}
 BINARY_NAME="cent-ans"
 [[ "$PLATFORM" == "windows" ]] && BINARY_NAME="cent-ans.exe"
 CLIENT_BINARY="$CLIENT_TARGET/release/$BINARY_NAME"
@@ -255,11 +265,13 @@ launch_bevy() {
         [[ "$PLATFORM" == "linux" ]] && { check_linux_libraries || true; }
         [[ $BUILD -eq 1 ]] && say "(essai à blanc) compilation : cargo build --release --manifest-path $CLIENT/Cargo.toml"
         [[ $MODELS -eq 1 ]] && say "(essai à blanc) modèles générés : paquet v$(json_version data/art/dn_models_hosting.json) voulu, v$(json_version "${CENT_ANS_MODELS_DIR:-game/assets/models}/dn/package.json") installé"
+        [[ -z "${CENT_ANS_NO_KTX2_BAKE:-}" ]] && say "(essai à blanc) cache KTX2 : uv run --project tools cent-ans textures bake-ktx2 --auto"
         check_relief
         say "(essai à blanc) lancement : CENT_ANS_ROOT=$ROOT $CLIENT_BINARY ${1+$*}"
         exit 0
     fi
 
+    bake_ktx2
     if [[ $BUILD -eq 1 ]]; then
         if [[ $have_cargo -eq 1 ]]; then
             [[ "$PLATFORM" == "linux" ]] && { check_linux_libraries || fail "Installez ces bibliothèques puis relancez."; }

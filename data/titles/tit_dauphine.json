@@ -1,0 +1,26 @@
+{
+  "id": "tit_dauphine",
+  "rank": "county",
+  "name": {
+    "display": "Dauphiné de Viennois",
+    "local": "Dalfinat de Vièna",
+    "local_language": "franco-provençal"
+  },
+  "heraldry": {
+    "blazon": "D'or au dauphin d'azur, crêté, barbé, loré et oreillé de gueules.",
+    "description": "Dauphin bleu sur champ d’or, armes des dauphins de Viennois.",
+    "primary_color": "#E8B923",
+    "secondary_color": "#1F4E9E"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_dauphine"
+  ],
+  "holder_1337": {
+    "faction": "fac_dauphine",
+    "sources": [
+      "Dauphiné de Viennois",
+      "Humbert II de Viennois"
+    ]
+  }
+}

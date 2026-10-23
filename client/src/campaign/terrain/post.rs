@@ -150,6 +150,9 @@ pub struct AerialLook {
     /// Share of the strength removed under the "fog" weather (the ADR 0596 depth fog already
     /// veils the distance: no double veil).
     pub fog_cut: f32,
+    /// Share of the strength kept in clear weather (ADR 0755): the veil of the far land is for
+    /// the horizon, the clear middle ground keeps its colours. Rises to `1 - fog_cut` with fog.
+    pub clear_scale: f32,
     pub color: Vec3,
     pub cold_color: Vec3,
 }
@@ -228,6 +231,7 @@ impl Default for PostLook {
                 desaturate: 0.6,
                 sky_share: 0.35,
                 fog_cut: 0.6,
+                clear_scale: 1.0,
                 color: Vec3::new(0.6, 0.66, 0.74),
                 cold_color: Vec3::new(0.56, 0.65, 0.79),
             },
@@ -318,6 +322,7 @@ impl PostLook {
         aerial.desaturate = num(&a["desaturate"], aerial.desaturate);
         aerial.sky_share = num(&a["sky_share"], aerial.sky_share);
         aerial.fog_cut = num(&a["fog_cut"], aerial.fog_cut).clamp(0.0, 1.0);
+        aerial.clear_scale = num(&a["clear_scale"], aerial.clear_scale).clamp(0.0, 1.0);
         aerial.color = rgb(&a["color"], aerial.color);
         aerial.cold_color = rgb(&a["cold_color"], aerial.cold_color);
         let c = &data["cold"];
@@ -527,7 +532,8 @@ fn sync_atmosphere(
     let follow = m.follow_focus * focus_alt;
     let a = &look.aerial;
     let aerial_strength = if look.enabled && a.enabled {
-        a.strength * (1.0 - a.fog_cut * fog.clamp(0.0, 1.0))
+        let fog = fog.clamp(0.0, 1.0);
+        a.strength * (a.clear_scale + ((1.0 - a.fog_cut) - a.clear_scale) * fog)
     } else {
         0.0
     };

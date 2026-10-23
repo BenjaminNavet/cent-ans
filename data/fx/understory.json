@@ -1,5 +1,5 @@
 {
-  "description": "TS-T7 : sous-bois et touffes de la carte de campagne (rendu seulement). Niveau « far » (cellules de 16 px) : ceinture de sous-bois le long des lisières de forêt et touffes pâles sur la neige et la toundra ; niveau « near » (cellules de 10 px) : touffes d'herbes hautes et fleurs au sol, sous la distance de caméra max_distance. Tailles en px de carte (même échelle stylisée que les arbres). Teintes par saison : printemps, été, automne, hiver (multiplicateur linéaire de la carte).",
+  "description": "TS-T7 : sous-bois et touffes de la carte de campagne (rendu seulement). Niveau « far » (cellules de 16 px) : ceinture de sous-bois le long des lisières de forêt et touffes pâles sur la neige et la toundra ; niveau « near » (cellules de 10 px) : touffes d’herbes hautes et fleurs au sol, sous la distance de caméra max_distance. Tailles en px de carte (même échelle stylisée que les arbres). Teintes par saison : printemps, été, automne, hiver (multiplicateur linéaire de la carte).",
   "seed": 7007,
   "far": {
     "cell_px": 16.0,

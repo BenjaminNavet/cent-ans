@@ -1,0 +1,129 @@
+{
+  "description": "Textes du journal des causes (ADR 0748, schéma causes.schema.json). Le cœur n’écrit que des clés et des nombres ; ce fichier donne les phrases.",
+  "ui": {
+    "tab_title": "Causes",
+    "panel_title": "Chroniques et causes",
+    "empty": "Aucun événement notable à expliquer pour l’instant.",
+    "factors_heading": "Facteurs, du plus lourd au plus léger :",
+    "reason_line": "Raison de l’IA : {reason}",
+    "filter_mine": "Mon royaume",
+    "filter_all": "Toute l’Europe",
+    "top_causes_defeat": "Les trois causes principales de votre défaite",
+    "top_causes_victory": "Les trois causes principales de votre victoire",
+    "top_causes_none": "Aucune cause enregistrée n’explique cette issue.",
+    "battle_causes_title": "Pourquoi cette bataille ?",
+    "battle_causes_none": "Aucune cause enregistrée pour cette bataille.",
+    "notification_tooltip": "Cause : {summary}. Ouvrir la chronique des causes.",
+    "open_causes_button": "Chroniques et causes",
+    "goto_map": "Voir sur la carte",
+    "why_battle_button": "Pourquoi cette bataille ?",
+    "date_line": "{season} {year}"
+  },
+  "kinds": {
+    "battle": {
+      "loss": "Défaite face à {acteur}, près {de_lieu}",
+      "gain": "Victoire sur {sujet}, près {de_lieu}",
+      "other": "Bataille près {de_lieu} : {acteur} bat {sujet}"
+    },
+    "place_taken": {
+      "loss": "Perte {de_lieu}, au profit {de_acteur}",
+      "gain": "Prise {de_lieu}, aux dépens {de_sujet}",
+      "other": "Changement de maître {de_lieu} : {sujet} cède la place à {acteur}"
+    },
+    "bankruptcy": {
+      "other": "Banqueroute : le trésor est vide"
+    },
+    "revolt": {
+      "other": "Révolte {de_lieu}"
+    },
+    "unrest_warning": {
+      "other": "Grogne {de_lieu} : la tension monte"
+    },
+    "war_declared": {
+      "loss": "{acteur} nous déclare la guerre",
+      "gain": "Nous déclarons la guerre à {sujet}",
+      "other": "{acteur} déclare la guerre à {sujet}"
+    },
+    "alliance_broken": {
+      "loss": "{acteur} rompt son alliance avec nous",
+      "gain": "Nous rompons l’alliance avec {sujet}",
+      "other": "{acteur} rompt son alliance avec {sujet}"
+    },
+    "succession": {
+      "other": "Succession à la tête {de_sujet}"
+    },
+    "game_won": {
+      "other": "Victoire de la campagne"
+    },
+    "game_lost": {
+      "other": "Défaite de la campagne"
+    }
+  },
+  "factors": {
+    "heavy_losses": "{value} % des effectifs perdus",
+    "outnumbered": "Forces inférieures : {value} % de l’effectif adverse",
+    "firepower_edge": "Puissance de feu adverse supérieure de {value} %",
+    "general_lost": "Chef tué ou capturé",
+    "morale_broken": "Moral brisé ({value} points perdus)",
+    "morale_shaken": "Moral ébranlé ({value} points perdus)",
+    "terrain_hills": "Terrain défavorable : collines tenues par le défenseur",
+    "terrain_forest": "Terrain défavorable : forêt tenue par le défenseur",
+    "terrain_mountains": "Terrain défavorable : montagne tenue par le défenseur",
+    "terrain_marsh": "Terrain défavorable : marais tenu par le défenseur",
+    "terrain_heath": "Terrain défavorable : lande tenue par le défenseur",
+    "terrain_bocage": "Terrain défavorable : bocage tenu par le défenseur",
+    "siege_seasons": "Siège de {value} saisons",
+    "starved": "Garnison affamée",
+    "walls_breached": "Murailles bréchées ({value} %)",
+    "no_siege": "Prise sans siège régulier",
+    "undefended": "Place sans défenseurs au moment de sa chute",
+    "garrison_outnumbered": "Assiégeants à {value} % de la garnison",
+    "army_upkeep": "Entretien des armées : {value} livres par saison",
+    "army_surcharge": "dont surcoût des armées au-delà du quota : {value} livres",
+    "building_upkeep": "Entretien des bâtiments : {value} livres",
+    "administration": "Cour et administration : {value} livres",
+    "table": "Tables et vivres : {value} livres",
+    "income_short": "Revenus insuffisants : {value} livres par saison",
+    "deficit_seasons": "Déficit depuis {value} saisons",
+    "debt": "Dette : {value} livres",
+    "tension": "Tension de la province : {value}",
+    "unrest_tax": "Impôts trop lourds (+{value})",
+    "unrest_devastation": "Terres ravagées (+{value})",
+    "unrest_goods": "Biens de consommation rares (+{value})",
+    "unrest_health": "Mauvaise santé du peuple (+{value})",
+    "unrest_occupation": "Occupation étrangère (+{value})",
+    "unrest_foreign_religion": "Religion étrangère (+{value})",
+    "unrest_disorder": "Désordre récent : prise, pillage ou régence (+{value})",
+    "unrest_buildings": "Effets des bâtiments (+{value})",
+    "unrest_loyalty": "Noblesse peu loyale (+{value})",
+    "unrest_garrison": "Garnison insuffisante (+{value})",
+    "sworn_bond": "Serment trahi",
+    "truce_broken": "Trêve rompue",
+    "pact_broken": "Pacte de non-agression rompu",
+    "casus_belli": "Motif de guerre valable",
+    "no_casus_belli": "Aucun motif de guerre",
+    "stronger_aggressor": "Agresseur plus puissant de {value} %",
+    "stronger_target": "Cible plus puissante de {value} %",
+    "betrayal": "Confiance perdue (−{value})",
+    "call_refused": "A refusé l’appel aux armes",
+    "ruler_age": "Souverain mort à {value} ans",
+    "no_designated_heir": "Aucun héritier désigné",
+    "contested": "Succession contestée",
+    "minor_successor": "Successeur mineur ({value} ans) : régence",
+    "line_extinct": "Lignée éteinte",
+    "elective": "Succession élective",
+    "score": "Score : {value}",
+    "objectives_done": "Objectifs remplis : {value}",
+    "provinces_held": "Provinces tenues : {value}",
+    "no_land_left": "Plus aucune terre"
+  },
+  "reasons": {
+    "ultimatum_refused": "Ultimatum refusé : la guerre suit son refus",
+    "independence": "Guerre d’indépendance d’un vassal contre son suzerain",
+    "ally_war": "Soutien d’un allié déjà en guerre contre la cible",
+    "crown_claim": "Revendication de la couronne",
+    "opportunism": "Opportunisme : l’adversaire est nettement plus faible",
+    "ambition": "Ambition de conquête du prince",
+    "realignment": "Changement de camp : l’alliance ne sert plus ses desseins"
+  }
+}

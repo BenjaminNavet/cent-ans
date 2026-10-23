@@ -45,6 +45,10 @@ pub const CLUSTER_PX: f32 = 70.0;
 const SHRINK_START_M: f32 = 260.0;
 const SHRINK_END_M: f32 = 700.0;
 const MIN_SCALE: f32 = 0.5;
+/// Resting plates are drawn at this share of the camera scale (« cartes compactes », ADR 0752 lot
+/// UX): they open to full size only for the selected regiments, so the opening view is not
+/// covered by a row of stickers.
+pub const COMPACT: f32 = 0.7;
 const NUDGES: [(f32, f32); 8] = [
     (0.0, -1.0),
     (1.0, 0.0),
@@ -552,7 +556,7 @@ fn update_markers(
         entries
     };
     let anchors: Vec<Vec2> = shown.iter().map(|e| e.anchor).collect();
-    let placed = layout(&anchors, marker_scale);
+    let placed = layout(&anchors, marker_scale * COMPACT);
     // Create the plates that are missing.
     for entry in &shown {
         if let MapEntry::Vacant(slot) = markers.plates.entry(entry.id) {
@@ -596,13 +600,18 @@ fn update_markers(
         let is_selected = entry.members.iter().any(|m| selected.contains(m));
         // Root: scaled about its own centre, placed so that its tip sits on the rect's bottom.
         let full = Vec2::new(WIDTH + BADGE_W, HEIGHT);
-        let tip_x = rect.min.x + WIDTH * marker_scale * 0.5;
+        let plate_scale = if is_selected {
+            marker_scale
+        } else {
+            marker_scale * COMPACT
+        };
+        let tip_x = rect.min.x + WIDTH * plate_scale * 0.5;
         let centre = full * 0.5;
         if let Ok((mut node, mut visibility, mut transform)) = nodes.get_mut(plate.root) {
-            node.left = Val::Px(tip_x - centre.x - (WIDTH * 0.5 - centre.x) * marker_scale);
-            node.top = Val::Px(rect.max.y - centre.y - (full.y - centre.y) * marker_scale);
+            node.left = Val::Px(tip_x - centre.x - (WIDTH * 0.5 - centre.x) * plate_scale);
+            node.top = Val::Px(rect.max.y - centre.y - (full.y - centre.y) * plate_scale);
             *visibility = Visibility::Inherited;
-            transform.scale = Vec2::splat(marker_scale);
+            transform.scale = Vec2::splat(plate_scale);
         }
         if let Ok(mut border) = borders.get_mut(plate.plaque) {
             *border = BorderColor::all(if is_selected { GOLD } else { frame });

@@ -500,7 +500,7 @@ mod tests {
     #[test]
     fn json_documents_keep_the_readers_working() {
         let rules: AtmosphereRules = serde_json::from_slice(&real("fx/atmosphere.json")).unwrap();
-        assert_eq!(time_key_for(&rules.0, "dawn"), "morning");
+        assert_eq!(time_key_for(&rules.0, "dawn"), "dawn");
         let doc: TownLookDoc = serde_json::from_slice(&real("art/town_look.json")).unwrap();
         assert_eq!(
             TownLook::from_json(&doc.0),

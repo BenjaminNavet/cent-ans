@@ -44,17 +44,17 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Orléans",
-      "local": "Orliens",
+      "display": "Tours",
+      "local": "Tors",
       "local_language": "ancien français"
     },
-    "lat": 47.9029,
-    "lon": 1.9039
+    "lat": 47.3941,
+    "lon": 0.6848
   },
   "geo": {
     "capital_lonlat": [
-      1.9039,
-      47.9029
+      0.6848,
+      47.3941
     ],
     "seed_lonlat": [
       0.7,

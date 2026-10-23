@@ -1,5 +1,5 @@
 {
-  "description": "Fleuves navigables (RG9, ADR 0343). Les places sont ordonnées de l'amont vers l'aval ; km est l'abscisse le long du cours (mesurée sur rivers.geojson). Une armée dans une place riveraine rejoint une autre place du même fleuve en payant la distance fluviale (règles : data/movement/rules.json).",
+  "description": "Fleuves navigables (RG9, ADR 0343). Les places sont ordonnées de l’amont vers l’aval ; km est l’abscisse le long du cours (mesurée sur rivers.geojson). Une armée dans une place riveraine rejoint une autre place du même fleuve en payant la distance fluviale (règles : data/movement/rules.json).",
   "rivers": [
     {
       "id": "riv_seine",

@@ -58,5 +58,10 @@
   "description": "Empereur excommunié (1324) en conflit permanent avec Avignon ; s’allie à [[cdx_edouard_iii|Édouard III]] en 1337 et le nomme [[cdx_vicariat_imperial|vicaire impérial]] en 1338.",
   "sources": [
     "Louis IV du Saint-Empire"
-  ]
+  ],
+  "family": {
+    "spouses": [
+      "chr_marguerite_de_hainaut"
+    ]
+  }
 }

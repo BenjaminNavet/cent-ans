@@ -53,6 +53,31 @@ fn a_hoarded_treasury_feeds_the_court() {
     assert!(rich - base >= 1_000_000 * rules.opulence_percent / 100);
 }
 
+/// ECO (ADR 0749): the idle-hoard drain is nil within the reserve and grows
+/// faster than the hoard (each tier adds its share), so no balance is stable
+/// above the point where the drain equals the surplus.
+#[test]
+fn the_hoard_drain_is_progressive() {
+    let rules = &game_data().economy_rules;
+    let income = 10_000;
+    let reserve = rules.opulence_seasons * income;
+    assert_eq!(rules.opulence(reserve, income), 0);
+    assert_eq!(rules.opulence(0, income), 0);
+    let drain = |seasons: i64| rules.opulence(seasons * income, income);
+    let mut previous_rate = 0.0;
+    for seasons in 3..=20 {
+        let rate = drain(seasons) as f64 / (seasons * income) as f64;
+        assert!(
+            rate >= previous_rate,
+            "drain share must not fall: {seasons} seasons -> {rate}"
+        );
+        previous_rate = rate;
+    }
+    // A hoard of twelve seasons loses at least a quarter of its income value
+    // per season: the realm cannot sit on it.
+    assert!(drain(12) >= 3 * income);
+}
+
 #[test]
 fn a_vanished_faction_leaves_no_war_or_alliance() {
     let data = game_data();

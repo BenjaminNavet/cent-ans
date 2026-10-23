@@ -101,7 +101,7 @@ pub use entities::diplomacy_rules::{
     RevokeAccessRules,
 };
 pub use entities::economy_rules::{
-    AiDemolition, EconomyRules, TaxBracket, TaxBrackets, TaxPerHead,
+    AiDemolition, EconomyRules, OpulenceTier, TaxBracket, TaxBrackets, TaxPerHead,
 };
 pub use entities::edict::{Edict, EdictCost, EdictRequirements};
 pub use entities::encounter::{

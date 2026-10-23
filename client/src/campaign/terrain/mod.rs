@@ -22,6 +22,7 @@ pub mod cpu_sampler;
 pub mod decode;
 pub mod fields;
 pub mod ground;
+pub mod ground_cache;
 pub mod ground_detail;
 pub mod lighting;
 pub mod lod;
@@ -36,7 +37,10 @@ pub mod relief_floor;
 pub mod relief_gpu;
 pub mod relief_state;
 pub mod season;
+pub mod shade;
 pub mod shadows;
+#[cfg(feature = "solari")]
+pub mod solari_proxy;
 pub mod surface;
 pub mod terroir;
 pub mod tres;
@@ -72,9 +76,13 @@ impl Plugin for CampaignTerrainPlugin {
         embedded_asset!(app, "terrain_shadow.wesl");
         // Shared relief module: `import cent_ans_client::campaign::terrain::relief::{...}`.
         bevy::shader::load_shader_library!(app, "relief.wesl");
+        // bevy_solari prototype on the map (docs/wip/bevy-solari-campagne-proto.md).
+        #[cfg(feature = "solari")]
+        solari_proxy::add_plugin(app);
         app.init_resource::<cpu_sampler::CpuSampler>()
             .init_resource::<season::SeasonWeights>();
         app.add_plugins(MaterialPlugin::<TerrainMaterial>::default())
+            .add_plugins(ground_cache::GroundCachePlugin)
             .add_plugins(lighting::CampaignLightPlugin)
             .add_systems(
                 OnEnter(AppState::Campaign),
@@ -113,7 +121,12 @@ impl Plugin for CampaignTerrainPlugin {
                     coast::poll_bake,
                     coast::bind_coast,
                     look::sync_cumulus,
-                    ensure_lod,
+                    ground_cache::sync_shade,
+                    (
+                        ensure_lod,
+                        ground_cache::invalidate,
+                        ground_cache::mark_camera,
+                    ),
                     lod::sync_relief_quality,
                     update_lod
                         .after(CameraSet)
@@ -502,6 +515,11 @@ fn create_material(
         coast_types: None,
         wx_field: None,
         wx_clear: None,
+        cache_albedo: None,
+        cache_dn: None,
+        cache_shade: None,
+        shade: shade::ShadeParams::default(),
+        cache_texels: 0,
     };
     if let Some(textures) = ground_textures {
         bind_ground(&mut material, &textures);
@@ -615,6 +633,8 @@ fn ensure_lod(
     relief: Option<Res<ReliefState>>,
     surface: Option<Res<Surface>>,
     time: Res<Time>,
+    quality: Option<Res<crate::settings::RenderQuality>>,
+    mut images: ResMut<Assets<Image>>,
 ) {
     if lod.is_some() {
         return;
@@ -628,6 +648,21 @@ fn ensure_lod(
         material.params.scale.x = relief.vertical_scale;
         material.params.scale.y = relief.gain;
         material.params.scale.z = relief.squash;
+        // Ground cache (ADR 0742): chosen before the first node, kept for the whole visit.
+        let texels = quality.map_or(0, |q| q.ground_cache_texels);
+        if texels > 0 {
+            let cache = ground_cache::GroundCache::new(texels, &mut images);
+            material.cache_albedo = Some(cache.albedo.clone());
+            material.cache_dn = Some(cache.dn.clone());
+            material.cache_shade = Some(cache.shade.clone());
+            material.cache_texels = texels;
+            commands.insert_resource(cache);
+        } else {
+            material.cache_albedo = None;
+            material.cache_dn = None;
+            material.cache_shade = None;
+            material.cache_texels = 0;
+        }
     }
     let mut state = TerrainLod::new(&world.pyramid, &world.heights, handle.0.clone());
     if let Some(surface) = surface {
@@ -636,9 +671,11 @@ fn ensure_lod(
     commands.insert_resource(state);
 }
 
-fn teardown(mut commands: Commands) {
+fn teardown(mut commands: Commands, mut bake_queue: ResMut<ground_cache::GroundBakeQueue>) {
     // Node entities carry `DespawnOnExit`; the selector must start afresh on the next visit.
     commands.remove_resource::<TerrainLod>();
+    commands.remove_resource::<ground_cache::GroundCache>();
+    bake_queue.jobs.clear();
 }
 
 fn dump_terrain(world: &World) -> (String, Value) {
@@ -781,6 +818,7 @@ fn dump_terrain(world: &World) -> (String, Value) {
         value["peak_nodes"] = json!(lod.peak_nodes);
         value["triangles"] = json!(lod.triangles());
         value["pending_builds"] = json!(lod.pending_builds);
+        value["pending_bakes"] = json!(lod.pending_bakes);
         value["meshes_built"] = json!(lod.meshes_built);
         value["pages_loaded"] = json!(lod.pages_loaded);
         value["pages_in_flight"] = json!(lod.in_flight());
@@ -789,6 +827,18 @@ fn dump_terrain(world: &World) -> (String, Value) {
         value["build_ms_last"] = json!(lod.build_ms_last);
         value["settled"] = json!(lod.is_settled());
         value["frame"] = json!(lod.frame);
+    }
+    if let Some(cache) = world.get_resource::<ground_cache::GroundCache>() {
+        value["ground_cache"] = json!({
+            "texels": cache.texels,
+            "layers_used": cache.used_layers(),
+            "bakes_done": cache.bakes_done,
+            "pending": cache.pending,
+            "generation": cache.generation,
+            "exhausted": cache.exhausted,
+            "shade_rebakes": cache.shade_rebakes,
+            "shade_enabled": cache.shade_enabled,
+        });
     }
     ("campaign_terrain".into(), value)
 }

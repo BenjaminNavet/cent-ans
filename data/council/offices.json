@@ -1,5 +1,5 @@
 {
-  "description": "Charges du conseil du royaume (ADR 0341). Chaque charge est tenue par un personnage de la faction (jamais le souverain) ; ses effets croissent avec la compétence du titulaire ; une charge vacante n'a aucun effet. `advice_kinds` range chaque genre d'alerte, d'indice ou de journal déjà produit dans le domaine d'une charge : le conseiller présente ceux de son domaine.",
+  "description": "Charges du conseil du royaume (ADR 0341). Chaque charge est tenue par un personnage de la faction (jamais le souverain) ; ses effets croissent avec la compétence du titulaire ; une charge vacante n’a aucun effet. `advice_kinds` range chaque genre d’alerte, d’indice ou de journal déjà produit dans le domaine d’une charge : le conseiller présente ceux de son domaine.",
   "dismissal_loyalty_penalty": 1,
   "offices": [
     {
@@ -7,7 +7,7 @@
       "name": { "display": "Chancelier" },
       "skill": "court",
       "effects": [
-        { "kind": "diplomatic_acceptance", "per_point": 1.0, "text": "{value} pts d'acceptation diplomatique" }
+        { "kind": "diplomatic_acceptance", "per_point": 1.0, "text": "{value} pts d’acceptation diplomatique" }
       ],
       "advice_kinds": [
         "diplomacy_offer", "crusade", "agent", "war_declared", "peace_signed",
@@ -20,8 +20,8 @@
       "name": { "display": "Connétable" },
       "skill": "command",
       "effects": [
-        { "kind": "recruit_experience", "per_point": 0.2, "text": "{value} d'expérience des recrues" },
-        { "kind": "army_morale", "per_point": 0.5, "text": "{value} % de moral d'armée" }
+        { "kind": "recruit_experience", "per_point": 0.2, "text": "{value} d’expérience des recrues" },
+        { "kind": "army_morale", "per_point": 0.5, "text": "{value} % de moral d’armée" }
       ],
       "advice_kinds": [
         "siege", "enemy_army", "idle_army", "army_idle", "captain", "ransom", "loyalty",

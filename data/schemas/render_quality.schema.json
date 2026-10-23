@@ -141,6 +141,16 @@
             "4x"
           ]
         },
+        "map_ground_cache": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1024,
+          "description": "Carte : texels par côté d'une couche du cache du sol (le sol régional cuit une fois par nœud de relief), 0 = calcul à chaque pixel (ADR 0742)."
+        },
+        "map_smaa": {
+          "type": "boolean",
+          "description": "Carte : SMAA (anticrénelage en post-traitement) au lieu du MSAA ; le shader de terrain coûte deux fois sur les bords de triangles en MSAA (ADR 0741)."
+        },
         "map_msaa": {
           "enum": [
             "off",
@@ -155,6 +165,12 @@
           "maximum": 2
         },
         "shadow_atlas": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 16384
+        },
+        "map_shadow_atlas": {
+          "description": "Shadow atlas of the campaign sun (ADR 0747); shadow_atlas when absent.",
           "type": "integer",
           "minimum": 1024,
           "maximum": 16384
@@ -184,6 +200,22 @@
         "shadow_distance": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "postfx": {
+          "type": "array",
+          "description": "Post-effets optionnels activés par ce préréglage (paramètres dans data/fx/postfx.json). Vide par défaut.",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "depth_of_field",
+              "motion_blur",
+              "auto_exposure",
+              "color_grading",
+              "chromatic_aberration",
+              "sharpening",
+              "soft_shadows"
+            ]
+          }
         },
         "ssao": {
           "type": "boolean"

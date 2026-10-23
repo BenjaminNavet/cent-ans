@@ -1,5 +1,5 @@
 {
-  "description": "TS-T6 : fil d'événements de la carte de campagne, panneau compact en haut à droite, replié par rubrique. Chaque rubrique regroupe des genres d'événements du cœur (`kind`) ; un événement absent de toute liste va à la rubrique `other`. Les nouvelles lointaines (« Monde » du journal) vont toujours à `world_category`. Rendu seulement : le cœur décide quelles nouvelles sont pertinentes (réglage `interface/news_filter`). `default_folded` : rubriques repliées tant que le joueur n'a rien choisi (l'état choisi est gardé dans les réglages). `icon` : id d'icône de `icons_ink.json`.",
+  "description": "TS-T6 : fil d’événements de la carte de campagne, panneau compact en haut à droite, replié par rubrique. Chaque rubrique regroupe des genres d’événements du cœur (`kind`) ; un événement absent de toute liste va à la rubrique `other`. Les nouvelles lointaines (« Monde » du journal) vont toujours à `world_category`. Rendu seulement : le cœur décide quelles nouvelles sont pertinentes (réglage `interface/news_filter`). `default_folded` : rubriques repliées tant que le joueur n’a rien choisi (l’état choisi est gardé dans les réglages). `icon` : id d’icône de `icons_ink.json`.",
   "width_px": 276,
   "max_per_category": 6,
   "keep_turns": 3,

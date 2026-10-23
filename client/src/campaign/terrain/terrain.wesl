@@ -107,7 +107,6 @@ struct LookParams {
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(4) var<uniform> look: LookParams;
 @group(constants::MATERIAL_BIND_GROUP) @binding(5) var fog_mask: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(6) var fog_mask_sampler: sampler;
 
 // Regional ground (ground.rs, TX ADR 0243): 45 layers by (biome, role), biome blend, splat, grain.
 struct GroundParams {
@@ -142,9 +141,7 @@ struct GroundParams {
 @group(constants::MATERIAL_BIND_GROUP) @binding(9) var ground_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(10) var bg_normal: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(11) var ab_dist: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(12) var ab_dist_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(13) var splat: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(14) var splat_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(15) var micro_albedo: texture_2d_array<f32>;
 
 // Painted fields table (fields.rs): crops by biome / landscape, view and geo tuning.
@@ -182,12 +179,10 @@ struct FieldParams {
 @group(constants::MATERIAL_BIND_GROUP) @binding(16) var<uniform> fields: FieldParams;
 @group(constants::MATERIAL_BIND_GROUP) @binding(17) var height_lod: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(18) var wash_tex: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(19) var wash_sampler: sampler;
 // Close patchwork (campvis3): parcels materials, land use, terroir mask.
 @group(constants::MATERIAL_BIND_GROUP) @binding(20) var parcels_albedo: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(21) var parcels_normal: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(22) var landuse_tex: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(23) var landuse_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(24) var terroir_tex: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(25) var terroir_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(26) var occlusion_tex: texture_2d<f32>;
@@ -231,12 +226,26 @@ struct TerrainExtras {
 @group(constants::MATERIAL_BIND_GROUP) @binding(27) var<uniform> extras: TerrainExtras;
 @group(constants::MATERIAL_BIND_GROUP) @binding(40) var<uniform> gd: GdParams;
 @group(constants::MATERIAL_BIND_GROUP) @binding(28) var coast_dist_tex: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(29) var coast_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(30) var coast_probe_tex: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(31) var coast_types_tex: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(32) var wx_field_tex: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(33) var wx_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(34) var wx_clear_tex: texture_2d<f32>;
+// Ground cache (ADR 0742): one layer per relief node, the regional ground baked once
+// (rgb albedo, a forest share; rg normal offset), sampled with `terroir_sampler`.
+// Relief shade (ADR 0745, `shade.rs`): march settings of the bake, baked sun visibility (r) and
+// horizon occlusion (g) per node layer.
+struct ShadeParams {
+    // xyz: quantised direction towards the sun, w: 1 when baked.
+    sun: vec4<f32>,
+    // reach (map px), steps, penumbra (m), bias (m).
+    march: vec4<f32>,
+    // shadow strength, AO strength, AO reach (map px), displayed units per metre.
+    mix: vec4<f32>,
+};
+@group(constants::MATERIAL_BIND_GROUP) @binding(43) var<uniform> shade: ShadeParams;
+@group(constants::MATERIAL_BIND_GROUP) @binding(44) var cache_shade: texture_2d_array<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(41) var cache_albedo: texture_2d_array<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(42) var cache_dn: texture_2d_array<f32>;
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
@@ -248,7 +257,8 @@ struct Vertex {
     @location(2) fields_a: vec2<f32>,
     // squash factor k, massif lift D (m)
     @location(3) fields_b: vec2<f32>,
-    // geomorph delta (m, parent level minus own), vertex spacing
+    // geomorph delta (m, parent level minus own), vertex spacing, ground cache layer (-1: none),
+    // packed node uv (`ui + 65 vi + 4225 q`, ui/vi in 64ths, quads = 64 >> q; `mesh.rs`)
     @location(5) morph: vec4<f32>,
 };
 
@@ -260,7 +270,20 @@ struct Varyings {
     @location(2) altitude: f32,
     // altitude gradient (m per map unit)
     @location(3) slope_xz: vec2<f32>,
+    // ground cache: node uv, layer (-1: none), world size of a cache texel
+    @location(4) cache: vec4<f32>,
 };
+
+// Ground cache coordinates of a vertex (ADR 0742): uv in the node, layer, texel size.
+fn cache_coords(morph: vec4<f32>) -> vec4<f32> {
+    let packed = morph.w;
+    let q = floor(packed / 4225.0);
+    let rest = packed - q * 4225.0;
+    let vi = floor(rest / 65.0);
+    let ui = rest - vi * 65.0;
+    let extent = morph.y * f32(64u >> u32(q));
+    return vec4<f32>(ui / 64.0, vi / 64.0, morph.z, extent / f32(constants::GC_TEXELS));
+}
 
 fn displayed_y(h: f32, fa: vec2<f32>, fb: vec2<f32>) -> f32 {
     let s = params.scale.x;
@@ -285,7 +308,7 @@ fn river_carve(xz: vec2<f32>, local: vec3<f32>) -> f32 {
     }
     // Signed distance to the bank (map px, negative in the bed), as in `map_cell`; an unbound
     // texture (white) reads as far from any river.
-    let sd = (textureSampleLevel(ab_dist, ab_dist_sampler, xz / params.map.xy, 0.0).a * 255.0 - 128.0) / 16.0;
+    let sd = (textureSampleLevel(ab_dist, terroir_sampler, xz / params.map.xy, 0.0).a * 255.0 - 128.0) / 16.0;
     return RIVER_CARVE_DEPTH * (1.0 - smoothstep(-0.3, RIVER_BANK_PX, sd)) * near;
 }
 
@@ -316,6 +339,7 @@ fn vertex(v: Vertex) -> Varyings {
     out.world = world.xyz;
     out.altitude = h;
     out.slope_xz = v.slope.xy;
+    out.cache = cache_coords(v.morph);
     out.clip = position_world_to_clip(world.xyz);
     // Displayed gradient: dY/dh of the exaggeration formula times the altitude gradient.
     let k = params.scale.z * v.fields_b.x;
@@ -350,6 +374,8 @@ struct SnowCover {
     snow: f32,
     mud: f32,
     grain: f32,
+    // EAU (ADR 0750): share of forest canopy under the cover (frosted, not buried).
+    frost: f32,
 };
 
 // Multi-scale patch noise of the snow (x, 0..1), its fine octaves fading with the footprint, and
@@ -374,25 +400,28 @@ fn snow_cover_of(c: f32, noise: vec2<f32>, flat_y: f32) -> SnowCover {
     var out: SnowCover;
     let pn = noise.x;
     // The noise shifts the threshold: a cover c leaves about c of the ground white, in patches.
-    let t = c + (pn - 0.5) * 0.9 * (1.0 - smoothstep(0.85, 1.0, c));
+    let t = c + (pn - 0.5) * 0.72 * (1.0 - smoothstep(0.85, 1.0, c));
     let fringe = max(season.mud.w, 0.0);
-    out.snow = smoothstep(0.42, 0.68, t) * smoothstep(season.snow_mask.z, season.snow_mask.w, flat_y);
+    // EAU: a wide ramp (no binary mask) and a slope fade that starts earlier, so the cover thins
+    // out over the steep faces instead of ending on a line.
+    out.snow = smoothstep(0.34, 0.76, t) * smoothstep(season.snow_mask.z - 0.1, season.snow_mask.w + 0.05, flat_y);
     // Thin snow towards the edge of the cover and in the plains: the soil shows through in
     // small holes (detail noise), the deep snow of the heights stays whole.
     let thin = 1.0 - smoothstep(0.65, 1.1, t);
     out.snow = out.snow * (1.0 - thin * 0.6 * (1.0 - smoothstep(0.3, 0.6, noise.y)));
     // Mud only in the band just outside the snow, on the ground that could hold it (not on the
     // bare rock of the steep faces above the snow line).
-    out.mud = smoothstep(0.5 - fringe, 0.5, t) * (1.0 - smoothstep(0.42, 0.68, t)) * smoothstep(0.0, 0.3, c)
+    out.mud = smoothstep(0.5 - fringe, 0.5, t) * (1.0 - smoothstep(0.34, 0.76, t)) * smoothstep(0.0, 0.3, c)
         * smoothstep(season.snow_mask.z - 0.15, season.snow_mask.z + 0.05, flat_y);
     out.grain = noise.y;
+    out.frost = 0.0;
     return out;
 }
 
 // Seasonal snow cover: above the seasonal snow line (jittered by the noise), plus a share of the
 // plains of the north in winter, in patches; it slides off the steep slopes of the displayed relief
 // (`disp_y` the vertical component of the exaggerated normal), thinner under the forests.
-fn season_snow(disp_y: f32, altitude: f32, xz: vec2<f32>, footprint: f32, forest: f32) -> SnowCover {
+fn season_snow(disp_y: f32, altitude: f32, xz: vec2<f32>, footprint: f32, forest: f32, n_xz: vec2<f32>) -> SnowCover {
     let w = season.weights;
     let line = dot(w, season.snow_lines);
     let pn = snow_patch_noise(xz, footprint);
@@ -406,8 +435,18 @@ fn season_snow(disp_y: f32, altitude: f32, xz: vec2<f32>, footprint: f32, forest
     let region = vnoise(xz * max(season.snow_mask.x, 1e-4) * 0.12 + vec2<f32>(13.1, 5.3));
     let plain = season.snow_plain.z * (1.0 - season.snow_plain.w * smoothstep(0.35, 0.75, region));
     c = max(c, w.w * north * plain);
+    // EAU: accumulation by altitude and exposure. Snow thickens with height, piles on the faces
+    // turned away from the sun and melts first on those that face it (smooth, never a mask).
+    if (c > 0.0) {
+        let sun_h = normalize(params.sun_dir.xz + vec2<f32>(1e-4, 0.0));
+        let facing = clamp(dot(n_xz, sun_h) * 5.0, -1.0, 1.0);
+        let high = smoothstep(0.0, 800.0, altitude);
+        c = clamp(c - 0.2 * facing * (1.0 - disp_y * 0.5) + 0.1 * high * w.w, 0.0, 1.0);
+    }
     c = c * mix(1.0, season.snow_shade.a, forest);
-    return snow_cover_of(c, pn, disp_y);
+    var cover = snow_cover_of(c, pn, disp_y);
+    cover.frost = forest;
+    return cover;
 }
 
 // Snow colour: warm in the sun, cold and bluish in the shade (`lit` = n.l x sun visibility),
@@ -419,7 +458,10 @@ fn snow_tint(lit: f32, grain: f32) -> vec3<f32> {
 
 fn snow_apply(col: vec3<f32>, cover: SnowCover, lit: f32) -> vec3<f32> {
     var out = mix(col, season.mud.rgb * (0.85 + 0.3 * cover.grain), cover.mud * 0.85);
-    return mix(out, snow_tint(lit, cover.grain), cover.snow);
+    // EAU: under a forest the snow is a frost: greyer, bluer, and the canopy texture shows through.
+    let frost_tint = vec3<f32>(0.80, 0.86, 0.95);
+    let tint = snow_tint(lit, cover.grain) * mix(vec3<f32>(1.0), frost_tint, cover.frost);
+    return mix(out, tint, cover.snow * (1.0 - 0.28 * cover.frost));
 }
 
 // TS-T1 dark rock of the heights and of the steep displayed slopes: grey-brown, strata, lighter
@@ -583,7 +625,7 @@ fn wx_at(p: vec2<f32>) -> vec4<f32> {
     if (extras.wx.x < 0.5) {
         return vec4<f32>(0.0);
     }
-    return wx_field(wx_field_tex, wx_sampler, p, params.map.xy);
+    return wx_field(wx_field_tex, terroir_sampler, p, params.map.xy);
 }
 
 // 1 outside the selected province, 0 inside (feathered); 1 without a selection.
@@ -591,7 +633,7 @@ fn wx_clear_at(p: vec2<f32>) -> f32 {
     if (extras.wx.y < 0.5) {
         return 1.0;
     }
-    return wx_selection_clear(wx_clear_tex, wx_sampler, p, params.map.xy);
+    return wx_selection_clear(wx_clear_tex, terroir_sampler, p, params.map.xy);
 }
 
 // Wet ground (slightly darker, TB6 `weather_wet_dim`) and fresh snow where it rains / snows
@@ -613,6 +655,7 @@ fn weather_ground(col: vec3<f32>, altitude: f32, p: vec2<f32>, disp_y: f32, foot
         var cover = snow_cover_of(c, pn, disp_y);
         cover.snow = cover.snow * land;
         cover.mud = cover.mud * land;
+        cover.frost = forest;
         out = snow_apply(out, cover, lit);
     }
     return out;
@@ -651,7 +694,39 @@ fn fw_glacier_apply(col: vec3<f32>, p: vec2<f32>, hc: f32, slope: f32, footprint
 
 // Signed distance to the coast (map px, > 0 on land) at `uv`.
 fn coast_px(uv: vec2<f32>) -> f32 {
-    return (textureSampleLevel(coast_dist_tex, coast_sampler, uv, 0.0).r * 255.0 - 128.0) / extras.coast.texel.z;
+    return (textureSampleLevel(coast_dist_tex, terroir_sampler, uv, 0.0).r * 255.0 - 128.0) / extras.coast.texel.z;
+}
+
+// EAU (ADR 0750): the same coast distance, smoothed close up. The raster has one texel per map px and
+// a 0.5 px step: the bilinear read draws stair steps on the beach and the surf. Within 5 px of the
+// shore and below ~1.8 map px per screen px it is read as a cubic B-spline (four bilinear reads, the
+// same sampler as above); the sea shader (`water/shaders/sea.wesl`) does the same, so both agree.
+fn coast_px_smooth(uv: vec2<f32>, footprint: f32) -> f32 {
+    let raw = coast_px(uv);
+    if (abs(raw) >= 5.0 || footprint >= 1.8) {
+        return raw;
+    }
+    let ts = vec2<f32>(textureDimensions(coast_dist_tex));
+    let st = uv * ts - vec2<f32>(0.5);
+    let i = floor(st);
+    let f = st - i;
+    let f2 = f * f;
+    let f3 = f2 * f;
+    let w0 = (1.0 - 3.0 * f + 3.0 * f2 - f3) / 6.0;
+    let w1 = (4.0 - 6.0 * f2 + 3.0 * f3) / 6.0;
+    let w2 = (1.0 + 3.0 * f + 3.0 * f2 - 3.0 * f3) / 6.0;
+    let w3 = f3 / 6.0;
+    let g0 = w0 + w1;
+    let g1 = w2 + w3;
+    let o0 = (i + vec2<f32>(0.5) + (-1.0 + w1 / g0)) / ts;
+    let o1 = (i + vec2<f32>(0.5) + (1.0 + w3 / g1)) / ts;
+    let a = textureSampleLevel(coast_dist_tex, terroir_sampler, vec2<f32>(o0.x, o0.y), 0.0).r;
+    let b = textureSampleLevel(coast_dist_tex, terroir_sampler, vec2<f32>(o1.x, o0.y), 0.0).r;
+    let c = textureSampleLevel(coast_dist_tex, terroir_sampler, vec2<f32>(o0.x, o1.y), 0.0).r;
+    let d = textureSampleLevel(coast_dist_tex, terroir_sampler, vec2<f32>(o1.x, o1.y), 0.0).r;
+    let r = g0.y * (g0.x * a + g1.x * b) + g1.y * (g0.x * c + g1.x * d);
+    let smooth_c = (r * 255.0 - 128.0) / extras.coast.texel.z;
+    return mix(smooth_c, raw, smoothstep(0.9, 1.8, footprint));
 }
 
 // Direction of the land (gradient of the coast distance), unit, in map px.
@@ -659,8 +734,8 @@ fn coast_to_land(uv: vec2<f32>) -> vec2<f32> {
     let ex = vec2<f32>(1.0 / extras.coast.texel.x, 0.0);
     let ey = vec2<f32>(0.0, 1.0 / extras.coast.texel.y);
     let cg = vec2<f32>(
-        textureSampleLevel(coast_dist_tex, coast_sampler, uv + ex, 0.0).r - textureSampleLevel(coast_dist_tex, coast_sampler, uv - ex, 0.0).r,
-        textureSampleLevel(coast_dist_tex, coast_sampler, uv + ey, 0.0).r - textureSampleLevel(coast_dist_tex, coast_sampler, uv - ey, 0.0).r);
+        textureSampleLevel(coast_dist_tex, terroir_sampler, uv + ex, 0.0).r - textureSampleLevel(coast_dist_tex, terroir_sampler, uv - ex, 0.0).r,
+        textureSampleLevel(coast_dist_tex, terroir_sampler, uv + ey, 0.0).r - textureSampleLevel(coast_dist_tex, terroir_sampler, uv - ey, 0.0).r);
     return cg / max(length(cg), 1e-5);
 }
 
@@ -668,7 +743,7 @@ fn coast_to_land(uv: vec2<f32>) -> vec2<f32> {
 // slow noise (no straight limit along the shore).
 fn coast_geology(p: vec2<f32>) -> vec4<f32> {
     let warp = (vec2<f32>(vnoise(p * 0.21), vnoise(p * 0.21 + vec2<f32>(37.0, 11.0))) - 0.5) * 10.0;
-    let g = textureSampleLevel(coast_types_tex, coast_sampler, (p + warp) / params.map.xy, 0.0);
+    let g = textureSampleLevel(coast_types_tex, terroir_sampler, (p + warp) / params.map.xy, 0.0);
     return vec4<f32>(smoothstep(vec3<f32>(0.3), vec3<f32>(0.7), g.rgb), g.a);
 }
 
@@ -720,7 +795,7 @@ fn coast_band(p: vec2<f32>, footprint: f32, hc: f32, world_y: f32, slope: f32, s
         return out;
     }
     let uv = p / params.map.xy;
-    let coast = coast_px(uv);
+    let coast = coast_px_smooth(uv, footprint);
     let cliff_px = c.band_a.x;
     let widen = c.band_a.y;
     let beach_px = c.band_a.w;
@@ -732,7 +807,7 @@ fn coast_band(p: vec2<f32>, footprint: f32, hc: f32, world_y: f32, slope: f32, s
     if (coast < -0.3 && emerged <= 0.0) {
         return out;
     }
-    let probe = textureSampleLevel(coast_probe_tex, coast_sampler, uv, 0.0);
+    let probe = textureSampleLevel(coast_probe_tex, terroir_sampler, uv, 0.0);
     if (probe.g > 0.5) {
         return out;
     }
@@ -793,7 +868,7 @@ fn fog_of_war_veil(col: vec3<f32>, p: vec2<f32>) -> vec3<f32> {
     }
     let jitter = vec2<f32>(fbm(p * 0.035), fbm(p * 0.035 + vec2<f32>(31.7, 5.3))) - 0.5;
     let q = (p + jitter * look.fog_veil.w) / look.fog_map.xy;
-    let seen = textureSampleLevel(fog_mask, fog_mask_sampler, q, 0.0).r;
+    let seen = textureSampleLevel(fog_mask, terroir_sampler, q, 0.0).r;
     let fogged = 1.0 - smoothstep(0.32, 0.68, seen);
     if (fogged <= 0.0) {
         return col;
@@ -1000,7 +1075,7 @@ fn pm_mountain(p: vec2<f32>, cell: vec2<f32>, footprint: f32) -> vec3<f32> {
 fn pm_tree(p: vec2<f32>, cell: vec2<f32>, footprint: f32) -> vec3<f32> {
     let jitter = pm_hash2(cell + 11.0) - 0.5;
     let base = (cell + vec2<f32>(0.5, 0.8) + jitter * 0.35) * PM_TREE_CELL;
-    let sp = textureSampleLevel(splat, splat_sampler, base / params.map.xy, 0.0);
+    let sp = textureSampleLevel(splat, terroir_sampler, base / params.map.xy, 0.0);
     let forest = sp.b / max(sp.r + sp.g + sp.b + sp.a, 1e-3);
     if (forest < PM_TREE_MIN + (hash21(cell) - 0.5) * 0.25 || hash21(cell + 2.7) < 0.35 || pm_height(base) <= 0.0) {
         return vec3<f32>(0.0);
@@ -1026,14 +1101,14 @@ fn parchment_ground(base: vec3<f32>, n: vec3<f32>, altitude: f32, p: vec2<f32>, 
     // Watercolour wash of the realms: owner pigment, granular, pooling near the borders.
     let jitter = (vec2<f32>(vnoise(p * 0.6), vnoise(p * 0.6 + vec2<f32>(5.0, 3.0))) - 0.5) * 3.0;
     let q = (p + jitter) / params.map.xy;
-    let wash_here = textureSampleLevel(wash_tex, wash_sampler, q, 0.0);
+    let wash_here = textureSampleLevel(wash_tex, terroir_sampler, q, 0.0);
     if (wash_here.a > 0.5) {
         let step_uv = 6.0 / params.map.xy;
         var diff = 0.0;
-        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, wash_sampler, q + vec2<f32>(step_uv.x, 0.0), 0.0)));
-        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, wash_sampler, q - vec2<f32>(step_uv.x, 0.0), 0.0)));
-        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, wash_sampler, q + vec2<f32>(0.0, step_uv.y), 0.0)));
-        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, wash_sampler, q - vec2<f32>(0.0, step_uv.y), 0.0)));
+        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, terroir_sampler, q + vec2<f32>(step_uv.x, 0.0), 0.0)));
+        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, terroir_sampler, q - vec2<f32>(step_uv.x, 0.0), 0.0)));
+        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, terroir_sampler, q + vec2<f32>(0.0, step_uv.y), 0.0)));
+        diff = max(diff, distance(wash_here, textureSampleLevel(wash_tex, terroir_sampler, q - vec2<f32>(0.0, step_uv.y), 0.0)));
         let pool = smoothstep(0.02, 0.2, diff);
         var wash = wash_here.rgb / max(max(wash_here.r, max(wash_here.g, wash_here.b)), 0.05);
         let gran = 0.8 + 0.4 * vnoise(p * 0.35) * vnoise(p * 0.07 + vec2<f32>(4.0));
@@ -1074,7 +1149,7 @@ fn parchment_ground(base: vec3<f32>, n: vec3<f32>, altitude: f32, p: vec2<f32>, 
     }
 
     // Forests: green wash and small drawn trees (the cell and its southern row).
-    let sp = textureSampleLevel(splat, splat_sampler, uv, 0.0);
+    let sp = textureSampleLevel(splat, terroir_sampler, uv, 0.0);
     var forest_here = sp.b / max(sp.r + sp.g + sp.b + sp.a, 1e-3);
     if (ground.splat.x < 0.5) {
         let luma_base = dot(base, vec3<f32>(0.299, 0.587, 0.114));
@@ -1120,36 +1195,44 @@ struct LayerAcc {
     normal: vec2<f32>,
 };
 
-// One layer at two scales (anti-repetition): tinted albedo + normal, weighted by w.
+// One layer at two scales (anti-repetition): tinted albedo + normal, weighted by w. `detail` is the
+// albedo detail strength and `fade` the normal one: when a term is 0 its taps would not contribute,
+// so they are skipped (explicit gradients: legal in non-uniform control flow).
 fn sample_layer(layer: u32, uv_a: vec2<f32>, uv_b: vec2<f32>, da: vec4<f32>, db: vec4<f32>, mix_b: f32,
-        tint: vec3<f32>, detail: f32, w: f32, acc: LayerAcc) -> LayerAcc {
+        tint: vec3<f32>, detail: f32, fade: f32, w: f32, acc: LayerAcc) -> LayerAcc {
     let li = i32(layer);
-    let ta = textureSampleGrad(bg_albedo, ground_sampler, uv_a, li, da.xy, da.zw).rgb;
-    let tb = textureSampleGrad(bg_albedo, ground_sampler, uv_b, li, db.xy, db.zw).rgb;
-    let t = mix(ta, tb, mix_b);
-    let na = textureSampleGrad(bg_normal, ground_sampler, uv_a, li, da.xy, da.zw).rg;
-    let nb = textureSampleGrad(bg_normal, ground_sampler, uv_b, li, db.xy, db.zw).rg;
-    let nm = mix(na, nb, mix_b);
-    var ratio = t / max(ground.means[layer].rgb, vec3<f32>(0.01));
-    // Detail mostly in luminance: no coloured reflections of the photos.
-    ratio = mix(vec3<f32>(luma(ratio)), ratio, 0.35);
-    let hue = mix(vec3<f32>(1.0), ground.hues[layer].rgb, ground.bg.w * clamp(detail, 0.0, 1.0));
     var out = acc;
-    out.albedo = out.albedo + w * tint * hue * mix(vec3<f32>(1.0), ratio, detail);
-    out.normal = out.normal + w * (nm * 2.0 - 1.0);
+    if (detail > 0.0) {
+        let ta = textureSampleGrad(bg_albedo, ground_sampler, uv_a, li, da.xy, da.zw).rgb;
+        let tb = textureSampleGrad(bg_albedo, ground_sampler, uv_b, li, db.xy, db.zw).rgb;
+        let t = mix(ta, tb, mix_b);
+        var ratio = t / max(ground.means[layer].rgb, vec3<f32>(0.01));
+        // Detail mostly in luminance: no coloured reflections of the photos.
+        ratio = mix(vec3<f32>(luma(ratio)), ratio, 0.35);
+        let hue = mix(vec3<f32>(1.0), ground.hues[layer].rgb, ground.bg.w * clamp(detail, 0.0, 1.0));
+        out.albedo = out.albedo + w * tint * hue * mix(vec3<f32>(1.0), ratio, detail);
+    } else {
+        out.albedo = out.albedo + w * tint;
+    }
+    if (fade > 0.0) {
+        let na = textureSampleGrad(bg_normal, ground_sampler, uv_a, li, da.xy, da.zw).rg;
+        let nb = textureSampleGrad(bg_normal, ground_sampler, uv_b, li, db.xy, db.zw).rg;
+        let nm = mix(na, nb, mix_b);
+        out.normal = out.normal + w * (nm * 2.0 - 1.0);
+    }
     return out;
 }
 
 // One role of the background, blended between the pixel biome (a) and its neighbour (b).
 fn sample_role(role: u32, ba: u32, bb: u32, wb: f32, uv_a: vec2<f32>, uv_b: vec2<f32>, da: vec4<f32>,
-        db: vec4<f32>, mix_b: f32, tint: vec3<f32>, detail: f32, w: f32, acc: LayerAcc) -> LayerAcc {
+        db: vec4<f32>, mix_b: f32, tint: vec3<f32>, detail: f32, fade: f32, w: f32, acc: LayerAcc) -> LayerAcc {
     let la = bg_layer(role, ba);
     let lb = bg_layer(role, bb);
     if (la == lb || wb <= ground.bg.z) {
-        return sample_layer(la, uv_a, uv_b, da, db, mix_b, tint, detail, w, acc);
+        return sample_layer(la, uv_a, uv_b, da, db, mix_b, tint, detail, fade, w, acc);
     }
-    let first = sample_layer(la, uv_a, uv_b, da, db, mix_b, tint, detail, w * (1.0 - wb), acc);
-    return sample_layer(lb, uv_a, uv_b, da, db, mix_b, tint, detail, w * wb, first);
+    let first = sample_layer(la, uv_a, uv_b, da, db, mix_b, tint, detail, fade, w * (1.0 - wb), acc);
+    return sample_layer(lb, uv_a, uv_b, da, db, mix_b, tint, detail, fade, w * wb, first);
 }
 
 // --- Close patchwork (CV1 terroirs, V2b parcels, ZG5b fine parcels) ---------------------------
@@ -1570,7 +1653,7 @@ fn fp_splat(s: vec4<f32>, p: vec2<f32>, footprint: f32) -> vec4<f32> {
     var w = vec2<f32>(vnoise(p * 0.9), vnoise(p * 0.9 + vec2<f32>(31.7, 11.3))) - 0.5;
     w = w + (vec2<f32>(vnoise(p * 3.7 + 5.1), vnoise(p * 3.7 + 17.9)) - 0.5) * 0.45;
     w = w + (vec2<f32>(vnoise(p * 14.0 + 2.3), vnoise(p * 14.0 + 8.1)) - 0.5) * 0.18;
-    let warped = textureSampleLevel(splat, splat_sampler, (p + w * 1.1) / params.map.xy, 0.0);
+    let warped = textureSampleLevel(splat, terroir_sampler, (p + w * 1.1) / params.map.xy, 0.0);
     return mix(s, warped, vis);
 }
 
@@ -1794,8 +1877,10 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     // Soil weights.
     var s = vec4<f32>(0.5, 0.3, 0.2, 0.0);
     if (ground.splat.x > 0.5) {
-        s = textureSampleLevel(splat, splat_sampler, uv, 0.0);
-        s = fp_splat(s, p, footprint);
+        s = textureSampleLevel(splat, terroir_sampler, uv, 0.0);
+        @if(!PERF_TNOFPSPLAT) {
+            s = fp_splat(s, p, footprint);
+        }
     }
     s = s / max(s.r + s.g + s.b + s.a, 1e-3);
     // CV1 terroirs: finages of the settlements (fields, pasture ring).
@@ -1813,7 +1898,7 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     // Land use (R vine, G dryness, B bocage) with the vines of the terroirs; V2b parcels.
     var lu = vec3<f32>(0.0);
     if (ground.splat.z > 0.5) {
-        lu = textureSampleLevel(landuse_tex, landuse_sampler, uv, 0.0).rgb;
+        lu = textureSampleLevel(landuse_tex, terroir_sampler, uv, 0.0).rgb;
     }
     lu = terroir_landuse(lu, terroir);
     let v2 = v2b_parcels(p, footprint, s, lu);
@@ -1828,14 +1913,18 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     let packed = u32(textureLoad(ab_dist, vec2<i32>(clamp(uv * dims, vec2<f32>(0.0), dims - 1.0)), 0).r * 255.0 + 0.5);
     let ba = clamp(packed % 16u, 1u, 14u);
     let bb = clamp(packed / 16u, 1u, 14u);
-    let dist_texels = textureSampleLevel(ab_dist, ab_dist_sampler, uv, 0.0).g * 255.0;
+    let dist_texels = textureSampleLevel(ab_dist, terroir_sampler, uv, 0.0).g * 255.0;
     let wb = 0.5 * (1.0 - smoothstep(0.0, ground.bg.y, dist_texels));
     var acc = LayerAcc(vec3<f32>(0.0), vec2<f32>(0.0));
-    if (w_grass > 0.01) { acc = sample_role(0u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.grass_tint, det, w_grass, acc); }
-    if (w_farm > 0.01) { acc = sample_role(1u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.farm_tint, det, w_farm, acc); }
-    if (w_forest > 0.01) { acc = sample_role(2u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_FOREST, det, w_forest, acc); }
-    if (w_rock > 0.01) { acc = sample_role(3u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_ROCK, det, w_rock, acc); }
-    if (w_heath > 0.01) { acc = sample_role(4u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_HEATH, det, w_heath, acc); }
+    var role_min = 0.01;
+    @if(PERF_TONEROLE) {
+        role_min = max(max(w_grass, w_farm), max(max(w_forest, w_rock), w_heath)) - 1e-4;
+    }
+    if (w_grass > role_min) { acc = sample_role(0u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.grass_tint, det, detail_fade, w_grass, acc); }
+    if (w_farm > role_min) { acc = sample_role(1u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, v2.farm_tint, det, detail_fade, w_farm, acc); }
+    if (w_forest > role_min) { acc = sample_role(2u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_FOREST, det, detail_fade, w_forest, acc); }
+    if (w_rock > role_min) { acc = sample_role(3u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_ROCK, det, detail_fade, w_rock, acc); }
+    if (w_heath > role_min) { acc = sample_role(4u, ba, bb, wb, uv_a, uv_b, da, db, mix_b, TINT_HEATH, det, detail_fade, w_heath, acc); }
     var col = acc.albedo / wsum;
     out.dn = acc.normal / wsum * ground.tiling.w * detail_fade;
     // Micro grain by dominant material (luminance only).
@@ -1847,12 +1936,22 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     if (w_rock > best) { best = w_rock; role = 3u; }
     if (w_heath > best) { best = w_heath; role = 4u; }
     let mlayer = ground.micro_layers[role / 4u][role % 4u];
-    let grain = textureSampleGrad(micro_albedo, ground_sampler, muv, i32(mlayer), mdx, mdy).rgb;
-    let g_ratio = luma(grain) / max(ground.micro_mean[mlayer / 4u][mlayer % 4u], 0.01);
-    col = col * mix(1.0, clamp(g_ratio, 0.4, 1.8), micro_k);
+    var micro_on = micro_k > 0.0;
+    @if(PERF_TNOMICRO) {
+        micro_on = false;
+    }
+    if (micro_on) {
+        let grain = textureSampleGrad(micro_albedo, ground_sampler, muv, i32(mlayer), mdx, mdy).rgb;
+        let g_ratio = luma(grain) / max(ground.micro_mean[mlayer / 4u][mlayer % 4u], 0.01);
+        col = col * mix(1.0, clamp(g_ratio, 0.4, 1.8), micro_k);
+    }
     // GA4 macro variation of hue (fine octaves first) and luminance (wide octaves first), the
     // same 4 noise samples (ga_macro.gdshaderinc); the luminance part fades out with the footprint.
-    if (ground.macro_amp.y > 0.0 || ground.macro_amp.x > 0.0) {
+    var macro_on = ground.macro_amp.y > 0.0 || ground.macro_amp.x > 0.0;
+    @if(PERF_TNOMACRO) {
+        macro_on = false;
+    }
+    if (macro_on) {
         let mo = vec4<f32>(vnoise(p / ground.macro_periods.x + vec2<f32>(3.1, 7.7)),
             vnoise(p / ground.macro_periods.y + vec2<f32>(11.3, 1.9)),
             vnoise(p / ground.macro_periods.z + vec2<f32>(5.3, 17.2)),
@@ -1876,9 +1975,11 @@ fn ground_proc(p: vec2<f32>, uv: vec2<f32>, footprint: f32, altitude: f32, slope
     col = mix(col, TRACK_COLOR * (0.9 + 0.2 * macro_n), v2.track * farm_open * 0.85);
     col = mix(col, HEDGE_COLOR, v2.hedge * farm_open * 0.55);
     // ZG5b fine parcels in metres (valley / site views).
-    let fp = fp_parcels(p, footprint, grad, slope, altitude, s, lu, terroir, farm_open, w_forest / wsum, col);
-    col = fp.color;
-    out.dn = out.dn + fp.dn;
+    @if(!PERF_TNOFP) {
+        let fp = fp_parcels(p, footprint, grad, slope, altitude, s, lu, terroir, farm_open, w_forest / wsum, col);
+        col = fp.color;
+        out.dn = out.dn + fp.dn;
+    }
     out.color = col;
     out.open_w = (w_grass + w_farm + w_heath) / wsum;
     out.forest_w = w_forest / wsum;
@@ -1953,7 +2054,7 @@ fn map_cell(uv: vec2<f32>) -> MapCell {
     let dims = vec2<f32>(textureDimensions(ab_dist));
     let t = textureLoad(ab_dist, vec2<i32>(clamp(uv * dims, vec2<f32>(0.0), dims - 1.0)), 0);
     let packed = u32(t.r * 255.0 + 0.5);
-    let river = (textureSampleLevel(ab_dist, ab_dist_sampler, uv, 0.0).a * 255.0 - 128.0) / 16.0;
+    let river = (textureSampleLevel(ab_dist, terroir_sampler, uv, 0.0).a * 255.0 - 128.0) / 16.0;
     return MapCell(clamp(packed % 16u, 1u, 14u), u32(t.b * 255.0 + 0.5), river);
 }
 
@@ -2125,7 +2226,11 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
         presence = presence * relief_k;
     }
     let farm_frac = clamp(max(farm_share, fields.v4.w) * presence, 0.0, 1.0);
-    if (w_far > 0.001) {
+    var far_on = w_far > 0.001;
+    @if(PERF_TNOFAR) {
+        far_on = false;
+    }
+    if (far_on) {
         let far_col = hb_far_patch(uu, footprint, footprint / cell_px, row, h_dom, vine_k, meadow_k);
         col = mix(col, hb_relative(col, far_col), w_far * open_w * farm_frac);
     }
@@ -2133,7 +2238,10 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
     if (w_bare <= 0.001) {
         return out;
     }
-    let has_tex = fields.tex_flags.z > 0.5 && fields.rows_e[row].w > 0.5;
+    var has_tex = fields.tex_flags.z > 0.5 && fields.rows_e[row].w > 0.5;
+    @if(PERF_TNOHBTEX) {
+        has_tex = false;
+    }
     let sw = season.weights;
     // Unfarmed parcel: the two wild soils of the row, mixed by a slow noise.
     let wild_mix = smoothstep(0.35, 0.65, vnoise(p * 0.35 + 3.7));
@@ -2207,6 +2315,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
                 let grain_l = clamp(luma(open_col) / max(luma(mean), 1e-3), 0.7, 1.35);
                 open_col = mix(open_col, far_col * grain_l, patch_k);
             }
+            @if(!PERF_TNOGDK)
             gd_k = gd_parcel_k(gd, open_col, p, parcel.id, field_ang, cls, footprint, mpp, season.weights,
                 parcel.edge * cell_px * mpp, hedge_k);
             // Hedges and banks on the edges of the cultivated parcels.
@@ -2272,21 +2381,86 @@ fn sun_shadow(world: vec3<f32>, n: vec3<f32>, frag_xy: vec2<f32>) -> f32 {
     return shadows::fetch_directional_shadow(0u, wp, n, view_z, frag_xy);
 }
 
-@fragment
-fn fragment(in: Varyings) -> @location(0) vec4<f32> {
-    var albedo = vec3<f32>(0.10, 0.15, 0.06);
-    let k_proj_ground = view.clip_from_view[1][1] * view.viewport.w * 0.5;
-    let ground_footprint = distance(in.world, view.world_position) / max(k_proj_ground, 1.0);
+// Regional ground (TX + painted fields + close detail + forest floor and canopy) of a map point:
+// the costly, view-independent part of the ground colour, shared by the live fragment and the
+// ground-cache bake (ADR 0742). `dn` offsets the normal: n = normalize(n + (dn.x, 0, dn.y)).
+struct RegionalOut {
+    albedo: vec3<f32>,
+    dn: vec2<f32>,
+    forest_f: f32,
+};
+
+fn regional_ground(p: vec2<f32>, footprint: f32, altitude: f32, slope_xz: vec2<f32>, base_albedo: vec3<f32>) -> RegionalOut {
+    var albedo = base_albedo;
+    var forest_f = 0.0;
+    var nd = vec2<f32>(0.0);
+    // Regional ground (TX): the colormap gives the colour far away, the textured soil draws
+    // close up (sg_apply of satellite_ground.gdshaderinc: share 0.45 at the closest, 1 far).
+    let slope_m = length(slope_xz) / max(ground.micro.w, 1.0);
+    let g = ground_proc(p, p / params.map.xy, footprint, altitude, slope_m, slope_xz);
+    let land = smoothstep(0.0, 2.0, altitude);
+    var painted = g.color;
     if (params.map.w > 0.5) {
-        let cm_uv = in.world.xz / params.map.xy;
+        let far_w = smoothstep(0.05, 0.5, footprint);
+        let ratio = clamp(luma(g.color) / max(luma(base_albedo), 1e-3), 0.55, 1.6);
+        // TB1: the season shift of the land cover over the mean-season colour map.
+        let tinted = base_albedo * mix(1.0, ratio, 0.55 * (1.0 - far_w)) * pow(g.season_k, vec3<f32>(SG_SEASON_STRENGTH));
+        painted = mix(g.color, tinted, mix(0.45, 1.0, far_w));
+    }
+    // Painted fields over the ground colour (after the colormap, like hb_apply).
+    var dn = g.dn;
+    var fields_on = fields.v8.w > 0.5;
+    @if(PERF_TNOFIELDS) {
+        fields_on = false;
+    }
+    if (fields_on) {
+        let fo = fields_apply(p, p / params.map.xy, footprint, land,
+            g.open_w, g.forest_w, g.rock_w, g.farm_share, slope_m, slope_xz, altitude, g.k_wild,
+            g.k_forest, painted);
+        painted = fo.color;
+        dn = dn + fo.dn;
+    }
+    @if(!PERF_TNOGDMACRO)
+    painted = gd_macro(gd, painted, p, footprint, land, g.open_w);
+    albedo = mix(base_albedo, painted, land);
+    nd = nd + vec2<f32>(dn.x, -dn.y) * land;
+    // Forest crowns: relief and tone contrast of the canopy (0.45 bump, 0.35 contrast).
+    forest_f = g.forest_w * land;
+    // TS-T1: green-black ground under the forests.
+    albedo = albedo * mix(vec3<f32>(1.0), season.forest_floor.rgb, season.forest_floor.a * forest_f);
+    if (forest_f > 0.01) {
+        let cf = canopy_field(p, footprint);
+        nd = nd - cf.yz * 0.45 * forest_f;
+        albedo = albedo * (1.0 + 0.35 * forest_f * cf.x);
+    }
+    return RegionalOut(albedo, nd, forest_f);
+}
+
+// Colour map of the ground (with the dark masses of the regional ground).
+fn base_ground(p: vec2<f32>, footprint: f32) -> vec3<f32> {
+    var albedo = vec3<f32>(0.10, 0.15, 0.06);
+    if (params.map.w > 0.5) {
+        let cm_uv = p / params.map.xy;
         albedo = textureSample(colormap, colormap_sampler, cm_uv).rgb;
         let soft = textureSampleBias(colormap, colormap_sampler, cm_uv, ground.dark.z).rgb;
         if (ground.bg.x > 0.5) {
-            albedo = dark_masses(albedo, soft, in.world.xz, ground_footprint);
+            albedo = dark_masses(albedo, soft, p, footprint);
         }
     }
+    return albedo;
+}
+
+@fragment
+fn fragment(in: Varyings) -> @location(0) vec4<f32> {
+    let k_proj_ground = view.clip_from_view[1][1] * view.viewport.w * 0.5;
+    let ground_footprint = distance(in.world, view.world_position) / max(k_proj_ground, 1.0);
+    var albedo = base_ground(in.world.xz, ground_footprint);
     var n = normalize(in.normal);
     let base_albedo = albedo;
+    // Perf bisection (`CENT_ANS_PERF_OFF=tflat`): colour map only, flat light.
+    @if(PERF_TFLAT) {
+        return vec4<f32>(albedo * (params.ambient.rgb + params.sun_color.rgb * max(dot(n, params.sun_dir.xyz), 0.0)) * params.ambient.a, 1.0);
+    }
     // TS-T1: slope of the displayed (exaggerated) relief, the steeper of the interpolated normal
     // and of the triangle (the vertex normal of a coarse node is smoothed), and the crests
     // (divergence of the normal along the screen axes, per map px).
@@ -2299,62 +2473,77 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     let curv = dot(dnx, dwx) / max(dot(dwx, dwx), 1e-8) + dot(dny, dwy) / max(dot(dwy, dwy), 1e-8);
     let crest = clamp(curv * season.rock_light.w, 0.0, 1.0);
     // Sun term of the geometric normal (snow tint, rock contrast), the shadow fetched once.
-    let sun_vis = sun_shadow(in.world, n, in.clip.xy);
-    let lit0 = max(dot(n, params.sun_dir.xyz), 0.0) * sun_vis;
+    var sun_vis = 1.0;
+    @if(!PERF_TNOSUN) {
+        sun_vis = sun_shadow(in.world, n, in.clip.xy);
+    }
+    // Baked relief shade (ADR 0745): sun visibility and horizon occlusion (1, 1 when off).
+    var relief_vis = 1.0;
+    var relief_ao = 1.0;
+    // Ground cache (ADR 0742): a layer not baked yet (cleared, alpha 0) falls back to the base
+    // ground, so a node entering the view is drawn at once instead of leaving a black hole.
+    var cache_texel = vec4<f32>(0.0);
+    var cache_uv = vec2<f32>(0.0);
+    var cache_ok = false;
+    @if(GROUND_CACHE) {
+        let half_texel = 0.5 / f32(constants::GC_TEXELS);
+        cache_uv = clamp(in.cache.xy, vec2<f32>(half_texel), vec2<f32>(1.0 - half_texel));
+        if (in.cache.z >= 0.0) {
+            cache_texel = textureSampleLevel(cache_albedo, terroir_sampler, cache_uv, i32(in.cache.z), 0.0);
+            cache_ok = cache_texel.a > 0.25;
+        }
+        if (shade.sun.w > 0.5 && cache_ok) {
+            let baked = textureSampleLevel(cache_shade, terroir_sampler, cache_uv, i32(in.cache.z), 0.0).rg;
+            relief_vis = mix(1.0, baked.r, shade.mix.x);
+            relief_ao = mix(1.0, baked.g, shade.mix.y);
+        }
+    }
+    let lit0 = max(dot(n, params.sun_dir.xyz), 0.0) * sun_vis * relief_vis;
     var forest_f = 0.0;
-    if (ground.bg.x > 0.5) {
-        // Regional ground (TX): the colormap gives the colour far away, the textured soil draws
-        // close up (sg_apply of satellite_ground.gdshaderinc: share 0.45 at the closest, 1 far).
-        let slope_m = length(in.slope_xz) / max(ground.micro.w, 1.0);
-        let g = ground_proc(in.world.xz, in.world.xz / params.map.xy, ground_footprint, in.altitude, slope_m, in.slope_xz);
-        let land = smoothstep(0.0, 2.0, in.altitude);
-        var painted = g.color;
-        if (params.map.w > 0.5) {
-            let far_w = smoothstep(0.05, 0.5, ground_footprint);
-            let ratio = clamp(luma(g.color) / max(luma(base_albedo), 1e-3), 0.55, 1.6);
-            // TB1: the season shift of the land cover over the mean-season colour map.
-            let tinted = base_albedo * mix(1.0, ratio, 0.55 * (1.0 - far_w)) * pow(g.season_k, vec3<f32>(SG_SEASON_STRENGTH));
-            painted = mix(g.color, tinted, mix(0.45, 1.0, far_w));
+    var regional = ground.bg.x > 0.5;
+    @if(PERF_TNOPROC) {
+        regional = false;
+    }
+    if (regional) {
+        @if(GROUND_CACHE) {
+            // Baked once per node (ADR 0742); the clamp keeps the bilinear inside the layer.
+            // Alpha packs the forest share as 0.5 + 0.5 f (0: not baked, base ground kept).
+            if (cache_ok) {
+                let dn = textureSampleLevel(cache_dn, terroir_sampler, cache_uv, i32(in.cache.z), 0.0).xy;
+                albedo = cache_texel.rgb;
+                forest_f = saturate(cache_texel.a * 2.0 - 1.0);
+                n = normalize(n + vec3<f32>(dn.x, 0.0, dn.y));
+            }
         }
-        // Painted fields over the ground colour (after the colormap, like hb_apply).
-        var dn = g.dn;
-        if (fields.v8.w > 0.5) {
-            let fo = fields_apply(in.world.xz, in.world.xz / params.map.xy, ground_footprint, land,
-                g.open_w, g.forest_w, g.rock_w, g.farm_share, slope_m, in.slope_xz, in.altitude, g.k_wild,
-                g.k_forest, painted);
-            painted = fo.color;
-            dn = dn + fo.dn;
-        }
-        painted = gd_macro(gd, painted, in.world.xz, ground_footprint, land, g.open_w);
-        albedo = mix(base_albedo, painted, land);
-        n = normalize(vec3<f32>(n.x + dn.x * land, n.y, n.z - dn.y * land));
-        // Forest crowns: relief and tone contrast of the canopy (0.45 bump, 0.35 contrast).
-        forest_f = g.forest_w * land;
-        // TS-T1: green-black ground under the forests.
-        albedo = albedo * mix(vec3<f32>(1.0), season.forest_floor.rgb, season.forest_floor.a * forest_f);
-        if (forest_f > 0.01) {
-            let cf = canopy_field(in.world.xz, ground_footprint);
-            n = normalize(vec3<f32>(n.x - cf.y * 0.45 * forest_f, n.y, n.z - cf.z * 0.45 * forest_f));
-            albedo = albedo * (1.0 + 0.35 * forest_f * cf.x);
+        @if(!GROUND_CACHE) {
+            let r = regional_ground(in.world.xz, ground_footprint, in.altitude, in.slope_xz, base_albedo);
+            albedo = r.albedo;
+            forest_f = r.forest_f;
+            n = normalize(n + vec3<f32>(r.dn.x, 0.0, r.dn.y));
         }
     }
     let land_g = smoothstep(0.0, 2.0, in.altitude);
     albedo = rock_apply(albedo, in.world.xz, disp_y, in.altitude, ground_footprint, lit0, crest * land_g, forest_f);
-    let cover = season_snow(disp_y, in.altitude, in.world.xz, ground_footprint, forest_f);
+    let cover = season_snow(disp_y, in.altitude, in.world.xz, ground_footprint, forest_f, n.xz);
     albedo = season_ground(albedo, cover, lit0);
     // DN-ME4 névés and glaciers, then the TB5 coast band (cliffs, beaches, swash).
     let slope_g = length(in.slope_xz) / max(ground.micro.w, 1.0);
     albedo = fw_glacier_apply(albedo, in.world.xz, in.altitude, slope_g, ground_footprint, land_g, disp_y, lit0);
-    let coast_out = coast_band(in.world.xz, ground_footprint, in.altitude, in.world.y, slope_g,
-        cover.snow, albedo, n);
-    albedo = coast_out.color;
-    n = coast_out.n;
-    albedo = weather_ground(albedo, in.altitude, in.world.xz, disp_y, ground_footprint, lit0, forest_f);
-    let to_eye = normalize(view.world_position - in.world);
-    albedo = weather_mist(albedo, in.world.xz, in.altitude, ground_footprint, 1.0 - abs(to_eye.y));
+    @if(!PERF_TNOCOAST) {
+        let coast_out = coast_band(in.world.xz, ground_footprint, in.altitude, in.world.y, slope_g,
+            cover.snow, albedo, n);
+        albedo = coast_out.color;
+        n = coast_out.n;
+    }
+    @if(!PERF_TNOWX) {
+        albedo = weather_ground(albedo, in.altitude, in.world.xz, disp_y, ground_footprint, lit0, forest_f);
+        let to_eye = normalize(view.world_position - in.world);
+        albedo = weather_mist(albedo, in.world.xz, in.altitude, ground_footprint, 1.0 - abs(to_eye.y));
+    }
     albedo = fog_of_war_veil(albedo, in.world.xz);
     // RV-C: fair-weather cumulus shadows (gone on the parchment).
     let area_px = sqrt(length(dpdx(in.world.xz)) * length(dpdy(in.world.xz)));
+    @if(!PERF_TNOCLOUD)
     albedo = albedo * cloud_shadow_light(in.world.xz, ground_footprint, area_px, 1.0 - look.weather.z);
     // Strategic view: fade to the parchment map (ADR 0124). Port of `pm_output`
     // (parchment_common.gdshaderinc): the paper goes mostly through the emission (unlit flat
@@ -2375,7 +2564,7 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     let rvd = rvd_apply(in.world.xz / params.map.xy, ground_footprint, smoothstep(0.0, 2.0, in.altitude), albedo);
     albedo = rvd.color;
     let ndl = max(dot(n, params.sun_dir.xyz), 0.0);
-    var color = albedo * (params.ambient.rgb * rvd.ao + params.sun_color.rgb * ndl * sun_vis) * params.ambient.a;
+    var color = albedo * (params.ambient.rgb * rvd.ao * relief_ao + params.sun_color.rgb * ndl * sun_vis * relief_vis) * params.ambient.a;
     // TS-T9: a cast shadow is the sky light, never black: it keeps at least `1 - opacity` of the lit
     // ground, with the hue of the ambient (sky) light (see `shadows::capped_shadow`).
     let sky = params.ambient.rgb / max(dot(params.ambient.rgb, vec3<f32>(0.2126, 0.7152, 0.0722)), 1e-4);
@@ -2398,4 +2587,96 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         color = mix(color, params.edge.rgb, haze);
     }
     return vec4<f32>(color, 1.0);
+}
+
+// Relief shade of a map point (ADR 0745), marched on the 16 px block heightfield: (sun visibility,
+// ambient visibility). Runs in the vertex stage of the bake only (once per node vertex, amortised
+// by the cache), never in the main pass.
+const SHADE_MAX_ALT_M = 5200.0;
+const SHADE_AO_GAIN = 6.0;
+
+fn relief_shade(xz: vec2<f32>, h0: f32) -> vec2<f32> {
+    if (shade.sun.w < 0.5) {
+        return vec2<f32>(1.0);
+    }
+    let s_eff = max(shade.mix.w, 1e-5);
+    let sun = shade.sun.xyz;
+    let horiz = length(sun.xz);
+    var vis = 1.0;
+    if (horiz > 1e-3 && sun.y > 0.0) {
+        let dir = sun.xz / horiz;
+        // Metres of altitude the sun ray gains per map px.
+        let rise = (sun.y / horiz) / s_eff;
+        let start_h = max(h0, pm_height(xz)) + shade.march.w;
+        let n = i32(shade.march.y);
+        for (var i = 1; i <= n; i = i + 1) {
+            let t = f32(i) / f32(n);
+            let d = shade.march.x * t * t;
+            let ray_h = start_h + rise * d;
+            if (ray_h > SHADE_MAX_ALT_M) {
+                break;
+            }
+            let pen = shade.march.z * (0.25 + t);
+            vis = min(vis, smoothstep(-pen, pen, ray_h - pm_height(xz + dir * d)));
+        }
+    }
+    // Horizon occlusion: highest elevation seen in 8 directions at 3 distances.
+    var occ = 0.0;
+    for (var k = 0u; k < 8u; k = k + 1u) {
+        let a = f32(k) * 0.785398;
+        let dir = vec2<f32>(cos(a), sin(a));
+        var best = 0.0;
+        for (var j = 1; j <= 3; j = j + 1) {
+            let d = shade.mix.z * (f32(j) / 3.0) * (f32(j) / 3.0);
+            let tan_e = (pm_height(xz + dir * d) - h0) * s_eff / max(d, 1.0);
+            best = max(best, tan_e * inverseSqrt(1.0 + tan_e * tan_e));
+        }
+        occ = occ + best;
+    }
+    let ao = 1.0 - clamp(occ * 0.125 * SHADE_AO_GAIN, 0.0, 1.0);
+    return vec2<f32>(vis, ao);
+}
+
+// Ground cache bake (ADR 0742, `ground_cache.rs`): the node mesh drawn flat over its cache layer,
+// one fragment per texel, the regional ground computed with the texel as footprint. The skirts
+// collapse onto the node edges.
+struct BakeVaryings {
+    @builtin(position) clip: vec4<f32>,
+    @location(0) xz: vec2<f32>,
+    @location(1) altitude: f32,
+    @location(2) slope_xz: vec2<f32>,
+    @location(3) texel: f32,
+    // Relief shade (ADR 0745): per vertex, interpolated over the node.
+    @location(4) shade: vec2<f32>,
+};
+
+@vertex
+fn bake_vertex(v: Vertex) -> BakeVaryings {
+    let c = cache_coords(v.morph);
+    var out: BakeVaryings;
+    out.clip = vec4<f32>(c.x * 2.0 - 1.0, 1.0 - c.y * 2.0, 0.5, 1.0);
+    out.xz = v.position.xz;
+    out.altitude = v.position.y;
+    out.slope_xz = v.slope.xy;
+    out.texel = c.w;
+    out.shade = relief_shade(v.position.xz, v.position.y);
+    return out;
+}
+
+struct BakeOut {
+    @location(0) albedo: vec4<f32>,
+    @location(1) dn: vec4<f32>,
+    @location(2) shade: vec4<f32>,
+};
+
+@fragment
+fn bake_fragment(in: BakeVaryings) -> BakeOut {
+    let base = base_ground(in.xz, in.texel);
+    let r = regional_ground(in.xz, in.texel, in.altitude, in.slope_xz, base);
+    var out: BakeOut;
+    // Alpha 0.5 + 0.5 f: never 0, which marks a layer not baked yet (cleared on allocation).
+    out.albedo = vec4<f32>(r.albedo, 0.5 + 0.5 * r.forest_f);
+    out.dn = vec4<f32>(r.dn, 0.0, 1.0);
+    out.shade = vec4<f32>(in.shade, 0.0, 1.0);
+    return out;
 }

@@ -111,6 +111,12 @@ pub struct GameEvent {
     /// The event is a loss for its `faction` (the interface's tone).
     #[serde(default, skip_serializing_if = "is_false")]
     pub loss: bool,
+    /// ADR 0748: the structured cause, until the end of the turn moves it into the journal.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cause: Option<Box<crate::causes::Cause>>,
+    /// ADR 0748: identifier of the cause in the journal (the notification's tooltip).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cause_id: Option<u32>,
 }
 
 fn is_false(value: &bool) -> bool {
@@ -127,6 +133,8 @@ impl GameEvent {
             faction: None,
             public: false,
             loss: false,
+            cause: None,
+            cause_id: None,
         }
     }
 
@@ -151,6 +159,18 @@ impl GameEvent {
         self
     }
 
+    /// Attaches the structured cause of the event (ADR 0748).
+    pub fn cause(mut self, cause: crate::causes::Cause) -> Self {
+        self.cause = Some(Box::new(cause));
+        self
+    }
+
+    /// [`GameEvent::cause`] when there is one (producers that only explain the player's events).
+    pub fn maybe_cause(mut self, cause: Option<crate::causes::Cause>) -> Self {
+        self.cause = cause.map(Box::new);
+        self
+    }
+
     /// A loss for the event's faction (see [`GameEvent::loss`]).
     pub fn loss(mut self) -> Self {
         self.loss = true;
@@ -167,7 +187,7 @@ pub fn capitalize(text: &str) -> String {
 }
 
 /// French preposition "de" with elision before a vowel: `de("Île-de-France")`
-/// gives "d'Île-de-France", `de("Guyenne")` gives "de Guyenne". A leading "h"
+/// gives "d’Île-de-France", `de("Guyenne")` gives "de Guyenne". A leading "h"
 /// is treated as aspirated ("de Hainaut"), as for most place names of the
 /// period.
 pub fn de(name: &str) -> String {
@@ -176,7 +196,7 @@ pub fn de(name: &str) -> String {
         .next()
         .is_some_and(|c| "AEIOUYÉÈÊÂÎÔaeiouyéèêâîô".contains(c));
     if starts_with_vowel {
-        format!("d'{name}")
+        format!("d’{name}")
     } else {
         format!("de {name}")
     }
@@ -188,8 +208,8 @@ mod elision_tests {
 
     #[test]
     fn elides_before_vowels_only() {
-        assert_eq!(de("Île-de-France"), "d'Île-de-France");
-        assert_eq!(de("Artois"), "d'Artois");
+        assert_eq!(de("Île-de-France"), "d’Île-de-France");
+        assert_eq!(de("Artois"), "d’Artois");
         assert_eq!(de("Guyenne"), "de Guyenne");
         assert_eq!(de("Hainaut"), "de Hainaut");
     }

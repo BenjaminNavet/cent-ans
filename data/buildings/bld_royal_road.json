@@ -25,6 +25,10 @@
       "effect": "trade_income",
       "value": 5,
       "mode": "percent"
+    },
+    {
+      "effect": "supply",
+      "value": 5
     }
   ],
   "description": "Grand chemin pavé, entretenu par les officiers du roi, ponts et gués remis en état : les cases de la province coûtent 30 % de moins aux armées en marche (RG9, ADR 0343).",

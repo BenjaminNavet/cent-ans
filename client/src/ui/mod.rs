@@ -8,6 +8,7 @@
 //! panel lot), `window_resize_grip.gd` (panel stack lot), `audio_buses.gd` (the audio plugin
 //! owns the volumes), UI scale rules (`settings::auto_ui_scale`, 1.0 at 900 px, 0.9..1.6).
 
+pub mod advisor_band;
 pub mod art_plates;
 pub mod cursor;
 pub mod fader;

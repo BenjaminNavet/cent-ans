@@ -11,11 +11,27 @@
 //
 // Texture reads below flow control use explicit gradients or levels (WGSL uniformity rules).
 import bevy_pbr::render::{
-    forward_io::{VertexOutput, FragmentOutput},
     pbr_fragment::pbr_input_from_standard_material,
-    pbr_functions::{apply_pbr_lighting, main_pass_post_lighting_processing},
-    mesh_view_bindings::view,
+    pbr_types::PbrInput,
+    mesh_view_bindings::{view, lights},
 };
+import bevy_pbr::decal::clustered::apply_decals;
+
+// Two render paths share `ground_pbr_input` below (the whole material computation):
+// - forward (default): `apply_pbr_lighting` + post-lighting processing in the main pass;
+// - deferred (`PREPASS_PIPELINE`, used when Solari makes the deferred renderer the default): the
+//   same PbrInput goes to the G-buffer through `deferred_output`, lit afterwards (Solari / deferred
+//   lighting pass). The G-buffer keeps base colour (8-bit sRGB), perceptual roughness (8 bit), the
+//   shading normal (octahedral) and emissive: that is all this shader produces (snow, mud, splat,
+//   decals and the weather are already folded into those), so only precision is lost.
+@if(PREPASS_PIPELINE)
+import bevy_pbr::prepass::io::{VertexOutput, FragmentOutput};
+@if(PREPASS_PIPELINE)
+import bevy_pbr::deferred::functions::deferred_output;
+@if(!PREPASS_PIPELINE)
+import bevy_pbr::render::forward_io::{VertexOutput, FragmentOutput};
+@if(!PREPASS_PIPELINE)
+import bevy_pbr::render::pbr_functions::{apply_pbr_lighting, main_pass_post_lighting_processing};
 
 struct GroundParams {
     layers: array<vec4<f32>, 13>,
@@ -39,15 +55,12 @@ struct GroundParams {
 @group(constants::MATERIAL_BIND_GROUP) @binding(102) var albedo_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(103) var normal_array: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(105) var micro_albedo: texture_2d_array<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(106) var micro_albedo_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(107) var micro_normal: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(109) var decor_fields: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(110) var decor_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(111) var relief_map: texture_2d<f32>;
-@group(constants::MATERIAL_BIND_GROUP) @binding(112) var relief_sampler: sampler;
 @group(constants::MATERIAL_BIND_GROUP) @binding(113) var trample_map: texture_2d<f32>;
-// Samplers are shared (Metal allows 16 per stage): the normal arrays use their albedo
-// sampler, the trample map the relief sampler (both linear, clamped).
+// Samplers are shared (Metal allows 16 per stage): the normal arrays and the micro grain pack use
+// the albedo sampler; the relief and trample maps are read without a sampler (`bilinear_clamped`).
 
 const L_GRASS: i32 = 0;
 const L_MEADOW: i32 = 1;
@@ -74,9 +87,11 @@ const FREQ_PATCH2: f32 = 0.0047;
 const FREQ_PUDDLE: f32 = 0.021;
 const FREQ_MACRO_VAR: f32 = 0.0017;
 const FINE_CONTRAST: f32 = 0.6;
-const MACRO_TINT: f32 = 0.28;
+const MACRO_TINT: f32 = 0.38;
 const MACRO_WET: f32 = 0.3;
 const MACRO_ALBEDO: f32 = 0.12;
+// Share of the relief bumps kept when the sun is on the horizon (ADR 0755).
+const LOW_SUN_BUMP: f32 = 0.3;
 
 // --- battle_common.gdshaderinc --------------------------------------------------------------
 
@@ -155,6 +170,30 @@ fn bt_decor_field(df: vec4<f32>, p: vec2<f32>) -> vec3<f32> {
     return vec3<f32>(kind, dot(p, vec2<f32>(-sin(yaw), cos(yaw))), df.b);
 }
 
+// Nearest read of the decor fields without a sampler (Metal allows 16 samplers per stage, and the
+// clustered decals take one): same result as a nearest, clamped sampler at mip 0.
+fn decor_texel(uv: vec2<f32>) -> vec4<f32> {
+    let dims = vec2<i32>(textureDimensions(decor_fields));
+    let texel = clamp(vec2<i32>(floor(uv * vec2<f32>(dims))), vec2<i32>(0), dims - vec2<i32>(1));
+    return textureLoad(decor_fields, texel, 0);
+}
+
+// Bilinear, clamped read at mip 0 without a sampler (Metal allows 16 samplers per stage): same
+// result as a linear, clamp-to-edge sampler; frees the relief / trample sampler slot.
+fn bilinear_clamped(tex: texture_2d<f32>, uv: vec2<f32>) -> vec4<f32> {
+    let dims = vec2<i32>(textureDimensions(tex));
+    let q = uv * vec2<f32>(dims) - 0.5;
+    let f = fract(q);
+    let i0 = vec2<i32>(floor(q));
+    let lo = vec2<i32>(0);
+    let hi = dims - vec2<i32>(1);
+    let a = textureLoad(tex, clamp(i0, lo, hi), 0);
+    let b = textureLoad(tex, clamp(i0 + vec2<i32>(1, 0), lo, hi), 0);
+    let c = textureLoad(tex, clamp(i0 + vec2<i32>(0, 1), lo, hi), 0);
+    let d = textureLoad(tex, clamp(i0 + vec2<i32>(1, 1), lo, hi), 0);
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
 // Bilinear "clear" coverage (Godot `splat_b.g`, a linear-filtered 4 m map): the decor map is
 // sampled nearest, so its alpha is filtered by hand to give soft edges instead of 4 m blocks.
 fn decor_clear_soft(uv: vec2<f32>) -> f32 {
@@ -164,10 +203,10 @@ fn decor_clear_soft(uv: vec2<f32>) -> f32 {
     let f = q - base;
     let c = (base + 0.5) / dims;
     let texel = 1.0 / dims;
-    let a00 = step(0.25, textureSampleLevel(decor_fields, decor_sampler, c, 0.0).a);
-    let a10 = step(0.25, textureSampleLevel(decor_fields, decor_sampler, c + vec2<f32>(texel.x, 0.0), 0.0).a);
-    let a01 = step(0.25, textureSampleLevel(decor_fields, decor_sampler, c + vec2<f32>(0.0, texel.y), 0.0).a);
-    let a11 = step(0.25, textureSampleLevel(decor_fields, decor_sampler, c + texel, 0.0).a);
+    let a00 = step(0.25, decor_texel(c).a);
+    let a10 = step(0.25, decor_texel(c + vec2<f32>(texel.x, 0.0)).a);
+    let a01 = step(0.25, decor_texel(c + vec2<f32>(0.0, texel.y)).a);
+    let a11 = step(0.25, decor_texel(c + texel).a);
     return mix(mix(a00, a10, f.x), mix(a01, a11, f.x), f.y);
 }
 
@@ -214,15 +253,17 @@ fn layer_albedo(k: i32, uv: vec2<f32>, g: Grads, scale: f32) -> vec3<f32> {
     return textureSampleGrad(albedo_array, albedo_sampler, uv, k, g.dx * scale, g.dy * scale).rgb;
 }
 
-fn layer_normal_xy(k: i32, uv: vec2<f32>, g: Grads, scale: f32) -> vec2<f32> {
-    if ground.detail.z < 0.5 {
+// `normals_on` is false once the normal strength has faded to 0 (beyond `detail.y`): the taps would
+// be multiplied by 0, so they are skipped (explicit gradients: legal in non-uniform control flow).
+fn layer_normal_xy(k: i32, uv: vec2<f32>, g: Grads, scale: f32, normals_on: bool) -> vec2<f32> {
+    if ground.detail.z < 0.5 || !normals_on {
         return vec2<f32>(0.0);
     }
     return textureSampleGrad(normal_array, albedo_sampler, uv, k, g.dx * scale, g.dy * scale).xy * 2.0 - 1.0;
 }
 
-@fragment
-fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> FragmentOutput {
+// The ground material as a PbrInput (shared by the forward and the deferred paths).
+fn ground_pbr_input(in: VertexOutput, is_front: bool) -> PbrInput {
     var pbr_input = pbr_input_from_standard_material(in, is_front);
     let p = in.world_position.xz;
     let world_y = in.world_position.y;
@@ -250,7 +291,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     let suv = (p - ground.rect.xy) / ground.rect.zw;
     let inside = all(suv >= vec2<f32>(0.0)) && all(suv <= vec2<f32>(1.0));
     let duv = (p + bt_edge_warp(p) - ground.rect.xy) / ground.rect.zw;
-    let df = textureSampleLevel(decor_fields, decor_sampler, duv, 0.0);
+    let df = decor_texel(duv);
     // Noise-jittered (like the splat read of Godot) and bilinear: no 4 m blocks.
     let clear_jitter = (vec2<f32>(fine, bt_value_noise(p * 0.21 + 7.3)) - 0.5) * 6.0 / ground.rect.zw;
     let clear_zone = select(0.0, decor_clear_soft(suv + clear_jitter), inside);
@@ -295,7 +336,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     var relief = vec4<f32>(0.0, 0.5, 0.5, 1.0);
     if ground.relief.z > 0.0 {
         let ruv = (p - ground.relief_rect.xy) / ground.relief_rect.zw;
-        let r = textureSampleLevel(relief_map, relief_sampler, ruv, 0.0);
+        let r = bilinear_clamped(relief_map, ruv);
         if all(ruv >= vec2<f32>(0.0)) && all(ruv <= vec2<f32>(1.0)) {
             relief = r;
         }
@@ -336,7 +377,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     var trampled = 0.0;
     if ground.weather.y > 0.0 && ground.trample_rect.z > 0.0 {
         let tuv = (p - ground.trample_rect.xy) / ground.trample_rect.zw;
-        let tm = textureSampleLevel(trample_map, relief_sampler, tuv, 0.0).r;
+        let tm = bilinear_clamped(trample_map, tuv).r;
         if all(tuv >= vec2<f32>(0.0)) && all(tuv <= vec2<f32>(1.0)) {
             trampled = smoothstep(0.08, 0.85, tm + (fine - 0.5) * 0.35 * tm);
         }
@@ -364,6 +405,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
 
     // Layers: two taps (scales and orientations), flattened to their mean at mid distance.
     let far_k = smoothstep(ground.far.y, ground.far.z, view_dist) * ground.far.x;
+    let normals_on = ground.detail.x > 0.0 && view_dist < ground.detail.y;
     let g2 = Grads(rot_a(g.dx), rot_a(g.dy));
     var albedo = vec3<f32>(0.0);
     var nxy = vec2<f32>(0.0);
@@ -384,7 +426,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
         let uv1 = p / s;
         let uv2 = rot_a(p) / (s * 2.3) + vec2<f32>(0.37, 0.71);
         var a = mix(layer_albedo(i, uv1, g, 1.0 / s), layer_albedo(i, uv2, g2, 1.0 / (s * 2.3)), blend);
-        var n = mix(layer_normal_xy(i, uv1, g, 1.0 / s), layer_normal_xy(i, uv2, g2, 1.0 / (s * 2.3)), blend);
+        var n = mix(layer_normal_xy(i, uv1, g, 1.0 / s, normals_on), layer_normal_xy(i, uv2, g2, 1.0 / (s * 2.3), normals_on), blend);
         let mean = ground.layers[i].rgb;
         a = mix(a, mean, far_k);
         n = n * (1.0 - far_k);
@@ -401,24 +443,27 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
 
     // Grass: tint, corn, dry / lush / rusty patches, hollows and crests, macro variation.
     let grassy = w[L_GRASS] + w[L_MEADOW] + w[L_FLOWER] + w[L_TRODDEN];
-    var tint = ground.season.rgb * mix(vec3<f32>(0.92, 1.0, 0.86), vec3<f32>(1.08, 1.02, 0.86), macro2);
+    var tint = ground.season.rgb * mix(vec3<f32>(0.94, 1.0, 0.9), vec3<f32>(1.04, 1.02, 0.88), macro2);
     if field.x == 2.0 {
         tint = mix(tint, select(vec3<f32>(1.45, 1.18, 0.62), vec3<f32>(1.3, 1.1, 0.7), decor_kind == 6.0), field_w);
     }
     let dry = smoothstep(0.42, 0.66, patch_n * 0.7 + patch2 * 0.45);
     let lush = smoothstep(0.45, 0.7, (1.0 - patch_n) * 0.75 + patch2 * 0.35);
     let rust = smoothstep(0.68, 0.8, patch2) * (1.0 - dry);
-    tint = mix(tint, tint * vec3<f32>(1.35, 1.12, 0.62), dry * 0.85);
+    tint = mix(tint, tint * vec3<f32>(1.24, 1.08, 0.72), dry * 0.85);
     tint = mix(tint, tint * vec3<f32>(0.7, 0.86, 0.66), lush * 0.8);
     tint = mix(tint, tint * vec3<f32>(1.15, 0.92, 0.72), rust * 0.45);
     let tx_ground = ground.micro.w;
     tint = mix(tint, mix(vec3<f32>(1.0), tint, 0.6), tx_ground);
     tint = mix(tint, tint * vec3<f32>(0.78, 0.92, 0.72), dip * 0.7);
     tint = mix(tint, tint * vec3<f32>(1.14, 1.06, 0.8), crest * 0.55);
-    let mv = macro_tex(p * FREQ_MACRO_VAR + vec2<f32>(0.47, 0.19)) * 0.65
-        + macro_tex(p * FREQ_MACRO_VAR * 0.43 + vec2<f32>(0.81, 0.33)) * 0.35;
+    // World-noise macro variation of the grass (ADR 0755): three octaves (from the long field scale down to the
+    // meadow), so that no two stretches of field share a tint; one extra tap, no extra pass.
+    let mv = macro_tex(p * FREQ_MACRO_VAR + vec2<f32>(0.47, 0.19)) * 0.5
+        + macro_tex(p * FREQ_MACRO_VAR * 0.43 + vec2<f32>(0.81, 0.33)) * 0.3
+        + macro_tex(p * FREQ_MACRO_VAR * 2.7 + vec2<f32>(0.19, 0.66)) * 0.2;
     let mv_c = (mv - 0.5) * 2.0;
-    tint = tint * mix(vec3<f32>(1.0), vec3<f32>(1.0 + 0.5 * mv_c, 1.0 + 0.12 * mv_c, 1.0 - 0.45 * mv_c), MACRO_TINT);
+    tint = tint * mix(vec3<f32>(1.0), vec3<f32>(1.0 + 0.42 * mv_c, 1.0 + 0.1 * mv_c, 1.0 - 0.4 * mv_c), MACRO_TINT);
     albedo = mix(albedo, albedo * tint, grassy);
     albedo = albedo * (1.0 + mv_c * MACRO_ALBEDO);
     albedo = mix(albedo, albedo * vec3<f32>(0.78, 0.8, 0.74), clamp(-mv_c, 0.0, 1.0) * MACRO_WET);
@@ -440,7 +485,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
         let dcol = layer_albedo(dom, uvn, gn, 1.0 / s);
         let dl = bt_luma(dcol) / max(bt_luma(ground.layers[dom].rgb), 0.02);
         albedo = albedo * mix(1.0, clamp(dl, 0.55, 1.5), near_k * 0.5);
-        nxy = nxy + layer_normal_xy(dom, uvn, gn, 1.0 / s) * near_k * 0.6;
+        nxy = nxy + layer_normal_xy(dom, uvn, gn, 1.0 / s, normals_on) * near_k * 0.6;
     }
     // PO4 micro grain on grass, meadows, dirt and mud (not rock nor snow).
     var nd_k = 1.0 - smoothstep(ground.micro.z * 0.45, ground.micro.z, view_dist);
@@ -451,12 +496,14 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
         let muv = rot_a(p) / mt + vec2<f32>(0.37, 0.11);
         let mdx = rot_a(g.dx) / mt;
         let mdy = rot_a(g.dy) / mt;
-        let mcol = textureSampleGrad(micro_albedo, micro_albedo_sampler, muv, ml, mdx, mdy).rgb;
-        let mref = textureSampleLevel(micro_albedo, micro_albedo_sampler, muv, ml, 12.0).rgb;
+        let mcol = textureSampleGrad(micro_albedo, albedo_sampler, muv, ml, mdx, mdy).rgb;
+        let mref = textureSampleLevel(micro_albedo, albedo_sampler, muv, ml, 12.0).rgb;
         let mlum = bt_luma(mcol) / max(bt_luma(mref), 0.02);
         albedo = albedo * mix(1.0, clamp(mlum, 0.5, 1.6), nd_k * ground.micro.y);
-        let mn = textureSampleGrad(micro_normal, micro_albedo_sampler, muv, ml, mdx, mdy).xy * 2.0 - 1.0;
-        nxy = nxy + mn * nd_k * 0.8;
+        if normals_on {
+            let mn = textureSampleGrad(micro_normal, albedo_sampler, muv, ml, mdx, mdy).xy * 2.0 - 1.0;
+            nxy = nxy + mn * nd_k * 0.8;
+        }
     }
     // Furrows, faded where their period goes under a few pixels and at mid distance.
     if w_plough > 0.0 || w_fresh > 0.0 {
@@ -510,12 +557,20 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
 
     // Normals: layer maps (tangent +x, bitangent cross(up, +x)) faded with the distance, plus the
     // R2 detail bumps (stronger on stony ground), faded far away and under snow.
-    let strength = ground.detail.x * (1.0 - smoothstep(ground.detail.y * 0.4, ground.detail.y, view_dist));
+    // Raking light: the same bumps swing N.L by +-60 % at 9 degrees of sun height (dawn, dusk)
+    // against +-20 % at 30 degrees, which painted the ground with dark leopard spots. The bumps
+    // and layer normals ease off with the sun height.
+    var sun_up = 1.0;
+    if lights.n_directional_lights > 0u {
+        sun_up = lights.directional_lights[0].direction_to_light.y;
+    }
+    let low_sun = mix(LOW_SUN_BUMP, 1.0, smoothstep(0.15, 0.5, sun_up));
+    let strength = ground.detail.x * low_sun * (1.0 - smoothstep(ground.detail.y * 0.4, ground.detail.y, view_dist));
     let up = normalize(pbr_input.world_normal);
     let tangent = normalize(vec3<f32>(1.0, 0.0, 0.0) - up * up.x);
     let bitangent = cross(up, tangent);
     var n_world = up + (tangent * nxy.x + bitangent * nxy.y) * strength;
-    let bump_fade = (1.0 - smoothstep(120.0, 420.0, view_dist)) * ground.relief.y * (1.0 - snowy_w * 0.7);
+    let bump_fade = (1.0 - smoothstep(120.0, 420.0, view_dist)) * ground.relief.y * low_sun * (1.0 - snowy_w * 0.7);
     if bump_fade > 0.01 {
         let rough = clamp(outcrops + w[L_ROCK] + w[L_PEBBLES], 0.0, 1.0);
         let e = 0.6;
@@ -529,8 +584,22 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     let gloss_far = mix(0.38, 0.62, smoothstep(80.0, 300.0, view_dist));
     pbr_input.material.perceptual_roughness = mix(0.95, gloss_far, mud_gloss * (0.5 + 0.5 * w[L_MUD] + 0.3 * w[L_DIRT]));
 
+    // Clustered decals (lot decals): blood and mud traces; a no-op without the `decals` feature.
+    apply_decals(&pbr_input);
+    return pbr_input;
+}
+
+@fragment
+fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> FragmentOutput {
+    let pbr_input = ground_pbr_input(in, is_front);
+@if(PREPASS_PIPELINE)
+    return deferred_output(in, pbr_input);
+@if(!PREPASS_PIPELINE)
     var out: FragmentOutput;
+@if(!PREPASS_PIPELINE)
     out.color = apply_pbr_lighting(pbr_input);
+@if(!PREPASS_PIPELINE)
     out.color = main_pass_post_lighting_processing(pbr_input, out.color);
+@if(!PREPASS_PIPELINE)
     return out;
 }

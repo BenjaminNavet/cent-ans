@@ -29,10 +29,17 @@ pub const LEVELS: [&str; 4] = ["low", "medium", "high", "ultra"];
 pub struct Preset {
     pub msaa: Msaa,
     pub map_msaa: Msaa,
+    /// Campaign map: SMAA post-pass instead of MSAA (`map_smaa`, ADR 0741).
+    pub map_smaa: bool,
+    /// Campaign map: texels per side of a ground cache layer (`map_ground_cache`, ADR 0742),
+    /// 0 for the live ground.
+    pub map_ground_cache: u32,
     pub shadow_atlas: usize,
     pub shadow_splits: usize,
     /// Cascades of the campaign sun (`map_shadow_splits`).
     pub map_shadow_splits: usize,
+    /// Shadow atlas of the campaign sun (`map_shadow_atlas`, `shadow_atlas` when absent).
+    pub map_shadow_atlas: usize,
     pub shadow_distance: f32,
     pub map_shadow_range: f32,
     pub model_shadow_distance: f32,
@@ -47,6 +54,8 @@ pub struct Preset {
     pub relief_vertex_px: f32,
     /// Campaign relief: node budget before the quadtree coarsens (`relief_items`).
     pub relief_items: u32,
+    /// Optional post-effects this preset enables (`postfx`, ids of [`super::postfx::EFFECTS`]).
+    pub postfx: Vec<String>,
 }
 
 fn msaa_from(name: &str) -> Option<Msaa> {
@@ -64,9 +73,12 @@ impl Preset {
         Self {
             msaa: Msaa::Sample2,
             map_msaa: Msaa::Off,
+            map_smaa: true,
+            map_ground_cache: 0,
             shadow_atlas: 8192,
             shadow_splits: 4,
             map_shadow_splits: 4,
+            map_shadow_atlas: 8192,
             shadow_distance: 1.0,
             map_shadow_range: 1.0,
             model_shadow_distance: 250.0,
@@ -76,6 +88,7 @@ impl Preset {
             battle_lod: 1.0,
             relief_vertex_px: 7.5,
             relief_items: 700,
+            postfx: Vec::new(),
         }
     }
 
@@ -85,9 +98,16 @@ impl Preset {
         Some(Self {
             msaa: msaa_from(text("msaa")?)?,
             map_msaa: msaa_from(text("map_msaa")?)?,
+            map_smaa: value
+                .get("map_smaa")
+                .and_then(Value::as_bool)
+                .unwrap_or(false),
+            map_ground_cache: number("map_ground_cache").map_or(0, |v| v as u32),
             shadow_atlas: number("shadow_atlas")? as usize,
             shadow_splits: number("shadow_splits")? as usize,
             map_shadow_splits: number("map_shadow_splits").map_or(4, |v| v as usize),
+            map_shadow_atlas: number("map_shadow_atlas").or_else(|| number("shadow_atlas"))?
+                as usize,
             shadow_distance: number("shadow_distance")? as f32,
             map_shadow_range: number("map_shadow_range")? as f32,
             model_shadow_distance: number("model_shadow_distance")? as f32,
@@ -97,6 +117,16 @@ impl Preset {
             battle_lod: number("battle_lod").unwrap_or(1.0) as f32,
             relief_vertex_px: number("relief_vertex_px").unwrap_or(7.5).clamp(1.0, 32.0) as f32,
             relief_items: number("relief_items").unwrap_or(700.0).clamp(50.0, 4000.0) as u32,
+            postfx: value
+                .get("postfx")
+                .and_then(Value::as_array)
+                .map(|ids| {
+                    ids.iter()
+                        .filter_map(Value::as_str)
+                        .map(str::to_owned)
+                        .collect()
+                })
+                .unwrap_or_default(),
         })
     }
 }
@@ -184,11 +214,17 @@ pub struct RenderQuality {
     /// Multiplier of the regiments' impostor distance (`battle_lod` of the preset).
     pub battle_lod: f32,
     pub msaa_campaign: Msaa,
+    /// SMAA on the campaign camera: the preset asks for it and the player forced no MSAA level.
+    pub smaa_campaign: bool,
+    /// Ground cache of the campaign map: texels per layer side, 0 off (ADR 0742).
+    pub ground_cache_texels: u32,
     /// Campaign relief density of the preset (`relief_vertex_px`, `relief_items`).
     pub relief_vertex_px: f32,
     pub relief_items: u32,
     pub shadows: bool,
     pub shadow_map_size: usize,
+    /// Side of one campaign cascade's shadow map (ADR 0747).
+    pub map_shadow_map_size: usize,
     pub shadow_cascades: usize,
     /// Cascades allowed to the campaign sun.
     pub map_shadow_cascades: usize,
@@ -200,6 +236,8 @@ pub struct RenderQuality {
     pub veg_max_distance: f32,
     /// Multiplier of the camera far planes (`Settings::view_distance`).
     pub view_distance: f32,
+    /// Optional post-effects on or off (player setting over the preset, see `postfx`).
+    pub postfx: super::postfx::PostFxFlags,
 }
 
 /// Side of one cascade's shadow map. Godot's `shadow_atlas` is ONE atlas shared by the cascades
@@ -236,10 +274,17 @@ impl RenderQuality {
             ssao_quality: preset.ssao_quality.clone(),
             battle_lod: preset.battle_lod,
             msaa_campaign: forced.unwrap_or(preset.map_msaa),
+            smaa_campaign: preset.map_smaa && forced.is_none(),
+            ground_cache_texels: crate::campaign::perf_switch::value("GROUND_CACHE")
+                .map_or(preset.map_ground_cache, |v| v as u32),
             relief_vertex_px: preset.relief_vertex_px,
             relief_items: preset.relief_items,
             shadows: settings.shadows,
             shadow_map_size: cascade_map_size(preset.shadow_atlas, preset.shadow_splits),
+            map_shadow_map_size: cascade_map_size(
+                preset.map_shadow_atlas,
+                preset.map_shadow_splits,
+            ),
             shadow_cascades: preset.shadow_splits,
             map_shadow_cascades: preset.map_shadow_splits.clamp(1, 4),
             shadow_distance: preset.shadow_distance,
@@ -247,6 +292,7 @@ impl RenderQuality {
             model_shadow_distance: preset.model_shadow_distance,
             veg_max_distance: preset.veg_max_distance,
             view_distance: settings.view_distance.clamp(0.25, 2.0),
+            postfx: super::postfx::PostFxFlags::resolve(settings, &preset.postfx),
         }
     }
 }
@@ -350,14 +396,21 @@ pub fn apply_shadows(
         Option<&mut CascadeShadowConfig>,
     )>,
 ) {
-    let wanted_size = crate::campaign::perf_switch::value("SHADOW_SIZE")
-        .map_or(quality.shadow_map_size, |v| v as usize);
+    let battle = matches!(state.as_deref().map(|s| *s.get()), Some(AppState::Battle));
+    let preset_size = if battle {
+        quality.shadow_map_size
+    } else {
+        quality.map_shadow_map_size
+    };
+    let wanted_size =
+        crate::campaign::perf_switch::value("SHADOW_SIZE").map_or(preset_size, |v| v as usize);
     if map.size != wanted_size {
         map.size = wanted_size;
     }
-    let scale = match state.as_deref().map(|s| *s.get()) {
-        Some(AppState::Battle) => quality.shadow_distance,
-        _ => quality.map_shadow_range,
+    let scale = if battle {
+        quality.shadow_distance
+    } else {
+        quality.map_shadow_range
     };
     for (base, mut light, cascades) in &mut suns {
         let enabled = base.shadows && quality.shadows;
@@ -499,6 +552,7 @@ mod tests {
         assert!(!ultra.ssao_battle);
         assert_eq!(ultra.msaa_battle, Msaa::Sample4);
         assert_eq!(ultra.shadow_map_size, 4096);
+        assert_eq!(ultra.map_shadow_map_size, 2048);
         assert_eq!(ultra.view_distance, 0.5);
     }
 }

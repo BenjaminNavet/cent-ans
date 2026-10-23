@@ -180,12 +180,27 @@ fn spawn(commands: &mut Commands, theme: &UiTheme, assets: &AssetServer, view: &
                         UiType::Body,
                     ));
                     card.spawn(caption(&theme, &view.lines.join("\n")));
+                    // ADR 0754: why the campaign ended as it did.
+                    if !view.causes_title.is_empty() {
+                        card.spawn((
+                            Name::new("EndingCauses"),
+                            typed(&theme, &view.causes_title, UiType::Body),
+                        ));
+                        if !view.causes.is_empty() {
+                            card.spawn(caption(&theme, &view.causes.join("\n")));
+                        }
+                    }
                     card.spawn(Node {
                         column_gap: Val::Px(16.0),
                         justify_content: JustifyContent::Center,
                         ..default()
                     })
                     .with_children(|row| {
+                        row.spawn(button_primary(
+                            &theme,
+                            "ending:causes",
+                            &game_api::causes::ui_text("open_causes_button"),
+                        ));
                         row.spawn(button_primary(
                             &theme,
                             "ending:continue",
@@ -205,9 +220,18 @@ fn handle_buttons(
     mut screen: ResMut<EndScreen>,
     mut sim: ResMut<Sim>,
     mut next: MessageWriter<crate::ui::fader::FadeToState>,
+    mut causes: ResMut<crate::campaign::panels::chronicle::CausesRequest>,
 ) {
     for press in pressed.read() {
         match press.name.as_str() {
+            "ending:causes" => {
+                // The campaign goes on behind the screen, on the chronicle of causes.
+                if let Some(root) = screen.root.take() {
+                    commands.entity(root).despawn();
+                }
+                screen.continued += 1;
+                causes.0 = Some(None);
+            }
             "ending:continue" => {
                 if let Some(root) = screen.root.take() {
                     commands.entity(root).despawn();
@@ -238,6 +262,7 @@ fn dump(world: &World) -> (String, Value) {
             "view": screen.view.as_ref().map(|v| json!({
                 "kind": v.kind, "title": v.title, "score": v.score, "turn": v.turn,
                 "art": v.art, "lines": v.lines, "breakdown": v.breakdown,
+                "causes_title": v.causes_title, "causes": v.causes,
             })),
         }),
     )

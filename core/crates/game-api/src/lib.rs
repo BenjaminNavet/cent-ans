@@ -3,6 +3,7 @@
 //! view is unit-tested here by `cargo test -p game-api`.
 
 pub mod army;
+pub mod causes;
 pub mod chronicle;
 pub mod common;
 pub mod court;

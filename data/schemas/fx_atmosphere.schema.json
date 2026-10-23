@@ -145,7 +145,7 @@
     "time_of_day": {
       "type": "object",
       "description": "Chantier PO (ADR 0097, bible DA § 12.6) : préréglages d'heure du jour (soleil, ciel et étalonnage). Bataille (PO4) : la phase de départ donnée par le cœur (EP8, `phases`) choisit le préréglage ; sans heure du cœur, tirage de rendu déterministe sur la graine (`midday` exclu par temps couvert). Rendu seulement.",
-      "propertyNames": { "enum": ["morning", "midday", "evening"] },
+      "propertyNames": { "enum": ["dawn", "morning", "midday", "afternoon", "dusk", "night"] },
       "additionalProperties": {
         "type": "object",
         "properties": {
@@ -153,6 +153,22 @@
           "sun_elevation": { "type": "number", "minimum": 0, "maximum": 90, "description": "Degrés au-dessus de l'horizon (temps clair ; multiplié par sun_elevation_scale de la météo)." },
           "sun_azimuth": { "type": "number", "minimum": 0, "maximum": 360, "description": "Lacet du soleil en degrés (rotation Y de la lumière, même repère que sun_yaw_deg d'EP8 : 218 = sud-ouest du champ)." },
           "sun_color": { "$ref": "#/$defs/rgb" },
+          "sun_kelvin": { "type": "number", "minimum": 1000, "maximum": 12000, "description": "ADR 0748 : température de couleur du soleil (K) ; l'emporte sur sun_color." },
+          "sky_luminance_scale": { "type": "number", "minimum": 0.01, "maximum": 2, "description": "ADR 0748 : facteur sur la luminance du ciel de la météo (nuit : sombre)." },
+          "air": {
+            "type": "object",
+            "description": "ADR 0748 : couleur de l'air à cette heure (brume dorée de l'aube, orangée du soir). Tout champ absent = valeur de la météo.",
+            "additionalProperties": false,
+            "properties": {
+              "color": { "$ref": "#/$defs/rgb", "description": "Couleur du brouillard et du voile d'horizon." },
+              "inscattering": { "$ref": "#/$defs/rgb", "description": "Lumière diffusée par la perspective aérienne." },
+              "sun_color": { "$ref": "#/$defs/rgb", "description": "Lueur du brouillard côté soleil." },
+              "ambient_color": { "$ref": "#/$defs/rgb", "description": "Couleur de l'ambiance." },
+              "visibility_scale": { "type": "number", "minimum": 0.1, "maximum": 2, "description": "Facteur sur la visibilité aérienne (< 1 : air plus épais)." },
+              "ambient_scale": { "type": "number", "minimum": 0, "maximum": 3, "description": "Facteur sur l'ambiance." },
+              "overcast_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de la teinte appliquée sous pluie, brouillard et neige." }
+            }
+          },
           "sun_energy": { "type": "number", "minimum": 0, "maximum": 4, "description": "Énergie par temps clair (multipliée par sun_energy_scale de la météo)." },
           "sky": {
             "type": "object",
@@ -162,7 +178,7 @@
           },
           "grade": { "$ref": "#/$defs/grade", "description": "Étalonnage de l'heure, appliqué après ceux de la saison et de la météo." }
         },
-        "required": ["phases", "sun_elevation", "sun_azimuth", "sun_color", "sun_energy", "grade"],
+        "required": ["phases", "sun_elevation", "sun_azimuth", "sun_energy", "grade"],
         "additionalProperties": false
       }
     }

@@ -1,0 +1,20 @@
+{
+  "description": "Décals clusterisés Bevy (lot decals) : traces au sol de la bataille (sang des morts, boue des charges). Rendu seulement. DÉSACTIVÉ par défaut tant que le coût n’est pas mesuré ; demande aussi la feature Cargo `decals`.",
+  "enabled": true,
+  "max_decals": 256,
+  "lifetime_s": 120.0,
+  "fade_s": 20.0,
+  "projection_depth_m": 3.0,
+  "max_per_frame": 12,
+  "blood": {
+    "enabled": true,
+    "size_m": [0.9, 1.7],
+    "min_interval_s": 0.1
+  },
+  "mud": {
+    "enabled": true,
+    "size_m": [1.4, 2.6],
+    "interval_s": 0.7,
+    "contact_scale": 2.2
+  }
+}

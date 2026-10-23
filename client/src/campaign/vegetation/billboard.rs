@@ -18,7 +18,7 @@ use bevy::{
     },
     mesh::{MeshVertexBufferLayoutRef, VertexBufferLayout},
     pbr::{
-        MeshPipeline, MeshPipelineKey, MeshPipelineSystems, SetMeshViewBindGroup,
+        LightEntity, MeshPipeline, MeshPipelineKey, MeshPipelineSystems, SetMeshViewBindGroup,
         SetMeshViewBindingArrayBindGroup, ViewKeyCache,
     },
     prelude::*,
@@ -212,6 +212,49 @@ pub struct VegBatch {
     pub version: u64,
     /// Bumped whenever `params` changes: the uniform is rebuilt.
     pub params_version: u64,
+    /// Order of the records by ground distance to the camera, for the shadow cascades.
+    pub shadow_order: Arc<ShadowOrder>,
+}
+
+/// The records of a batch sorted by horizontal distance to `origin` (the camera's ground point
+/// at assembly): each shadow cascade draws only the contiguous run of trees it can see
+/// (`shadows::shadow_ranges`). Empty: unsorted, every cascade draws everything.
+#[derive(Clone, Debug, Default)]
+pub struct ShadowOrder {
+    pub origin: Vec2,
+    /// Sorted horizontal distances, one per record.
+    pub distances: Vec<f32>,
+    /// Tallest record (`scale`) and lowest base (`y`): bounds of the shadow reach.
+    pub max_height: f32,
+    pub min_y: f32,
+}
+
+/// Sorts `records` near to far from `origin` (horizontal distance) and returns their order.
+pub fn sort_records(records: &mut Vec<u8>, origin: Vec2) -> ShadowOrder {
+    let float = |rec: &[u8], at: usize| f32::from_le_bytes(rec[at..at + 4].try_into().unwrap());
+    let mut keyed: Vec<(f32, usize)> = records
+        .as_chunks::<RECORD_BYTES>()
+        .0
+        .iter()
+        .enumerate()
+        .map(|(i, rec)| (Vec2::new(float(rec, 0), float(rec, 8)).distance(origin), i))
+        .collect();
+    keyed.sort_unstable_by(|a, b| a.0.total_cmp(&b.0));
+    let mut sorted = Vec::with_capacity(records.len());
+    let (mut max_height, mut min_y) = (0.0f32, f32::MAX);
+    for &(_, i) in &keyed {
+        let rec = &records[i * RECORD_BYTES..(i + 1) * RECORD_BYTES];
+        max_height = max_height.max(float(rec, 16));
+        min_y = min_y.min(float(rec, 4));
+        sorted.extend_from_slice(rec);
+    }
+    *records = sorted;
+    ShadowOrder {
+        origin,
+        distances: keyed.into_iter().map(|(d, _)| d).collect(),
+        max_height,
+        min_y: if min_y == f32::MAX { 0.0 } else { min_y },
+    }
 }
 
 /// Appends one record to `out`.
@@ -563,23 +606,40 @@ impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
         param: SystemParamItem<'w, '_, Self::Param>,
         pass: &mut TrackedRenderPass<'w>,
     ) -> RenderCommandResult {
-        draw_records(item, view, item_query, param, pass, false)
+        draw_records(item, view, item_query, param, pass, false, 0..u32::MAX)
     }
 }
 
 impl<P: PhaseItem> RenderCommand<P> for DrawShadowBatch {
     type Param = (SRes<RenderAssets<RenderMesh>>, SRes<MeshAllocator>);
-    type ViewQuery = ();
-    type ItemQuery = (Read<InstanceBuffer>, Read<VegBatch>);
+    type ViewQuery = Option<Read<LightEntity>>;
+    type ItemQuery = (
+        Read<InstanceBuffer>,
+        Read<VegBatch>,
+        Option<Read<super::shadow_pass::VegShadowCaster>>,
+    );
 
     fn render<'w>(
         item: &P,
-        view: (),
-        item_query: Option<(&'w InstanceBuffer, &'w VegBatch)>,
+        light: Option<&'w LightEntity>,
+        item_query: Option<(
+            &'w InstanceBuffer,
+            &'w VegBatch,
+            Option<&'w super::shadow_pass::VegShadowCaster>,
+        )>,
         param: SystemParamItem<'w, '_, Self::Param>,
         pass: &mut TrackedRenderPass<'w>,
     ) -> RenderCommandResult {
-        draw_records(item, view, item_query, param, pass, true)
+        let Some((instances, batch, caster)) = item_query else {
+            return RenderCommandResult::Skip;
+        };
+        let range = match (light, caster) {
+            (Some(LightEntity::Directional { cascade_index, .. }), Some(caster)) => {
+                caster.range(*cascade_index)
+            }
+            _ => 0..u32::MAX,
+        };
+        draw_records(item, (), Some((instances, batch)), param, pass, true, range)
     }
 }
 
@@ -595,13 +655,15 @@ fn draw_records<'w, P: PhaseItem>(
     >,
     pass: &mut TrackedRenderPass<'w>,
     shadow: bool,
+    range: std::ops::Range<u32>,
 ) -> RenderCommandResult {
     let allocator = allocator.into_inner();
     let Some((instances, batch)) = item_query else {
         return RenderCommandResult::Skip;
     };
     let count = instances.count;
-    if count == 0 {
+    let range = range.start.min(count)..range.end.min(count);
+    if range.is_empty() {
         return RenderCommandResult::Success;
     }
     let mesh_id = match (shadow, &batch.shadow_mesh) {
@@ -628,11 +690,11 @@ fn draw_records<'w, P: PhaseItem>(
             pass.draw_indexed(
                 index_slice.range.start..(index_slice.range.start + index_count),
                 vertex_slice.range.start as i32,
-                0..count,
+                range,
             );
         }
         RenderMeshBufferInfo::NonIndexed => {
-            pass.draw(vertex_slice.range, 0..count);
+            pass.draw(vertex_slice.range, range);
         }
     }
     RenderCommandResult::Success
@@ -641,6 +703,19 @@ fn draw_records<'w, P: PhaseItem>(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn records_sort_near_to_far_with_their_bounds() {
+        let mut out = Vec::new();
+        for (x, h, y) in [(9.0, 1.0, 2.0), (-1.0, 3.0, 0.5), (4.0, 2.0, 1.0)] {
+            push_record(&mut out, Vec3::new(x, y, 0.0), 0.0, h, 0.0, [1.0; 3]);
+        }
+        let order = sort_records(&mut out, Vec2::ZERO);
+        assert_eq!(order.distances, vec![1.0, 4.0, 9.0]);
+        assert_eq!((order.max_height, order.min_y), (3.0, 0.5));
+        let x_of = |i: usize| f32::from_le_bytes(out[i * RECORD_BYTES..][..4].try_into().unwrap());
+        assert_eq!([x_of(0), x_of(1), x_of(2)], [-1.0, 4.0, 9.0]);
+    }
 
     #[test]
     fn record_and_params_have_the_declared_sizes() {

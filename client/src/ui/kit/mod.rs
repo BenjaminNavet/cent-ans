@@ -22,6 +22,7 @@
 
 pub mod contrast;
 pub mod fa;
+pub mod focus;
 pub mod fr;
 pub mod gallery;
 pub mod icons;
@@ -313,7 +314,9 @@ impl Plugin for UiKitPlugin {
             .add_plugins(resize_grip::plugin)
             .add_plugins(fa::plugin)
             .add_plugins(contrast::plugin)
+            .add_plugins(focus::FocusPlugin)
             .add_plugins((super::fader::plugin, super::art_plates::plugin))
+            .add_plugins(super::advisor_band::AdvisorBandPlugin)
             .add_systems(Startup, (load_resources, spawn_ui_camera).chain())
             .add_systems(Update, apply_text_scale)
             .add_observer(on_activate)

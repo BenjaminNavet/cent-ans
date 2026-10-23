@@ -35,17 +35,17 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Selånger",
-      "local": "Selånger",
+      "display": "Stockholm",
+      "local": "Stockholm",
       "local_language": "vieux suédois"
     },
-    "lat": 62.3958,
-    "lon": 17.2843
+    "lat": 59.3293,
+    "lon": 18.0686
   },
   "geo": {
     "capital_lonlat": [
-      17.2843,
-      62.3958
+      18.0686,
+      59.3293
     ],
     "seed_lonlat": [
       17.6,

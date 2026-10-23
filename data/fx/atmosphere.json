@@ -16,7 +16,7 @@
     },
     "dawn": {
       "path": "res://assets/third_party/skies/kloppenheim_06_puresky/kloppenheim_06_puresky_2k.hdr",
-      "sun_azimuth_deg": 40.7, "sun_elevation_deg": 4.7, "mean": 0.827, "sunny": false
+      "sun_azimuth_deg": 40.7, "sun_elevation_deg": 4.7, "mean": 0.827, "sunny": true
     },
     "misty_morning": {
       "path": "res://assets/third_party/skies/kloofendal_misty_morning_puresky/kloofendal_misty_morning_puresky_2k.hdr",
@@ -41,7 +41,7 @@
   },
   "seasons": {
     "spring": {"temperature": -0.05, "tint": -0.03, "saturation": 1.0, "gain": [0.99, 1.01, 1.0]},
-    "summer": {"temperature": 0.18, "saturation": 1.04, "contrast": 1.03},
+    "summer": {"temperature": 0.08, "saturation": 1.04, "contrast": 1.03},
     "autumn": {"temperature": 0.34, "saturation": 1.02, "gain": [1.03, 1.0, 0.92], "highlights": [1.03, 0.99, 0.9]},
     "winter": {"temperature": -0.5, "saturation": 0.72, "lift": [0.0, 0.006, 0.02], "highlights": [0.97, 1.0, 1.04]}
   },
@@ -52,7 +52,7 @@
     },
     "summer": {
       "decor_saturation": 0.6,
-      "grade": {"temperature": 0.18, "saturation": 1.04, "contrast": 1.03, "shadow_saturation": 0.7}
+      "grade": {"temperature": 0.08, "saturation": 1.0, "contrast": 1.03, "shadow_saturation": 0.7}
     },
     "autumn": {
       "decor_saturation": 0.5,
@@ -61,30 +61,54 @@
     "winter": {"decor_saturation": 0.6}
   },
   "time_of_day": {
+    "dawn": {
+      "phases": ["dawn"],
+      "sun_elevation": 8.0, "sun_azimuth": 100.0, "sun_kelvin": 3100, "sun_energy": 2.5,
+      "sky_luminance_scale": 1.0,
+      "sky": {"clear": {"spring": "dawn", "summer": "dawn", "autumn": "dawn", "winter": "dawn"}},
+      "air": {"color": [0.93, 0.78, 0.68], "inscattering": [0.98, 0.78, 0.60], "sun_color": [1.0, 0.68, 0.38], "visibility_scale": 0.5, "ambient_color": [0.80, 0.80, 0.94], "ambient_scale": 1.35, "overcast_share": 0.3},
+      "grade": {"temperature": 0.16, "tint": 0.03, "contrast": 1.05, "saturation": 1.04, "lift": [0.014, 0.010, 0.016], "highlights": [1.06, 1.0, 0.88], "shadows": [0.96, 0.97, 1.06]}
+    },
     "morning": {
-      "phases": ["dawn", "morning"],
-      "sun_elevation": 15.0, "sun_azimuth": 115.0, "sun_color": [1.0, 0.86, 0.66], "sun_energy": 1.55,
+      "phases": ["morning"],
+      "sun_elevation": 24.0, "sun_azimuth": 118.0, "sun_kelvin": 4500, "sun_energy": 2.3,
       "sky": {"clear": {"spring": "winter_clear", "summer": "winter_clear", "autumn": "winter_clear", "winter": "winter_clear"}},
-      "grade": {"temperature": 0.22, "tint": 0.02, "contrast": 1.04, "saturation": 0.96, "lift": [0.012, 0.01, 0.006], "highlights": [1.03, 1.0, 0.93], "shadows": [0.97, 0.98, 1.03]}
+      "air": {"color": [0.80, 0.82, 0.88], "visibility_scale": 0.85, "overcast_share": 0.0},
+      "grade": {"temperature": 0.08, "contrast": 1.03, "saturation": 1.0, "highlights": [1.03, 1.0, 0.94], "shadows": [0.97, 0.98, 1.03]}
     },
     "midday": {
-      "phases": ["midday", "afternoon"],
-      "sun_elevation": 30.0, "sun_azimuth": 218.0, "sun_color": [1.0, 0.93, 0.82], "sun_energy": 2.2,
-      "grade": {"temperature": 0.05, "contrast": 1.02, "highlights": [1.0, 0.99, 0.96]}
+      "phases": ["midday"],
+      "sun_elevation": 32.0, "sun_azimuth": 218.0, "sun_kelvin": 5600, "sun_energy": 2.2,
+      "grade": {"temperature": 0.0, "contrast": 1.0}
     },
-    "evening": {
-      "phases": ["dusk", "night"],
-      "sun_elevation": 12.0, "sun_azimuth": 250.0, "sun_color": [1.0, 0.72, 0.46], "sun_energy": 1.45,
-      "sky": {"clear": {"spring": "winter_clear", "summer": "winter_clear", "autumn": "autumn_clear", "winter": "winter_clear"}},
-      "grade": {"temperature": 0.38, "tint": 0.03, "contrast": 1.08, "saturation": 0.98, "gain": [1.03, 0.99, 0.9], "highlights": [1.05, 0.98, 0.86], "shadows": [0.95, 0.96, 1.04]}
+    "afternoon": {
+      "phases": ["afternoon"],
+      "sun_elevation": 22.0, "sun_azimuth": 242.0, "sun_kelvin": 4700, "sun_energy": 2.3,
+      "air": {"inscattering": [0.92, 0.86, 0.90], "sun_color": [1.0, 0.78, 0.50]},
+      "grade": {"temperature": 0.12, "contrast": 1.03, "highlights": [1.04, 0.99, 0.92]}
+    },
+    "dusk": {
+      "phases": ["dusk"],
+      "sun_elevation": 9.0, "sun_azimuth": 262.0, "sun_kelvin": 3300, "sun_energy": 2.6,
+      "sky": {"clear": {"spring": "dawn", "summer": "dawn", "autumn": "dawn", "winter": "dawn"}},
+      "air": {"color": [0.93, 0.68, 0.50], "inscattering": [0.98, 0.66, 0.44], "sun_color": [1.0, 0.56, 0.26], "visibility_scale": 0.55, "ambient_color": [0.66, 0.64, 0.86], "ambient_scale": 1.5, "overcast_share": 0.3},
+      "grade": {"temperature": 0.16, "tint": 0.04, "contrast": 1.05, "saturation": 0.96, "lift": [0.016, 0.008, 0.012], "gain": [1.02, 0.99, 0.94], "highlights": [1.05, 0.98, 0.88], "shadows": [0.94, 0.95, 1.08]}
+    },
+    "night": {
+      "phases": ["night"],
+      "sun_elevation": 20.0, "sun_azimuth": 60.0, "sun_kelvin": 9500, "sun_energy": 0.2,
+      "sky_luminance_scale": 0.12,
+      "sky": {"clear": {"spring": "overcast", "summer": "overcast", "autumn": "overcast", "winter": "overcast"}},
+      "air": {"color": [0.18, 0.21, 0.32], "inscattering": [0.2, 0.24, 0.4], "sun_color": [0.4, 0.5, 0.8], "visibility_scale": 0.5, "ambient_color": [0.5, 0.58, 0.9], "ambient_scale": 0.5, "overcast_share": 0.5},
+      "grade": {"temperature": -0.25, "contrast": 1.04, "saturation": 0.7, "lift": [0.004, 0.008, 0.02], "shadows": [0.9, 0.94, 1.12]}
     }
   },
   "battle": {
     "clear": {
       "sky": {"spring": "clear_midday", "summer": "clear_midday", "autumn": "autumn_clear", "winter": "winter_clear"},
       "sun_energy_scale": 1.0, "sun_elevation_scale": 1.0, "sun_tint": [1.0, 1.0, 1.0],
-      "sky_luminance": 0.62, "sky_saturation": 1.0, "sky_tint": [1.0, 1.0, 1.0], "sun_disc": 1.0, "haze": 0.3,
-      "grade": {"contrast": 1.14, "saturation": 1.04, "shadows": [0.97, 0.99, 1.04]}
+      "sky_luminance": 0.62, "sky_saturation": 0.9, "sky_tint": [1.0, 1.0, 1.0], "sun_disc": 1.0, "haze": 0.3,
+      "grade": {"contrast": 1.06, "saturation": 1.0, "shadows": [0.97, 0.99, 1.04]}
     },
     "fog": {
       "sky": {"spring": "misty_morning", "summer": "misty_morning", "autumn": "dawn", "winter": "misty_morning"},
@@ -120,16 +144,16 @@
     "seasons": {
       "spring": {"sky": "clear_midday", "sky_luminance": 0.7, "haze": 0.45, "fog_color": [0.74, 0.79, 0.86], "fog_sun_scatter": 0.3,
         "sun_elevation": 20, "sun_azimuth": 245, "sun_color": [1.0, 0.86, 0.66], "sun_energy": 1.5,
-        "grade": {"contrast": 1.02, "lift": [0.01, 0.012, 0.02], "highlights": [1.03, 1.0, 0.95], "saturation": 0.8, "shadow_saturation": 0.45}},
+        "grade": {"contrast": 1.04, "lift": [0.004, 0.005, 0.008], "highlights": [1.03, 1.0, 0.95], "saturation": 0.95, "shadow_saturation": 0.65}},
       "summer": {"sky": "autumn_clear", "sky_luminance": 0.72, "haze": 0.45, "fog_color": [0.76, 0.79, 0.84], "fog_sun_scatter": 0.36,
         "sun_elevation": 21, "sun_azimuth": 250, "sun_color": [1.0, 0.84, 0.62], "sun_energy": 1.55,
-        "grade": {"contrast": 1.02, "lift": [0.01, 0.012, 0.02], "highlights": [1.04, 1.0, 0.94], "saturation": 0.77, "shadow_saturation": 0.45}},
+        "grade": {"contrast": 1.04, "lift": [0.004, 0.005, 0.008], "highlights": [1.04, 1.0, 0.94], "saturation": 0.96, "shadow_saturation": 0.65}},
       "autumn": {"sky": "overcast", "sky_luminance": 0.66, "haze": 0.5, "fog_color": [0.77, 0.77, 0.8], "fog_sun_scatter": 0.34,
         "sun_elevation": 18, "sun_azimuth": 248, "sun_color": [1.0, 0.89, 0.74], "sun_energy": 1.3,
-        "grade": {"contrast": 1.02, "lift": [0.012, 0.012, 0.02], "gain": [0.95, 1.03, 1.0], "highlights": [1.04, 0.99, 0.93], "saturation": 0.7, "shadow_saturation": 0.45}},
+        "grade": {"contrast": 1.04, "lift": [0.005, 0.005, 0.008], "gain": [0.97, 1.02, 1.0], "highlights": [1.04, 0.99, 0.93], "saturation": 0.9, "shadow_saturation": 0.6}},
       "winter": {"sky": "overcast_field", "sky_luminance": 0.7, "haze": 0.55, "fog_color": [0.75, 0.8, 0.88], "fog_sun_scatter": 0.2,
         "sun_elevation": 18, "sun_azimuth": 240, "sun_color": [0.98, 0.87, 0.76], "sun_energy": 1.0,
-        "grade": {"contrast": 1.02, "lift": [0.012, 0.014, 0.024], "highlights": [1.03, 1.0, 0.97], "saturation": 0.88, "shadow_saturation": 0.5}}
+        "grade": {"contrast": 1.04, "lift": [0.005, 0.006, 0.012], "highlights": [1.03, 1.0, 0.97], "saturation": 0.9, "shadow_saturation": 0.55}}
     }
   }
 }

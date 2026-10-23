@@ -1458,7 +1458,7 @@
    "min_settlement_px": 0.8,
    "nodes": [
     "set_vezelay",
-    "set_lyon",
+    "set_vienne",
     "set_conques",
     "set_lectoure",
     "set_pampelune"

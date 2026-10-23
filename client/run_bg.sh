@@ -22,6 +22,11 @@ profile=${CENT_ANS_PROFILE:-release}
 build=(cargo build)
 [[ $profile == release ]] && build+=(--release)
 [[ -n "${CENT_ANS_FEATURES:-}" ]] && build+=(--features "$CENT_ANS_FEATURES")
+# KTX2 ground arrays: rebuilt only if a source texture or the recipe changed; never fatal (the client
+# falls back to the JPG strips). CENT_ANS_NO_KTX2_BAKE=1 skips it.
+if [[ -z ${CENT_ANS_NO_KTX2_BAKE:-} ]] && command -v uv >/dev/null; then
+	(cd "$here/.." && uv run --project tools cent-ans textures bake-ktx2 --auto) >&2 || true
+fi
 (cd "$here" && "${build[@]}") >&2 || exit 1
 
 visible=0

@@ -187,11 +187,11 @@
       {
         "id": "obj_fr_dauphine",
         "title": "Acquérir le Dauphiné",
-        "description": "Le Dauphiné (province de Provence), terre d’Empire, doit rejoindre le domaine royal, comme en 1349.",
+        "description": "Le Dauphiné de Viennois, terre d’Empire, doit rejoindre le domaine royal, comme en 1349.",
         "condition": {
           "kind": "control_all",
           "provinces": [
-            "prov_provence"
+            "prov_dauphine"
           ]
         },
         "scope": "long_only"

@@ -104,6 +104,10 @@ impl Plugin for CampaignCameraPlugin {
         );
         app.add_systems(
             Update,
+            apply_campaign_smaa.run_if(in_state(AppState::Campaign)),
+        );
+        app.add_systems(
+            Update,
             apply_reduce_motion
                 .before(drive_camera)
                 .run_if(in_state(AppState::Campaign))
@@ -287,6 +291,7 @@ fn spawn_camera(
         Tonemapping::AgX,
         Transform::from_xyz(0.0, 100.0, 0.0),
         DespawnOnExit(AppState::Campaign),
+        crate::settings::render_scale::ScaledWorldCamera,
     ));
     if let Some(target) = target {
         camera.insert(RenderTarget::Image(target.0.clone().into()));
@@ -502,6 +507,28 @@ fn dump_zoom(world: &World) -> (String, Value) {
         .copied()
         .unwrap_or_default();
     ("campaign_zoom".into(), zoom::dump(&view))
+}
+
+/// SMAA on the map camera when the quality asks for it (`map_smaa`, ADR 0741): the terrain shader
+/// runs twice on every triangle-edge pixel under MSAA (~17 ms at 1080p equivalent on an M4 Pro),
+/// SMAA costs about one.
+fn apply_campaign_smaa(
+    mut commands: Commands,
+    quality: Option<Res<crate::settings::quality::RenderQuality>>,
+    cameras: Query<(Entity, Has<bevy::anti_alias::smaa::Smaa>), With<CampaignCamera>>,
+) {
+    let want = quality.is_some_and(|q| q.smaa_campaign);
+    for (camera, has) in &cameras {
+        if want && !has {
+            commands
+                .entity(camera)
+                .insert(bevy::anti_alias::smaa::Smaa::default());
+        } else if !want && has {
+            commands
+                .entity(camera)
+                .remove::<bevy::anti_alias::smaa::Smaa>();
+        }
+    }
 }
 
 #[cfg(test)]

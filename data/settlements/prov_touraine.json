@@ -2,7 +2,7 @@
   {
     "id": "set_orleans",
     "province": "prov_touraine",
-    "kind": "city",
+    "kind": "town",
     "name": {
       "display": "Orléans",
       "local": "Orliens",
@@ -19,9 +19,9 @@
       "bld_market",
       "bld_water_mill",
       "bld_vineyard_press",
-      "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field",
+      "bld_collegiate_church",
       "bld_university"
     ],
     "port": false,
@@ -33,7 +33,7 @@
   {
     "id": "set_tours",
     "province": "prov_touraine",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Tours",
       "local": "Tors",

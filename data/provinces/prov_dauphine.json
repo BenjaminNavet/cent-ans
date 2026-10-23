@@ -1,0 +1,105 @@
+{
+  "id": "prov_dauphine",
+  "name": {
+    "display": "Dauphiné",
+    "local": "Dalfinat",
+    "local_language": "franco-provençal"
+  },
+  "region": "provence_alpes",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [
+    "prov_beaucaire",
+    "prov_comtat_venaissin",
+    "prov_provence",
+    "prov_savoie"
+  ],
+  "rivers": [
+    "Isère",
+    "Drôme",
+    "Rhône",
+    "Drac"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wool",
+    "res_wheat",
+    "res_iron",
+    "res_wine",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Grenoble",
+      "local": "Grenoble",
+      "local_language": "franco-provençal"
+    },
+    "lat": 45.1885,
+    "lon": 5.7245
+  },
+  "geo": {
+    "capital_lonlat": [
+      5.7245,
+      45.1885
+    ],
+    "seed_lonlat": [
+      5.6,
+      45.0
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_dauphine",
+  "culture": "cul_savoyard",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Grenoble compte environ 6 000 habitants, Vienne 7 000.",
+    "classes": {
+      "peasants": {
+        "count": 260113,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 41280,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7800,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2807,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_water_mill",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2100,
+  "description": "Principauté du Dauphiné de Viennois, fief d’Empire tenu par le dauphin Humbert II de La Tour-du-Pin : Grenoble, siège du Parlement delphinal, Vienne et la vallée du Rhône, Grande Chartreuse. Criblé de dettes, Humbert II la cède en 1349 (traité de Romans) à l’héritier du roi de France.",
+  "sources": [
+    "Dauphiné de Viennois",
+    "Humbert II de Viennois",
+    "Grenoble",
+    "Vienne (Isère)"
+  ]
+}

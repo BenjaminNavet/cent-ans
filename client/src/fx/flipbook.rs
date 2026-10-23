@@ -22,7 +22,7 @@ use bevy::prelude::*;
 use bevy::render::render_resource::{AsBindGroup, ShaderType};
 use bevy::shader::ShaderRef;
 
-use crate::agent::dump::DumpAppExt;
+use crate::agent::dump::{DumpAppExt, DumpPrepare};
 
 const FLAME_SHEET: &str = "textures/fx/flame_flipbook.png";
 const SMOKE_SHEET: &str = "textures/fx/smoke_flipbook.png";
@@ -904,7 +904,7 @@ pub fn spawn_static_flame(
 #[derive(Component)]
 pub struct StaticFlame;
 
-/// Counts refreshed every frame for the dump (the dump only sees `&World`).
+/// Per-kind counts for the dump, refreshed on demand by [`DumpPrepare`] (the dump only sees `&World`).
 #[derive(Resource, Default, Debug)]
 pub struct FlipbookStats {
     /// kind key -> (emitters, live particles).
@@ -913,9 +913,21 @@ pub struct FlipbookStats {
     pub sample_frames: Vec<serde_json::Value>,
 }
 
+/// Sprites alive, refreshed every frame: [`FlipbookLooks::live`] lets producers leave room for
+/// the fires. Only a count (no per-kind tally; that one is dump-only, see [`count_sprites`]).
+fn count_live(looks: Option<ResMut<FlipbookLooks>>, particles: Query<(), With<FlipbookParticle>>) {
+    if let Some(mut looks) = looks {
+        let live = particles.count();
+        if looks.live != live {
+            looks.live = live;
+        }
+    }
+}
+
+/// Per-kind tally for the dump (run on demand by [`DumpPrepare`]).
 fn count_sprites(
     mut stats: ResMut<FlipbookStats>,
-    looks: Option<ResMut<FlipbookLooks>>,
+    looks: Option<Res<FlipbookLooks>>,
     emitters: Query<&FlipbookEmitter>,
     particles: Query<(&FlipbookParticle, &MeshTag)>,
     statics: Query<(), With<StaticFlame>>,
@@ -926,9 +938,6 @@ fn count_sprites(
         stats.by_kind.entry(e.kind.key()).or_default().0 += 1;
     }
     let total = looks.as_ref().map_or(64, |l| l.totals[0]);
-    if let Some(mut looks) = looks {
-        looks.live = particles.iter().count();
-    }
     for (p, tag) in &particles {
         stats.by_kind.entry(p.kind.key()).or_default().1 += 1;
         if stats.sample_frames.len() < 6 {
@@ -974,7 +983,8 @@ impl Plugin for FlipbookPlugin {
             .init_resource::<FlipbookStats>()
             .add_plugins(MaterialPlugin::<FlipbookMaterial>::default())
             .add_systems(Startup, build_looks)
-            .add_systems(Update, (emit, advance, count_sprites).chain())
+            .add_systems(Update, (emit, advance, count_live).chain())
+            .add_systems(DumpPrepare, count_sprites)
             .register_dump(dump_flipbook);
     }
 }

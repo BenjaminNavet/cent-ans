@@ -145,6 +145,41 @@ pub struct WindLook {
     pub direction_deg: f32,
 }
 
+/// Which passes see the wind sway (`wind_passes` of `battle_decor_look.json`). Both off = the
+/// historical behaviour (still shadows, no foliage in the prepass).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(default)]
+pub struct WindPasses {
+    /// The shadows of the trees move with the sway.
+    pub wind_in_shadows: bool,
+    /// The depth/normal/motion prepass (SSAO, depth of field, motion blur) sees the foliage
+    /// and its sway. Shares its vertex stage with the shadows (see `uses_wind_vertex`).
+    pub wind_in_prepass: bool,
+}
+
+impl Default for WindPasses {
+    fn default() -> Self {
+        WindPasses {
+            wind_in_shadows: true,
+            wind_in_prepass: false,
+        }
+    }
+}
+
+impl WindPasses {
+    /// Bevy runs one vertex stage for the prepass and the shadows: the swaying one is needed
+    /// as soon as either pass wants the wind (then the other follows it).
+    pub fn uses_wind_vertex(&self) -> bool {
+        self.wind_in_shadows || self.wind_in_prepass
+    }
+
+    /// The settings of the data file, read once (the material trait functions are static).
+    pub fn current() -> WindPasses {
+        static PASSES: std::sync::OnceLock<WindPasses> = std::sync::OnceLock::new();
+        *PASSES.get_or_init(|| DecorLook::load().wind_passes)
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct GrassLook {
     pub spacing_m: f32,
@@ -188,6 +223,8 @@ pub struct DecorLook {
     pub vineyard: VineyardLook,
     pub grass: GrassLook,
     pub tree_wind: WindLook,
+    #[serde(default)]
+    pub wind_passes: WindPasses,
     pub ground: GroundLook,
 }
 
@@ -241,6 +278,21 @@ pub fn wind_direction(wind: &WindLook) -> Vec2 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn wind_passes_default_and_parse() {
+        let default = WindPasses::default();
+        assert!(default.wind_in_shadows && !default.wind_in_prepass);
+        assert!(default.uses_wind_vertex());
+        let off: WindPasses =
+            serde_json::from_str(r#"{"wind_in_shadows": false, "wind_in_prepass": false}"#)
+                .unwrap();
+        assert!(!off.uses_wind_vertex());
+        let partial: WindPasses = serde_json::from_str(r#"{"wind_in_prepass": true}"#).unwrap();
+        assert!(partial.wind_in_shadows && partial.wind_in_prepass);
+        let bundled: DecorLook = serde_json::from_str(BUNDLED).unwrap();
+        assert_eq!(bundled.wind_passes, WindPasses::default());
+    }
 
     #[test]
     fn bundled_look_parses_and_matches_the_data_file() {

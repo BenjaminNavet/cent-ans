@@ -18,23 +18,58 @@ path = "src/main.rs"
 
 [features]
 # Fast iterations: Bevy dynamic linking. The player binary is linked statically.
-dev = ["bevy/dynamic_linking", "bevy/file_watcher", "bevy/debug", "remote", "dep:bevy_brp_extras", "dep:bevy_egui", "dep:bevy_console", "dep:clap"]
+dev = ["bevy/dynamic_linking", "bevy/file_watcher", "bevy/debug", "remote", "reflect-inspect", "dep:bevy_brp_extras", "dep:bevy_egui", "dep:bevy_console", "dep:clap", "bevy-devtools"]
+# Lot devtools: Bevy 0.20 dev tools (diagnostics overlay, render debug overlay, system stepping).
+# Only reachable through `dev`; the player build never enables them (docs/wip/bevy-devtools.md).
+bevy-devtools = ["bevy/bevy_dev_tools", "bevy/render_dev_tools", "bevy/bevy_debug_stepping"]
+# Lot devtools: subsecond hotpatching of systems (`dx serve --hotpatch`). Separate from `dev`
+# because it is untested with `dynamic_linking`; see client/README.md.
+hotpatch = ["bevy/hotpatching"]
 # Bevy Remote Protocol (HTTP, localhost) for live inspection by agents.
 remote = ["bevy/bevy_remote"]
 # Per-system timings (bevy_ecs tracing spans + our own subscriber layer, no Chrome/Tracy crate):
 # adds a "systems" section to the `--bench-map` report. See tools/bevy_bench/README.md.
 profile = ["dep:ecs_trace", "dep:tracing", "dep:tracing-subscriber"]
 
+# Lot misc (Bevy 0.20 features): types deriving `Reflect` register themselves (no `register_type`) and
+# Bevy's math/color types gain serde, so BRP (`world.get_resources`, `brp.sh`) can read and edit the
+# `Settings` resource live. Debug-only: pulled in by `dev`, never in the player binary.
+reflect-inspect = ["bevy/reflect_auto_register", "bevy/serialize"]
+
 # Processed assets (ADR 0724): images become BC7/BC5 KTX2 in `imported_assets/` at startup (cache, never
 # committed). Enabled by `tools/launch.sh`; the dev build keeps reading raw JPG/PNG.
 processed-assets = ["bevy/asset_processor", "bevy/compressed_image_saver", "bevy/ktx2", "bevy/zstd_rust"]
 
+# --- lot decals ---
+# Clustered decals (ground traces of the battle, src/battle/effects/decals.rs). OFF by default: the
+# Bevy feature widens the view bind groups of every PBR material. Runtime switch: `enabled` of
+# data/fx/battle_decals.json (off too).
+decals = ["bevy/pbr_clustered_decals"]
+# solari (docs/wip/bevy-solari.md): raytraced lighting (bevy_solari). Needs a GPU with ray queries; the
+# plugin is only added when the adapter exposes them (see src/battle/scene/solari.rs).
+solari = ["bevy/bevy_solari", "dep:wgpu"]
+# Owner decision 2026-10-22: every Bevy feature lot is on by default. `ground.wesl` imports the clustered
+# decal module, which Bevy only registers with `decals`, so the ground shader needs it in every build.
+default = ["decals", "solari"]
+
 [dependencies]
+# solari: adapter probe before the app is built (same wgpu as Bevy's).
+wgpu = { version = "=30.0.1", optional = true, default-features = false }
 # Renamed: Bevy derive macros would otherwise resolve `bevy_ecs` as a direct dependency.
 ecs_trace = { package = "bevy_ecs", version = "=0.20.0", optional = true, features = ["trace", "debug"] }
 tracing = { version = "0.1", optional = true }
 tracing-subscriber = { version = "0.3", optional = true }
-bevy = { version = "=0.20.0", features = ["jpeg", "png", "webp", "mp3", "wav"] }
+bevy = { version = "=0.20.0", features = [
+    "jpeg", "png", "webp", "mp3", "wav",
+    # KTX2 texture arrays of the battle ground (docs/wip/bevy-ktx2-array.md): UASTC + zstd, transcoded to BC7.
+    "ktx2", "zstd_c", "basis-universal",
+    # pbr lot (docs/wip/bevy-pbr.md): PCSS soft shadows (`soft_shadows` post-effect in settings).
+    # NOT enabled: pbr_anisotropy_texture, pbr_multi_layer_material_textures, pbr_specular_textures,
+    # pbr_transmission_textures. Each adds sampler slots to StandardMaterial; with all four the ground,
+    # stone and building extensions hit 17-19 samplers and Metal's limit of 16 crashes the battle at load.
+    "experimental_pbr_pcss",
+] }
+libc = "0.2"
 data-model = { path = "../core/crates/data-model" }
 sim-campaign = { path = "../core/crates/sim-campaign" }
 sim-battle = { path = "../core/crates/sim-battle" }

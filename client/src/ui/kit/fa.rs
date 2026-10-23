@@ -150,11 +150,12 @@ pub struct FaStats {
 fn dress_plates(
     assets: Res<AssetServer>,
     mut stats: ResMut<FaStats>,
-    mut buttons: Query<(&FaPlate, &Hovered, &mut ImageNode), With<KitButton>>,
+    mut buttons: Query<(&FaPlate, &Hovered, &mut ImageNode, Option<&Children>), With<KitButton>>,
+    mut inks: Query<&mut TextColor>,
 ) {
     let fa = FaUi::global();
     let (mut dressed, mut lit) = (0, 0);
-    for (plate, hovered, mut image) in &mut buttons {
+    for (plate, hovered, mut image, children) in &mut buttons {
         let Some(entry) = fa.plates.get(plate.0) else {
             continue;
         };
@@ -180,6 +181,17 @@ fn dress_plates(
         };
         if image.color != color {
             image.color = color;
+        }
+        // The dark leather plate needs a light ink: the kit's dark ink on brown is unreadable
+        // (« Retour » of the faction screen).
+        if plate.0 == "plate_leather_brass" {
+            for child in children.into_iter().flatten() {
+                if let Ok(mut ink) = inks.get_mut(*child)
+                    && ink.0 != super::style::PARCHMENT_LIGHT
+                {
+                    ink.0 = super::style::PARCHMENT_LIGHT;
+                }
+            }
         }
     }
     stats.plate_buttons = dressed;

@@ -3,7 +3,7 @@
   "name": {
     "display": "Banalités"
   },
-  "description": "Le seigneur impose l'usage obligatoire de son moulin, de son four et de son pressoir contre redevance, selon le droit de ban ([[cdx_banalites_et_moulin|banalités]]) : la recette augmente, les paysans s'en plaignent.",
+  "description": "Le seigneur impose l’usage obligatoire de son moulin, de son four et de son pressoir contre redevance, selon le droit de ban ([[cdx_banalites_et_moulin|banalités]]) : la recette augmente, les paysans s’en plaignent.",
   "delay_turns": 1,
   "requires": {
     "building": "bld_water_mill"

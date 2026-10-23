@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_battle_crowd.schema.json",
+  "title": "Rendu de masse des soldats",
+  "description": "Fichier data/fx/battle_crowd.json (lot foule1) : culling par soldat et habillage allégé (ombres, LOD lointain). Rendu seulement.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "cull": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "margin_m": { "type": "number", "minimum": 0 },
+        "foot_radius_m": { "type": "number", "exclusiveMinimum": 0 },
+        "mounted_radius_m": { "type": "number", "exclusiveMinimum": 0 },
+        "foot_centre_height_m": { "type": "number", "minimum": 0 },
+        "mounted_centre_height_m": { "type": "number", "minimum": 0 },
+        "shadow_height_m": { "type": "number", "exclusiveMinimum": 0 },
+        "shadow_max_length_m": { "type": "number", "exclusiveMinimum": 0 },
+        "min_sun_elevation": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+      },
+      "required": ["enabled"],
+      "additionalProperties": false
+    },
+    "shadow_skin": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "single_frame": { "type": "boolean" },
+        "bone_cut": { "type": "boolean" },
+        "no_fade": { "type": "boolean" },
+        "no_prop": { "type": "boolean" }
+      },
+      "required": ["enabled"],
+      "additionalProperties": false
+    },
+    "far_skin": {
+      "type": "object",
+      "properties": { "enabled": { "type": "boolean" } },
+      "required": ["enabled"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["cull", "shadow_skin", "far_skin"],
+  "additionalProperties": false
+}

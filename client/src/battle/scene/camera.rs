@@ -36,7 +36,12 @@ const MANUAL_PITCH_MIN_DEG: f32 = 5.0;
 const MANUAL_PITCH_MAX_DEG: f32 = 85.0;
 const MANUAL_PITCH_DRAG_SPEED: f32 = 0.15;
 /// Opening shot (`camera_feel.json` `battle.opening_distance_m`, closer: the figures stay readable).
-pub const OPENING_DISTANCE: f32 = 100.0;
+pub const OPENING_DISTANCE: f32 = 75.0;
+/// Lower tilt (degrees) of the automatic pitch in the opening range, so that the first picture
+/// is a wall of men with the horizon high instead of half a screen of empty grass (ADR 0760).
+const LOW_TILT_BIAS_DEG: f32 = 9.0;
+/// The bias is full up to this distance and gone by twice that distance (m).
+const LOW_TILT_FULL_M: f32 = 110.0;
 
 #[derive(Component)]
 pub struct BattleCamera;
@@ -115,7 +120,10 @@ pub fn eye_and_aim(
 ) -> (Vec3, Vec3, f32) {
     let pitch_deg = match state.manual_pitch_deg {
         Some(deg) => deg.clamp(MANUAL_PITCH_MIN_DEG, MANUAL_PITCH_MAX_DEG),
-        None => auto_pitch_deg(state.distance),
+        None => {
+            let fade = 1.0 - smoothstep(LOW_TILT_FULL_M, LOW_TILT_FULL_M * 2.5, state.distance);
+            (auto_pitch_deg(state.distance) - LOW_TILT_BIAS_DEG * fade).max(PITCH_NEAR_DEG)
+        }
     };
     let pitch = pitch_deg.to_radians();
     let close = smoothstep(MIN_DISTANCE, CLOSE_RANGE, state.distance);
@@ -275,6 +283,20 @@ impl Plugin for BattleCameraPlugin {
     }
 }
 
+#[cfg(feature = "solari")]
+pub(super) type SolariActive<'w> = Option<Res<'w, super::solari::SolariSettings>>;
+#[cfg(not(feature = "solari"))]
+pub(super) type SolariActive<'w> = Option<Res<'w, NoSolari>>;
+
+/// Never inserted: stands in for `SolariSettings` when the `solari` feature is off.
+#[cfg(not(feature = "solari"))]
+#[derive(Resource)]
+struct NoSolari;
+
+pub(super) fn solari_active(solari: &SolariActive) -> bool {
+    solari.is_some()
+}
+
 /// The UI camera's clear colour and MSAA before the battle took it over, and whether the battle
 /// made it HDR.
 #[derive(Resource)]
@@ -290,20 +312,36 @@ fn release_ui_clear(
     mut commands: Commands,
     quality: Res<crate::settings::quality::RenderQuality>,
     lighting: Option<Res<super::lighting::LightingLook>>,
+    solari: SolariActive,
     mut ui_cameras: Query<
         (Entity, &mut Camera, &mut Msaa, Has<bevy::camera::Hdr>),
         With<crate::ui::kit::UiCamera>,
     >,
 ) {
     if let Ok((entity, mut camera, mut msaa, hdr)) = ui_cameras.single_mut() {
-        let make_hdr = !hdr && lighting.is_some_and(|look| look.bloom.enabled);
+        // Solari forces the battle camera HDR (`#[require(Hdr)]`), so the HUD camera must follow.
+        let battle_hdr = lighting.is_some_and(|look| look.bloom.enabled) || solari_active(&solari);
+        let make_hdr = !hdr && battle_hdr;
         commands.insert_resource(SavedUiClear(camera.clear_color, *msaa, make_hdr));
         camera.clear_color = ClearColorConfig::None;
-        *msaa = quality.msaa_battle;
+        // Solari forces the battle camera to Msaa::Off; the HUD camera must match it.
+        *msaa = if solari_active(&solari) {
+            Msaa::Off
+        } else {
+            quality.msaa_battle
+        };
         if make_hdr {
             commands
                 .entity(entity)
                 .insert((bevy::camera::Hdr, Tonemapping::None));
+        }
+        if solari_active(&solari) {
+            // The main texture is keyed by (target, format, usages, msaa): the HUD camera must
+            // match the battle camera's usages or it gets its own texture and hides the world.
+            commands.entity(entity).insert(
+                bevy::camera::CameraMainTextureUsages::default()
+                    .with(bevy::render::render_resource::TextureUsages::STORAGE_BINDING),
+            );
         }
     }
 }
@@ -318,6 +356,9 @@ fn restore_ui_clear(
     {
         camera.clear_color = saved.0;
         *msaa = saved.1;
+        commands
+            .entity(entity)
+            .insert(bevy::camera::CameraMainTextureUsages::default());
         if saved.2 {
             // Camera2d's default tonemapping is `Linear`.
             commands
@@ -517,7 +558,7 @@ pub fn control_camera(
     state.distance += (state.target_distance - state.distance) * blend;
 }
 
-fn apply_camera(
+pub(crate) fn apply_camera(
     mut session: ResMut<BattleSession>,
     state: Option<ResMut<BattleCameraState>>,
     mut cameras: Query<&mut Transform, With<BattleCamera>>,

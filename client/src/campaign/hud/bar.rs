@@ -376,6 +376,8 @@ pub fn spawn_top_bar(
         GlobalZIndex(crate::ui::kit::style::UiTier::Panel.z() + 5),
         crate::ui::kit::widgets::panel_inset(theme),
     ))
+    // A 40 px strip: the inset texture margins (6 px) do not apply to it, out of the layout probe.
+    .insert(crate::ui::kit::widgets::KitWidget("top_bar"))
     .insert(Node {
         position_type: PositionType::Absolute,
         top: Val::Px(0.0),
@@ -519,7 +521,44 @@ pub fn compact_bar(width: f32) -> bool {
 
 /// Compact state of the bar (read by `update_fields`).
 #[derive(Resource, Default, Debug, Clone, Copy, PartialEq, Eq)]
-pub struct BarCompact(pub bool);
+pub struct BarCompact(pub bool, pub bool);
+
+/// Bar width from which the words before the figures fit (measured: 1422 px logical overflows).
+pub const LABELS_WIDTH: f32 = 1500.0;
+
+/// Words written before the figures of the bar (`data/ui/hud_labels.json`, UX ADR 0752).
+#[derive(Resource, Debug, Clone, PartialEq, Eq)]
+pub struct HudLabels {
+    pub manpower: String,
+    pub prestige: String,
+    pub unrest: String,
+}
+
+impl HudLabels {
+    pub fn parse(text: &str) -> Option<Self> {
+        let tree: serde_json::Value = serde_json::from_str(text).ok()?;
+        let figure = |key: &str| tree.get("figures")?.get(key)?.as_str().map(str::to_owned);
+        Some(Self {
+            manpower: figure("manpower")?,
+            prestige: figure("prestige")?,
+            unrest: figure("unrest")?,
+        })
+    }
+}
+
+impl Default for HudLabels {
+    fn default() -> Self {
+        crate::paths::find_root()
+            .ok()
+            .and_then(|root| std::fs::read_to_string(root.join("data/ui/hud_labels.json")).ok())
+            .and_then(|text| Self::parse(&text))
+            .unwrap_or(Self {
+                manpower: String::new(),
+                prestige: String::new(),
+                unrest: String::new(),
+            })
+    }
+}
 
 /// Switches the bar compact from its laid-out width.
 pub(super) fn fit_top_bar(
@@ -529,6 +568,10 @@ pub(super) fn fit_top_bar(
 ) {
     let Ok(node) = bar.single() else { return };
     let wanted = compact_bar(node.size().x * node.inverse_scale_factor());
+    let words = node.size().x * node.inverse_scale_factor() >= LABELS_WIDTH;
+    if compact.1 != words {
+        compact.1 = words;
+    }
     if compact.0 != wanted {
         compact.0 = wanted;
     }

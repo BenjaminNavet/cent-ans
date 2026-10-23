@@ -70,7 +70,17 @@ impl CampaignState {
             &["alliance"],
             &text,
         );
-        self.push_order_event(GameEvent::new(EventKind::AllianceBroken, text).faction(faction));
+        // ADR 0748: a betrayal, for the player's alliances.
+        let cause =
+            (faction == &self.player_faction || target == &self.player_faction).then(|| {
+                let reason = (self.ai_turn.as_ref() == Some(faction)).then_some("realignment");
+                crate::cause_builders::alliance_cause(faction, target, 30, reason)
+            });
+        self.push_order_event(
+            GameEvent::new(EventKind::AllianceBroken, text)
+                .faction(faction)
+                .maybe_cause(cause),
+        );
         Ok(())
     }
 

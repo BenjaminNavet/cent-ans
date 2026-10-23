@@ -1,5 +1,5 @@
 {
-  "description": "Lot TW m2b (ADR 0326, 0327) : excommunication élargie et interdit, conversion progressive des provinces, croisade papale, prétention dynastique née d'un mariage. Tout le barème est ici.",
+  "description": "Lot TW m2b (ADR 0326, 0327) : excommunication élargie et interdit, conversion progressive des provinces, croisade papale, prétention dynastique née d’un mariage. Tout le barème est ici.",
   "excommunication": {
     "perjury_favor_below": 50,
     "captive_favor_loss": 15,

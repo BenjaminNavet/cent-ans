@@ -1,0 +1,39 @@
+{
+  "id": "chr_blanche_de_valois",
+  "name": {
+    "display": "Blanche de Valois",
+    "local": "Blanka z Valois",
+    "local_language": "tchèque"
+  },
+  "sex": "female",
+  "house": "Valois",
+  "faction": "fac_bohemia",
+  "role": "consort",
+  "birth": {
+    "value": "1316"
+  },
+  "death": {
+    "value": "1348-08-01"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 3,
+    "court": 5
+  },
+  "traits": [
+    "trait_kind"
+  ],
+  "piety": 55,
+  "family": {
+    "spouses": [
+      "chr_charles_de_luxembourg"
+    ]
+  },
+  "starting_location": "prov_bohemia",
+  "status": "at_court",
+  "description": "Fille de Charles de Valois, sœur de Philippe VI, mariée en 1329 à Charles de Luxembourg, margrave de Moravie et héritier de Bohême.",
+  "sources": [
+    "Blanche de Valois (1316-1348)"
+  ]
+}

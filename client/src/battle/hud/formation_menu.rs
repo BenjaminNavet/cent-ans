@@ -272,14 +272,14 @@ fn reset(mut menu: ResMut<FormationMenu>) {
 
 fn spawn(
     mut commands: Commands,
-    roots: Query<Entity, With<BattleHudRoot>>,
+    root: Single<Entity, With<BattleHudRoot>>,
     slots: Query<(Entity, &super::geometry::HudSlot)>,
     existing: Query<(), With<MenuButton>>,
     mut menu: ResMut<FormationMenu>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
 ) {
-    let Ok(root) = roots.single() else { return };
+    let root = *root;
     if !existing.is_empty() {
         return;
     }

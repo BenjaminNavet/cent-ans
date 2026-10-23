@@ -24,6 +24,15 @@
     "vineyard": { "type": "object" },
     "grass": { "type": "object" },
     "tree_wind": { "type": "object" },
+    "wind_passes": {
+      "type": "object",
+      "description": "Passes qui suivent le balancement du vent. wind_in_shadows : les ombres des arbres bougent ; wind_in_prepass : le prépasse (SSAO, profondeur de champ, flou de mouvement) voit le feuillage balancé. Les deux partagent le même vertex shader dans Bevy : si l'un est vrai, les ombres utilisent aussi le vertex balancé (sans prépasse caméra si wind_in_prepass est faux). Tous deux faux = comportement historique.",
+      "properties": {
+        "wind_in_shadows": { "type": "boolean" },
+        "wind_in_prepass": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
     "ground": { "type": "object" }
   },
   "additionalProperties": false

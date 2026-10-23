@@ -480,7 +480,7 @@ def real_editor(tmp_path_factory) -> editor.Editor:
 def test_state_lists_places_geometry_and_masks(real_editor) -> None:
     """``/api/state`` : lieux nommés, côtes, fleuves, masques."""
     state = real_editor.state()
-    assert len(state["places"]) == 400 and state["mask_size"] == [443, 382]
+    assert len(state["places"]) == 402 and state["mask_size"] == [443, 382]
     assert (
         state["coast"]
         and state["rivers"]
