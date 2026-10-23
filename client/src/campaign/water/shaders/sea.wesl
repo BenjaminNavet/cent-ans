@@ -48,6 +48,8 @@ struct Params {
     detail_depth: vec4<f32>,
     basin_detail: array<vec4<f32>, 5>,
     basin_detail_mean: array<vec4<f32>, 5>,
+    eau: vec4<f32>,
+    eau_b: vec4<f32>,
 }
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> params: Params;
@@ -100,12 +102,78 @@ fn value_noise(p: vec2<f32>) -> f32 {
 
 fn swell(p: vec2<f32>, t: f32) -> f32 {
     var h = 0.0;
-    let wp = vec2<f32>(value_noise(p * 0.21 + 3.0), value_noise(p * 0.17 + 11.0)) * 3.0;
+    let wp = vec2<f32>(value_noise(p * 0.21 + 3.0), value_noise(p * 0.17 + 11.0)) * 3.0 * params.eau_b.x;
+    if params.eau.x > 0.5 {
+        // EAU: long swell crossing the short chop, itself warped by a slow field, so no two
+        // wave trains line up for long (no repeating pattern).
+        let slow = vec2<f32>(value_noise(p * 0.043 + 5.0), value_noise(p * 0.037 + 17.0)) * 4.0 - 2.0;
+        h = h + sin(dot(p, vec2<f32>(0.62, 0.78)) * 0.43 + t * 0.7 + slow.x * 1.6) * 0.75;
+        h = h + sin(dot(p, vec2<f32>(-0.91, 0.41)) * 0.71 - t * 0.9 + slow.y * 1.3) * 0.45;
+    }
     h = h + sin(dot(p, vec2<f32>(0.82, 0.57)) * 1.0 + t * 1.1 + wp.x) * 0.5;
     h = h + sin(dot(p, vec2<f32>(-0.35, 0.94)) * 1.7 - t * 1.4 + wp.y) * 0.3;
     h = h + sin(dot(p, vec2<f32>(0.99, -0.12)) * 2.9 + t * 2.1 + wp.x - wp.y) * 0.15;
     h = h + (value_noise(p * 1.3 + t * 0.3) - 0.5) * 0.6;
     return h;
+}
+
+// EAU: signed coast distance (map px, negative at sea). The L8 raster has one texel per map px and a
+// 0.5 px step, so close up the bilinear read shows stair steps: near the shore it is replaced by a
+// cubic B-spline (four bilinear reads, same sampler, no extra binding).
+fn coast_bspline(uv: vec2<f32>) -> f32 {
+    let ts = vec2<f32>(textureDimensions(coast_dist));
+    let st = uv * ts - vec2<f32>(0.5);
+    let i = floor(st);
+    let f = st - i;
+    let f2 = f * f;
+    let f3 = f2 * f;
+    let w0 = (1.0 - 3.0 * f + 3.0 * f2 - f3) / 6.0;
+    let w1 = (4.0 - 6.0 * f2 + 3.0 * f3) / 6.0;
+    let w2 = (1.0 + 3.0 * f + 3.0 * f2 - 3.0 * f3) / 6.0;
+    let w3 = f3 / 6.0;
+    let g0 = w0 + w1;
+    let g1 = w2 + w3;
+    let o0 = (i + vec2<f32>(0.5) + (-1.0 + w1 / g0)) / ts;
+    let o1 = (i + vec2<f32>(0.5) + (1.0 + w3 / g1)) / ts;
+    let a = textureSampleLevel(coast_dist, coast_sampler, vec2<f32>(o0.x, o0.y), 0.0).r;
+    let b = textureSampleLevel(coast_dist, coast_sampler, vec2<f32>(o1.x, o0.y), 0.0).r;
+    let c = textureSampleLevel(coast_dist, coast_sampler, vec2<f32>(o0.x, o1.y), 0.0).r;
+    let d = textureSampleLevel(coast_dist, coast_sampler, vec2<f32>(o1.x, o1.y), 0.0).r;
+    let r = g0.y * (g0.x * a + g1.x * b) + g1.y * (g0.x * c + g1.x * d);
+    return (r * 255.0 - 128.0) / params.coast_dist_scale;
+}
+
+fn coast_smooth(uv: vec2<f32>, footprint: f32) -> f32 {
+    let raw = (textureSampleLevel(coast_dist, coast_sampler, uv, 0.0).r * 255.0 - 128.0) / params.coast_dist_scale;
+    if params.eau.x > 0.5 && params.eau.w > 0.5 && abs(raw) < 5.0 && footprint < 1.8 {
+        return mix(coast_bspline(uv), raw, smoothstep(0.9, 1.8, footprint));
+    }
+    return raw;
+}
+
+// EAU: broad soft whitecaps drifting with the swell, in place of the thin crest lines (which read as
+// vermicelli). Stretched along the wind, warped by two noise scales; faded near the coast and far.
+fn sea_whitecaps(p: vec2<f32>, depth: f32, footprint: f32, h: f32) -> f32 {
+    let amount = params.eau.y;
+    if amount <= 0.0 {
+        return 0.0;
+    }
+    let deep = smoothstep(params.crest_b.x * 0.5, params.crest_b.y, depth);
+    let fade = 1.0 - smoothstep(1.0, 4.0, footprint);
+    if deep * fade <= 0.0 {
+        return 0.0;
+    }
+    let dir = normalize(params.crest_dir.xy);
+    let across = vec2<f32>(-dir.y, dir.x);
+    let t = globals.time * params.crest_b.w * 0.25;
+    let sc = params.eau_b.w;
+    let warp = vec2<f32>(value_noise(p * 0.017 * sc + 7.0), value_noise(p * 0.017 * sc + 19.0)) * 22.0;
+    let q = vec2<f32>(dot(p + warp, dir) - t * 6.0, dot(p + warp, across) * 1.7) * 0.035 * sc;
+    let big = value_noise(q) * 0.55 + value_noise(q * 2.3 + 4.0) * 0.3 + value_noise(q * 5.1 + 9.0) * 0.15;
+    let patch_m = smoothstep(0.52, 0.8, big);
+    let grain = smoothstep(0.3, 0.75, value_noise(p * 0.55 * sc + vec2<f32>(t * 3.0, 0.0)));
+    let peak = smoothstep(-0.2, 0.9, h);
+    return patch_m * mix(0.35, 1.0, grain) * mix(0.5, 1.0, peak) * deep * fade * amount;
 }
 
 // ME1 (sea_life.gdshaderinc). Saturation capped at `sat_max`, value kept.
@@ -274,10 +342,14 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     // Signed distance to the coast in map pixels (negative at sea).
     var coast = -50.0;
     if inside {
-        coast = (textureSampleLevel(coast_dist, coast_sampler, uv, 0.0).r * 255.0 - 128.0) / params.coast_dist_scale;
+        coast = coast_smooth(uv, footprint);
     }
     let off = max(-coast, 0.0);
-    let depth = min(off * params.depth_per_px_m, params.max_depth_m);
+    var depth = min(off * params.depth_per_px_m, params.max_depth_m);
+    if params.eau.x > 0.5 {
+        // Uneven sea floor: the turquoise edge follows banks instead of a contour line.
+        depth = depth * (1.0 - params.eau_b.z + 2.0 * params.eau_b.z * value_noise(p * 0.045 + 13.0));
+    }
     let clarity = max(water.x, 0.1);
     let seen_depth = select(depth + (1.0 / clarity - 1.0) * 20.0, depth / clarity, clarity >= 1.0);
     let mid = smoothstep(0.0, params.mid_depth_m, seen_depth);
@@ -346,16 +418,27 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let life = params.life_a.x > 0.5;
     if life {
         col = sea_shallows(col, p, depth, footprint);
-        col = mix(col, params.crest_a.rgb, sea_crests(p, depth, footprint));
+        var sat_max = params.life_a.z;
+        if params.eau.x > 0.5 {
+            col = mix(col, params.crest_a.rgb, sea_whitecaps(p, depth, footprint, h0));
+            // Turquoise near the coast keeps its colour, the open sea calms down to blue-green.
+            sat_max = mix(params.eau.z, params.life_a.z, smoothstep(params.shallows_a.w * 0.15, params.shallows_a.w * 1.3, depth));
+        } else {
+            col = mix(col, params.crest_a.rgb, sea_crests(p, depth, footprint));
+        }
         let cur = value_noise(p * 0.011 + 31.0) * 0.65 + value_noise(p * 0.027 + 7.0) * 0.35;
         col = col * params.life_a.y * (0.82 + 0.4 * cur) * mix(vec3<f32>(0.92, 1.04, 1.12), vec3<f32>(1.0, 1.1, 1.0), smoothstep(0.35, 0.65, cur));
-        col = limit_saturation(col, params.life_a.z);
+        col = limit_saturation(col, sat_max);
     }
 
     // Coast foam band (surf lines, broken by noise).
     var foam_w = max(params.foam_px, footprint * 1.2);
     if life && params.life_a.w > 0.0 {
         foam_w = max(params.foam_px, footprint * params.life_a.w);
+    }
+    if params.eau.x > 0.5 {
+        // Surf width varies along the shore (sets, small bays) and the band has a soft outer lace.
+        foam_w = foam_w * params.eau_b.y * (0.6 + 0.9 * value_noise(p * 0.22 + 3.0));
     }
     let band = 1.0 - smoothstep(0.0, foam_w, off);
     let lines = smoothstep(0.55, 0.95, sin(off * 5.5 + globals.time * 1.6 + value_noise(p * 0.8) * 4.0) * 0.5 + 0.5);

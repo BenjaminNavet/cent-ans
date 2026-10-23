@@ -26,6 +26,7 @@ struct Params {
     look2: vec4<f32>,
     look3: vec4<f32>,
     look4: vec4<f32>,
+    season: vec4<f32>,
     fine_zone: vec4<f32>,
     fords: array<vec4<f32>, 32>,
     map_size: vec2<f32>,
@@ -315,6 +316,11 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     // Campaign grade: water is not more saturated / brighter than the ground it lies on.
     let luma = dot(col, vec3<f32>(0.2126, 0.7152, 0.0722));
     col = (vec3<f32>(luma) + (col - vec3<f32>(luma)) * params.look.x) * params.look.y;
+    // EAU: season colour of the water (clear in summer, milky and brown in autumn, cold in winter) and
+    // the first ice along the banks, fading towards the middle of the stream.
+    col = col * params.season.rgb;
+    let ice = params.season.w * smoothstep(0.35, 0.95, edge) * (1.0 - far_t) * (0.7 + 0.3 * n2);
+    col = mix(col, vec3<f32>(0.66, 0.74, 0.80), clamp(ice, 0.0, 0.85));
     // Far: sober blue-grey line, still readable (opacity is untouched).
     col = mix(col, params.far_color.rgb, far_t * select(1.0, 0.6, sheet));
     // A ribbon only a few pixels wide is all bank: the dark soaked edges would turn it into a black

@@ -1,6 +1,6 @@
 # Lot EAU : mer, côtes, rivières, neige (campagne)
 
-Source : `out/juge/iter-02-art.md` constats 8, 9, 10. ADR 0748.
+Source : `out/juge/iter-02-art.md` constats 8, 9, 10. ADR 0750.
 
 ## État
 - Squelette : note.

@@ -96,6 +96,39 @@ impl SeaLife {
         );
         params.tide_mud = v3(mud, 0.0);
         params.tide_wet = v3(wet, 0.0);
+        self.apply_eau(params);
+    }
+
+    /// EAU (ADR 0750): depth colours, whitecaps, smoothed coast. `CENT_ANS_EAU_V2=0` switches the
+    /// whole block off (A/B bench), the plain ME1 look stays.
+    fn apply_eau(&self, params: &mut SeaParams) {
+        let Some(eau) = self.spec.get("eau") else {
+            return;
+        };
+        let off = crate::campaign::perf_switch::value("EAU_V2").is_some_and(|v| v < 0.5);
+        if off || number(eau, &["enabled"], 1.0) < 0.5 {
+            return;
+        }
+        let colour = |key: &str, default: Vec4| {
+            let c = array(eau, &["colors", key], [default.x, default.y, default.z]);
+            Vec4::new(c[0], c[1], c[2], 1.0)
+        };
+        params.shallow_color = colour("shallow", params.shallow_color);
+        params.mid_color = colour("mid", params.mid_color);
+        params.deep_color = colour("deep", params.deep_color);
+        params.depth_per_px_m = number(eau, &["depth_per_px_m"], params.depth_per_px_m);
+        params.eau = Vec4::new(
+            1.0,
+            number(eau, &["whitecaps", "amount"], 0.0),
+            number(eau, &["turquoise_saturation"], 0.6),
+            number(eau, &["smooth_coast"], 1.0),
+        );
+        params.eau_b = Vec4::new(
+            number(eau, &["swell_warp"], 1.0),
+            number(eau, &["surf_lace"], 1.0),
+            number(eau, &["turquoise_edge_noise"], 0.35),
+            number(eau, &["whitecaps", "scale"], 1.0),
+        );
     }
 
     /// `(id, width_px, polygon)` of the tide zones, in file order.
