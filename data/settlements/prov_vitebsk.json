@@ -18,8 +18,7 @@
     "buildings": [
       "bld_castle",
       "bld_market",
-      "bld_muster_field",
-      "bld_cathedral"
+      "bld_muster_field"
     ],
     "port": false,
     "description": "Vieille cité orthodoxe de la Dvina, avec la cathédrale Sainte-Sophie.",

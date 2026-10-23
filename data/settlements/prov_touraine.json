@@ -19,9 +19,9 @@
       "bld_market",
       "bld_water_mill",
       "bld_vineyard_press",
-      "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field",
+      "bld_collegiate_church",
       "bld_university"
     ],
     "port": false,

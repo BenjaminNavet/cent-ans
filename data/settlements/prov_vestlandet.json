@@ -18,8 +18,7 @@
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_muster_field",
-      "bld_cathedral"
+      "bld_muster_field"
     ],
     "port": true,
     "description": "Trondheim médiévale : cathédrale du saint roi Olaf et siège de l’archevêque.",
