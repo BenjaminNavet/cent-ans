@@ -1,0 +1,40 @@
+{
+  "id": "chr_beatrice_de_bourbon",
+  "name": {
+    "display": "Béatrice de Bourbon",
+    "local": "Beatrix z Bourbonu",
+    "local_language": "tchèque"
+  },
+  "sex": "female",
+  "house": "Bourbon",
+  "faction": "fac_bohemia",
+  "role": "consort",
+  "birth": {
+    "value": "1320",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1383-12-23"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 3,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 55,
+  "family": {
+    "spouses": [
+      "chr_jean_de_luxembourg"
+    ]
+  },
+  "starting_location": "prov_bohemia",
+  "status": "at_court",
+  "description": "Fille de Louis Ier de Bourbon, mariée en 1334 à Jean de Luxembourg, roi de Bohême, dont elle est la seconde épouse.",
+  "sources": [
+    "Béatrice de Bourbon (1320-1383)"
+  ]
+}

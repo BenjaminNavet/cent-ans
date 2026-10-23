@@ -3,6 +3,7 @@
 mod campaign;
 mod df1_difficulty;
 mod f7_events;
+mod hist_spouses;
 mod fk5_incidents;
 mod fk_map_scenes;
 mod m10_events;

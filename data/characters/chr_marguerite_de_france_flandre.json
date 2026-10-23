@@ -1,0 +1,40 @@
+{
+  "id": "chr_marguerite_de_france_flandre",
+  "name": {
+    "display": "Marguerite de France",
+    "local": "Margriet van Frankrijk",
+    "local_language": "moyen néerlandais"
+  },
+  "sex": "female",
+  "house": "Capet",
+  "faction": "fac_flanders",
+  "role": "consort",
+  "birth": {
+    "value": "1310",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1382-05-09"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 3,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 55,
+  "family": {
+    "spouses": [
+      "chr_louis_de_nevers"
+    ]
+  },
+  "starting_location": "prov_flandre",
+  "status": "at_court",
+  "description": "Fille de Philippe V le Long, mariée en 1320 à Louis de Nevers, comte de Flandre ; comtesse de Flandre et de Nevers, mère de Louis de Male.",
+  "sources": [
+    "Marguerite de France (1310-1382)"
+  ]
+}

@@ -47,6 +47,9 @@
   ],
   "piety": 55,
   "family": {
+    "spouses": [
+      "chr_beatrice_de_bourbon"
+    ],
     "children": [
       "chr_bonne_de_luxembourg",
       "chr_charles_de_luxembourg"
