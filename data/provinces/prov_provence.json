@@ -16,9 +16,7 @@
   "rivers": [
     "Rhône",
     "Durance",
-    "Var",
-    "Isère",
-    "Drôme"
+    "Var"
   ],
   "coastal": true,
   "ports": [
@@ -66,28 +64,28 @@
     "note": "Marseille compte environ 25 000 habitants, Aix 8 000.",
     "classes": {
       "peasants": {
-        "count": 650282,
+        "count": 390169,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 103200,
+        "count": 61920,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 19500,
+        "count": 11700,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 7018,
+        "count": 4211,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -105,14 +103,11 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 5250,
-  "description": "Comté de Provence et de Forcalquier, terre d’Empire tenue par Robert d’Anjou, roi de Naples (l’Empire n’en est que le suzerain nominal). Marseille, port des croisades ; Aix, siège de la cour comtale. Province composée : regroupe aussi Dauphiné.",
+  "base_supply": 3150,
+  "description": "Comté de Provence et de Forcalquier, terre d’Empire tenue par Robert d’Anjou, roi de Naples (l’Empire n’en est que le suzerain nominal). Marseille, port des croisades ; Aix, siège de la cour comtale. Le Dauphiné voisin forme une province distincte (ADR 0732).",
   "sources": [
     "Comté de Provence",
     "Robert Ier de Naples",
-    "Marseille",
-    "Dauphiné de Viennois",
-    "Humbert II de Viennois",
-    "Grenoble"
+    "Marseille"
   ]
 }

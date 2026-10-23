@@ -1,6 +1,6 @@
 {
  "params": {
-  "province_target": 213,
+  "province_target": 214,
   "settlement_target": 400,
   "min_spacing_km": 45.0,
   "max_lon": 41.5,
@@ -2115,9 +2115,25 @@
    ]
   },
   {
+   "id": "prov_dauphine",
+   "merged_from": [
+    "prov_dauphine"
+   ],
+   "owner": "fac_dauphine",
+   "region": "provence_alpes",
+   "capital_settlement": "set_grenoble",
+   "settlements": [
+    "set_grenoble",
+    "set_vienne",
+    "set_grande_chartreuse"
+   ],
+   "owners": [
+    "fac_dauphine"
+   ]
+  },
+  {
    "id": "prov_provence",
    "merged_from": [
-    "prov_dauphine",
     "prov_provence"
    ],
    "owner": "fac_naples",
@@ -2125,11 +2141,9 @@
    "capital_settlement": "set_aix",
    "settlements": [
     "set_aix",
-    "set_les_baux",
-    "set_grande_chartreuse"
+    "set_les_baux"
    ],
    "owners": [
-    "fac_empire",
     "fac_naples"
    ]
   },
@@ -5672,8 +5686,26 @@
    "protected": true
   },
   {
+   "id": "set_grenoble",
+   "province": "prov_dauphine",
+   "kind": "city",
+   "lon": 5.7245,
+   "lat": 45.1885,
+   "score": 24.0,
+   "protected": false
+  },
+  {
+   "id": "set_vienne",
+   "province": "prov_dauphine",
+   "kind": "town",
+   "lon": 4.8745,
+   "lat": 45.5256,
+   "score": 16.0,
+   "protected": false
+  },
+  {
    "id": "set_grande_chartreuse",
-   "province": "prov_provence",
+   "province": "prov_dauphine",
    "kind": "abbey",
    "lon": 5.7975,
    "lat": 45.3608,
