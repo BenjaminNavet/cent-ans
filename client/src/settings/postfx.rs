@@ -500,18 +500,23 @@ mod tests {
     }
 
     #[test]
-    fn data_file_reads_and_presets_enable_nothing() {
+    fn data_file_reads_and_only_ultra_enables_discreet_effects() {
         assert!(PostFxParams::load().is_some(), "{DATA_PATH}");
         let presets = QualityPresets::load();
         assert!(presets.from_file);
         for (level, preset) in &presets.levels {
-            assert!(
-                preset.postfx.is_empty(),
-                "{level} enables {:?}",
-                preset.postfx
-            );
+            // Only the ultra preset turns effects on, and only the two discreet ones (measured:
+            // depth of field and chromatic aberration blur and fringe the picture).
+            let expected: &[&str] = if level == "ultra" {
+                &["auto_exposure", "sharpening"]
+            } else {
+                &[]
+            };
+            let mut enabled: Vec<&str> = preset.postfx.iter().map(String::as_str).collect();
+            enabled.sort_unstable();
+            assert_eq!(enabled, expected, "{level}");
             let quality = RenderQuality::resolve(&Settings::default(), &presets, level);
-            assert!(!quality.postfx.any(), "{level}");
+            assert_eq!(quality.postfx.any(), !expected.is_empty(), "{level}");
         }
         for effect in EFFECTS {
             assert!(

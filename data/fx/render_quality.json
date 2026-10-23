@@ -168,6 +168,7 @@
     "ultra": {
       "note": "Carte : SMAA au lieu du MSAA 2x (ADR 0741). Plafonné pour tenir 15 i/s : relief à 6 px, ombres des arbres et moulins à 200, MetalFX spatial 0,85 (primitives au zoom max de Paris : 8,4 M -> 6,3 M).",
       "msaa": "4x",
+      "postfx": ["auto_exposure", "sharpening"],
       "shadow_atlas": 8192,
       "soft_shadows": "ultra",
       "map_msaa": "off",
