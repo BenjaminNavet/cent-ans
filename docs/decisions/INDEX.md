@@ -314,3 +314,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0742 | [Cache du sol par nœud de relief](0742-cache-du-sol-par-noeud.md) | accepté |
 | 0743 | [Ombres d'arbres découpées par cascade](0743-ombres-d-arbres-par-cascade.md) | accepté |
 | 0744 | [Modèles d'arbres proches en lod2 au-delà de 35 unités](0744-modeles-d-arbres-lod2-au-loin.md) | accepté |
+| 0746 | [Arbres proches moins chers : zone de modèles réduite et lod2 dès 15 unités](0746-arbres-proches-moins-chers.md) | accepté |

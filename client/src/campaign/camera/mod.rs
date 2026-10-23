@@ -296,15 +296,6 @@ fn spawn_camera(
     if let Some(target) = target {
         camera.insert(RenderTarget::Image(target.0.clone().into()));
     }
-    // Bench knob: sun shadow filter of the map (0 hardware 2x2, 1 Gaussian (default), 2 temporal).
-    if let Some(filter) = crate::campaign::perf_switch::value("MAP_SHADOW_FILTER") {
-        use bevy::light::ShadowFilteringMethod as F;
-        camera.insert(match filter as i32 {
-            0 => F::Hardware2x2,
-            2 => F::Temporal,
-            _ => F::Gaussian,
-        });
-    }
     // Same MSAA as the UI camera from the first frame (see `settings::quality::apply_msaa`).
     if let Some(quality) = &quality {
         camera.insert(quality.msaa_campaign);

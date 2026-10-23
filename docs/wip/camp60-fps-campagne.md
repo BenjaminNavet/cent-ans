@@ -17,6 +17,9 @@ Conditions du joueur : `CENT_ANS_VIEW_SIZE=3456x2234` + copie de son `settings.j
 - Outil : interrupteurs du shader du sol `CENT_ANS_PERF_OFF=t...` (liste `PERF_DEFS`, `terrain/material.rs`), `tshadow`.
 
 ## État
+- 23/10 matin : ADR 0746 — arbres proches moins chers (lod1 jusqu'à 15 au lieu de 35, zone de modèles ×0,4 au lieu de ×0,6) :
+  −1,6 et −1,9 ms mesurés séparément à d30 ; pré-passe de profondeur des imposteurs essayée et retirée (pas de gain).
+  Bancs arrêtés : le joueur a débranché le secteur (tout banc sur batterie est incomparable).
 - 23/10 1 h 30 : SMAA au lieu du MSAA sur la carte (ADR 0741, 1be8b2d71) : Ultra joueur 55-62 → 45,8 ms.
   Trace Metal (xctrace) : passe opaque ≈ 35 ms de fragment (shader du sol), 4 cascades d'ombre ≈ 13 ms,
   pas de passe fantôme. Densité du relief (RELIEF_PX 6 → 24) : ~0 ms sur le shader plat.
@@ -37,7 +40,8 @@ Fait : cache du sol (ADR 0742), ombres d'arbres par cascade (ADR 0743), modèles
 Réglages du joueur, p50 / p95 en ms :
 d=30 47,5 → 21,2 / 24,0 ; d=60 → 22,4 / 25,1 ; d=150 33,9 → 14,8 ; d=500 34,1 → 13,8.
 Reste pour 60 i/s de près : à d=30 les ombres coûtent ≈ 8 ms (bâtiments, villes, modèles) et le sol ≈ 4 ms.
-Prochaines pistes : coût des ombres hors arbres (villes, décor) ; passe principale des arbres (alpha-test, pas de rejet précoce).
+Prochaines pistes (sur secteur) : mesurer la combinaison ADR 0746 et `armyshadow` ; ombres des imposteurs (≈ 3,7 ms, plus gros poste) ;
+vérifier en capture la transition modèle/imposteur à d≈20-30.
 Captures utilisées : 4 sur 5.
 Avant chaque série de bancs, prévenir game-project-79 (fenêtre GPU de 20 min après chacune de nos séries).
-Réglages de banc : `CENT_ANS_GROUND_CACHE`, `GC_*`, `VEG_CASCADES`, `PERF_OFF=vegcull`, `MODEL_LOD1_DISTANCE`.
+Réglages de banc : `CENT_ANS_GROUND_CACHE`, `GC_*`, `VEG_CASCADES`, `PERF_OFF=vegcull|meshshadow|townshadow|stdshadow|markershadow|lifeshadow|armyshadow`, `MODEL_LOD1_DISTANCE`, `MODEL_RADIUS_FACTOR`.

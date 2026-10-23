@@ -29,8 +29,9 @@ pub const ATLAS_VIEWS: u32 = 8;
 /// Baking frame (`ortho`, `foot` of `campaign_tree_impostor.gdshaderinc`).
 const ORTHO: f32 = 1.7;
 const FOOT: f32 = 0.2588;
-/// Tree models closer than this to the focus are real meshes (`generalised_model_*`).
-pub const MODEL_RADIUS_FACTOR: f32 = 0.6;
+/// Tree models closer than this to the focus are real meshes (`generalised_model_*`). Factor 0.4
+/// (was 0.6) saves 1.9 ms at camera distance 30 (ADR 0746); `CENT_ANS_MODEL_RADIUS_FACTOR`.
+pub const MODEL_RADIUS_FACTOR: f32 = 0.4;
 pub const MODEL_RADIUS_MIN: f32 = 8.0;
 pub const MODEL_RADIUS_MAX: f32 = 40.0;
 pub const MODEL_MAX_DISTANCE: f32 = 150.0;
@@ -43,9 +44,9 @@ pub const MODEL_LOD: &str = "lod1";
 /// Level of detail of the near models in the shadow maps (`<id>_lod2.glb`).
 pub const SHADOW_LOD: &str = "lod2";
 /// Near models farther than this from the camera draw their lod2 mesh (a quarter of the
-/// triangles of lod1: the model pass is bound by its vertices). Under it a tree spans about
-/// 60 px at the player's resolution; `CENT_ANS_MODEL_LOD1_DISTANCE` overrides it.
-pub const MODEL_LOD1_DISTANCE: f32 = 35.0;
+/// triangles of lod1: the model pass is bound by its vertices). 15 (was 35) saves 1.6 ms at
+/// camera distance 30 (ADR 0746); `CENT_ANS_MODEL_LOD1_DISTANCE` overrides it.
+pub const MODEL_LOD1_DISTANCE: f32 = 15.0;
 /// Bit of the batch key's row marking the near models drawn with their lod2 mesh.
 pub const FAR_MODEL_BIT: u16 = 0x8000;
 
@@ -135,7 +136,9 @@ pub fn model_radius(distance: f32) -> f32 {
     if distance > MODEL_MAX_DISTANCE {
         return 0.0;
     }
-    (MODEL_RADIUS_FACTOR * distance).clamp(MODEL_RADIUS_MIN, MODEL_RADIUS_MAX)
+    let factor =
+        crate::campaign::perf_switch::value("MODEL_RADIUS_FACTOR").unwrap_or(MODEL_RADIUS_FACTOR);
+    (factor * distance).clamp(MODEL_RADIUS_MIN, MODEL_RADIUS_MAX)
 }
 
 /// A glTF model of a species while it loads, then once normalised.
