@@ -275,7 +275,10 @@ fn the_dauphine_purchase_takes_the_capital_province_from_humbert() {
     assert!(state.factions[&fac("fac_france")].treasury < treasury - 9_000);
     assert!(!state.factions[&fac("fac_dauphine")].alive);
     // Provence stays with Naples: the objective no longer drags Marseille along.
-    assert_eq!(state.province_owner(&prov("prov_provence")), Some(&fac("fac_naples")));
+    assert_eq!(
+        state.province_owner(&prov("prov_provence")),
+        Some(&fac("fac_naples"))
+    );
 }
 
 // 5. Player ransoms ----------------------------------------------------------

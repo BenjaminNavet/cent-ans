@@ -49,7 +49,7 @@
     "fac_genoa": 25408,
     "fac_germiyan": 1108,
     "fac_glogow": 1544,
-    "fac_granada": 9020,
+    "fac_granada": 8772,
     "fac_guelders": 3416,
     "fac_hafsids": 13948,
     "fac_hainaut": 4924,
@@ -81,7 +81,7 @@
     "fac_makki": 788,
     "fac_mamluks": 16684,
     "fac_mantua": 1496,
-    "fac_marinids": 20940,
+    "fac_marinids": 21184,
     "fac_mark": 1672,
     "fac_mecklenburg": 1788,
     "fac_meissen": 6612,
@@ -121,7 +121,7 @@
     "fac_saluzzo": 1016,
     "fac_saruhan": 1128,
     "fac_schleswig": 1704,
-    "fac_scotland": 4776,
+    "fac_scotland": 3996,
     "fac_serbia": 8132,
     "fac_sicily": 9744,
     "fac_siena": 1452,
@@ -207,6 +207,10 @@
     ],
     "set_blois": [
       3
+    ],
+    "set_brest_berestia": [
+      1,
+      2
     ],
     "set_briansk": [
       3
@@ -323,10 +327,6 @@
     "set_kastamonu": [
       2,
       3
-    ],
-    "set_kaunas": [
-      1,
-      2
     ],
     "set_kiev": [
       2,
@@ -464,10 +464,6 @@
       2,
       3
     ],
-    "set_polotsk": [
-      1,
-      2
-    ],
     "set_pskov": [
       2,
       3
@@ -589,6 +585,10 @@
     "set_visoko": [
       2,
       3
+    ],
+    "set_vitebsk": [
+      1,
+      2
     ],
     "set_wenden": [
       2,
@@ -994,7 +994,8 @@
       1
     ],
     "army_0132": [
-      0
+      0,
+      1
     ],
     "army_0135": [
       0,
