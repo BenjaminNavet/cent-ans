@@ -207,8 +207,19 @@ impl EventRefs<'_> {
                     self.condition(inner);
                 }
             }
-            Condition::YearBetween { .. } | Condition::Schism { .. } | Condition::Season { .. } => {
+            Condition::Not { condition } => self.condition(condition),
+            Condition::BattleBalance { faction, rival, .. }
+            | Condition::StrengthRatio { faction, rival, .. } => {
+                self.faction("conditions.faction", faction.as_ref());
+                self.faction("conditions.rival", Some(rival));
             }
+            Condition::DomainBelow { faction, .. } => {
+                self.faction("conditions.faction", faction.as_ref());
+            }
+            Condition::YearBetween { .. }
+            | Condition::Schism { .. }
+            | Condition::Season { .. }
+            | Condition::Flag { .. } => {}
         }
     }
 
@@ -287,7 +298,7 @@ impl EventRefs<'_> {
             EventEffect::Loyalty { vassal, .. } => {
                 self.faction("effects.vassal", vassal.as_ref());
             }
-            EventEffect::PlagueWave { .. } => {}
+            EventEffect::PlagueWave { .. } | EventEffect::SetFlag { .. } => {}
             EventEffect::CaptureCharacter {
                 id,
                 faction,

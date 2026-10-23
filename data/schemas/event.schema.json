@@ -32,6 +32,7 @@
   "additionalProperties": false,
   "$defs": {
     "event_id": { "type": "string", "pattern": "^evt_[a-z0-9_]+$" },
+    "flag_id": { "type": "string", "pattern": "^[a-z0-9_]+$", "description": "Drapeau de chronique (EVENTS, ADR 0779)." },
     "season": { "type": "string", "enum": ["spring", "summer", "autumn", "winter"] },
     "faction_id": { "$ref": "common.schema.json#/$defs/faction_id" },
     "province_id": { "$ref": "common.schema.json#/$defs/province_id" },
@@ -95,7 +96,12 @@
         { "properties": { "type": { "const": "not_fired" }, "event": { "$ref": "#/$defs/event_id" } }, "required": ["event"], "additionalProperties": false },
         { "properties": { "type": { "const": "fired" }, "event": { "$ref": "#/$defs/event_id" } }, "required": ["event"], "additionalProperties": false },
         { "properties": { "type": { "const": "season" }, "season": { "$ref": "#/$defs/season" } }, "required": ["season"], "additionalProperties": false },
-        { "properties": { "type": { "const": "any_of" }, "conditions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/condition" } } }, "required": ["conditions"], "additionalProperties": false }
+        { "properties": { "type": { "const": "any_of" }, "conditions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/condition" } } }, "required": ["conditions"], "additionalProperties": false },
+        { "description": "EVENTS (ADR 0779) : la condition imbriquée est fausse.", "properties": { "type": { "const": "not" }, "condition": { "$ref": "#/$defs/condition" } }, "required": ["condition"], "additionalProperties": false },
+        { "description": "EVENTS : victoires en bataille rangée de faction sur rival moins celles de rival sur faction, au moins at_least (peut être négatif). Décompte permanent de la partie.", "properties": { "type": { "const": "battle_balance" }, "faction": { "$ref": "#/$defs/faction_id" }, "rival": { "$ref": "#/$defs/faction_id" }, "at_least": { "type": "integer" } }, "required": ["rival", "at_least"], "additionalProperties": false },
+        { "description": "EVENTS : moins de percent % des provinces tenues par faction en 1337 sont encore sous son contrôle (le domaine royal).", "properties": { "type": { "const": "domain_below" }, "faction": { "$ref": "#/$defs/faction_id" }, "percent": { "type": "integer", "minimum": 0, "maximum": 100 } }, "required": ["percent"], "additionalProperties": false },
+        { "description": "EVENTS : les hommes en armes de faction font au moins percent % de ceux de rival (100 = aussi fort).", "properties": { "type": { "const": "strength_ratio" }, "faction": { "$ref": "#/$defs/faction_id" }, "rival": { "$ref": "#/$defs/faction_id" }, "percent": { "type": "integer", "minimum": 0 } }, "required": ["rival", "percent"], "additionalProperties": false },
+        { "description": "EVENTS : le drapeau de chronique a été levé par un effet set_flag (mémoire durable d'un choix).", "properties": { "type": { "const": "flag" }, "flag": { "$ref": "#/$defs/flag_id" } }, "required": ["flag"], "additionalProperties": false }
       ]
     },
     "scope": {
@@ -148,6 +154,7 @@
         { "description": "H6 : la faction (défaut : celle qui décide) fonde l'ordre de chevalerie order ; sans effet si elle en a déjà un. Le coût et le prestige restent portés par les autres effets de l'option.", "properties": { "type": { "const": "found_chivalric_order" }, "order": { "$ref": "common.schema.json#/$defs/chivalric_order_id" }, "faction": { "$ref": "#/$defs/faction_id" } }, "required": ["order"], "additionalProperties": false },
         { "description": "G1 : la province passe (propriété et contrôle) à faction (défaut : celle qui décide) ; achat ou traité. Siège, garnison, recrutements et gouverneur de l'ancien détenteur prennent fin. Avec from : seulement si cette faction la possède ou la contrôle ; jamais la capitale de son propriétaire. LR-17 : price est versé par payer (défaut : l'acquéreur) à l'ancien propriétaire si la province change de mains.", "properties": { "type": { "const": "transfer_province" }, "province": { "$ref": "#/$defs/province_id" }, "faction": { "$ref": "#/$defs/faction_id" }, "from": { "$ref": "#/$defs/faction_id" }, "price": { "type": "integer", "minimum": 0 }, "payer": { "$ref": "#/$defs/faction_id" } }, "required": ["province"], "additionalProperties": false },
         { "description": "LR-17 : vente ou cession du titre à faction (défaut : celle qui décide), avec ses provinces propres encore tenues par le vendeur, capitale comprise ; un vendeur laissé sans titre se fond dans l'acquéreur. Avec from : seulement si cette faction tient le titre. price est versé par payer (défaut : l'acquéreur) au vendeur s'il subsiste, sinon à une couronne hors carte.", "properties": { "type": { "const": "transfer_title" }, "title": { "$ref": "common.schema.json#/$defs/title_id" }, "faction": { "$ref": "#/$defs/faction_id" }, "from": { "$ref": "#/$defs/faction_id" }, "price": { "type": "integer", "minimum": 0 }, "payer": { "$ref": "#/$defs/faction_id" } }, "required": ["title"], "additionalProperties": false },
+        { "description": "EVENTS (ADR 0779) : lève le drapeau de chronique flag, conservé dans la sauvegarde et lu par la condition flag.", "properties": { "type": { "const": "set_flag" }, "flag": { "$ref": "#/$defs/flag_id" } }, "required": ["flag"], "additionalProperties": false },
         { "description": "LR-17 : character, vivant et de faction (défaut : celle qui décide), prend ou reçoit par élection le trône ; l'ancien souverain vit, déposé, et l'héritier est choisi de nouveau selon la loi de succession.", "properties": { "type": { "const": "set_ruler" }, "character": { "$ref": "common.schema.json#/$defs/character_id" }, "faction": { "$ref": "#/$defs/faction_id" } }, "required": ["character"], "additionalProperties": false }
       ]
     }

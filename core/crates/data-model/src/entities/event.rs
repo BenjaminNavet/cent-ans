@@ -199,6 +199,42 @@ pub enum Condition {
     AnyOf {
         conditions: Vec<Condition>,
     },
+    /// EVENTS (ADR 0779): `condition` does not hold.
+    Not {
+        condition: Box<Condition>,
+    },
+    /// EVENTS: balance of the field battles `faction` (default: scope) and
+    /// `rival` have fought so far: victories of `faction` over `rival` minus
+    /// victories of `rival` over `faction`, at least `at_least` (may be
+    /// negative: "not behind by more than two").
+    BattleBalance {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        faction: Option<FactionId>,
+        rival: FactionId,
+        at_least: i32,
+    },
+    /// EVENTS: fewer than `percent` % of the provinces `faction` (default:
+    /// scope) held at the 1337 start are still under its control (the
+    /// "royal domain" of the collapse tests). False for a faction that
+    /// started without province.
+    DomainBelow {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        faction: Option<FactionId>,
+        percent: u32,
+    },
+    /// EVENTS: the men under arms of `faction` (default: scope) amount to at
+    /// least `percent` % of those of `rival` (100 = at least as strong).
+    StrengthRatio {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        faction: Option<FactionId>,
+        rival: FactionId,
+        percent: u32,
+    },
+    /// EVENTS: the chronicle flag was raised by a `set_flag` effect (the
+    /// lasting memory of a choice made at a fork).
+    Flag {
+        flag: String,
+    },
 }
 
 fn default_true() -> bool {
@@ -497,6 +533,11 @@ pub enum EventEffect {
         character: CharacterId,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         faction: Option<FactionId>,
+    },
+    /// EVENTS (ADR 0779): raises the chronicle flag `flag`, kept in the save;
+    /// later events read it with the `flag` condition.
+    SetFlag {
+        flag: String,
     },
 }
 
