@@ -14,6 +14,7 @@ pub mod anim;
 pub mod arms;
 pub mod banners;
 pub mod corpses;
+pub mod crowd;
 pub mod engage;
 pub mod figures;
 pub mod fine_maps;
@@ -55,8 +56,15 @@ const TELEPORT_M: f32 = 8.0;
 /// Counters of the soldier renderer (dump section `battle_units`, and `battle`).
 #[derive(Resource, Default, Debug, Clone)]
 pub struct SoldierStats {
-    /// Soldiers handed to the GPU this frame (all levels of detail and impostors).
+    /// Soldiers handed to the GPU this frame after culling (colour or shadows; all levels of
+    /// detail and impostors).
     pub drawn: usize,
+    /// Soldiers of the regiments on the field before the per-soldier culling.
+    pub total: usize,
+    /// Soldiers in the camera frustum (drawn in colour).
+    pub visible: usize,
+    /// Soldiers outside the frustum kept for their shadow only.
+    pub shadow_only: usize,
     /// `[attacker foot, attacker mounted, defender foot, defender mounted]`.
     pub per_batch: [usize; 4],
     /// Soldiers per level of detail: full, medium, far, impostor.
@@ -192,7 +200,8 @@ impl Plugin for BattleUnitsPlugin {
                     .run_if(resource_exists::<FigureLibrary>),
             )
                 .chain()
-                .after(crate::battle::scene::StepSet),
+                .after(crate::battle::scene::StepSet)
+                .after(crate::battle::scene::camera::apply_camera),
         )
         .add_systems(OnExit(AppState::Battle), clear_units);
     }
@@ -329,7 +338,16 @@ fn dump_units(world: &World) -> (String, serde_json::Value) {
             "regiments": stats.regiments,
             "regiments_with_lance": regiments.map(|r| r.lance_stats().0),
             "steel_occlusion_min": regiments.map(|r| r.lance_stats().1),
-            "soldiers_drawn": stats.drawn,
+            "soldiers_drawn": stats.visible,
+            "soldiers_total": stats.total,
+            "soldiers_shadow_only": stats.shadow_only,
+            "soldiers_uploaded": stats.drawn,
+            "soldiers_drawn_over_total": format!("{} / {}", stats.visible, stats.total),
+            "crowd": {
+                "cull": crowd::CrowdSettings::bundled().cull.enabled,
+                "shadow_skin": crowd::CrowdSettings::bundled().shadow_skin,
+                "far_skin": crowd::CrowdSettings::bundled().far_skin,
+            },
             "soldiers_by_lod": named(stats.lod),
             "regiments_by_lod": named(by_lod),
             "soldiers_by_figure": by_figure,

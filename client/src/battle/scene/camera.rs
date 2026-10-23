@@ -477,7 +477,7 @@ pub fn control_camera(
     state.distance += (state.target_distance - state.distance) * blend;
 }
 
-fn apply_camera(
+pub(crate) fn apply_camera(
     mut session: ResMut<BattleSession>,
     state: Option<ResMut<BattleCameraState>>,
     mut cameras: Query<&mut Transform, With<BattleCamera>>,
