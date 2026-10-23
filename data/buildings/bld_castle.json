@@ -35,6 +35,10 @@
     {
       "effect": "loyalty",
       "value": 5
+    },
+    {
+      "effect": "recruit_slots",
+      "value": 1
     }
   ],
   "description": "Donjon, enceinte flanquée de tours, parfois concentrique, citerne et réserves ; tient des mois contre un siège. Voir [[cdx_chateau_fort]].",

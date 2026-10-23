@@ -260,7 +260,9 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
             let f = &state.factions[&france];
             let b = &f.last_budget;
             let net = b.income - b.army_upkeep - b.building_upkeep - b.administration;
-            france_treasury.push(json!({"turn": state.turn, "treasury": f.treasury, "income": b.income, "net": net}));
+            france_treasury.push(
+                json!({"turn": state.turn, "treasury": f.treasury, "income": b.income, "net": net}),
+            );
         }
         let now = sieges(&state);
         for (id, (attacker, holder, _, _)) in &now {

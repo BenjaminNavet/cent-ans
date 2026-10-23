@@ -36,6 +36,10 @@
     {
       "effect": "loyalty",
       "value": 5
+    },
+    {
+      "effect": "recruit_slots",
+      "value": 1
     }
   ],
   "description": "Boulevard de terre et de bois devant les portes, tours basses et épaisses percées de canonnières ; réponse du XVe siècle à la bombarde. Voir [[cdx_boulevard_artillerie]].",

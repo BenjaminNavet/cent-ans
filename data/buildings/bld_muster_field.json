@@ -19,6 +19,11 @@
     {
       "effect": "recruit_slots",
       "value": 1
+    },
+    {
+      "effect": "recruit_cost",
+      "value": -5,
+      "mode": "percent"
     }
   ],
   "description": "Terrain où les capitaines présentent leurs troupes à la montre, pour être comptées et payées. Voir [[cdx_ost_feodal]].",

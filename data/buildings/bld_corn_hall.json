@@ -25,6 +25,10 @@
     {
       "effect": "unrest",
       "value": -1
+    },
+    {
+      "effect": "supply",
+      "value": 10
     }
   ],
   "description": "Halle et greniers publics où la ville stocke le blé et en règle le prix pour parer aux disettes. Bâtiment de la cité de la province.",

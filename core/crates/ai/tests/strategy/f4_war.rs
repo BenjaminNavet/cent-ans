@@ -138,10 +138,11 @@ fn a_hoarding_realm_spends() {
     let data = data();
     let mut state = CampaignState::new_1337(data, fac("fac_papacy"), 1).unwrap();
     let empire = fac("fac_france");
-    // 300 000 (was 400 000). The settlements' buildings add upkeep,
-    // and at 400 000 the court's opulence (20 % of the excess) made the war
-    // runway rule dismiss troops before the hoard could be spent.
-    state.factions.get_mut(&empire).unwrap().treasury = 300_000;
+    // 150 000 (was 400 000, then 300 000). The settlements' buildings add
+    // upkeep, and a bigger hoard makes the court's progressive opulence
+    // (ADR 0749) so heavy that the war runway rule dismisses troops before
+    // the hoard could be spent.
+    state.factions.get_mut(&empire).unwrap().treasury = 150_000;
     state.season = Season::Autumn;
     let orders = ai::plan_turn(&state, data, &empire);
     assert!(orders.iter().any(|o| matches!(o, Order::Recruit { .. })));

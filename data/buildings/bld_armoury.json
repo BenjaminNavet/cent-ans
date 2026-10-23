@@ -28,6 +28,11 @@
     {
       "effect": "army_experience",
       "value": 1
+    },
+    {
+      "effect": "recruit_cost",
+      "value": -8,
+      "mode": "percent"
     }
   ],
   "description": "Magasin d’armes et d’armures du roi : Privy Wardrobe de la Tour de Londres, artillerie du Louvre, Clos des galées de Rouen. Voir [[cdx_arsenal]].",
