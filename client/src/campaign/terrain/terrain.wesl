@@ -232,6 +232,18 @@ struct TerrainExtras {
 @group(constants::MATERIAL_BIND_GROUP) @binding(34) var wx_clear_tex: texture_2d<f32>;
 // Ground cache (ADR 0742): one layer per relief node, the regional ground baked once
 // (rgb albedo, a forest share; rg normal offset), sampled with `terroir_sampler`.
+// Relief shade (ADR 0745, `shade.rs`): march settings of the bake, baked sun visibility (r) and
+// horizon occlusion (g) per node layer.
+struct ShadeParams {
+    // xyz: quantised direction towards the sun, w: 1 when baked.
+    sun: vec4<f32>,
+    // reach (map px), steps, penumbra (m), bias (m).
+    march: vec4<f32>,
+    // shadow strength, AO strength, AO reach (map px), displayed units per metre.
+    mix: vec4<f32>,
+};
+@group(constants::MATERIAL_BIND_GROUP) @binding(43) var<uniform> shade: ShadeParams;
+@group(constants::MATERIAL_BIND_GROUP) @binding(44) var cache_shade: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(41) var cache_albedo: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(42) var cache_dn: texture_2d_array<f32>;
 
@@ -2414,7 +2426,19 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     @if(!PERF_TNOSUN) {
         sun_vis = sun_shadow(in.world, n, in.clip.xy);
     }
-    let lit0 = max(dot(n, params.sun_dir.xyz), 0.0) * sun_vis;
+    // Baked relief shade (ADR 0745): sun visibility and horizon occlusion (1, 1 when off).
+    var relief_vis = 1.0;
+    var relief_ao = 1.0;
+    @if(GROUND_CACHE) {
+        if (shade.sun.w > 0.5) {
+            let half_texel = 0.5 / f32(constants::GC_TEXELS);
+            let uv = clamp(in.cache.xy, vec2<f32>(half_texel), vec2<f32>(1.0 - half_texel));
+            let baked = textureSampleLevel(cache_shade, terroir_sampler, uv, i32(in.cache.z), 0.0).rg;
+            relief_vis = mix(1.0, baked.r, shade.mix.x);
+            relief_ao = mix(1.0, baked.g, shade.mix.y);
+        }
+    }
+    let lit0 = max(dot(n, params.sun_dir.xyz), 0.0) * sun_vis * relief_vis;
     var forest_f = 0.0;
     var regional = ground.bg.x > 0.5;
     @if(PERF_TNOPROC) {
@@ -2481,7 +2505,7 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     let rvd = rvd_apply(in.world.xz / params.map.xy, ground_footprint, smoothstep(0.0, 2.0, in.altitude), albedo);
     albedo = rvd.color;
     let ndl = max(dot(n, params.sun_dir.xyz), 0.0);
-    var color = albedo * (params.ambient.rgb * rvd.ao + params.sun_color.rgb * ndl * sun_vis) * params.ambient.a;
+    var color = albedo * (params.ambient.rgb * rvd.ao * relief_ao + params.sun_color.rgb * ndl * sun_vis * relief_vis) * params.ambient.a;
     // TS-T9: a cast shadow is the sky light, never black: it keeps at least `1 - opacity` of the lit
     // ground, with the hue of the ambient (sky) light (see `shadows::capped_shadow`).
     let sky = params.ambient.rgb / max(dot(params.ambient.rgb, vec3<f32>(0.2126, 0.7152, 0.0722)), 1e-4);
@@ -2506,6 +2530,54 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     return vec4<f32>(color, 1.0);
 }
 
+// Relief shade of a map point (ADR 0745), marched on the 16 px block heightfield: (sun visibility,
+// ambient visibility). Runs in the vertex stage of the bake only (once per node vertex, amortised
+// by the cache), never in the main pass.
+const SHADE_MAX_ALT_M = 5200.0;
+const SHADE_AO_GAIN = 6.0;
+
+fn relief_shade(xz: vec2<f32>, h0: f32) -> vec2<f32> {
+    if (shade.sun.w < 0.5) {
+        return vec2<f32>(1.0);
+    }
+    let s_eff = max(shade.mix.w, 1e-5);
+    let sun = shade.sun.xyz;
+    let horiz = length(sun.xz);
+    var vis = 1.0;
+    if (horiz > 1e-3 && sun.y > 0.0) {
+        let dir = sun.xz / horiz;
+        // Metres of altitude the sun ray gains per map px.
+        let rise = (sun.y / horiz) / s_eff;
+        let start_h = max(h0, pm_height(xz)) + shade.march.w;
+        let n = i32(shade.march.y);
+        for (var i = 1; i <= n; i = i + 1) {
+            let t = f32(i) / f32(n);
+            let d = shade.march.x * t * t;
+            let ray_h = start_h + rise * d;
+            if (ray_h > SHADE_MAX_ALT_M) {
+                break;
+            }
+            let pen = shade.march.z * (0.25 + t);
+            vis = min(vis, smoothstep(-pen, pen, ray_h - pm_height(xz + dir * d)));
+        }
+    }
+    // Horizon occlusion: highest elevation seen in 8 directions at 3 distances.
+    var occ = 0.0;
+    for (var k = 0u; k < 8u; k = k + 1u) {
+        let a = f32(k) * 0.785398;
+        let dir = vec2<f32>(cos(a), sin(a));
+        var best = 0.0;
+        for (var j = 1; j <= 3; j = j + 1) {
+            let d = shade.mix.z * (f32(j) / 3.0) * (f32(j) / 3.0);
+            let tan_e = (pm_height(xz + dir * d) - h0) * s_eff / max(d, 1.0);
+            best = max(best, tan_e * inverseSqrt(1.0 + tan_e * tan_e));
+        }
+        occ = occ + best;
+    }
+    let ao = 1.0 - clamp(occ * 0.125 * SHADE_AO_GAIN, 0.0, 1.0);
+    return vec2<f32>(vis, ao);
+}
+
 // Ground cache bake (ADR 0742, `ground_cache.rs`): the node mesh drawn flat over its cache layer,
 // one fragment per texel, the regional ground computed with the texel as footprint. The skirts
 // collapse onto the node edges.
@@ -2515,6 +2587,8 @@ struct BakeVaryings {
     @location(1) altitude: f32,
     @location(2) slope_xz: vec2<f32>,
     @location(3) texel: f32,
+    // Relief shade (ADR 0745): per vertex, interpolated over the node.
+    @location(4) shade: vec2<f32>,
 };
 
 @vertex
@@ -2526,12 +2600,14 @@ fn bake_vertex(v: Vertex) -> BakeVaryings {
     out.altitude = v.position.y;
     out.slope_xz = v.slope.xy;
     out.texel = c.w;
+    out.shade = relief_shade(v.position.xz, v.position.y);
     return out;
 }
 
 struct BakeOut {
     @location(0) albedo: vec4<f32>,
     @location(1) dn: vec4<f32>,
+    @location(2) shade: vec4<f32>,
 };
 
 @fragment
@@ -2541,5 +2617,6 @@ fn bake_fragment(in: BakeVaryings) -> BakeOut {
     var out: BakeOut;
     out.albedo = vec4<f32>(r.albedo, r.forest_f);
     out.dn = vec4<f32>(r.dn, 0.0, 1.0);
+    out.shade = vec4<f32>(in.shade, 0.0, 1.0);
     return out;
 }

@@ -196,6 +196,12 @@ pub struct TerrainMaterial {
     pub cache_albedo: Option<Handle<Image>>,
     #[texture(42, dimension = "2d_array")]
     pub cache_dn: Option<Handle<Image>>,
+    /// Relief shade (ADR 0745): sun visibility + horizon occlusion baked per node (Rg8 atlas).
+    #[texture(44, dimension = "2d_array")]
+    pub cache_shade: Option<Handle<Image>>,
+    /// Sun / horizon march settings of the relief shade, read by the bake.
+    #[uniform(43)]
+    pub shade: super::shade::ShadeParams,
     /// Texels per side of a cache layer, 0 when the ground is computed live.
     pub cache_texels: u32,
 }

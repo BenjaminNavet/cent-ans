@@ -37,6 +37,7 @@ pub mod relief_floor;
 pub mod relief_gpu;
 pub mod relief_state;
 pub mod season;
+pub mod shade;
 pub mod shadows;
 #[cfg(feature = "solari")]
 pub mod solari_proxy;
@@ -120,6 +121,7 @@ impl Plugin for CampaignTerrainPlugin {
                     coast::poll_bake,
                     coast::bind_coast,
                     look::sync_cumulus,
+                    ground_cache::sync_shade,
                     (
                         ensure_lod,
                         ground_cache::invalidate,
@@ -515,6 +517,8 @@ fn create_material(
         wx_clear: None,
         cache_albedo: None,
         cache_dn: None,
+        cache_shade: None,
+        shade: shade::ShadeParams::default(),
         cache_texels: 0,
     };
     if let Some(textures) = ground_textures {
@@ -650,11 +654,13 @@ fn ensure_lod(
             let cache = ground_cache::GroundCache::new(texels, &mut images);
             material.cache_albedo = Some(cache.albedo.clone());
             material.cache_dn = Some(cache.dn.clone());
+            material.cache_shade = Some(cache.shade.clone());
             material.cache_texels = texels;
             commands.insert_resource(cache);
         } else {
             material.cache_albedo = None;
             material.cache_dn = None;
+            material.cache_shade = None;
             material.cache_texels = 0;
         }
     }
@@ -830,6 +836,8 @@ fn dump_terrain(world: &World) -> (String, Value) {
             "pending": cache.pending,
             "generation": cache.generation,
             "exhausted": cache.exhausted,
+            "shade_rebakes": cache.shade_rebakes,
+            "shade_enabled": cache.shade_enabled,
         });
     }
     ("campaign_terrain".into(), value)
