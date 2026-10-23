@@ -377,7 +377,7 @@ pub(crate) fn resolve_victory(
                 &player,
                 held,
                 (done, objectives.len() as u32),
-                i64::from(score),
+                score,
             ))
         }
     };

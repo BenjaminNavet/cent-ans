@@ -779,7 +779,7 @@ pub(crate) fn resolve_economy(
                         building_upkeep: budget.building_upkeep,
                         administration: budget.administration,
                         table: budget.table,
-                        deficit_seasons: u32::from(faction.deficit_seasons),
+                        deficit_seasons: faction.deficit_seasons,
                     },
                 ));
             }

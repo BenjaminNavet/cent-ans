@@ -7,11 +7,9 @@ use data_model::{FactionId, ProvinceId};
 use crate::causes::{Cause, CauseKind};
 
 fn pct(part: u64, whole: u64) -> i64 {
-    if whole == 0 {
-        0
-    } else {
-        (part.saturating_mul(100) / whole) as i64
-    }
+    part.saturating_mul(100)
+        .checked_div(whole)
+        .map_or(0, |share| share as i64)
 }
 
 /// What a battle's cause is built from (the loser's point of view).
