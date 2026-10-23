@@ -312,3 +312,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0740 | [Mise à l'échelle du monde 3D (Bevy)](0740-mise-a-l-echelle-du-monde-bevy.md) | accepté |
 | 0741 | [SMAA sur la carte de campagne au lieu du MSAA](0741-smaa-carte-au-lieu-du-msaa.md) | accepté |
 | 0742 | [Cache du sol par nœud de relief](0742-cache-du-sol-par-noeud.md) | accepté |
+| 0743 | [Ombres d'arbres découpées par cascade](0743-ombres-d-arbres-par-cascade.md) | accepté |

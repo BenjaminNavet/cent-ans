@@ -33,10 +33,10 @@ Conditions du joueur : `CENT_ANS_VIEW_SIZE=3456x2234` + copie de son `settings.j
   `rsync -a --ignore-existing <principal>/game/assets/ game/assets/` ; tuer le client par son pid ; `CARGO_INCREMENTAL=0`.
 
 ## Prochaine étape
-Cache du sol **fait** (939c58718, ADR 0742, préréglages Ultra 320 / Haute-Moyenne 256 / Basse 192) :
-d=30 47,5 → 27-28 ms, d=150 33,9 → 14,6, d=500 34,1 → 13,8 (réglages du joueur).
-Reste : d=30 (≈ 27 ms). Bissection avec cache en cours (`c_*`) : ombres (arbres surtout),
-végétation, reste du fragment (roche, neige, côte, météo, nuages).
-Puis : capture de contrôle, fusion dans main (worktree dédié, ff-only), ADR 0740/0741/0742 dans INDEX.
-Réglages de banc ajoutés : `CENT_ANS_GROUND_CACHE=<texels>`, `GC_FIRST`, `GC_REFRESH`, `GC_STRESS`,
-`GC_LOG` (journal des cuissons), `VEG_CASCADES`.
+Fait : cache du sol (ADR 0742) et ombres d'arbres par cascade (ADR 0743).
+Réglages du joueur, p50 : d=30 47,5 → 21,8 ms ; d=150 33,9 → 14,6 ; d=500 34,1 → 13,8.
+Bissection d=30 avec cache : toutes ombres coupées 13,7 ; sans ombres d'arbres 18,3 ; sol plat 23,7 ; taille d'ombre 4096 sans effet.
+Point le plus lent maintenant : d=60 (29,1 ms, ombres d'arbres jusqu'à d=70). À mesurer : `k_nocull` à d=60, puis bissection.
+Ensuite : capture de contrôle (2 restantes), fusion dans main (worktree dédié, ff-only).
+Avant chaque série de bancs, prévenir game-project-79, qui a une fenêtre GPU de 20 min après chacune de nos séries.
+Réglages de banc : `CENT_ANS_GROUND_CACHE`, `GC_*`, `VEG_CASCADES`, `PERF_OFF=vegcull`.
