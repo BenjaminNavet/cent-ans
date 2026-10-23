@@ -238,6 +238,7 @@ fn spawn_scene(
         sky_color(weather),
         centre,
         yaw,
+        opening_distance(sim),
     );
 }
 
@@ -246,6 +247,45 @@ use super::camera;
 /// Radius (m) around the regiment nearest the army centroid that the opening shot frames.
 const OPENING_CLUSTER_M: f32 = 120.0;
 
+/// Distance (m) of the opening shot: further back at a siege, so the assailing army and the
+/// ramparts share the frame (ADR 0773).
+pub fn opening_distance(sim: &sim_battle::BattleSim) -> f32 {
+    if sim.siege().is_some() {
+        SIEGE_OPENING_DISTANCE
+    } else {
+        camera::OPENING_DISTANCE
+    }
+}
+
+/// Siege opening distance (m).
+const SIEGE_OPENING_DISTANCE: f32 = 170.0;
+/// Share of the way from the besiegers to the gate where a siege shot pivots.
+const SIEGE_PIVOT_SHARE: f32 = 0.55;
+
+/// Siege shot (ADR 0773): from behind the besiegers (never from inside the roofs), the pivot
+/// between their army and the gate, looking at the walls.
+fn siege_opening_frame(sim: &sim_battle::BattleSim) -> Option<(Vec3, f32)> {
+    let works = sim.siege()?;
+    let gate = works.pieces.get(works.gate)?.midpoint();
+    let gate = Vec3::new(gate.0 as f32, 0.0, gate.1 as f32);
+    let attackers: Vec<Vec3> = sim
+        .units()
+        .iter()
+        .filter(|u| u.side == sim_battle::SideId::Attacker && !u.synthetic)
+        .map(|u| Vec3::new(u.x as f32, 0.0, u.z as f32))
+        .collect();
+    if attackers.is_empty() {
+        return None;
+    }
+    let army = attackers.iter().copied().sum::<Vec3>() / attackers.len() as f32;
+    let centre = army.lerp(gate, SIEGE_PIVOT_SHARE);
+    let toward = gate - army;
+    if toward.xz().length_squared() < 1.0 {
+        return None;
+    }
+    Some((centre, (-toward.x).atan2(-toward.z)))
+}
+
 /// Opening shot: the knot of the player's regiments nearest the army centroid (attacker without a
 /// player), seen from behind it towards the enemy centroid. A deployed army is often split in
 /// separate battles, so the plain centroid may fall on an empty meadow.
@@ -253,6 +293,9 @@ pub fn opening_frame(
     player: Option<sim_battle::SideId>,
     sim: &sim_battle::BattleSim,
 ) -> (Vec3, f32) {
+    if let Some(frame) = siege_opening_frame(sim) {
+        return frame;
+    }
     let side = player.unwrap_or(sim_battle::SideId::Attacker);
     let field = sim.field();
     let middle = Vec3::new(field.width as f32 * 0.5, 0.0, field.depth as f32 * 0.5);

@@ -151,7 +151,8 @@ pub fn refresh_deployment(
                         crate::battle::scene::terrain::opening_frame(Some(player), sim);
                     camera_state.target = centre;
                     camera_state.yaw = yaw;
-                    camera_state.target_distance = crate::battle::scene::camera::OPENING_DISTANCE;
+                    camera_state.target_distance =
+                        crate::battle::scene::terrain::opening_distance(sim);
                 } else if let Some(zone) = deployment.zones.first().copied() {
                     frame_zone(&mut camera_state, zone, player);
                 }
