@@ -120,7 +120,11 @@ impl Plugin for CampaignTerrainPlugin {
                     coast::poll_bake,
                     coast::bind_coast,
                     look::sync_cumulus,
-                    (ensure_lod, ground_cache::invalidate, ground_cache::mark_camera),
+                    (
+                        ensure_lod,
+                        ground_cache::invalidate,
+                        ground_cache::mark_camera,
+                    ),
                     lod::sync_relief_quality,
                     update_lod
                         .after(CameraSet)

@@ -509,27 +509,6 @@ fn dump_zoom(world: &World) -> (String, Value) {
     ("campaign_zoom".into(), zoom::dump(&view))
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn env_formats() {
-        let to_px = |lon: f64, lat: f64| Some([lon * 100.0, lat * 10.0]);
-        let ll = parse_camera_env("2.35, 48.85, 300", to_px).unwrap();
-        assert_eq!(
-            (ll.x, ll.z, ll.distance, ll.yaw),
-            (235.0, 488.5, 300.0, 0.0)
-        );
-        let xz = parse_camera_env("xz:3500,3000,120,90", to_px).unwrap();
-        assert_eq!((xz.x, xz.z, xz.distance), (3500.0, 3000.0, 120.0));
-        assert!((xz.yaw - std::f32::consts::FRAC_PI_2).abs() < 1e-6);
-        assert!(parse_camera_env("1,2", to_px).is_err());
-        assert!(parse_camera_env("a,b,c", to_px).is_err());
-        assert!(parse_camera_env("1,2,3", |_, _| None).is_err());
-    }
-}
-
 /// SMAA on the map camera when the quality asks for it (`map_smaa`, ADR 0741): the terrain shader
 /// runs twice on every triangle-edge pixel under MSAA (~17 ms at 1080p equivalent on an M4 Pro),
 /// SMAA costs about one.
@@ -549,5 +528,26 @@ fn apply_campaign_smaa(
                 .entity(camera)
                 .remove::<bevy::anti_alias::smaa::Smaa>();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn env_formats() {
+        let to_px = |lon: f64, lat: f64| Some([lon * 100.0, lat * 10.0]);
+        let ll = parse_camera_env("2.35, 48.85, 300", to_px).unwrap();
+        assert_eq!(
+            (ll.x, ll.z, ll.distance, ll.yaw),
+            (235.0, 488.5, 300.0, 0.0)
+        );
+        let xz = parse_camera_env("xz:3500,3000,120,90", to_px).unwrap();
+        assert_eq!((xz.x, xz.z, xz.distance), (3500.0, 3000.0, 120.0));
+        assert!((xz.yaw - std::f32::consts::FRAC_PI_2).abs() < 1e-6);
+        assert!(parse_camera_env("1,2", to_px).is_err());
+        assert!(parse_camera_env("a,b,c", to_px).is_err());
+        assert!(parse_camera_env("1,2,3", |_, _| None).is_err());
     }
 }

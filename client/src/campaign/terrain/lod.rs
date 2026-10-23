@@ -89,6 +89,8 @@ pub struct TerrainLod {
     pub peak_nodes: usize,
     /// Ground cache bakes still wanted (ADR 0742).
     pub pending_bakes: usize,
+    /// Longest frame since the last bake log line (s, `CENT_ANS_GC_LOG`).
+    pub dt_max: f32,
 }
 
 impl TerrainLod {
@@ -129,6 +131,7 @@ impl TerrainLod {
             pending_builds: 0,
             peak_nodes: 0,
             pending_bakes: 0,
+            dt_max: 0.0,
         }
     }
 
@@ -284,6 +287,7 @@ pub fn update_lod(
     let aspect = viewport.x / viewport.y.max(1.0);
     let now = time.elapsed_secs_f64();
     lod.frame += 1;
+    lod.dt_max = lod.dt_max.max(time.delta_secs());
 
     // Pages decoded by the workers: residency (LRU) and notification of the selector.
     let frame = lod.frame;
@@ -526,6 +530,22 @@ fn update_bakes(
         }
     }
     lod.pending_bakes = jobs.len();
+    if lod.frame % 30 == 0 && crate::campaign::perf_switch::value("GC_LOG").is_some() {
+        info!(
+            "ground cache: frame {} dtmax {:.1} retiring {} build {:.1} exhausted {} gen {} pending {} first {} bakes {} layers {}",
+            lod.frame,
+            lod.dt_max * 1000.0,
+            lod.retiring.len(),
+            lod.build_ms_last,
+            cache.exhausted,
+            generation,
+            jobs.len(),
+            jobs.iter().filter(|(first, _)| *first).count(),
+            cache.bakes_done,
+            cache.used_layers()
+        );
+        lod.dt_max = 0.0;
+    }
     super::ground_cache::publish_jobs(cache, queue, lod.material.id(), jobs);
 }
 

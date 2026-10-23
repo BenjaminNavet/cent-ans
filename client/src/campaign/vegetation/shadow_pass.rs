@@ -237,7 +237,8 @@ fn queue_shadow_batches(
     if crate::campaign::perf_switch::off("vegshadow") {
         return;
     }
-    let max_cascades = crate::campaign::perf_switch::value("VEG_CASCADES").map_or(usize::MAX, |v| v as usize);
+    let max_cascades =
+        crate::campaign::perf_switch::value("VEG_CASCADES").map_or(usize::MAX, |v| v as usize);
     let mut seen = Vec::new();
     for (light, view) in &lights {
         let LightEntity::Directional { cascade_index, .. } = light else {

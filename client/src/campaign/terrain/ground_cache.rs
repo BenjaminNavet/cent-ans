@@ -23,8 +23,6 @@ use bevy::asset::RenderAssetUsages;
 use bevy::core_pipeline::Core3dSystems;
 use bevy::core_pipeline::schedule::Core3d;
 use bevy::pbr::{MATERIAL_BIND_GROUP_INDEX, MeshPipeline, MeshPipelineKey, PreparedMaterial};
-use bevy::render::render_resource::{PrimitiveTopology, SpecializedMeshPipeline};
-use bevy::shader::ShaderDefVal;
 use bevy::prelude::*;
 use bevy::render::erased_render_asset::ErasedRenderAssets;
 use bevy::render::extract_component::{ExtractComponent, ExtractComponentPlugin};
@@ -41,10 +39,12 @@ use bevy::render::render_resource::{
     TextureFormat, TextureUsages, TextureView, TextureViewDescriptor, TextureViewDimension,
     VertexState,
 };
+use bevy::render::render_resource::{PrimitiveTopology, SpecializedMeshPipeline};
 use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
 use bevy::render::texture::GpuImage;
 use bevy::render::{Render, RenderApp, RenderStartup, RenderSystems};
 use bevy::shader::Shader;
+use bevy::shader::ShaderDefVal;
 
 use super::material::{SHADER_PATH, TerrainMaterial, perf_defs};
 
@@ -53,7 +53,7 @@ pub const ALBEDO_FORMAT: TextureFormat = TextureFormat::Rgba8UnormSrgb;
 /// Baked normal offset (x, z).
 pub const DN_FORMAT: TextureFormat = TextureFormat::Rg16Float;
 /// Layers of the atlas: more than the nodes drawn at once (selected + retiring).
-pub const LAYERS: u32 = 320;
+pub const LAYERS: u32 = 384;
 /// Nodes baked per frame at most once every node is shown (a refresh after an invalidation).
 const REFRESH_PER_FRAME: usize = 2;
 /// Nodes baked per frame at most while some node waits for its first bake.
@@ -186,10 +186,13 @@ pub fn publish_jobs(
 ) {
     let first = jobs.iter().filter(|(first, _)| *first).count();
     jobs.sort_by_key(|(first, _)| !*first);
+    let knob = |name: &str, default: usize| {
+        crate::campaign::perf_switch::value(name).map_or(default, |v| v as usize)
+    };
     let budget = if first > 0 {
-        FIRST_PER_FRAME
+        knob("GC_FIRST", FIRST_PER_FRAME)
     } else {
-        REFRESH_PER_FRAME
+        knob("GC_REFRESH", REFRESH_PER_FRAME)
     };
     cache.pending = jobs.len();
     queue.texels = cache.texels;
@@ -246,6 +249,10 @@ pub fn invalidate(
     let (Some(mut cache), Some(handle)) = (cache, handle) else {
         return;
     };
+    // Bench only: rebake every node continuously (`CENT_ANS_GC_STRESS=1`).
+    if crate::campaign::perf_switch::value("GC_STRESS").is_some() {
+        cache.generation += 1;
+    }
     let now = time.elapsed_secs_f64();
     if !modified && cache.signature.is_some() {
         return;
@@ -270,10 +277,7 @@ pub fn invalidate(
 pub fn mark_camera(
     mut commands: Commands,
     cache: Option<Res<GroundCache>>,
-    cameras: Query<
-        (Entity, Has<GroundCacheView>),
-        With<crate::campaign::camera::CampaignCamera>,
-    >,
+    cameras: Query<(Entity, Has<GroundCacheView>), With<crate::campaign::camera::CampaignCamera>>,
 ) {
     for (camera, has) in &cameras {
         if cache.is_some() && !has {

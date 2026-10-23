@@ -216,6 +216,29 @@ mod tests {
         (surface, relief)
     }
 
+    /// Mirror of `cache_coords` (terrain.wesl): the packed uv decodes exactly.
+    #[test]
+    fn cache_uv_unpacks_like_the_shader() {
+        for quads in [64u32, 32] {
+            for (i, j) in [
+                (0usize, 0usize),
+                (1, 0),
+                (0, 1),
+                (quads as usize, quads as usize),
+                (7, 13),
+            ] {
+                let packed = pack_cache_uv(i, j, quads);
+                let q = (packed / 4225.0).floor();
+                let rest = packed - q * 4225.0;
+                let vi = (rest / 65.0).floor();
+                let ui = rest - vi * 65.0;
+                assert_eq!(64 >> q as u32, quads);
+                assert_eq!(ui / 64.0, i as f32 / quads as f32);
+                assert_eq!(vi / 64.0, j as f32 / quads as f32);
+            }
+        }
+    }
+
     #[test]
     fn patch_has_the_expected_counts_and_slopes() {
         let (surface, relief) = world();

@@ -141,6 +141,12 @@
             "4x"
           ]
         },
+        "map_ground_cache": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1024,
+          "description": "Carte : texels par côté d'une couche du cache du sol (le sol régional cuit une fois par nœud de relief), 0 = calcul à chaque pixel (ADR 0742)."
+        },
         "map_smaa": {
           "type": "boolean",
           "description": "Carte : SMAA (anticrénelage en post-traitement) au lieu du MSAA ; le shader de terrain coûte deux fois sur les bords de triangles en MSAA (ADR 0741)."
