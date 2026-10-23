@@ -4,21 +4,21 @@
 //! it until the next season. The conditions only read what the core already exposes (alerts,
 //! idle army, treasury, building sites); no rule here.
 
-use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
 use game_api::Alert;
 use serde_json::{Value, json};
 
 use super::flow::EndTurnRequested;
-use super::{AdvisorColumn, HudData, HudSet, HudWidget};
+use super::{HudData, HudSet};
 use crate::agent::dump::DumpAppExt;
 use crate::campaign::armies::SelectedArmy;
 use crate::campaign::panels::OpenPanel;
 use crate::campaign::provinces::picker::SelectProvince;
 use crate::sim::Sim;
-use crate::ui::kit::style::{self, UiType};
-use crate::ui::kit::widgets::{button_small, panel_note};
-use crate::ui::kit::{ButtonPressed, UiTheme, fr};
+use crate::ui::advisor_band::{
+    AdvisorAction, AdvisorActionKind, AdvisorPriority, AdvisorWithdraw, BandSay,
+};
+use crate::ui::kit::fr;
 use sim_campaign::ArmyId;
 
 /// Conditions served by an alert of the same kind.
@@ -189,6 +189,7 @@ pub struct NextHint {
     dismissed: Vec<String>,
     dismissed_turn: u32,
     pub activated: u32,
+    /// What the band was last told (`Some(None)` = told that there is nothing).
     built: Option<Option<Hint>>,
 }
 
@@ -205,15 +206,12 @@ impl Default for NextHint {
     }
 }
 
-#[derive(Component)]
-struct HintCard;
-
 pub fn plugin(app: &mut App) {
     app.init_resource::<NextHint>()
         .register_dump(dump_hint)
         .add_systems(
             Update,
-            (refresh, rebuild_card, handle_buttons)
+            (refresh, publish, handle_buttons)
                 .chain()
                 .in_set(HudSet::Ui),
         );
@@ -291,75 +289,55 @@ fn refresh(
     }
 }
 
-fn rebuild_card(
-    mut commands: Commands,
+/// Key of the band message of hint `id`.
+fn band_key(id: &str) -> String {
+    format!("hint:{id}")
+}
+
+/// Sends the current hint to the single advisor band (ADR 0752) and withdraws the one that is
+/// gone. A hint is a standing message: after the reading time it folds into the band's chip.
+fn publish(
     mut hint: ResMut<NextHint>,
-    theme: Res<UiTheme>,
-    column: Query<Entity, With<AdvisorColumn>>,
-    card: Query<Entity, With<HintCard>>,
+    mut says: MessageWriter<BandSay>,
+    mut withdraws: MessageWriter<AdvisorWithdraw>,
     keymap: Option<Res<crate::settings::KeyMap>>,
     settings: Option<Res<crate::settings::Settings>>,
 ) {
-    let Ok(column) = column.single() else { return };
-    let existing = card.single().ok();
-    if existing.is_some() && hint.built.as_ref() == Some(&hint.current) {
+    if hint.built.as_ref() == Some(&hint.current) {
         return;
     }
-    if existing.is_none() && hint.built.as_ref() == Some(&hint.current) && hint.current.is_none() {
-        return;
+    let now = hint.current.clone();
+    let previous = hint.built.replace(now).flatten();
+    if let Some(previous) = previous
+        && hint.current.as_ref().map(|h| h.id.as_str()) != Some(previous.id.as_str())
+    {
+        withdraws.write(AdvisorWithdraw(band_key(&previous.id)));
     }
-    hint.built = Some(hint.current.clone());
-    if let Some(entity) = existing {
-        commands.entity(entity).despawn();
-    }
-    let Some(mut current) = hint.current.clone() else {
+    let Some(current) = hint.current.clone() else {
         return;
     };
     // `{key:ACTION}` reads the key actually bound (never a letter written in the data).
     let keys = super::bar::KeyHints::new(keymap.as_deref(), settings.as_deref());
-    current.title = keys.expand(&current.title);
-    current.text = keys.expand(&current.text);
-    commands
-        .spawn((
-            Name::new("hud:hint"),
-            HintCard,
-            ChildOf(column),
-            HudWidget,
-            Hovered::default(),
-            panel_note(&theme),
-        ))
-        .insert(Node {
-            width: Val::Px(280.0),
-            flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(3.0),
-            padding: UiRect::axes(Val::Px(12.0), Val::Px(6.0)),
-            ..default()
-        })
-        .with_children(|card| {
-            card.spawn((
-                Text::new(format!("Conseil : {}", current.title)),
-                theme.text_font(true, false, UiType::Caption.size()),
-                TextColor(style::RUBRIC),
-            ));
-            card.spawn((
-                Text::new(current.text.clone()),
-                theme.text_font(false, false, UiType::Caption.size()),
-                TextColor(style::INK),
-            ));
-            card.spawn(Node {
-                column_gap: Val::Px(4.0),
-                ..default()
-            })
-            .with_children(|row| {
-                row.spawn(button_small(&theme, "hud:hint_go", "Y aller"));
-                row.spawn(button_small(&theme, "hud:hint_hide", "Masquer"));
-            });
-        });
+    let title = keys.expand(&current.title);
+    let text = keys.expand(&current.text);
+    let priority = if matches!(current.id.as_str(), "siege" | "enemy_army") {
+        AdvisorPriority::Warning
+    } else {
+        AdvisorPriority::Advice
+    };
+    says.write(BandSay {
+        key: band_key(&current.id),
+        text: format!("{title}\n{text}"),
+        priority,
+        seconds: None,
+        action: Some("Y aller".to_owned()),
+        standing: true,
+    });
 }
 
 #[allow(clippy::too_many_arguments)]
 fn handle_buttons(
-    mut pressed: MessageReader<ButtonPressed>,
+    mut actions: MessageReader<AdvisorAction>,
     mut hint: ResMut<NextHint>,
     sim: Res<Sim>,
     mut panels: MessageWriter<OpenPanel>,
@@ -368,15 +346,18 @@ fn handle_buttons(
     mut selected_army: ResMut<SelectedArmy>,
     mut end_turn: MessageWriter<EndTurnRequested>,
 ) {
-    for press in pressed.read() {
+    for action in actions.read() {
         let Some(current) = hint.current.clone() else {
             continue;
         };
-        match press.name.as_str() {
-            "hud:hint_hide" => {
+        if action.key != band_key(&current.id) {
+            continue;
+        }
+        match action.kind {
+            AdvisorActionKind::Later => {
                 hint.dismissed.push(current.id);
             }
-            "hud:hint_go" => {
+            AdvisorActionKind::Go => {
                 hint.activated += 1;
                 match current.action.as_str() {
                     "alert" => {
@@ -418,7 +399,6 @@ fn handle_buttons(
                     _ => {}
                 }
             }
-            _ => {}
         }
     }
 }

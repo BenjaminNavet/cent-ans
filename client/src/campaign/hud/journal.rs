@@ -27,6 +27,8 @@ const VIGNETTE_HEIGHT: f32 = 64.0;
 const TOGGLE: &str = "hud:journal_toggle";
 const GENRE_PREFIX: &str = "hud:journal_genre:";
 const WORLD: &str = "hud:journal_world";
+/// Advisor messages listed at the top of the unfolded journal.
+const HISTORY_LINES: usize = 4;
 
 /// Folded at the start (Godot `set_log_expanded(false)`).
 #[derive(Resource, Debug, Default)]
@@ -35,7 +37,7 @@ pub struct JournalState {
 }
 
 /// What the card was built for: unfolded, turns, lines, genre, « Monde » open.
-type BuiltKey = (bool, u32, usize, String, bool);
+type BuiltKey = (bool, u32, usize, String, bool, usize);
 
 #[derive(Component)]
 struct JournalCard;
@@ -96,6 +98,7 @@ fn rebuild(
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
     plates: Option<Res<ArtPlates>>,
+    band: Option<Res<crate::ui::advisor_band::AdvisorBand>>,
     column: Query<Entity, With<AdvisorColumn>>,
     card: Query<Entity, With<JournalCard>>,
     mut built: Local<Option<BuiltKey>>,
@@ -108,6 +111,7 @@ fn rebuild(
         log.lines.len(),
         genre.clone(),
         panel.world_open(),
+        band.as_ref().map_or(0, |b| b.history().len()),
     );
     let existing = card.single().ok();
     if existing.is_some() && built.as_ref() == Some(&key) {
@@ -180,6 +184,22 @@ fn rebuild(
             });
             box_.spawn(scroll_list(&theme, "hud:journal_list", LIST_HEIGHT))
                 .with_children(|list| {
+                    // History of the advisor band (ADR 0752): what it said, newest first.
+                    if let Some(band) = band.as_deref() {
+                        let recent: Vec<_> =
+                            band.history().iter().rev().take(HISTORY_LINES).collect();
+                        if !recent.is_empty() {
+                            list.spawn(caption(&theme, "Conseiller"));
+                            for entry in recent {
+                                list.spawn(rich_text(
+                                    &theme,
+                                    &assets,
+                                    &format!("[i]{}[/i]", entry.text.replace('\n', " — ")),
+                                    &body,
+                                ));
+                            }
+                        }
+                    }
                     let shown = log.shown_lines(&genre);
                     if log.lines.is_empty() {
                         list.spawn(caption(&theme, "Aucun événement pour l’instant."));

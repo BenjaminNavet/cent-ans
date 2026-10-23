@@ -132,12 +132,21 @@ pub fn plugin(app: &mut App) {
                 handle_buttons,
                 check_objective,
                 rebuild,
+                yield_band,
                 persist,
             )
                 .chain()
                 .run_if(in_state(AppState::Campaign)),
         )
-        .add_systems(OnExit(AppState::Campaign), close_on_exit);
+        .add_systems(
+            OnExit(AppState::Campaign),
+            (
+                close_on_exit,
+                |mut band: ResMut<crate::ui::advisor_band::AdvisorBand>| {
+                    band.suppressed = false;
+                },
+            ),
+        );
 }
 
 fn load_steps(mut tutorial: ResMut<Tutorial>) {
@@ -726,6 +735,15 @@ fn spawn(
                 });
         })
         .id()
+}
+
+/// The guide card owns the bottom-left zone while it is shown: the advisor band yields to it
+/// (ADR 0752, one narrator at a time).
+fn yield_band(tutorial: Res<Tutorial>, mut band: ResMut<crate::ui::advisor_band::AdvisorBand>) {
+    let shown = tutorial.root.is_some();
+    if band.suppressed != shown {
+        band.suppressed = shown;
+    }
 }
 
 fn dump(world: &World) -> (String, Value) {

@@ -367,11 +367,13 @@ fn open_help(
             .to_owned();
         let mut spec = ModalSpec::info(
             &title,
-            &legend_bbcode(
-                &tree,
-                mode.key(),
-                focus.as_deref(),
-                palette.is_some_and(|p| p.colorblind),
+            &super::bar::KeyHints::new(keymap.as_deref(), settings.as_deref()).expand(
+                &legend_bbcode(
+                    &tree,
+                    mode.key(),
+                    focus.as_deref(),
+                    palette.is_some_and(|p| p.colorblind),
+                ),
             ),
         );
         spec.width = 520.0;

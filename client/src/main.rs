@@ -44,7 +44,7 @@ fn main() -> ExitCode {
             .set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "Cent Ans".into(),
-                    resolution: WindowResolution::new(agent::VIEW_SIZE.0, agent::VIEW_SIZE.1)
+                    resolution: WindowResolution::new(agent::view_size().0, agent::view_size().1)
                         .with_scale_factor_override(1.0),
                     present_mode: PresentMode::AutoVsync,
                     // Never take the player's focus when an agent launches the client.

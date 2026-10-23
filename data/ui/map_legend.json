@@ -4,9 +4,9 @@
   "factions": ["fac_england", "fac_burgundy", "fac_flanders", "fac_scotland"],
   "mode_titles": {
     "political": "Carte politique",
-    "unrest": "Carte du mécontentement (M)",
-    "diplomacy": "Carte diplomatique (N)",
-    "religion": "Carte religieuse (R)",
+    "unrest": "Carte du mécontentement ({key:map_toggle_unrest})",
+    "diplomacy": "Carte diplomatique ({key:map_mode_diplomacy})",
+    "religion": "Carte religieuse ({key:map_mode_religion})",
     "loyalty": "Carte de la loyauté des vassaux",
     "supply": "Carte du ravitaillement",
     "claims": "Carte des revendications",
@@ -33,7 +33,7 @@
         {
           "sample": {"type": "gradient", "from": "#338c33", "to": "#bf261a"},
           "label": "Du vert au rouge",
-          "text": "Mécontentement moyen des places de la province : vert, calme ; rouge, très mécontente. La touche M revient aux couleurs des royaumes."
+          "text": "Mécontentement moyen des places de la province : vert, calme ; rouge, très mécontente. La touche {key:map_toggle_unrest} bascule entre cette carte et les couleurs des royaumes."
         }
       ]
     },

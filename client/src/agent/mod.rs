@@ -33,6 +33,17 @@ use script::{MouseButtonName, ScriptCommand, parse_script};
 
 /// Size of the offscreen render target (logical pixels = window size).
 pub const VIEW_SIZE: (u32, u32) = (1280, 800);
+
+/// [`VIEW_SIZE`], or `CENT_ANS_VIEW_SIZE=WxH` (agent runs checking a layout at 1920x1080).
+pub fn view_size() -> (u32, u32) {
+    std::env::var("CENT_ANS_VIEW_SIZE")
+        .ok()
+        .and_then(|v| {
+            let (w, h) = v.split_once('x')?;
+            Some((w.parse().ok()?, h.parse().ok()?))
+        })
+        .unwrap_or(VIEW_SIZE)
+}
 /// Frames a `click` waits for its target to exist before failing the run.
 const CLICK_RETRY_FRAMES: u32 = 300;
 /// `click_if` waits this long for the node before skipping it.
@@ -90,8 +101,8 @@ impl Plugin for AgentPlugin {
         if cli.wants_offscreen() {
             let mut images = app.world_mut().resource_mut::<Assets<Image>>();
             let target = images.add(Image::new_target_texture(
-                VIEW_SIZE.0,
-                VIEW_SIZE.1,
+                view_size().0,
+                view_size().1,
                 TextureFormat::Rgba8UnormSrgb,
                 None,
             ));

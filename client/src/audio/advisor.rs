@@ -8,8 +8,8 @@
 //! The music is ducked while he speaks. A line waits while a blocking window is open (queue of
 //! 2, forgotten after 120 s). Disabled by the `voice/advisor` setting.
 //!
-//! Subtitle: a kit toast `« text »` for the duration of the line (Godot draws a dedicated bubble
-//! with a dismiss button, not ported). Other lots send [`AdvisorSay`].
+//! Subtitle: a message of the single advisor band (`ui::advisor_band`, ADR 0752) for the duration
+//! of the line, history in the journal. Other lots send [`AdvisorSay`].
 
 use std::collections::{HashMap, HashSet};
 
@@ -23,12 +23,9 @@ use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::hud::flow::TurnAdvanced;
 use crate::settings::Settings;
+use crate::ui::advisor_band::{AdvisorBandHost, AdvisorPriority, BandSay};
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::PanelStack;
-use crate::ui::kit::style::{self, UiType};
-use crate::ui::kit::widgets::button_small;
-use crate::ui::kit::widgets::panel_note;
-use crate::ui::kit::{ButtonPressed, UiTheme};
 
 const DUCK_DB: f32 = -9.0;
 const READ_CHARS_PER_SECOND: f32 = 14.0;
@@ -249,10 +246,10 @@ impl Plugin for AdvisorPlugin {
         app.add_message::<AdvisorSay>()
             .add_message::<TurnAdvanced>()
             .add_message::<ToastRequest>()
-            .add_message::<AdvisorBubble>()
+            .add_message::<BandSay>()
             .add_systems(
                 Update,
-                (show_bubble, expire_bubble, close_bubble).run_if(in_state(AppState::Battle)),
+                ensure_battle_host.run_if(in_state(AppState::Battle)),
             )
             .add_systems(
                 Startup,
@@ -317,132 +314,57 @@ fn emit(
     );
 }
 
-/// Where a subtitle goes: a kit toast on the campaign, a bubble under the journal (left column)
-/// in battle, as Godot's `advisor.gd` places it.
+/// Where a subtitle goes: the single advisor band (ADR 0752), on the campaign and in battle.
 #[derive(SystemParam)]
 pub struct Subtitles<'w> {
-    toasts: MessageWriter<'w, ToastRequest>,
-    bubbles: MessageWriter<'w, AdvisorBubble>,
-    state: Res<'w, State<AppState>>,
+    band: MessageWriter<'w, BandSay>,
 }
 
 impl Subtitles<'_> {
     fn say(&mut self, text: String, seconds: f32) {
-        if *self.state.get() == AppState::Battle {
-            self.bubbles.write(AdvisorBubble { text, seconds });
-        } else {
-            self.toasts.write(ToastRequest { text, seconds });
-        }
+        self.band.write(BandSay {
+            key: "advisor:voice".to_owned(),
+            text,
+            priority: AdvisorPriority::Info,
+            seconds: Some(seconds),
+            action: None,
+            standing: false,
+        });
     }
 }
 
-/// A subtitle for the battle bubble.
-#[derive(Message, Debug, Clone)]
-pub struct AdvisorBubble {
-    pub text: String,
-    pub seconds: f32,
-}
-
-#[derive(Component)]
-struct BubbleLife(Timer);
-
-/// Shows the bubble at the top of the `Journal` slot, ABOVE the journal panel (never under it:
-/// the journal grows downwards and would push the bubble out of sight). One bubble at a time;
-/// the « × » button dismisses it (Godot `dismiss`; the voice line itself is not interrupted,
-/// the audio director has no stop message).
-fn show_bubble(
+/// The band's host in battle: a column at the top of the `Journal` slot, ABOVE the journal
+/// panel (the journal grows downwards and would push the band out of sight). The campaign HUD
+/// spawns its own host.
+fn ensure_battle_host(
     mut commands: Commands,
-    mut requests: MessageReader<AdvisorBubble>,
     slots: Query<(Entity, &crate::battle::hud::geometry::HudSlot)>,
-    old: Query<Entity, With<BubbleLife>>,
-    theme: Option<Res<UiTheme>>,
+    hosts: Query<Entity, With<AdvisorBandHost>>,
 ) {
-    // Headless audio tests run the advisor without the UI kit: no theme, no bubble.
-    let Some(theme) = theme else {
+    if !hosts.is_empty() {
         return;
-    };
-    let Some(request) = requests.read().last().cloned() else {
-        return;
-    };
+    }
     let Some((slot, _)) = slots
         .iter()
         .find(|(_, s)| **s == crate::battle::hud::geometry::HudSlot::Journal)
     else {
         return;
     };
-    for entity in &old {
-        commands.entity(entity).despawn();
-    }
-    let bubble = commands
+    let host = commands
         .spawn((
-            Name::new("AdvisorBubble"),
-            BubbleLife(Timer::from_seconds(
-                request.seconds.max(1.0),
-                TimerMode::Once,
-            )),
-            panel_note(&theme),
+            Name::new("advisor:host"),
+            AdvisorBandHost,
+            DespawnOnExit(AppState::Battle),
+            Node {
+                width: Val::Percent(100.0),
+                flex_direction: FlexDirection::Column,
+                margin: UiRect::bottom(Val::Px(4.0)),
+                ..default()
+            },
             Pickable::IGNORE,
         ))
-        .insert(Node {
-            width: Val::Percent(100.0),
-            flex_direction: FlexDirection::Column,
-            margin: UiRect::top(Val::Px(4.0)),
-            padding: UiRect::all(Val::Px(8.0)),
-            ..default()
-        })
-        .with_children(|bubble| {
-            bubble
-                .spawn(Node {
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::SpaceBetween,
-                    align_items: AlignItems::FlexStart,
-                    column_gap: Val::Px(6.0),
-                    ..default()
-                })
-                .with_children(|row| {
-                    row.spawn((
-                        Text::new(request.text),
-                        theme.text_font(false, true, UiType::Caption.size()),
-                        TextColor(style::INK),
-                        Node {
-                            flex_shrink: 1.0,
-                            ..default()
-                        },
-                        Pickable::IGNORE,
-                    ));
-                    row.spawn(button_small(&theme, BUBBLE_CLOSE, "×"));
-                });
-        })
         .id();
-    // First child of the slot: above the journal.
-    commands.entity(slot).insert_children(0, &[bubble]);
-}
-
-const BUBBLE_CLOSE: &str = "advisor:close";
-
-/// « × » of the bubble: dismisses it.
-fn close_bubble(
-    mut commands: Commands,
-    mut pressed: MessageReader<ButtonPressed>,
-    bubbles: Query<Entity, With<BubbleLife>>,
-) {
-    if pressed.read().any(|press| press.name == BUBBLE_CLOSE) {
-        for entity in &bubbles {
-            commands.entity(entity).despawn();
-        }
-    }
-}
-
-fn expire_bubble(
-    mut commands: Commands,
-    time: Res<Time>,
-    mut bubbles: Query<(Entity, &mut BubbleLife)>,
-) {
-    for (entity, mut life) in &mut bubbles {
-        if life.0.tick(time.delta()).is_finished() {
-            commands.entity(entity).despawn();
-        }
-    }
+    commands.entity(slot).insert_children(0, &[host]);
 }
 
 fn blocked(stack: Option<&PanelStack>) -> bool {

@@ -309,3 +309,5 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0722 | [Brouillard de la prévision de bataille](0722-brouillard-de-la-prevision.md) | accepté |
 | 0723 | [Sort de la ville prise : culture, remise, libération, banditisme](0723-sort-de-la-ville-prise-culture-cession-liberation.md) | accepté |
 | 0731 | [Révoltes graduées et armée rebelle](0731-revoltes-graduees-et-armee-rebelle.md) | accepté |
+| 0752 | [Bandeau Conseiller unique](0752-bandeau-conseiller-unique.md) | accepté |
+| 0753 | [Focus clavier et manette du kit UI](0753-focus-clavier-et-manette.md) | accepté |
