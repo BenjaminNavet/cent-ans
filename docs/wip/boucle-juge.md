@@ -10,6 +10,7 @@ Budget : Meshy 155 crédits (23/10, à choisir avec soin, confirmer le coût ava
 ## Itérations
 | # | Juge | Majeurs | Corrigés | fps | Commit |
 |---|------|---------|----------|-----|--------|
+| 1 | out/juge/iter-01.md | 1 (C1 fps bataille) → infirmé par banc neuf `j1` | 0 code ; rejetés : C1 (bataille 75 fps calme / 59 mêlée, p95 18,5 ms), C2 (ADR 0183), C3 (météo brouillard ADR 0596), C5 (champ `playable` = sélecteur de faction, 139 voulues), C6, C8 (déjà daté 1360), C10 (artefact `--offscreen`) ; restent C4 (toits de siège sombres, mineur), C7 (conseiller Jean le Bel, mineur) | carte pan 69 moy., bataille 75/59 | 9518d5d0b |
 
 ## Prochaine étape
-Itération 1 : lancer le juge.
+Itération 2 : juge ciblé sur gameplay/IA (parties scriptées, seed bots), tutoriel, mémoire, plausibilité ; constats à prouver (dump/mesure) avant d'être retenus. Faux positifs connus à éviter : voir ligne 1.
