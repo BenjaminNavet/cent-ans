@@ -15,6 +15,8 @@
     "battle_causes_none": "Aucune cause enregistrée pour cette bataille.",
     "notification_tooltip": "Cause : {summary}. Ouvrir la chronique des causes.",
     "open_causes_button": "Chroniques et causes",
+    "goto_map": "Voir sur la carte",
+    "why_battle_button": "Pourquoi cette bataille ?",
     "date_line": "{season} {year}"
   },
   "kinds": {

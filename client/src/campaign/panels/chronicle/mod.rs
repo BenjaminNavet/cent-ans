@@ -12,7 +12,12 @@
 //! `OpenPanel::CloseAll`. Widget names (agent `click`): `chronicle:tab_decisions|journal|letters`,
 //! `chronicle:genre:<id>`, `chronicle:world`, `chronicle:option:<decision>:<index>`,
 //! `chronicle:letter:<index>` (unfold), `chronicle:dismiss:<index>`, `chronicle:close`.
-//! Dev hook: `CENT_ANS_OPEN_CHRONICLE=decisions|journal|letters` opens the panel on entering the
+//! ADR 0748: the `causes` tab (« Chroniques et causes ») lists the core's journal of causes
+//! (`game_api::causes`: the player's realm or all of Europe, factors ranked, the AI's named reason);
+//! widget names `chronicle:tab_causes`, `chronicle:cause_filter:mine|all`, `chronicle:cause:<id>`
+//! (unfold), `chronicle:cause_goto:<province>`. Anyone (end-of-battle screen, notifications, end
+//! screens) opens it by setting [`CausesRequest`].
+//! Dev hook: `CENT_ANS_OPEN_CHRONICLE=decisions|journal|letters|causes` opens the panel on entering the
 //! campaign.
 //!
 //! Wax seals bear the arms of the faction (`heraldry/<faction>.png`, `wax_seal`); the Codex words
@@ -28,6 +33,7 @@ pub mod log;
 
 use bevy::prelude::*;
 use bevy::ui::InteractionDisabled;
+use game_api::causes::{CauseFilter, CauseView, LIST_LIMIT, Perspective, ui_text};
 use game_api::chronicle::{ChronicleView, NewsLetter, NewsMode, genre_choices};
 use serde_json::{Value, json};
 use sim_campaign::Order;
@@ -66,6 +72,8 @@ pub enum Tab {
     Decisions,
     Journal,
     Letters,
+    /// ADR 0748: « Chroniques et causes ».
+    Causes,
 }
 
 impl Tab {
@@ -74,21 +82,30 @@ impl Tab {
             Tab::Decisions => "decisions",
             Tab::Journal => "journal",
             Tab::Letters => "letters",
+            Tab::Causes => "causes",
         }
     }
 }
+
+/// Request to open the chronicle on the « Causes » tab (`Some(None)`: the tab, `Some(Some(id))`:
+/// the tab with that cause unfolded). Consumed by the panel, also across the battle → campaign
+/// change of state.
+#[derive(Resource, Default, Debug, Clone, PartialEq, Eq)]
+pub struct CausesRequest(pub Option<Option<u32>>);
 
 pub struct PanelChroniclePlugin;
 
 impl Plugin for PanelChroniclePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ChroniclePanel>()
+            .init_resource::<CausesRequest>()
             .init_resource::<ChronicleLog>()
             .add_systems(OnEnter(AppState::Campaign), reset_on_enter)
             .add_systems(
                 Update,
                 (
                     open_close.before(crate::menu::pause::pause_escape),
+                    demo_causes,
                     record_turns,
                     watch_state,
                     handle_buttons,
@@ -119,6 +136,12 @@ pub struct ChroniclePanel {
     last_order: String,
     /// What the last unfolded letter did (`province`, `faction`, `none`; dump).
     last_letter: String,
+    /// « Causes » tab: all of Europe instead of the player's realm.
+    causes_all: bool,
+    /// « Causes » tab: the unfolded cause.
+    cause_open: Option<u32>,
+    /// Size of the journal of causes the screen was built for.
+    built_causes: usize,
 }
 
 impl ChroniclePanel {
@@ -161,11 +184,74 @@ fn reset_on_enter(mut log: ResMut<ChronicleLog>, mut panel: ResMut<ChroniclePane
         panel.tab = match tab.as_str() {
             "journal" => Tab::Journal,
             "letters" => Tab::Letters,
+            "causes" => Tab::Causes,
             _ => Tab::Decisions,
         };
         panel.open = true;
         panel.dirty = true;
     }
+}
+
+/// Dev hook `CENT_ANS_CAUSES_DEMO=1`: records three sample causes of the player (a lost battle, a
+/// lost city, a war suffered) through the core's builders, to look at the tab, the tooltips and the
+/// end screens without playing to the first disaster. Not a rule: the core records nothing here.
+fn demo_causes(mut sim: ResMut<Sim>, mut done: Local<bool>) {
+    if *done {
+        return;
+    }
+    if std::env::var_os("CENT_ANS_CAUSES_DEMO").is_none() {
+        *done = true;
+        return;
+    }
+    let Some(state) = sim.state.as_mut() else {
+        return;
+    };
+    *done = true;
+    use sim_campaign::cause_builders as build;
+    let player = state.player_faction().clone();
+    let foe = state
+        .factions
+        .keys()
+        .find(|f| **f != player && !f.is_rebels())
+        .cloned();
+    let (Some(foe), Some(province)) = (foe, state.provinces.keys().next().cloned()) else {
+        return;
+    };
+    state.note_cause(build::battle_cause(&build::BattleFacts {
+        winner: &foe,
+        loser: &player,
+        province: &province,
+        winner_strength: 3200,
+        loser_strength: 2100,
+        loser_losses: 714,
+        winner_power: 160.0,
+        loser_power: 100.0,
+        loser_general_lost: true,
+        loser_routed: true,
+        loser_morale_delta: -30,
+        winner_defended: true,
+        rough_terrain: Some("hills"),
+    }));
+    state.note_cause(build::place_cause(&build::PlaceFacts {
+        previous: &player,
+        new_holder: &foe,
+        province: &province,
+        is_city: true,
+        siege: Some((3, 0, 60)),
+        garrison: 0,
+        besiegers: 2400,
+    }));
+    state.note_cause(build::war_cause(&build::WarFacts {
+        attacker: &foe,
+        target: &player,
+        casus_belli: false,
+        truce_broken: false,
+        pact_broken: false,
+        sworn_bond: false,
+        attacker_power: 180.0,
+        target_power: 100.0,
+        reason: Some("opportunism"),
+    }));
 }
 
 fn close_on_exit(mut commands: Commands, mut panel: ResMut<ChroniclePanel>) {
@@ -177,6 +263,7 @@ fn close_on_exit(mut commands: Commands, mut panel: ResMut<ChroniclePanel>) {
 
 fn open_close(
     mut panel: ResMut<ChroniclePanel>,
+    mut request: ResMut<CausesRequest>,
     mut messages: MessageReader<OpenPanel>,
     keys: Res<ButtonInput<KeyCode>>,
     keymap: Option<Res<crate::settings::KeyMap>>,
@@ -184,6 +271,12 @@ fn open_close(
     mut edges: ResMut<KeyEdges>,
     mut held: Local<bool>,
 ) {
+    if let Some(cause) = request.0.take() {
+        panel.open = true;
+        panel.tab = Tab::Causes;
+        panel.cause_open = cause;
+        panel.dirty = true;
+    }
     for message in messages.read() {
         match message {
             OpenPanel::Chronicle => {
@@ -256,7 +349,9 @@ fn watch_state(mut panel: ResMut<ChroniclePanel>, sim: Res<Sim>) {
             .filter(|d| d.faction == sim.player)
             .count();
         let _ = data;
-        if (state.turn, count) != panel.built_for {
+        if (state.turn, count) != panel.built_for
+            || (panel.tab == Tab::Causes && state.cause_journal().len() != panel.built_causes)
+        {
             panel.dirty = true;
         }
     }
@@ -286,10 +381,18 @@ fn handle_buttons(
             "tab_decisions" => panel.tab = Tab::Decisions,
             "tab_journal" => panel.tab = Tab::Journal,
             "tab_letters" => panel.tab = Tab::Letters,
+            "tab_causes" => panel.tab = Tab::Causes,
+            "cause_filter:mine" => panel.causes_all = false,
+            "cause_filter:all" => panel.causes_all = true,
             "world" => panel.world_open = !panel.world_open,
             _ => {
                 if let Some(genre) = name.strip_prefix("genre:") {
                     panel.genre = genre.to_owned();
+                } else if let Some(id) = name.strip_prefix("cause_goto:") {
+                    focus.write(FocusCamera::Province(id.to_owned()));
+                } else if let Some(id) = name.strip_prefix("cause:") {
+                    let id = id.parse::<u32>().ok();
+                    panel.cause_open = if panel.cause_open == id { None } else { id };
                 } else if let Some(index) = name.strip_prefix("letter:") {
                     let index = index.parse::<usize>().ok();
                     panel.letter_open = if panel.letter_open == index {
@@ -385,7 +488,18 @@ fn rebuild(
         commands.entity(root).despawn();
     }
     let view = game_api::chronicle_view(data, state, &sim.player);
+    let causes = if panel.tab == Tab::Causes {
+        let filter = if panel.causes_all {
+            CauseFilter::All
+        } else {
+            CauseFilter::Mine
+        };
+        game_api::causes::causes_view(state, data, filter, LIST_LIMIT)
+    } else {
+        Vec::new()
+    };
     panel.built_for = (state.turn, view.count);
+    panel.built_causes = state.cause_journal().len();
     let mode = settings
         .as_ref()
         .map_or(NewsMode::Interest, |s| NewsMode::parse(&s.news_filter));
@@ -395,6 +509,7 @@ fn rebuild(
         &assets,
         &view,
         &log,
+        &causes,
         &panel,
         mode,
         plates.as_deref(),
@@ -410,6 +525,7 @@ fn spawn_screen(
     assets: &AssetServer,
     view: &ChronicleView,
     log: &ChronicleLog,
+    causes: &[CauseView],
     panel: &ChroniclePanel,
     mode: NewsMode,
     plates: Option<&crate::ui::art_plates::ArtPlates>,
@@ -456,6 +572,7 @@ fn spawn_screen(
                     .with_children(|tabs| {
                         let decisions = format!("Décisions ({})", view.count);
                         let letters = format!("Lettres ({})", log.letters.len());
+                        let causes_label = ui_text("tab_title");
                         for (tab, name, label) in [
                             (
                                 Tab::Decisions,
@@ -464,6 +581,7 @@ fn spawn_screen(
                             ),
                             (Tab::Journal, "chronicle:tab_journal", "Journal"),
                             (Tab::Letters, "chronicle:tab_letters", letters.as_str()),
+                            (Tab::Causes, "chronicle:tab_causes", causes_label.as_str()),
                         ] {
                             tabs.spawn(toggle_button(&theme, name, label, panel.tab == tab));
                         }
@@ -475,6 +593,7 @@ fn spawn_screen(
                         }
                         Tab::Journal => journal_tab(page, &theme, assets, &body, log, panel),
                         Tab::Letters => letters_tab(page, &theme, assets, log, panel, mode),
+                        Tab::Causes => causes_tab(page, &theme, causes, panel),
                     }
                 });
         })
@@ -640,6 +759,86 @@ fn journal_tab(
                         list.spawn(rich_text(theme, assets, &text, &RichStyle::caption(theme)));
                     }
                 }
+            }
+        });
+}
+
+/// Colour of a cause headline: red for a setback of the player, green for his gain.
+fn cause_color(perspective: Perspective) -> Color {
+    match perspective {
+        Perspective::Loss => Color::srgb(0.55, 0.11, 0.08),
+        Perspective::Gain => Color::srgb(0.16, 0.42, 0.16),
+        Perspective::Other => style::INK_TITLE,
+    }
+}
+
+/// « Causes » tab (ADR 0748): the journal of causes, a cause unfolds into its ranked factors.
+fn causes_tab(
+    page: &mut ChildSpawnerCommands,
+    theme: &UiTheme,
+    causes: &[CauseView],
+    panel: &ChroniclePanel,
+) {
+    page.spawn(Node {
+        column_gap: Val::Px(4.0),
+        ..default()
+    })
+    .with_children(|bar| {
+        bar.spawn(toggle_button(
+            theme,
+            "chronicle:cause_filter:mine",
+            &ui_text("filter_mine"),
+            !panel.causes_all,
+        ));
+        bar.spawn(toggle_button(
+            theme,
+            "chronicle:cause_filter:all",
+            &ui_text("filter_all"),
+            panel.causes_all,
+        ));
+    });
+    page.spawn(scroll_list(theme, "chronicle:causes", LIST_HEIGHT))
+        .with_children(|list| {
+            if causes.is_empty() {
+                list.spawn(caption(theme, &ui_text("empty")));
+            }
+            for cause in causes {
+                let open = panel.cause_open == Some(cause.id);
+                let label = format!(
+                    "{} {} — {}",
+                    if open { "▾" } else { "▸" },
+                    cause.date,
+                    cause.summary
+                );
+                let name = format!("chronicle:cause:{}", cause.id);
+                list.spawn(button_small(theme, &name, &label));
+                if !open {
+                    continue;
+                }
+                list.spawn(Node {
+                    flex_direction: FlexDirection::Column,
+                    padding: UiRect::left(Val::Px(18.0)),
+                    margin: UiRect::bottom(Val::Px(6.0)),
+                    row_gap: Val::Px(2.0),
+                    ..default()
+                })
+                .with_children(|detail| {
+                    detail.spawn((
+                        Text::new(ui_text("factors_heading")),
+                        theme.text_font(true, false, UiType::Caption.size()),
+                        TextColor(cause_color(cause.perspective)),
+                    ));
+                    for factor in &cause.factors {
+                        detail.spawn(caption(theme, &format!("• {}", factor.text)));
+                    }
+                    if let Some(reason) = &cause.reason {
+                        detail.spawn(caption(theme, reason));
+                    }
+                    if let Some(province) = &cause.province {
+                        let name = format!("chronicle:cause_goto:{province}");
+                        detail.spawn(button_small(theme, &name, &ui_text("goto_map")));
+                    }
+                });
             }
         });
 }
@@ -851,12 +1050,43 @@ fn dump_chronicle(world: &World) -> (String, Value) {
             "turns_recorded": log.turns,
             "journal_lines": log.line_count(),
             "world_lines": log.world_count(),
+            "causes": causes_dump(world),
             "letters": log.letters.len(),
             "letter_rubrics": log.letters.iter().map(|l| l.rubric.clone()).collect::<Vec<_>>(),
             "last_expired": log.last_expired,
             "last_order": panel.last_order,
         }),
     )
+}
+
+/// Dump section of the « Causes » tab: journal size, the panel's choices and the newest entries
+/// (summary, perspective, ranked factors; the whole journal is never dumped).
+fn causes_dump(world: &World) -> Value {
+    let panel = world.resource::<ChroniclePanel>();
+    let sim = world.resource::<Sim>();
+    let (Some(data), Some(state)) = (&sim.data, &sim.state) else {
+        return Value::Null;
+    };
+    let filter = if panel.causes_all {
+        CauseFilter::All
+    } else {
+        CauseFilter::Mine
+    };
+    let list = game_api::causes::causes_view(state, data, filter, 5);
+    json!({
+        "journal_len": state.cause_journal().len(),
+        "filter": if panel.causes_all { "all" } else { "mine" },
+        "open_cause": panel.cause_open,
+        "newest": list.iter().map(|c| json!({
+            "id": c.id,
+            "kind": c.kind,
+            "perspective": c.perspective,
+            "date": c.date,
+            "summary": c.summary,
+            "factors": c.factors.iter().map(|f| f.text.clone()).collect::<Vec<_>>(),
+            "reason": c.reason,
+        })).collect::<Vec<_>>(),
+    })
 }
 
 #[cfg(test)]

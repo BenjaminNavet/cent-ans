@@ -38,6 +38,7 @@ use crate::ui::kit::{ButtonPressed, UiTheme};
 const TOGGLE: &str = "feed:toggle";
 const FOLD_PREFIX: &str = "feed:fold:";
 const ENTRY_PREFIX: &str = "feed:entry:";
+const CAUSE_PREFIX: &str = "feed:cause:";
 const INDENT: f32 = 20.0;
 const ICON_SIZE: f32 = 16.0;
 
@@ -177,6 +178,8 @@ pub struct FeedEntry {
     pub province: Option<String>,
     pub faction: Option<String>,
     pub loss: bool,
+    /// ADR 0748: the cause in the journal of causes (tooltip, « ? » button).
+    pub cause_id: Option<u32>,
 }
 
 /// The kept entries, newest first.
@@ -206,6 +209,7 @@ impl EventFeed {
             province: entry.province.clone(),
             faction: entry.faction.clone(),
             loss: entry.loss,
+            cause_id: entry.cause_id,
         });
     }
 
@@ -385,10 +389,17 @@ fn handle_buttons(
     mut focus: MessageWriter<FocusCamera>,
     mut open_panel: MessageWriter<OpenPanel>,
     mut diplomacy: ResMut<DiplomacyUi>,
+    mut causes: ResMut<crate::campaign::panels::chronicle::CausesRequest>,
 ) {
     let mut persist = false;
     for press in pressed.read() {
-        if press.name == TOGGLE {
+        if let Some(id) = press.name.strip_prefix(CAUSE_PREFIX) {
+            // ADR 0748: « ? » beside a notification opens the chronicle on its cause.
+            if let Ok(id) = id.parse::<u32>() {
+                causes.0 = Some(Some(id));
+                ui.last_action = format!("cause:{id}");
+            }
+        } else if press.name == TOGGLE {
             ui.open = !ui.open;
             persist = true;
         } else if let Some(id) = press.name.strip_prefix(FOLD_PREFIX) {
@@ -438,6 +449,7 @@ fn rebuild(
     cfg: Res<FeedData>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
+    sim: Res<Sim>,
     root: Query<Entity, With<FeedRoot>>,
     mut built: Local<Option<(u64, bool, BTreeSet<String>)>>,
 ) {
@@ -513,16 +525,42 @@ fn rebuild(
                             ..default()
                         })
                         .with_children(|row| {
+                            // ADR 0748: a notification with a cause says why in its tooltip.
+                            let why = entry
+                                .cause_id
+                                .zip(sim.data.as_deref().zip(sim.state.as_ref()))
+                                .and_then(|(id, (data, state))| {
+                                    game_api::causes::notification_tooltip(state, data, id)
+                                });
+                            let tip = match &why {
+                                Some(why) => format!(
+                                    "{}\n[i]{}[/i]\n{}",
+                                    escape(&entry.text),
+                                    escape(&entry.date),
+                                    escape(why)
+                                ),
+                                None => format!(
+                                    "{}\n[i]{}[/i]",
+                                    escape(&entry.text),
+                                    escape(&entry.date)
+                                ),
+                            };
                             row.spawn(button_small(
                                 &theme,
                                 &format!("{ENTRY_PREFIX}{}", entry.id),
                                 &shorten(&entry.text, cfg.max_chars),
                             ))
-                            .insert(Tooltip::new(&format!(
-                                "{}\n[i]{}[/i]",
-                                escape(&entry.text),
-                                escape(&entry.date)
-                            )));
+                            .insert(Tooltip::new(&tip));
+                            if let (Some(id), Some(_)) = (entry.cause_id, &why) {
+                                row.spawn(button_small(
+                                    &theme,
+                                    &format!("{CAUSE_PREFIX}{id}"),
+                                    "?",
+                                ))
+                                .insert(Tooltip::new(&escape(&game_api::causes::ui_text(
+                                    "open_causes_button",
+                                ))));
+                            }
                         });
                     }
                 }
@@ -560,7 +598,7 @@ fn dump_feed(world: &World) -> (String, Value) {
                 "folded": ui.folded.contains(&c.id),
                 "entries": feed.in_category(&c.id).map(|e| json!({
                     "id": e.id, "kind": e.kind, "text": shorten(&e.text, cfg.max_chars),
-                    "province": e.province,
+                    "province": e.province, "cause_id": e.cause_id,
                 })).collect::<Vec<_>>(),
             })
         })
