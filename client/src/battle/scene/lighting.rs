@@ -933,6 +933,10 @@ fn shadow_probe(
 pub fn dump(world: &World) -> (String, serde_json::Value) {
     let state = world.get_resource::<SkyLightState>();
     let look = world.get_resource::<LightingLook>();
+    let atmosphere = world.get_resource::<AtmosphereState>();
+    let clock = world
+        .get_resource::<BattleSession>()
+        .map(|session| (session.snapshot.start_hour, session.snapshot.hour));
     let mut cameras = 0;
     let mut env = 0;
     let mut ssao = 0;
@@ -954,6 +958,20 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
             "exposure_ev100": look.map(|l| l.exposure_ev100),
             "tonemapping": look.map(|l| l.tonemapping.clone()),
             "lit_cameras": cameras,
+            // Exact inputs of the light, comparable between two launches without a capture.
+            "inputs": serde_json::json!({
+                "start_hour": clock.map(|c| c.0),
+                "hour": clock.map(|c| c.1),
+                "phase": atmosphere.map(|a| a.phase.clone()),
+                "time_key": atmosphere.map(|a| a.time_key.clone()),
+                "weather": atmosphere.map(|a| a.weather.clone()),
+                "sun_illuminance": atmosphere.map(|a| a.sun_illuminance),
+                "sun_elevation_deg": atmosphere.map(|a| a.sun_elevation_deg),
+                "sun_azimuth_deg": atmosphere.map(|a| a.sun_azimuth_deg),
+                "fog_density": atmosphere.map(|a| a.fog_density),
+                "fixed_exposure_env": std::env::var(crate::settings::postfx::FROZEN_EXPOSURE_ENV).ok(),
+                "forced_hour_env": std::env::var(crate::battle::scene::HOUR_ENV).ok(),
+            }),
         "shadow_unclipped_depth": crate::battle::units::skinned::UNCLIPPED_DEPTH.load(std::sync::atomic::Ordering::Relaxed),
         "shadow_draws_total": crate::battle::units::skinned::SHADOW_DRAWS.load(std::sync::atomic::Ordering::Relaxed),
         "shadow_casters": crate::battle::units::skinned::SHADOW_CASTERS.load(std::sync::atomic::Ordering::Relaxed),
@@ -984,6 +1002,22 @@ pub fn dump(world: &World) -> (String, serde_json::Value) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The real clock never enters the battle light (A/B captures, seed reproducibility).
+    #[test]
+    fn lighting_sources_do_not_read_the_clock() {
+        let clock = ["System", "Time"].concat();
+        let instant = ["Instant", "::now"].concat();
+        let entropy = ["from_", "entropy"].concat();
+        for (name, source) in [
+            ("lighting.rs", include_str!("lighting.rs")),
+            ("atmosphere.rs", include_str!("../decor/atmosphere.rs")),
+        ] {
+            for token in [&clock, &instant, &entropy] {
+                assert!(!source.contains(token.as_str()), "{name} reads {token}");
+            }
+        }
+    }
 
     fn rules() -> serde_json::Value {
         let root = paths::find_root().unwrap();

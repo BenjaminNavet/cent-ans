@@ -97,6 +97,9 @@ impl BattleSession {
 pub struct BattleSnapshot {
     pub tick: u64,
     pub elapsed_s: f64,
+    /// Hour the battle began and hour of the day now (decimal, 0-24).
+    pub start_hour: f64,
+    pub hour: f64,
     pub finished: bool,
     /// `[attacker, defender]`: regiments, soldiers alive, strength, as in the HUD balance bar.
     pub regiments: [usize; 2],
@@ -110,6 +113,8 @@ impl BattleSnapshot {
         let mut snapshot = BattleSnapshot {
             tick: sim.ticks(),
             elapsed_s: sim.elapsed(),
+            start_hour: sim.start_hour(),
+            hour: sim.hour(),
             finished: sim.is_finished(),
             field: (
                 sim.field().width,
@@ -416,6 +421,23 @@ fn open_replay(game: &GameData, request: &replay::PendingReplay) -> Result<Battl
     Ok(session)
 }
 
+/// Dev variable freezing the starting hour of a battle (`12`, `17.5` or a phase key such as
+/// `dusk`); the hour still advances with the simulated time.
+pub const HOUR_ENV: &str = "CENT_ANS_BATTLE_HOUR";
+
+/// Starting hour asked by `value` (decimal hour or phase key); `None` when empty or unknown.
+pub fn forced_hour(value: Option<&str>) -> Option<f64> {
+    let value = value?.trim();
+    if value.is_empty() {
+        return None;
+    }
+    value
+        .parse::<f64>()
+        .ok()
+        .filter(|h| h.is_finite())
+        .or_else(|| sim_battle::TimeOfDayRules::bundled().start_hour_of(value))
+}
+
 /// Wraps an opened battle into the session resource and starts its recording.
 fn session_from_opened(game: &GameData, opened: Opened) -> Result<BattleSession, String> {
     let Opened {
@@ -429,6 +451,8 @@ fn session_from_opened(game: &GameData, opened: Opened) -> Result<BattleSession,
     } = opened;
     // The recording starts right after the build; the hour is its first recorded input.
     replay::begin_recording(start, &sim);
+    // Dev hook `CENT_ANS_BATTLE_HOUR` wins over the drawn / scripted hour (A/B captures).
+    let hour = forced_hour(std::env::var(HOUR_ENV).ok().as_deref()).or(hour);
     if let Some(hour) = hour {
         replay::drive(&mut sim, sim_battle::ReplayAction::StartHour { hour });
     }
@@ -584,4 +608,18 @@ fn dump_battle(world: &World) -> (String, serde_json::Value) {
             })),
         }),
     )
+}
+
+#[cfg(test)]
+mod forced_hour_tests {
+    use super::forced_hour;
+
+    #[test]
+    fn hour_override_parses_numbers_and_phases() {
+        assert_eq!(forced_hour(None), None);
+        assert_eq!(forced_hour(Some("")), None);
+        assert_eq!(forced_hour(Some("17.5")), Some(17.5));
+        assert_eq!(forced_hour(Some("midday")), Some(12.0));
+        assert_eq!(forced_hour(Some("nonsense")), None);
+    }
 }
