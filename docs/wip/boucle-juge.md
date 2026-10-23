@@ -14,3 +14,8 @@ Budget : Meshy 155 crédits (23/10, à choisir avec soin, confirmer le coût ava
 
 ## Prochaine étape
 Itération 2 : juge ciblé sur gameplay/IA (parties scriptées, seed bots), tutoriel, mémoire, plausibilité ; constats à prouver (dump/mesure) avant d'être retenus. Faux positifs connus à éviter : voir ligne 1.
+
+## Intégration 23/10 (branche integ/juge)
+Fusion des lots MEM, HIST, DAUPHINE, ECO, CAUSES, UX, LUM, EAU, TERRAIN (partiel), ARMEES (partiel). ADR renumérotés : 0754 causes, 0755 palette.
+Dérogation décidée par le joueur pour CE tour : ni smoke ni seed bots. Contrôle = clippy, tests cœur et client, pytest. Smoke et seed bots à passer au prochain tour d'intégration.
+Restes : hameaux + ADR terrain, densité/imposteurs des armées, vérification visuelle campagne (LUM, EAU), 2 échecs pytest HIST (maisons sans blason, références d'archétypes de portraits), refontes de design (IA à doctrines, arcs de partie).
