@@ -124,8 +124,9 @@ fn vertex(in: Vertex) -> VertexOutput {
     let mode = params.frame.w;
     // Stand height variety of the main pass (`canopy_size` of `billboard.wesl`, without the far
     // growth: the shadow maps are only drawn near by).
-    let stand_h = 1.0 + params.shape.y
-        * (2.0 * value_noise(origin.xz / max(params.shape.z, 1.0) + vec2<f32>(7.3, 1.9)) - 1.0);
+    let near = select(1.0, params.winter.z, params.winter.z > 0.0);
+    let stand_h = near * (1.0 + params.shape.y
+        * (2.0 * value_noise(origin.xz / max(params.shape.z, 1.0) + vec2<f32>(7.3, 1.9)) - 1.0));
     let jitter = (1.0 + 0.25 * (2.0 * fract(seed * 53.17) - 1.0)) * stand_h;
     let gust = wind_gust(origin.xz);
     let shiver = sin(globals.time * 1.7 + seed * 23.0) * (0.4 + 0.6 * gust);

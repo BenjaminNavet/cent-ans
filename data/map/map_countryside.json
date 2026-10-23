@@ -318,18 +318,20 @@
     "farm_norman": {
       "model": "buildings/farm_norman_timber_courtyard",
       "max_mult": 60,
-      "size_scale": 1.0,
-      "fade_from": 45,
-      "max_distance": 80,
-      "max_instances": 500
+      "size_scale": 3.5,
+      "fade_from": 70,
+      "max_distance": 110,
+      "max_instances": 500,
+      "albedo_gain": 1.55
     },
     "farm_mas": {
       "model": "buildings/farm_southern_stone_mas",
       "max_mult": 60,
-      "size_scale": 1.0,
-      "fade_from": 45,
-      "max_distance": 80,
-      "max_instances": 400
+      "size_scale": 3.5,
+      "fade_from": 70,
+      "max_distance": 110,
+      "max_instances": 400,
+      "albedo_gain": 1.55
     },
     "vine_hut": {
       "model": "props/vineyard_hut",
@@ -372,6 +374,69 @@
       "max_distance": 42,
       "max_instances": 1200,
       "stretched": true
+    },
+    "farm_german": {
+      "max_mult": 60,
+      "size_scale": 3.5,
+      "fade_from": 70,
+      "max_distance": 110,
+      "model": "buildings/farm_german_fachwerk",
+      "max_instances": 600,
+      "albedo_gain": 1.55
+    },
+    "farm_flemish": {
+      "max_mult": 60,
+      "size_scale": 3.5,
+      "fade_from": 70,
+      "max_distance": 110,
+      "model": "buildings/farm_flemish_brick_barn",
+      "max_instances": 600,
+      "albedo_gain": 1.55
+    },
+    "house_brick": {
+      "max_mult": 60,
+      "size_scale": 3.5,
+      "fade_from": 70,
+      "max_distance": 110,
+      "model": "buildings/house_brick_gable",
+      "max_instances": 600,
+      "albedo_gain": 1.55
+    },
+    "farm_cortijo": {
+      "max_mult": 60,
+      "size_scale": 3.5,
+      "fade_from": 70,
+      "max_distance": 110,
+      "model": "buildings/farm_iberian_adobe_cortijo",
+      "max_instances": 600,
+      "albedo_gain": 1.55
+    },
+    "farm_alpine": {
+      "max_mult": 60,
+      "size_scale": 3.5,
+      "fade_from": 70,
+      "max_distance": 110,
+      "model": "buildings/farm_alpine_chalet_stone",
+      "max_instances": 600,
+      "albedo_gain": 1.55
+    },
+    "farm_english": {
+      "max_mult": 60,
+      "size_scale": 3.5,
+      "fade_from": 70,
+      "max_distance": 110,
+      "model": "buildings/farm_english_stone_manor",
+      "max_instances": 600,
+      "albedo_gain": 1.55
+    },
+    "hamlet_garden": {
+      "max_mult": 40,
+      "size_scale": 3.0,
+      "fade_from": 60,
+      "max_distance": 90,
+      "model": "props/crop_turnip_cabbage_garden",
+      "max_instances": 600,
+      "albedo_gain": 1.3
     }
   },
   "regions": {
@@ -1288,6 +1353,585 @@
         "forest_max": 0.85,
         "slope_max_deg": 10,
         "alt_max_m": 800
+      }
+    },
+    {
+      "id": "hameau_ouest_a",
+      "mode": "village",
+      "props": {
+        "farm_norman": 3,
+        "farm_german": 1,
+        "house_brick": 1
+      },
+      "regions": [
+        "europe_occ",
+        "bretagne",
+        "bocage_ouest",
+        "bocage_angleterre_sw",
+        "bocage_marches_galles"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.95,
+        "offset_m": [
+          80,
+          200
+        ]
+      }
+    },
+    {
+      "id": "hameau_ouest_b",
+      "mode": "village",
+      "props": {
+        "farm_norman": 3,
+        "farm_german": 1,
+        "house_brick": 1
+      },
+      "regions": [
+        "europe_occ",
+        "bretagne",
+        "bocage_ouest",
+        "bocage_angleterre_sw",
+        "bocage_marches_galles"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.8,
+        "offset_m": [
+          160,
+          340
+        ]
+      }
+    },
+    {
+      "id": "hameau_ouest_c",
+      "mode": "village",
+      "props": {
+        "farm_norman": 3,
+        "farm_german": 1,
+        "house_brick": 1
+      },
+      "regions": [
+        "europe_occ",
+        "bretagne",
+        "bocage_ouest",
+        "bocage_angleterre_sw",
+        "bocage_marches_galles"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.6,
+        "offset_m": [
+          260,
+          480
+        ]
+      }
+    },
+    {
+      "id": "hameau_nord_a",
+      "mode": "village",
+      "props": {
+        "house_brick": 3,
+        "farm_flemish": 2,
+        "farm_german": 2
+      },
+      "regions": [
+        "pays_bas_flandre",
+        "europe_nord_plaine"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.95,
+        "offset_m": [
+          80,
+          200
+        ]
+      }
+    },
+    {
+      "id": "hameau_nord_b",
+      "mode": "village",
+      "props": {
+        "house_brick": 3,
+        "farm_flemish": 2,
+        "farm_german": 2
+      },
+      "regions": [
+        "pays_bas_flandre",
+        "europe_nord_plaine"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.8,
+        "offset_m": [
+          160,
+          340
+        ]
+      }
+    },
+    {
+      "id": "hameau_nord_c",
+      "mode": "village",
+      "props": {
+        "house_brick": 3,
+        "farm_flemish": 2,
+        "farm_german": 2
+      },
+      "regions": [
+        "pays_bas_flandre",
+        "europe_nord_plaine"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.6,
+        "offset_m": [
+          260,
+          480
+        ]
+      }
+    },
+    {
+      "id": "hameau_angleterre_a",
+      "mode": "village",
+      "props": {
+        "farm_english": 1,
+        "farm_norman": 2,
+        "farm_german": 2
+      },
+      "regions": [
+        "laine_angleterre"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.95,
+        "offset_m": [
+          80,
+          200
+        ]
+      }
+    },
+    {
+      "id": "hameau_angleterre_b",
+      "mode": "village",
+      "props": {
+        "farm_english": 1,
+        "farm_norman": 2,
+        "farm_german": 2
+      },
+      "regions": [
+        "laine_angleterre"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.8,
+        "offset_m": [
+          160,
+          340
+        ]
+      }
+    },
+    {
+      "id": "hameau_angleterre_c",
+      "mode": "village",
+      "props": {
+        "farm_english": 1,
+        "farm_norman": 2,
+        "farm_german": 2
+      },
+      "regions": [
+        "laine_angleterre"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.6,
+        "offset_m": [
+          260,
+          480
+        ]
+      }
+    },
+    {
+      "id": "hameau_sud_a",
+      "mode": "village",
+      "props": {
+        "farm_mas": 3,
+        "farm_cortijo": 1
+      },
+      "regions": [
+        "mediterranee",
+        "italie",
+        "vignobles_france"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.95,
+        "offset_m": [
+          80,
+          200
+        ]
+      }
+    },
+    {
+      "id": "hameau_sud_b",
+      "mode": "village",
+      "props": {
+        "farm_mas": 3,
+        "farm_cortijo": 1
+      },
+      "regions": [
+        "mediterranee",
+        "italie",
+        "vignobles_france"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.8,
+        "offset_m": [
+          160,
+          340
+        ]
+      }
+    },
+    {
+      "id": "hameau_sud_c",
+      "mode": "village",
+      "props": {
+        "farm_mas": 3,
+        "farm_cortijo": 1
+      },
+      "regions": [
+        "mediterranee",
+        "italie",
+        "vignobles_france"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.6,
+        "offset_m": [
+          260,
+          480
+        ]
+      }
+    },
+    {
+      "id": "hameau_iberie_a",
+      "mode": "village",
+      "props": {
+        "farm_cortijo": 3,
+        "farm_mas": 2
+      },
+      "regions": [
+        "iberie"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.95,
+        "offset_m": [
+          80,
+          200
+        ]
+      }
+    },
+    {
+      "id": "hameau_iberie_b",
+      "mode": "village",
+      "props": {
+        "farm_cortijo": 3,
+        "farm_mas": 2
+      },
+      "regions": [
+        "iberie"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.8,
+        "offset_m": [
+          160,
+          340
+        ]
+      }
+    },
+    {
+      "id": "hameau_iberie_c",
+      "mode": "village",
+      "props": {
+        "farm_cortijo": 3,
+        "farm_mas": 2
+      },
+      "regions": [
+        "iberie"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.6,
+        "offset_m": [
+          260,
+          480
+        ]
+      }
+    },
+    {
+      "id": "hameau_montagne_a",
+      "mode": "village",
+      "props": {
+        "farm_alpine": 3,
+        "farm_mas": 1
+      },
+      "regions": [
+        "alpes_pyrenees",
+        "pyrenees",
+        "causses"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.95,
+        "offset_m": [
+          80,
+          200
+        ]
+      }
+    },
+    {
+      "id": "hameau_montagne_b",
+      "mode": "village",
+      "props": {
+        "farm_alpine": 3,
+        "farm_mas": 1
+      },
+      "regions": [
+        "alpes_pyrenees",
+        "pyrenees",
+        "causses"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.8,
+        "offset_m": [
+          160,
+          340
+        ]
+      }
+    },
+    {
+      "id": "hameau_montagne_c",
+      "mode": "village",
+      "props": {
+        "farm_alpine": 3,
+        "farm_mas": 1
+      },
+      "regions": [
+        "alpes_pyrenees",
+        "pyrenees",
+        "causses"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.6,
+        "offset_m": [
+          260,
+          480
+        ]
+      }
+    },
+    {
+      "id": "hameau_jardins",
+      "mode": "village",
+      "props": {
+        "hamlet_garden": 1
+      },
+      "regions": [
+        "europe_occ",
+        "bretagne",
+        "pays_bas_flandre",
+        "europe_nord_plaine",
+        "bocage_ouest",
+        "mediterranee",
+        "italie",
+        "iberie"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.7,
+        "offset_m": [
+          60,
+          150
+        ]
+      }
+    },
+    {
+      "id": "hameau_ouest_d",
+      "mode": "village",
+      "props": {
+        "farm_norman": 3,
+        "farm_german": 1,
+        "house_brick": 1
+      },
+      "regions": [
+        "europe_occ",
+        "bretagne",
+        "bocage_ouest",
+        "bocage_angleterre_sw",
+        "bocage_marches_galles"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.45,
+        "offset_m": [
+          340,
+          560
+        ]
+      }
+    },
+    {
+      "id": "hameau_nord_d",
+      "mode": "village",
+      "props": {
+        "house_brick": 3,
+        "farm_flemish": 2,
+        "farm_german": 2
+      },
+      "regions": [
+        "pays_bas_flandre",
+        "europe_nord_plaine"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.45,
+        "offset_m": [
+          340,
+          560
+        ]
+      }
+    },
+    {
+      "id": "hameau_angleterre_d",
+      "mode": "village",
+      "props": {
+        "farm_english": 1,
+        "farm_norman": 2,
+        "farm_german": 2
+      },
+      "regions": [
+        "laine_angleterre"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.45,
+        "offset_m": [
+          340,
+          560
+        ]
+      }
+    },
+    {
+      "id": "hameau_sud_d",
+      "mode": "village",
+      "props": {
+        "farm_mas": 3,
+        "farm_cortijo": 1
+      },
+      "regions": [
+        "mediterranee",
+        "italie",
+        "vignobles_france"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.45,
+        "offset_m": [
+          340,
+          560
+        ]
+      }
+    },
+    {
+      "id": "hameau_iberie_d",
+      "mode": "village",
+      "props": {
+        "farm_cortijo": 3,
+        "farm_mas": 2
+      },
+      "regions": [
+        "iberie"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.45,
+        "offset_m": [
+          340,
+          560
+        ]
+      }
+    },
+    {
+      "id": "hameau_montagne_d",
+      "mode": "village",
+      "props": {
+        "farm_alpine": 3,
+        "farm_mas": 1
+      },
+      "regions": [
+        "alpes_pyrenees",
+        "pyrenees",
+        "causses"
+      ],
+      "village": {
+        "kinds": [
+          "hamlet"
+        ],
+        "chance": 0.45,
+        "offset_m": [
+          340,
+          560
+        ]
       }
     }
   ]

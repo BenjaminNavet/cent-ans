@@ -163,6 +163,11 @@
           "type": "number",
           "minimum": 0,
           "description": "Agrandissement des imposteurs au loin (0 : taille réelle), pour une masse sombre lisible."
+        },
+        "near_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Taille des couronnes près de la caméra (1 : taille d'origine) ; la croissance lointaine les ramène à la taille pleine."
         }
       }
     },
