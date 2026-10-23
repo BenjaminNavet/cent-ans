@@ -41,3 +41,6 @@ Suivre les deux lots en cours, puis : (a) benchs sur machine calme (réf, Solari
 - Solari campagne (prototype proxy 500 k triangles) : bancs pan 12,4 ms vs 17,2 ; mais capture : l'écran de prologue ne disparaît pas (agent solari-camp-load en cours). `enabled:false`.
 - Session 51 (perf/camp60) a fusionné dans main : cache du sol par nœud (ADR 0742), ombres d'arbres par cascade (0743), arbres lod2 (0744).
 - Restent : shader différé du terrain de campagne (option (a) de bevy-etude-terrain-std.md), vent V0/V2, contrôle visuel de la foule en mouvement, Solari par défaut (ombres des soldats), L3-L7 campagne (session 51).
+
+## Vent de bataille : coût mesuré (23/10, release, Crécy, ultra)
+`CENT_ANS_PERF_OFF=wind` (nouveau, dev) remplace le vertex shader du vent par celui de Bevy : mêlée 16,7 ms (vent) vs 17,0 ms (sans), calme 13,2 vs 13,0 : aucun coût mesurable, même avec les amplitudes x3,5. Refonte du vent pour la perf : inutile. Reste possible pour le rendu seulement (ombres qui suivent le balancement : lot V4 de bevy-etude-vent.md).

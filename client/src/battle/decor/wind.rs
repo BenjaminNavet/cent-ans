@@ -58,6 +58,10 @@ pub struct WindExtension {
 
 impl MaterialExtension for WindExtension {
     fn vertex_shader() -> ShaderRef {
+        // Dev A/B switch (`CENT_ANS_PERF_OFF=wind`): Bevy's own vertex stage, no sway.
+        if wind_switched_off() {
+            return ShaderRef::Default;
+        }
         "embedded://cent_ans_client/battle/decor/wind.wesl".into()
     }
     /// No depth prepass: Bevy's default prepass vertex stage does not sway, so with SSAO on
@@ -69,6 +73,12 @@ impl MaterialExtension for WindExtension {
 }
 
 pub type WindMaterial = ExtendedMaterial<StandardMaterial, WindExtension>;
+
+/// True when `CENT_ANS_PERF_OFF` lists `wind` (dev A/B bench of the sway's vertex cost).
+fn wind_switched_off() -> bool {
+    std::env::var("CENT_ANS_PERF_OFF")
+        .is_ok_and(|list| list.split(',').any(|name| name.trim() == "wind"))
+}
 
 pub struct WindPlugin;
 
