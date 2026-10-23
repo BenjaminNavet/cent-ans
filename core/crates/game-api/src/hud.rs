@@ -131,6 +131,14 @@ pub struct EconomyView {
     pub trade_income_last_turn: i64,
     pub mercenary_premium: i64,
     pub mercenary_premium_last_turn: i64,
+    /// ECO2 (ADR 0777): recurring charges of the crown, in livres per season.
+    pub household: i64,
+    pub wages: i64,
+    pub siege_costs: i64,
+    pub obligations: i64,
+    pub interest: i64,
+    /// Principal owed to the bankers.
+    pub debt: i64,
     pub budget_lines: Vec<BudgetLineView>,
     pub budget_history: Vec<BudgetRecordView>,
     /// Non-zero receipts of the coming season by source.
@@ -181,6 +189,12 @@ pub fn economy(data: &GameData, state: &CampaignState, faction: &FactionId) -> O
             .get(faction)
             .copied()
             .unwrap_or(0),
+        household: economy.household,
+        wages: economy.wages,
+        siege_costs: economy.siege,
+        obligations: economy.obligations,
+        interest: economy.interest,
+        debt: economy.debt,
         budget_lines: economy
             .budget_lines(last)
             .iter()

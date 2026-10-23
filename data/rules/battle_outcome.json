@@ -23,10 +23,10 @@
     "max_milli": 800
   },
   "spoils": {
-    "standard_gold": 15,
+    "standard_gold": 40,
     "standard_prestige": 1,
     "general_standard_prestige": 3,
-    "baggage_gold": 120,
+    "baggage_gold": 400,
     "standard_lost_prestige": 0
   },
   "classes": {

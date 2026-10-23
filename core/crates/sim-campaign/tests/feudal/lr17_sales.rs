@@ -143,6 +143,9 @@ fn danish_estonia_is_sold_to_the_order_in_1346() {
     let mut state = start(data, "fac_england", 4);
     state.year = 1346;
     state.season = Season::Summer;
+    // ECO2: the court and the hoard levy leave the Order a thin purse by 1346;
+    // the sale (6 000 livres) is payable only with some money in the coffers.
+    state.factions.get_mut(&fac("fac_teutonic")).unwrap().treasury += 12_000;
     state.end_turn_with(data, idle);
     assert!(state
         .chronicle

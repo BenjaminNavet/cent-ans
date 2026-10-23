@@ -114,6 +114,20 @@ pub struct FactionEconomy {
     /// C5: trade income paid during the last resolved turn.
     #[serde(default)]
     pub trade_income_last_turn: i64,
+    /// ECO2 (ADR 0777): the recurring charges of the crown this season.
+    #[serde(default)]
+    pub household: i64,
+    #[serde(default)]
+    pub wages: i64,
+    #[serde(default)]
+    pub siege: i64,
+    #[serde(default)]
+    pub obligations: i64,
+    #[serde(default)]
+    pub interest: i64,
+    /// ECO2: principal owed to the bankers.
+    #[serde(default)]
+    pub debt: i64,
 }
 
 /// The purse of one faction for one season, in livres: what
@@ -713,6 +727,12 @@ impl CampaignState {
             goods_categories,
             trade_income: crate::trade::faction_trade_income(self, data, id),
             trade_income_last_turn: last.trade_income,
+            household: projected.household,
+            wages: projected.wages,
+            siege: projected.siege,
+            obligations: projected.obligations,
+            interest: projected.interest,
+            debt: faction.finance.debt(),
         })
     }
 }

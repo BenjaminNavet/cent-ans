@@ -2,18 +2,18 @@
   "description": "ECO2 (ADR 0777, 0778) : finances royales. La maison du roi coûte une part du revenu brut qui croît avec le rang du royaume (nombre de provinces) et le prestige du souverain ; les gages des gouverneurs et des chefs d’armée et le coût des sièges sont des charges structurelles, toutes plafonnées en part du revenu pour épargner les petites factions. Crédit : les banquiers prêtent jusqu’à limit_seasons saisons de revenu brut à rate_permille par saison (majoré quand la cote de crédit baisse) ; la banqueroute royale survient quand le trésor est négatif et la dette dépasse default.debt_seasons saisons de revenu : une part de la dette est effacée, les banquiers saisissent une part du revenu, le crédit est gelé, les provinces grognent. Impôts exceptionnels : un rendement immédiat en saisons de revenu, de la grogne pendant unrest_turns saisons, un délai avant de relever le même impôt. Dot : étalée sur installments saisons par la maison de l’épouse. IA : emprunte sous borrow_below_seasons, rembourse au-dessus de repay_above_seasons.",
   "household": {
     "tiers": [
-      { "min_provinces": 3, "percent": 4.0 },
-      { "min_provinces": 6, "percent": 10.0 },
-      { "min_provinces": 12, "percent": 16.0 },
-      { "min_provinces": 25, "percent": 22.0 }
+      { "min_provinces": 3, "percent": 5.0 },
+      { "min_provinces": 6, "percent": 18.0 },
+      { "min_provinces": 12, "percent": 24.0 },
+      { "min_provinces": 25, "percent": 30.0 }
     ],
-    "percent_per_10_prestige": 0.5,
-    "max_percent": 32.0
+    "percent_per_10_prestige": 1.0,
+    "max_percent": 40.0
   },
   "officers": {
-    "governor_wage": 30,
-    "commander_wage": 50,
-    "max_percent": 8.0
+    "governor_wage": 60,
+    "commander_wage": 120,
+    "max_percent": 10.0
   },
   "siege": {
     "per_siege": 150,
