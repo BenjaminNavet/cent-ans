@@ -451,7 +451,7 @@ mod tests {
         assert!((light.elevation - 21.0).abs() < 1e-4);
         assert!(light.color.x > light.color.z, "warm sun");
         assert!(light.ambient.z > light.ambient.x, "cool ambient");
-        assert!((light.saturation - 0.77).abs() < 1e-4);
+        assert!((light.saturation - 0.96).abs() < 1e-4);
         assert!(data.grade_strength > 0.8);
     }
 

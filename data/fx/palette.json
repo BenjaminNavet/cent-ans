@@ -1,0 +1,52 @@
+{
+  "description": "Bible de palette unique de Cent Ans (ADR 0748, docs/design/palette.md) : valeurs de référence du sol, du ciel, de la pierre, du cuir et du textile, saison et heure de référence, écarts de saison dérivés, étalonnage commun campagne / bataille et cibles de mesure. Couleurs sRGB 0-1 (albédo, pas lumière reçue). `ground` est lu par le client (sol, herbe, horizon de bataille : palette.rs) ; `common_grade` et `targets` sont contrôlés par test contre data/fx/atmosphere.json ; `surfaces` et `sky` sont la référence des assets et des ciels (pas de couleur de matériau sans la rattacher ici). Rendu seulement.",
+  "reference_season": "spring",
+  "reference_hour": "midday",
+  "ground": {
+    "spring": [0.34, 0.50, 0.22],
+    "summer": [0.40, 0.48, 0.22],
+    "autumn": [0.48, 0.41, 0.20],
+    "winter": [0.82, 0.84, 0.86]
+  },
+  "surfaces": {
+    "grass": [0.34, 0.50, 0.22],
+    "grass_dry": [0.55, 0.48, 0.25],
+    "soil": [0.42, 0.33, 0.23],
+    "mud": [0.30, 0.24, 0.18],
+    "chalk": [0.74, 0.71, 0.64],
+    "stone": [0.58, 0.55, 0.50],
+    "stone_dark": [0.38, 0.36, 0.34],
+    "slate": [0.30, 0.32, 0.36],
+    "roof_tile": [0.55, 0.30, 0.20],
+    "thatch": [0.60, 0.50, 0.30],
+    "oak_bark": [0.26, 0.20, 0.15],
+    "foliage": [0.22, 0.36, 0.14],
+    "leather": [0.32, 0.20, 0.12],
+    "leather_dark": [0.18, 0.12, 0.08],
+    "wool_undyed": [0.74, 0.68, 0.54],
+    "linen": [0.82, 0.78, 0.68],
+    "water": [0.16, 0.28, 0.32]
+  },
+  "sky": {
+    "zenith": [0.30, 0.50, 0.80],
+    "horizon": [0.72, 0.80, 0.88],
+    "haze": [0.70, 0.76, 0.84]
+  },
+  "season_deltas": {
+    "summer": { "hue_deg": -16, "saturation": 0.97, "value": 0.96, "temperature": 0.13 },
+    "autumn": { "hue_deg": -49, "saturation": 1.04, "value": 0.96, "temperature": 0.27 },
+    "winter": { "hue_deg": 0, "saturation": 0.08, "value": 1.72, "temperature": -0.45 }
+  },
+  "common_grade": {
+    "contrast": 1.05,
+    "saturation": 0.97,
+    "shadow_saturation": 0.65,
+    "tolerance": { "contrast": 0.05, "saturation": 0.1 }
+  },
+  "targets": {
+    "ground_midday_hsv": { "hue_deg": [82, 106], "saturation": [0.22, 0.42], "value": [0.36, 0.56] },
+    "dusk_ground_value_min": 0.26,
+    "dawn_ground_value_min": 0.28,
+    "campaign_clear_ground_saturation_min": 0.18
+  }
+}

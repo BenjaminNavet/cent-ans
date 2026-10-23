@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_palette.schema.json",
+  "title": "Bible de palette (ADR 0748)",
+  "description": "Fichier data/fx/palette.json : valeurs de référence du sol, de la pierre, du cuir, du textile et du ciel, saison et heure de référence, écarts de saison dérivés, étalonnage commun campagne / bataille et cibles de mesure (docs/design/palette.md). Rendu seulement.",
+  "type": "object",
+  "$defs": {
+    "rgb": { "$ref": "common.schema.json#/$defs/rgb3" },
+    "range": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+  },
+  "required": ["reference_season", "reference_hour", "ground", "surfaces", "sky", "season_deltas", "common_grade", "targets"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "reference_season": { "enum": ["spring", "summer", "autumn", "winter"] },
+    "reference_hour": { "enum": ["dawn", "morning", "midday", "afternoon", "dusk", "night"] },
+    "ground": {
+      "type": "object",
+      "description": "Albédo moyen du sol et de l'herbe par saison (lu par le client de bataille).",
+      "required": ["spring", "summer", "autumn", "winter"],
+      "additionalProperties": false,
+      "properties": {
+        "spring": { "$ref": "#/$defs/rgb" },
+        "summer": { "$ref": "#/$defs/rgb" },
+        "autumn": { "$ref": "#/$defs/rgb" },
+        "winter": { "$ref": "#/$defs/rgb" }
+      }
+    },
+    "surfaces": { "type": "object", "description": "Albédo de référence (saison de référence, midi) des matières.", "additionalProperties": { "$ref": "#/$defs/rgb" } },
+    "sky": {
+      "type": "object",
+      "required": ["zenith", "horizon", "haze"],
+      "additionalProperties": false,
+      "properties": { "zenith": { "$ref": "#/$defs/rgb" }, "horizon": { "$ref": "#/$defs/rgb" }, "haze": { "$ref": "#/$defs/rgb" } }
+    },
+    "season_deltas": {
+      "type": "object",
+      "description": "Écarts du sol d'une saison à la saison de référence (teinte en degrés, saturation et valeur en facteurs, température d'étalonnage).",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["hue_deg", "saturation", "value", "temperature"],
+        "additionalProperties": false,
+        "properties": {
+          "hue_deg": { "type": "number" },
+          "saturation": { "type": "number", "minimum": 0 },
+          "value": { "type": "number", "minimum": 0 },
+          "temperature": { "type": "number", "minimum": -1, "maximum": 1 }
+        }
+      }
+    },
+    "common_grade": {
+      "type": "object",
+      "required": ["contrast", "saturation", "shadow_saturation", "tolerance"],
+      "additionalProperties": false,
+      "properties": {
+        "contrast": { "type": "number", "minimum": 0.5, "maximum": 1.5 },
+        "saturation": { "type": "number", "minimum": 0, "maximum": 2 },
+        "shadow_saturation": { "type": "number", "minimum": 0, "maximum": 1 },
+        "tolerance": {
+          "type": "object",
+          "required": ["contrast", "saturation"],
+          "additionalProperties": false,
+          "properties": { "contrast": { "type": "number", "minimum": 0 }, "saturation": { "type": "number", "minimum": 0 } }
+        }
+      }
+    },
+    "targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ground_midday_hsv": {
+          "type": "object",
+          "required": ["hue_deg", "saturation", "value"],
+          "additionalProperties": false,
+          "properties": { "hue_deg": { "$ref": "#/$defs/range" }, "saturation": { "$ref": "#/$defs/range" }, "value": { "$ref": "#/$defs/range" } }
+        },
+        "dusk_ground_value_min": { "type": "number", "minimum": 0, "maximum": 1 },
+        "dawn_ground_value_min": { "type": "number", "minimum": 0, "maximum": 1 },
+        "campaign_clear_ground_saturation_min": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

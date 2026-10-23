@@ -11,6 +11,7 @@ pub mod dataassets;
 pub mod flow;
 pub mod fx;
 pub mod menu;
+pub mod palette;
 pub mod paths;
 pub mod settings;
 pub mod sim;
