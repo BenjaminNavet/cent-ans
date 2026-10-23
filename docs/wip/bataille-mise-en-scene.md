@@ -8,3 +8,6 @@
 ## Reste
 - (4) unit_size/max_figures non changés (bench à charge 45 : non fiable, mêlée à 59 fps sans marge) ; imposteurs animés non faits.
 - Ciel/exposition : hors périmètre (lighting.rs interdit).
+## Mesures siege (captures out/shots)
+- pivot 0.55 / 170 m : armee assaillante visible, pas de toits, remparts hors cadre.
+- pivot 0.65-0.8 / 200-240 m : face a la tour de porte, trop pres. A regler. deploy.rs utilise le cadrage de siege meme sans regiments poses (le joueur de la demo est defenseur).

@@ -146,7 +146,9 @@ pub fn refresh_deployment(
                 deployment.opened = true;
                 // Frame the knot of the player's regiments (they stand at the back of the zone, so
                 // the zone centre is often an empty meadow); the zone is the fallback.
-                if sim.units().iter().any(|u| u.side == player && !u.synthetic) {
+                if sim.siege().is_some()
+                    || sim.units().iter().any(|u| u.side == player && !u.synthetic)
+                {
                     let (centre, yaw) =
                         crate::battle::scene::terrain::opening_frame(Some(player), sim);
                     camera_state.target = centre;
