@@ -47,7 +47,7 @@ fn frozen_save_loads_plays_a_turn_and_resaves(version: u32) {
     assert_eq!(state.player_faction().as_str(), "fac_england");
     state.end_turn(data);
     assert_eq!(state.turn(), 11);
-    let dir = std::env::temp_dir().join(format!("cent-ans-fixture-rt-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("cent-ans-fixture-rt-{version}-{}", std::process::id()));
     let path = game_api::saves::write_save(&dir, "again", &state, "2026-10-22T00:00:01").unwrap();
     let reloaded = game_api::saves::load_save(data, &path).unwrap();
     assert_eq!(reloaded.save_json(), state.save_json());

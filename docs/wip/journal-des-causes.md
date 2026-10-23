@@ -13,12 +13,17 @@ Branche : worktree-agent-a810e54a95d255ac3.
 - Fait (données) : `data/ui/causes.fr.json` + `data/schemas/causes.schema.json` (+ `test_schemas.py`).
 - Fait (game-api) : `causes.rs` (vues, filtre, `top_causes`, `last_battle_causes`, `notification_tooltip`),
   `JournalEntry::cause_id`, fixture de sauvegarde v10 (`save_v10.json`, v9 conservée).
-- À faire : client (onglet Causes du panneau Chronique, fin de bataille, fin de partie, infobulles),
-  dump d'état, tests client, smoke, seed-bots rapide.
+- Fait (client) : onglet Causes du panneau Chronique (`CausesRequest`, filtre, facteurs dépliables, dump
+  `panel_chronicle.causes`), bouton « ? » et infobulle sur le fil d'événements (`hud/feed.rs`), bloc
+  « trois causes principales » + bouton Causes sur l'écran de fin (`ending.rs`, `EndView.causes`),
+  bouton « Pourquoi cette bataille ? » sur l'écran de fin de bataille, hook `CENT_ANS_CAUSES_DEMO=1`.
+- Testé : cargo fmt/clippy core et client propres ; `cargo test --workspace` core OK (hors course
+  de fixtures corrigée ensuite) ; tests client ciblés chronicle/feed OK.
+- Non fait : smoke, dump d'état et captures du client (arrêt demandé), seed-bots, clippy client final
+  après les dernières retouches.
 
 ## Prochaine étape
-Client Bevy : `client/src/campaign/panels/chronicle/` (onglet), écrans de fin (`flow`), infobulles du fil
-d'événements (`hud/feed.rs`).
+Intégrateur : clippy client, smoke, dump `panel_chronicle.causes` avec `CENT_ANS_CAUSES_DEMO=1`.
 
 ## Points ouverts
 - Doctrine de recrutement de l'IA (crate `ai`) non journalisée : le planificateur lit un état immuable.

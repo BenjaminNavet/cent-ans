@@ -1135,6 +1135,7 @@ mod tests {
     fn f5_ignored_while_typing() {
         let mut app = App::new();
         app.init_resource::<ChroniclePanel>()
+            .init_resource::<CausesRequest>()
             .init_resource::<KeyEdges>()
             .init_resource::<ButtonInput<KeyCode>>()
             .init_resource::<TextInputFocus>()
@@ -1170,5 +1171,11 @@ mod tests {
     fn tab_names_are_stable() {
         assert_eq!(Tab::default().name(), "decisions");
         assert_eq!(Tab::Letters.name(), "letters");
+        assert_eq!(Tab::Causes.name(), "causes");
+    }
+
+    #[test]
+    fn a_request_for_the_causes_tab_is_empty_by_default() {
+        assert_eq!(CausesRequest::default().0, None);
     }
 }
