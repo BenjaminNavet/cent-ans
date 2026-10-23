@@ -42,9 +42,33 @@ use super::billboard::{
 
 const SHADER_PATH: &str = "embedded://cent_ans_client/campaign/vegetation/shadow_cast.wesl";
 
-/// Marker of the vegetation batches drawn into the sun's shadow maps (tree impostors, models).
-#[derive(Component, Clone, Copy, Debug, Default)]
-pub struct VegShadowCaster;
+/// Most sun cascades a range is kept for.
+pub const MAX_CASCADES: usize = 4;
+
+/// Marks the vegetation batches drawn into the sun's shadow maps (tree impostors, models), with
+/// the run of sorted records each cascade draws (`shadows::shadow_ranges`).
+#[derive(Component, Clone, Copy, Debug)]
+pub struct VegShadowCaster {
+    pub ranges: [[u32; 2]; MAX_CASCADES],
+}
+
+impl Default for VegShadowCaster {
+    /// Every cascade draws every record.
+    fn default() -> Self {
+        VegShadowCaster {
+            ranges: [[0, u32::MAX]; MAX_CASCADES],
+        }
+    }
+}
+
+impl VegShadowCaster {
+    /// Records drawn into cascade `index` (everything past the kept cascades).
+    pub fn range(&self, index: usize) -> std::ops::Range<u32> {
+        self.ranges
+            .get(index)
+            .map_or(0..u32::MAX, |[start, end]| *start..*end)
+    }
+}
 
 impl SyncComponent<RenderApp> for VegShadowCaster {
     type Target = Self;
@@ -55,8 +79,8 @@ impl ExtractComponent<RenderApp> for VegShadowCaster {
     type QueryFilter = ();
     type Out = Self;
 
-    fn extract_component(_item: QueryItem<'_, '_, Self::QueryData>) -> Option<Self> {
-        Some(VegShadowCaster)
+    fn extract_component(item: QueryItem<'_, '_, Self::QueryData>) -> Option<Self> {
+        Some(*item)
     }
 }
 
@@ -228,7 +252,7 @@ fn queue_shadow_batches(
     pipeline_cache: Res<PipelineCache>,
     meshes: Res<RenderAssets<RenderMesh>>,
     allocator: Res<MeshAllocator>,
-    batches: Query<(Entity, &MainEntity, &VegBatch), With<VegShadowCaster>>,
+    batches: Query<(Entity, &MainEntity, &VegBatch, &VegShadowCaster)>,
     mut phases: ResMut<ViewBinnedRenderPhases<Shadow>>,
     lights: Query<(&LightEntity, &ExtractedView)>,
     mut queued: ResMut<QueuedShadowCasters>,
@@ -261,8 +285,8 @@ fn queue_shadow_batches(
             continue;
         }
         let mut added = Vec::new();
-        for (entity, main_entity, batch) in &batches {
-            if batch.count == 0 {
+        for (entity, main_entity, batch, caster) in &batches {
+            if batch.count == 0 || caster.range(*cascade_index).is_empty() {
                 continue;
             }
             let mesh_id = batch

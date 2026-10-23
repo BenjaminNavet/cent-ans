@@ -16,7 +16,7 @@ use bevy::gltf::GltfAssetLabel;
 use bevy::mesh::{Indices, PrimitiveTopology, VertexAttributeValues};
 use bevy::prelude::*;
 
-use super::billboard::{Mode, Params as VegParams, push_weighted};
+use super::billboard::{Mode, Params as VegParams, ShadowOrder, push_weighted, sort_records};
 
 use super::data::VegetationWorld;
 use super::look::{OpenThinning, Role};
@@ -395,6 +395,8 @@ pub fn impostor_params(row: u16, rows: u32, ratio: f32, season_class: i32, gain:
 #[derive(Default)]
 pub struct Assembled {
     pub batches: HashMap<(u16, bool), Vec<u8>>,
+    /// Shadow order of each batch (records already sorted in `batches`).
+    pub orders: HashMap<(u16, bool), ShadowOrder>,
     pub near: usize,
     pub far: usize,
     pub thinned: usize,
@@ -416,6 +418,7 @@ pub fn assemble(
     density: f32,
     thinning: &OpenThinning,
     model_rows: &[bool],
+    sort_origin: Vec2,
 ) -> Assembled {
     let mut out = Assembled::default();
     let grow = 1.0 / density.sqrt();
@@ -482,6 +485,9 @@ pub fn assemble(
                 out.far += 1;
             }
         }
+    }
+    for (key, records) in &mut out.batches {
+        out.orders.insert(*key, sort_records(records, sort_origin));
     }
     out
 }
@@ -569,6 +575,7 @@ mod tests {
             0.5,
             &OpenThinning::none(),
             &[true],
+            Vec2::ZERO,
         );
         assert_eq!((out.near, out.far, out.thinned), (1, 1, 1));
         assert_eq!(
@@ -585,7 +592,15 @@ mod tests {
                 .map(|i| tree(9.0, 0.5 + i as f32 / 400.0))
                 .collect::<Vec<_>>(),
         )];
-        let out = assemble(&band, Vec2::ZERO, 10.0, 1.0, &OpenThinning::none(), &[true]);
+        let out = assemble(
+            &band,
+            Vec2::ZERO,
+            10.0,
+            1.0,
+            &OpenThinning::none(),
+            &[true],
+            Vec2::ZERO,
+        );
         let models = out.batches[&(0, true)].len() / super::super::billboard::RECORD_BYTES;
         let cards = out.batches[&(0, false)].len() / super::super::billboard::RECORD_BYTES;
         assert_eq!(models + cards, 200);
@@ -600,6 +615,7 @@ mod tests {
             1.0,
             &OpenThinning::none(),
             &[false],
+            Vec2::ZERO,
         );
         assert_eq!((out.near, out.far), (0, 3));
         assert!(out.wanted_rows.contains(&0));

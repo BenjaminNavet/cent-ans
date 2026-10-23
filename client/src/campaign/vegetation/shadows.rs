@@ -13,7 +13,8 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use serde_json::Value;
 
-use super::shadow_pass::VegShadowCaster;
+use super::billboard::{ShadowOrder, VegBatch};
+use super::shadow_pass::{MAX_CASCADES, VegShadowCaster};
 use super::{VegRender, VegView};
 use crate::settings::quality::RenderQuality;
 
@@ -130,7 +131,9 @@ pub(super) fn sync_shadows(
         if shadows.on {
             count += 1;
             if !has {
-                commands.entity(*entity).try_insert(VegShadowCaster);
+                commands
+                    .entity(*entity)
+                    .try_insert(VegShadowCaster::default());
             }
         } else if has {
             commands.entity(*entity).try_remove::<VegShadowCaster>();
@@ -139,9 +142,116 @@ pub(super) fn sync_shadows(
     shadows.casters = count;
 }
 
+/// The camera seen by the cascades, for [`cascade_range`].
+#[derive(Clone, Copy, Debug)]
+pub struct CascadeView {
+    /// Ground point (xz) and height of the camera.
+    pub ground: Vec2,
+    pub height: f32,
+    /// `1 / cos` of the widest angle between the view axis and a ray of the frustum: a point at
+    /// view depth `z` lies at most `z * slant` from the camera.
+    pub slant: f32,
+    /// Horizontal shadow length per unit of height (`1 / tan` of the sun's elevation).
+    pub shadow_run: f32,
+}
+
+/// Records of a sorted batch that may cast into the cascade covering view depths `near..far`:
+/// a tree is kept when its ground distance to the camera fits the slice's distances, widened by
+/// the reach of its shadow and by how far the camera moved since the sort.
+pub fn cascade_range(order: &ShadowOrder, view: &CascadeView, near: f32, far: f32) -> [u32; 2] {
+    if order.distances.is_empty() {
+        return [0, u32::MAX];
+    }
+    let reach = order.max_height * 1.5 * view.shadow_run + view.ground.distance(order.origin) + 0.5;
+    let drop = (view.height - order.min_y).max(0.0);
+    let min = (near * near - drop * drop).max(0.0).sqrt() - reach;
+    let max = far * view.slant + reach;
+    let start = order.distances.partition_point(|d| *d < min);
+    let end = order.distances.partition_point(|d| *d <= max);
+    [start as u32, end as u32]
+}
+
+/// Per-cascade record runs of the shadow-casting tree batches (after the transforms, so with
+/// this frame's camera).
+pub(super) fn shadow_ranges(
+    cameras: Query<(&GlobalTransform, &Projection), With<crate::campaign::camera::CampaignCamera>>,
+    suns: Query<(&GlobalTransform, &bevy::light::CascadeShadowConfig), With<DirectionalLight>>,
+    mut batches: Query<(&VegBatch, &mut VegShadowCaster)>,
+) {
+    let view = cameras.iter().next().and_then(|(camera, projection)| {
+        let Projection::Perspective(p) = projection else {
+            return None;
+        };
+        let (sun, config) = suns.iter().next()?;
+        let t = (p.fov * 0.5).tan();
+        let elevation = (-sun.forward().y).clamp(0.08, 1.0);
+        Some((
+            CascadeView {
+                ground: camera.translation().xz(),
+                height: camera.translation().y,
+                slant: (1.0 + t * t * (1.0 + p.aspect_ratio * p.aspect_ratio)).sqrt(),
+                shadow_run: (1.0 - elevation * elevation).sqrt() / elevation,
+            },
+            config.clone(),
+        ))
+    });
+    let off = crate::campaign::perf_switch::off("vegcull");
+    for (batch, mut caster) in &mut batches {
+        let mut ranges = [[0, u32::MAX]; MAX_CASCADES];
+        if let (Some((view, config)), false) = (view.as_ref(), off) {
+            for (i, range) in ranges.iter_mut().enumerate() {
+                let Some(&far) = config.bounds.get(i) else {
+                    *range = [0, 0];
+                    continue;
+                };
+                let near = if i == 0 {
+                    config.minimum_distance
+                } else {
+                    config.bounds[i - 1] * (1.0 - config.overlap_proportion)
+                };
+                *range = cascade_range(&batch.shadow_order, view, near, far);
+            }
+        }
+        if caster.ranges != ranges {
+            caster.ranges = ranges;
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn cascades_keep_the_trees_of_their_slice() {
+        let order = ShadowOrder {
+            origin: Vec2::ZERO,
+            distances: (0..100).map(|d| d as f32).collect(),
+            max_height: 1.0,
+            min_y: 0.0,
+        };
+        let view = CascadeView {
+            ground: Vec2::ZERO,
+            height: 20.0,
+            slant: 1.2,
+            shadow_run: 1.0,
+        };
+        // A slice under the camera's height starts at the foot of the camera.
+        assert_eq!(cascade_range(&order, &view, 1.0, 10.0), [0, 15]);
+        // Farther: the near trees are skipped (sqrt(40² - 20²) - 2 = 32.6).
+        assert_eq!(cascade_range(&order, &view, 40.0, 50.0), [33, 63]);
+        // The camera moved since the sort: the run widens.
+        let moved = CascadeView {
+            ground: Vec2::new(5.0, 0.0),
+            ..view
+        };
+        assert_eq!(cascade_range(&order, &moved, 40.0, 50.0), [28, 68]);
+        // Unsorted batch: everything.
+        assert_eq!(
+            cascade_range(&ShadowOrder::default(), &view, 40.0, 50.0),
+            [0, u32::MAX]
+        );
+    }
 
     #[test]
     fn shadows_switch_with_hysteresis() {
