@@ -15,5 +15,10 @@ Branche : worktree-agent-a61d8ee004a6f80db. ADR 0774 (garde-fous), 0775 (focus, 
 - B7 stick gauche = fleches du focus ; limite manette dans l'aide.
 - B9 core : un seul message pour capitulation + chute de la place.
 
-## A faire
-B8 (4 echecs ui_kit.layout choix de faction), B10 (aide de siege du conseiller), verifs en run (dumps), ADR, nettoyage target.
+## Termine
+B8 (faction select 4 -> 0 echecs), B10 (alerte siege_against), ADR 0774/0775, README. Clippy lib+tests propre, tests cibles verts (focus, shader_check, advisor, hud, notify, missions, modal, faction, chronicle ; core m8).
+
+## Ouvert
+- Sondes ui_kit.layout de ~1 px sur hud:feed / hud:journal / advisor:band (campagne sans guide) : echelle UI < 1.
+- Voix de adv_siege_against non enregistree (sous-titre seul).
+- Focus : pas de defilement automatique vers un bouton hors de vue.

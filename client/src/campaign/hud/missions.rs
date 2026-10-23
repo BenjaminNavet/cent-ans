@@ -212,6 +212,7 @@ fn rebuild_tracker(
         });
 }
 
+#[allow(clippy::too_many_arguments)]
 fn rebuild_offer(
     mut commands: Commands,
     missions: Res<Missions>,

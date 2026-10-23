@@ -22,7 +22,6 @@
 //! systems only gather what is on screen.
 
 use bevy::input::ButtonState;
-use bevy::input::keyboard::KeyboardInput;
 use bevy::input::mouse::MouseButtonInput;
 use bevy::prelude::*;
 use bevy::ui::InteractionDisabled;
@@ -220,7 +219,6 @@ fn navigate(
     mut commands: Commands,
     mut focus: ResMut<UiFocus>,
     mut keys: ResMut<ButtonInput<KeyCode>>,
-    mut key_events: MessageReader<KeyboardInput>,
     mut mouse_events: MessageReader<MouseButtonInput>,
     gamepads: Query<&Gamepad>,
     nodes: Query<
@@ -246,9 +244,7 @@ fn navigate(
 ) {
     // A click gives the screen back to the mouse (the ring hides; over the HUD the keys too).
     let clicked = mouse_events.read().any(|e| e.state == ButtonState::Pressed);
-    let engage_pressed = key_events
-        .read()
-        .any(|e| e.state == ButtonState::Pressed && !e.repeat && e.key_code == ENGAGE_KEY);
+    let engage_pressed = keys.just_pressed(ENGAGE_KEY);
     if clicked {
         focus.visible = false;
         focus.engaged = false;

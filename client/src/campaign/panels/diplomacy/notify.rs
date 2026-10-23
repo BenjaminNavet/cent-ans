@@ -86,6 +86,7 @@ pub fn count_text(count: usize) -> String {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn after_turn(
     mut turns: MessageReader<TurnAdvanced>,
     sim: Res<Sim>,

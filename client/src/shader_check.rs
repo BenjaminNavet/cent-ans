@@ -183,7 +183,7 @@ fn every_client_shader_compiles_and_validates() {
             origin: PathOrigin::Package("cent_ans_client".to_string()),
             components: rel
                 .iter()
-                .map(|c| c.to_string_lossy().to_string().into())
+                .map(|c| c.to_string_lossy().to_string())
                 .collect(),
         };
         if let Err(e) = check(&resolver, &module, &flags) {
