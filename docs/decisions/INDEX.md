@@ -316,3 +316,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0744 | [Modèles d'arbres proches en lod2 au-delà de 35 unités](0744-modeles-d-arbres-lod2-au-loin.md) | accepté |
 | 0746 | [Arbres proches moins chers : zone de modèles réduite et lod2 dès 15 unités](0746-arbres-proches-moins-chers.md) | accepté |
 | 0747 | [Carte d'ombre de la campagne à 2048 par cascade](0747-ombres-de-campagne-en-2048.md) | accepté |
+| 0748 | [Palette unique, six heures de bataille, voile de campagne réduit](0748-palette-unique-et-heures-de-bataille.md) | accepté |

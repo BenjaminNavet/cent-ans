@@ -137,10 +137,15 @@ mod tests {
         let campaign = &rules["campaign"]["seasons"]["spring"]["grade"];
         let battle_season = &rules["battle_seasons"]["spring"]["grade"];
         let battle_clear = &rules["battle"]["clear"]["grade"];
-        let battle_saturation = num(&battle_season["saturation"]) * num(&battle_clear["saturation"]);
+        let battle_saturation =
+            num(&battle_season["saturation"]) * num(&battle_clear["saturation"]);
         let battle_contrast = num(&battle_clear["contrast"]);
         for (what, saturation, contrast) in [
-            ("campaign", num(&campaign["saturation"]), num(&campaign["contrast"])),
+            (
+                "campaign",
+                num(&campaign["saturation"]),
+                num(&campaign["contrast"]),
+            ),
             ("battle", battle_saturation, battle_contrast),
         ] {
             assert!(

@@ -419,15 +419,13 @@ fn fog_on_camera(
     };
     state.fog_density = density;
     for camera in &cameras {
-        commands
-            .entity(camera)
-            .insert(distance_fog(
-                fog,
-                density,
-                horizon_active,
-                &state.air,
-                weather,
-            ));
+        commands.entity(camera).insert(distance_fog(
+            fog,
+            density,
+            horizon_active,
+            &state.air,
+            weather,
+        ));
         state.fog_on_camera = true;
     }
 }

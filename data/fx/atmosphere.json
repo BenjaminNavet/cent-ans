@@ -41,7 +41,7 @@
   },
   "seasons": {
     "spring": {"temperature": -0.05, "tint": -0.03, "saturation": 1.0, "gain": [0.99, 1.01, 1.0]},
-    "summer": {"temperature": 0.18, "saturation": 1.04, "contrast": 1.03},
+    "summer": {"temperature": 0.08, "saturation": 1.04, "contrast": 1.03},
     "autumn": {"temperature": 0.34, "saturation": 1.02, "gain": [1.03, 1.0, 0.92], "highlights": [1.03, 0.99, 0.9]},
     "winter": {"temperature": -0.5, "saturation": 0.72, "lift": [0.0, 0.006, 0.02], "highlights": [0.97, 1.0, 1.04]}
   },
@@ -52,7 +52,7 @@
     },
     "summer": {
       "decor_saturation": 0.6,
-      "grade": {"temperature": 0.18, "saturation": 1.04, "contrast": 1.03, "shadow_saturation": 0.7}
+      "grade": {"temperature": 0.08, "saturation": 1.0, "contrast": 1.03, "shadow_saturation": 0.7}
     },
     "autumn": {
       "decor_saturation": 0.5,
@@ -89,10 +89,10 @@
     },
     "dusk": {
       "phases": ["dusk"],
-      "sun_elevation": 9.0, "sun_azimuth": 262.0, "sun_kelvin": 2700, "sun_energy": 2.6,
+      "sun_elevation": 9.0, "sun_azimuth": 262.0, "sun_kelvin": 3300, "sun_energy": 2.6,
       "sky": {"clear": {"spring": "dawn", "summer": "dawn", "autumn": "dawn", "winter": "dawn"}},
       "air": {"color": [0.93, 0.68, 0.50], "inscattering": [0.98, 0.66, 0.44], "sun_color": [1.0, 0.56, 0.26], "visibility_scale": 0.55, "ambient_color": [0.66, 0.64, 0.86], "ambient_scale": 1.5, "overcast_share": 0.3},
-      "grade": {"temperature": 0.28, "tint": 0.04, "contrast": 1.05, "saturation": 1.06, "lift": [0.016, 0.008, 0.012], "gain": [1.04, 0.98, 0.9], "highlights": [1.06, 0.97, 0.84], "shadows": [0.94, 0.95, 1.08]}
+      "grade": {"temperature": 0.16, "tint": 0.04, "contrast": 1.05, "saturation": 0.96, "lift": [0.016, 0.008, 0.012], "gain": [1.02, 0.99, 0.94], "highlights": [1.05, 0.98, 0.88], "shadows": [0.94, 0.95, 1.08]}
     },
     "night": {
       "phases": ["night"],

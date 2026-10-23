@@ -33,7 +33,7 @@
     "haze": [0.70, 0.76, 0.84]
   },
   "season_deltas": {
-    "summer": { "hue_deg": -16, "saturation": 0.97, "value": 0.96, "temperature": 0.23 },
+    "summer": { "hue_deg": -16, "saturation": 0.97, "value": 0.96, "temperature": 0.13 },
     "autumn": { "hue_deg": -49, "saturation": 1.04, "value": 0.96, "temperature": 0.27 },
     "winter": { "hue_deg": 0, "saturation": 0.08, "value": 1.72, "temperature": -0.45 }
   },
