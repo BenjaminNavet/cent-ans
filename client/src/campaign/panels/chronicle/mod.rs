@@ -261,6 +261,7 @@ fn close_on_exit(mut commands: Commands, mut panel: ResMut<ChroniclePanel>) {
     panel.open = false;
 }
 
+#[allow(clippy::too_many_arguments)]
 fn open_close(
     mut panel: ResMut<ChroniclePanel>,
     mut request: ResMut<CausesRequest>,

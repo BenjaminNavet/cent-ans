@@ -431,6 +431,7 @@ fn fog_on_camera(
 }
 
 /// The sun follows the phase of the day once per second.
+#[allow(clippy::too_many_arguments)]
 fn follow_day(
     time: Res<Time>,
     mut timer: Local<f32>,
