@@ -479,9 +479,10 @@ fn salic_succession_from_philippe_to_jean() {
 #[test]
 fn a_minor_ruler_opens_a_regency() {
     let data = game_data();
-    // Seed 12 (HV8 data): seeds 10 and 11 give Jean a random elder son
-    // (born 1337), who rightly inherits before Charles V.
-    let mut state = start(data, "fac_france", 12);
+    // Seed 13 (HIST spouses data): with the 1337 spouses of the HIST lot seed 12
+    // gives Jean a random elder son (born 1337), who rightly inherits before
+    // Charles V; seeds 10, 11 and 13 to 19 do not.
+    let mut state = start(data, "fac_france", 13);
     // Let Charles V be born, then kill every adult Valois ahead of him.
     for _ in 0..8 {
         state.end_turn_with(data, idle);
