@@ -109,13 +109,18 @@ fn sun(mut suns: Query<&mut DirectionalLight>) {
 }
 
 /// Meshes of material `M` that still cast shadows.
-type Casters<'w, 's, M> =
-    Query<'w, 's, Entity, (With<MeshMaterial3d<M>>, Without<bevy::light::NotShadowCaster>)>;
+type Casters<'w, 's, M> = Query<
+    'w,
+    's,
+    Entity,
+    (
+        With<MeshMaterial3d<M>>,
+        Without<bevy::light::NotShadowCaster>,
+    ),
+>;
 
 /// `<family>shadow`: the meshes of material `M` stop casting into the sun's shadow maps.
-fn no_shadow<M: Material>(
-    group: &'static str,
-) -> impl FnMut(Commands, Casters<M>) {
+fn no_shadow<M: Material>(group: &'static str) -> impl FnMut(Commands, Casters<M>) {
     move |mut commands, q: Casters<M>| {
         if off(group) {
             for entity in &q {
