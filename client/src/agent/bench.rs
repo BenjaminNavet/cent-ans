@@ -352,6 +352,9 @@ pub(super) fn write_report(
     out: Option<&PathBuf>,
     exit: &mut MessageWriter<AppExit>,
 ) {
+    let mut report = report.clone();
+    report["memory"] = super::memory::report();
+    let report = &report;
     let text = serde_json::to_string_pretty(report).unwrap_or_default();
     info!(
         "CampaignMap: bench_{} {}",

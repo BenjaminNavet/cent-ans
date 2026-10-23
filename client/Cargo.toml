@@ -69,6 +69,7 @@ bevy = { version = "=0.20.0", features = [
     # stone and building extensions hit 17-19 samplers and Metal's limit of 16 crashes the battle at load.
     "experimental_pbr_pcss",
 ] }
+libc = "0.2"
 data-model = { path = "../core/crates/data-model" }
 sim-campaign = { path = "../core/crates/sim-campaign" }
 sim-battle = { path = "../core/crates/sim-battle" }

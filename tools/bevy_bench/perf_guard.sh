@@ -43,6 +43,17 @@ for phase, stats in limits.items():
         ok = value <= limit
         bad += not ok
         print(f"{'ok  ' if ok else 'FAIL'} {kind}.{phase}.{stat} = {value:.2f} ms (max {limit}) [load {load}]")
+# Memory budget (ADR 0748): peak RSS of the process, `memory.peak_rss_mib` of the report.
+mem_limit = json.load(open(conf)).get("memory", {}).get(kind)
+if mem_limit is not None:
+    peak = rep.get("memory", {}).get("peak_rss_mib")
+    if peak is None:
+        print(f"FAIL {kind}.memory: absent from the report")
+        bad += 1
+    else:
+        ok = peak <= mem_limit
+        bad += not ok
+        print(f"{'ok  ' if ok else 'FAIL'} {kind}.peak_rss = {peak:.0f} MiB (max {mem_limit})")
 sys.exit(1 if bad else 0)
 PY
 }
