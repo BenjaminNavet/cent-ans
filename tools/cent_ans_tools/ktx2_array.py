@@ -59,7 +59,9 @@ def find_ktx() -> Path:
     for candidate in (os.environ.get("KTX"), shutil.which("ktx"), *KTX_CANDIDATES):
         if candidate and Path(candidate).is_file():
             return Path(candidate)
-    raise FileNotFoundError("outil `ktx` introuvable (KTX-Software 4.4, voir docs/wip/bevy-ktx2-array.md)")
+    raise FileNotFoundError(
+        "outil `ktx` introuvable (KTX-Software 4.4, voir docs/wip/bevy-ktx2-array.md)"
+    )
 
 
 def strips_of_battle() -> list[Strip]:
@@ -87,11 +89,15 @@ def split_layers(strip: Strip, folder: Path) -> list[Path]:
     image = Image.open(ASSETS / strip.source).convert("RGBA")
     size = image.width // strip.cols
     if image.width % strip.cols or image.height != size * strip.rows:
-        raise ValueError(f"{strip.source}: forme {image.size} inattendue pour la grille {strip.cols}x{strip.rows}")
+        raise ValueError(
+            f"{strip.source}: forme {image.size} inattendue pour la grille {strip.cols}x{strip.rows}"
+        )
     paths = []
     for row in range(strip.rows):
         for col in range(strip.cols):
-            layer = image.crop((col * size, row * size, (col + 1) * size, (row + 1) * size))
+            layer = image.crop(
+                (col * size, row * size, (col + 1) * size, (row + 1) * size)
+            )
             path = folder / f"layer_{row * strip.cols + col:03d}.png"
             layer.save(path)
             paths.append(path)
@@ -117,11 +123,15 @@ def bake(strip: Strip, ktx: Path, cache: Path = CACHE_DIR) -> Path:
         ]  # fmt: skip
         result = subprocess.run(command, capture_output=True, text=True)
         if result.returncode:
-            raise RuntimeError(f"ktx create a échoué pour {strip.source} : {result.stderr.strip()}")
+            raise RuntimeError(
+                f"ktx create a échoué pour {strip.source} : {result.stderr.strip()}"
+            )
     return out
 
 
-def bake_all(only: str | None = None, force: bool = False) -> list[tuple[Strip, Path, int]]:
+def bake_all(
+    only: str | None = None, force: bool = False
+) -> list[tuple[Strip, Path, int]]:
     """Cuit toutes les bandes de bataille absentes du cache (ou toutes avec ``force``)."""
     ktx = find_ktx()
     done = []
