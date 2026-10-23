@@ -33,3 +33,11 @@ Suivre les deux lots en cours, puis : (a) benchs sur machine calme (réf, Solari
 - `CENT_ANS_BATTLE_LOD=0.55` (préréglage low) : 17,3 ms / 58,0 fps. `=2` : identique à la référence (déjà ultra).
 - Conclusion : le coût est la géométrie des soldats (LOD0/1 jusqu'à ~11 600 triangles) et leurs ombres, pas la logique (Update ~4 ms). Lots foule 1 (habillage allégé LOD2 + passe d'ombres) et 2 (culling par soldat) engagés.
 - Solari bataille : voir bevy-solari.md (mêlée 52 fps car cascades d'ombre coupées, soldats sans ombre).
+
+## Mesures et décisions du 23/10 (nuit)
+- Bataille release (Crécy, ultra) : référence 24,1 ms mêlée (41 fps) -> 16,6 ms (60,7 fps) avec foule1 (culling par soldat + ombres allégées) ; `CENT_ANS_CROWD=off` redonne 24,1 ms. KTX2 sol de bataille : CPU 284 ms -> 0, GPU 127 -> 32 Mio (cache `out/ktx2_cache/` à cuire : `uv run --project tools cent-ans textures bake-ktx2`).
+- Post-effets (préréglage auto, mêlée 9,0 ms) : chaque effet +0,1 à 0,4 ms, tous +1,5 ms. Ultra = auto_exposure + sharpening (dans main). DoF / aberration chromatique / flou de mouvement / ombres douces : laissés désactivés (image floue, franges, bruit).
+- Solari bataille : mêlée 52 fps (cascades coupées), calme 57,6 ; soldats sans ombre ; reste `enabled:false`.
+- Solari campagne (prototype proxy 500 k triangles) : bancs pan 12,4 ms vs 17,2 ; mais capture : l'écran de prologue ne disparaît pas (agent solari-camp-load en cours). `enabled:false`.
+- Session 51 (perf/camp60) a fusionné dans main : cache du sol par nœud (ADR 0742), ombres d'arbres par cascade (0743), arbres lod2 (0744).
+- Restent : shader différé du terrain de campagne (option (a) de bevy-etude-terrain-std.md), vent V0/V2, contrôle visuel de la foule en mouvement, Solari par défaut (ombres des soldats), L3-L7 campagne (session 51).
