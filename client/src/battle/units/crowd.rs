@@ -17,7 +17,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use bevy::camera::Projection;
 use bevy::math::{Vec3, Vec4};
-use bevy::prelude::{GlobalTransform, Transform};
+use bevy::prelude::{Component, GlobalTransform, Transform};
 use serde_json::Value;
 
 /// Dev hook for A/B captures in one process (`CENT_ANS_CROWD_FLIP_EVERY=<frames>`): every that
@@ -49,6 +49,14 @@ pub fn flip_phase(mut frame: bevy::prelude::Local<u64>) {
     }
     *frame += 1;
     BASELINE_PHASE.store((*frame / every) % 2 == 1, Ordering::Relaxed);
+}
+
+/// Marks the instanced batches of a live regiment (main or impostor draw), as opposed to corpses:
+/// the Solari trial reads their records to place shadow proxies (`scene/solari_soldiers.rs`).
+#[derive(Component, Clone, Copy, Debug)]
+pub struct ProxyCaster {
+    /// Horseman (horse + rider) rather than a foot soldier.
+    pub mounted: bool,
 }
 
 /// Where a soldier has to be drawn.

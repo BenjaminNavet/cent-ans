@@ -480,6 +480,9 @@ pub fn update_regiments(
                         count: 0,
                         version: 0,
                     },
+                    super::crowd::ProxyCaster {
+                        mounted: spec.mounted,
+                    },
                     DespawnOnExit(AppState::Battle),
                 )
             };
