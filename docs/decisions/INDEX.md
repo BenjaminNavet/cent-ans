@@ -317,3 +317,5 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0746 | [Arbres proches moins chers : zone de modèles réduite et lod2 dès 15 unités](0746-arbres-proches-moins-chers.md) | accepté |
 | 0747 | [Carte d'ombre de la campagne à 2048 par cascade](0747-ombres-de-campagne-en-2048.md) | accepté |
 | 0732 | [Province du Dauphiné de Viennois](0732-province-du-dauphine.md) | accepté |
+| 0752 | [Bandeau Conseiller unique](0752-bandeau-conseiller-unique.md) | accepté |
+| 0753 | [Focus clavier et manette du kit UI](0753-focus-clavier-et-manette.md) | accepté |

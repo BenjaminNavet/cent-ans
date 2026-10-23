@@ -495,7 +495,7 @@ fn spawn_minimap(
         .insert(Node {
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(4.0),
-            padding: UiRect::all(Val::Px(6.0)),
+            padding: UiRect::axes(Val::Px(9.0), Val::Px(7.0)),
             ..default()
         })
         .with_children(|frame| {
@@ -630,7 +630,7 @@ fn spawn_minimap(
                     margin: UiRect::bottom(Val::Px(4.0)),
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Px(2.0),
-                    padding: UiRect::all(Val::Px(8.0)),
+                    padding: UiRect::all(Val::Px(12.0)),
                     min_width: Val::Px(200.0),
                     ..default()
                 })

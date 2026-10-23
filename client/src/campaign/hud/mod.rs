@@ -197,6 +197,7 @@ impl Plugin for CampaignHudPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<HudData>()
             .init_resource::<bar::BarCompact>()
+            .init_resource::<bar::HudLabels>()
             .init_resource::<AlertCursor>()
             .configure_sets(
                 Update,
@@ -411,6 +412,21 @@ fn spawn_hud(
                 },
                 Pickable::IGNORE,
             ));
+            // The single advisor band (ADR 0752): bottom left, just above the army strip. The
+            // tutorial card takes the same place while the guide runs (the band then yields).
+            root.spawn((
+                Name::new("advisor:host"),
+                crate::ui::advisor_band::AdvisorBandHost,
+                Node {
+                    position_type: PositionType::Absolute,
+                    bottom: Val::Px(layout::EDGE + layout::ARMY_STRIP_HEIGHT + layout::GAP),
+                    left: Val::Px(layout::EDGE),
+                    width: Val::Px(320.0),
+                    flex_direction: FlexDirection::Column,
+                    ..default()
+                },
+                Pickable::IGNORE,
+            ));
             // Army strip, bottom left.
             root.spawn((
                 Name::new("hud:army_strip"),
@@ -502,12 +518,21 @@ fn update_fields(
     mut texts: Query<(&mut Text, &mut TextColor), With<FieldText>>,
     mut images: Query<&mut ImageNode, With<FieldImage>>,
     compact: Res<bar::BarCompact>,
+    labels: Res<bar::HudLabels>,
     mut shown: Local<(String, String)>,
 ) {
     if !hud.is_changed() && !compact.is_changed() {
         return;
     }
     let Some(top) = &hud.top else { return };
+    // A figure with no word is unreadable: the word comes first unless the bar is compact.
+    let word = |label: &str| {
+        if !compact.1 || label.is_empty() {
+            String::new()
+        } else {
+            format!("{label} ")
+        }
+    };
     let [prestige_tip, men_tip, unrest_tip] = text::forecast_tooltips(hud.forecast.as_ref());
     let arrow = |gauge: Option<&game_api::hud::GaugeView>| {
         gauge.map_or_else(String::new, |g| format!(" {}", text::arrow(g)))
@@ -567,7 +592,8 @@ fn update_fields(
             ),
             HudField::Manpower => (
                 format!(
-                    "{}{}",
+                    "{}{}{}",
+                    word(&labels.manpower),
                     fr::digits(top.manpower as i64),
                     arrow(forecast.map(|f| &f.men))
                 ),
@@ -575,13 +601,19 @@ fn update_fields(
                 format!("[b]Hommes disponibles[/b]\nRéserve de recrues de votre royaume : le nombre d’hommes que vos provinces peuvent encore lever.\n{men_tip}"),
             ),
             HudField::Prestige => (
-                format!("{}{}", top.prestige, arrow(forecast.map(|f| &f.prestige))),
+                format!(
+                    "{}{}{}",
+                    word(&labels.prestige),
+                    top.prestige,
+                    arrow(forecast.map(|f| &f.prestige))
+                ),
                 style::INK,
                 format!("[b]Prestige[/b]\nRenommée de votre couronne : elle pèse dans la diplomatie, et déclarer la guerre sans motif en coûte.\n{prestige_tip}"),
             ),
             HudField::Unrest => (
                 format!(
-                    "{} %{}",
+                    "{}{} %{}",
+                    word(&labels.unrest),
                     top.mean_unrest,
                     arrow(forecast.map(|f| &f.unrest))
                 ),
