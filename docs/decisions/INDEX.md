@@ -291,37 +291,43 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0361 | [Carte peinte : retrait du calculé et peinture vectorielle régionale](0361-carte-peinte-masques.md) | accepté |
 | 0362 | [Les lanceurs démarrent le client Bevy](0362-lanceurs-bevy.md) | accepté |
 | 0363 | [Données visuelles du client en assets Bevy typés](0363-donnees-client-en-assets.md) | accepté |
-| 0364 | [Outils de développement essayés (BRP extras, MCP, mélange des schedules, console)](0364-outils-dev-essayes.md) | accepté |
-| 0365 | [Outils de productivité du client Bevy (nextest, insta, sccache optionnel)](0365-outils-productivite-bevy.md) | accepté |
+| 0364 | [outils de développement essayés (lot devtools2)](0364-outils-dev-essayes.md) | accepté |
+| 0365 | [Outils de productivité du client Bevy : nextest, insta, sccache (optionnel)](0365-outils-productivite-bevy.md) | accepté |
 | 0366 | [Retrait du client Godot](0366-retrait-godot.md) | accepté |
-| 0404 | [Seuil de perf des lots de qualité visuelle](0404-seuil-perf-qualite-visuelle.md) | accepté |
-| 0405 | [Fondu des maquettes par bande et budget de spawn partagé](0405-fondu-par-bande-et-budget-de-spawn.md) | accepté |
+| 0404 | [Seuil de perf des lots de qualité visuelle (chantier VQ)](0404-seuil-perf-qualite-visuelle.md) | accepté |
+| 0405 | [Fondu des maquettes par bande et budget de spawn partagé](0405-fondu-par-bande-et-budget-de-spawn.md) | n/d |
 | 0406 | [Lumière de bataille : perspective aérienne et rapport soleil/ciel](0406-lumiere-bataille-perspective-aerienne.md) | accepté |
-| 0446 | [Empilement des fenêtres : un narrateur à la fois](0446-empilement-fenetres-un-narrateur-a-la-fois.md) | accepté |
-| 0456 | [Historique client dans la sauvegarde](0456-historique-client-dans-la-sauvegarde.md) | accepté |
+| 0446 | [Empilement des fenêtres : un narrateur à la fois, avis sous les fenêtres](0446-empilement-fenetres-un-narrateur-a-la-fois.md) | n/d |
+| 0456 | [Historique client dans la sauvegarde](0456-historique-client-dans-la-sauvegarde.md) | n/d |
 | 0476 | [Le vaincu se replie hors de la province de la bataille](0476-repli-hors-de-la-province.md) | accepté |
 | 0496 | [Géographie de la carte : lacs au vrai niveau, côte lissée, maquettes hors de la mer](0496-geographie-carte-lacs-cotes-maquettes.md) | accepté |
 | 0596 | [La météo « brouillard » de campagne rend la brume visible](0596-meteo-brouillard-brume-visible.md) | accepté |
+| 0706 | [La campagne applique la densité de relief du préréglage](0706-densite-relief-campagne-du-prereglage.md) | accepté |
 | 0710 | [La carte de campagne vise l'atmosphère de Total War](0710-style-total-war-campagne.md) | accepté |
 | 0711 | [Le choc des charges est un modèle en données (élan, poids, arc-boutement, paliers)](0711-choc-des-charges-en-donnees.md) | accepté |
 | 0720 | [Rancunes datées : des missions ancrées dans un affront subi](0720-rancunes-datees.md) | accepté |
-| 0721 | [Parjure : événements diplomatiques en table, à fenêtre](0721-parjure-evenements-diplomatiques-a-fenetre.md) | accepté |
+| 0721 | [Parjure : événements diplomatiques en table, à fenêtre (lot M6)](0721-parjure-evenements-diplomatiques-a-fenetre.md) | accepté |
 | 0722 | [Brouillard de la prévision de bataille](0722-brouillard-de-la-prevision.md) | accepté |
 | 0723 | [Sort de la ville prise : culture, remise, libération, banditisme](0723-sort-de-la-ville-prise-culture-cession-liberation.md) | accepté |
+| 0724 | [Textures compressées par le préprocesseur d'assets de Bevy](0724-textures-compressees-par-le-preprocesseur-d-assets.md) | acceptée |
+| 0730 | [Guyenne en trois provinces, Lothian écossais, Pays de Galles, champs de bataille historiques variés](0730-guyenne-trois-provinces-et-fidelite-1337.md) | accepté |
 | 0731 | [Révoltes graduées et armée rebelle](0731-revoltes-graduees-et-armee-rebelle.md) | accepté |
+| 0732 | [Province du Dauphiné de Viennois, achat de 1349 et objectif français](0732-province-du-dauphine.md) | accepté |
 | 0740 | [Mise à l'échelle du monde 3D (Bevy)](0740-mise-a-l-echelle-du-monde-bevy.md) | accepté |
-| 0741 | [SMAA sur la carte de campagne au lieu du MSAA](0741-smaa-carte-au-lieu-du-msaa.md) | accepté |
-| 0742 | [Cache du sol par nœud de relief](0742-cache-du-sol-par-noeud.md) | accepté |
-| 0743 | [Ombres d'arbres découpées par cascade](0743-ombres-d-arbres-par-cascade.md) | accepté |
-| 0744 | [Modèles d'arbres proches en lod2 au-delà de 35 unités](0744-modeles-d-arbres-lod2-au-loin.md) | accepté |
+| 0741 | [SMAA sur la carte de campagne au lieu du MSAA](0741-smaa-carte-au-lieu-du-msaa.md) | n/d |
+| 0742 | [Cache du sol par nœud de relief](0742-cache-du-sol-par-noeud.md) | n/d |
+| 0743 | [Ombres d'arbres découpées par cascade](0743-ombres-d-arbres-par-cascade.md) | n/d |
+| 0744 | [Modèles d'arbres proches en lod2 au-delà de 35 unités](0744-modeles-d-arbres-lod2-au-loin.md) | n/d |
+| 0745 | [Ombre de relief et occlusion d'horizon cuites dans le cache du sol](0745-ombre-de-relief-et-ao-cuites.md) | n/d |
 | 0746 | [Arbres proches moins chers : zone de modèles réduite et lod2 dès 15 unités](0746-arbres-proches-moins-chers.md) | accepté |
 | 0747 | [Carte d'ombre de la campagne à 2048 par cascade](0747-ombres-de-campagne-en-2048.md) | accepté |
-| 0732 | [Province du Dauphiné de Viennois](0732-province-du-dauphine.md) | accepté |
-| 0752 | [Bandeau Conseiller unique](0752-bandeau-conseiller-unique.md) | accepté |
-| 0753 | [Focus clavier et manette du kit UI](0753-focus-clavier-et-manette.md) | accepté |
-| 0755 | [Palette unique, six heures de bataille, voile de campagne réduit](0755-palette-unique-et-heures-de-bataille.md) | accepté |
+| 0748 | [Budget mémoire du client Bevy](0748-budget-memoire.md) | acceptée |
+| 0749 | [Puits d'argent : ponction progressive sur l'épargne dormante (lot ECO)](0749-puits-d-argent-epargne-progressive.md) | accepté |
 | 0750 | [Eau, côtes et neige de la campagne](0750-eau-cotes-neige-de-la-campagne.md) | accepté |
-| 0748 | [Budget mémoire du client Bevy](0748-budget-memoire.md) | accepté |
-| 0749 | [Puits d'argent : épargne progressive](0749-puits-d-argent-epargne-progressive.md) | accepté |
-| 0754 | [Journal des causes](0754-journal-des-causes.md) | accepté |
-| 0760 | [Masse et cadrage des armées en bataille](0760-masse-et-cadrage-des-armees-en-bataille.md) | accepté |
+| 0752 | [Un seul bandeau Conseiller](0752-bandeau-conseiller-unique.md) | accepté |
+| 0753 | [Focus clavier et manette du kit UI](0753-focus-clavier-et-manette.md) | accepté |
+| 0754 | [Journal des causes (« pourquoi ai-je perdu / gagné ? »)](0754-journal-des-causes.md) | accepté |
+| 0755 | [Palette unique, six heures de bataille, voile de campagne réduit](0755-palette-unique-et-heures-de-bataille.md) | accepté |
+| 0760 | [Masse, variété et cadrage des armées en bataille](0760-masse-et-cadrage-des-armees-en-bataille.md) | n/d |
+| 0772 | [Le compteur « Nuit dans » suit l'heure de départ](0772-compteur-nuit-lie-a-l-heure-de-depart.md) | n/d |
+| 0773 | [Mise en scène des batailles : cadrage de siège, suivi, cartes compactes, premier plan](0773-mise-en-scene-des-batailles.md) | n/d |
