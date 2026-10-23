@@ -124,6 +124,15 @@ fn fill(template: &str, pairs: &[(&str, &str)]) -> String {
         })
 }
 
+/// « de X » with elision (« d’Angleterre »); empty when there is no name.
+fn optional_de(name: &str) -> String {
+    if name.is_empty() {
+        String::new()
+    } else {
+        sim_campaign::events::de(name)
+    }
+}
+
 fn perspective(cause: &Cause, player: &data_model::FactionId) -> Perspective {
     if cause.subject.as_ref() == Some(player) {
         Perspective::Loss
@@ -162,7 +171,14 @@ pub fn cause_view(state: &CampaignState, data: &GameData, record: &CauseRecord) 
         .unwrap_or_default();
     let summary = fill(
         summary_template.unwrap_or(kind),
-        &[("lieu", &place), ("sujet", &subject), ("acteur", &actor)],
+        &[
+            ("lieu", &place),
+            ("sujet", &subject),
+            ("acteur", &actor),
+            ("de_lieu", &optional_de(&place)),
+            ("de_sujet", &optional_de(&subject)),
+            ("de_acteur", &optional_de(&actor)),
+        ],
     );
     let factors = cause
         .factors
@@ -485,6 +501,36 @@ mod tests {
             every_key_resolves(&build::game_end_cause(kind, &b, 0, (1, 4), 50));
             every_key_resolves(&build::game_end_cause(kind, &b, 5, (1, 4), 50));
         }
+    }
+
+    #[test]
+    fn summaries_elide_and_never_agree_with_a_place_name() {
+        let t = texts();
+        for (kind, k) in &t.kinds {
+            for text in [k.loss.as_deref(), k.gain.as_deref(), Some(k.other.as_str())]
+                .into_iter()
+                .flatten()
+            {
+                assert!(!text.contains("de {"), "{kind}: unelided « de » in {text}");
+                assert!(
+                    !text.contains("perdue"),
+                    "{kind}: feminine agreement: {text}"
+                );
+                assert!(!text.contains('\''), "{kind}: straight apostrophe: {text}");
+            }
+        }
+        let filled = fill(
+            "Perte {de_lieu}, au profit {de_acteur}",
+            &[
+                ("de_lieu", &optional_de("Agenais")),
+                ("de_acteur", &optional_de("Angleterre")),
+            ],
+        );
+        assert_eq!(filled, "Perte d’Agenais, au profit d’Angleterre");
+        assert_eq!(optional_de("Écosse"), "d’Écosse");
+        assert_eq!(optional_de("Aragon"), "d’Aragon");
+        assert_eq!(optional_de("Albret"), "d’Albret");
+        assert_eq!(optional_de("Bourgogne"), "de Bourgogne");
     }
 
     #[test]

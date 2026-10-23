@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "causes.schema.json",
   "title": "Textes du journal des causes (ADR 0748)",
-  "description": "Phrases françaises du journal des causes : le cœur n'écrit que des clés et des nombres. Marqueurs : {lieu} (province), {sujet} (faction touchée), {acteur} (faction agissante), {value} (valeur du facteur), {reason}, {summary}.",
+  "description": "Phrases françaises du journal des causes : le cœur n'écrit que des clés et des nombres. Marqueurs : {lieu} (province), {sujet} (faction touchée), {acteur} (faction agissante), {de_lieu}, {de_sujet}, {de_acteur} (mêmes noms avec « de » élidé : « d’Angleterre »), {value} (valeur du facteur), {reason}, {summary}.",
   "type": "object",
   "required": ["ui", "kinds", "factors", "reasons"],
   "additionalProperties": false,
