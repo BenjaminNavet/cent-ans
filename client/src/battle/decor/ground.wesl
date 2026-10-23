@@ -13,7 +13,7 @@
 import bevy_pbr::render::{
     pbr_fragment::pbr_input_from_standard_material,
     pbr_types::PbrInput,
-    mesh_view_bindings::view,
+    mesh_view_bindings::{view, lights},
 };
 import bevy_pbr::decal::clustered::apply_decals;
 
@@ -87,9 +87,11 @@ const FREQ_PATCH2: f32 = 0.0047;
 const FREQ_PUDDLE: f32 = 0.021;
 const FREQ_MACRO_VAR: f32 = 0.0017;
 const FINE_CONTRAST: f32 = 0.6;
-const MACRO_TINT: f32 = 0.28;
+const MACRO_TINT: f32 = 0.38;
 const MACRO_WET: f32 = 0.3;
 const MACRO_ALBEDO: f32 = 0.12;
+// Share of the relief bumps kept when the sun is on the horizon (ADR 0748).
+const LOW_SUN_BUMP: f32 = 0.3;
 
 // --- battle_common.gdshaderinc --------------------------------------------------------------
 
@@ -441,24 +443,27 @@ fn ground_pbr_input(in: VertexOutput, is_front: bool) -> PbrInput {
 
     // Grass: tint, corn, dry / lush / rusty patches, hollows and crests, macro variation.
     let grassy = w[L_GRASS] + w[L_MEADOW] + w[L_FLOWER] + w[L_TRODDEN];
-    var tint = ground.season.rgb * mix(vec3<f32>(0.92, 1.0, 0.86), vec3<f32>(1.08, 1.02, 0.86), macro2);
+    var tint = ground.season.rgb * mix(vec3<f32>(0.94, 1.0, 0.9), vec3<f32>(1.04, 1.02, 0.88), macro2);
     if field.x == 2.0 {
         tint = mix(tint, select(vec3<f32>(1.45, 1.18, 0.62), vec3<f32>(1.3, 1.1, 0.7), decor_kind == 6.0), field_w);
     }
     let dry = smoothstep(0.42, 0.66, patch_n * 0.7 + patch2 * 0.45);
     let lush = smoothstep(0.45, 0.7, (1.0 - patch_n) * 0.75 + patch2 * 0.35);
     let rust = smoothstep(0.68, 0.8, patch2) * (1.0 - dry);
-    tint = mix(tint, tint * vec3<f32>(1.35, 1.12, 0.62), dry * 0.85);
+    tint = mix(tint, tint * vec3<f32>(1.24, 1.08, 0.72), dry * 0.85);
     tint = mix(tint, tint * vec3<f32>(0.7, 0.86, 0.66), lush * 0.8);
     tint = mix(tint, tint * vec3<f32>(1.15, 0.92, 0.72), rust * 0.45);
     let tx_ground = ground.micro.w;
     tint = mix(tint, mix(vec3<f32>(1.0), tint, 0.6), tx_ground);
     tint = mix(tint, tint * vec3<f32>(0.78, 0.92, 0.72), dip * 0.7);
     tint = mix(tint, tint * vec3<f32>(1.14, 1.06, 0.8), crest * 0.55);
-    let mv = macro_tex(p * FREQ_MACRO_VAR + vec2<f32>(0.47, 0.19)) * 0.65
-        + macro_tex(p * FREQ_MACRO_VAR * 0.43 + vec2<f32>(0.81, 0.33)) * 0.35;
+    // World-noise macro variation of the grass (ADR 0748): three octaves (from the long field scale down to the
+    // meadow), so that no two stretches of field share a tint; one extra tap, no extra pass.
+    let mv = macro_tex(p * FREQ_MACRO_VAR + vec2<f32>(0.47, 0.19)) * 0.5
+        + macro_tex(p * FREQ_MACRO_VAR * 0.43 + vec2<f32>(0.81, 0.33)) * 0.3
+        + macro_tex(p * FREQ_MACRO_VAR * 2.7 + vec2<f32>(0.19, 0.66)) * 0.2;
     let mv_c = (mv - 0.5) * 2.0;
-    tint = tint * mix(vec3<f32>(1.0), vec3<f32>(1.0 + 0.5 * mv_c, 1.0 + 0.12 * mv_c, 1.0 - 0.45 * mv_c), MACRO_TINT);
+    tint = tint * mix(vec3<f32>(1.0), vec3<f32>(1.0 + 0.42 * mv_c, 1.0 + 0.1 * mv_c, 1.0 - 0.4 * mv_c), MACRO_TINT);
     albedo = mix(albedo, albedo * tint, grassy);
     albedo = albedo * (1.0 + mv_c * MACRO_ALBEDO);
     albedo = mix(albedo, albedo * vec3<f32>(0.78, 0.8, 0.74), clamp(-mv_c, 0.0, 1.0) * MACRO_WET);
@@ -552,12 +557,20 @@ fn ground_pbr_input(in: VertexOutput, is_front: bool) -> PbrInput {
 
     // Normals: layer maps (tangent +x, bitangent cross(up, +x)) faded with the distance, plus the
     // R2 detail bumps (stronger on stony ground), faded far away and under snow.
-    let strength = ground.detail.x * (1.0 - smoothstep(ground.detail.y * 0.4, ground.detail.y, view_dist));
+    // Raking light: the same bumps swing N.L by +-60 % at 9 degrees of sun height (dawn, dusk)
+    // against +-20 % at 30 degrees, which painted the ground with dark leopard spots. The bumps
+    // and layer normals ease off with the sun height.
+    var sun_up = 1.0;
+    if lights.n_directional_lights > 0u {
+        sun_up = lights.directional_lights[0].direction_to_light.y;
+    }
+    let low_sun = mix(LOW_SUN_BUMP, 1.0, smoothstep(0.15, 0.5, sun_up));
+    let strength = ground.detail.x * low_sun * (1.0 - smoothstep(ground.detail.y * 0.4, ground.detail.y, view_dist));
     let up = normalize(pbr_input.world_normal);
     let tangent = normalize(vec3<f32>(1.0, 0.0, 0.0) - up * up.x);
     let bitangent = cross(up, tangent);
     var n_world = up + (tangent * nxy.x + bitangent * nxy.y) * strength;
-    let bump_fade = (1.0 - smoothstep(120.0, 420.0, view_dist)) * ground.relief.y * (1.0 - snowy_w * 0.7);
+    let bump_fade = (1.0 - smoothstep(120.0, 420.0, view_dist)) * ground.relief.y * low_sun * (1.0 - snowy_w * 0.7);
     if bump_fade > 0.01 {
         let rough = clamp(outcrops + w[L_ROCK] + w[L_PEBBLES], 0.0, 1.0);
         let e = 0.6;

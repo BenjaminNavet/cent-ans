@@ -12,10 +12,10 @@ def _load(relative: str) -> dict:
 
 
 def test_time_of_day_presets_complete() -> None:
-    """The three presets exist and every sky they reference exists."""
+    """The six presets exist and every sky they reference exists."""
     atmosphere = _load("fx/atmosphere.json")
     presets = atmosphere["time_of_day"]
-    assert set(presets) == {"morning", "midday", "evening"}
+    assert set(presets) == {"dawn", "morning", "midday", "afternoon", "dusk", "night"}
     skies = atmosphere["skies"]
     for key, preset in presets.items():
         for weather, season_map in preset.get("sky", {}).items():

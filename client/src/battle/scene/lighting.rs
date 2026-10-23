@@ -608,11 +608,13 @@ fn build_sky_light(
     let sl = &look.sky_light;
     let darken = |c: f32| c * (1.0 - sl.ground_darken);
     let params = SkyParams {
-        exposure: num(&wx["sky_luminance"], 0.6) / num(&sky["mean"], 1.0).max(0.05),
+        exposure: num(&wx["sky_luminance"], 0.6)
+            * num(&rules["time_of_day"][key.0.as_str()]["sky_luminance_scale"], 1.0)
+            / num(&sky["mean"], 1.0).max(0.05),
         saturation: num(&wx["sky_saturation"], 1.0),
         tint: srgb3(rgb_of(&wx["sky_tint"])),
         haze_amount: num(&wx["haze"], 0.35),
-        haze_color: srgb3(fog.color),
+        haze_color: srgb3(atmosphere.air.tint(fog.color, weather)),
         ground_color: srgb3([darken(horizon[0]), darken(horizon[1]), darken(horizon[2])]),
         max_luminance: sl.max_luminance,
         horizon_floor: sl.horizon_floor,
@@ -1104,7 +1106,7 @@ mod tests {
     #[test]
     fn grade_pass_keeps_per_channel_lift_and_gain() {
         let rules = rules();
-        let all = grades(&rules, "snow", "winter", "evening");
+        let all = grades(&rules, "snow", "winter", "dusk");
         let g = battle_grade(&all, 1.0);
         assert_eq!(g.global.x, 1.0);
         let used = [g.a, g.b, g.c].iter().filter(|u| u.scalars.w > 0.5).count();
