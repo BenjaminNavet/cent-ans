@@ -42,6 +42,17 @@ pub const MODEL_FADE: f32 = 0.35;
 pub const MODEL_LOD: &str = "lod1";
 /// Level of detail of the near models in the shadow maps (`<id>_lod2.glb`).
 pub const SHADOW_LOD: &str = "lod2";
+/// Near models farther than this from the camera draw their lod2 mesh (a quarter of the
+/// triangles of lod1: the model pass is bound by its vertices). Under it a tree spans about
+/// 60 px at the player's resolution; `CENT_ANS_MODEL_LOD1_DISTANCE` overrides it.
+pub const MODEL_LOD1_DISTANCE: f32 = 35.0;
+/// Bit of the batch key's row marking the near models drawn with their lod2 mesh.
+pub const FAR_MODEL_BIT: u16 = 0x8000;
+
+/// `MODEL_LOD1_DISTANCE` or its override.
+pub fn model_lod1_distance() -> f32 {
+    crate::campaign::perf_switch::value("MODEL_LOD1_DISTANCE").unwrap_or(MODEL_LOD1_DISTANCE)
+}
 /// Brightening of the model textures so the model / impostor switch does not show
 /// (`DnTreeModels.MODEL_BOOST`).
 pub const MODEL_BOOST: f32 = 1.55;
@@ -411,6 +422,7 @@ pub fn density_at(distance: f32) -> f32 {
 }
 
 /// Builds the records of all tiles (worker thread). `model_rows`: species with a ready model.
+#[allow(clippy::too_many_arguments)]
 pub fn assemble(
     tiles: &[Arc<Vec<TreeInst>>],
     focus: Vec2,
@@ -418,8 +430,10 @@ pub fn assemble(
     density: f32,
     thinning: &OpenThinning,
     model_rows: &[bool],
-    sort_origin: Vec2,
+    camera: Vec3,
+    lod1_distance: f32,
 ) -> Assembled {
+    let lod1_distance2 = lod1_distance * lod1_distance;
     let mut out = Assembled::default();
     let grow = 1.0 / density.sqrt();
     let radius2 = model_radius * model_radius;
@@ -455,8 +469,13 @@ pub fn assemble(
             };
             let near = modelled && zone > (tree.seed * 97.31).fract();
             if near {
-                // Near models keep their size.
-                let buffer = out.batches.entry((tree.row, true)).or_default();
+                // Near models keep their size; past `lod1_distance` they draw the lod2 mesh.
+                let row = if position.distance_squared(camera) > lod1_distance2 {
+                    tree.row | FAR_MODEL_BIT
+                } else {
+                    tree.row
+                };
+                let buffer = out.batches.entry((row, true)).or_default();
                 push_weighted(
                     buffer,
                     position,
@@ -487,7 +506,7 @@ pub fn assemble(
         }
     }
     for (key, records) in &mut out.batches {
-        out.orders.insert(*key, sort_records(records, sort_origin));
+        out.orders.insert(*key, sort_records(records, camera.xz()));
     }
     out
 }
@@ -575,7 +594,8 @@ mod tests {
             0.5,
             &OpenThinning::none(),
             &[true],
-            Vec2::ZERO,
+            Vec3::ZERO,
+            f32::MAX,
         );
         assert_eq!((out.near, out.far, out.thinned), (1, 1, 1));
         assert_eq!(
@@ -599,7 +619,8 @@ mod tests {
             1.0,
             &OpenThinning::none(),
             &[true],
-            Vec2::ZERO,
+            Vec3::ZERO,
+            f32::MAX,
         );
         let models = out.batches[&(0, true)].len() / super::super::billboard::RECORD_BYTES;
         let cards = out.batches[&(0, false)].len() / super::super::billboard::RECORD_BYTES;
@@ -615,9 +636,40 @@ mod tests {
             1.0,
             &OpenThinning::none(),
             &[false],
-            Vec2::ZERO,
+            Vec3::ZERO,
+            f32::MAX,
         );
         assert_eq!((out.near, out.far), (0, 3));
         assert!(out.wanted_rows.contains(&0));
+    }
+
+    #[test]
+    fn far_near_models_take_the_lod2_key() {
+        let tree = |x: f32| TreeInst {
+            x,
+            z: 0.0,
+            y: 0.0,
+            yaw_deg: 0.0,
+            height: 1.0,
+            crown: 1.0,
+            row: 0,
+            seed: 0.9,
+            tint: [1.0; 3],
+            role: crate::campaign::vegetation::look::Role::Open,
+        };
+        let tiles = vec![Arc::new(vec![tree(1.0), tree(9.0)])];
+        let out = assemble(
+            &tiles,
+            Vec2::ZERO,
+            40.0,
+            1.0,
+            &OpenThinning::none(),
+            &[true],
+            Vec3::ZERO,
+            5.0,
+        );
+        let rb = super::super::billboard::RECORD_BYTES;
+        assert_eq!(out.batches[&(0, true)].len(), rb);
+        assert_eq!(out.batches[&(FAR_MODEL_BIT, true)].len(), rb);
     }
 }

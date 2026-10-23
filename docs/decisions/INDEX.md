@@ -313,3 +313,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0741 | [SMAA sur la carte de campagne au lieu du MSAA](0741-smaa-carte-au-lieu-du-msaa.md) | accepté |
 | 0742 | [Cache du sol par nœud de relief](0742-cache-du-sol-par-noeud.md) | accepté |
 | 0743 | [Ombres d'arbres découpées par cascade](0743-ombres-d-arbres-par-cascade.md) | accepté |
+| 0744 | [Modèles d'arbres proches en lod2 au-delà de 35 unités](0744-modeles-d-arbres-lod2-au-loin.md) | accepté |

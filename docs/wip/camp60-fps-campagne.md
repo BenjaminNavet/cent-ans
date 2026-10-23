@@ -33,10 +33,11 @@ Conditions du joueur : `CENT_ANS_VIEW_SIZE=3456x2234` + copie de son `settings.j
   `rsync -a --ignore-existing <principal>/game/assets/ game/assets/` ; tuer le client par son pid ; `CARGO_INCREMENTAL=0`.
 
 ## Prochaine étape
-Fait : cache du sol (ADR 0742) et ombres d'arbres par cascade (ADR 0743).
-Réglages du joueur, p50 : d=30 47,5 → 21,8 ms ; d=150 33,9 → 14,6 ; d=500 34,1 → 13,8.
-Bissection d=30 avec cache : toutes ombres coupées 13,7 ; sans ombres d'arbres 18,3 ; sol plat 23,7 ; taille d'ombre 4096 sans effet.
-Point le plus lent maintenant : d=60 (29,1 ms, ombres d'arbres jusqu'à d=70). À mesurer : `k_nocull` à d=60, puis bissection.
-Ensuite : capture de contrôle (2 restantes), fusion dans main (worktree dédié, ff-only).
-Avant chaque série de bancs, prévenir game-project-79, qui a une fenêtre GPU de 20 min après chacune de nos séries.
-Réglages de banc : `CENT_ANS_GROUND_CACHE`, `GC_*`, `VEG_CASCADES`, `PERF_OFF=vegcull`.
+Fait : cache du sol (ADR 0742), ombres d'arbres par cascade (ADR 0743), modèles d'arbres en lod2 au-delà de 35 unités (ADR 0744).
+Réglages du joueur, p50 / p95 en ms :
+d=30 47,5 → 21,2 / 24,0 ; d=60 → 22,4 / 25,1 ; d=150 33,9 → 14,8 ; d=500 34,1 → 13,8.
+Reste pour 60 i/s de près : à d=30 les ombres coûtent ≈ 8 ms (bâtiments, villes, modèles) et le sol ≈ 4 ms.
+Prochaines pistes : coût des ombres hors arbres (villes, décor) ; passe principale des arbres (alpha-test, pas de rejet précoce).
+Captures utilisées : 4 sur 5.
+Avant chaque série de bancs, prévenir game-project-79 (fenêtre GPU de 20 min après chacune de nos séries).
+Réglages de banc : `CENT_ANS_GROUND_CACHE`, `GC_*`, `VEG_CASCADES`, `PERF_OFF=vegcull`, `MODEL_LOD1_DISTANCE`.

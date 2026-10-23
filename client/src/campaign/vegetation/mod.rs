@@ -501,10 +501,12 @@ fn assemble_records(
 ) {
     let Some(_world) = world else { return };
     // The records are sorted from the camera's ground point (shadow cascades, `shadows.rs`).
-    let sort_origin = cameras
-        .iter()
-        .next()
-        .map_or(view.focus, |t| t.translation().xz());
+    let camera = cameras.iter().next().map_or(
+        Vec3::new(view.focus.x, view.distance, view.focus.y),
+        GlobalTransform::translation,
+    );
+    let sort_origin = camera.xz();
+    let lod1_distance = render::model_lod1_distance();
     let thinning = look::OpenThinning::new(
         &_world.0.look,
         view.distance,
@@ -566,7 +568,8 @@ fn assemble_records(
             density,
             &thinning,
             &model_rows,
-            sort_origin,
+            camera,
+            lod1_distance,
         );
         assembled.ms = started.elapsed().as_secs_f32() * 1000.0;
         *out.lock().expect("assembly slot") = Some(assembled);
@@ -624,7 +627,10 @@ fn apply_records(
     let season_weights = season.map_or(Vec4::new(1.0, 0.0, 0.0, 0.0), |s| s.weights);
     let mut orders = assembled.orders;
     for (key, bytes) in assembled.batches {
-        let (row, model) = key;
+        let (key_row, model) = key;
+        // Near models past `MODEL_LOD1_DISTANCE` carry `FAR_MODEL_BIT` and draw their lod2 mesh.
+        let far_model = model && key_row & render::FAR_MODEL_BIT != 0;
+        let row = key_row & !render::FAR_MODEL_BIT;
         let shadow_order = Arc::new(orders.remove(&key).unwrap_or_default());
         let species_id = world
             .0
@@ -649,10 +655,14 @@ fn apply_records(
                 .models
                 .get(&row)
                 .and_then(|m| m.shadow_ready.clone());
-            let Some((mesh, texture)) =
+            let Some((lod1, texture)) =
                 render.assets.models.get(&row).and_then(|m| m.ready.clone())
             else {
                 continue;
+            };
+            let mesh = match (&shadow_mesh, far_model) {
+                (Some(lod2), true) => lod2.clone(),
+                _ => lod1,
             };
             seen.insert(key);
             match render
@@ -663,6 +673,7 @@ fn apply_records(
                 Some(mut batch) => {
                     batch.records = records;
                     batch.count = count;
+                    batch.mesh_handle = mesh;
                     batch.shadow_mesh = shadow_mesh;
                     batch.version = version;
                     batch.shadow_order = shadow_order;
@@ -677,7 +688,10 @@ fn apply_records(
                     params.season = season_weights;
                     let entity = commands
                         .spawn((
-                            Name::new(format!("Trees{species_id}Model")),
+                            Name::new(format!(
+                                "Trees{species_id}Model{}",
+                                if far_model { "Far" } else { "" }
+                            )),
                             VegBatch {
                                 mesh_handle: mesh,
                                 records,
