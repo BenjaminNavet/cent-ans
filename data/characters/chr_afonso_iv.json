@@ -44,6 +44,9 @@
     "Alphonse IV de Portugal"
   ],
   "family": {
+    "spouses": [
+      "chr_beatriz_de_castilla"
+    ],
     "children": [
       "chr_pedro_i_de_portugal",
       "chr_maria_de_portugal_castile"

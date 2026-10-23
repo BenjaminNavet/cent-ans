@@ -2,7 +2,7 @@
   {
     "id": "set_newcastle",
     "province": "prov_yorkshire",
-    "kind": "city",
+    "kind": "town",
     "name": {
       "display": "Newcastle",
       "local": "Newcastel",
@@ -35,7 +35,7 @@
   {
     "id": "set_york",
     "province": "prov_yorkshire",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "York",
       "local": "Everwyk",

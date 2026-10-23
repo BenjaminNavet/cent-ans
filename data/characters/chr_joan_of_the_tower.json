@@ -1,0 +1,39 @@
+{
+  "id": "chr_joan_of_the_tower",
+  "name": {
+    "display": "Jeanne de la Tour",
+    "local": "Joan of the Tower",
+    "local_language": "moyen anglais"
+  },
+  "sex": "female",
+  "house": "Plantagenêt",
+  "faction": "fac_scotland",
+  "role": "consort",
+  "birth": {
+    "value": "1321-07-05"
+  },
+  "death": {
+    "value": "1362-09-14"
+  },
+  "historical": true,
+  "skills": {
+    "command": 0,
+    "governance": 3,
+    "court": 5
+  },
+  "traits": [
+    "trait_kind"
+  ],
+  "piety": 55,
+  "family": {
+    "spouses": [
+      "chr_david_ii"
+    ]
+  },
+  "starting_location": "prov_normandie",
+  "status": "at_court",
+  "description": "Fille d’Édouard II d’Angleterre et sœur d’Édouard III, mariée à David II d’Écosse par le traité de Northampton (1328) ; elle partage son exil à Château-Gaillard.",
+  "sources": [
+    "Jeanne de la Tour"
+  ]
+}

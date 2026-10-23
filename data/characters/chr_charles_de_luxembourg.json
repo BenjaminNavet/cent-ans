@@ -28,7 +28,10 @@
   ],
   "piety": 70,
   "family": {
-    "father": "chr_jean_de_luxembourg"
+    "father": "chr_jean_de_luxembourg",
+    "spouses": [
+      "chr_blanche_de_valois"
+    ]
   },
   "starting_location": "prov_bohemia",
   "status": "at_court",

@@ -83,8 +83,8 @@ pub fn open_felony_towards(
         GameEvent::new(
             EventKind::Vassalage,
             format!(
-                "Félonie de {} envers {} ({}) : la commise peut être prononcée.",
-                data.faction_name(vassal),
+                "Félonie {} envers {} ({}) : la commise peut être prononcée.",
+                crate::events::de(&data.faction_name(vassal)),
                 data.faction_name(liege),
                 reason_text(reason)
             ),

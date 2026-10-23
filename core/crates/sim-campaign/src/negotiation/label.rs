@@ -48,9 +48,9 @@ impl Article {
             }
             Article::TradeAgreement => "Accord commercial".to_owned(),
             Article::Marriage { character, spouse } => format!(
-                "Mariage de {} et de {}",
-                state.character_name(data, character),
-                state.character_name(data, spouse)
+                "Mariage {} et {}",
+                crate::events::de(&state.character_name(data, character)),
+                crate::events::de(&state.character_name(data, spouse))
             ),
             Article::Tribute {
                 giver,
@@ -150,9 +150,9 @@ impl Article {
                 giver: super::Party::Recipient,
             } => format!("{name} exige que vous deveniez son vassal."),
             Article::Marriage { character, spouse } => format!(
-                "{name} propose le mariage de {} et de {}.",
-                state.character_name(data, character),
-                state.character_name(data, spouse)
+                "{name} propose le mariage {} et {}.",
+                crate::events::de(&state.character_name(data, character)),
+                crate::events::de(&state.character_name(data, spouse))
             ),
             Article::Obedience { religion } => format!(
                 "Grand Schisme : rejoindre {} ?",
