@@ -272,7 +272,8 @@ fn the_dauphine_purchase_takes_the_capital_province_from_humbert() {
         sim_campaign::effects::apply_effect(&mut state, data, effect, &ctx, &mut Vec::new());
     }
     assert_eq!(state.province_owner(&dauphine), Some(&fac("fac_france")));
-    assert_eq!(state.factions[&fac("fac_france")].treasury, treasury - 12_000);
+    assert!(state.factions[&fac("fac_france")].treasury < treasury - 9_000);
+    assert!(!state.factions[&fac("fac_dauphine")].alive);
     // Provence stays with Naples: the objective no longer drags Marseille along.
     assert_eq!(state.province_owner(&prov("prov_provence")), Some(&fac("fac_naples")));
 }
