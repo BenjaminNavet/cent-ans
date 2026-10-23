@@ -153,6 +153,8 @@ pub fn refresh_deployment(
                         crate::battle::scene::terrain::opening_frame(Some(player), sim);
                     camera_state.target = centre;
                     camera_state.yaw = yaw;
+                    camera_state.manual_pitch_deg =
+                        crate::battle::scene::terrain::opening_pitch(sim);
                     camera_state.target_distance =
                         crate::battle::scene::terrain::opening_distance(sim);
                 } else if let Some(zone) = deployment.zones.first().copied() {

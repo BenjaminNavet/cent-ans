@@ -240,6 +240,7 @@ fn spawn_scene(
         centre,
         yaw,
         opening_distance(sim),
+        opening_pitch(sim),
     );
 }
 
@@ -258,10 +259,16 @@ pub fn opening_distance(sim: &sim_battle::BattleSim) -> f32 {
     }
 }
 
+/// Tilt (degrees) of the siege opening: high enough to see over the besiegers to the walls.
+pub fn opening_pitch(sim: &sim_battle::BattleSim) -> Option<f32> {
+    sim.siege().map(|_| SIEGE_OPENING_PITCH_DEG)
+}
+
+const SIEGE_OPENING_PITCH_DEG: f32 = 20.0;
 /// Siege opening distance (m).
-const SIEGE_OPENING_DISTANCE: f32 = 170.0;
+const SIEGE_OPENING_DISTANCE: f32 = 210.0;
 /// Share of the way from the besiegers to the gate where a siege shot pivots.
-const SIEGE_PIVOT_SHARE: f32 = 0.55;
+const SIEGE_PIVOT_SHARE: f32 = 0.42;
 
 /// Siege shot (ADR 0773): from behind the besiegers (never from inside the roofs), the pivot
 /// between their army and the gate, looking at the walls.

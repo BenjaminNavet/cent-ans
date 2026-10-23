@@ -380,8 +380,10 @@ pub fn spawn_battle_camera(
     centre: Vec3,
     yaw: f32,
     distance: f32,
+    pitch_deg: Option<f32>,
 ) {
     let mut state = BattleCameraState::new(centre, yaw, distance, field);
+    state.manual_pitch_deg = pitch_deg;
     // Dev hook: `CENT_ANS_BATTLE_CAM=<distance>[,<dx>,<dz>[,<yaw_deg>]]` frames the proof shots.
     if let Ok(spec) = std::env::var("CENT_ANS_BATTLE_CAM") {
         state.auto_follow = false;
