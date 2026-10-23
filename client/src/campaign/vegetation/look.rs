@@ -287,11 +287,11 @@ pub const LEVELS: [&str; 4] = ["low", "medium", "high", "ultra"];
 impl Default for ForestLook {
     fn default() -> Self {
         ForestLook {
-            value: 0.72,
-            saturation: 1.3,
-            balance: Vec3::new(0.86, 1.0, 0.78),
-            tree_value_spread: 0.22,
-            stand_value_spread: 0.3,
+            value: 0.88,
+            saturation: 1.2,
+            balance: Vec3::new(0.92, 1.0, 0.8),
+            tree_value_spread: 0.3,
+            stand_value_spread: 0.4,
             stand_period: 26.0,
             height_spread: 0.3,
             height_period: 40.0,

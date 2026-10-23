@@ -1478,6 +1478,9 @@ struct Mat { base_color: vec4<f32>, perceptual_roughness: f32, };
 struct PbrInput { material: Mat, world_normal: vec3<f32>, N: vec3<f32>, };
 struct View { world_position: vec3<f32>, };
 @group(0) @binding(0) var<uniform> view: View;
+struct DirectionalLight { direction_to_light: vec3<f32>, };
+struct Lights { n_directional_lights: u32, directional_lights: array<DirectionalLight, 4>, };
+@group(0) @binding(1) var<uniform> lights: Lights;
 fn pbr_input_from_standard_material(in: VertexOutput, f: bool) -> PbrInput {
     return PbrInput(Mat(vec4<f32>(1.0), 1.0), in.world_normal, in.world_normal);
 }

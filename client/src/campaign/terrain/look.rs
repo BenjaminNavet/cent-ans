@@ -369,9 +369,9 @@ mod tests {
         )
         .unwrap();
         let p = LookParams::from_map_json(&text);
-        assert!((p.cumulus_d.x - 0.4).abs() < 1e-6);
-        assert!((p.cumulus_strength(60.0, 0.0) - 0.4).abs() < 1e-6);
-        assert!((p.cumulus_strength(800.0, 0.0) - 0.4 * 0.3).abs() < 1e-5);
+        assert!((p.cumulus_d.x - 0.3).abs() < 1e-6);
+        assert!((p.cumulus_strength(60.0, 0.0) - 0.3).abs() < 1e-6);
+        assert!((p.cumulus_strength(800.0, 0.0) - 0.3 * 0.3).abs() < 1e-5);
         assert_eq!(p.cumulus_strength(60.0, 1.0), 0.0);
     }
 
