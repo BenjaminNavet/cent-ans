@@ -3,8 +3,8 @@
   "cull": {
     "enabled": true,
     "margin_m": 8.0,
-    "foot_radius_m": 2.4,
-    "mounted_radius_m": 4.6,
+    "foot_radius_m": 4.5,
+    "mounted_radius_m": 6.5,
     "shadow_height_m": 3.2,
     "shadow_max_length_m": 70.0,
     "min_sun_elevation": 0.12
