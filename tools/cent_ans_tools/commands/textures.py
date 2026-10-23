@@ -216,3 +216,34 @@ def families() -> None:
 
     for family in FAMILIES:
         typer.echo(family)
+
+
+@textures_app.command("bake-ktx2")
+def bake_ktx2_command(
+    only: str = typer.Option(
+        None,
+        "--only",
+        help="Ne cuire que les bandes dont le chemin contient ce texte (ex. b02).",
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Recuire même si le fichier existe."
+    ),
+) -> None:
+    """Cuit les bandes du sol de bataille en tableaux KTX2 dans `out/ktx2_cache/` (jamais commité).
+
+    Nécessite l'outil `ktx` (KTX-Software 4.4, variable KTX ou PATH). Le client les charge à la place
+    des bandes JPG s'ils existent (repli automatique sinon).
+    """
+    from cent_ans_tools.ktx2_array import CACHE_DIR, bake_all
+
+    try:
+        done = bake_all(only, force)
+    except (FileNotFoundError, RuntimeError) as error:
+        typer.echo(f"Erreur : {error}", err=True)
+        raise typer.Exit(1) from error
+    total = sum(size for _, _, size in done)
+    for strip, _, size in done:
+        typer.echo(f"{strip.source} -> {size / 1048576:.1f} Mio")
+    typer.echo(
+        f"{len(done)} tableau(x) cuit(s), {total / 1048576:.1f} Mio dans {CACHE_DIR}"
+    )
