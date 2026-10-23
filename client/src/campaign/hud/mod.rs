@@ -526,8 +526,10 @@ fn update_fields(
     }
     let Some(top) = &hud.top else { return };
     // A figure with no word is unreadable: the word comes first unless the bar is compact.
-    let word = |label: &str| {
-        if !compact.1 || label.is_empty() {
+    // Whole words on a wide bar, abbreviations below (ADR 0775): never a bare number.
+    let word = |full: &str, short: &str| {
+        let label = if compact.1 { full } else { short };
+        if label.is_empty() {
             String::new()
         } else {
             format!("{label} ")
@@ -593,7 +595,7 @@ fn update_fields(
             HudField::Manpower => (
                 format!(
                     "{}{}{}",
-                    word(&labels.manpower),
+                    word(&labels.manpower, &labels.short_manpower),
                     fr::digits(top.manpower as i64),
                     arrow(forecast.map(|f| &f.men))
                 ),
@@ -603,7 +605,7 @@ fn update_fields(
             HudField::Prestige => (
                 format!(
                     "{}{}{}",
-                    word(&labels.prestige),
+                    word(&labels.prestige, &labels.short_prestige),
                     top.prestige,
                     arrow(forecast.map(|f| &f.prestige))
                 ),
@@ -613,7 +615,7 @@ fn update_fields(
             HudField::Unrest => (
                 format!(
                     "{}{} %{}",
-                    word(&labels.unrest),
+                    word(&labels.unrest, &labels.short_unrest),
                     top.mean_unrest,
                     arrow(forecast.map(|f| &f.unrest))
                 ),

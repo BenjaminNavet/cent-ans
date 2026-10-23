@@ -103,6 +103,36 @@ pub const SECTIONS: &[(&str, &[Line])] = &[
         ],
     ),
     (
+        "Clavier et manette (sans souris)",
+        &[
+            (
+                "ui_focus_engage",
+                "Engager le focus clavier sur la carte ou en bataille (anneau doré), puis le quitter",
+                "F9",
+            ),
+            (
+                "ui_focus_move",
+                "Passer au bouton suivant ou précédent / au bouton voisin",
+                "Tab, Maj+Tab / flèches",
+            ),
+            (
+                "ui_focus_activate",
+                "Activer le bouton focalisé (dans un dialogue, « Oui » ou « Continuer » est focalisé d’emblée)",
+                "Entrée / Espace",
+            ),
+            (
+                "ui_focus_leave",
+                "Rendre les touches à la caméra",
+                "Échap, clic",
+            ),
+            (
+                "ui_pad",
+                "Manette (non testée sur matériel) : croix ou stick gauche = flèches, A = Entrée, B = Échap ; pas de caméra ni d’ordres à la manette",
+                "croix, stick, A, B",
+            ),
+        ],
+    ),
+    (
         "Partie",
         &[
             ("campaign_end_turn", "Finir la saison", "Entrée"),

@@ -88,9 +88,16 @@ fn a_starved_town_capitulates() {
     assert!(siege.supplies > 0 && siege.turns_left > 0);
     let mut taken = false;
     for _ in 0..12 {
-        state.end_turn_with(data, idle);
+        let events = state.end_turn_with(data, idle);
         if state.settlement_state(&guyenne).unwrap().controller == fac("fac_france") {
             taken = true;
+            // ADR 0775: the capitulation and the fall are one line of the feed, not two.
+            let falls: Vec<_> = events
+                .iter()
+                .filter(|e| e.text_fr.contains("capitule") || e.text_fr.contains("tombe aux mains"))
+                .collect();
+            assert_eq!(falls.len(), 1, "{falls:?}");
+            assert!(falls[0].text_fr.contains("capitule"), "{falls:?}");
             break;
         }
         let s = state.settlement_state(&guyenne).unwrap().siege.clone();

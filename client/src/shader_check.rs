@@ -6,11 +6,25 @@
 
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
+use wesl::error::ResolveError;
 use wesl::syntax::{ModulePath, PathOrigin};
-use wesl::{CompileOptions, ResolveError, Resolver};
+use wesl::{CompileOptions, Resolver};
 
 /// Constantes que Bevy injecte dans le module virtuel `constants`.
-const CONSTANTS: &str = "const MATERIAL_BIND_GROUP = 2;\n";
+const CONSTANTS: &str = "\
+const MATERIAL_BIND_GROUP = 3;
+const MAX_CASCADES_PER_LIGHT = 4;
+const MAX_DIRECTIONAL_LIGHTS = 10;
+const MAX_RECT_LIGHTS = 8;
+const TONEMAPPING_LUT_TEXTURE_BINDING_INDEX = 18;
+const TONEMAPPING_LUT_SAMPLER_BINDING_INDEX = 19;
+const SHADOW_SAMPLES = 16;
+const SORTED_FRAGMENT_MAX_COUNT = 16;
+const GC_TEXELS = 64;
+const SLICE_COUNT = 3;
+const SAMPLES_PER_SLICE_SIDE = 3;
+const SCREEN_SPACE_SPECULAR_TRANSMISSION_BLUR_TAPS = 4;
+";
 
 /// Résout les modules de Bevy (sources du registre cargo) et ceux du client.
 struct RepoResolver {
@@ -66,6 +80,8 @@ impl Resolver for RepoResolver {
         let PathOrigin::Package(pkg) = &path.origin else {
             return Err(ResolveError::ModuleNotFound(path.clone(), "origine".into()));
         };
+        // Like Bevy's resolver: `cent_ans_client/bevy_pbr` names the package `bevy_pbr`.
+        let pkg = pkg.rsplit('/').next().unwrap_or(pkg);
         if pkg == "constants" {
             return Ok(Cow::Borrowed(CONSTANTS));
         }
@@ -74,6 +90,16 @@ impl Resolver for RepoResolver {
             if name == pkg {
                 let file = root.join(&rel).with_extension("wesl");
                 if let Ok(src) = std::fs::read_to_string(&file) {
+                    // `provinces/drape.rs` inlines the shared hatching functions the same way.
+                    let src = if src.contains("//@include hatch") {
+                        let hatch = self.roots[0]
+                            .1
+                            .join("campaign/provinces/shaders/hatch.wesl");
+                        let hatch = std::fs::read_to_string(hatch).unwrap_or_default();
+                        src.replace("//@include hatch", &hatch)
+                    } else {
+                        src
+                    };
                     return Ok(Cow::Owned(src));
                 }
             }
@@ -113,6 +139,14 @@ fn check(resolver: &RepoResolver, module: &ModulePath, flags: &[&str]) -> Result
     let compiled = wesl::compile(module, &options, resolver)
         .map_err(|e| e.diagnostic().render_plain().to_string())?;
     let wgsl = compiled.to_string();
+    if let Ok(dir) = std::env::var("SHADER_CHECK_DUMP") {
+        let name = module
+            .components
+            .last()
+            .map(|c| c.to_string())
+            .unwrap_or_default();
+        let _ = std::fs::write(Path::new(&dir).join(format!("{name}.wgsl")), &wgsl);
+    }
     let parsed = naga::front::wgsl::parse_str(&wgsl).map_err(|e| e.emit_to_string(&wgsl))?;
     naga::valid::Validator::new(
         naga::valid::ValidationFlags::all(),
@@ -132,10 +166,15 @@ fn every_client_shader_compiles_and_validates() {
     collect(&src, &mut files);
     assert!(files.len() > 30, "shaders introuvables ({})", files.len());
     let flags = [
+        "VERTEX_POSITIONS",
         "VERTEX_NORMALS",
         "VERTEX_UVS",
         "VERTEX_UVS_A",
+        "VERTEX_UVS_B",
         "VERTEX_COLORS",
+        "VERTEX_OUTPUT_INSTANCE_INDEX",
+        "DISTANCE_FOG",
+        "GROUND_CACHE",
     ];
     let mut failures = Vec::new();
     for file in &files {

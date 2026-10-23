@@ -38,6 +38,8 @@ pub struct OfferWatch {
     pub toasts: u32,
     pub waiting: usize,
     pub pill: String,
+    /// A weighty offer waits for the screen to be free (ADR 0775: one notice at a time).
+    pub deferred: bool,
 }
 
 pub struct NotifyPlugin;
@@ -49,7 +51,7 @@ impl Plugin for NotifyPlugin {
             .add_systems(OnEnter(AppState::Campaign), reset)
             .add_systems(
                 Update,
-                (after_turn, update_pill)
+                (after_turn, open_deferred, update_pill)
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
             );
@@ -90,6 +92,7 @@ fn after_turn(
     mut watch: ResMut<OfferWatch>,
     ui: Res<DiplomacyUi>,
     chronicle: Option<Res<ChroniclePanel>>,
+    modals: Option<Res<crate::ui::kit::modal::ModalQueue>>,
     mut panels: MessageWriter<OpenPanel>,
     mut toasts: MessageWriter<ToastRequest>,
 ) {
@@ -113,15 +116,53 @@ fn after_turn(
         .iter()
         .any(|d| d.faction == sim.player)
         || chronicle.is_some_and(|c| c.open);
+    // One notice at a time (ADR 0775): a modal in progress (season report, decision) keeps the
+    // screen; the offer then waits (toast + pill) and opens once it is free.
+    let modal_busy = modals.is_some_and(|m| m.is_busy());
     if weighty > 0 && !decision_waiting && !ui.open {
-        panels.write(OpenPanel::Diplomacy);
-        watch.auto_opened += 1;
+        if modal_busy {
+            watch.deferred = true;
+        } else {
+            panels.write(OpenPanel::Diplomacy);
+            watch.auto_opened += 1;
+        }
     }
     toasts.write(ToastRequest::new(&format!(
         "{} en attente.",
         count_text(waiting.len())
     )));
     watch.toasts += 1;
+}
+
+/// Opens the screen of a deferred weighty offer once no modal holds the screen any more.
+fn open_deferred(
+    mut watch: ResMut<OfferWatch>,
+    ui: Res<DiplomacyUi>,
+    sim: Res<Sim>,
+    chronicle: Option<Res<ChroniclePanel>>,
+    modals: Option<Res<crate::ui::kit::modal::ModalQueue>>,
+    mut panels: MessageWriter<OpenPanel>,
+) {
+    if !watch.deferred {
+        return;
+    }
+    if ui.open {
+        watch.deferred = false;
+        return;
+    }
+    let decision_waiting = sim.state.as_ref().is_some_and(|state| {
+        state
+            .chronicle
+            .pending_decisions
+            .iter()
+            .any(|d| d.faction == sim.player)
+    }) || chronicle.is_some_and(|c| c.open);
+    if modals.is_some_and(|m| m.is_busy()) || decision_waiting {
+        return;
+    }
+    panels.write(OpenPanel::Diplomacy);
+    watch.auto_opened += 1;
+    watch.deferred = false;
 }
 
 /// Caption of the HUD button: « Diplomatie (n) » while offers wait.
@@ -168,6 +209,7 @@ fn dump_watch(world: &World) -> (String, Value) {
             "last_fresh": watch.last_fresh,
             "last_weighty": watch.last_weighty,
             "auto_opened": watch.auto_opened,
+            "deferred": watch.deferred,
             "toasts": watch.toasts,
             "waiting": watch.waiting,
             "pill": watch.pill,

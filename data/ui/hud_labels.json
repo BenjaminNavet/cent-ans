@@ -1,8 +1,13 @@
 {
-  "description": "Mots écrits à côté des chiffres de la barre du haut de la campagne (UX, ADR 0752) : un chiffre sans mot ne se lit pas. Affichés quand la barre n’est pas compacte ; l’infobulle donne le détail.",
+  "description": "Mots écrits à côté des chiffres de la barre du haut de la campagne (UX, ADR 0752, 0775) : un chiffre sans mot ne se lit pas. Mots entiers sur une barre large (1500 px logiques et plus), forme abrégée en dessous (MacBook 14 pouces, 1280x800) ; l’infobulle donne toujours le mot entier et le détail.",
   "figures": {
     "manpower": "Hommes",
     "prestige": "Prestige",
     "unrest": "Désordre"
+  },
+  "short": {
+    "manpower": "Hom.",
+    "prestige": "Prest.",
+    "unrest": "Dés."
   }
 }

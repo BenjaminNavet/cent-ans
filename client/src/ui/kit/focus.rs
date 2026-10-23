@@ -2,14 +2,20 @@
 //! (or slider) at a time, moved by Tab / Shift+Tab (reading order) and the arrows (spatial),
 //! activated by Enter / Space, left by Escape (handled by the screens as before).
 //!
-//! Scope: only the topmost layer takes the focus (a modal over a panel over the HUD, by
-//! `GlobalZIndex`), so a modal never lets the focus leave it. The focus keys are always live in
-//! the front-end menus, under a modal and with a central window open; over the bare campaign /
-//! battle HUD they are live only once the player engages the focus with **F8** (Tab keeps its
-//! shortcut `campaign_next_idle` there, the arrows keep panning the camera). The mouse
-//! (click) or Escape gives them back.
+//! Scope: with a modal, a central window or a front-end menu, only the topmost layer takes the
+//! focus (by `GlobalZIndex`), so a modal never lets the focus leave it. Over the bare campaign /
+//! battle HUD every visible button is one scope (the HUD is made of many layers: order bar,
+//! unit cards, formation menu, launchers; ADR 0775). The focus keys are always live in the
+//! front-end menus, under a modal and with a central window open; over the bare HUD they are
+//! live only once the player engages the focus with **F9** (ADR 0775: F8 is the developer
+//! console; Tab keeps its shortcut `campaign_next_idle` there, the arrows keep panning the
+//! camera). The mouse (click) or Escape gives them back.
 //!
-//! Gamepad: D-pad = arrows, A (south) = Enter, B (east) = Escape, any D-pad press engages.
+//! The first focus lands on the safe default action of the screen: a button carrying
+//! [`FocusDefault`] (the confirming button of a modal) before the first in reading order.
+//!
+//! Gamepad: D-pad or left stick = arrows, A (south) = Enter, B (east) = Escape, any D-pad press
+//! or stick push engages. Not tested on hardware (the pure logic is).
 //! Sliders: Left / Right change the focused slider by 5 % of its range.
 //!
 //! The pure geometry ([`pick_direction`], [`reading_order`], [`next_in_order`]) is tested; the
@@ -29,8 +35,14 @@ use super::style;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 
-/// Key that engages / releases the focus over the bare HUD.
-pub const ENGAGE_KEY: KeyCode = KeyCode::F8;
+/// Key that engages / releases the focus over the bare HUD (F8 is the developer console).
+pub const ENGAGE_KEY: KeyCode = KeyCode::F9;
+/// Left stick deflection that counts as a direction press.
+const STICK_THRESHOLD: f32 = 0.6;
+
+/// Marks the button the keyboard focus lands on first (the safe, confirming action of a dialog).
+#[derive(Component, Debug, Clone, Copy, Default)]
+pub struct FocusDefault;
 /// Rows closer than this (px) count as one line in reading order.
 const ROW_TOLERANCE: f32 = 10.0;
 
@@ -105,11 +117,33 @@ pub fn next_in_order(order: &[Entity], current: Option<Entity>, backwards: bool)
     Some(order[index])
 }
 
+/// Direction of a left-stick deflection (`None` inside the dead zone).
+pub fn stick_direction(stick: Vec2) -> Option<Dir> {
+    if stick.length() < STICK_THRESHOLD {
+        return None;
+    }
+    if stick.x.abs() >= stick.y.abs() {
+        Some(if stick.x > 0.0 { Dir::Right } else { Dir::Left })
+    } else {
+        Some(if stick.y > 0.0 { Dir::Up } else { Dir::Down })
+    }
+}
+
+/// The first focus of a screen: the first default (in reading order) among `order`, else the
+/// first (the last when going backwards).
+pub fn initial_pick(order: &[Entity], defaults: &[Entity], backwards: bool) -> Option<Entity> {
+    order
+        .iter()
+        .find(|e| defaults.contains(e))
+        .copied()
+        .or_else(|| next_in_order(order, None, backwards))
+}
+
 /// State of the focus.
 #[derive(Resource, Default, Debug)]
 pub struct UiFocus {
     pub current: Option<Entity>,
-    /// The focus keys are live over the bare HUD (F8).
+    /// The focus keys are live over the bare HUD (F9).
     pub engaged: bool,
     /// The ring is drawn (hidden again by a mouse click).
     pub visible: bool,
@@ -117,6 +151,7 @@ pub struct UiFocus {
     pub moves: u32,
     pub activations: u32,
     ring_on: Option<Entity>,
+    stick: Option<Dir>,
     scope_z: i32,
     candidates: usize,
     live: bool,
@@ -203,6 +238,7 @@ fn navigate(
     parents: Query<&ChildOf>,
     zs: Query<&GlobalZIndex>,
     sliders: Query<(&SliderRange, Has<Slider>)>,
+    defaults: Query<(), With<FocusDefault>>,
     state: Option<Res<State<AppState>>>,
     stack: Option<Res<super::panel_stack::PanelStack>>,
     modals: Option<Res<super::modal::ModalQueue>>,
@@ -235,6 +271,16 @@ fn navigate(
     } else if keys.just_pressed(KeyCode::ArrowRight) || pad(GamepadButton::DPadRight) {
         dir = Some(Dir::Right);
     }
+    let stick = gamepads
+        .iter()
+        .find_map(|g| stick_direction(g.left_stick()));
+    let stick_edge = stick.filter(|s| Some(*s) != focus.stick);
+    focus.stick = stick;
+    let mut from_stick = false;
+    if dir.is_none() && stick_edge.is_some() {
+        dir = stick_edge;
+        from_stick = true;
+    }
     if keys.just_pressed(KeyCode::Tab) {
         tab = Some(shift);
     }
@@ -248,18 +294,19 @@ fn navigate(
     if pad(GamepadButton::East) {
         keys.press(KeyCode::Escape); // B = Escape for every screen
     }
-    let pad_nav = dir.is_some()
-        && gamepads.iter().any(|g| {
-            g.get_just_pressed().any(|b| {
-                matches!(
-                    b,
-                    GamepadButton::DPadUp
-                        | GamepadButton::DPadDown
-                        | GamepadButton::DPadLeft
-                        | GamepadButton::DPadRight
-                )
-            })
-        });
+    let pad_nav = from_stick
+        || dir.is_some()
+            && gamepads.iter().any(|g| {
+                g.get_just_pressed().any(|b| {
+                    matches!(
+                        b,
+                        GamepadButton::DPadUp
+                            | GamepadButton::DPadDown
+                            | GamepadButton::DPadLeft
+                            | GamepadButton::DPadRight
+                    )
+                })
+            });
     if engage_pressed {
         focus.engaged = !focus.engaged;
         focus.visible = focus.engaged;
@@ -280,21 +327,26 @@ fn navigate(
         focus.candidates = 0;
         return;
     };
-    let layer: Vec<(Entity, Rect)> = candidates
-        .iter()
-        .filter(|c| c.z == top)
-        .map(|c| (c.entity, c.rect))
-        .collect();
-    focus.scope_z = top;
-    focus.candidates = layer.len();
-
-    // Live without F8: front-end menus, a modal, a central window.
+    // Live without F9: front-end menus, a modal, a central window.
     let in_game = state
         .as_ref()
         .is_some_and(|s| matches!(s.get(), AppState::Campaign | AppState::Battle));
     let always = !in_game
         || modals.is_some_and(|m| m.is_busy())
         || stack.is_some_and(|s| s.has_modal_open() || s.has_central_open());
+    // A modal / window / menu keeps the focus on its own layer; the bare HUD is one scope.
+    let layer: Vec<(Entity, Rect)> = candidates
+        .iter()
+        .filter(|c| !always || c.z == top)
+        .map(|c| (c.entity, c.rect))
+        .collect();
+    focus.scope_z = top;
+    focus.candidates = layer.len();
+    let default_buttons: Vec<Entity> = layer
+        .iter()
+        .map(|(e, _)| *e)
+        .filter(|e| defaults.contains(*e))
+        .collect();
     focus.live = always || focus.engaged || pad_nav;
     if pad_nav {
         focus.engaged = true;
@@ -318,7 +370,11 @@ fn navigate(
     }
     let order = reading_order(&layer);
     if let Some(backwards) = tab {
-        focus.current = next_in_order(&order, focus.current, backwards);
+        focus.current = if focus.current.is_none() {
+            initial_pick(&order, &default_buttons, backwards)
+        } else {
+            next_in_order(&order, focus.current, backwards)
+        };
         focus.visible = true;
         focus.moves += 1;
         consume(&mut keys, &[KeyCode::Tab]);
@@ -357,7 +413,7 @@ fn navigate(
                         .collect();
                     pick_direction(from, direction, &others).or(focus.current)
                 }
-                None => order.first().copied(),
+                None => initial_pick(&order, &default_buttons, false),
             };
             if next != focus.current {
                 focus.moves += 1;
@@ -384,7 +440,7 @@ fn navigate(
             );
         }
     } else if engage_pressed && focus.current.is_none() && focus.engaged {
-        focus.current = order.first().copied();
+        focus.current = initial_pick(&order, &default_buttons, false);
     }
     if keys.just_pressed(KeyCode::Escape) && focus.engaged && !always {
         // Escape over the bare HUD gives the keys back (the pause menu still opens).
@@ -429,6 +485,7 @@ fn dump(world: &World) -> (String, Value) {
         "ui_focus".to_owned(),
         json!({
             "current": name,
+            "engage_key": format!("{ENGAGE_KEY:?}"),
             "engaged": focus.engaged,
             "visible": focus.visible,
             "live": focus.live,
@@ -482,6 +539,24 @@ mod tests {
             Some(e(1))
         );
         assert_eq!(pick_direction(from, Dir::Left, &[lower, aligned]), None);
+    }
+
+    #[test]
+    fn stick_has_a_dead_zone_and_picks_the_dominant_axis() {
+        assert_eq!(stick_direction(Vec2::new(0.2, 0.3)), None);
+        assert_eq!(stick_direction(Vec2::new(0.9, 0.3)), Some(Dir::Right));
+        assert_eq!(stick_direction(Vec2::new(-0.8, 0.1)), Some(Dir::Left));
+        assert_eq!(stick_direction(Vec2::new(0.1, 0.9)), Some(Dir::Up));
+        assert_eq!(stick_direction(Vec2::new(0.1, -0.9)), Some(Dir::Down));
+    }
+
+    #[test]
+    fn first_focus_prefers_the_default_action() {
+        let order = vec![e(1), e(2), e(3)];
+        assert_eq!(initial_pick(&order, &[e(3)], false), Some(e(3)));
+        assert_eq!(initial_pick(&order, &[], false), Some(e(1)));
+        assert_eq!(initial_pick(&order, &[], true), Some(e(3)));
+        assert_eq!(initial_pick(&[], &[e(3)], false), None);
     }
 
     #[test]

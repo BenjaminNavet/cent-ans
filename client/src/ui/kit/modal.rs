@@ -374,6 +374,8 @@ fn spawn_modal(commands: &mut Commands, theme: &UiTheme, assets: &AssetServer, e
                     row.spawn((
                         button_primary(theme, &spec.yes_label, &spec.yes_label),
                         ModalButton { confirm: true },
+                        // Tab then Enter confirms: the keyboard focus starts here (ADR 0775).
+                        super::focus::FocusDefault,
                     ));
                 });
             });

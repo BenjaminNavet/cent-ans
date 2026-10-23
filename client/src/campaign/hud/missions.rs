@@ -218,12 +218,17 @@ fn rebuild_offer(
     theme: Res<UiTheme>,
     window: Query<Entity, With<OfferWindow>>,
     modals: Res<crate::ui::kit::modal::ModalQueue>,
+    stack: Option<Res<crate::ui::kit::panel_stack::PanelStack>>,
     mut local: Local<Option<(Option<MissionOfferView>, bool)>>,
+    mut toasts: MessageWriter<ToastRequest>,
 ) {
-    // The offer waits for the modal in progress (season report, decision): one window at a time.
+    // The offer waits for the modal in progress (season report, decision) and for a central
+    // window (diplomacy, chronicle): one notice at a time (ADR 0775). The advisor and the
+    // missions tracker keep it visible meanwhile.
+    let screen_taken = modals.is_busy() || stack.is_some_and(|s| s.has_central_open());
     let want = (
         missions.offer.clone(),
-        missions.offer_dismissed || missions.offer.is_none() || modals.is_busy(),
+        missions.offer_dismissed || missions.offer.is_none() || screen_taken,
     );
     let existing = window.single().ok();
     if existing.is_some() && local.as_ref() == Some(&want) {
@@ -234,6 +239,12 @@ fn rebuild_offer(
     }
     if let Some(entity) = existing {
         commands.entity(entity).despawn();
+    }
+    // The pill of a deferred offer: a toast says it waits for the screen (ADR 0775).
+    if want.0.is_some() && screen_taken && !missions.offer_dismissed {
+        toasts.write(ToastRequest::new(
+            "Le conseil a des missions à proposer : elles s’ouvriront dès que l’écran sera libre.",
+        ));
     }
     *local = Some(want.clone());
     let (Some(offer), false) = (want.0, want.1) else {

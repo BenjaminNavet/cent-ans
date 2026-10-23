@@ -523,7 +523,8 @@ pub fn compact_bar(width: f32) -> bool {
 #[derive(Resource, Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BarCompact(pub bool, pub bool);
 
-/// Bar width from which the words before the figures fit (measured: 1422 px logical overflows).
+/// Bar width from which the whole words before the figures fit (measured: 1422 px logical
+/// overflows); below it the abbreviations of `data/ui/hud_labels.json` are written (ADR 0775).
 pub const LABELS_WIDTH: f32 = 1500.0;
 
 /// Words written before the figures of the bar (`data/ui/hud_labels.json`, UX ADR 0752).
@@ -532,16 +533,24 @@ pub struct HudLabels {
     pub manpower: String,
     pub prestige: String,
     pub unrest: String,
+    /// Abbreviations for a bar narrower than [`LABELS_WIDTH`].
+    pub short_manpower: String,
+    pub short_prestige: String,
+    pub short_unrest: String,
 }
 
 impl HudLabels {
     pub fn parse(text: &str) -> Option<Self> {
         let tree: serde_json::Value = serde_json::from_str(text).ok()?;
         let figure = |key: &str| tree.get("figures")?.get(key)?.as_str().map(str::to_owned);
+        let short = |key: &str| tree.get("short")?.get(key)?.as_str().map(str::to_owned);
         Some(Self {
             manpower: figure("manpower")?,
             prestige: figure("prestige")?,
             unrest: figure("unrest")?,
+            short_manpower: short("manpower")?,
+            short_prestige: short("prestige")?,
+            short_unrest: short("unrest")?,
         })
     }
 }
@@ -556,6 +565,9 @@ impl Default for HudLabels {
                 manpower: String::new(),
                 prestige: String::new(),
                 unrest: String::new(),
+                short_manpower: String::new(),
+                short_prestige: String::new(),
+                short_unrest: String::new(),
             })
     }
 }
