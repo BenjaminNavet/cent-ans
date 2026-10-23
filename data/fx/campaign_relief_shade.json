@@ -1,5 +1,5 @@
 {
-  "description": "Ombre portée du relief et occlusion d'horizon de la carte de campagne (ADR 0745). Marche du soleil et recherche d'horizon sur la carte d'altitude (blocs de 16 px), cuites dans le cache du sol par nœud (ADR 0742) : coût amorti, aucun calcul par pixel. enabled=false : rendu identique à avant. Réglages purement visuels.",
+  "description": "Ombre portée du relief et occlusion d’horizon de la carte de campagne (ADR 0745). Marche du soleil et recherche d’horizon sur la carte d’altitude (blocs de 16 px), cuites dans le cache du sol par nœud (ADR 0742) : coût amorti, aucun calcul par pixel. enabled=false : rendu identique à avant. Réglages purement visuels.",
   "enabled": true,
   "shadow_strength": 0.7,
   "ao_strength": 0.5,

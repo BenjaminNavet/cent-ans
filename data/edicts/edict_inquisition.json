@@ -3,7 +3,7 @@
   "name": {
     "display": "Inquisition"
   },
-  "description": "Le prince seconde les inquisiteurs dominicains dans la recherche des hérétiques, comme en Languedoc depuis le XIIIe siècle : l'orthodoxie y gagne, mais bourgeois et nobles redoutent les dénonciations.",
+  "description": "Le prince seconde les inquisiteurs dominicains dans la recherche des hérétiques, comme en Languedoc depuis le XIIIe siècle : l’orthodoxie y gagne, mais bourgeois et nobles redoutent les dénonciations.",
   "delay_turns": 2,
   "cost": {
     "money": 40,

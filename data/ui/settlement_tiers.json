@@ -1,5 +1,5 @@
 {
-  "description": "CO-C (ADR 0292) : noms français des six paliers de développement visuels d'une colonie, par type. Le palier (1 à 6) vient du cœur (settlement_tier, seuils dans settlements/rules.json development_tiers) ; l'illustration est res://assets/illustrations/settlement_tiers/<type>_<palier>.jpg. Aucune règle de jeu.",
+  "description": "CO-C (ADR 0292) : noms français des six paliers de développement visuels d’une colonie, par type. Le palier (1 à 6) vient du cœur (settlement_tier, seuils dans settlements/rules.json development_tiers) ; l’illustration est res://assets/illustrations/settlement_tiers/<type>_<palier>.jpg. Aucune règle de jeu.",
   "illustration_dir": "res://assets/illustrations/settlement_tiers",
   "names": {
     "city": ["Cité éprouvée", "Cité marchande", "Grande cité", "Cité prospère", "Cité fortifiée et florissante", "Métropole du royaume"],

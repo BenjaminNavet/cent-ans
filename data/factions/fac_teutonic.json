@@ -78,11 +78,11 @@
     "end_year": 1453,
     "short_end_year": 1380,
     "hold_turns": 8,
-    "summary": "Tenir l'État monastique de Prusse et soumettre la Livonie.",
+    "summary": "Tenir l’État monastique de Prusse et soumettre la Livonie.",
     "objectives": [
       {
         "id": "obj_te_state",
-        "title": "L'État de Prusse",
+        "title": "L’État de Prusse",
         "description": "Tenir au moins deux provinces.",
         "condition": {
           "kind": "province_count",
@@ -92,7 +92,7 @@
       {
         "id": "obj_te_title",
         "title": "Le grand-maître",
-        "description": "Le titre de l'Ordre teutonique doit rester en vos mains.",
+        "description": "Le titre de l’Ordre teutonique doit rester en vos mains.",
         "condition": {
           "kind": "hold_title",
           "title": "tit_teutonic"

@@ -2,7 +2,7 @@
   "tracks": [
     {
       "file": "assets/third_party/music/ars_nova/binchois_adieu_mamour.ogg",
-      "title": "Gilles Binchois — rondeau « Adieu m'amour » (XVe s.)",
+      "title": "Gilles Binchois — rondeau « Adieu m’amour » (XVe s.)",
       "creators": "Studio der frühen Musik (Andrea von Ramm, Nigel Rogers, Sterling Jones, Thomas Binkley)",
       "licence": "Public domain",
       "source_url": "https://commons.wikimedia.org/wiki/File:Studio_des_fr%C3%BChen_Musik_I_-_SMV_-_MMG7_0023.wav"
@@ -16,7 +16,7 @@
     },
     {
       "file": "assets/third_party/music/ars_nova/dufay_adieu_mamour.ogg",
-      "title": "Guillaume Dufay — rondeau « Adieu m'amour » (XVe s.)",
+      "title": "Guillaume Dufay — rondeau « Adieu m’amour » (XVe s.)",
       "creators": "Studio der frühen Musik (Andrea von Ramm, Nigel Rogers, Sterling Jones, Thomas Binkley)",
       "licence": "Public domain",
       "source_url": "https://commons.wikimedia.org/wiki/File:Studio_des_fr%C3%BChen_Musik_I_-_SMV_-_MMG7_0023.wav"
@@ -281,7 +281,7 @@
     },
     {
       "file": "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3",
-      "title": "Folía traditionnelle d'Ahigal (Cáceres), flûte à trois trous et tambourin",
+      "title": "Folía traditionnelle d’Ahigal (Cáceres), flûte à trois trous et tambourin",
       "creators": "Loreto Galindo, tamborilero (Fundación Joaquín Díaz, 1988)",
       "licence": "CC BY-SA 3.0",
       "source_url": "https://commons.wikimedia.org/wiki/File:Fundaci%C3%B3n_Joaqu%C3%ADn_D%C3%ADaz_-_ATO_00330_01_-_Fol%C3%ADa.ogg",
@@ -296,7 +296,7 @@
     },
     {
       "file": "assets/third_party/music/wikimedia/istikhbar_mezmoum.mp3",
-      "title": "Istikhbar Mezmoum, improvisation vocale (san'a de Tlemcen, musique andalouse d'Algérie)",
+      "title": "Istikhbar Mezmoum, improvisation vocale (san’a de Tlemcen, musique andalouse d’Algérie)",
       "creators": "Lazaar Ben Dali Yahia (Laazar Sliman), 1929",
       "licence": "Public domain",
       "source_url": "https://commons.wikimedia.org/wiki/File:Istakhbar_Mezmoum.ogg"
@@ -324,7 +324,7 @@
     },
     {
       "file": "assets/third_party/music/wikimedia/machaut_riches_damour.mp3",
-      "title": "Guillaume de Machaut — « Riches d'amour et mandians d'amie » (XIVe s.)",
+      "title": "Guillaume de Machaut — « Riches d’amour et mandians d’amie » (XIVe s.)",
       "creators": "Réalisation MIDI, Tetraktys",
       "licence": "Public domain",
       "source_url": "https://commons.wikimedia.org/wiki/File:Guillaume_de_Machaut_-_Riches_d'amour_et_mandians_d'amie.ogg"
@@ -354,7 +354,7 @@
     },
     {
       "file": "assets/third_party/music/wikimedia/tomsinska_cest_mon_amy.mp3",
-      "title": "Anonyme — « C'est mon amy », luth seul (France, XVIe s.)",
+      "title": "Anonyme — « C’est mon amy », luth seul (France, XVIe s.)",
       "creators": "Magdalena Tomsińska, luth (Collegium Vocale Bydgoszcz)",
       "licence": "CC BY 3.0",
       "source_url": "https://commons.wikimedia.org/wiki/File:Anonymous_--_C'est_mon_amy_(Magdalena_Tomsinska).opus",
@@ -386,7 +386,7 @@
     },
     {
       "file": "assets/third_party/music/wikimedia/znamenny_se_zhenih_grjadet.mp3",
-      "title": "« Се Жених грядет в полунощи » (Voici l'Époux), chant znamenny",
+      "title": "« Се Жених грядет в полунощи » (Voici l’Époux), chant znamenny",
       "creators": "Chœur patriarcal de Moscou",
       "licence": "CC0",
       "source_url": "https://commons.wikimedia.org/wiki/File:05_Se_Zhenih_grjadet_v_polunowi_znamennyj_raspev_grind_Moscow_Patriarchal_Choir.ogg",

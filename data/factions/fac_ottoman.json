@@ -95,7 +95,7 @@
       },
       {
         "id": "obj_ot_city",
-        "title": "La Pomme d'Or",
+        "title": "La Pomme d’Or",
         "description": "Constantinople doit tomber dans votre main.",
         "condition": {
           "kind": "control_all",

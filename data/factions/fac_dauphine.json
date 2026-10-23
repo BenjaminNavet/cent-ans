@@ -19,7 +19,7 @@
   "primary_title": "tit_dauphine",
   "heraldry": {
     "blazon": "D'or au dauphin d'azur, crêté, barbé, loré et oreillé de gueules.",
-    "description": "Dauphin bleu sur champ d'or, armes des dauphins de Viennois.",
+    "description": "Dauphin bleu sur champ d’or, armes des dauphins de Viennois.",
     "primary_color": "#E8B923",
     "secondary_color": "#1F4E9E"
   },
@@ -57,7 +57,7 @@
     "trade": 40,
     "piety": 70
   },
-  "description": "Principauté alpine de l'Isère et du Rhône, fief d'Empire. Humbert II, dépensier et sans héritier, la cédera à l'héritier du roi de France en 1349 (traité de Romans).",
+  "description": "Principauté alpine de l’Isère et du Rhône, fief d’Empire. Humbert II, dépensier et sans héritier, la cédera à l’héritier du roi de France en 1349 (traité de Romans).",
   "sources": [
     "Dauphiné de Viennois",
     "Humbert II de Viennois"

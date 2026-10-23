@@ -1,5 +1,5 @@
 {
-  "description": "Genres du filtre du journal de campagne (WR turn, ADR 0304) : chaque genre regroupe des genres d'événements (`kind` du cœur). Rendu seulement ; un événement absent de toute liste va au genre `other`.",
+  "description": "Genres du filtre du journal de campagne (WR turn, ADR 0304) : chaque genre regroupe des genres d’événements (`kind` du cœur). Rendu seulement ; un événement absent de toute liste va au genre `other`.",
   "all_label": "Tout",
   "other": "other",
   "genres": [

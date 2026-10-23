@@ -1,5 +1,5 @@
 {
- "description": "Généré par `cent-ans geo sea-lanes` (lot SL1, ADR 0139) depuis data/naval/sea_lanes.json : tracé des routes maritimes en pixels carte, routé sur l'eau de land_mask.png, et longueur en kilomètres (coût de la route).",
+ "description": "Généré par `cent-ans geo sea-lanes` (lot SL1, ADR 0139) depuis data/naval/sea_lanes.json : tracé des routes maritimes en pixels carte, routé sur l’eau de land_mask.png, et longueur en kilomètres (coût de la route).",
  "lanes": [
   {
    "id": "lane_southampton_bordeaux",

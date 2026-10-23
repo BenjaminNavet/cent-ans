@@ -1,5 +1,5 @@
 {
-  "description": "VQ cground : détail du sol de campagne de près (shader ground_detail.wesl). Valeurs à pleine force ; le bouton `ground_detail` de render_quality.json choisit le niveau (0 coupé, 1 tons de parcelle et dérive macro, 2 + lanières, balks et mouchetures). Distances en pixels de carte par pixel d'écran (empreinte).",
+  "description": "VQ cground : détail du sol de campagne de près (shader ground_detail.wesl). Valeurs à pleine force ; le bouton `ground_detail` de render_quality.json choisit le niveau (0 coupé, 1 tons de parcelle et dérive macro, 2 + lanières, balks et mouchetures). Distances en pixels de carte par pixel d’écran (empreinte).",
   "macro": {
     "tone_amp": 0.16,
     "hue_amp": 0.3,

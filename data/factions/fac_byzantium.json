@@ -130,7 +130,7 @@
       {
         "id": "obj_by_capital",
         "title": "La Reine des villes",
-        "description": "Constantinople doit rester à l'Empire.",
+        "description": "Constantinople doit rester à l’Empire.",
         "condition": {
           "kind": "control_all",
           "provinces": [
@@ -141,7 +141,7 @@
       {
         "id": "obj_by_morea",
         "title": "Thessalonique et la Morée",
-        "description": "Thessalonique et la Morée doivent être tenues par l'empereur.",
+        "description": "Thessalonique et la Morée doivent être tenues par l’empereur.",
         "condition": {
           "kind": "control_all",
           "provinces": [

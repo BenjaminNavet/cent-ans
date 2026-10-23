@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "Réglages de l'érosion hors ligne du relief composé (lot CC CD) : lu par `cent-ans geo compose-erode`. Distances en pixels de travail (E1 = 4 px par pixel de carte = 180 m), hauteurs en mètres. Le relief d'entrée (heightmap.png) n'est jamais modifié : la sortie va dans data/map/pyramid/ (hors git).",
+  "description": "Réglages de l’érosion hors ligne du relief composé (lot CC CD) : lu par `cent-ans geo compose-erode`. Distances en pixels de travail (E1 = 4 px par pixel de carte = 180 m), hauteurs en mètres. Le relief d’entrée (heightmap.png) n’est jamais modifié : la sortie va dans data/map/pyramid/ (hors git).",
   "seed": 4242,
   "work_scale": 4,
   "activation": {

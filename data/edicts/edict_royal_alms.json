@@ -3,7 +3,7 @@
   "name": {
     "display": "Aumône royale"
   },
-  "description": "Distribution régulière de pain et de deniers aux pauvres par l'aumônier du prince, à la manière des rois de France et d'Angleterre : la faim recule et la piété du prince grandit, au prix du trésor.",
+  "description": "Distribution régulière de pain et de deniers aux pauvres par l’aumônier du prince, à la manière des rois de France et d’Angleterre : la faim recule et la piété du prince grandit, au prix du trésor.",
   "delay_turns": 1,
   "cost": {
     "money": 60

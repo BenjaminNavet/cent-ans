@@ -1,5 +1,5 @@
 {
-  "description": "Effets de météo des batailles du client Bevy (lot batmo) : pluie et neige autour de la caméra, brouillard volumétrique, fumées des villages de l'horizon. Port de game/scripts/battle/battle_atmosphere.gd (_add_precipitation, _setup_volumetric_fog, add_ground_mist) et de game/shaders/battle_horizon_smoke.gdshader. Lu par client/src/battle/decor/{precipitation,volumetric,horizon_smoke}.rs. Aucune règle de jeu.",
+  "description": "Effets de météo des batailles du client Bevy (lot batmo) : pluie et neige autour de la caméra, brouillard volumétrique, fumées des villages de l’horizon. Port de game/scripts/battle/battle_atmosphere.gd (_add_precipitation, _setup_volumetric_fog, add_ground_mist) et de game/shaders/battle_horizon_smoke.gdshader. Lu par client/src/battle/decor/{precipitation,volumetric,horizon_smoke}.rs. Aucune règle de jeu.",
   "precipitation": {
     "rain": {
       "count": 9000,

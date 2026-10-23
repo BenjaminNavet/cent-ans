@@ -1,5 +1,5 @@
 {
-  "description": "Paramètres des post-effets Bevy optionnels (profondeur de champ, flou de mouvement, auto-exposition, étalonnage, aberration chromatique, netteté, ombres douces). Tous désactivés par défaut : l'activation vient du réglage du joueur ou de la clé `postfx` du préréglage de `render_quality.json`. Lus par client/src/settings/postfx.rs.",
+  "description": "Paramètres des post-effets Bevy optionnels (profondeur de champ, flou de mouvement, auto-exposition, étalonnage, aberration chromatique, netteté, ombres douces). Tous désactivés par défaut : l’activation vient du réglage du joueur ou de la clé `postfx` du préréglage de `render_quality.json`. Lus par client/src/settings/postfx.rs.",
   "depth_of_field": {"mode": "gaussian", "sensor_height": 0.01866, "aperture_f_stops": 0.05, "max_circle_of_confusion_diameter": 48.0, "max_depth": 3000.0},
   "motion_blur": {"shutter_angle": 0.4, "samples": 2},
   "auto_exposure": {"range_min_ev": -3.0, "range_max_ev": 3.0, "speed_brighten": 2.0, "speed_darken": 1.0},

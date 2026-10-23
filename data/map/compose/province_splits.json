@@ -1,5 +1,5 @@
 {
-  "description": "Scissions de provinces composées (lot B3, ADR 0730) : les pixels de la province de base sont répartis entre les parties par la graine la plus proche (pixels réels, distance divisée par weight). Le premier élément porte l'id de la base. Guyenne = Bordelais (Médoc, Entre-deux-Mers, Libournais jusqu'à Castillon), Bazadais = Bazas, Langon, La Réole, Gascogne = Landes, Marsan, Labourd.",
+  "description": "Scissions de provinces composées (lot B3, ADR 0730) : les pixels de la province de base sont répartis entre les parties par la graine la plus proche (pixels réels, distance divisée par weight). Le premier élément porte l’id de la base. Guyenne = Bordelais (Médoc, Entre-deux-Mers, Libournais jusqu’à Castillon), Bazadais = Bazas, Langon, La Réole, Gascogne = Landes, Marsan, Labourd.",
   "splits": {
     "prov_guyenne": [
       { "id": "prov_guyenne", "seed_lonlat": [-0.5, 45.0], "weight": 1.15 },

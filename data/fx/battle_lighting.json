@@ -1,5 +1,5 @@
 {
-  "description": "Lumière des batailles du client Bevy (lot bvis2) : exposition, tonemapping, halo, occlusion ambiante, lumière du ciel HDRI et étalonnage. Port des réglages d'environnement de game/scripts/battle/battle_atmosphere.gd et de game/shaders/hdri_sky.gdshader ; le soleil et le brouillard restent dans battle_decor_look.json / atmosphere.json. Aucune règle de jeu.",
+  "description": "Lumière des batailles du client Bevy (lot bvis2) : exposition, tonemapping, halo, occlusion ambiante, lumière du ciel HDRI et étalonnage. Port des réglages d’environnement de game/scripts/battle/battle_atmosphere.gd et de game/shaders/hdri_sky.gdshader ; le soleil et le brouillard restent dans battle_decor_look.json / atmosphere.json. Aucune règle de jeu.",
   "exposure_ev100": 11.05,
   "tonemapping": "agx",
   "bloom": { "enabled": false, "intensity": 0.06, "threshold": 1.1, "threshold_softness": 0.3 },

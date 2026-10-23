@@ -68,7 +68,7 @@
         },
         {
           "min_buildings": 4,
-          "label": "Carrefour d'échanges",
+          "label": "Carrefour d’échanges",
           "effects": [
             { "effect": "trade_income", "value": 8, "mode": "percent" },
             { "effect": "tax_income", "value": 3, "mode": "percent" }
@@ -89,7 +89,7 @@
       "coherence": [
         {
           "min_buildings": 2,
-          "label": "Place d'armes",
+          "label": "Place d’armes",
           "effects": [
             { "effect": "army_experience", "value": 1 },
             { "effect": "recruit_cost", "value": -5, "mode": "percent" }

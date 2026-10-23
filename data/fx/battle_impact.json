@@ -1,5 +1,5 @@
 {
-  "description": "Mêlée lisible (lot B2) : orientation des soldats vers l'ennemi le plus proche au contact, et étincelles d'impact (braises du flipbook de feu existant) quand le cœur déclare des pertes de mêlée. Rendu seulement : qui frappe, qui tombe et pourquoi sont décidés par le cœur (sim-battle).",
+  "description": "Mêlée lisible (lot B2) : orientation des soldats vers l’ennemi le plus proche au contact, et étincelles d’impact (braises du flipbook de feu existant) quand le cœur déclare des pertes de mêlée. Rendu seulement : qui frappe, qui tombe et pourquoi sont décidés par le cœur (sim-battle).",
   "engage": {
     "range_m": 7.0,
     "min_men": 2
