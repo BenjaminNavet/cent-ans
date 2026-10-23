@@ -22,8 +22,8 @@ Essais rejetés :
   d'ombre par famille (`meshshadow`, `townshadow`, `stdshadow`, `markershadow`, `lifeshadow`, `armyshadow`).
 
 ## Conséquences
-- La combinaison des deux réglages n'a pas été mesurée (banc interrompu : machine passée sur batterie) ;
-  gain attendu ≈ 2-3 ms à d30, à confirmer sur secteur.
+- Combinaison mesurée sur secteur (alternée deux fois) : d30 19,2 ms contre 21,75 avec les anciennes valeurs (−2,5 ms).
+  d60 non mesurable (compilations d'une autre session en parallèle).
 - Rendu non vérifié en capture : sous d≈20, couronnes lod2 plus clairsemées et transition
   modèle/imposteur plus proche ; revenir aux anciennes valeurs par les variables ci-dessus si c'est visible.
-- `armyshadow` non mesuré proprement ; les ombres des imposteurs (≈ 3,7 ms) restent le plus gros poste.
+- `armyshadow` : 19,6 contre 19,2 ms, aucun gain ; les ombres des imposteurs (≈ 3,7 ms) restent le plus gros poste.

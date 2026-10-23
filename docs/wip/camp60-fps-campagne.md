@@ -40,7 +40,7 @@ Fait : cache du sol (ADR 0742), ombres d'arbres par cascade (ADR 0743), modèles
 Réglages du joueur, p50 / p95 en ms :
 d=30 47,5 → 21,2 / 24,0 ; d=60 → 22,4 / 25,1 ; d=150 33,9 → 14,8 ; d=500 34,1 → 13,8.
 Reste pour 60 i/s de près : à d=30 les ombres coûtent ≈ 8 ms (bâtiments, villes, modèles) et le sol ≈ 4 ms.
-Prochaines pistes (sur secteur) : mesurer la combinaison ADR 0746 et `armyshadow` ; ombres des imposteurs (≈ 3,7 ms, plus gros poste) ;
+Prochaines pistes (sur secteur) : mesurer ADR 0746 à d60 (d30 confirmé : 21,75 → 19,2 ms ; `armyshadow` sans gain) ; ombres des imposteurs (≈ 3,7 ms, plus gros poste) ;
 vérifier en capture la transition modèle/imposteur à d≈20-30.
 Captures utilisées : 4 sur 5.
 Avant chaque série de bancs, prévenir game-project-79 (fenêtre GPU de 20 min après chacune de nos séries).
