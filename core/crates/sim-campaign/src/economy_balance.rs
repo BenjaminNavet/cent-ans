@@ -269,8 +269,9 @@ impl CampaignState {
                 .get(id)
                 .copied()
                 .unwrap_or(faction.treasury - record.net());
-            record.other = faction.treasury - before - record.net() - record.levies - record.borrowed
-                + record.repaid;
+            record.other =
+                faction.treasury - before - record.net() - record.levies - record.borrowed
+                    + record.repaid;
             faction.budget_history.push(record);
             let excess = faction
                 .budget_history

@@ -753,15 +753,15 @@ pub(crate) fn resolve_economy(
         // H5: seigniorage is income, the recoinage of strong money upkeep.
         let mut budget = TurnBudget::compute(state, data, &faction_id);
         // WH econ: edicts the purse cannot carry are dropped.
-        let balance = state.factions[&faction_id].treasury + budget.income
-            - (budget.upkeep() - budget.table);
+        let balance =
+            state.factions[&faction_id].treasury + budget.income - (budget.upkeep() - budget.table);
         if balance < 0
             && crate::edicts::drop_unaffordable(state, data, &faction_id, -balance, events)
         {
             budget = TurnBudget::compute(state, data, &faction_id);
         }
-        let available = state.factions[&faction_id].treasury + budget.income
-            - (budget.upkeep() - budget.table);
+        let available =
+            state.factions[&faction_id].treasury + budget.income - (budget.upkeep() - budget.table);
         // H3: the diets of the provinces (« Table »), those the purse cannot
         // cover fall back to the default.
         budget.table = crate::table::pay_table(state, data, &faction_id, available, events);

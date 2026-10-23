@@ -275,9 +275,7 @@ fn explains(cause: &Cause, player: &data_model::FactionId, favourable: bool) -> 
         CauseKind::Bankruptcy
         | CauseKind::RoyalDefault
         | CauseKind::Revolt
-        | CauseKind::Succession => {
-            !favourable && cause.subject.as_ref() == Some(player)
-        }
+        | CauseKind::Succession => !favourable && cause.subject.as_ref() == Some(player),
     }
 }
 

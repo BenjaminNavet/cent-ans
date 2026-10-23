@@ -237,7 +237,11 @@ pub fn debasement_cause(f: &DebasementFacts<'_>) -> Cause {
     let mut cause = Cause::new(CauseKind::Debasement, 35)
         .subject(f.faction)
         .factor("seigniorage_gain", f.seigniorage_gain, 50)
-        .factor("inflation_ahead", f.price_level, (f.price_level - 100).max(0));
+        .factor(
+            "inflation_ahead",
+            f.price_level,
+            (f.price_level - 100).max(0),
+        );
     if f.treasury < 0 {
         cause = cause.factor("treasury_negative", f.treasury, 75);
     }

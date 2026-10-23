@@ -118,7 +118,9 @@ impl<'a> Context<'a> {
         let income = gross_income
             - state.administration_upkeep_for(data, faction, gross_income)
             - tribute
-            - commitments(state, faction);
+            - commitments(state, faction)
+            // ECO2 (ADR 0777): household, wages, sieges, obligations, interest.
+            - sim_campaign::finance::structural_costs(state, data, faction, gross_income).total();
         Some(Context {
             anchors,
             grid,

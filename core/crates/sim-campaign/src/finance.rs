@@ -679,14 +679,16 @@ fn maybe_default(
     )
     .faction(faction);
     if faction == &state.player_faction {
-        event = event.cause(cause_builders::default_cause(&cause_builders::DefaultFacts {
-            faction,
-            debt_seasons_percent: seasons_of_debt,
-            written_off_percent: rule.write_off_percent,
-            freeze_turns: i64::from(rule.freeze_turns),
-            seizure,
-            treasury: treasury_before,
-        }));
+        event = event.cause(cause_builders::default_cause(
+            &cause_builders::DefaultFacts {
+                faction,
+                debt_seasons_percent: seasons_of_debt,
+                written_off_percent: rule.write_off_percent,
+                freeze_turns: i64::from(rule.freeze_turns),
+                seizure,
+                treasury: treasury_before,
+            },
+        ));
     }
     events.push(event);
 }

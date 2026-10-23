@@ -23,17 +23,18 @@ Chantier C du juge (`out/juge/iter-03-design.md`) : « éco-guerre : logistique,
 | Mesure | Avant (ADR 0749) | Après |
 |---|---|---|
 | Net initial de la France | +20 k | +14,3 k (maison du roi 18 % + prestige, gages) |
-| Pic du trésor France | 135-136 k (6,8 saisons du net initial) | 87,6 k / 80,3 k (6,1 / 5,6 saisons) |
-| Trésor France, tour 40 | 81-83 k | 36 k / 37 k |
-| Banqueroutes ordinaires, 177 factions | 4 / 5 | 9 / 18 (< 53, borne de l'ADR 0183) |
-| Banqueroutes royales | 0 | 1 / 1 |
-| Impôts exceptionnels levés par l'IA | 0 | 33 / 31 |
-| Factions endettées en fin de partie | 0 | 10 / 7 |
+| Pic du trésor France | 135-136 k (6,8 saisons du net initial) | 82,3 k / 80,3 k (5,7 / 5,6 saisons) |
+| Trésor France, tour 40 | 81-83 k | 37 k / 51 k |
+| Banqueroutes ordinaires, 177 factions | 4 / 5 | 1 / 0 (borne de l'ADR 0183 : < 53) |
+| Banqueroutes royales | 0 | 0 / 0 |
+| Impôts exceptionnels levés par l'IA | 0 | 13 / 20 |
+| Factions endettées en fin de partie | 0 | 2 / 3 (4 k et 12 k livres au total) |
 
 France jouée par l'IA (sans `--passive`) : trésor de 80 k au tour 4 à 13-32 k au tour 40, solde de -15 à -27 k par saison à la fin : l'argent est rare dès qu'on dépense. Seed bots `--quick` : 8 parties, aucun constat.
 
 ## Conséquences
 
 - La ponction d'épargne (ADR 0749) est resserrée (paliers à 1, 2 et 4 saisons de revenu) pour que l'équilibre du trésor passif suive les nouvelles charges ; elle reste un filet, la dette et les charges étant les vrais puits.
+- L'IA retranche les charges structurelles de son revenu de planification (`Context::income`) ; sans cela les banqueroutes montaient à 9 / 18. Deux tests d'IA (`a_hoarding_realm_spends`, `recruits_join_a_small_army...`) ont vu leur trésor de départ baissé : un grand magot n'est plus dépensé en bâtiments, la cour et la ponction laissant peu de marge.
 - `starting_fit::structural_balance` ne compte pas la maison du roi ni les gages : l'ajustement des armées de départ (ADR 0183) ne retire pas d'unités pour payer une cour.
 - Points ouverts : boutons du client pour emprunter, rembourser et lever un impôt (lot UX2) ; tribut et subsides de guerre comme obligations (aucun producteur) ; passe longue des seed bots non lancée ; la part de milice et l'IA de campagne n'ont pas été rééquilibrées avec les coûts de siège.

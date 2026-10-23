@@ -22,9 +22,7 @@ fn the_household_grows_with_rank_and_spares_small_realms() {
     let small = state
         .factions
         .keys()
-        .find(|id| {
-            !id.is_rebels() && state.controlled_provinces(id).count() == 1 && **id != france
-        })
+        .find(|id| !id.is_rebels() && state.controlled_provinces(id).count() == 1 && **id != france)
         .cloned()
         .expect("a small realm");
     let small_gross = state.faction_income(data, &small);
@@ -120,7 +118,12 @@ fn repaying_pays_the_dearest_loan_first() {
     assert_eq!(loans.len(), 1);
     assert_eq!(loans[0].lender, "lombards", "the florentine loan is gone");
     assert!(state
-        .submit_order(data, Order::Repay { amount: 100_000_000 })
+        .submit_order(
+            data,
+            Order::Repay {
+                amount: 100_000_000
+            }
+        )
         .is_err());
 }
 
@@ -253,11 +256,18 @@ fn a_dowry_goes_from_the_brides_house_to_the_grooms_realm() {
     assert_eq!(per_season, gross / 4);
     state.end_turn_with(data, idle);
     // The groom's realm received an instalment (on top of its own budget).
-    let net = state.factions[&groom].last_budget.income + state.factions[&groom].last_budget.trade_income
+    let net = state.factions[&groom].last_budget.income
+        + state.factions[&groom].last_budget.trade_income
         - state.factions[&groom].last_budget.upkeep();
     let got = state.factions[&groom].treasury - creditor_before - net;
-    assert!(got >= per_season, "instalment received ({got} vs {per_season})");
-    assert_eq!(state.factions[&bride].finance.obligations[0].seasons_left, 3);
+    assert!(
+        got >= per_season,
+        "instalment received ({got} vs {per_season})"
+    );
+    assert_eq!(
+        state.factions[&bride].finance.obligations[0].seasons_left,
+        3
+    );
 }
 
 fn finance_marriage(
@@ -271,12 +281,16 @@ fn finance_marriage(
     let bride_char = state
         .characters
         .iter()
-        .find(|(_, c)| &c.faction == bride && c.alive && c.sex == data_model::Sex::Female && c.spouse.is_none())
+        .find(|(_, c)| {
+            &c.faction == bride && c.alive && c.sex == data_model::Sex::Female && c.spouse.is_none()
+        })
         .map(|(id, _)| id.clone());
     let groom_char = state
         .characters
         .iter()
-        .find(|(_, c)| &c.faction == groom && c.alive && c.sex == data_model::Sex::Male && c.spouse.is_none())
+        .find(|(_, c)| {
+            &c.faction == groom && c.alive && c.sex == data_model::Sex::Male && c.spouse.is_none()
+        })
         .map(|(id, _)| id.clone());
     if let (Some(b), Some(g)) = (bride_char, groom_char) {
         if sim_campaign::dynasty::propose_marriage(state, data, &g, &b).is_ok() {
@@ -318,7 +332,10 @@ fn a_poor_ai_realm_levies_or_borrows_and_a_rich_one_repays() {
     }
     let cache = PlanCache::new(&state);
     let orders = finance::ai_finance_orders(&cache, data, &england);
-    assert!(matches!(orders.as_slice(), [Order::Repay { amount: 10_000 }]), "{orders:?}");
+    assert!(
+        matches!(orders.as_slice(), [Order::Repay { amount: 10_000 }]),
+        "{orders:?}"
+    );
 }
 
 #[test]

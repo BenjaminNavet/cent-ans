@@ -178,7 +178,10 @@ mod tests {
         assert_eq!(view.debt, 0);
         assert_eq!(view.lenders.len(), 2);
         assert!(view.lenders.iter().all(|l| l.room > 0));
-        assert!(view.levies.iter().any(|l| l.id == "aide" && l.ready_in == 0));
+        assert!(view
+            .levies
+            .iter()
+            .any(|l| l.id == "aide" && l.ready_in == 0));
         // The gabelle only exists from 1341.
         assert!(view.levies.iter().all(|l| l.id != "gabelle"));
         state

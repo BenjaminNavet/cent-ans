@@ -708,7 +708,10 @@ pub struct FactionState {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub coinage_changed_year: Option<i32>,
     /// ECO2 (ADR 0777): loans, obligations, grievances of the crown.
-    #[serde(default, skip_serializing_if = "crate::finance::FinanceState::is_default")]
+    #[serde(
+        default,
+        skip_serializing_if = "crate::finance::FinanceState::is_default"
+    )]
     pub finance: crate::finance::FinanceState,
     // ----- H6: ransoms and chivalric orders -----------------------------------
     /// Ransoms being paid by installments (this faction owes them).

@@ -725,7 +725,11 @@ pub(crate) fn budget_table(pane: &mut Kids, theme: &UiTheme, view: &FactionPanel
     {
         budget_row(pane, theme, line, has_past, &view.table);
     }
-    if let Some(finance) = view.finance.as_ref().filter(|f| f.debt > 0 || f.defaults > 0) {
+    if let Some(finance) = view
+        .finance
+        .as_ref()
+        .filter(|f| f.debt > 0 || f.defaults > 0)
+    {
         let risk = format!("{} %", finance.default_risk_percent);
         table_row(
             pane,

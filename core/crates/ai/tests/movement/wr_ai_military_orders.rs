@@ -16,7 +16,7 @@ fn paris_with_army(units: usize) -> (&'static GameData, CampaignState, ArmyId, S
     let mut state = CampaignState::new_1337(data, fac("fac_england"), 5).unwrap();
     state.chronicle.disabled = true;
     state.season = Season::Summer;
-    state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 200_000;
+    state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 90_000;
     let army = main_army(&state, "fac_france");
     let paris = capital_city(&state, "fac_france");
     let entry = state.armies.get_mut(&army).unwrap();

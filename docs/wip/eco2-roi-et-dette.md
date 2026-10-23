@@ -9,7 +9,7 @@ Lot : refonte économique de la campagne (juge it.3 chantiers 1 et 3). ADR 0777 
 - [x] Budget : `TurnBudget`, `BudgetRecord`, `budget_lines` ; `game-api` `EconomyView` + `FinanceView` (`FactionPanelView.finance`).
 - [x] Client : lignes de budget et dette dans `campaign/panels/faction/view.rs` (pas de boutons d'ordres).
 - [x] Ponction d'épargne resserrée (1, 2, 4 saisons) ; butin et chevauchée relevés.
-- [x] Mesures : voir ADR 0778 (pic France passive 87,6 k / 80,3 k, soit 6,1 / 5,6 saisons du net initial ; banqueroutes 9 / 18). Seed bots `--quick` : 0 constat.
+- [x] Mesures : voir ADR 0778 (pic France passive 82,3 k / 80,3 k, soit 5,7 / 5,6 saisons du net initial ; banqueroutes 1 / 0). Seed bots `--quick` : 0 constat.
 - [ ] Vérification finale : fmt, clippy workspace, `cargo test --workspace --no-fail-fast`, `cargo check` client.
 
 ## Reste / limites
