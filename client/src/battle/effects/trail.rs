@@ -202,8 +202,8 @@ mod tests {
             build_ribbons(&[(tip, dir)], Vec3::new(10.0, 20.0, 15.0));
         assert_eq!(positions.len(), 4);
         assert_eq!(indices.len(), 6);
-        // The tail is 5 m behind the tip.
-        assert!((positions[2][0] - 5.0).abs() < 1e-4);
+        // The tail is TRAIL_LENGTH_M behind the tip.
+        assert!((positions[2][0] - (10.0 - TRAIL_LENGTH_M)).abs() < 1e-4);
         // Turned toward the camera: the width is along Z... no, across both flight and view (Y).
         let width = Vec3::from(positions[1]) - Vec3::from(positions[0]);
         assert!(width.dot(dir).abs() < 1e-4 && width.dot(Vec3::Z).abs() < 1e-3);
