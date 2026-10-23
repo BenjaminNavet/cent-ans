@@ -376,6 +376,8 @@ pub fn spawn_top_bar(
         GlobalZIndex(crate::ui::kit::style::UiTier::Panel.z() + 5),
         crate::ui::kit::widgets::panel_inset(theme),
     ))
+    // A 40 px strip: the inset texture margins (6 px) do not apply to it, out of the layout probe.
+    .insert(crate::ui::kit::widgets::KitWidget("top_bar"))
     .insert(Node {
         position_type: PositionType::Absolute,
         top: Val::Px(0.0),
@@ -519,7 +521,10 @@ pub fn compact_bar(width: f32) -> bool {
 
 /// Compact state of the bar (read by `update_fields`).
 #[derive(Resource, Default, Debug, Clone, Copy, PartialEq, Eq)]
-pub struct BarCompact(pub bool);
+pub struct BarCompact(pub bool, pub bool);
+
+/// Bar width from which the words before the figures fit (measured: 1422 px logical overflows).
+pub const LABELS_WIDTH: f32 = 1500.0;
 
 /// Words written before the figures of the bar (`data/ui/hud_labels.json`, UX ADR 0752).
 #[derive(Resource, Debug, Clone, PartialEq, Eq)]
@@ -563,6 +568,10 @@ pub(super) fn fit_top_bar(
 ) {
     let Ok(node) = bar.single() else { return };
     let wanted = compact_bar(node.size().x * node.inverse_scale_factor());
+    let words = node.size().x * node.inverse_scale_factor() >= LABELS_WIDTH;
+    if compact.1 != words {
+        compact.1 = words;
+    }
     if compact.0 != wanted {
         compact.0 = wanted;
     }

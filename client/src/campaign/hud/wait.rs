@@ -16,7 +16,7 @@ use crate::app::AppState;
 use crate::ui::kit::UiTheme;
 use crate::ui::kit::modal::ReduceMotion;
 use crate::ui::kit::style::{self, UiTier, UiType};
-use crate::ui::kit::widgets::panel_illuminated;
+use crate::ui::kit::widgets::panel_note;
 
 pub const TEXT: &str = "Les cours d’Europe délibèrent…";
 /// Delay before the cartouche appears (s) and fade duration (s).
@@ -107,7 +107,7 @@ fn spawn(mut commands: Commands, theme: Res<UiTheme>) {
             WaitRoot,
             DespawnOnExit(AppState::Campaign),
             UiTier::Banner.index(),
-            panel_illuminated(&theme),
+            panel_note(&theme),
             Pickable::IGNORE,
             Visibility::Hidden,
         ))
@@ -118,7 +118,7 @@ fn spawn(mut commands: Commands, theme: Res<UiTheme>) {
             margin: UiRect::left(Val::Px(-130.0)),
             width: Val::Px(260.0),
             min_height: Val::Px(0.0),
-            padding: UiRect::axes(Val::Px(18.0), Val::Px(8.0)),
+            padding: UiRect::axes(Val::Px(18.0), Val::Px(13.0)),
             flex_direction: FlexDirection::Row,
             align_items: AlignItems::Center,
             column_gap: Val::Px(8.0),

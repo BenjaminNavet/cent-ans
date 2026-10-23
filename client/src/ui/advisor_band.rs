@@ -139,8 +139,12 @@ impl BandState {
     }
 
     fn log(&mut self, say: &BandSay) {
-        // A refreshed message is not logged twice in a row.
-        if self.history.last().is_some_and(|h| h.key == say.key) {
+        // The same message is not logged twice in a row.
+        if self
+            .history
+            .last()
+            .is_some_and(|h| h.key == say.key && h.text == say.text)
+        {
             return;
         }
         self.history.push(HistoryEntry {
@@ -193,10 +197,9 @@ impl BandState {
             self.chip = None;
         }
         self.queue.retain(|q| q.key != say.key);
-        let preempts = self
-            .active
-            .as_ref()
-            .is_some_and(|a| say.priority > a.say.priority);
+        let preempts = self.active.as_ref().is_some_and(|a| {
+            say.priority >= AdvisorPriority::Warning && say.priority > a.say.priority
+        });
         self.queue.push(say);
         // Highest priority first, arrival order inside a priority (stable sort).
         self.queue.sort_by_key(|q| std::cmp::Reverse(q.priority));
@@ -431,7 +434,7 @@ fn spawn_message(commands: &mut Commands, theme: &UiTheme, host: Entity, say: &B
             width: Val::Percent(100.0),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(4.0),
-            padding: UiRect::axes(Val::Px(12.0), Val::Px(8.0)),
+            padding: UiRect::all(Val::Px(12.0)),
             ..default()
         })
         .with_children(|band| {

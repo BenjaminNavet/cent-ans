@@ -527,7 +527,7 @@ fn update_fields(
     let Some(top) = &hud.top else { return };
     // A figure with no word is unreadable: the word comes first unless the bar is compact.
     let word = |label: &str| {
-        if compact.0 || label.is_empty() {
+        if !compact.1 || label.is_empty() {
             String::new()
         } else {
             format!("{label} ")

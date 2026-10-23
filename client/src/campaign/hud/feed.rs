@@ -350,7 +350,7 @@ fn spawn_root(mut commands: Commands, theme: Res<UiTheme>, cfg: Res<FeedData>) {
             width: Val::Px(cfg.0.width),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(3.0),
-            padding: UiRect::all(Val::Px(6.0)),
+            padding: UiRect::all(Val::Px(12.0)),
             ..default()
         });
 }

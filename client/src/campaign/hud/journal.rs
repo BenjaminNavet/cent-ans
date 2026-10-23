@@ -140,7 +140,7 @@ fn rebuild(
             width: Val::Px(WIDTH),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(3.0),
-            padding: UiRect::all(Val::Px(6.0)),
+            padding: UiRect::all(Val::Px(12.0)),
             ..default()
         })
         .with_children(|box_| {
