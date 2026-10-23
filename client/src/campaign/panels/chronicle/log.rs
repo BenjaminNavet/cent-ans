@@ -164,6 +164,7 @@ mod tests {
             public: false,
             loss: false,
             style: chronicle::line_style(kind),
+            cause_id: None,
         }
     }
 

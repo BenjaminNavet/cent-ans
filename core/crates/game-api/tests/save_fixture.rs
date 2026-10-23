@@ -1,5 +1,5 @@
-//! A frozen real save (wrapper v1 around campaign state v9, England, seed 1337, 10 turns) must
-//! keep loading. Rule: every bump of `STATE_VERSION` or `SAVE_VERSION` adds a new fixture and
+//! Frozen real saves (wrapper v1 around campaign state v9 and v10, England, seed 1337, 10
+//! turns) must keep loading. Rule: every bump of `STATE_VERSION` or `SAVE_VERSION` adds a new fixture and
 //! keeps this one loading through the migration chain.
 //!
 //! Regenerate (only for a deliberate new fixture): `CENT_ANS_WRITE_FIXTURE=1 cargo test -p
@@ -7,8 +7,8 @@
 
 use std::path::PathBuf;
 
-fn fixture() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/save_v9.json")
+fn fixture(version: u32) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/save_v{version}.json"))
 }
 
 #[test]
@@ -22,16 +22,27 @@ fn write_fixture() {
         state.end_turn(data);
     }
     let dir = std::env::temp_dir().join(format!("cent-ans-fixture-{}", std::process::id()));
-    let path = game_api::saves::write_save(&dir, "save_v9", &state, "2026-10-22T00:00:00").unwrap();
-    std::fs::create_dir_all(fixture().parent().unwrap()).unwrap();
-    std::fs::copy(path, fixture()).unwrap();
+    let path =
+        game_api::saves::write_save(&dir, "save_v10", &state, "2026-10-22T00:00:00").unwrap();
+    std::fs::create_dir_all(fixture(10).parent().unwrap()).unwrap();
+    std::fs::copy(path, fixture(10)).unwrap();
     let _ = std::fs::remove_dir_all(dir);
 }
 
 #[test]
 fn frozen_v9_save_loads_plays_a_turn_and_resaves() {
+    frozen_save_loads_plays_a_turn_and_resaves(9);
+}
+
+#[test]
+fn frozen_v10_save_loads_plays_a_turn_and_resaves() {
+    frozen_save_loads_plays_a_turn_and_resaves(10);
+}
+
+fn frozen_save_loads_plays_a_turn_and_resaves(version: u32) {
     let data = data_model::test_support::game_data();
-    let mut state = game_api::saves::load_save(data, &fixture()).expect("fixture v9 loads");
+    let mut state =
+        game_api::saves::load_save(data, &fixture(version)).expect("frozen fixture loads");
     assert_eq!(state.turn(), 10);
     assert_eq!(state.player_faction().as_str(), "fac_england");
     state.end_turn(data);

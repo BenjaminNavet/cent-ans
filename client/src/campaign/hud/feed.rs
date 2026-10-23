@@ -604,6 +604,7 @@ mod tests {
             public: false,
             loss: false,
             style: None,
+            cause_id: None,
         }
     }
 
