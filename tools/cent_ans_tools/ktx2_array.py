@@ -115,6 +115,7 @@ def bake(strip: Strip, ktx: Path, cache: Path = CACHE_DIR) -> Path:
         command = [
             str(ktx), "create",
             "--format", "R8G8B8A8_UNORM",
+            "--assign-tf", "linear",  # sinon ktx linéarise les PNG (sRGB par défaut) : octets altérés
             "--layers", str(strip.layers),
             "--generate-mipmap", "--mipmap-filter", "box",
             "--encode", "uastc", "--uastc-quality", "2",

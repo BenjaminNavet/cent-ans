@@ -1268,54 +1268,56 @@ fn poll_baked(
 ) {
     use bevy::asset::LoadState;
     let mut fallback = ArraySources::default();
-    pending.0.retain(|ktx| match assets.load_state(&ktx.handle) {
-        LoadState::Loaded => {
-            let name = format!("ktx2 array load {:?}", ktx.slot);
-            let image = images.get(&ktx.handle);
-            let bytes = image.map_or(0, crate::agent::texture_census::gpu_bytes);
-            crate::agent::texture_census::record(name, ktx.requested, bytes);
-            if let Some(stats) = stats.as_mut() {
-                stats.ktx2_loaded += 1;
-                if let Some(image) = image {
-                    stats.mip_levels = stats
-                        .mip_levels
-                        .max(image.texture_descriptor.mip_level_count);
+    pending
+        .0
+        .retain(|ktx| match assets.load_state(&ktx.handle) {
+            LoadState::Loaded => {
+                let name = format!("ktx2 array load {:?}", ktx.slot);
+                let image = images.get(&ktx.handle);
+                let bytes = image.map_or(0, crate::agent::texture_census::gpu_bytes);
+                crate::agent::texture_census::record(name, ktx.requested, bytes);
+                if let Some(stats) = stats.as_mut() {
+                    stats.ktx2_loaded += 1;
+                    if let Some(image) = image {
+                        stats.mip_levels = stats
+                            .mip_levels
+                            .max(image.texture_descriptor.mip_level_count);
+                    }
                 }
+                false
             }
-            false
-        }
-        LoadState::Failed(error) => {
-            warn!(
-                "battle ground: baked array of {} failed ({error}), using the JPG strip",
-                ktx.fallback_path
-            );
-            let handle = load_strip(
-                &assets,
-                ktx.fallback_path.clone(),
-                ktx.srgb,
-                ktx.grid,
-                ktx.anisotropy,
-                &mut fallback,
-            );
-            for (_, material) in materials.iter_mut() {
-                let extension = &mut material.extension;
-                let slot = match ktx.slot {
-                    GroundSlot::Albedo => &mut extension.albedo,
-                    GroundSlot::Normal => &mut extension.normal,
-                    GroundSlot::MicroAlbedo => &mut extension.micro_albedo,
-                    GroundSlot::MicroNormal => &mut extension.micro_normal,
-                };
-                if slot.as_ref() == Some(&ktx.handle) {
-                    *slot = Some(handle.clone());
+            LoadState::Failed(error) => {
+                warn!(
+                    "battle ground: baked array of {} failed ({error}), using the JPG strip",
+                    ktx.fallback_path
+                );
+                let handle = load_strip(
+                    &assets,
+                    ktx.fallback_path.clone(),
+                    ktx.srgb,
+                    ktx.grid,
+                    ktx.anisotropy,
+                    &mut fallback,
+                );
+                for (_, material) in materials.iter_mut() {
+                    let extension = &mut material.extension;
+                    let slot = match ktx.slot {
+                        GroundSlot::Albedo => &mut extension.albedo,
+                        GroundSlot::Normal => &mut extension.normal,
+                        GroundSlot::MicroAlbedo => &mut extension.micro_albedo,
+                        GroundSlot::MicroNormal => &mut extension.micro_normal,
+                    };
+                    if slot.as_ref() == Some(&ktx.handle) {
+                        *slot = Some(handle.clone());
+                    }
                 }
+                if let Some(stats) = stats.as_mut() {
+                    stats.ktx2_fallback += 1;
+                }
+                false
             }
-            if let Some(stats) = stats.as_mut() {
-                stats.ktx2_fallback += 1;
-            }
-            false
-        }
-        _ => true,
-    });
+            _ => true,
+        });
     match strips.as_mut() {
         Some(existing) => existing.0.append(&mut fallback.strips),
         None if !fallback.strips.is_empty() => {
