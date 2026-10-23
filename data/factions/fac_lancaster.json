@@ -18,8 +18,8 @@
   "suzerain": "fac_england",
   "primary_title": "tit_lancaster",
   "heraldry": {
-    "blazon": "De gueules à trois léopards d'or, à la bande d'azur brochant sur le tout.",
-    "description": "Armes d’Angleterre brisées d’une bande d’azur.",
+    "blazon": "De gueules à trois léopards d’or, au lambel d’azur chargé de fleurs de lis d’or.",
+    "description": "Armes d’Angleterre brisées d’un lambel d’azur semé de fleurs de lis d’or (Lancastre, comme dans l’héraldique de la maison).",
     "primary_color": "#B0182B",
     "secondary_color": "#1F3A93"
   },

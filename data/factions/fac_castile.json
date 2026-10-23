@@ -63,8 +63,8 @@
     },
     {
       "faction": "fac_marinids",
-      "status": "war",
-      "note": "Guerre du Détroit : siège de Gibraltar (1333), campagne du Salado (1340)."
+      "status": "truce",
+      "note": "Trêve de 1334 après la reprise de Gibraltar (1333) ; la guerre du Détroit reprend en 1339 (défaite navale d’Algésiras, avril 1340, puis Salado, 30 octobre 1340)."
     }
   ],
   "ai_personality": {
