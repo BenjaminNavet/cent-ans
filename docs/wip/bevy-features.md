@@ -44,3 +44,8 @@ Suivre les deux lots en cours, puis : (a) benchs sur machine calme (réf, Solari
 
 ## Vent de bataille : coût mesuré (23/10, release, Crécy, ultra)
 `CENT_ANS_PERF_OFF=wind` (nouveau, dev) remplace le vertex shader du vent par celui de Bevy : mêlée 16,7 ms (vent) vs 17,0 ms (sans), calme 13,2 vs 13,0 : aucun coût mesurable, même avec les amplitudes x3,5. Refonte du vent pour la perf : inutile. Reste possible pour le rendu seulement (ombres qui suivent le balancement : lot V4 de bevy-etude-vent.md).
+
+## Fin de nuit 23/10 : état final (main 1155010d6, non poussé)
+- Dans main : foule1 (+46 % fps mêlée), KTX2 sol de bataille (cache à cuire), correctif samplers campagne (3 propres), ombre de relief + AO cuites en campagne (ADR 0745, coût ~0 ms), ultra = auto_exposure + sharpening, décals, outils dev, `CENT_ANS_PERF_OFF=wind`.
+- Mesures : vent 0 ms ; A+B campagne +0,1 ms (d30), 0 (d150) ; Solari campagne et bataille désactivés (rendu pâle / pas d'ombre de soldats).
+- Restent : Solari par défaut (soldats dans le TLAS ?), contrôle visuel de la foule en mouvement, lots L3-L7 campagne (session 51), shader différé du terrain (abandonné avec Solari campagne), V4 vent (ombres animées), nettoyage des branches `worktree-agent-*` et `.claude/worktrees` (~40 worktrees).
