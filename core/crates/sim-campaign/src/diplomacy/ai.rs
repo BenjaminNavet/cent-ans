@@ -568,6 +568,37 @@ enum UltimatumStep {
     Wait,
 }
 
+/// ADR 0748: the named reason (doctrine or objective, a key of `data/ui/causes.fr.json`) of the
+/// war `attacker` declares on `target`. The AI plans on a read-only state and returns orders, so
+/// the reason is derived when the order is applied, by the same pure tests as the planner's.
+pub(crate) fn war_reason(
+    state: &CampaignState,
+    data: &GameData,
+    attacker: &FactionId,
+    target: &FactionId,
+) -> &'static str {
+    if ultimatum_war(state, attacker).as_ref() == Some(target) {
+        "ultimatum_refused"
+    } else if matches!(
+        state.relation(attacker, target),
+        RelationKind::Vassal | RelationKind::Suzerain
+    ) {
+        "independence"
+    } else if state
+        .factions
+        .get(attacker)
+        .is_some_and(|f| f.allies.iter().any(|ally| state.is_at_war(ally, target)))
+    {
+        "ally_war"
+    } else if crate::negotiation::pretender_ready(state, data, attacker) {
+        "crown_claim"
+    } else if state.faction_power(attacker) >= OPPORTUNIST_RATIO * state.faction_power(target) {
+        "opportunism"
+    } else {
+        "ambition"
+    }
+}
+
 /// The target `faction` declares war on because it refused its ultimatum.
 fn ultimatum_war(state: &CampaignState, faction: &FactionId) -> Option<FactionId> {
     let me = state.factions.get(faction)?;

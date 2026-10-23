@@ -239,6 +239,8 @@ pub(crate) fn succeed(
         designated.as_ref(),
         events,
     );
+    let was_contested = contested.is_some();
+    let had_designated = designated.is_some();
     let successor = contested.or(designated).or_else(|| {
         dead_ruler
             .as_ref()
@@ -272,6 +274,16 @@ pub(crate) fn succeed(
             faction_state.heir = None;
             let next_heir = dynasty::pick_heir_by_law(state, data, faction, &new_ruler);
             state.factions.get_mut(faction).expect("exists").heir = next_heir;
+            let cause = succession_cause(
+                state,
+                faction,
+                dead_ruler.as_ref(),
+                had_designated,
+                was_contested,
+                Some(&new_ruler),
+                false,
+                elective,
+            );
             events.push(
                 GameEvent::new(
                     EventKind::Succession,
@@ -281,7 +293,8 @@ pub(crate) fn succeed(
                         data.faction_name(faction)
                     ),
                 )
-                .faction(faction),
+                .faction(faction)
+                .maybe_cause(cause),
             );
         }
         None => {
@@ -349,9 +362,55 @@ pub(crate) fn succeed(
             faction_state.heir = None;
             let next_heir = dynasty::pick_heir_by_law(state, data, faction, &ruler);
             state.factions.get_mut(faction).expect("exists").heir = next_heir;
-            events.push(GameEvent::new(EventKind::Succession, text).faction(faction));
+            let cause = succession_cause(
+                state,
+                faction,
+                dead_ruler.as_ref(),
+                had_designated,
+                was_contested,
+                Some(&ruler),
+                !elective,
+                elective,
+            );
+            events.push(
+                GameEvent::new(EventKind::Succession, text)
+                    .faction(faction)
+                    .maybe_cause(cause),
+            );
         }
     }
+}
+
+/// ADR 0748: the cause of a succession in the player's realm (`None` for the AI's).
+#[allow(clippy::too_many_arguments)]
+fn succession_cause(
+    state: &CampaignState,
+    faction: &FactionId,
+    dead_ruler: Option<&CharacterId>,
+    designated_heir: bool,
+    contested: bool,
+    successor: Option<&CharacterId>,
+    line_extinct: bool,
+    elective: bool,
+) -> Option<crate::causes::Cause> {
+    if faction != &state.player_faction {
+        return None;
+    }
+    let successor = successor.and_then(|id| state.characters.get(id));
+    Some(crate::cause_builders::succession_cause(
+        &crate::cause_builders::SuccessionFacts {
+            faction,
+            dead_ruler_age: dead_ruler
+                .and_then(|id| state.characters.get(id))
+                .map(|c| c.age(state.year)),
+            designated_heir,
+            contested,
+            successor_age: successor.map(|c| c.age(state.year)),
+            successor_minor: successor.is_some_and(|c| !c.is_major(state.year)),
+            line_extinct,
+            elective,
+        },
+    ))
 }
 
 /// Marks `id` dead: its wars, alliances, truces, embargoes and vassal ties

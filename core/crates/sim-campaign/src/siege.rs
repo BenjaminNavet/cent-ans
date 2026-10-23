@@ -1485,6 +1485,22 @@ pub(crate) fn capture(
 ) {
     let province_id = province_of(state, settlement_id);
     let is_city = state.province_city_id(&province_id) == Some(settlement_id);
+    // ADR 0748: what the fall of the place owes to, gathered before the hand-over.
+    let fall_facts = state.settlements.get(settlement_id).map(|settlement| {
+        let besieger_men: u32 = besiegers_of(state, settlement_id)
+            .iter()
+            .filter_map(|id| state.armies.get(id))
+            .map(|army| army.total_strength())
+            .sum();
+        (
+            settlement
+                .siege
+                .as_ref()
+                .map(|siege| (siege.turns_elapsed, siege.supplies, siege.breach)),
+            settlement.garrison_strength(),
+            besieger_men,
+        )
+    });
     let Some(settlement) = state.settlements.get_mut(settlement_id) else {
         return;
     };
@@ -1511,18 +1527,33 @@ pub(crate) fn capture(
             data.province_name(&province_id)
         )
     };
-    events.push(
-        GameEvent::new(
-            EventKind::ProvinceCaptured,
-            format!(
-                "{place} tombe aux mains de {} (auparavant {}).",
-                data.faction_name(new_controller),
-                data.faction_name(&previous)
-            ),
-        )
-        .province(&province_id)
-        .faction(new_controller),
-    );
+    let mut fall = GameEvent::new(
+        EventKind::ProvinceCaptured,
+        format!(
+            "{place} tombe aux mains de {} (auparavant {}).",
+            data.faction_name(new_controller),
+            data.faction_name(&previous)
+        ),
+    )
+    .province(&province_id)
+    .faction(new_controller);
+    let player = &state.player_faction;
+    if let (Some((siege, garrison, besiegers)), true) =
+        (fall_facts, &previous == player || new_controller == player)
+    {
+        fall = fall.cause(crate::cause_builders::place_cause(
+            &crate::cause_builders::PlaceFacts {
+                previous: &previous,
+                new_holder: new_controller,
+                province: &province_id,
+                is_city,
+                siege,
+                garrison,
+                besiegers,
+            },
+        ));
+    }
+    events.push(fall);
     // JR1: a place of the Holy Land, or the city of the vow.
     crate::crusade::on_settlement_taken(state, data, new_controller, settlement_id, events);
     // TW2-T1: the fate of the place (player's choice, or the AI's at once).

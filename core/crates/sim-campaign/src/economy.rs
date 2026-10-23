@@ -760,13 +760,30 @@ pub(crate) fn resolve_economy(
                     unit.morale = unit.morale.saturating_sub(penalty);
                 }
             }
-            events.push(
-                GameEvent::new(
-                    EventKind::Bankruptcy,
-                    format!("Le trésor est vide : les troupes grondent (moral -{penalty})."),
-                )
-                .faction(&faction_id),
-            );
+            let mut bankruptcy = GameEvent::new(
+                EventKind::Bankruptcy,
+                format!("Le trésor est vide : les troupes grondent (moral -{penalty})."),
+            )
+            .faction(&faction_id);
+            if faction_id == state.player_faction {
+                // ADR 0748: the budget lines behind the empty purse.
+                let faction = &state.factions[&faction_id];
+                let budget = &faction.last_budget;
+                bankruptcy = bankruptcy.cause(crate::cause_builders::bankruptcy_cause(
+                    &crate::cause_builders::BankruptcyFacts {
+                        faction: &faction_id,
+                        treasury: faction.treasury,
+                        income: budget.income,
+                        army_upkeep: budget.army_upkeep,
+                        army_surcharge: budget.army_surcharge,
+                        building_upkeep: budget.building_upkeep,
+                        administration: budget.administration,
+                        table: budget.table,
+                        deficit_seasons: u32::from(faction.deficit_seasons),
+                    },
+                ));
+            }
+            events.push(bankruptcy);
         }
     }
 

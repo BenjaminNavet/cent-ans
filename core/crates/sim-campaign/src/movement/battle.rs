@@ -697,6 +697,7 @@ pub(crate) fn apply_battle_result(
             String::new()
         }
     };
+    let battle_event = events.len();
     events.push(
         GameEvent::new(
             EventKind::Battle,
@@ -781,6 +782,52 @@ pub(crate) fn apply_battle_result(
         ),
         result,
     );
+    // ADR 0748: why the battle was lost, when the player fought it.
+    if attacker_faction == state.player_faction || defender_faction == state.player_faction {
+        let attacker_won = result.winner == Winner::Attacker;
+        let (winner_side, loser_side, winner_ids, loser_ids) = if attacker_won {
+            (&result.attacker, &result.defender, attackers, defenders)
+        } else {
+            (&result.defender, &result.attacker, defenders, attackers)
+        };
+        let (winner_faction, loser_faction) = if attacker_won {
+            (&attacker_faction, &defender_faction)
+        } else {
+            (&defender_faction, &attacker_faction)
+        };
+        // The loser's side is the defender when the attacker won, and the reverse.
+        let loser_tally = tally(loser_ids, loser_side);
+        let rough_terrain = province
+            .map(|p| p.terrain)
+            .filter(|t| {
+                !matches!(
+                    t,
+                    data_model::Terrain::Plains
+                        | data_model::Terrain::Steppe
+                        | data_model::Terrain::Desert
+                )
+            })
+            .map(|t| t.key());
+        let cause = crate::cause_builders::battle_cause(&crate::cause_builders::BattleFacts {
+            winner: winner_faction,
+            loser: loser_faction,
+            province: &province_id,
+            winner_strength: tally(winner_ids, winner_side).strength,
+            loser_strength: loser_tally.strength,
+            loser_losses: loser_tally.losses,
+            winner_power: winner_side.power,
+            loser_power: loser_side.power,
+            loser_general_lost: loser_tally.general_lost,
+            loser_routed: loser_side.routed,
+            loser_morale_delta: loser_side.morale_delta,
+            winner_defended: !attacker_won,
+            rough_terrain,
+        });
+        let cause_id = state.note_cause(cause);
+        if let Some(event) = events.get_mut(battle_event) {
+            event.cause_id = Some(cause_id);
+        }
+    }
     let place = crate::march::nearest_settlement(data, battlefield)
         .map_or_else(|| province_name.clone(), |s| data.settlement_name(&s));
     let (attacker_xp, defender_xp) = crate::battle_outcome::apply(

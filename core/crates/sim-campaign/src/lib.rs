@@ -63,6 +63,7 @@ pub mod buildings;
 pub mod campaign_stats;
 pub mod captains;
 pub mod capture;
+pub mod cause_builders;
 pub mod causes;
 pub mod char_travel;
 pub mod characters;

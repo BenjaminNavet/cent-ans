@@ -6,6 +6,8 @@
 
 use data_model::{FactionId, GameData, ProvinceId, UnitTypeId};
 
+use crate::cause_builders;
+use crate::causes::{Cause, CauseKind};
 use crate::events::{EventKind, GameEvent};
 use crate::state::{Army, ArmyPosition, CampaignState, Unit, Uprising};
 
@@ -75,6 +77,24 @@ fn rebel_regiments(state: &CampaignState, data: &GameData, id: &ProvinceId) -> V
     units
 }
 
+/// ADR 0748: the cause of a warning or of an uprising, for the player's provinces only.
+fn unrest_cause(
+    state: &CampaignState,
+    data: &GameData,
+    kind: CauseKind,
+    controller: &FactionId,
+    id: &ProvinceId,
+    tension: u32,
+) -> Option<Cause> {
+    if controller != &state.player_faction {
+        return None;
+    }
+    let terms = crate::population::province_unrest_terms(state, data, id);
+    Some(cause_builders::unrest_cause(
+        kind, controller, id, tension, &terms,
+    ))
+}
+
 /// The tension of `id` for this season (called by the population phase with
 /// the class-weighted unrest and the city's controller). Warns, raises the
 /// uprising at full tension, and follows a uprising already under way.
@@ -120,6 +140,7 @@ pub(crate) fn resolve(
     }
     for &level in &rules.warning_tensions {
         if before < level && after >= level {
+            let cause = unrest_cause(state, data, CauseKind::UnrestWarning, controller, id, after);
             events.push(
                 GameEvent::new(
                     EventKind::Unrest,
@@ -130,7 +151,8 @@ pub(crate) fn resolve(
                 )
                 .province(id)
                 .faction(controller)
-                .loss(),
+                .loss()
+                .maybe_cause(cause),
             );
         }
     }
@@ -174,13 +196,22 @@ fn rise_up(
     let units = rebel_regiments(state, data, id);
     let rebels = rebels().filter(|r| state.factions.contains_key(r));
     let Some(rebels) = rebels.filter(|_| !units.is_empty()) else {
+        let cause = unrest_cause(
+            state,
+            data,
+            CauseKind::Revolt,
+            controller,
+            id,
+            rules.tension_max,
+        );
         events.push(
             GameEvent::new(
                 EventKind::Revolt,
                 format!("Révolte à {name} : la garnison est affaiblie."),
             )
             .province(id)
-            .faction(controller),
+            .faction(controller)
+            .maybe_cause(cause),
         );
         return;
     };
@@ -204,6 +235,14 @@ fn rise_up(
             seasons: 0,
         });
     }
+    let cause = unrest_cause(
+        state,
+        data,
+        CauseKind::Revolt,
+        controller,
+        id,
+        rules.tension_max,
+    );
     events.push(
         GameEvent::new(
             EventKind::Revolt,
@@ -213,7 +252,8 @@ fn rise_up(
         )
         .province(id)
         .army(&army_id)
-        .faction(controller),
+        .faction(controller)
+        .maybe_cause(cause),
     );
 }
 
@@ -292,13 +332,22 @@ fn resolve_uprising(
     if let Some(city) = state.settlements.get_mut(&city_id) {
         city.hand_over(&rebels);
     }
+    let cause = unrest_cause(
+        state,
+        data,
+        CauseKind::Revolt,
+        controller,
+        id,
+        rules.tension_max,
+    );
     events.push(
         GameEvent::new(
             EventKind::Revolt,
             format!("{name} passe aux mains des rebelles."),
         )
         .province(id)
-        .faction(&rebels),
+        .faction(&rebels)
+        .maybe_cause(cause),
     );
 }
 

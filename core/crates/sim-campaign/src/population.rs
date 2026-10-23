@@ -494,6 +494,31 @@ fn equilibrium_detail(
 /// Key of the forecast term for the unrest already there, which fades.
 pub const UNREST_INERTIA_KEY: &str = "inertia";
 
+/// ADR 0748: the terms of the unrest of one province (points of discontent each pulls on the
+/// population-weighted mean target), for the journal of causes. Empty without population.
+pub(crate) fn province_unrest_terms(
+    state: &CampaignState,
+    data: &GameData,
+    province: &ProvinceId,
+) -> Vec<(&'static str, f64)> {
+    let Some(classes) = equilibrium_detail(state, data, province) else {
+        return Vec::new();
+    };
+    let total: u64 = classes.iter().map(|(_, count, _, _)| *count).sum();
+    if total == 0 {
+        return Vec::new();
+    }
+    let mut terms: std::collections::BTreeMap<&'static str, f64> =
+        std::collections::BTreeMap::new();
+    for (_, count, _, class_terms) in classes {
+        let weight = count as f64 / total as f64;
+        for (key, value) in class_terms {
+            *terms.entry(key).or_default() += weight * value;
+        }
+    }
+    terms.into_iter().collect()
+}
+
 /// Forecast of the weighted mean unrest of `faction`: how many points each
 /// term of the unrest targets (see [`unrest_breakdown`]) pulls the mean this
 /// season, `UNREST_SPEED` of the way to the target, weighted by population,

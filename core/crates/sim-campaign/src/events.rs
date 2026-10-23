@@ -165,6 +165,12 @@ impl GameEvent {
         self
     }
 
+    /// [`GameEvent::cause`] when there is one (producers that only explain the player's events).
+    pub fn maybe_cause(mut self, cause: Option<crate::causes::Cause>) -> Self {
+        self.cause = cause.map(Box::new);
+        self
+    }
+
     /// A loss for the event's faction (see [`GameEvent::loss`]).
     pub fn loss(mut self) -> Self {
         self.loss = true;
