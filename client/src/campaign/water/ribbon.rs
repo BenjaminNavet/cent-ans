@@ -188,12 +188,12 @@ pub fn wander(points: &[Vec2], step: f32, amplitude: f32, wavelength: f32) -> Ve
     }
     // Moving average, two passes (about a triangle window of 2 * HALF + 1 samples), ends pinned
     // by shrinking the window.
-    const HALF: usize = 5;
+    let window = ((5.0 / step.max(0.25)).round() as usize).max(2);
     let mut smooth = dense.clone();
     for _ in 0..2 {
         let source = smooth.clone();
         for (i, slot) in smooth.iter_mut().enumerate() {
-            let half = HALF.min(i).min(n - 1 - i);
+            let half = window.min(i).min(n - 1 - i);
             let (lo, hi) = (i - half, i + half);
             let sum: Vec2 = source[lo..=hi].iter().copied().sum();
             *slot = sum / (hi - lo + 1) as f32;

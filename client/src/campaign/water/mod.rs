@@ -787,12 +787,24 @@ fn build_roads(
         ),
     ] {
         let roads: Vec<&data::Road> = data.roads.iter().filter(|r| r.main == main).collect();
-        let widths: Vec<Vec<f32>> = roads.iter().map(|r| vec![width; r.points.len()]).collect();
-        let lines: Vec<RibbonLine> = roads
+        // Same wandering track as the near ribbons, so the tiers cross-fade on one line.
+        let shaped: Vec<Vec<Vec2>> = roads
+            .iter()
+            .map(|r| {
+                ribbon::wander(
+                    &r.points,
+                    RIBBON_STEP * 2.0,
+                    ROAD_WANDER_AMPLITUDE,
+                    ROAD_WANDER_WAVELENGTH,
+                )
+            })
+            .collect();
+        let widths: Vec<Vec<f32>> = shaped.iter().map(|p| vec![width; p.len()]).collect();
+        let lines: Vec<RibbonLine> = shaped
             .iter()
             .zip(&widths)
-            .map(|(r, w)| RibbonLine {
-                points: &r.points,
+            .map(|(points, w)| RibbonLine {
+                points,
                 widths: w,
                 importance: 0.0,
             })
