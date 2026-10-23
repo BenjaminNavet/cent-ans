@@ -70,3 +70,21 @@ Moyenne 256, Basse 192, `legacy` 0.
   `AssetEvent<Image>` si un tel cas apparaît.
 - Les fonctions du bloc régional ne doivent pas lire `view`, `globals` ni `lights` (la cuisson n'a
   pas de vue) : à respecter en les modifiant.
+
+## Correctif du 23/10 : carrés noirs
+
+Le joueur voyait des carrés noirs sur le sol et de brèves coupures noires. Une tuile restait cachée
+jusqu'à sa première cuisson (au plus 6 par image) : en panoramique, en zoom ou en rotation, les
+tuiles qui entrent dans le champ n'ont aucune ancienne tuile pour les couvrir. On voyait donc le
+fond noir à travers, parfois pendant plus de 10 images (jusqu'à 78 cuissons en attente mesurées
+au banc).
+
+- La cuisson écrit l'alpha de l'albédo sous la forme `0,5 + 0,5 × part de forêt`, jamais 0. Une
+  couche réattribuée est remise à zéro (`clear_texture`, une fois par publication, liste `clears`
+  de `GroundBakeQueue`). Le fragment lit l'alpha : 0 veut dire « pas encore cuite ». Il garde
+  alors le sol de base, sans ombre de relief cuite. C'est aussi le repli de la couche -1 (atlas
+  plein).
+- Une tuile non cuite s'affiche tout de suite si aucune tuile en retrait ne recouvre son carré.
+  Sinon, la tuile en retrait reste affichée jusqu'à la cuisson, comme avant.
+- `FIRST_PER_FRAME` passe de 6 à 10 cuissons par image, pour que le sol de base plat dure moins
+  longtemps.

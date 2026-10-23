@@ -44,6 +44,9 @@ struct Node {
     baked_ticket: u64,
     generation: u64,
     mesh: Option<AssetId<Mesh>>,
+    /// Visibility set to `Visible` (a cache node shows before its first bake when no retiring
+    /// node covers it: the shader draws the base ground until the layer is baked).
+    shown: bool,
 }
 
 impl Node {
@@ -411,6 +414,7 @@ pub fn update_lod(
                 baked_ticket: 0,
                 generation: 0,
                 mesh: None,
+                shown: false,
             },
         );
     }
@@ -452,6 +456,7 @@ pub fn update_lod(
                 commands
                     .entity(node.entity)
                     .insert((Mesh3d(mesh), Visibility::Visible));
+                node.shown = true;
             }
         }
         built += 1;
@@ -481,6 +486,20 @@ pub fn update_lod(
             }
         }
     }
+    // Cache nodes still waiting for their first bake: drawn at once (base ground) unless an older
+    // node still covers their square; hiding them left black holes at the edges of a pan or zoom.
+    if cache.is_some() {
+        let retiring: Vec<_> = lod.retiring.iter().map(|(n, _)| n.rect()).collect();
+        for node in lod.nodes.values_mut() {
+            if node.shown || node.mesh.is_none() {
+                continue;
+            }
+            if !retiring.iter().any(|r| overlaps(*r, node.rect())) {
+                commands.entity(node.entity).insert(Visibility::Visible);
+                node.shown = true;
+            }
+        }
+    }
     lod.meshes_built += built as u64;
     lod.build_ms_last = started.elapsed().as_secs_f32() * 1000.0;
 }
@@ -499,8 +518,9 @@ fn update_bakes(
             .values_mut()
             .find(|n| n.spec.cache_layer == layer as i32 && n.bake_ticket == ticket)
         {
-            if node.baked_ticket == 0 {
+            if !node.shown {
                 commands.entity(node.entity).insert(Visibility::Visible);
+                node.shown = true;
             }
             node.baked_ticket = ticket;
         }

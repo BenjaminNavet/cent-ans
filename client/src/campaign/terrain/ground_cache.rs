@@ -33,9 +33,9 @@ use bevy::render::mesh::{RenderMesh, RenderMeshBufferInfo};
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::render_resource::{
     BindGroup, BindGroupLayoutDescriptor, CachedRenderPipelineId, ColorTargetState, ColorWrites,
-    Extent3d, FragmentState, LoadOp, Operations, Origin3d, PipelineCache, PrimitiveState,
-    RenderPassColorAttachment, RenderPassDescriptor, RenderPipelineDescriptor, StoreOp,
-    TexelCopyTextureInfo, Texture, TextureAspect, TextureDescriptor, TextureDimension,
+    Extent3d, FragmentState, ImageSubresourceRange, LoadOp, Operations, Origin3d, PipelineCache,
+    PrimitiveState, RenderPassColorAttachment, RenderPassDescriptor, RenderPipelineDescriptor,
+    StoreOp, TexelCopyTextureInfo, Texture, TextureAspect, TextureDescriptor, TextureDimension,
     TextureFormat, TextureUsages, TextureView, TextureViewDescriptor, TextureViewDimension,
     VertexState,
 };
@@ -59,7 +59,7 @@ pub const LAYERS: u32 = 384;
 /// Nodes baked per frame at most once every node is shown (a refresh after an invalidation).
 const REFRESH_PER_FRAME: usize = 2;
 /// Nodes baked per frame at most while some node waits for its first bake.
-const FIRST_PER_FRAME: usize = 6;
+const FIRST_PER_FRAME: usize = 10;
 /// Shortest delay between two invalidations (s): gliding seasons rebake at this pace at most.
 const INVALIDATE_MIN_S: f64 = 1.0;
 
@@ -79,6 +79,11 @@ pub struct GroundCache {
     pub dn: Handle<Image>,
     pub shade: Handle<Image>,
     free: Vec<u32>,
+    /// Layers handed out since the last publish: cleared by the render world (alpha 0 = not
+    /// baked) before any node draws them, so a reused layer never shows its previous node.
+    fresh: Vec<u32>,
+    /// Number of the last publish (the render world clears `fresh` once per publish).
+    serial: u64,
     next_ticket: u64,
     /// Bumped by an invalidation: every node with an older generation is baked again.
     pub generation: u64,
@@ -123,6 +128,8 @@ impl GroundCache {
             dn: atlas(DN_FORMAT),
             shade: atlas(SHADE_FORMAT),
             free: (0..LAYERS).rev().collect(),
+            fresh: Vec::new(),
+            serial: 0,
             next_ticket: 0,
             generation: 0,
             signature: None,
@@ -140,7 +147,10 @@ impl GroundCache {
     /// A free layer for a new node (-1 when the atlas is full).
     pub fn alloc(&mut self) -> i32 {
         match self.free.pop() {
-            Some(layer) => layer as i32,
+            Some(layer) => {
+                self.fresh.push(layer);
+                layer as i32
+            }
             None => {
                 self.exhausted += 1;
                 -1
@@ -181,6 +191,9 @@ pub struct GroundBakeQueue {
     pub shade: Handle<Image>,
     pub material: AssetId<TerrainMaterial>,
     pub jobs: Vec<BakeJob>,
+    /// Layers to clear before this frame's bakes, and the publish they belong to.
+    pub clears: Vec<u32>,
+    pub serial: u64,
     pub done: Arc<Mutex<Vec<(u32, u64)>>>,
 }
 
@@ -213,6 +226,9 @@ pub fn publish_jobs(
     queue.shade = cache.shade.clone();
     queue.material = material;
     queue.done = cache.done.clone();
+    cache.serial += 1;
+    queue.serial = cache.serial;
+    queue.clears = std::mem::take(&mut cache.fresh);
     queue.jobs = jobs.into_iter().take(budget).map(|(_, job)| job).collect();
 }
 
@@ -546,9 +562,32 @@ fn bake_pass(
     images: Res<RenderAssets<GpuImage>>,
     materials: Res<ErasedRenderAssets<PreparedMaterial>>,
     allocators: Res<MaterialBindGroupAllocators>,
+    mut cleared_serial: Local<u64>,
     mut ctx: RenderContext,
 ) {
-    let (Some(queue), Some(pipeline)) = (queue, pipeline) else {
+    let Some(queue) = queue else {
+        return;
+    };
+    // Fresh layers first, once per publish (an unchanged queue is not extracted again).
+    if queue.serial != *cleared_serial {
+        *cleared_serial = queue.serial;
+        if let Some(albedo_atlas) = images.get(&queue.albedo) {
+            let encoder = ctx.command_encoder();
+            for &layer in &queue.clears {
+                encoder.clear_texture(
+                    &albedo_atlas.texture,
+                    &ImageSubresourceRange {
+                        aspect: TextureAspect::All,
+                        base_mip_level: 0,
+                        mip_level_count: None,
+                        base_array_layer: layer,
+                        array_layer_count: Some(1),
+                    },
+                );
+            }
+        }
+    }
+    let Some(pipeline) = pipeline else {
         return;
     };
     if queue.jobs.is_empty() {

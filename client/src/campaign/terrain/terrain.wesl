@@ -2429,11 +2429,20 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     // Baked relief shade (ADR 0745): sun visibility and horizon occlusion (1, 1 when off).
     var relief_vis = 1.0;
     var relief_ao = 1.0;
+    // Ground cache (ADR 0742): a layer not baked yet (cleared, alpha 0) falls back to the base
+    // ground, so a node entering the view is drawn at once instead of leaving a black hole.
+    var cache_texel = vec4<f32>(0.0);
+    var cache_uv = vec2<f32>(0.0);
+    var cache_ok = false;
     @if(GROUND_CACHE) {
-        if (shade.sun.w > 0.5) {
-            let half_texel = 0.5 / f32(constants::GC_TEXELS);
-            let uv = clamp(in.cache.xy, vec2<f32>(half_texel), vec2<f32>(1.0 - half_texel));
-            let baked = textureSampleLevel(cache_shade, terroir_sampler, uv, i32(in.cache.z), 0.0).rg;
+        let half_texel = 0.5 / f32(constants::GC_TEXELS);
+        cache_uv = clamp(in.cache.xy, vec2<f32>(half_texel), vec2<f32>(1.0 - half_texel));
+        if (in.cache.z >= 0.0) {
+            cache_texel = textureSampleLevel(cache_albedo, terroir_sampler, cache_uv, i32(in.cache.z), 0.0);
+            cache_ok = cache_texel.a > 0.25;
+        }
+        if (shade.sun.w > 0.5 && cache_ok) {
+            let baked = textureSampleLevel(cache_shade, terroir_sampler, cache_uv, i32(in.cache.z), 0.0).rg;
             relief_vis = mix(1.0, baked.r, shade.mix.x);
             relief_ao = mix(1.0, baked.g, shade.mix.y);
         }
@@ -2447,14 +2456,13 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
     if (regional) {
         @if(GROUND_CACHE) {
             // Baked once per node (ADR 0742); the clamp keeps the bilinear inside the layer.
-            let half_texel = 0.5 / f32(constants::GC_TEXELS);
-            let uv = clamp(in.cache.xy, vec2<f32>(half_texel), vec2<f32>(1.0 - half_texel));
-            let layer = i32(in.cache.z);
-            let a = textureSampleLevel(cache_albedo, terroir_sampler, uv, layer, 0.0);
-            let dn = textureSampleLevel(cache_dn, terroir_sampler, uv, layer, 0.0).xy;
-            albedo = a.rgb;
-            forest_f = a.a;
-            n = normalize(n + vec3<f32>(dn.x, 0.0, dn.y));
+            // Alpha packs the forest share as 0.5 + 0.5 f (0: not baked, base ground kept).
+            if (cache_ok) {
+                let dn = textureSampleLevel(cache_dn, terroir_sampler, cache_uv, i32(in.cache.z), 0.0).xy;
+                albedo = cache_texel.rgb;
+                forest_f = saturate(cache_texel.a * 2.0 - 1.0);
+                n = normalize(n + vec3<f32>(dn.x, 0.0, dn.y));
+            }
         }
         @if(!GROUND_CACHE) {
             let r = regional_ground(in.world.xz, ground_footprint, in.altitude, in.slope_xz, base_albedo);
@@ -2615,7 +2623,8 @@ fn bake_fragment(in: BakeVaryings) -> BakeOut {
     let base = base_ground(in.xz, in.texel);
     let r = regional_ground(in.xz, in.texel, in.altitude, in.slope_xz, base);
     var out: BakeOut;
-    out.albedo = vec4<f32>(r.albedo, r.forest_f);
+    // Alpha 0.5 + 0.5 f: never 0, which marks a layer not baked yet (cleared on allocation).
+    out.albedo = vec4<f32>(r.albedo, 0.5 + 0.5 * r.forest_f);
     out.dn = vec4<f32>(r.dn, 0.0, 1.0);
     out.shade = vec4<f32>(in.shade, 0.0, 1.0);
     return out;
