@@ -2534,7 +2534,7 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
 // ambient visibility). Runs in the vertex stage of the bake only (once per node vertex, amortised
 // by the cache), never in the main pass.
 const SHADE_MAX_ALT_M = 5200.0;
-const SHADE_AO_GAIN = 3.0;
+const SHADE_AO_GAIN = 6.0;
 
 fn relief_shade(xz: vec2<f32>, h0: f32) -> vec2<f32> {
     if (shade.sun.w < 0.5) {

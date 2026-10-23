@@ -15,4 +15,8 @@ ADR 0745. Réglages : `data/fx/campaign_relief_shade.json` (schéma `fx_campaign
   aucune lecture dans le fragment, rendu identique.
 
 ## État
-Voir `git log`. Prochaine étape : captures de contrôle, réglage de la force.
+Fait : cuisson, réglages, dump (`ground_cache.shade_rebakes`, `shade_enabled`), clippy x2, tests
+(1451 ok), bataille et campagne 300 images exit 0, 2 captures A/B (Alpes 6,9E 45,8N d=60,
+`CENT_ANS_RELIEF_SHADE=0|1` force `enabled`). Effet modeste (ombres des crêtes dans les vallées,
+plafonné par l'opacité max des ombres portées TS-T9 0,35-0,45). Réglage : `length_gain` allonge les
+ombres, `ao_strength`. Reste : bancs release par la session principale.

@@ -3,10 +3,11 @@
   "enabled": true,
   "shadow_strength": 0.7,
   "ao_strength": 0.5,
-  "max_distance_px": 512,
+  "max_distance_px": 256,
   "steps": 24,
   "penumbra_m": 80,
   "bias_m": 6,
   "ao_radius_px": 160,
+  "length_gain": 1.6,
   "sun_quantize_deg": 1.0
 }

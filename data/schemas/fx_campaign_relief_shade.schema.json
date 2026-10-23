@@ -4,7 +4,7 @@
   "title": "Ombre de relief et occlusion d'horizon de la campagne",
   "description": "Fichier data/fx/campaign_relief_shade.json (ADR 0745), lu par client/src/campaign/terrain/shade.rs. Rendu seulement.",
   "type": "object",
-  "required": ["description", "enabled", "shadow_strength", "ao_strength", "max_distance_px", "steps", "penumbra_m", "bias_m", "ao_radius_px", "sun_quantize_deg"],
+  "required": ["description", "enabled", "shadow_strength", "ao_strength", "max_distance_px", "steps", "penumbra_m", "bias_m", "ao_radius_px", "length_gain", "sun_quantize_deg"],
   "additionalProperties": false,
   "properties": {
     "description": {"type": "string", "minLength": 1},
@@ -16,6 +16,7 @@
     "penumbra_m": {"type": "number", "minimum": 1, "description": "Largeur de la pénombre (m d'altitude)."},
     "bias_m": {"type": "number", "minimum": 0, "description": "Décalage du rayon au-dessus du sol (m)."},
     "ao_radius_px": {"type": "number", "minimum": 16, "maximum": 2048},
+    "length_gain": {"type": "number", "minimum": 0.1, "maximum": 8, "description": "Allongement des ombres (1 = élévation géométrique du soleil)."},
     "sun_quantize_deg": {"type": "number", "minimum": 0, "maximum": 10, "description": "Quantification de la direction du soleil dans la signature du cache (degrés)."}
   }
 }

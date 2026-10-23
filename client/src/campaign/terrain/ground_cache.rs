@@ -220,7 +220,11 @@ pub fn publish_jobs(
 fn shade_signature(material: &TerrainMaterial) -> u64 {
     let mut hasher = DefaultHasher::new();
     format!("{:?}", material.shade).hash(&mut hasher);
-    material.height_lod.as_ref().map(Handle::id).hash(&mut hasher);
+    material
+        .height_lod
+        .as_ref()
+        .map(Handle::id)
+        .hash(&mut hasher);
     hasher.finish()
 }
 

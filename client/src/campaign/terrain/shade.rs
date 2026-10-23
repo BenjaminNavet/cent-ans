@@ -34,6 +34,8 @@ pub struct ReliefShadeSettings {
     pub bias_m: f32,
     /// Reach of the horizon search (map px).
     pub ao_radius_px: f32,
+    /// Lengthening of the shadows (1 = geometric sun elevation, 2 = twice as long).
+    pub length_gain: f32,
     /// Quantisation of the sun direction in the cache signature (degrees).
     pub sun_quantize_deg: f32,
 }
@@ -49,23 +51,31 @@ impl Default for ReliefShadeSettings {
             penumbra_m: 80.0,
             bias_m: 6.0,
             ao_radius_px: 160.0,
+            length_gain: 1.0,
             sun_quantize_deg: 1.0,
         }
     }
 }
 
 impl ReliefShadeSettings {
+    /// The data file; `CENT_ANS_RELIEF_SHADE=0|1` forces `enabled` (A/B captures).
     pub fn load() -> ReliefShadeSettings {
-        let Some(root) = paths::find_root().ok() else {
-            return Self::default();
-        };
-        match std::fs::read(paths::data_dir(&root).join(DATA_FILE)) {
-            Ok(bytes) => serde_json::from_slice(&bytes).unwrap_or_else(|error| {
+        let mut settings = match paths::find_root()
+            .ok()
+            .map(|root| std::fs::read(paths::data_dir(&root).join(DATA_FILE)))
+        {
+            Some(Ok(bytes)) => serde_json::from_slice(&bytes).unwrap_or_else(|error| {
                 error!("{DATA_FILE}: {error}");
                 Self::default()
             }),
-            Err(_) => Self::default(),
+            _ => Self::default(),
+        };
+        match std::env::var("CENT_ANS_RELIEF_SHADE").as_deref() {
+            Ok("0") => settings.enabled = false,
+            Ok("1") => settings.enabled = true,
+            _ => {}
         }
+        settings
     }
 }
 
@@ -130,7 +140,7 @@ pub fn params(
             settings.shadow_strength.clamp(0.0, 1.0),
             settings.ao_strength.clamp(0.0, 1.0),
             settings.ao_radius_px.max(16.0),
-            quantize_scale(scale, gain),
+            quantize_scale(scale, gain) / settings.length_gain.max(0.1),
         ),
     }
 }

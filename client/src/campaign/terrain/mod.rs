@@ -23,7 +23,6 @@ pub mod decode;
 pub mod fields;
 pub mod ground;
 pub mod ground_cache;
-pub mod shade;
 pub mod ground_detail;
 pub mod lighting;
 pub mod lod;
@@ -38,6 +37,7 @@ pub mod relief_floor;
 pub mod relief_gpu;
 pub mod relief_state;
 pub mod season;
+pub mod shade;
 pub mod shadows;
 #[cfg(feature = "solari")]
 pub mod solari_proxy;
