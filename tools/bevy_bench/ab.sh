@@ -7,13 +7,15 @@
 set -u
 here=${0:A:h}
 root=${here:h:h}
+calm_root=$root
+source "$here/calm.sh"
 (( $# >= 4 )) || { echo "usage: ab.sh <map|battle> <label> \"<envA>\" \"<envB>\" [pairs]" >&2; exit 2; }
 mode=$1 label=$2 env_a=$3 env_b=$4 pairs=${5:-3}
 [[ $mode == map || $mode == battle ]] || { echo "mode must be map or battle" >&2; exit 2; }
 extra=()
 [[ $mode == battle ]] && extra=(--bench-battle)
 # One build for all runs (run_bg.sh rebuilds only what changed).
-(cd "$root/client" && cargo build --release) >&2 || exit 1
+(cd "$root/client" && heavy_run cargo build --release) >&2 || exit 1
 for ((i = 1; i <= pairs; i++)); do
 	for variant in A B; do
 		if [[ $variant == A ]]; then assigns=$env_a; else assigns=$env_b; fi

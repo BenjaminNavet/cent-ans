@@ -14,5 +14,6 @@ pub mod menu;
 pub mod palette;
 pub mod paths;
 pub mod settings;
+mod shader_check;
 pub mod sim;
 pub mod ui;

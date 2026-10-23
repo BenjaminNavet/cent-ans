@@ -70,12 +70,14 @@ for name in $names; do
 	(( code != 0 )) && reasons+=("run_bg exit $code")
 	grep -q "panicked at" "$log" && reasons+=("panic")
 	grep -q "AGENT_FATAL" "$log" && reasons+=("AGENT_FATAL")
+	# A wgpu shader error does not stop the game: black ground with no other symptom (ADR 0774).
+	grep -q -E "failed to create shader module|no definition in scope|Shader compilation error" "$log" && reasons+=("shader error")
 	grep -q -E "AGENT_EXIT (script|bench)" "$log" || reasons+=("script did not reach exit")
 	nerrors=$(grep -c -E "(^|[^A-Za-z])ERROR([^A-Za-z]|$)" "$log")
 	(( nerrors > 0 )) && reasons+=("$nerrors ERROR line(s)")
 	if (( ${#reasons} )); then
 		echo "SMOKE FAIL $name (${elapsed}s): ${(j:, :)reasons} -> $log"
-		grep -m5 -E "panicked at|AGENT_FATAL|ERROR" "$log" | cut -c1-300 | sed 's/^/    /'
+		grep -m5 -E "panicked at|AGENT_FATAL|ERROR|shader module|no definition in scope|Shader compilation error" "$log" | cut -c1-300 | sed 's/^/    /'
 		failed+=($name)
 	else
 		echo "SMOKE ok   $name (${elapsed}s)"

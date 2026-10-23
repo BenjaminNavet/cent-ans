@@ -44,6 +44,7 @@ for seed in $seeds; do
 		(( code != 0 )) && reasons+=("exit $code")
 		grep -q "panicked at" "$log" && reasons+=("panic")
 		grep -q "AGENT_FATAL" "$log" && reasons+=("AGENT_FATAL")
+		grep -q -E "failed to create shader module|no definition in scope|Shader compilation error" "$log" && reasons+=("shader error")
 		grep -q -E "AGENT_EXIT (script|bench)" "$log" || reasons+=("script did not reach exit")
 		nerrors=$(grep -c -E "(^|[^A-Za-z])ERROR([^A-Za-z]|$)" "$log")
 		(( nerrors > 0 )) && reasons+=("$nerrors ERROR line(s)")
