@@ -178,7 +178,7 @@ pub struct FeedEntry {
     pub province: Option<String>,
     pub faction: Option<String>,
     pub loss: bool,
-    /// ADR 0748: the cause in the journal of causes (tooltip, « ? » button).
+    /// ADR 0754: the cause in the journal of causes (tooltip, « ? » button).
     pub cause_id: Option<u32>,
 }
 
@@ -394,7 +394,7 @@ fn handle_buttons(
     let mut persist = false;
     for press in pressed.read() {
         if let Some(id) = press.name.strip_prefix(CAUSE_PREFIX) {
-            // ADR 0748: « ? » beside a notification opens the chronicle on its cause.
+            // ADR 0754: « ? » beside a notification opens the chronicle on its cause.
             if let Ok(id) = id.parse::<u32>() {
                 causes.0 = Some(Some(id));
                 ui.last_action = format!("cause:{id}");
@@ -525,7 +525,7 @@ fn rebuild(
                             ..default()
                         })
                         .with_children(|row| {
-                            // ADR 0748: a notification with a cause says why in its tooltip.
+                            // ADR 0754: a notification with a cause says why in its tooltip.
                             let why = entry
                                 .cause_id
                                 .zip(sim.data.as_deref().zip(sim.state.as_ref()))

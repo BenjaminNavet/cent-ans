@@ -42,7 +42,7 @@ pub struct TerrainMeshData {
 
 /// Ground colour of a season (sRGB), before woods, mud and water tint it.
 pub fn season_ground(season: BattleSeason) -> [f32; 3] {
-    // The palette bible (`data/fx/palette.json`, ADR 0748) holds the ground of every season.
+    // The palette bible (`data/fx/palette.json`, ADR 0755) holds the ground of every season.
     crate::palette::palette().ground_of(match season {
         BattleSeason::Spring => "spring",
         BattleSeason::Summer => "summer",

@@ -90,7 +90,7 @@ const FINE_CONTRAST: f32 = 0.6;
 const MACRO_TINT: f32 = 0.38;
 const MACRO_WET: f32 = 0.3;
 const MACRO_ALBEDO: f32 = 0.12;
-// Share of the relief bumps kept when the sun is on the horizon (ADR 0748).
+// Share of the relief bumps kept when the sun is on the horizon (ADR 0755).
 const LOW_SUN_BUMP: f32 = 0.3;
 
 // --- battle_common.gdshaderinc --------------------------------------------------------------
@@ -457,7 +457,7 @@ fn ground_pbr_input(in: VertexOutput, is_front: bool) -> PbrInput {
     tint = mix(tint, mix(vec3<f32>(1.0), tint, 0.6), tx_ground);
     tint = mix(tint, tint * vec3<f32>(0.78, 0.92, 0.72), dip * 0.7);
     tint = mix(tint, tint * vec3<f32>(1.14, 1.06, 0.8), crest * 0.55);
-    // World-noise macro variation of the grass (ADR 0748): three octaves (from the long field scale down to the
+    // World-noise macro variation of the grass (ADR 0755): three octaves (from the long field scale down to the
     // meadow), so that no two stretches of field share a tint; one extra tap, no extra pass.
     let mv = macro_tex(p * FREQ_MACRO_VAR + vec2<f32>(0.47, 0.19)) * 0.5
         + macro_tex(p * FREQ_MACRO_VAR * 0.43 + vec2<f32>(0.81, 0.33)) * 0.3

@@ -150,7 +150,7 @@ pub struct AerialLook {
     /// Share of the strength removed under the "fog" weather (the ADR 0596 depth fog already
     /// veils the distance: no double veil).
     pub fog_cut: f32,
-    /// Share of the strength kept in clear weather (ADR 0748): the veil of the far land is for
+    /// Share of the strength kept in clear weather (ADR 0755): the veil of the far land is for
     /// the horizon, the clear middle ground keeps its colours. Rises to `1 - fog_cut` with fog.
     pub clear_scale: f32,
     pub color: Vec3,

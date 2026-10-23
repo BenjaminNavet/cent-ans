@@ -1,4 +1,4 @@
-# 0748 — Journal des causes (« pourquoi ai-je perdu / gagné ? »)
+# 0754 — Journal des causes (« pourquoi ai-je perdu / gagné ? »)
 
 Statut : accepté (lot CAUSES, 23/10/2026).
 

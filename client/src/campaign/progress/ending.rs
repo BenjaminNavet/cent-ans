@@ -180,7 +180,7 @@ fn spawn(commands: &mut Commands, theme: &UiTheme, assets: &AssetServer, view: &
                         UiType::Body,
                     ));
                     card.spawn(caption(&theme, &view.lines.join("\n")));
-                    // ADR 0748: why the campaign ended as it did.
+                    // ADR 0754: why the campaign ended as it did.
                     if !view.causes_title.is_empty() {
                         card.spawn((
                             Name::new("EndingCauses"),

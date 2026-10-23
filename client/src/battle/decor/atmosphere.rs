@@ -57,7 +57,7 @@ pub struct AtmosphereState {
     pub sun_azimuth_deg: f32,
     pub sun_direction: [f32; 3],
     pub fog_on_camera: bool,
-    /// Colour of the air at this hour (`time_of_day.<key>.air`, ADR 0748).
+    /// Colour of the air at this hour (`time_of_day.<key>.air`, ADR 0755).
     pub air: HourAir,
     /// `data/fx/atmosphere.json`, read once.
     pub rules: serde_json::Value,

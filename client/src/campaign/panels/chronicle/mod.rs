@@ -12,7 +12,7 @@
 //! `OpenPanel::CloseAll`. Widget names (agent `click`): `chronicle:tab_decisions|journal|letters`,
 //! `chronicle:genre:<id>`, `chronicle:world`, `chronicle:option:<decision>:<index>`,
 //! `chronicle:letter:<index>` (unfold), `chronicle:dismiss:<index>`, `chronicle:close`.
-//! ADR 0748: the `causes` tab (« Chroniques et causes ») lists the core's journal of causes
+//! ADR 0754: the `causes` tab (« Chroniques et causes ») lists the core's journal of causes
 //! (`game_api::causes`: the player's realm or all of Europe, factors ranked, the AI's named reason);
 //! widget names `chronicle:tab_causes`, `chronicle:cause_filter:mine|all`, `chronicle:cause:<id>`
 //! (unfold), `chronicle:cause_goto:<province>`. Anyone (end-of-battle screen, notifications, end
@@ -72,7 +72,7 @@ pub enum Tab {
     Decisions,
     Journal,
     Letters,
-    /// ADR 0748: « Chroniques et causes ».
+    /// ADR 0754: « Chroniques et causes ».
     Causes,
 }
 
@@ -772,7 +772,7 @@ fn cause_color(perspective: Perspective) -> Color {
     }
 }
 
-/// « Causes » tab (ADR 0748): the journal of causes, a cause unfolds into its ranked factors.
+/// « Causes » tab (ADR 0754): the journal of causes, a cause unfolds into its ranked factors.
 fn causes_tab(
     page: &mut ChildSpawnerCommands,
     theme: &UiTheme,

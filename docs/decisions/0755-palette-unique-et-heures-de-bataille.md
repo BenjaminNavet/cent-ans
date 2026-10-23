@@ -1,4 +1,4 @@
-# 0748 — Palette unique, six heures de bataille, voile de campagne réduit
+# 0755 — Palette unique, six heures de bataille, voile de campagne réduit
 
 Statut : accepté (23/10). Amende 0097 (préréglages d'heure : trois deviennent six), 0406 (contraste clair de bataille), 0710 (étalonnage et voile de la carte). 0596 (météo brouillard) inchangé.
 

@@ -1,4 +1,4 @@
-//! The palette bible of the game (`data/fx/palette.json`, ADR 0748, `docs/design/palette.md`):
+//! The palette bible of the game (`data/fx/palette.json`, ADR 0755, `docs/design/palette.md`):
 //! one set of reference colours (ground, stone, leather, textile, sky) for the campaign and the
 //! battle, a reference season (spring) and a reference hour (midday). The battle ground, grass
 //! and horizon read the season ground from here; the common grade and the measurement targets

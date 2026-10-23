@@ -40,7 +40,7 @@ const CARD_W: f32 = 54.0;
 const CARD_H: f32 = 80.0;
 const RETURN_BUTTON: &str = "result:return";
 const WATCH_BUTTON: &str = "result:watch";
-/// ADR 0748: back to the campaign, on the chronicle of causes (why the battle went that way).
+/// ADR 0754: back to the campaign, on the chronicle of causes (why the battle went that way).
 const WHY_BUTTON: &str = "result:why";
 
 /// « Victoire », « Victoire à la Pyrrhus » or « Défaite » (`banner_title`).

@@ -1,4 +1,4 @@
-# Bible de palette (ADR 0748)
+# Bible de palette (ADR 0755)
 
 Une seule palette pour la campagne et la bataille. Données : `data/fx/palette.json` (schéma `fx_palette.schema.json`). Lecteur : `client/src/palette.rs`. Mesures du juge DA (`out/juge/iter-02-art.md`, 5,3 / 10) : deux mondes colorimétriques (campagne gris-vert froid, bataille jaune-vert saturé et ciel bleu vif), aube indiscernable du midi, crépuscule sale.
 
