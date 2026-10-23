@@ -57,10 +57,22 @@ pub enum Mode {
     Model = 3,
 }
 
-/// Pipeline key: the mesh key of the view and the mesh.
+/// Pipeline key: the mesh key of the view and the mesh, and the pass.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct VegKey {
     mesh: MeshPipelineKey,
+    pass: VegPass,
+}
+
+/// Which draw of a batch a pipeline serves.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub enum VegPass {
+    /// Colour with depth write (no prepass).
+    Single,
+    /// Depth only, with the colour pass's coverage (`fragment_depth`).
+    Depth,
+    /// Colour over the prepass depth: depth test only, no write.
+    Colour,
 }
 
 /// Parameter block mirrored by `Params` in `billboard.wesl`.
@@ -369,6 +381,7 @@ impl SpecializedMeshPipeline for VegPipeline {
     ) -> Result<RenderPipelineDescriptor, SpecializedMeshPipelineError> {
         let mut descriptor = self.mesh_pipeline.specialize(key.mesh, layout)?;
         descriptor.vertex.shader = self.shader.clone();
+        descriptor.vertex.entry_point = Some("vertex".into());
         descriptor.vertex.buffers.push(VertexBufferLayout {
             array_stride: RECORD_BYTES as u64,
             step_mode: VertexStepMode::Instance,
@@ -392,6 +405,18 @@ impl SpecializedMeshPipeline for VegPipeline {
         });
         if let Some(fragment) = descriptor.fragment.as_mut() {
             fragment.shader = self.shader.clone();
+            fragment.entry_point = Some("fragment".into());
+            if key.pass == VegPass::Depth {
+                fragment.entry_point = Some("fragment_depth".into());
+                for target in fragment.targets.iter_mut().flatten() {
+                    target.write_mask = ColorWrites::empty();
+                }
+            }
+        }
+        if key.pass == VegPass::Colour
+            && let Some(depth) = descriptor.depth_stencil.as_mut()
+        {
+            depth.depth_write_enabled = Some(false);
         }
         // Cards are seen from both sides.
         descriptor.primitive.cull_mode = None;
@@ -419,6 +444,7 @@ fn queue_batches(
     if crate::campaign::perf_switch::off("veg") {
         return;
     }
+    let prepass = !crate::campaign::perf_switch::off("vegprepass");
     for view in &views {
         let Some(phase) = phases.get_mut(&view.retained_view_entity) else {
             continue;
@@ -433,13 +459,41 @@ fn queue_batches(
                 }
                 continue;
             };
+            let mesh_key = view_key
+                | MeshPipelineKey::from_primitive_topology_and_strip_index(
+                    mesh.primitive_topology(),
+                    mesh.index_format(),
+                );
             let key = VegKey {
-                mesh: view_key
-                    | MeshPipelineKey::from_primitive_topology_and_strip_index(
-                        mesh.primitive_topology(),
-                        mesh.index_format(),
-                    ),
+                mesh: mesh_key,
+                pass: if prepass {
+                    VegPass::Colour
+                } else {
+                    VegPass::Single
+                },
             };
+            if prepass {
+                let depth_key = VegKey {
+                    mesh: mesh_key,
+                    pass: VegPass::Depth,
+                };
+                if let Ok(depth_pipeline) =
+                    pipelines.specialize(&pipeline_cache, &pipeline, depth_key, &mesh.layout)
+                {
+                    // Before every sorted item (`AlwaysOnTop` sorts first); a second key for the
+                    // same render entity: the batch itself stands in as main entity.
+                    phase.add_transient(Transparent3d {
+                        sorting_info: TransparentSortingInfo3d::AlwaysOnTop,
+                        entity: (entity, MainEntity::from(entity)),
+                        pipeline: depth_pipeline,
+                        draw_function,
+                        distance: f32::NEG_INFINITY,
+                        batch_range: 0..1,
+                        extra_index: PhaseItemExtraIndex::None,
+                        indexed: true,
+                    });
+                }
+            }
             let pipeline_id = match pipelines.specialize(
                 &pipeline_cache,
                 &pipeline,

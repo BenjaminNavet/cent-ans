@@ -1,5 +1,6 @@
 //! Dev-only GPU bisection switches: `CENT_ANS_PERF_OFF=shadows,post,veg,vegshadow,terrain,water,
-//! provinces,towns,life,armies,markers,psea,vslod1` (comma list; `vslod1`: tree models cast
+//! provinces,towns,life,armies,markers,psea,vslod1,meshshadow,townshadow,stdshadow,markershadow,
+//! lifeshadow,armyshadow` (comma list; `*shadow`: those meshes stop casting sun shadows; `vslod1`: tree models cast
 //! shadows with their lod1 mesh instead of lod2) turns the named passes / material
 //! families off so a bench shows what each one costs. Does nothing when the variable is unset.
 
@@ -82,6 +83,19 @@ impl Plugin for PerfSwitchPlugin {
                 hide::<parchment::sea::ParchmentSeaMaterial>("psea"),
             )
                 .before(before()),
+        )
+        .add_systems(
+            PostUpdate,
+            (
+                no_shadow::<towns::atlas::BuildingAtlasMaterial>("townshadow"),
+                no_shadow::<towns::far::TownFarMaterial>("townshadow"),
+                no_shadow::<StandardMaterial>("stdshadow"),
+                no_shadow::<markers::lod::KitMaterial>("markershadow"),
+                no_shadow::<life::anim::AnimMaterial>("lifeshadow"),
+                no_shadow::<armies::cloth::FlagMaterial>("armyshadow"),
+                all_no_shadow,
+            )
+                .before(before()),
         );
     }
 }
@@ -90,6 +104,39 @@ fn sun(mut suns: Query<&mut DirectionalLight>) {
     if off("shadows") {
         for mut sun in &mut suns {
             sun.shadow_maps_enabled = false;
+        }
+    }
+}
+
+/// Meshes of material `M` that still cast shadows.
+type Casters<'w, 's, M> =
+    Query<'w, 's, Entity, (With<MeshMaterial3d<M>>, Without<bevy::light::NotShadowCaster>)>;
+
+/// `<family>shadow`: the meshes of material `M` stop casting into the sun's shadow maps.
+fn no_shadow<M: Material>(
+    group: &'static str,
+) -> impl FnMut(Commands, Casters<M>) {
+    move |mut commands, q: Casters<M>| {
+        if off(group) {
+            for entity in &q {
+                commands
+                    .entity(entity)
+                    .try_insert(bevy::light::NotShadowCaster);
+            }
+        }
+    }
+}
+
+/// `meshshadow`: no mesh casts (the trees, drawn by their own pass, still do).
+fn all_no_shadow(
+    mut commands: Commands,
+    q: Query<Entity, (With<Mesh3d>, Without<bevy::light::NotShadowCaster>)>,
+) {
+    if off("meshshadow") {
+        for entity in &q {
+            commands
+                .entity(entity)
+                .try_insert(bevy::light::NotShadowCaster);
         }
     }
 }

@@ -61,7 +61,9 @@ struct Vertex {
 }
 
 struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
+    // Invariant: the depth prepass (`fragment_depth`) and the colour pass must land on the same
+    // depth bit for bit.
+    @invariant @builtin(position) position: vec4<f32>,
     @location(0) world_position: vec3<f32>,
     @location(1) uv0: vec2<f32>,
     @location(2) uv1: vec2<f32>,
@@ -370,6 +372,58 @@ fn shade_foliage(albedo: vec3<f32>, n: vec3<f32>, occlusion: f32, backlight: f32
     let t = clamp((d - begin) / max(params.fog_range.y - begin, 1.0), 0.0, 1.0);
     color = mix(color, params.fog.rgb, pow(t, 1.6) * params.fog.a);
     return camera_fog(color, world);
+}
+
+// Bounded mip level of the impostor atlas (see `fragment`).
+fn atlas_lod(uv: vec2<f32>) -> f32 {
+    let texels = vec2<f32>(textureDimensions(albedo_texture, 0));
+    let duv_x = dpdx(uv * texels);
+    let duv_y = dpdy(uv * texels);
+    return clamp(0.5 * log2(max(max(dot(duv_x, duv_x), dot(duv_y, duv_y)), 1e-8)), 0.0, MAX_LOD);
+}
+
+// Coverage of `fragment` without its shading: the same discards, in the same order. Keep the
+// two in step (a pixel the prepass keeps but `fragment` drops would show the ground's depth hole).
+fn covered(in: VertexOutput, lod: f32) -> bool {
+    let mode = params.frame.w;
+    let zone = in.misc.w;
+    let seed = in.misc.y;
+    let cls = params.tint.w;
+    if mode < 0.5 {
+        if zone > 0.0 && bayer4(in.position.xy) < zone {
+            return false;
+        }
+        let t0 = textureSampleLevel(albedo_texture, albedo_sampler, in.uv0, lod);
+        let t1 = textureSampleLevel(albedo_texture, albedo_sampler, in.uv1, lod);
+        if season_deciduous(cls) && params.season.w > 0.5 && lod < 1.5
+            && value_noise(in.local * 16.0 + vec2<f32>(seed * 29.0, seed * 3.0)) < params.far.w {
+            return false;
+        }
+        return mix(t0.a, t1.a, in.misc.x) * (1.0 + lod * 0.35) >= params.frame.z;
+    } else if mode < 1.5 {
+        let t = textureSample(albedo_texture, albedo_sampler, in.uv0);
+        return !(t.a < params.frame.z || hash12(in.position.xy) > params.range.w);
+    } else if mode > 2.5 {
+        if mode < 3.5 && bayer4(in.position.xy) >= zone {
+            return false;
+        }
+        return !(season_deciduous(cls) && params.season.w > 0.5
+            && value_noise(in.local * 2.4) < params.far.w + 0.05);
+    }
+    let r = length(in.uv0 - vec2<f32>(0.5)) * 2.0;
+    return !(r > 1.0 || hash12(in.position.xy) > smoothstep(1.0, 0.7, r) * params.range.w);
+}
+
+// Depth prepass of the vegetation (`VegPass::Depth`): writes the depth of the covered pixels
+// only, so the colour pass that follows (depth test, no write) shades each visible pixel once
+// instead of every overlapping crown.
+@fragment
+fn fragment_depth(in: VertexOutput) -> @location(0) vec4<f32> {
+    let lod = atlas_lod(in.uv0);
+    if !covered(in, lod) {
+        discard;
+    }
+    return vec4<f32>(0.0);
 }
 
 @fragment
