@@ -8,7 +8,12 @@
   "region": "provence_alpes",
   "terrain": "mountains",
   "climate": "mountain",
-  "neighbors": [],
+  "neighbors": [
+    "prov_beaucaire",
+    "prov_comtat_venaissin",
+    "prov_provence",
+    "prov_savoie"
+  ],
   "rivers": [
     "Isère",
     "Drôme",

@@ -564,6 +564,18 @@
    "relief_max_m": 679.0,
    "sea_share": 0.19
   },
+  "prov_dauphine": {
+   "file": "prov_dauphine.bin",
+   "lon": 5.6763,
+   "lat": 44.8866,
+   "ref_m": 565.1,
+   "terrain": "mountains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 6.53,
+   "relief_max_m": 2426.0,
+   "sea_share": 0.0
+  },
   "prov_desmond": {
    "file": "prov_desmond.bin",
    "lon": -9.9873,
@@ -1778,15 +1790,15 @@
   },
   "prov_provence": {
    "file": "prov_provence.bin",
-   "lon": 5.1835,
-   "lat": 43.36,
-   "ref_m": 109.2,
+   "lon": 6.7253,
+   "lat": 43.3767,
+   "ref_m": 3.4,
    "terrain": "hills",
    "coastal": true,
-   "coast_bearing_deg": 186.8,
-   "skyline_max_deg": 1.0,
-   "relief_max_m": 267.0,
-   "sea_share": 0.481
+   "coast_bearing_deg": 130.6,
+   "skyline_max_deg": 1.92,
+   "relief_max_m": 431.0,
+   "sea_share": 0.416
   },
   "prov_pskov": {
    "file": "prov_pskov.bin",
