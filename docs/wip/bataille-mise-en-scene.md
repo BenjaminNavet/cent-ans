@@ -11,3 +11,7 @@
 ## Mesures siege (captures out/shots)
 - pivot 0.55 / 170 m : armee assaillante visible, pas de toits, remparts hors cadre.
 - pivot 0.65-0.8 / 200-240 m : face a la tour de porte, trop pres. A regler. deploy.rs utilise le cadrage de siege meme sans regiments poses (le joueur de la demo est defenseur).
+## Fin
+- Siege: pivot 0.42, 210 m, tangage 20 : armee et remparts visibles (valide par capture). Les cinematiques du Capitaine deplacent la camera : capturer apres Echap.
+- Bench release unique (load 19-22, bruite) : calme 75,05, melee 55,4 (ref 75/59). Marge nulle : A/B a refaire par integrateur en machine calme (suspects : poussiere de melee, etincelles x1,7).
+- unit_size/max_figures inchanges : 1.0 = 1 figurine par homme, le plafond 15000 ne mord que si unit_size > 1 ; monter coute des fps sans marge.
