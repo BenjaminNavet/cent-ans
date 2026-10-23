@@ -19,6 +19,7 @@
     { "id": "adv_first_defeat", "trigger": "first_defeat", "text": "La journée est mauvaise, mais la guerre n'est pas perdue. Rassemblez les survivants, rachetez vos captifs, et ne vous laissez plus surprendre." },
     { "id": "adv_war_declared", "trigger": "alert", "event": "war_declared", "text": "La guerre est déclarée. Les chevauchées vont ravager les campagnes : mettez vos villes en défense et levez vos gens d'armes sans tarder." },
     { "id": "adv_siege_started", "trigger": "alert", "event": "siege_started", "text": "Un siège est mis devant une ville. Chaque saison compte : l'affamé cède avant le fort." },
+    { "id": "adv_siege_against", "trigger": "alert", "event": "siege_against", "text": "Sire, l'ennemi assiège l'une de nos villes. Ses vivres s'épuisent chaque saison : envoyez une armée de secours avant qu'elle ne cède, ou tentez une sortie quand la brèche s'ouvre. Ouvrez le panneau de la place pour voir la brèche et les vivres." },
     { "id": "adv_plague", "trigger": "alert", "event": "plague", "text": "Sire, la grande mortalité est à nos portes. Rien n'arrête ce fléau ; fermez les villes si vous le pouvez, et priez." },
     { "id": "adv_famine", "trigger": "alert", "event": "famine", "text": "La disette gagne le pays. Un peuple qui a faim n'obéit plus longtemps : allégez l'impôt ou ouvrez les greniers." },
     { "id": "adv_revolt", "trigger": "alert", "event": "revolt", "text": "Le peuple s'est soulevé. Vilains et bourgeois ne pardonnent ni l'impôt ni le pillage ; il faut rétablir l'ordre, par la force ou par la clémence." },
