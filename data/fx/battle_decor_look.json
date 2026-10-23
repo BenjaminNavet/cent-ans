@@ -74,5 +74,6 @@
     "wind": {"amplitude_m": 0.3, "speed": 1.9, "gust_amplitude_m": 0.22, "gust_speed": 0.45, "direction_deg": 62.0}
   },
   "tree_wind": {"amplitude_m": 0.18, "speed": 1.2, "gust_amplitude_m": 0.14, "gust_speed": 0.45, "direction_deg": 62.0},
+  "wind_passes": {"wind_in_shadows": true, "wind_in_prepass": false},
   "ground": {"normal_strength": 0.7, "normal_fade_m": 140.0, "texture_fade_m": 520.0, "macro_contrast": 0.45, "anisotropy": 8}
 }
