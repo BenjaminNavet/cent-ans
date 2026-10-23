@@ -33,6 +33,10 @@ use sim_campaign::{CampaignState, EventKind, Order};
 /// TW ai-camp: designations of an heir ordered by the AI, all seeds together.
 static HEIRS_DESIGNATED: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
 
+/// ECO (ADR 0749): `--passive` leaves the player's faction (France) idle:
+/// no offers answered, no orders; the AI still plays every other faction.
+static PASSIVE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
 /// `ai::plan_turn`, counting the heir designations it orders.
 fn counting_planner(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
     let orders = ai::plan_turn(state, data, faction);
@@ -222,8 +226,13 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         (0u32, 0u32, 0u32, 0u32);
     let mut sieges_walked_off = 0u32;
     let (mut sieges_relieved, mut sieges_abandoned, mut abandoned_turns) = (0u32, 0u32, 0u64);
+    let passive = PASSIVE.load(std::sync::atomic::Ordering::Relaxed);
+    let mut france_treasury: Vec<Value> = Vec::new();
     for _ in 0..turns {
         for offer in state.factions[&france].offers.clone() {
+            if passive {
+                break;
+            }
             let accept = sim_campaign::negotiation::evaluate_treaty(
                 &state,
                 data,
@@ -240,11 +249,19 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
                 },
             );
         }
-        for order in ai::plan_turn(&state, data, &france) {
-            let _ = state.submit_order(data, order);
+        if !passive {
+            for order in ai::plan_turn(&state, data, &france) {
+                let _ = state.submit_order(data, order);
+            }
         }
         let events = state.end_turn_with(data, counting_planner);
         played += 1;
+        {
+            let f = &state.factions[&france];
+            let b = &f.last_budget;
+            let net = b.income - b.army_upkeep - b.building_upkeep - b.administration;
+            france_treasury.push(json!({"turn": state.turn, "treasury": f.treasury, "income": b.income, "net": net}));
+        }
         let now = sieges(&state);
         for (id, (attacker, holder, _, _)) in &now {
             if live_sieges
@@ -491,6 +508,7 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
             / f64::from((sieges_captured + sieges_peace + sieges_other).max(1)),
         "top": top_rows,
         "series_every_40_turns": series,
+        "france_treasury": france_treasury,
         "seconds": started.elapsed().as_secs_f64(),
         "seconds_per_turn": started.elapsed().as_secs_f64() / denom,
     })
@@ -515,6 +533,7 @@ fn main() {
             "--top" => top = args.next().and_then(|s| s.parse().ok()).expect("--top K"),
             "--json" => json_out = true,
             "--full" => full = true,
+            "--passive" => PASSIVE.store(true, std::sync::atomic::Ordering::Relaxed),
             other => panic!("unknown argument {other}"),
         }
     }
