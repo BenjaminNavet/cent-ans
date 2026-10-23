@@ -226,22 +226,34 @@ def bake_ktx2_command(
         help="Ne cuire que les bandes dont le chemin contient ce texte (ex. b02).",
     ),
     force: bool = typer.Option(
-        False, "--force", help="Recuire même si le fichier existe."
+        False, "--force", help="Recuire même si le tableau est à jour."
+    ),
+    auto: bool = typer.Option(
+        False,
+        "--auto",
+        help="Mode des lanceurs : silencieux si tout est à jour, jamais fatal (sans `ktx`, le client garde les JPG).",
     ),
 ) -> None:
-    """Cuit les bandes du sol de bataille en tableaux KTX2 dans `out/ktx2_cache/` (jamais commité).
+    """Cuit les bandes du sol de bataille périmées en tableaux KTX2 dans `out/ktx2_cache/` (jamais commité).
 
-    Nécessite l'outil `ktx` (KTX-Software 4.4, variable KTX ou PATH). Le client les charge à la place
-    des bandes JPG s'ils existent (repli automatique sinon).
+    Une bande est refaite si son tableau manque, si la texture source est plus récente ou si la
+    recette (ktx2_array.py) a changé : `tools/launch.sh` et `client/run_bg.sh` l'appellent donc
+    à chaque lancement (``--auto``). Nécessite l'outil `ktx` (KTX-Software 4.4, variable KTX ou
+    PATH) ; le client charge ces tableaux à la place des bandes JPG s'ils existent (repli sinon).
     """
     from cent_ans_tools.ktx2_array import CACHE_DIR, bake_all
 
     try:
         done = bake_all(only, force)
     except (FileNotFoundError, RuntimeError) as error:
+        if auto:
+            typer.echo(f"KTX2 : cache non mis à jour ({error}). Le jeu garde les JPG.")
+            return
         typer.echo(f"Erreur : {error}", err=True)
         raise typer.Exit(1) from error
     total = sum(size for _, _, size in done)
+    if auto and not done:
+        return
     for strip, _, size in done:
         typer.echo(f"{strip.source} -> {size / 1048576:.1f} Mio")
     typer.echo(

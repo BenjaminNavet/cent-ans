@@ -130,17 +130,34 @@ def bake(strip: Strip, ktx: Path, cache: Path = CACHE_DIR) -> Path:
     return out
 
 
+def is_stale(strip: Strip, target: Path) -> bool:
+    """Vrai si le tableau du cache manque ou date d'avant sa source ou d'avant cette recette."""
+    if not target.is_file():
+        return True
+    baked_at = target.stat().st_mtime
+    source = ASSETS / strip.source
+    newest_input = max(
+        source.stat().st_mtime if source.is_file() else 0.0,
+        Path(__file__).stat().st_mtime,
+    )
+    return baked_at < newest_input
+
+
 def bake_all(
     only: str | None = None, force: bool = False
 ) -> list[tuple[Strip, Path, int]]:
-    """Cuit toutes les bandes de bataille absentes du cache (ou toutes avec ``force``)."""
+    """Cuit les bandes de bataille périmées du cache (toutes avec ``force``).
+
+    Périmée = absente, plus ancienne que sa bande source, ou plus ancienne que ce script : un
+    changement de texture ou de recette de cuisson est donc repris sans option.
+    """
     ktx = find_ktx()
     done = []
     for strip in strips_of_battle():
         if only and only not in strip.source:
             continue
         target = strip.output()
-        if target.is_file() and not force:
+        if not force and not is_stale(strip, target):
             continue
         path = bake(strip, ktx)
         done.append((strip, path, path.stat().st_size))
