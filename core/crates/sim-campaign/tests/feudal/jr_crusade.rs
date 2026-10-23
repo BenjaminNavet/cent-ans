@@ -453,7 +453,12 @@ fn the_starting_host_is_about_balanced_at_the_starting_fervour() {
         rules(data).fervor.start
     );
     let economy = state.faction_economy(data, &faction).expect("economy");
-    let net = economy.net_income();
+    // ECO (ADR 0749): the war chest's idle-hoard drain is not a structural
+    // cost of the host; the balance is judged without it.
+    let drain = data
+        .economy_rules
+        .opulence(economy.treasury, economy.projected_income);
+    let net = economy.net_income() + drain;
     println!(
         "receipts {} trade {} armies {} buildings {} administration {} table {} net {net}",
         economy.projected_income,
