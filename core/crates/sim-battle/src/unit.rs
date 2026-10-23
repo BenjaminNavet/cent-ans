@@ -314,6 +314,9 @@ fn unseen() -> f64 {
     -1.0e6
 }
 
+/// Depth jitter of drawn figures relative to the lateral one (rendering only).
+const DEPTH_JITTER: f64 = 1.6;
+
 impl Unit {
     pub(crate) fn from_setup(id: u32, side: SideId, setup_index: usize, setup: &UnitSetup) -> Self {
         let ranged_capable = setup.stats.ranged > 0 && setup.stats.range > 0;
@@ -851,7 +854,9 @@ impl Unit {
             .map(|(i, (lx, lz))| {
                 let i = i as u64;
                 let jx = jitter(u64::from(self.id), i * 2) * spread;
-                let jz = jitter(u64::from(self.id), i * 2 + 1) * spread;
+                // Ranks wobble more in depth than files sideways: a drilled front keeps its
+                // alignment, men do not stand on a ruler (ADR 0760).
+                let jz = jitter(u64::from(self.id), i * 2 + 1) * spread * DEPTH_JITTER;
                 let (lx, lz) = (lx + jx, lz + jz);
                 let angle = if self.state == UnitState::Routing {
                     self.facing + jitter(u64::from(self.id) + 7, i) * 1.5
