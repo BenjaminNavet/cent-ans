@@ -18,7 +18,7 @@ use super::gaits::{self, GaitMemory};
 use super::heraldry::{ArmsAtlasHandle, BattleHeraldry};
 use super::library::{FigureLibrary, FigureSpec, render_kind};
 use super::looks;
-use super::skinned::{RECORD_FLOATS, SkinParams, SkinnedBatch, push_record};
+use super::skinned::{RECORD_FLOATS, SkinParams, SkinnedBatch, SkinnedColourCount, push_record};
 use super::{PoseFrames, SoldierStats, blend_poses, drawn_units};
 use crate::app::AppState;
 use crate::battle::orders::BattleSelection;
@@ -365,6 +365,8 @@ pub fn update_regiments(
     time: Res<Time>,
     selection: Option<Res<BattleSelection>>,
     camera: Query<&GlobalTransform, With<BattleCamera>>,
+    camera_view: Query<(&Transform, &Projection), With<BattleCamera>>,
+    sun: Query<&GlobalTransform, With<crate::battle::decor::atmosphere::BattleSun>>,
     mut regiments: ResMut<Regiments>,
     mut frames: ResMut<PoseFrames>,
     mut stats: ResMut<SoldierStats>,
@@ -392,6 +394,17 @@ pub fn update_regiments(
         .iter()
         .next()
         .map_or(Vec3::new(0.0, 100.0, 0.0), |t| t.translation());
+    let mut crowd = super::crowd::CrowdSettings::bundled();
+    if super::crowd::baseline_phase() {
+        crowd.cull.enabled = false;
+    }
+    let cull_view = camera_view.iter().next().map(|(transform, projection)| {
+        super::crowd::CullView::from_camera(
+            transform,
+            projection,
+            sun.iter().next().map(|s| *s.forward()),
+        )
+    });
     let Some(game) = ctx.sim.data.clone() else {
         return;
     };
@@ -428,6 +441,7 @@ pub fn update_regiments(
     let mut seen: Vec<u32> = Vec::new();
     let mut lod_counts = [0usize; 4];
     let mut total = 0usize;
+    let (mut uploaded, mut visible_total, mut shadow_only_total) = (0usize, 0usize, 0usize);
     for unit in drawn_units(sim) {
         let Some(kind) = render_kind(unit) else {
             continue;
@@ -644,9 +658,20 @@ pub fn update_regiments(
             .as_ref()
             .is_some_and(|s| s.units.contains(&unit.id));
         let far_blend = ((distance - 80.0) / 180.0).clamp(0.0, 1.0);
-        let mut bytes = Vec::with_capacity(poses.len() * RECORD_FLOATS * 4);
+        // Per-soldier culling: visible soldiers first, then those kept for their shadow.
+        let sorted = match &cull_view {
+            Some(view) => {
+                super::crowd::sort_poses(view, &poses, regiment.spec.mounted, &crowd.cull)
+            }
+            None => super::crowd::Sorted {
+                order: (0..poses.len()).collect(),
+                visible: poses.len(),
+            },
+        };
+        let mut bytes = Vec::with_capacity(sorted.order.len() * RECORD_FLOATS * 4);
         let id_offset = (unit.id % 13) as f32 * 500.0;
-        for (i, pose) in poses.iter().enumerate() {
+        for &i in &sorted.order {
+            let pose = &poses[i];
             let record: [f32; RECORD_FLOATS] = [
                 pose[0],
                 pose[1],
@@ -663,8 +688,12 @@ pub fn update_regiments(
             ];
             push_record(&mut bytes, &record);
         }
-        let count = poses.len() as u32;
+        let count = sorted.order.len() as u32;
+        let visible = sorted.visible as u32;
         regiment.drawn = poses.len();
+        uploaded += sorted.order.len();
+        visible_total += sorted.visible;
+        shadow_only_total += sorted.order.len() - sorted.visible;
         total += poses.len();
         lod_counts[lod.index()] += poses.len();
         let unchanged = is_unchanged(
@@ -694,8 +723,12 @@ pub fn update_regiments(
                 batch.params_version = regiment.params_version;
             }
         }
+        ctx.commands
+            .entity(regiment.main)
+            .insert(SkinnedColourCount(visible));
         if let Ok(mut batch) = batches.get_mut(regiment.impostor) {
-            batch.count = if lod == Lod::Impostor { count } else { 0 };
+            // Impostors cast no shadow: only the soldiers in the frustum.
+            batch.count = if lod == Lod::Impostor { visible } else { 0 };
             batch.records = records.clone();
             batch.version = regiment.version;
             if regiment.impostor_params_version != regiment.params_version {
@@ -732,7 +765,11 @@ pub fn update_regiments(
             }
         }
     }
-    stats.drawn = total;
+    stats.drawn = uploaded;
+    stats.total = total;
+    stats.visible = visible_total;
+    stats.shadow_only = shadow_only_total;
+    stats.sun = cull_view.and_then(|v| v.sun).map(|s| s.to_array());
     stats.lod = lod_counts;
     stats.regiments = seen.len();
     let mut per_batch = [0usize; 4];

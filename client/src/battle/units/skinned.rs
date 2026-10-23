@@ -373,6 +373,26 @@ pub struct SkinnedBatch {
     pub version: u64,
 }
 
+/// Colour-pass limit of a batch whose records hold more soldiers than the camera sees: the
+/// first `n` records are in the frustum, the rest are kept for their shadow only (foule1, see
+/// `crowd.rs`). Absent: the colour pass draws all `count` records like the shadow passes.
+#[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SkinnedColourCount(pub u32);
+
+impl SyncComponent<RenderApp> for SkinnedColourCount {
+    type Target = Self;
+}
+
+impl ExtractComponent<RenderApp> for SkinnedColourCount {
+    type QueryData = &'static SkinnedColourCount;
+    type QueryFilter = ();
+    type Out = Self;
+
+    fn extract_component(item: QueryItem<'_, '_, Self::QueryData>) -> Option<Self> {
+        Some(*item)
+    }
+}
+
 impl SyncComponent<RenderApp> for SkinnedBatch {
     type Target = Self;
 }
@@ -400,6 +420,7 @@ impl Plugin for SkinnedPlugin {
     fn build(&self, app: &mut App) {
         bevy::asset::embedded_asset!(app, "skinned.wesl");
         app.add_plugins(ExtractComponentPlugin::<SkinnedBatch>::default());
+        app.add_plugins(ExtractComponentPlugin::<SkinnedColourCount>::default());
         app.register_dump(probe::dump);
         let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
             return;
@@ -442,6 +463,10 @@ struct SkinnedPipeline {
     shader: Handle<Shader>,
     mesh_pipeline: MeshPipeline,
     material_layout: BindGroupLayoutDescriptor,
+    /// `LITE_FAR` shader def: single-frame skinning at the farthest level of detail (foule1).
+    far_skin: bool,
+    /// Shader defs of the shadow pipeline: lighter skinning in the cascades.
+    shadow_skin: super::crowd::ShadowSkin,
 }
 
 fn init_pipeline(
@@ -452,6 +477,7 @@ fn init_pipeline(
     use bevy::render::render_resource::binding_types::{
         sampler, texture_2d, texture_2d_array, uniform_buffer_sized,
     };
+    let crowd = super::crowd::CrowdSettings::bundled();
     let material_layout = BindGroupLayoutDescriptor::new(
         "skinned_material_layout",
         &BindGroupLayoutEntries::sequential(
@@ -479,6 +505,8 @@ fn init_pipeline(
         shader: asset_server.load(SHADER_PATH),
         mesh_pipeline: mesh_pipeline.clone(),
         material_layout,
+        far_skin: crowd.far_skin,
+        shadow_skin: crowd.shadow_skin,
     });
 }
 
@@ -492,6 +520,9 @@ impl SpecializedMeshPipeline for SkinnedPipeline {
     ) -> Result<RenderPipelineDescriptor, SpecializedMeshPipelineError> {
         let mut descriptor = self.mesh_pipeline.specialize(key, layout)?;
         descriptor.vertex.shader = self.shader.clone();
+        if self.far_skin {
+            descriptor.vertex.shader_defs.push("LITE_FAR".into());
+        }
         let mesh_layout = layout.0.get_layout(&[
             Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
             Mesh::ATTRIBUTE_NORMAL.at_shader_location(1),
@@ -922,15 +953,21 @@ fn init_shadow_pipeline(
 }
 
 impl SpecializedMeshPipeline for SkinnedShadowPipeline {
-    type Key = MeshPipelineKey;
+    /// Mesh key, and whether the lighter skinning is on (`crowd::shadow_lite_now`).
+    type Key = (MeshPipelineKey, bool);
 
     fn specialize(
         &self,
-        key: Self::Key,
+        (key, lite): Self::Key,
         layout: &MeshVertexBufferLayoutRef,
     ) -> Result<RenderPipelineDescriptor, SpecializedMeshPipelineError> {
         let mut descriptor = self.base.specialize(key, layout)?;
         descriptor.label = Some("skinned_shadow_pipeline".into());
+        if lite {
+            for def in self.base.shadow_skin.shader_defs() {
+                descriptor.vertex.shader_defs.push(def.into());
+            }
+        }
         descriptor.layout = vec![
             self.view_layout.clone(),
             self.empty_layout.clone(),
@@ -1027,8 +1064,9 @@ fn queue_shadow_casters(
                 mesh.primitive_topology(),
                 mesh.index_format(),
             ) | MeshPipelineKey::DEPTH_PREPASS;
+            let lite = super::crowd::shadow_lite_now();
             let pipeline_id =
-                match pipelines.specialize(&pipeline_cache, &pipeline, key, &mesh.layout) {
+                match pipelines.specialize(&pipeline_cache, &pipeline, (key, lite), &mesh.layout) {
                     Ok(id) => id,
                     Err(error) => {
                         if !*reported {
@@ -1064,7 +1102,7 @@ type DrawSkinnedShadow = (
     SetPrepassViewBindGroup<0>,
     SetPrepassViewEmptyBindGroup<1>,
     SetMaterialBindGroup<2>,
-    DrawBatch,
+    DrawBatch<true>,
     CountShadowDraw,
 );
 
@@ -1073,7 +1111,7 @@ type DrawSkinned = (
     SetMeshViewBindGroup<0>,
     SetMeshViewBindingArrayBindGroup<1>,
     SetMaterialBindGroup<2>,
-    DrawBatch,
+    DrawBatch<false>,
 );
 
 struct SetMaterialBindGroup<const I: usize>;
@@ -1098,34 +1136,39 @@ impl<P: PhaseItem, const I: usize> RenderCommand<P> for SetMaterialBindGroup<I> 
     }
 }
 
-struct DrawBatch;
+/// `SHADOW`: draws every record of the batch; colour: only the first `SkinnedColourCount`.
+struct DrawBatch<const SHADOW: bool>;
 
-impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
+impl<P: PhaseItem, const SHADOW: bool> RenderCommand<P> for DrawBatch<SHADOW> {
     type Param = (
         SRes<RenderAssets<RenderMesh>>,
         SRes<MeshAllocator>,
         SRes<SkinnedInstances>,
     );
     type ViewQuery = ();
-    type ItemQuery = Read<SkinnedBatch>;
+    type ItemQuery = (Read<SkinnedBatch>, Option<Read<SkinnedColourCount>>);
 
     fn render<'w>(
         item: &P,
         _view: (),
-        batch: Option<&'w SkinnedBatch>,
+        batch: Option<(&'w SkinnedBatch, Option<&'w SkinnedColourCount>)>,
         (meshes, allocator, instances): SystemParamItem<'w, '_, Self::Param>,
         pass: &mut TrackedRenderPass<'w>,
     ) -> RenderCommandResult {
         let allocator = allocator.into_inner();
         let instances = instances.into_inner();
-        let (Some(batch), Some(slot), Some(buffer)) = (
+        let (Some((batch, colour)), Some(slot), Some(buffer)) = (
             batch,
             instances.slots.get(&item.entity()),
             instances.buffer.as_ref(),
         ) else {
             return RenderCommandResult::Skip;
         };
-        if slot.count == 0 {
+        let drawn = match colour {
+            Some(limit) if !SHADOW => slot.count.min(limit.0),
+            _ => slot.count,
+        };
+        if drawn == 0 {
             return RenderCommandResult::Skip;
         }
         let records = slot.offset..slot.offset + u64::from(slot.count) * RECORD_BYTES as u64;
@@ -1150,15 +1193,15 @@ impl<P: PhaseItem> RenderCommand<P> for DrawBatch {
                 pass.draw_indexed(
                     index_slice.range.start..(index_slice.range.start + count),
                     vertex_slice.range.start as i32,
-                    0..slot.count,
+                    0..drawn,
                 );
             }
             RenderMeshBufferInfo::NonIndexed => {
-                pass.draw(vertex_slice.range, 0..slot.count);
+                pass.draw(vertex_slice.range, 0..drawn);
             }
         }
         DRAWN_SKINNED.fetch_add(1, Ordering::Relaxed);
-        DRAWN_FIGURES.fetch_add(slot.count, Ordering::Relaxed);
+        DRAWN_FIGURES.fetch_add(drawn, Ordering::Relaxed);
         RenderCommandResult::Success
     }
 }
