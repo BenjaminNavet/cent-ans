@@ -65,10 +65,16 @@ pub struct CullSettings {
     pub enabled: bool,
     /// Slack added to every frustum plane (m): camera moving between the test and the draw.
     pub margin_m: f32,
-    /// Bounding radius of a foot soldier around the pose position on the ground (m).
+    /// Bounding radius of a foot soldier around his centre (m), see `foot_centre_height_m`.
     pub foot_radius_m: f32,
     /// Same for a horseman (horse, rider and lance).
     pub mounted_radius_m: f32,
+    /// Height above the pose position of the foot soldier's bounding sphere centre (m). The
+    /// pose position is on the ground, but a soldier with his lance is over 4 m tall: a sphere
+    /// centred on the feet let near soldiers vanish when their feet left the bottom of the screen.
+    pub foot_centre_height_m: f32,
+    /// Same for a horseman.
+    pub mounted_centre_height_m: f32,
     /// Height of the tallest caster whose shadow is followed (m).
     pub shadow_height_m: f32,
     /// Longest shadow followed on the ground (m).
@@ -82,8 +88,10 @@ impl Default for CullSettings {
         Self {
             enabled: true,
             margin_m: 8.0,
-            foot_radius_m: 2.4,
-            mounted_radius_m: 4.6,
+            foot_radius_m: 3.0,
+            mounted_radius_m: 5.0,
+            foot_centre_height_m: 2.0,
+            mounted_centre_height_m: 2.5,
             shadow_height_m: 3.2,
             shadow_max_length_m: 70.0,
             min_sun_elevation: 0.12,
@@ -177,6 +185,16 @@ impl CrowdSettings {
             num(cull, "margin_m", &mut s.cull.margin_m);
             num(cull, "foot_radius_m", &mut s.cull.foot_radius_m);
             num(cull, "mounted_radius_m", &mut s.cull.mounted_radius_m);
+            num(
+                cull,
+                "foot_centre_height_m",
+                &mut s.cull.foot_centre_height_m,
+            );
+            num(
+                cull,
+                "mounted_centre_height_m",
+                &mut s.cull.mounted_centre_height_m,
+            );
             num(cull, "shadow_height_m", &mut s.cull.shadow_height_m);
             num(cull, "shadow_max_length_m", &mut s.cull.shadow_max_length_m);
             num(cull, "min_sun_elevation", &mut s.cull.min_sun_elevation);
@@ -294,12 +312,13 @@ pub fn shadow_tip(foot: Vec3, sun: Vec3, s: &CullSettings) -> Vec3 {
 
 /// Class of a soldier standing at `foot` (pose position on the ground).
 pub fn classify(view: &CullView, foot: Vec3, mounted: bool, s: &CullSettings) -> Class {
-    let radius = if mounted {
-        s.mounted_radius_m
+    let (radius, centre_height) = if mounted {
+        (s.mounted_radius_m, s.mounted_centre_height_m)
     } else {
-        s.foot_radius_m
+        (s.foot_radius_m, s.foot_centre_height_m)
     };
-    if sphere_in_frustum(&view.planes, foot, radius, s.margin_m) {
+    let centre = foot + Vec3::Y * centre_height;
+    if sphere_in_frustum(&view.planes, centre, radius, s.margin_m) {
         return Class::Visible;
     }
     let Some(sun) = view.sun else {
@@ -369,8 +388,29 @@ mod tests {
         CullSettings {
             margin_m: 0.0,
             foot_radius_m: 1.0,
+            // The geometry tests below reason about a sphere on the ground.
+            foot_centre_height_m: 0.0,
+            mounted_centre_height_m: 0.0,
             ..CullSettings::default()
         }
+    }
+
+    #[test]
+    fn near_soldier_with_feet_below_the_screen_stays_visible() {
+        // A soldier 3 m in front of the camera, 8 m below its axis: his feet are outside the view,
+        // but his body and lance (2 to 5 m above the feet) are inside. With the sphere on the feet
+        // he vanished (seen in melee, bottom-left of the screen).
+        let s = CullSettings {
+            margin_m: 0.0,
+            ..CullSettings::default()
+        };
+        let v = view(None);
+        let feet = Vec3::new(0.0, -8.0, -3.0);
+        let mut on_feet = s;
+        on_feet.foot_centre_height_m = 0.0;
+        on_feet.foot_radius_m = 2.4;
+        assert_eq!(classify(&v, feet, false, &on_feet), Class::Culled);
+        assert_eq!(classify(&v, feet, false, &s), Class::Visible);
     }
 
     #[test]

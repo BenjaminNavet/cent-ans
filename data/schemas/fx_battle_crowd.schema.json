@@ -13,6 +13,8 @@
         "margin_m": { "type": "number", "minimum": 0 },
         "foot_radius_m": { "type": "number", "exclusiveMinimum": 0 },
         "mounted_radius_m": { "type": "number", "exclusiveMinimum": 0 },
+        "foot_centre_height_m": { "type": "number", "minimum": 0 },
+        "mounted_centre_height_m": { "type": "number", "minimum": 0 },
         "shadow_height_m": { "type": "number", "exclusiveMinimum": 0 },
         "shadow_max_length_m": { "type": "number", "exclusiveMinimum": 0 },
         "min_sun_elevation": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
