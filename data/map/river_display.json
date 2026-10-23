@@ -33,9 +33,9 @@
     0.14,
     0.1
   ],
-  "bank_ink_strength": 0.5,
-  "bank_ink_px": 0.6,
-  "edge_soft_px": 0.5,
+  "bank_ink_strength": 0.36,
+  "bank_ink_px": 1.3,
+  "edge_soft_px": 1.6,
   "sky_reflect": 0.3,
   "sky_color": [
     0.52,
@@ -143,7 +143,7 @@
   "look": {
     "saturation": 0.72,
     "brightness": 0.85,
-    "base_reflect": 0.04,
+    "base_reflect": 0.07,
     "far_color": [
       0.27,
       0.36,
@@ -182,6 +182,8 @@
       0.1,
       0.22,
       0.28
-    ]
+    ],
+    "season_tint": [[1.0, 1.0, 1.0], [0.96, 1.02, 1.0], [1.08, 1.0, 0.86], [0.84, 0.93, 1.08]],
+    "season_ice": [0.0, 0.0, 0.08, 0.45]
   }
 }

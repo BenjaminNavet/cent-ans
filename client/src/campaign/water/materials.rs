@@ -300,6 +300,8 @@ pub struct RiverParams {
     pub look3: Vec4,
     /// x = share of the camera distance fog, yzw = wet colour (linear).
     pub look4: Vec4,
+    /// EAU (ADR 0750): rgb = season tint of the water (synced from the season weights), w = ice on the banks.
+    pub season: Vec4,
     /// Fine hydrography disc (`fine_zone`: centre xz, radius, weight): the ribbon fades out inside.
     pub fine_zone: Vec4,
     /// Fords and ferries (`river_crossings.gd` `ford_uniforms`): x, z, radius, 1 ford / 0.25 ferry.
@@ -473,6 +475,7 @@ impl RiverParams {
                 let w = linear(display.look.wet_color, 1.0);
                 Vec4::new(display.look.fog_strength, w.x, w.y, w.z)
             },
+            season: Vec4::new(1.0, 1.0, 1.0, 0.0),
             fine_zone: Vec4::new(0.0, 0.0, -1.0, 0.0),
             fords: [Vec4::ZERO; 32],
             ford_count: 0.0,
@@ -626,6 +629,11 @@ pub struct SeaParams {
     pub basin_detail: [Vec4; 5],
     /// Per basin slot: linear mean colour of the layer albedo.
     pub basin_detail_mean: [Vec4; 5],
+    /// EAU (ADR 0750): x = on, y = whitecap amount, z = max saturation of the shallows (turquoise),
+    /// w = smoothed coast distance on (B-spline reads of `coast_dist`).
+    pub eau: Vec4,
+    /// x = swell domain warp, y = surf lace width factor, z = turquoise edge noise, w = whitecap scale.
+    pub eau_b: Vec4,
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
@@ -745,6 +753,8 @@ impl SeaParams {
             detail_depth: Vec4::new(30.0, 120.0, 0.0, 0.0),
             basin_detail: [Vec4::new(-1.0, 0.0, 1.0, 0.0); 5],
             basin_detail_mean: [Vec4::ONE; 5],
+            eau: Vec4::ZERO,
+            eau_b: Vec4::new(1.0, 1.0, 0.0, 1.0),
         }
     }
 }

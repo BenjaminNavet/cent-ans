@@ -34,6 +34,7 @@ pub mod polygon;
 pub mod reseat;
 pub mod ribbon;
 pub mod sea_life;
+pub mod season;
 
 use std::path::Path;
 use std::time::Instant;
@@ -199,6 +200,7 @@ impl Plugin for CampaignWaterPlugin {
                     apply_view,
                     reseat::reseat_ribbons,
                     sync_fine_zone,
+                    season::sync_water_season,
                 )
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
@@ -342,6 +344,7 @@ fn build_water(
     let started = Instant::now();
     let map_dir = paths::data_dir(&root).join("map");
     let data = WaterData::load(&map_dir);
+    commands.insert_resource(season::WaterSeasonLook::from_look(&data.display.look));
     let mut ctx = Ctx {
         commands: &mut commands,
         meshes: &mut assets.meshes,

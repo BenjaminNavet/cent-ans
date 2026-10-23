@@ -176,6 +176,9 @@ pub struct WaterLook {
     pub glint_power: f32,
     pub lake_shallow_color: [f32; 3],
     pub lake_deep_color: [f32; 3],
+    /// EAU (ADR 0750): water tint per season (spring, summer, autumn, winter) and ice on the banks.
+    pub season_tint: [[f32; 3]; 4],
+    pub season_ice: [f32; 4],
 }
 
 impl Default for WaterLook {
@@ -200,6 +203,8 @@ impl Default for WaterLook {
             glint_power: 80.0,
             lake_shallow_color: [0.26, 0.46, 0.52],
             lake_deep_color: [0.13, 0.31, 0.44],
+            season_tint: [[1.0; 3]; 4],
+            season_ice: [0.0; 4],
         }
     }
 }

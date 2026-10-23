@@ -320,3 +320,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0752 | [Bandeau Conseiller unique](0752-bandeau-conseiller-unique.md) | accepté |
 | 0753 | [Focus clavier et manette du kit UI](0753-focus-clavier-et-manette.md) | accepté |
 | 0748 | [Palette unique, six heures de bataille, voile de campagne réduit](0748-palette-unique-et-heures-de-bataille.md) | accepté |
+| 0750 | [Eau, côtes et neige de la campagne](0750-eau-cotes-neige-de-la-campagne.md) | accepté |
