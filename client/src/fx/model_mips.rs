@@ -9,8 +9,10 @@
 
 use std::collections::VecDeque;
 
+use bevy::asset::RenderAssetUsages;
 use bevy::image::{ImageSampler, ImageSamplerDescriptor};
 use bevy::prelude::*;
+use bevy::tasks::{AsyncComputeTaskPool, Task, block_on, futures_lite::future};
 
 use crate::agent::dump::DumpAppExt;
 use bevy::render::render_resource::{TextureDimension, TextureFormat};
@@ -21,6 +23,12 @@ const PER_FRAME: usize = 2;
 const GIVE_UP_FRAMES: u32 = 1800;
 /// Anisotropy of the mipped samplers.
 const ANISOTROPY: u16 = 8;
+/// Asset path prefix of the generated campaign models (ADR 0211): their albedo is baked and opaque, so
+/// it is block-compressed (BC1) and kept on the GPU only (ADR 0776); 2048 px RGBA8 + mips was 21 MiB
+/// on the GPU and 21 MiB more in RAM for each of ~66 models.
+const COMPRESSED_PREFIX: &str = "models/dn/";
+/// Smallest side (texels) worth compressing.
+const MIN_COMPRESS_SIDE: usize = 256;
 
 pub struct ModelMipsPlugin;
 
@@ -30,7 +38,12 @@ impl Plugin for ModelMipsPlugin {
             .register_dump(dump)
             .add_systems(
                 Update,
-                (queue_material_images, generate_queued_mips).chain(),
+                (
+                    queue_material_images,
+                    generate_queued_mips,
+                    collect_compressed,
+                )
+                    .chain(),
             );
     }
 }
@@ -41,6 +54,10 @@ pub struct MipQueue {
     seen: std::collections::HashSet<AssetId<Image>>,
     /// Images that got a chain (dump probe).
     done: usize,
+    /// Background BC1 encodes: image id and the finished chain (`None`: not compressible).
+    encoding: Vec<(AssetId<Image>, Task<Option<Vec<u8>>>)>,
+    /// Images stored as BC1 and dropped from RAM (dump probe).
+    compressed: usize,
 }
 
 impl MipQueue {
@@ -81,7 +98,11 @@ fn queue_material_images(
     }
 }
 
-fn generate_queued_mips(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<Image>>) {
+fn generate_queued_mips(
+    mut queue: ResMut<MipQueue>,
+    mut images: ResMut<Assets<Image>>,
+    server: Res<AssetServer>,
+) {
     let mut budget = PER_FRAME;
     for _ in 0..queue.waiting.len() {
         if budget == 0 {
@@ -100,6 +121,18 @@ fn generate_queued_mips(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<I
         if !needs_mips(image) {
             continue;
         }
+        // Opaque baked albedo of the campaign models: chain + BC1 on a background thread.
+        if compressible(image)
+            && server
+                .get_path(id)
+                .is_some_and(|p| p.path().starts_with(COMPRESSED_PREFIX))
+            && let Some(data) = image.data.clone()
+        {
+            let (w, h) = (image.width() as usize, image.height() as usize);
+            let task = AsyncComputeTaskPool::get().spawn(async move { bc1_chain(&data, w, h) });
+            queue.encoding.push((id, task));
+            continue;
+        }
         budget -= 1;
         let started = std::time::Instant::now();
         if let Some(mut image) = images.get_mut(id)
@@ -115,11 +148,93 @@ fn generate_queued_mips(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<I
     }
 }
 
+/// Installs the finished BC1 chains: the image becomes `Bc1RgbaUnormSrgb` with its full mip chain and
+/// keeps no CPU copy (`RENDER_WORLD` only: Bevy drops `data` once uploaded). A chain that could not be
+/// built (translucent texels) falls back to the plain RGBA8 chain.
+fn collect_compressed(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<Image>>) {
+    let mut pending = Vec::new();
+    for (id, mut task) in std::mem::take(&mut queue.encoding) {
+        let Some(result) = block_on(future::poll_once(&mut task)) else {
+            pending.push((id, task));
+            continue;
+        };
+        let Some(mut image) = images.get_mut(id) else {
+            continue;
+        };
+        match result {
+            Some(chain) => {
+                let (w, h) = (image.width(), image.height());
+                image.texture_descriptor.format = TextureFormat::Bc1RgbaUnormSrgb;
+                image.texture_descriptor.mip_level_count = mip_levels(w, h);
+                image.data = Some(chain);
+                set_trilinear(&mut image);
+                image.asset_usage = RenderAssetUsages::RENDER_WORLD;
+                queue.compressed += 1;
+            }
+            None => {
+                if add_mips(&mut image) {
+                    queue.done += 1;
+                }
+            }
+        }
+    }
+    queue.encoding = pending;
+}
+
+/// Opaque sRGB RGBA8 texture whose sides are multiples of the BC block.
+fn compressible(image: &Image) -> bool {
+    let (w, h) = (image.width() as usize, image.height() as usize);
+    needs_mips(image)
+        && image.texture_descriptor.format == TextureFormat::Rgba8UnormSrgb
+        && w % 4 == 0
+        && h % 4 == 0
+        && w.min(h) >= MIN_COMPRESS_SIDE
+        && image.data.as_ref().is_some_and(|d| d.len() == w * h * 4)
+}
+
+/// Full BC1 mip chain of an RGBA8 image (level 0 first), `None` when a texel is not opaque.
+fn bc1_chain(rgba: &[u8], w: usize, h: usize) -> Option<Vec<u8>> {
+    use crate::campaign::terrain::bc1;
+    if rgba.chunks_exact(4).any(|p| p[3] != 255) {
+        return None;
+    }
+    let mut out = Vec::with_capacity(bc1::level_bytes(w, h) * 4 / 3 + 16);
+    let mut level = rgba.to_vec();
+    let (mut lw, mut lh) = (w, h);
+    loop {
+        out.extend(bc1::encode_level(&level, lw, lh));
+        if lw <= 1 && lh <= 1 {
+            break;
+        }
+        let (nw, nh) = ((lw / 2).max(1), (lh / 2).max(1));
+        level = box_down(&level, lw, lh, nw, nh);
+        (lw, lh) = (nw, nh);
+    }
+    Some(out)
+}
+
+/// One box-filtered mip level.
+fn box_down(prev: &[u8], pw: usize, ph: usize, nw: usize, nh: usize) -> Vec<u8> {
+    let mut out = Vec::with_capacity(nw * nh * 4);
+    for y in 0..nh {
+        for x in 0..nw {
+            let (x0, y0) = ((x * 2).min(pw - 1), (y * 2).min(ph - 1));
+            let (x1, y1) = ((x * 2 + 1).min(pw - 1), (y * 2 + 1).min(ph - 1));
+            for c in 0..4 {
+                let at = |xx: usize, yy: usize| u32::from(prev[(yy * pw + xx) * 4 + c]);
+                out.push(((at(x0, y0) + at(x1, y0) + at(x0, y1) + at(x1, y1) + 2) / 4) as u8);
+            }
+        }
+    }
+    out
+}
+
 fn dump(world: &World) -> (String, serde_json::Value) {
     let q = world.resource::<MipQueue>();
     (
         "model_mips".into(),
-        serde_json::json!({"mipped": q.done, "waiting": q.waiting.len(), "seen": q.seen.len()}),
+        serde_json::json!({"mipped": q.done, "waiting": q.waiting.len(), "seen": q.seen.len(),
+            "bc1_compressed": q.compressed, "bc1_encoding": q.encoding.len()}),
     )
 }
 
@@ -176,6 +291,11 @@ fn add_mips(image: &mut Image) -> bool {
     }
     image.data = Some(rgba8_mip_chain(&data, w, h));
     image.texture_descriptor.mip_level_count = mip_levels(w as u32, h as u32);
+    set_trilinear(image);
+    true
+}
+
+fn set_trilinear(image: &mut Image) {
     let mut descriptor = match &image.sampler {
         ImageSampler::Descriptor(d) => d.clone(),
         ImageSampler::Default => ImageSamplerDescriptor::linear(),
@@ -185,7 +305,6 @@ fn add_mips(image: &mut Image) -> bool {
     descriptor.mag_filter = bevy::image::ImageFilterMode::Linear;
     descriptor.anisotropy_clamp = ANISOTROPY;
     image.sampler = ImageSampler::Descriptor(descriptor);
-    true
 }
 
 #[cfg(test)]
@@ -200,6 +319,17 @@ mod tests {
         assert_eq!(chain.len(), (32 + 8 + 2 + 1) * 4);
         assert_eq!(mip_levels(8, 4), 4);
         assert!(chain.iter().all(|&b| b == 200));
+    }
+
+    #[test]
+    fn bc1_chain_covers_every_level_and_rejects_translucency() {
+        let opaque = vec![255u8; 16 * 16 * 4];
+        let chain = bc1_chain(&opaque, 16, 16).expect("opaque");
+        // 16x16 (16 blocks) + 8x8 (4) + 4x4 (1) + 2x2 (1) + 1x1 (1), 8 bytes each
+        assert_eq!(chain.len(), (16 + 4 + 1 + 1 + 1) * 8);
+        let mut translucent = opaque;
+        translucent[3] = 10;
+        assert!(bc1_chain(&translucent, 16, 16).is_none());
     }
 
     #[test]
