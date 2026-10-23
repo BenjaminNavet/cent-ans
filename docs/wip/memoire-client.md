@@ -1,11 +1,9 @@
-# Lot MEM : memoire du client Bevy
+# Lot MEM : mémoire du client Bevy
 
-## Etat
-- Sonde `memory` ajoutee au dump d etat (RSS, pic, images CPU/GPU, top 10) et au rapport des bancs (`memory.peak_rss_mib`).
-- Mesure de base (release, Ultra, hors fenetre) : voir ci-dessous.
+## État
+- Sonde `memory` (dump d'état + rapports de banc), garde RSS dans `perf_guard.sh`, doc `docs/performance-memoire.md`,
+  ADR 0748. Essais relief du tas et cache disque abandonnés (sans gain d'empreinte).
 
-## Prochaine etape
-- Identifier les gros postes (footprint, pas RSS : le compresseur macOS fausse RSS), corriger, ADR 0748, garde perf_guard.
-
-## Notes
-- `malloc_zone_pressure_relief` essaye puis abandonne : RSS baisse (pages compressees) mais footprint inchange.
+## Prochaine étape (machine calme)
+- Mesurer `footprint` avant/après : copies CPU en `RENDER_WORLD` (castle_wall, building arrays, flipbook, battle_ga3),
+  décodage des feuilles de sol en bandes, déchargement campagne -> bataille.
