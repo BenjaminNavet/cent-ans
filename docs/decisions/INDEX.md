@@ -309,3 +309,6 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0722 | [Brouillard de la prévision de bataille](0722-brouillard-de-la-prevision.md) | accepté |
 | 0723 | [Sort de la ville prise : culture, remise, libération, banditisme](0723-sort-de-la-ville-prise-culture-cession-liberation.md) | accepté |
 | 0731 | [Révoltes graduées et armée rebelle](0731-revoltes-graduees-et-armee-rebelle.md) | accepté |
+| 0740 | [Mise à l'échelle du monde 3D (Bevy)](0740-mise-a-l-echelle-du-monde-bevy.md) | accepté |
+| 0741 | [SMAA sur la carte de campagne au lieu du MSAA](0741-smaa-carte-au-lieu-du-msaa.md) | accepté |
+| 0742 | [Cache du sol par nœud de relief](0742-cache-du-sol-par-noeud.md) | accepté |
