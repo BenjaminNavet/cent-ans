@@ -17,5 +17,7 @@ Lot : cuire hors ligne les bandes albedo/normales/grain micro du sol de bataille
   ktx2_loaded 4, fallback 0 ; capture : sol herbeux, soldats, ciel normaux.
 - Comparaison old/new par pixels : non pertinente (caméras différentes entre les deux captures).
 
-## Reste
-- Campagne 300 images, test du repli (renommer un .ktx2), puis suppression de client/target.
+## Fait en fin de lot
+- Campagne 300 images exit 0. Fichier .ktx2 absent : chemin JPG direct (pas compté en fallback).
+  Fichier .ktx2 tronqué : `ktx2_fallback` 1, rendu correct (capture).
+- Non fait : bench release.
