@@ -3,6 +3,11 @@
 
 use std::process::ExitCode;
 
+// `--features system-alloc`: the platform allocator, for A/B measurements (ADR 0776).
+#[cfg(not(feature = "system-alloc"))]
+#[global_allocator]
+static ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 use bevy::asset::AssetPlugin;
 use bevy::prelude::*;
 use bevy::window::{PresentMode, WindowResolution};

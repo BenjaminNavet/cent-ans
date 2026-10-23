@@ -17,6 +17,8 @@ name = "cent-ans"
 path = "src/main.rs"
 
 [features]
+# Platform allocator instead of mimalloc (A/B memory and fps measurements, ADR 0776).
+system-alloc = []
 # Fast iterations: Bevy dynamic linking. The player binary is linked statically.
 dev = ["bevy/dynamic_linking", "bevy/file_watcher", "bevy/debug", "remote", "reflect-inspect", "dep:bevy_brp_extras", "dep:bevy_egui", "dep:bevy_console", "dep:clap", "bevy-devtools"]
 # Lot devtools: Bevy 0.20 dev tools (diagnostics overlay, render debug overlay, system stepping).
@@ -53,6 +55,10 @@ solari = ["bevy/bevy_solari", "dep:wgpu"]
 default = ["decals", "solari"]
 
 [dependencies]
+# Global allocator (ADR 0776): libmalloc keeps the freed 16 MiB texture decode buffers ("MALLOC_LARGE
+# (empty)", 0.6-1.1 GiB of footprint) and `malloc_zone_pressure_relief` returns none of them;
+# mimalloc hands pages back to the OS.
+mimalloc = { version = "=0.1.52", default-features = false }
 # solari: adapter probe before the app is built (same wgpu as Bevy's).
 wgpu = { version = "=30.0.1", optional = true, default-features = false }
 # Renamed: Bevy derive macros would otherwise resolve `bevy_ecs` as a direct dependency.

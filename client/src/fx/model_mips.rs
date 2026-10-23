@@ -27,6 +27,9 @@ const ANISOTROPY: u16 = 8;
 /// it is block-compressed (BC1) and kept on the GPU only (ADR 0776); 2048 px RGBA8 + mips was 21 MiB
 /// on the GPU and 21 MiB more in RAM for each of ~66 models.
 const COMPRESSED_PREFIXES: [&str; 2] = ["models/dn/", "models/props_ga/"];
+/// Largest side kept for a compressed model texture (2048 px baked albedo seen at campaign
+/// distances; 1024 px BC1 + mips is 0.7 MiB instead of 2.8 MiB).
+const MAX_MODEL_SIDE: usize = 1024;
 /// Smallest side (texels) worth compressing.
 const MIN_COMPRESS_SIDE: usize = 256;
 
@@ -55,7 +58,7 @@ pub struct MipQueue {
     /// Images that got a chain (dump probe).
     done: usize,
     /// Background BC1 encodes: image id and the finished chain (`None`: not compressible).
-    encoding: Vec<(AssetId<Image>, Task<Option<Vec<u8>>>)>,
+    encoding: Vec<(AssetId<Image>, Task<Option<(Vec<u8>, UVec2)>>)>,
     /// Images stored as BC1 and dropped from RAM (dump probe).
     compressed: usize,
 }
@@ -131,7 +134,8 @@ fn generate_queued_mips(
             && let Some(data) = image.data.clone()
         {
             let (w, h) = (image.width() as usize, image.height() as usize);
-            let task = AsyncComputeTaskPool::get().spawn(async move { bc1_chain(&data, w, h) });
+            let task = AsyncComputeTaskPool::get()
+                .spawn(async move { bc1_chain(&data, w, h, MAX_MODEL_SIDE) });
             queue.encoding.push((id, task));
             continue;
         }
@@ -164,8 +168,10 @@ fn collect_compressed(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<Ima
             continue;
         };
         match result {
-            Some(chain) => {
-                let (w, h) = (image.width(), image.height());
+            Some((chain, size)) => {
+                let (w, h) = (size.x, size.y);
+                image.texture_descriptor.size.width = w;
+                image.texture_descriptor.size.height = h;
                 image.texture_descriptor.format = TextureFormat::Bc1RgbaUnormSrgb;
                 image.texture_descriptor.mip_level_count = mip_levels(w, h);
                 image.data = Some(chain);
@@ -196,15 +202,22 @@ fn compressible(image: &Image) -> bool {
         && image.data.as_ref().is_some_and(|d| d.len() == w * h * 4)
 }
 
-/// Full BC1 mip chain of an RGBA8 image (level 0 first), `None` when a texel is not opaque.
-fn bc1_chain(rgba: &[u8], w: usize, h: usize) -> Option<Vec<u8>> {
+/// Full BC1 mip chain of an RGBA8 image (level 0 first, reduced by box filter until its larger side
+/// is at most `max_side`), `None` when a texel is not opaque.
+fn bc1_chain(rgba: &[u8], w: usize, h: usize, max_side: usize) -> Option<(Vec<u8>, UVec2)> {
     use crate::campaign::terrain::bc1;
     if rgba.chunks_exact(4).any(|p| p[3] != 255) {
         return None;
     }
-    let mut out = Vec::with_capacity(bc1::level_bytes(w, h) * 4 / 3 + 16);
+    let mut out = Vec::new();
     let mut level = rgba.to_vec();
     let (mut lw, mut lh) = (w, h);
+    while lw.max(lh) > max_side && lw % 8 == 0 && lh % 8 == 0 {
+        let (nw, nh) = (lw / 2, lh / 2);
+        level = box_down(&level, lw, lh, nw, nh);
+        (lw, lh) = (nw, nh);
+    }
+    let size = UVec2::new(lw as u32, lh as u32);
     loop {
         out.extend(bc1::encode_level(&level, lw, lh));
         if lw <= 1 && lh <= 1 {
@@ -214,7 +227,7 @@ fn bc1_chain(rgba: &[u8], w: usize, h: usize) -> Option<Vec<u8>> {
         level = box_down(&level, lw, lh, nw, nh);
         (lw, lh) = (nw, nh);
     }
-    Some(out)
+    Some((out, size))
 }
 
 /// One box-filtered mip level.
@@ -328,12 +341,16 @@ mod tests {
     #[test]
     fn bc1_chain_covers_every_level_and_rejects_translucency() {
         let opaque = vec![255u8; 16 * 16 * 4];
-        let chain = bc1_chain(&opaque, 16, 16).expect("opaque");
+        let (chain, size) = bc1_chain(&opaque, 16, 16, 64).expect("opaque");
+        assert_eq!(size, UVec2::new(16, 16));
         // 16x16 (16 blocks) + 8x8 (4) + 4x4 (1) + 2x2 (1) + 1x1 (1), 8 bytes each
         assert_eq!(chain.len(), (16 + 4 + 1 + 1 + 1) * 8);
         let mut translucent = opaque;
         translucent[3] = 10;
-        assert!(bc1_chain(&translucent, 16, 16).is_none());
+        assert!(bc1_chain(&translucent, 16, 16, 64).is_none());
+        let (reduced, size) = bc1_chain(&vec![255u8; 32 * 32 * 4], 32, 32, 16).expect("opaque");
+        assert_eq!(size, UVec2::new(16, 16));
+        assert_eq!(reduced.len(), (16 + 4 + 1 + 1 + 1) * 8);
     }
 
     #[test]
