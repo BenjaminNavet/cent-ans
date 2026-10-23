@@ -10,9 +10,9 @@ Lot : refonte économique de la campagne (juge it.3 chantiers 1 et 3). ADR 0777 
 - [x] Client : lignes de budget et dette dans `campaign/panels/faction/view.rs` (pas de boutons d'ordres).
 - [x] Ponction d'épargne resserrée (1, 2, 4 saisons) ; butin et chevauchée relevés.
 - [x] Mesures : voir ADR 0778 (pic France passive 82,3 k / 80,3 k, soit 5,7 / 5,6 saisons du net initial ; banqueroutes 1 / 0). Seed bots `--quick` : 0 constat.
-- [ ] Vérification finale : fmt, clippy workspace, `cargo test --workspace --no-fail-fast`, `cargo check` client.
+- [x] Vérification finale : fmt, clippy workspace, `cargo test --workspace --no-fail-fast` (39 binaires ok), pytest schémas, `cargo check` client, seed bots `--quick` (0 constat).
 
 ## Reste / limites
 - Boutons client pour emprunter, rembourser, lever un impôt (UX2).
-- Tribut et subsides de guerre : le mécanisme `Obligation` existe, aucun producteur.
+- `ObligationKind::Tribute` sans producteur (les tributs de traité restent dans `ledger.tributes`).
 - Passe longue des seed bots non lancée.
