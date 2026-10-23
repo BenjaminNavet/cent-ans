@@ -36,7 +36,12 @@ const MANUAL_PITCH_MIN_DEG: f32 = 5.0;
 const MANUAL_PITCH_MAX_DEG: f32 = 85.0;
 const MANUAL_PITCH_DRAG_SPEED: f32 = 0.15;
 /// Opening shot (`camera_feel.json` `battle.opening_distance_m`, closer: the figures stay readable).
-pub const OPENING_DISTANCE: f32 = 100.0;
+pub const OPENING_DISTANCE: f32 = 75.0;
+/// Lower tilt (degrees) of the automatic pitch in the opening range, so that the first picture
+/// is a wall of men with the horizon high instead of half a screen of empty grass (ADR 0760).
+const LOW_TILT_BIAS_DEG: f32 = 9.0;
+/// The bias is full up to this distance and gone by twice that distance (m).
+const LOW_TILT_FULL_M: f32 = 110.0;
 
 #[derive(Component)]
 pub struct BattleCamera;
@@ -109,7 +114,10 @@ pub fn eye_and_aim(
 ) -> (Vec3, Vec3, f32) {
     let pitch_deg = match state.manual_pitch_deg {
         Some(deg) => deg.clamp(MANUAL_PITCH_MIN_DEG, MANUAL_PITCH_MAX_DEG),
-        None => auto_pitch_deg(state.distance),
+        None => {
+            let fade = 1.0 - smoothstep(LOW_TILT_FULL_M, LOW_TILT_FULL_M * 2.5, state.distance);
+            (auto_pitch_deg(state.distance) - LOW_TILT_BIAS_DEG * fade).max(PITCH_NEAR_DEG)
+        }
     };
     let pitch = pitch_deg.to_radians();
     let close = smoothstep(MIN_DISTANCE, CLOSE_RANGE, state.distance);
