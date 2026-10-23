@@ -60,6 +60,10 @@
       "status": "overlord"
     },
     {
+      "faction": "fac_dauphine",
+      "status": "overlord"
+    },
+    {
       "faction": "fac_milan",
       "status": "overlord"
     },

@@ -251,9 +251,31 @@ fn the_dauphine_purchase_transfers_the_province() {
     let data = game_data();
     let event = &data.events[&data_model::EventId::new("evt_achat_dauphine").unwrap()];
     let has_transfer = event.options[0].effects.iter().any(|e| {
-        matches!(e, EventEffect::TransferProvince { province, .. } if *province == prov("prov_provence"))
+        matches!(e, EventEffect::TransferTitle { title, .. } if title.as_str() == "tit_dauphine")
     });
     assert!(has_transfer);
+}
+
+#[test]
+fn the_dauphine_purchase_takes_the_capital_province_from_humbert() {
+    let data = game_data();
+    let mut state = quiet_france(data, 3);
+    let dauphine = prov("prov_dauphine");
+    assert_eq!(state.province_owner(&dauphine), Some(&fac("fac_dauphine")));
+    let event = &data.events[&data_model::EventId::new("evt_achat_dauphine").unwrap()];
+    let treasury = state.factions[&fac("fac_france")].treasury;
+    let ctx = sim_campaign::EventContext {
+        faction: Some(fac("fac_france")),
+        province: None,
+    };
+    for effect in &event.options[0].effects {
+        sim_campaign::effects::apply_effect(&mut state, data, effect, &ctx, &mut Vec::new());
+    }
+    assert_eq!(state.province_owner(&dauphine), Some(&fac("fac_france")));
+    assert!(state.factions[&fac("fac_france")].treasury < treasury - 9_000);
+    assert!(!state.factions[&fac("fac_dauphine")].alive);
+    // Provence stays with Naples: the objective no longer drags Marseille along.
+    assert_eq!(state.province_owner(&prov("prov_provence")), Some(&fac("fac_naples")));
 }
 
 // 5. Player ransoms ----------------------------------------------------------

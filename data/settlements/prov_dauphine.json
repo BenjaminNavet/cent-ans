@@ -1,0 +1,85 @@
+[
+  {
+    "id": "set_grenoble",
+    "province": "prov_dauphine",
+    "kind": "city",
+    "name": {
+      "display": "Grenoble",
+      "local": "Grenoble",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      5.7245,
+      45.1885
+    ],
+    "weight": 24,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale du Dauphiné sur l’Isère et le Drac, siège du conseil delphinal et du Parlement ; verrou des routes alpines.",
+    "sources": [
+      "Grenoble",
+      "Dauphiné de Viennois"
+    ]
+  },
+  {
+    "id": "set_vienne",
+    "province": "prov_dauphine",
+    "kind": "town",
+    "name": {
+      "display": "Vienne",
+      "local": "Vièna",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      4.8745,
+      45.5256
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancienne capitale des Burgondes et siège d’un archevêché sur le Rhône, qui donne son nom au Viennois ; place de péage entre Lyon et le Midi.",
+    "sources": [
+      "Vienne (Isère)",
+      "Dauphiné de Viennois"
+    ]
+  },
+  {
+    "id": "set_grande_chartreuse",
+    "province": "prov_dauphine",
+    "kind": "abbey",
+    "name": {
+      "display": "Grande Chartreuse",
+      "local": "Charterosa",
+      "local_language": "franco-provençal"
+    },
+    "lonlat": [
+      5.7975,
+      45.3608
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Monastère fondé par saint Bruno en 1084, maison mère de l’ordre des Chartreux dans le massif éponyme.",
+    "sources": [
+      "Grande Chartreuse"
+    ]
+  }
+]

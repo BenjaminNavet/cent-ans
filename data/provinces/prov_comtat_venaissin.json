@@ -10,6 +10,7 @@
   "climate": "mediterranean",
   "neighbors": [
     "prov_beaucaire",
+    "prov_dauphine",
     "prov_provence"
   ],
   "rivers": [

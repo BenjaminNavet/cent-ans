@@ -247,8 +247,15 @@
   },
   {
    "from": "set_aix",
+   "to": "set_chambery",
+   "cost": 593.87,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_aix",
    "to": "set_grande_chartreuse",
-   "cost": 354.77,
+   "cost": 532.16,
    "road": false,
    "sea": false
   },
@@ -691,6 +698,13 @@
    "to": "set_ulm",
    "cost": 57.52,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_avignon",
+   "to": "set_grenoble",
+   "cost": 377.86,
+   "road": false,
    "sea": false
   },
   {
@@ -3152,15 +3166,22 @@
   },
   {
    "from": "set_grande_chartreuse",
-   "to": "set_les_baux",
-   "cost": 322.98,
+   "to": "set_grenoble",
+   "cost": 69.89,
    "road": false,
    "sea": false
   },
   {
    "from": "set_grande_chartreuse",
    "to": "set_montmelian",
-   "cost": 58.69,
+   "cost": 78.25,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_grande_chartreuse",
+   "to": "set_vienne",
+   "cost": 184.52,
    "road": false,
    "sea": false
   },
@@ -3190,6 +3211,20 @@
    "to": "set_malaga",
    "cost": 176.51,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_grenoble",
+   "to": "set_les_baux",
+   "cost": 432.16,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_grenoble",
+   "to": "set_vienne",
+   "cost": 100.3,
+   "road": true,
    "sea": false
   },
   {
@@ -3921,6 +3956,13 @@
    "sea": false
   },
   {
+   "from": "set_les_baux",
+   "to": "set_montmelian",
+   "cost": 534.49,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_liege",
    "to": "set_louvain",
    "cost": 75.47,
@@ -4184,6 +4226,13 @@
    "to": "set_moulins",
    "cost": 142.57,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_lyon",
+   "to": "set_vienne",
+   "cost": 117.99,
+   "road": false,
    "sea": false
   },
   {
