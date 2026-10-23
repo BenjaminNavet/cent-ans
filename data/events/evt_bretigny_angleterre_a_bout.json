@@ -1,0 +1,140 @@
+{
+  "id": "evt_bretigny_angleterre_a_bout",
+  "title": "Brétigny : Édouard demande la paix",
+  "text": "La Couronne d’Angleterre ne paie plus ses archers et les chevauchées s’épuisent devant des villes qui ne se rendent plus. Édouard III, qui n’a rien gagné sur le roi de France, demande la paix à Brétigny : il rendra Calais et le Ponthieu s’il peut sauver la face et garder l’Aquitaine.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1360,
+      "season": "spring"
+    },
+    "until_year": 1361,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "not",
+        "condition": {
+          "type": "character_captive",
+          "id": "chr_jean_de_normandie"
+        }
+      },
+      {
+        "type": "strength_ratio",
+        "faction": "fac_france",
+        "rival": "fac_england",
+        "percent": 110
+      },
+      {
+        "type": "not",
+        "condition": {
+          "type": "treasury_above",
+          "faction": "fac_england",
+          "amount": 8000
+        }
+      },
+      {
+        "type": "not",
+        "condition": {
+          "type": "faction_is_player",
+          "faction": "fac_england"
+        }
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Dicter la paix : Calais et le Ponthieu reviennent à la couronne",
+      "effects": [
+        {
+          "type": "peace",
+          "a": "fac_england",
+          "b": "fac_france"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_ponthieu",
+          "faction": "fac_france",
+          "from": "fac_england"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_boulonnais",
+          "faction": "fac_france",
+          "from": "fac_england"
+        },
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "treasury",
+          "amount": 10000
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretigny_inverse"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Accepter une trêve sans conditions",
+      "effects": [
+        {
+          "type": "peace",
+          "a": "fac_england",
+          "b": "fac_france"
+        },
+        {
+          "type": "prestige",
+          "amount": 3
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Écraser l’Angleterre tant qu’elle est à terre",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 8
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 6
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -20,
+          "reason": "Paix refusée par le roi de France"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1360-05-08"
+  },
+  "sources": [
+    "Traité de Brétigny",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023",
+    "Georges Minois, La Guerre de Cent Ans, Perrin, 2008"
+  ]
+}

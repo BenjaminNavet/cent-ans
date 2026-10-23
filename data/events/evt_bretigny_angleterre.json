@@ -1,0 +1,124 @@
+{
+  "id": "evt_bretigny_angleterre",
+  "title": "Brétigny : la paix de l’Aquitaine",
+  "text": "Le roi Jean est votre prisonnier et la France n’a plus de quoi payer ses soldats. Les légistes anglais rédigent à Brétigny les termes de la paix : trois millions d’écus de [[cdx_rancon|rançon]], l’Aquitaine en pleine souveraineté, Calais, le Ponthieu, le Poitou, la Saintonge, l’Agenais, le Périgord et le Quercy. Il faudra pour cela renoncer à la couronne de France.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1360,
+      "season": "spring"
+    },
+    "until_year": 1361,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "character_captive",
+        "id": "chr_jean_de_normandie"
+      },
+      {
+        "type": "faction_is_player",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Imposer les termes de Brétigny",
+      "effects": [
+        {
+          "type": "peace",
+          "a": "fac_england",
+          "b": "fac_france"
+        },
+        {
+          "type": "release_character",
+          "id": "chr_jean_de_normandie",
+          "faction": "fac_france",
+          "ransom": 40000
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_poitou",
+          "faction": "fac_england",
+          "from": "fac_france"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_saintonge",
+          "faction": "fac_england",
+          "from": "fac_france"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_agenais",
+          "faction": "fac_england",
+          "from": "fac_france"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_boulonnais",
+          "faction": "fac_england",
+          "from": "fac_france"
+        },
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "treasury",
+          "amount": 10000
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretigny_signe"
+        },
+        {
+          "type": "set_flag",
+          "flag": "guyenne_en_pleine_souverainete"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Garder le roi et exiger la couronne",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -20,
+          "reason": "Exigence de la couronne de France"
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretigny_refuse"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1360-05-08"
+  },
+  "sources": [
+    "Traité de Brétigny",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "id": "evt_fin_d_etienne_marcel",
+  "title": "La fin d’Étienne Marcel",
+  "text": "Au cœur de l’été 1358, la Jacquerie écrasée à Mello et le dauphin aux portes de Paris, [[cdx_etienne_marcel|Étienne Marcel]] cherche un autre prince : [[cdx_charles_le_mauvais|Charles de Navarre]], petit-fils de Louis X, que les Parisiens verraient volontiers roi. Les partisans du dauphin tiennent la porte Saint-Antoine. Le prévôt peut être livré ou aidé, la couronne n’est plus sûre.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1358,
+      "season": "summer"
+    },
+    "until_year": 1359,
+    "conditions": [
+      {
+        "type": "fired",
+        "event": "evt_etienne_marcel"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_france",
+        "province": "prov_ile_de_france"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province",
+    "province": "prov_ile_de_france"
+  },
+  "options": [
+    {
+      "text": "Ouvrir la porte au dauphin et restaurer l’ordre royal",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -12
+        },
+        {
+          "type": "prestige",
+          "amount": 8
+        },
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "set_flag",
+          "flag": "dauphin_maitre_de_paris"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Traiter avec le roi de Navarre contre le dauphin",
+      "effects": [
+        {
+          "type": "claim",
+          "faction": "fac_navarre",
+          "kind": "throne",
+          "target": "fac_france"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_navarre",
+          "amount": 25,
+          "reason": "Appel des Parisiens"
+        },
+        {
+          "type": "declare_war",
+          "a": "fac_france",
+          "b": "fac_navarre"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 12
+        },
+        {
+          "type": "prestige",
+          "amount": -8
+        },
+        {
+          "type": "set_flag",
+          "flag": "paris_navarrais"
+        }
+      ],
+      "ai_weight": 1,
+      "requires": [
+        {
+          "type": "flag",
+          "flag": "grande_ordonnance_acceptee"
+        }
+      ],
+      "requires_reason": "Exige d’avoir accepté la Grande Ordonnance de 1357."
+    },
+    {
+      "text": "Laisser la ville à son sort et partir pour la Normandie",
+      "effects": [
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 18
+        },
+        {
+          "type": "devastation",
+          "province": "prov_ile_de_france",
+          "amount": 8
+        },
+        {
+          "type": "prestige",
+          "amount": -12
+        },
+        {
+          "type": "set_flag",
+          "flag": "paris_abandonne"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1358-07-31"
+  },
+  "sources": [
+    "Étienne Marcel",
+    "Charles II de Navarre",
+    "Raymond Cazelles, Étienne Marcel, Tallandier, 1984",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

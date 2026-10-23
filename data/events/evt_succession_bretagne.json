@@ -54,6 +54,14 @@
           "type": "schedule_event",
           "event": "evt_hennebont",
           "delay": 4
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretagne_blois"
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretagne_blois"
         }
       ],
       "ai_weight": 2
@@ -88,6 +96,14 @@
           "type": "schedule_event",
           "event": "evt_hennebont",
           "delay": 4
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretagne_montfort"
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretagne_montfort"
         }
       ],
       "ai_weight": 1

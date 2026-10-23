@@ -1,7 +1,7 @@
 {
   "id": "evt_bretigny",
   "title": "Le traité de Brétigny",
-  "text": "Le roi Jean est toujours captif à Londres. À Brétigny, près de Chartres, les envoyés des deux rois arrêtent les termes de la paix : trois millions d’écus de [[cdx_rancon|rançon]] et l’Aquitaine en pleine souveraineté contre la renonciation d’Édouard à la couronne de France.",
+  "text": "Le roi Jean est toujours captif à Londres et le royaume épuisé. À Brétigny, près de Chartres, les envoyés des deux rois arrêtent les termes de la paix : trois millions d’écus de [[cdx_rancon|rançon]], l’Aquitaine en pleine souveraineté, Calais, le Ponthieu, le Poitou, la Saintonge, l’Agenais, le Périgord et le Quercy, contre la renonciation d’Édouard à la couronne de France.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -16,17 +16,15 @@
         "b": "fac_france"
       },
       {
-        "type": "any_of",
-        "conditions": [
-          {
-            "type": "character_captive",
-            "id": "chr_jean_de_normandie"
-          },
-          {
-            "type": "fired",
-            "event": "evt_poitiers"
-          }
-        ]
+        "type": "character_captive",
+        "id": "chr_jean_de_normandie"
+      },
+      {
+        "type": "not",
+        "condition": {
+          "type": "faction_is_player",
+          "faction": "fac_england"
+        }
       }
     ]
   },
@@ -37,7 +35,7 @@
   "map_scene": "celebration",
   "options": [
     {
-      "text": "Signer la paix et payer la rançon",
+      "text": "Signer la paix, payer la rançon et céder les provinces",
       "effects": [
         {
           "type": "peace",
@@ -51,11 +49,97 @@
           "ransom": 40000
         },
         {
+          "type": "transfer_province",
+          "province": "prov_poitou",
+          "faction": "fac_england",
+          "from": "fac_france"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_saintonge",
+          "faction": "fac_england",
+          "from": "fac_france"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_agenais",
+          "faction": "fac_england",
+          "from": "fac_france"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_boulonnais",
+          "faction": "fac_england",
+          "from": "fac_france"
+        },
+        {
           "type": "prestige",
           "amount": -10
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -5
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretigny_signe"
+        },
+        {
+          "type": "set_flag",
+          "flag": "guyenne_en_pleine_souverainete"
         }
       ],
       "ai_weight": 3
+    },
+    {
+      "text": "Obtenir des termes moins lourds contre une rançon accrue",
+      "effects": [
+        {
+          "type": "peace",
+          "a": "fac_england",
+          "b": "fac_france"
+        },
+        {
+          "type": "release_character",
+          "id": "chr_jean_de_normandie",
+          "faction": "fac_france",
+          "ransom": 60000
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_saintonge",
+          "faction": "fac_england",
+          "from": "fac_france"
+        },
+        {
+          "type": "transfer_province",
+          "province": "prov_agenais",
+          "faction": "fac_england",
+          "from": "fac_france"
+        },
+        {
+          "type": "prestige",
+          "amount": -15
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretigny_signe"
+        },
+        {
+          "type": "set_flag",
+          "flag": "guyenne_en_pleine_souverainete"
+        }
+      ],
+      "ai_weight": 1,
+      "requires": [
+        {
+          "type": "treasury_above",
+          "faction": "fac_france",
+          "amount": 20000
+        }
+      ],
+      "requires_reason": "Exige 20000 livres au trésor pour acheter de meilleurs termes."
     },
     {
       "text": "Refuser et poursuivre la guerre",
@@ -74,6 +158,10 @@
           "faction": "fac_england",
           "amount": -15,
           "reason": "Refus de la paix de Brétigny"
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretigny_refuse"
         }
       ],
       "ai_weight": 1

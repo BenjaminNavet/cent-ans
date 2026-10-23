@@ -1,0 +1,100 @@
+{
+  "id": "evt_traite_de_bayonne",
+  "title": "Le traité de Bayonne",
+  "text": "Épuisé par la peste, la dysenterie et le refus des Castillans de se soulever, Jean de Gand négocie. À Bayonne, il renonce à la couronne contre une indemnité considérable, et sa fille Catherine épousera l’héritier de Castille, ce qui réunira les deux lignées.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1388,
+      "season": "autumn"
+    },
+    "until_year": 1389,
+    "conditions": [
+      {
+        "type": "flag",
+        "flag": "gand_roi_de_castille"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_castile"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Renoncer à la Castille contre indemnité et mariage",
+      "effects": [
+        {
+          "type": "peace",
+          "a": "fac_england",
+          "b": "fac_castile"
+        },
+        {
+          "type": "treasury",
+          "amount": 12000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_castile",
+          "amount": 25,
+          "reason": "Traité de Bayonne"
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "set_flag",
+          "flag": "castille_reconciliee"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Poursuivre la guerre en Castille",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 8
+        },
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_castile",
+          "amount": -15,
+          "reason": "Refus de Bayonne"
+        },
+        {
+          "type": "set_flag",
+          "flag": "guerre_de_castille"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1388-07-08"
+  },
+  "sources": [
+    "Jean de Gand",
+    "Pierre Ier de Castille",
+    "Peter E. Russell, The English Intervention in Spain and Portugal, 1955",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}

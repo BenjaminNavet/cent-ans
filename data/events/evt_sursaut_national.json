@@ -1,0 +1,74 @@
+{
+  "id": "evt_sursaut_national",
+  "title": "Le sursaut du royaume",
+  "text": "Quand les châteaux tombent et que les bannières reculent, un frémissement parcourt les campagnes : les villages se cotisent, les [[cdx_chevalerie|chevaliers]] ruinés reprennent les armes et l’on murmure qu’un signe a été donné. La peur se change en obstination, et les capitaines qui désespéraient retrouvent des hommes.",
+  "kind": "random",
+  "trigger": {
+    "chance_permille": 12,
+    "conditions": [
+      {
+        "type": "domain_below",
+        "percent": 50
+      },
+      {
+        "type": "at_war"
+      },
+      {
+        "type": "year_between",
+        "from": 1340,
+        "to": 1460
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction"
+  },
+  "options": [
+    {
+      "text": "Armer le peuple et rendre l’espoir aux garnisons",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -10
+        },
+        {
+          "type": "spawn_army",
+          "units": [
+            "unit_men_at_arms_foot",
+            "unit_men_at_arms_foot",
+            "unit_crossbowmen"
+          ]
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Profiter de l’élan pour lever un impôt de guerre",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "treasury",
+          "amount": 6000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Philippe Contamine, Guerre, État et société à la fin du Moyen Âge, 1972",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

@@ -2,6 +2,7 @@
 
 mod campaign;
 mod df1_difficulty;
+mod ev_history;
 mod f7_events;
 mod fk5_incidents;
 mod fk_map_scenes;

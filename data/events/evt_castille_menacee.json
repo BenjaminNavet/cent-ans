@@ -1,0 +1,99 @@
+{
+  "id": "evt_castille_menacee",
+  "title": "La Castille face à Lancastre",
+  "text": "Les Anglais ont pris pied en Galice. Le roi de Castille réunit les Cortes, appelle ses alliés français et cherche à acheter le départ de Lancastre sans perdre la face : les vaisseaux de Séville peuvent couper la mer aux Anglais, mais les caisses se vident.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1386,
+      "season": "autumn"
+    },
+    "until_year": 1387,
+    "conditions": [
+      {
+        "type": "flag",
+        "flag": "expedition_de_galice"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_castile"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_castile"
+  },
+  "options": [
+    {
+      "text": "Appeler les Français et armer la flotte",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 20,
+          "reason": "Appel de Castille"
+        },
+        {
+          "type": "treasury",
+          "amount": -4000
+        },
+        {
+          "type": "prestige",
+          "amount": 8
+        },
+        {
+          "type": "spawn_army",
+          "faction": "fac_castile",
+          "province": "prov_galicia",
+          "units": [
+            "unit_knights",
+            "unit_men_at_arms_foot",
+            "unit_crossbowmen"
+          ]
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Acheter le départ des Anglais",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -10000
+        },
+        {
+          "type": "peace",
+          "a": "fac_castile",
+          "b": "fac_england"
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1,
+      "requires": [
+        {
+          "type": "treasury_above",
+          "faction": "fac_castile",
+          "amount": 10000
+        }
+      ],
+      "requires_reason": "Exige 10000 livres au trésor."
+    }
+  ],
+  "historical_date": {
+    "value": "1386-10-01"
+  },
+  "sources": [
+    "Jean de Gand",
+    "Pierre Ier de Castille",
+    "Peter E. Russell, The English Intervention in Spain and Portugal, 1955",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}

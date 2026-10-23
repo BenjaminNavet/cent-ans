@@ -1,0 +1,110 @@
+{
+  "id": "evt_bretigny_paix_blanche_anglaise",
+  "title": "Brétigny : la paix blanche",
+  "text": "Aucun des deux rois n’a pu faire plier l’autre : les routes sont ravagées, les compagnies pillent les deux camps et les trésors sont vides. À Brétigny, près de Chartres, les envoyés conviennent d’une [[cdx_bretigny|paix blanche]] : chacun garde ce qu’il tient, les prisonniers se rachètent, et la question de la couronne est remise à des jours meilleurs.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1360,
+      "season": "spring"
+    },
+    "until_year": 1361,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "not",
+        "condition": {
+          "type": "character_captive",
+          "id": "chr_jean_de_normandie"
+        }
+      },
+      {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "not",
+            "condition": {
+              "type": "strength_ratio",
+              "faction": "fac_france",
+              "rival": "fac_england",
+              "percent": 110
+            }
+          },
+          {
+            "type": "treasury_above",
+            "faction": "fac_england",
+            "amount": 8000
+          }
+        ]
+      },
+      {
+        "type": "faction_is_player",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Accepter la paix blanche",
+      "effects": [
+        {
+          "type": "peace",
+          "a": "fac_england",
+          "b": "fac_france"
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -8
+        },
+        {
+          "type": "set_flag",
+          "flag": "paix_blanche_de_bretigny"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Poursuivre la guerre",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "treasury",
+          "amount": -4000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -10,
+          "reason": "Refus de la paix blanche"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1360-05-08"
+  },
+  "sources": [
+    "Traité de Brétigny",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023",
+    "Philippe Contamine, La Guerre de Cent Ans, PUF, 1968"
+  ]
+}

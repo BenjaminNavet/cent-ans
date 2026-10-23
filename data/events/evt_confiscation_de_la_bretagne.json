@@ -1,0 +1,103 @@
+{
+  "id": "evt_confiscation_de_la_bretagne",
+  "title": "La confiscation du duché de Bretagne",
+  "text": "Jean IV a laissé les garnisons anglaises à Brest et à Saint-Mathieu : Charles V, malade, prononce la confiscation du duché devant le parlement. Les barons bretons, qui haïssent les Anglais plus encore que les Français, abandonnent le duc, tandis que du Guesclin marche sur Rennes.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1378,
+      "season": "summer"
+    },
+    "until_year": 1379,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_brittany"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_france"
+      },
+      {
+        "type": "flag",
+        "flag": "bretagne_alliance_anglaise"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_brittany"
+  },
+  "options": [
+    {
+      "text": "Résister avec les garnisons anglaises",
+      "effects": [
+        {
+          "type": "declare_war",
+          "a": "fac_france",
+          "b": "fac_brittany"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 10
+        },
+        {
+          "type": "devastation",
+          "province": "prov_bretagne",
+          "amount": 8
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 15,
+          "reason": "Brest maintenu"
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Se soumettre au roi et chasser les garnisons anglaises",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 20,
+          "reason": "Soumission de Jean IV"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -20,
+          "reason": "Garnisons chassées"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -5
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretagne_reconciliee"
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1378-12-18"
+  },
+  "sources": [
+    "Traité de Guérande (1365)",
+    "Jean IV de Bretagne",
+    "Michael Jones, Ducal Brittany 1364-1399, 1970"
+  ]
+}
