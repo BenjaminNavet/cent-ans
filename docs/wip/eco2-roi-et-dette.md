@@ -2,13 +2,17 @@
 
 Lot : refonte économique de la campagne (juge it.3 chantiers 1 et 3). ADR 0777 (finances royales : charges, crédit, impôts exceptionnels, banqueroute) et 0778 (éco-guerre, budget lisible).
 
-## Plan
-- Données : `data/rules/finance.json` + `data/schemas/finance_rules.schema.json` ; `data-model::FinanceRules`.
-- Cœur : `sim-campaign/src/finance.rs` (maison du roi, gages, sièges, obligations, prêts, banqueroute royale, impôts exceptionnels, IA).
-- Ordres : `Borrow`, `Repay`, `LevyExtraordinary` ; `SetCoinage` existant journalisé.
-- Journal des causes : `RoyalDefault`, `ExtraordinaryTax`, `Debasement` (cause_builders).
-- game-api : budget par poste (revenus/dépenses) dans la vue économie.
-- Mesures : `campaign_probe --turns 40 --seeds 1,2 --passive --full` ; seed bots `--quick`.
-
 ## État
-- [ ] squelette
+- [x] Données : `data/rules/finance.json` + schéma ; `data_model::FinanceRules`.
+- [x] Cœur `sim-campaign/src/finance.rs` : maison du roi, gages, sièges, obligations (dot, saisie), prêts (lombards, florentines), cote de crédit, banqueroute royale, impôts exceptionnels (aide, gabelle, fouage), IA (`ai_finance_orders`, branché dans `ai/src/campaign.rs`).
+- [x] Ordres `Borrow`, `Repay`, `LevyExtraordinary` ; journal des causes (`royal_default`, `extraordinary_tax`, `debasement`).
+- [x] Budget : `TurnBudget`, `BudgetRecord`, `budget_lines` ; `game-api` `EconomyView` + `FinanceView` (`FactionPanelView.finance`).
+- [x] Client : lignes de budget et dette dans `campaign/panels/faction/view.rs` (pas de boutons d'ordres).
+- [x] Ponction d'épargne resserrée (1, 2, 4 saisons) ; butin et chevauchée relevés.
+- [x] Mesures : voir ADR 0778 (pic France passive 87,6 k / 80,3 k, soit 6,1 / 5,6 saisons du net initial ; banqueroutes 9 / 18). Seed bots `--quick` : 0 constat.
+- [ ] Vérification finale : fmt, clippy workspace, `cargo test --workspace --no-fail-fast`, `cargo check` client.
+
+## Reste / limites
+- Boutons client pour emprunter, rembourser, lever un impôt (UX2).
+- Tribut et subsides de guerre : le mécanisme `Obligation` existe, aucun producteur.
+- Passe longue des seed bots non lancée.

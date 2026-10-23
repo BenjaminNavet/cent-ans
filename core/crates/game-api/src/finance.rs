@@ -164,3 +164,44 @@ pub fn finance_view(
         grievance_unrest: finance::finance_unrest(state, faction),
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_finance_view_lists_bankers_levies_and_the_loans_in_force() {
+        let data = data_model::test_support::game_data();
+        let mut state = sim_campaign::test_support::start_quiet(data, "fac_france", 5);
+        let france = FactionId::new("fac_france").unwrap();
+        let view = finance_view(data, &state, &france).expect("france");
+        assert_eq!(view.debt, 0);
+        assert_eq!(view.lenders.len(), 2);
+        assert!(view.lenders.iter().all(|l| l.room > 0));
+        assert!(view.levies.iter().any(|l| l.id == "aide" && l.ready_in == 0));
+        // The gabelle only exists from 1341.
+        assert!(view.levies.iter().all(|l| l.id != "gabelle"));
+        state
+            .submit_order(
+                data,
+                sim_campaign::Order::Borrow {
+                    lender: "lombards".into(),
+                    amount: 10_000,
+                },
+            )
+            .unwrap();
+        let view = finance_view(data, &state, &france).unwrap();
+        assert_eq!(view.debt, 10_000);
+        assert_eq!(view.loans.len(), 1);
+        assert_eq!(view.interest, 450);
+        assert!(view.default_risk_percent > 0);
+        let economy = crate::hud::economy(data, &state, &france).unwrap();
+        assert_eq!(economy.debt, 10_000);
+        assert!(economy.household > 0);
+        assert!(economy
+            .budget_lines
+            .iter()
+            .any(|l| l.key == "household" && l.charge));
+        assert!(finance_view(data, &state, &FactionId::new("fac_nobody").unwrap()).is_none());
+    }
+}
