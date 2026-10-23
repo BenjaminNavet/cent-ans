@@ -520,7 +520,7 @@ pub fn levy(
 }
 
 /// Dowry of a marriage between `bride_faction` and `groom_faction` (no-op within one realm).
-pub(crate) fn on_marriage(
+pub fn book_dowry(
     state: &mut CampaignState,
     data: &GameData,
     bride_faction: &FactionId,
@@ -568,7 +568,7 @@ pub(crate) fn dowry_for_marriage(
     } else {
         (cb.faction.clone(), ca.faction.clone())
     };
-    on_marriage(state, data, &bride, &groom);
+    book_dowry(state, data, &bride, &groom);
 }
 
 /// End of season, after the economy has booked the budget: obligations tick (the creditors
