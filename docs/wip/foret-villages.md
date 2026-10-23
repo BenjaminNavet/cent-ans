@@ -17,3 +17,9 @@ Branche `worktree-agent-a608f07146f7f2063` (base main + fb6b6e23d, sol corrigé)
 
 ## Reste
 - Captures de contrôle (forêt d = 60 / 200 / 600, hiver), mesure fps (`ab.sh`) si `uptime` < 20, ADR 0770, tests ciblés.
+
+## Mesures et état final
+- fps pan d = 30 (release, load 12-16, 2 paires alternées hameaux / sans) : p50 9,15 / 9,42 ms avec hameaux contre 9,21 / 10,46 sans ; p95 15,3 / 15,7 contre 15,4 / 19,0. Pas de régression. Journaux de lancement : 0 `failed to create shader module` / `no definition in scope`.
+- Captures utilisées : 7 sur 10 (`out/foret/`, ignorées par git : `m_a60.png` avant, `m_c60.png` après, `m_d.png` hameau d28 / hiver d200 / été d200 / été d600).
+- Réglage final des maisons : `size_scale` 1,7, `albedo_gain` 2 (non recapturé après ce dernier réglage).
+- Non fait : haies et enclos de hameau (mode ancré aux hameaux à écrire), ardoise dédiée, saison d'ambiance (LUT interdite au lot).

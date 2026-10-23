@@ -318,20 +318,20 @@
     "farm_norman": {
       "model": "buildings/farm_norman_timber_courtyard",
       "max_mult": 60,
-      "size_scale": 3.5,
-      "fade_from": 70,
-      "max_distance": 110,
+      "size_scale": 1.7,
+      "fade_from": 55,
+      "max_distance": 90,
       "max_instances": 500,
-      "albedo_gain": 1.55
+      "albedo_gain": 2.0
     },
     "farm_mas": {
       "model": "buildings/farm_southern_stone_mas",
       "max_mult": 60,
-      "size_scale": 3.5,
-      "fade_from": 70,
-      "max_distance": 110,
+      "size_scale": 1.7,
+      "fade_from": 55,
+      "max_distance": 90,
       "max_instances": 400,
-      "albedo_gain": 1.55
+      "albedo_gain": 2.0
     },
     "vine_hut": {
       "model": "props/vineyard_hut",
@@ -377,57 +377,57 @@
     },
     "farm_german": {
       "max_mult": 60,
-      "size_scale": 3.5,
-      "fade_from": 70,
-      "max_distance": 110,
+      "size_scale": 1.7,
+      "fade_from": 55,
+      "max_distance": 90,
       "model": "buildings/farm_german_fachwerk",
       "max_instances": 600,
-      "albedo_gain": 1.55
+      "albedo_gain": 2.0
     },
     "farm_flemish": {
       "max_mult": 60,
-      "size_scale": 3.5,
-      "fade_from": 70,
-      "max_distance": 110,
+      "size_scale": 1.7,
+      "fade_from": 55,
+      "max_distance": 90,
       "model": "buildings/farm_flemish_brick_barn",
       "max_instances": 600,
-      "albedo_gain": 1.55
+      "albedo_gain": 2.0
     },
     "house_brick": {
       "max_mult": 60,
-      "size_scale": 3.5,
-      "fade_from": 70,
-      "max_distance": 110,
+      "size_scale": 1.7,
+      "fade_from": 55,
+      "max_distance": 90,
       "model": "buildings/house_brick_gable",
       "max_instances": 600,
-      "albedo_gain": 1.55
+      "albedo_gain": 2.0
     },
     "farm_cortijo": {
       "max_mult": 60,
-      "size_scale": 3.5,
-      "fade_from": 70,
-      "max_distance": 110,
+      "size_scale": 1.7,
+      "fade_from": 55,
+      "max_distance": 90,
       "model": "buildings/farm_iberian_adobe_cortijo",
       "max_instances": 600,
-      "albedo_gain": 1.55
+      "albedo_gain": 2.0
     },
     "farm_alpine": {
       "max_mult": 60,
-      "size_scale": 3.5,
-      "fade_from": 70,
-      "max_distance": 110,
+      "size_scale": 1.7,
+      "fade_from": 55,
+      "max_distance": 90,
       "model": "buildings/farm_alpine_chalet_stone",
       "max_instances": 600,
-      "albedo_gain": 1.55
+      "albedo_gain": 2.0
     },
     "farm_english": {
       "max_mult": 60,
-      "size_scale": 3.5,
-      "fade_from": 70,
-      "max_distance": 110,
+      "size_scale": 1.7,
+      "fade_from": 55,
+      "max_distance": 90,
       "model": "buildings/farm_english_stone_manor",
       "max_instances": 600,
-      "albedo_gain": 1.55
+      "albedo_gain": 2.0
     },
     "hamlet_garden": {
       "max_mult": 40,
@@ -1379,6 +1379,10 @@
           80,
           200
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1405,6 +1409,10 @@
           160,
           340
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1431,6 +1439,10 @@
           260,
           480
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1454,6 +1466,10 @@
           80,
           200
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1477,6 +1493,10 @@
           160,
           340
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1500,6 +1520,10 @@
           260,
           480
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1522,6 +1546,10 @@
           80,
           200
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1544,6 +1572,10 @@
           160,
           340
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1566,6 +1598,10 @@
           260,
           480
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1589,6 +1625,10 @@
           80,
           200
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1612,6 +1652,10 @@
           160,
           340
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1635,6 +1679,10 @@
           260,
           480
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1656,6 +1704,10 @@
           80,
           200
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1677,6 +1729,10 @@
           160,
           340
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1698,6 +1754,10 @@
           260,
           480
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1721,6 +1781,10 @@
           80,
           200
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1744,6 +1808,10 @@
           160,
           340
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1767,6 +1835,10 @@
           260,
           480
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1794,6 +1866,10 @@
           60,
           150
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1820,6 +1896,10 @@
           340,
           560
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1843,6 +1923,10 @@
           340,
           560
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1865,6 +1949,10 @@
           340,
           560
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1888,6 +1976,10 @@
           340,
           560
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1909,6 +2001,10 @@
           340,
           560
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     },
     {
@@ -1932,6 +2028,10 @@
           340,
           560
         ]
+      },
+      "filters": {
+        "forest_max": 0.35,
+        "slope_max_deg": 20
       }
     }
   ]

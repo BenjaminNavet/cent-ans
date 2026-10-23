@@ -440,7 +440,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         // Winter, mid distance: the holes of the bare crown are not drawn (they would stipple); its
         // twigs darken the mass instead, so the stands do not read as white balls of cotton.
         if season_deciduous(cls) {
-            seasoned = seasoned * (1.0 - 0.42 * smoothstep(0.8, 2.0, lod) * params.season.w);
+            seasoned = seasoned * (1.0 - (0.2 + 0.4 * leaves) * smoothstep(0.8, 2.0, lod) * params.season.w);
         }
         color = vec4<f32>(seasoned, 1.0);
         occlusion = mix(0.55, 1.0, nt.a);
