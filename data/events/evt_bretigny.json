@@ -1,7 +1,7 @@
 {
   "id": "evt_bretigny",
   "title": "Le traité de Brétigny",
-  "text": "Le roi Jean est toujours captif à Londres et le royaume épuisé. À Brétigny, près de Chartres, les envoyés des deux rois arrêtent les termes de la paix : trois millions d’écus de [[cdx_rancon|rançon]], l’Aquitaine en pleine souveraineté, Calais, le Ponthieu, le Poitou, la Saintonge, l’Agenais, le Périgord et le Quercy, contre la renonciation d’Édouard à la couronne de France.",
+  "text": "Battu sur les champs de bataille, le royaume est épuisé, et le roi Jean, s’il vit encore prisonnier à Londres, y pèse de tout son poids. À Brétigny, près de Chartres, les envoyés des deux rois arrêtent les termes de la paix : trois millions d’écus de [[cdx_rancon|rançon]], l’Aquitaine en pleine souveraineté, Calais, le Ponthieu, le Poitou, la Saintonge, l’Agenais, le Périgord et le Quercy, contre la renonciation d’Édouard à la couronne de France.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -16,8 +16,19 @@
         "b": "fac_france"
       },
       {
-        "type": "character_captive",
-        "id": "chr_jean_de_normandie"
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "ruler_captive",
+            "faction": "fac_france"
+          },
+          {
+            "type": "battle_balance",
+            "faction": "fac_england",
+            "rival": "fac_france",
+            "at_least": 3
+          }
+        ]
       },
       {
         "type": "not",
@@ -44,7 +55,7 @@
         },
         {
           "type": "release_character",
-          "id": "chr_jean_de_normandie",
+          "id": "ruler",
           "faction": "fac_france",
           "ransom": 40000
         },
@@ -102,7 +113,7 @@
         },
         {
           "type": "release_character",
-          "id": "chr_jean_de_normandie",
+          "id": "ruler",
           "faction": "fac_france",
           "ransom": 60000
         },

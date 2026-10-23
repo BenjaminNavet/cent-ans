@@ -1,7 +1,7 @@
 {
   "id": "evt_bretigny_angleterre",
   "title": "Brétigny : la paix de l’Aquitaine",
-  "text": "Le roi Jean est votre prisonnier et la France n’a plus de quoi payer ses soldats. Les légistes anglais rédigent à Brétigny les termes de la paix : trois millions d’écus de [[cdx_rancon|rançon]], l’Aquitaine en pleine souveraineté, Calais, le Ponthieu, le Poitou, la Saintonge, l’Agenais, le Périgord et le Quercy. Il faudra pour cela renoncer à la couronne de France.",
+  "text": "La France, battue sur les champs, n’a plus de quoi payer ses soldats, et le roi Jean, s’il est votre prisonnier, ne sera libéré qu’à prix d’or. Les légistes anglais rédigent à Brétigny les termes de la paix : trois millions d’écus de [[cdx_rancon|rançon]], l’Aquitaine en pleine souveraineté, Calais, le Ponthieu, le Poitou, la Saintonge, l’Agenais, le Périgord et le Quercy. Il faudra pour cela renoncer à la couronne de France.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -16,8 +16,19 @@
         "b": "fac_france"
       },
       {
-        "type": "character_captive",
-        "id": "chr_jean_de_normandie"
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "ruler_captive",
+            "faction": "fac_france"
+          },
+          {
+            "type": "battle_balance",
+            "faction": "fac_england",
+            "rival": "fac_france",
+            "at_least": 3
+          }
+        ]
       },
       {
         "type": "faction_is_player",
@@ -41,7 +52,7 @@
         },
         {
           "type": "release_character",
-          "id": "chr_jean_de_normandie",
+          "id": "ruler",
           "faction": "fac_france",
           "ransom": 40000
         },

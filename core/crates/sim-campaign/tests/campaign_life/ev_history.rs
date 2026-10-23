@@ -58,18 +58,13 @@ fn staged(year: i32, season: Season) -> CampaignState {
     state
 }
 
-/// Jean II on the throne, as he is from 1350.
-fn crown_jean(state: &mut CampaignState) {
-    let data = game_data();
-    apply(
-        state,
-        data,
-        "fac_france",
-        EventEffect::SetRuler {
-            character: chr("chr_jean_de_normandie"),
-            faction: Some(fac("fac_france")),
-        },
-    );
+/// The king of France is a prisoner, whoever he is.
+fn ruler_captive(state: &CampaignState) -> bool {
+    let ruler = state.factions[&fac("fac_france")]
+        .ruler
+        .clone()
+        .expect("ruler");
+    state.characters[&ruler].captive
 }
 
 fn england_wins(state: &mut CampaignState, count: u32) {
@@ -178,12 +173,11 @@ fn field_victories_are_tallied_for_good() {
 fn poitiers_takes_the_king_only_after_an_english_victory() {
     let data = game_data();
     let mut state = staged(1356, Season::Autumn);
-    crown_jean(&mut state);
     england_wins(&mut state, 1);
     state.end_turn_with(data, idle);
     assert!(fired(&state, "evt_poitiers"));
     assert!(!fired(&state, "evt_poitiers_victoire_francaise"));
-    assert!(state.characters[&chr("chr_jean_de_normandie")].captive);
+    assert!(ruler_captive(&state));
     assert!(state.chronicle.flags.contains("roi_jean_captif"));
 }
 
@@ -195,7 +189,7 @@ fn poitiers_takes_the_prince_after_a_french_victory() {
     state.end_turn_with(data, idle);
     assert!(!fired(&state, "evt_poitiers"));
     assert!(fired(&state, "evt_poitiers_victoire_francaise"));
-    assert!(!state.characters[&chr("chr_jean_de_normandie")].captive);
+    assert!(!ruler_captive(&state));
     assert!(state.characters[&chr("chr_edward_of_woodstock")].captive);
 }
 
@@ -206,7 +200,7 @@ fn poitiers_is_inconclusive_when_nobody_won() {
     state.end_turn_with(data, idle);
     assert!(fired(&state, "evt_maupertuis_sans_bataille"));
     assert!(!fired(&state, "evt_poitiers"));
-    assert!(!state.characters[&chr("chr_jean_de_normandie")].captive);
+    assert!(!ruler_captive(&state));
 }
 
 #[test]
@@ -242,7 +236,7 @@ fn bretigny_cedes_the_provinces_when_the_king_is_captive() {
         data,
         "fac_france",
         EventEffect::CaptureCharacter {
-            id: CharacterRef::Id(chr("chr_jean_de_normandie")),
+            id: CharacterRef::Ruler,
             faction: None,
             captor: fac("fac_england"),
         },
@@ -265,6 +259,20 @@ fn bretigny_cedes_the_provinces_when_the_king_is_captive() {
     }
     assert!(!state.is_at_war(&fac("fac_england"), &fac("fac_france")));
     assert!(state.chronicle.flags.contains("bretigny_signe"));
+}
+
+#[test]
+fn bretigny_cedes_after_a_string_of_defeats_even_with_a_free_king() {
+    let data = game_data();
+    let mut state = staged(1360, Season::Spring);
+    england_wins(&mut state, 3);
+    assert!(!ruler_captive(&state));
+    state.end_turn_with(data, idle);
+    assert!(fired(&state, "evt_bretigny"));
+    assert_eq!(
+        state.province_owner(&prov("prov_poitou")),
+        Some(&fac("fac_england"))
+    );
 }
 
 #[test]
@@ -293,14 +301,15 @@ fn bretigny_turns_when_england_is_broke() {
         .get_mut(&fac("fac_england"))
         .unwrap()
         .treasury = 0;
-    // France far stronger under arms: add idle men to its armies.
-    for army in state.armies.values_mut() {
-        if army.faction == fac("fac_england") {
-            for unit in &mut army.units {
-                unit.strength = 1;
-            }
-        }
-    }
+    // England is deep in debt and has no army left under arms.
+    state
+        .factions
+        .get_mut(&fac("fac_england"))
+        .unwrap()
+        .treasury = -200_000;
+    state
+        .armies
+        .retain(|_, army| army.faction != fac("fac_england"));
     state.end_turn_with(data, idle);
     assert!(fired(&state, "evt_bretigny_angleterre_a_bout"), "ratio");
     assert!(!fired(&state, "evt_bretigny"));
@@ -375,12 +384,14 @@ fn the_national_surge_needs_a_collapsed_domain() {
 #[test]
 fn the_castilian_fork_leaves_a_claim_and_a_war() {
     let data = game_data();
-    let mut state = staged(1371, Season::Autumn);
-    state
-        .characters
-        .get_mut(&chr("chr_jean_de_gand"))
-        .expect("John of Gaunt exists")
-        .alive = true;
+    // John of Gaunt is born in 1340: let the births of that year happen first.
+    let mut state = staged(1340, Season::Spring);
+    for _ in 0..4 {
+        state.end_turn_with(data, idle);
+    }
+    assert!(state.characters.contains_key(&chr("chr_jean_de_gand")));
+    state.year = 1371;
+    state.season = Season::Autumn;
     state.end_turn_with(data, idle);
     assert!(fired(&state, "evt_mariage_de_jean_de_gand"));
     // The AI weights take the claim: the flag stays for fifteen years.
@@ -547,7 +558,7 @@ fn simulate(data: &GameData, player: &str, seed: u64) -> BTreeMap<EventId, i32> 
             let france = state.controlled_provinces(&fac("fac_france")).count();
             let domain = state.domain_share_percent(data, &fac("fac_france"));
             println!(
-                "{} war={at_war} france_provinces={france} domain={domain:?} tally={:?} jean_captive={}",
+                "{} war={at_war} france_provinces={france} domain={domain:?} tally={:?} ruler_captive={}",
                 state.year,
                 state
                     .chronicle
@@ -555,7 +566,7 @@ fn simulate(data: &GameData, player: &str, seed: u64) -> BTreeMap<EventId, i32> 
                     .iter()
                     .map(|t| format!("{}>{}:{}", &t.winner.as_str()[4..], &t.loser.as_str()[4..], t.victories))
                     .collect::<Vec<_>>(),
-                state.characters[&chr("chr_jean_de_normandie")].captive
+                ruler_captive(&state)
             );
         }
     }

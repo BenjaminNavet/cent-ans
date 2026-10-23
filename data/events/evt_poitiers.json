@@ -1,7 +1,7 @@
 {
   "id": "evt_poitiers",
   "title": "La prise du roi à Poitiers",
-  "text": "Les armées de France ont perdu la bataille rangée et le prince de Galles chevauche vers Bordeaux. À Maupertuis, près de Poitiers, il écrase l’ost du roi : Jean, combattant à pied avec son jeune fils Philippe, est pris et mené à [[cdx_bordeaux|Bordeaux]] puis à Londres. Le royaume est sans tête.",
+  "text": "Les armées de France ont perdu la bataille et le prince de Galles chevauche vers Bordeaux. À Maupertuis, près de Poitiers, il écrase l’ost du roi : le souverain, combattant à pied avec son plus jeune fils, est pris et mené à [[cdx_bordeaux|Bordeaux]] puis à Londres. Le royaume est sans tête.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -16,13 +16,11 @@
         "b": "fac_france"
       },
       {
-        "type": "character_alive",
-        "id": "chr_jean_de_normandie"
-      },
-      {
-        "type": "ruler_is",
-        "faction": "fac_france",
-        "character": "chr_jean_de_normandie"
+        "type": "not",
+        "condition": {
+          "type": "ruler_captive",
+          "faction": "fac_france"
+        }
       },
       {
         "type": "battle_balance",

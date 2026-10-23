@@ -17,11 +17,14 @@
       },
       {
         "type": "character_alive",
-        "id": "chr_jean_de_normandie"
+        "id": "chr_edward_of_woodstock"
       },
       {
-        "type": "character_alive",
-        "id": "chr_edward_of_woodstock"
+        "type": "not",
+        "condition": {
+          "type": "ruler_captive",
+          "faction": "fac_france"
+        }
       },
       {
         "type": "battle_balance",

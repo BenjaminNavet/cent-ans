@@ -203,7 +203,13 @@ pub enum Condition {
     Not {
         condition: Box<Condition>,
     },
-    /// EVENTS: balance of the field battles `faction` (default: scope) and
+    /// EVENTS: the ruler of `faction` (default: scope) is alive and held
+    /// captive (whoever sits on the throne: Philippe VI or Jean II).
+    RulerCaptive {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        faction: Option<FactionId>,
+    },
+    /// EVENTS: balance of the land battles `faction` (default: scope) and
     /// `rival` have fought so far: victories of `faction` over `rival` minus
     /// victories of `rival` over `faction`, at least `at_least` (may be
     /// negative: "not behind by more than two").

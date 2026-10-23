@@ -213,7 +213,7 @@ impl EventRefs<'_> {
                 self.faction("conditions.faction", faction.as_ref());
                 self.faction("conditions.rival", Some(rival));
             }
-            Condition::DomainBelow { faction, .. } => {
+            Condition::DomainBelow { faction, .. } | Condition::RulerCaptive { faction } => {
                 self.faction("conditions.faction", faction.as_ref());
             }
             Condition::YearBetween { .. }

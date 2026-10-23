@@ -397,6 +397,9 @@ impl CampaignState {
             Condition::AnyOf { conditions } => conditions
                 .iter()
                 .any(|inner| self.condition_holds(data, inner, ctx)),
+            Condition::RulerCaptive { faction } => scope_faction(faction)
+                .and_then(|f| self.ruler_state(&f))
+                .is_some_and(|ruler| ruler.captive),
             Condition::Not { condition } => !self.condition_holds(data, condition, ctx),
             Condition::BattleBalance {
                 faction,

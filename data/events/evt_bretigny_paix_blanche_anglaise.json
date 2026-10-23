@@ -18,8 +18,17 @@
       {
         "type": "not",
         "condition": {
-          "type": "character_captive",
-          "id": "chr_jean_de_normandie"
+          "type": "ruler_captive",
+          "faction": "fac_france"
+        }
+      },
+      {
+        "type": "not",
+        "condition": {
+          "type": "battle_balance",
+          "faction": "fac_england",
+          "rival": "fac_france",
+          "at_least": 3
         }
       },
       {
