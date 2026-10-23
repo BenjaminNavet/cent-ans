@@ -1,11 +1,13 @@
-# Lot ARMEES — masse, densité, variété (wip)
+# Lot ARMEES (wip)
 
-Source : out/juge/iter-02-art.md constats 2,12,13,14,19.
+## Fait
+- Caméra d ouverture 75 m, tilt auto -9 deg en plage proche (camera.rs).
+- Jitter de profondeur x1,6 (core unit.rs, rendu seul).
+- Palettes délavées pour 6 unités occidentales (data/fx/unit_looks.json).
+- ADR 0760.
 
-## État
-- Lecture du code : densité visuelle = réglage client unit_size (défaut 1.0) plafonné par max_figures (15000) ; core figure_layout serre les figurines dans le rectangle simulé ; OPENING_DISTANCE = 100 m dans scene/camera.rs.
+## Mesures
+Machine à charge 100+ : bancs non fiables. A/B unit_size 1.0 vs 2.0 via CENT_ANS_SETTINGS_PATH : aucun écart (réglage probablement non pris en compte par le banc ou plafonné) -> défaut unit_size NON changé.
 
-## Prochaine étape
-1. Banc de référence puis A/B densité.
-2. Caméra d ouverture basse + premier plan.
-3. Variété individuelle.
+## Ouvert
+- Densité par défaut, imposteurs animés VAT, kit modulaire de coiffes, props de premier plan, captures avant/après : à faire quand la charge < 20.
