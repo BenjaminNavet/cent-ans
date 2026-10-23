@@ -394,7 +394,10 @@ pub fn update_regiments(
         .iter()
         .next()
         .map_or(Vec3::new(0.0, 100.0, 0.0), |t| t.translation());
-    let crowd = super::crowd::CrowdSettings::bundled();
+    let mut crowd = super::crowd::CrowdSettings::bundled();
+    if super::crowd::baseline_phase() {
+        crowd.cull.enabled = false;
+    }
     let cull_view = camera_view.iter().next().map(|(transform, projection)| {
         super::crowd::CullView::from_camera(
             transform,
@@ -657,7 +660,9 @@ pub fn update_regiments(
         let far_blend = ((distance - 80.0) / 180.0).clamp(0.0, 1.0);
         // Per-soldier culling: visible soldiers first, then those kept for their shadow.
         let sorted = match &cull_view {
-            Some(view) => super::crowd::sort_poses(view, &poses, regiment.spec.mounted, &crowd.cull),
+            Some(view) => {
+                super::crowd::sort_poses(view, &poses, regiment.spec.mounted, &crowd.cull)
+            }
             None => super::crowd::Sorted {
                 order: (0..poses.len()).collect(),
                 visible: poses.len(),
@@ -764,6 +769,7 @@ pub fn update_regiments(
     stats.total = total;
     stats.visible = visible_total;
     stats.shadow_only = shadow_only_total;
+    stats.sun = cull_view.and_then(|v| v.sun).map(|s| s.to_array());
     stats.lod = lod_counts;
     stats.regiments = seen.len();
     let mut per_batch = [0usize; 4];

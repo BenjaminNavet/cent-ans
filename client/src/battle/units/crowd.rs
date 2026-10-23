@@ -7,17 +7,49 @@
 //! - [`Class::Visible`]: inside the camera frustum (plus a margin): drawn in colour and in shadows;
 //! - [`Class::ShadowOnly`]: outside the frustum but whose shadow, thrown along the sun direction,
 //!   can enter it: drawn in the cascades only;
-//! - [`Class::Culled`]: neither.
+//! - `Class::Culled`: neither.
 //!
 //! The buffer holds the visible soldiers first, then the shadow-only ones, so the colour draw is a
 //! prefix of the shadow draw (see [`SkinnedColourCount`](super::skinned::SkinnedColourCount)).
 
 use std::sync::OnceLock;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use bevy::camera::Projection;
 use bevy::math::{Vec3, Vec4};
 use bevy::prelude::{GlobalTransform, Transform};
 use serde_json::Value;
+
+/// Dev hook for A/B captures in one process (`CENT_ANS_CROWD_FLIP_EVERY=<frames>`): every that
+/// many frames all the optimisations of this file switch off, then on again, so two captures a
+/// period apart show the same scene with and without them.
+pub static BASELINE_PHASE: AtomicBool = AtomicBool::new(false);
+
+/// Whether the current frame is in the "optimisations off" phase of the flip hook.
+pub fn baseline_phase() -> bool {
+    BASELINE_PHASE.load(Ordering::Relaxed)
+}
+
+/// Whether the shadow cascades use the lighter skinning right now.
+pub fn shadow_lite_now() -> bool {
+    CrowdSettings::bundled().shadow_skin.enabled && !baseline_phase()
+}
+
+/// Flips [`BASELINE_PHASE`] every `CENT_ANS_CROWD_FLIP_EVERY` frames (no-op without the variable).
+pub fn flip_phase(mut frame: bevy::prelude::Local<u64>) {
+    static EVERY: OnceLock<u64> = OnceLock::new();
+    let every = *EVERY.get_or_init(|| {
+        std::env::var("CENT_ANS_CROWD_FLIP_EVERY")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(0)
+    });
+    if every == 0 {
+        return;
+    }
+    *frame += 1;
+    BASELINE_PHASE.store((*frame / every) % 2 == 1, Ordering::Relaxed);
+}
 
 /// Where a soldier has to be drawn.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -59,24 +91,60 @@ impl Default for CullSettings {
     }
 }
 
+/// Parts of the lighter skinning of the shadow cascades (each one a shader def).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ShadowSkin {
+    pub enabled: bool,
+    /// Nearest animation frame instead of the interpolation of two (`SHADOW_SINGLE_FRAME`).
+    pub single_frame: bool,
+    /// Drop the bones of low weight (`SHADOW_BONE_CUT`).
+    pub bone_cut: bool,
+    /// No fade from the previous clip or exchange (`SHADOW_NO_FADE`).
+    pub no_fade: bool,
+    /// No procedural lance (length, angle, pennon) (`SHADOW_NO_PROP`).
+    pub no_prop: bool,
+}
+
+impl ShadowSkin {
+    /// Shader defs to add to the shadow vertex stage.
+    pub fn shader_defs(&self) -> Vec<&'static str> {
+        let mut defs = Vec::new();
+        if self.enabled {
+            for (on, name) in [
+                (self.single_frame, "SHADOW_SINGLE_FRAME"),
+                (self.bone_cut, "SHADOW_BONE_CUT"),
+                (self.no_fade, "SHADOW_NO_FADE"),
+                (self.no_prop, "SHADOW_NO_PROP"),
+            ] {
+                if on {
+                    defs.push(name);
+                }
+            }
+        }
+        defs
+    }
+}
+
+impl Default for ShadowSkin {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            single_frame: true,
+            bone_cut: true,
+            no_fade: true,
+            no_prop: true,
+        }
+    }
+}
+
 /// All the switches of `battle_crowd.json`, after the environment overrides.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct CrowdSettings {
     pub cull: CullSettings,
     /// Lighter skinning in the shadow cascades.
-    pub shadow_skin: bool,
+    pub shadow_skin: ShadowSkin,
     /// Lighter skinning for the farthest level of detail in colour.
     pub far_skin: bool,
-}
-
-impl Default for CrowdSettings {
-    fn default() -> Self {
-        Self {
-            cull: CullSettings::default(),
-            shadow_skin: true,
-            far_skin: false,
-        }
-    }
 }
 
 fn switch(env: &str, current: bool) -> bool {
@@ -114,7 +182,18 @@ impl CrowdSettings {
             num(cull, "min_sun_elevation", &mut s.cull.min_sun_elevation);
         }
         if let Some(v) = json.get("shadow_skin") {
-            flag(v, &mut s.shadow_skin);
+            let k = &mut s.shadow_skin;
+            flag(v, &mut k.enabled);
+            for (key, into) in [
+                ("single_frame", &mut k.single_frame),
+                ("bone_cut", &mut k.bone_cut),
+                ("no_fade", &mut k.no_fade),
+                ("no_prop", &mut k.no_prop),
+            ] {
+                if let Some(b) = v.get(key).and_then(Value::as_bool) {
+                    *into = b;
+                }
+            }
         }
         if let Some(v) = json.get("far_skin") {
             flag(v, &mut s.far_skin);
@@ -138,11 +217,22 @@ impl CrowdSettings {
                 .unwrap_or_default();
             if std::env::var("CENT_ANS_CROWD").is_ok_and(|v| v == "off") {
                 s.cull.enabled = false;
-                s.shadow_skin = false;
+                s.shadow_skin.enabled = false;
                 s.far_skin = false;
             }
             s.cull.enabled = switch("CENT_ANS_CROWD_CULL", s.cull.enabled);
-            s.shadow_skin = switch("CENT_ANS_CROWD_SHADOW_SKIN", s.shadow_skin);
+            s.shadow_skin.enabled = switch("CENT_ANS_CROWD_SHADOW_SKIN", s.shadow_skin.enabled);
+            // `CENT_ANS_CROWD_SHADOW_PARTS=single_frame,bone_cut`: only these parts (bisecting).
+            if let Ok(parts) = std::env::var("CENT_ANS_CROWD_SHADOW_PARTS") {
+                let has = |name: &str| parts.split(',').any(|p| p.trim() == name);
+                let k = &mut s.shadow_skin;
+                (k.single_frame, k.bone_cut, k.no_fade, k.no_prop) = (
+                    has("single_frame"),
+                    has("bone_cut"),
+                    has("no_fade"),
+                    has("no_prop"),
+                );
+            }
             s.far_skin = switch("CENT_ANS_CROWD_FAR_SKIN", s.far_skin);
             s
         })
@@ -166,7 +256,9 @@ impl CullView {
         let frustum = projection.compute_frustum(&GlobalTransform::from(*transform));
         Self {
             planes: frustum.half_spaces.map(|half_space| half_space.normal_d()),
-            sun: sun.map(Vec3::normalize_or_zero).filter(|d| *d != Vec3::ZERO),
+            sun: sun
+                .map(Vec3::normalize_or_zero)
+                .filter(|d| *d != Vec3::ZERO),
         }
     }
 }
@@ -232,12 +324,7 @@ pub struct Sorted {
 
 /// Sorts the poses (`[x, y, z, facing]`) into visible / shadow-only; culled ones are dropped.
 /// With culling disabled every soldier is visible, in the original order.
-pub fn sort_poses(
-    view: &CullView,
-    poses: &[[f32; 4]],
-    mounted: bool,
-    s: &CullSettings,
-) -> Sorted {
+pub fn sort_poses(view: &CullView, poses: &[[f32; 4]], mounted: bool, s: &CullSettings) -> Sorted {
     if !s.enabled {
         return Sorted {
             order: (0..poses.len()).collect(),
@@ -267,11 +354,11 @@ mod tests {
         let s = std::f32::consts::FRAC_1_SQRT_2;
         CullView {
             planes: [
-                Vec4::new(s, 0.0, -s, 0.0),  // left
-                Vec4::new(-s, 0.0, -s, 0.0), // right
-                Vec4::new(0.0, s, -s, 0.0),  // bottom
-                Vec4::new(0.0, -s, -s, 0.0), // top
-                Vec4::new(0.0, 0.0, -1.0, -1.0), // near: z <= -1
+                Vec4::new(s, 0.0, -s, 0.0),       // left
+                Vec4::new(-s, 0.0, -s, 0.0),      // right
+                Vec4::new(0.0, s, -s, 0.0),       // bottom
+                Vec4::new(0.0, -s, -s, 0.0),      // top
+                Vec4::new(0.0, 0.0, -1.0, -1.0),  // near: z <= -1
                 Vec4::new(0.0, 0.0, 1.0, 1000.0), // far: z >= -1000
             ],
             sun,
@@ -377,7 +464,10 @@ mod tests {
         // Sun on the horizon: elevation floored, then length capped.
         let low = Vec3::new(1.0, -0.001, 0.0).normalize();
         let tip = shadow_tip(Vec3::ZERO, low, &s);
-        assert!((tip.x - (s.shadow_height_m / s.min_sun_elevation).min(s.shadow_max_length_m)).abs() < 1e-3);
+        assert!(
+            (tip.x - (s.shadow_height_m / s.min_sun_elevation).min(s.shadow_max_length_m)).abs()
+                < 1e-3
+        );
         // Vertical sun: no horizontal displacement, no NaN.
         let tip = shadow_tip(Vec3::ZERO, Vec3::NEG_Y, &s);
         assert!(tip.is_finite() && tip.x == 0.0 && tip.z == 0.0);
@@ -442,10 +532,14 @@ mod tests {
         let s = CrowdSettings::from_json(
             r#"{"cull":{"enabled":false,"margin_m":3.5},"shadow_skin":{"enabled":false},"far_skin":{"enabled":true}}"#,
         );
-        assert!(!s.cull.enabled && !s.shadow_skin && s.far_skin);
+        assert!(!s.cull.enabled && !s.shadow_skin.enabled && s.far_skin);
+        assert!(s.shadow_skin.single_frame);
         assert_eq!(s.cull.margin_m, 3.5);
         assert_eq!(s.cull.foot_radius_m, CullSettings::default().foot_radius_m);
-        assert_eq!(CrowdSettings::from_json("not json"), CrowdSettings::default());
+        assert_eq!(
+            CrowdSettings::from_json("not json"),
+            CrowdSettings::default()
+        );
     }
 
     #[test]

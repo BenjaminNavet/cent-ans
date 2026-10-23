@@ -465,8 +465,8 @@ struct SkinnedPipeline {
     material_layout: BindGroupLayoutDescriptor,
     /// `LITE_FAR` shader def: single-frame skinning at the farthest level of detail (foule1).
     far_skin: bool,
-    /// `SHADOW_SKIN` shader def of the shadow pipeline: lighter skinning in the cascades.
-    shadow_skin: bool,
+    /// Shader defs of the shadow pipeline: lighter skinning in the cascades.
+    shadow_skin: super::crowd::ShadowSkin,
 }
 
 fn init_pipeline(
@@ -953,17 +953,20 @@ fn init_shadow_pipeline(
 }
 
 impl SpecializedMeshPipeline for SkinnedShadowPipeline {
-    type Key = MeshPipelineKey;
+    /// Mesh key, and whether the lighter skinning is on (`crowd::shadow_lite_now`).
+    type Key = (MeshPipelineKey, bool);
 
     fn specialize(
         &self,
-        key: Self::Key,
+        (key, lite): Self::Key,
         layout: &MeshVertexBufferLayoutRef,
     ) -> Result<RenderPipelineDescriptor, SpecializedMeshPipelineError> {
         let mut descriptor = self.base.specialize(key, layout)?;
         descriptor.label = Some("skinned_shadow_pipeline".into());
-        if self.base.shadow_skin {
-            descriptor.vertex.shader_defs.push("SHADOW_SKIN".into());
+        if lite {
+            for def in self.base.shadow_skin.shader_defs() {
+                descriptor.vertex.shader_defs.push(def.into());
+            }
         }
         descriptor.layout = vec![
             self.view_layout.clone(),
@@ -1061,8 +1064,9 @@ fn queue_shadow_casters(
                 mesh.primitive_topology(),
                 mesh.index_format(),
             ) | MeshPipelineKey::DEPTH_PREPASS;
+            let lite = super::crowd::shadow_lite_now();
             let pipeline_id =
-                match pipelines.specialize(&pipeline_cache, &pipeline, key, &mesh.layout) {
+                match pipelines.specialize(&pipeline_cache, &pipeline, (key, lite), &mesh.layout) {
                     Ok(id) => id,
                     Err(error) => {
                         if !*reported {

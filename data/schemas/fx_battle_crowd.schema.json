@@ -22,7 +22,13 @@
     },
     "shadow_skin": {
       "type": "object",
-      "properties": { "enabled": { "type": "boolean" } },
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "single_frame": { "type": "boolean" },
+        "bone_cut": { "type": "boolean" },
+        "no_fade": { "type": "boolean" },
+        "no_prop": { "type": "boolean" }
+      },
       "required": ["enabled"],
       "additionalProperties": false
     },

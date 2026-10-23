@@ -65,6 +65,8 @@ pub struct SoldierStats {
     pub visible: usize,
     /// Soldiers outside the frustum kept for their shadow only.
     pub shadow_only: usize,
+    /// Direction the sun travels as seen by the culling (`None`: no sun found).
+    pub sun: Option<[f32; 3]>,
     /// `[attacker foot, attacker mounted, defender foot, defender mounted]`.
     pub per_batch: [usize; 4],
     /// Soldiers per level of detail: full, medium, far, impostor.
@@ -168,6 +170,16 @@ pub struct BattleUnitsPlugin;
 
 impl Plugin for BattleUnitsPlugin {
     fn build(&self, app: &mut App) {
+        // Dev hook for A/B captures: `CENT_ANS_FIXED_DT_MS=<ms>` advances the clock by exactly
+        // that much each frame, so two runs reach the same animation state at the same frame.
+        if let Some(ms) = std::env::var("CENT_ANS_FIXED_DT_MS")
+            .ok()
+            .and_then(|v| v.parse::<f64>().ok())
+        {
+            app.insert_resource(bevy::time::TimeUpdateStrategy::ManualDuration(
+                std::time::Duration::from_secs_f64(ms / 1000.0),
+            ));
+        }
         app.add_plugins((
             InstancingPlugin,
             SkinnedPlugin,
@@ -193,6 +205,7 @@ impl Plugin for BattleUnitsPlugin {
                 load_library.run_if(resource_added::<BattleSession>),
                 wind::init_wind.run_if(resource_added::<BattleSession>),
                 dev_view.run_if(resource_exists::<BattleSession>),
+                crowd::flip_phase,
                 dev_speed.run_if(resource_exists::<BattleSession>),
                 regiments::update_regiments
                     .run_if(in_state(AppState::Battle))
@@ -344,8 +357,10 @@ fn dump_units(world: &World) -> (String, serde_json::Value) {
             "soldiers_uploaded": stats.drawn,
             "soldiers_drawn_over_total": format!("{} / {}", stats.visible, stats.total),
             "crowd": {
+                "sun_travel": stats.sun,
+                "baseline_phase": crowd::baseline_phase(),
                 "cull": crowd::CrowdSettings::bundled().cull.enabled,
-                "shadow_skin": crowd::CrowdSettings::bundled().shadow_skin,
+                "shadow_skin": crowd::CrowdSettings::bundled().shadow_skin.shader_defs(),
                 "far_skin": crowd::CrowdSettings::bundled().far_skin,
             },
             "soldiers_by_lod": named(stats.lod),
