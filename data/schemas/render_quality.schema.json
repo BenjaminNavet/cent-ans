@@ -169,6 +169,12 @@
           "minimum": 1024,
           "maximum": 16384
         },
+        "map_shadow_atlas": {
+          "description": "Shadow atlas of the campaign sun (ADR 0747); shadow_atlas when absent.",
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 16384
+        },
         "soft_shadows": {
           "enum": [
             "low",
