@@ -2384,6 +2384,35 @@
       "vassal_of": [
         "fac_crusaders"
       ]
+    },
+    {
+      "id": "dunbar",
+      "name": "Dunbar",
+      "blazon": "De gueules au lion d'argent, à la bordure d'argent chargée de huit roses de gueules.",
+      "description": "Comtes de Dunbar et de March (Patrick, 9e comte, époux d'Agnès Randolph, défenseuse du château en 1338).",
+      "source": "en.wikipedia : Earl of March (Scotland), arms of Dunbar",
+      "certainty": "incertain",
+      "factions": [
+        "fac_scotland"
+      ],
+      "vassal_of": [
+        "fac_scotland"
+      ]
+    },
+    {
+      "id": "castille",
+      "name": "Castille",
+      "arms_of": "fac_castile",
+      "blazon": "Écartelé : aux 1 et 4 de gueules au château d'or ; aux 2 et 3 d'argent au lion de pourpre couronné d'or.",
+      "description": "Maison royale de Castille et León (Bourgogne-Ivrée), dont est issue Béatrice de Castille, reine de Portugal.",
+      "source": "fr.wikipedia : Armoiries de l'Espagne (Castille et León)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_castile"
+      ],
+      "vassal_of": [
+        "fac_castile"
+      ]
     }
   ]
 }
