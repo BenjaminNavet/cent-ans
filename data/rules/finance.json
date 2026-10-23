@@ -1,0 +1,61 @@
+{
+  "description": "ECO2 (ADR 0777, 0778) : finances royales. La maison du roi coûte une part du revenu brut qui croît avec le rang du royaume (nombre de provinces) et le prestige du souverain ; les gages des gouverneurs et des chefs d’armée et le coût des sièges sont des charges structurelles, toutes plafonnées en part du revenu pour épargner les petites factions. Crédit : les banquiers prêtent jusqu’à limit_seasons saisons de revenu brut à rate_permille par saison (majoré quand la cote de crédit baisse) ; la banqueroute royale survient quand le trésor est négatif et la dette dépasse default.debt_seasons saisons de revenu : une part de la dette est effacée, les banquiers saisissent une part du revenu, le crédit est gelé, les provinces grognent. Impôts exceptionnels : un rendement immédiat en saisons de revenu, de la grogne pendant unrest_turns saisons, un délai avant de relever le même impôt. Dot : étalée sur installments saisons par la maison de l’épouse. IA : emprunte sous borrow_below_seasons, rembourse au-dessus de repay_above_seasons.",
+  "household": {
+    "tiers": [
+      { "min_provinces": 3, "percent": 4.0 },
+      { "min_provinces": 6, "percent": 10.0 },
+      { "min_provinces": 12, "percent": 16.0 },
+      { "min_provinces": 25, "percent": 22.0 }
+    ],
+    "percent_per_10_prestige": 0.5,
+    "max_percent": 32.0
+  },
+  "officers": {
+    "governor_wage": 30,
+    "commander_wage": 50,
+    "max_percent": 8.0
+  },
+  "siege": {
+    "per_siege": 150,
+    "growth_percent_per_season": 25,
+    "growth_max_percent": 200,
+    "max_percent": 15.0
+  },
+  "credit": {
+    "lenders": [
+      { "id": "lombards", "name": "Banquiers lombards", "rate_permille": 45, "limit_seasons": 2.0, "min_loan": 500 },
+      { "id": "florentines", "name": "Compagnies florentines (Bardi, Peruzzi)", "rate_permille": 60, "limit_seasons": 4.0, "min_loan": 3000 }
+    ],
+    "start_rating": 100,
+    "rating_recovery": 2,
+    "rate_penalty_permille_per_point": 0.6,
+    "rating_scales_limit": true,
+    "default": {
+      "debt_seasons": 4.0,
+      "write_off_percent": 40,
+      "clear_treasury": true,
+      "freeze_turns": 20,
+      "rating_loss": 50,
+      "seizure_percent": 20.0,
+      "seizure_turns": 8,
+      "unrest": 10.0,
+      "unrest_turns": 8,
+      "prestige_loss": 15
+    }
+  },
+  "levies": [
+    { "id": "aide", "name": "Aide extraordinaire", "from_year": 0, "income_seasons": 0.5, "unrest": 4.0, "unrest_turns": 4, "cooldown_turns": 6 },
+    { "id": "gabelle", "name": "Gabelle du sel", "from_year": 1341, "income_seasons": 0.9, "unrest": 7.0, "unrest_turns": 8, "cooldown_turns": 12 },
+    { "id": "fouage", "name": "Fouage", "from_year": 1355, "income_seasons": 0.7, "unrest": 6.0, "unrest_turns": 6, "cooldown_turns": 8 }
+  ],
+  "dowry": {
+    "income_seasons": 1.0,
+    "installments": 4
+  },
+  "ai": {
+    "borrow_below_seasons": 0.25,
+    "borrow_seasons": 1.0,
+    "repay_above_seasons": 1.5,
+    "levy_max_unrest": 35
+  }
+}

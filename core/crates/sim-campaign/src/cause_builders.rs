@@ -127,12 +127,26 @@ pub struct BankruptcyFacts<'a> {
     pub building_upkeep: i64,
     pub administration: i64,
     pub table: i64,
+    pub household: i64,
+    pub wages: i64,
+    pub siege: i64,
+    pub obligations: i64,
+    pub interest: i64,
     pub deficit_seasons: u32,
 }
 
 /// Cause of an empty treasury: the budget lines ranked by their share of the upkeep.
 pub fn bankruptcy_cause(f: &BankruptcyFacts<'_>) -> Cause {
-    let upkeep = (f.army_upkeep + f.building_upkeep + f.administration + f.table).max(1);
+    let upkeep = (f.army_upkeep
+        + f.building_upkeep
+        + f.administration
+        + f.table
+        + f.household
+        + f.wages
+        + f.siege
+        + f.obligations
+        + f.interest)
+        .max(1);
     let share = |line: i64| pct(line.max(0) as u64, upkeep as u64);
     let gap = (upkeep - f.income).max(0);
     let severity = (60 + i64::from(f.deficit_seasons) * 5).clamp(0, 100) as u8;
@@ -151,6 +165,11 @@ pub fn bankruptcy_cause(f: &BankruptcyFacts<'_>) -> Cause {
         )
         .factor("administration", f.administration, share(f.administration))
         .factor("table", f.table, share(f.table))
+        .factor("household", f.household, share(f.household))
+        .factor("wages", f.wages, share(f.wages))
+        .factor("siege_costs", f.siege, share(f.siege))
+        .factor("obligations", f.obligations, share(f.obligations))
+        .factor("interest", f.interest, share(f.interest) + 2)
         .factor("income_short", f.income, pct(gap as u64, upkeep as u64));
     if f.deficit_seasons > 1 {
         let seasons = i64::from(f.deficit_seasons);
@@ -158,6 +177,69 @@ pub fn bankruptcy_cause(f: &BankruptcyFacts<'_>) -> Cause {
     }
     if f.treasury < 0 {
         cause = cause.factor("debt", f.treasury, 10);
+    }
+    cause.ranked()
+}
+
+/// What the cause of an extraordinary tax is built from.
+pub struct LevyFacts<'a> {
+    pub faction: &'a FactionId,
+    pub yield_livres: i64,
+    pub unrest: i64,
+    pub treasury_before: i64,
+}
+
+/// Cause of an extraordinary tax: the yield, the unrest it feeds and the empty purse behind it.
+pub fn levy_cause(f: &LevyFacts<'_>) -> Cause {
+    let mut cause = Cause::new(CauseKind::ExtraordinaryTax, 40)
+        .subject(f.faction)
+        .factor("levy_yield", f.yield_livres, 40)
+        .factor("unrest_levy", f.unrest, f.unrest * 6);
+    if f.treasury_before < 1500 {
+        cause = cause.factor("levy_shortfall", f.treasury_before, 70);
+    }
+    cause.ranked()
+}
+
+/// What the cause of a royal default is built from.
+pub struct DefaultFacts<'a> {
+    pub faction: &'a FactionId,
+    /// Debt, per cent of one season of gross income.
+    pub debt_seasons_percent: i64,
+    pub written_off_percent: i64,
+    pub freeze_turns: i64,
+    pub seizure: i64,
+    pub treasury: i64,
+}
+
+/// Cause of a royal default: the load of debt, then what the bankers take in return.
+pub fn default_cause(f: &DefaultFacts<'_>) -> Cause {
+    Cause::new(CauseKind::RoyalDefault, 85)
+        .subject(f.faction)
+        .factor("debt_seasons", f.debt_seasons_percent, 90)
+        .factor("treasury_negative", f.treasury, 60)
+        .factor("write_off", f.written_off_percent, 40)
+        .factor("credit_frozen", f.freeze_turns, 35)
+        .factor("seizure", f.seizure, 30)
+        .ranked()
+}
+
+/// What the cause of a debasement is built from.
+pub struct DebasementFacts<'a> {
+    pub faction: &'a FactionId,
+    pub seigniorage_gain: i64,
+    pub price_level: i64,
+    pub treasury: i64,
+}
+
+/// Cause of a debasement: the seigniorage wanted, the empty purse, the inflation already there.
+pub fn debasement_cause(f: &DebasementFacts<'_>) -> Cause {
+    let mut cause = Cause::new(CauseKind::Debasement, 35)
+        .subject(f.faction)
+        .factor("seigniorage_gain", f.seigniorage_gain, 50)
+        .factor("inflation_ahead", f.price_level, (f.price_level - 100).max(0));
+    if f.treasury < 0 {
+        cause = cause.factor("treasury_negative", f.treasury, 75);
     }
     cause.ranked()
 }
@@ -394,6 +476,11 @@ mod tests {
             building_upkeep: 100,
             administration: 100,
             table: 0,
+            household: 0,
+            wages: 0,
+            siege: 0,
+            obligations: 0,
+            interest: 0,
             deficit_seasons: 3,
         });
         assert_eq!(cause.factors[0].key, "army_upkeep");

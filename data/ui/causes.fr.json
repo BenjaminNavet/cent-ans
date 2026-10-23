@@ -33,6 +33,15 @@
     "bankruptcy": {
       "other": "Banqueroute : le trésor est vide"
     },
+    "royal_default": {
+      "other": "Banqueroute royale : la couronne ne paie plus ses banquiers"
+    },
+    "extraordinary_tax": {
+      "other": "Impôt exceptionnel levé pour remplir le trésor"
+    },
+    "debasement": {
+      "other": "Mutation de la monnaie : le titre des espèces est affaibli"
+    },
     "revolt": {
       "other": "Révolte {de_lieu}"
     },
@@ -82,6 +91,21 @@
     "army_surcharge": "dont surcoût des armées au-delà du quota : {value} livres",
     "building_upkeep": "Entretien des bâtiments : {value} livres",
     "administration": "Cour et administration : {value} livres",
+    "household": "Maison du roi : {value} livres par saison",
+    "wages": "Gages des officiers : {value} livres par saison",
+    "siege_costs": "Coût des sièges : {value} livres par saison",
+    "obligations": "Dot, tribut et saisies : {value} livres par saison",
+    "interest": "Intérêts de la dette : {value} livres par saison",
+    "debt_seasons": "Dette de {value} % d’une saison de revenu",
+    "write_off": "{value} % de la dette perdue par les banquiers",
+    "credit_frozen": "Crédit gelé pendant {value} tours",
+    "seizure": "Saisie de {value} livres de revenu par saison",
+    "unrest_levy": "Grogne dans les provinces (+{value})",
+    "levy_yield": "Rendement : {value} livres",
+    "levy_shortfall": "Trésor presque vide ({value} livres avant l’impôt)",
+    "seigniorage_gain": "Seigneuriage : +{value} livres par saison",
+    "inflation_ahead": "Prix déjà à {value} % de leur niveau de 1337",
+    "treasury_negative": "Trésor négatif ({value} livres)",
     "table": "Tables et vivres : {value} livres",
     "income_short": "Revenus insuffisants : {value} livres par saison",
     "deficit_seasons": "Déficit depuis {value} saisons",

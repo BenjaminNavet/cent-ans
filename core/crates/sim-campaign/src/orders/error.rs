@@ -144,6 +144,8 @@ pub enum OrderError {
     #[error(transparent)]
     Coinage(#[from] crate::coinage::CoinageError),
     #[error(transparent)]
+    Finance(#[from] crate::finance::FinanceError),
+    #[error(transparent)]
     Ransom(#[from] crate::ransom::RansomError),
     #[error(transparent)]
     Chivalry(#[from] crate::chivalry::ChivalryError),

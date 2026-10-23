@@ -48,6 +48,7 @@ pub mod replenishment;
 pub mod resource;
 pub mod retinue;
 pub mod revolt_rules;
+pub mod finance_rules;
 pub mod river_crossing;
 pub mod river_nav;
 pub mod royal_act;

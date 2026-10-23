@@ -410,7 +410,16 @@ fn state_plans(
                     },
                     || {
                         (
-                            sim_campaign::coinage::ai_choose_coinage(cache, data, faction),
+                            {
+                                // ECO2: loans, repayments and extraordinary taxes
+                                // come before the coinage.
+                                let mut orders =
+                                    sim_campaign::finance::ai_finance_orders(cache, data, faction);
+                                orders.extend(sim_campaign::coinage::ai_choose_coinage(
+                                    cache, data, faction,
+                                ));
+                                orders
+                            },
                             sim_campaign::ransom::ai_ransom_orders(cache, data, faction),
                             {
                                 // JR1: the crusader faction preaches the

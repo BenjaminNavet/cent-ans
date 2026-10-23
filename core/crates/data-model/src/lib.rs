@@ -159,6 +159,10 @@ pub use entities::resource::{Resource, ResourceCategory};
 pub use entities::retinue::{
     Acquisition, AcquisitionTrigger, Companion, CompanionCategory, CompanionConditions, Retinue,
 };
+pub use entities::finance_rules::{
+    CreditRules, DefaultRules, DowryRules, FinanceAiRules, FinanceRules, HouseholdRules,
+    HouseholdTier, Lender, Levy, OfficerRules, SiegeCostRules,
+};
 pub use entities::revolt_rules::{RebelLevy, RevoltRules};
 pub use entities::river_crossing::{CrossingFactors, MapCrossing, RiverCrossingRules};
 pub use entities::river_nav::{MapPass, NavigableRiver, NavigableRivers, RiverPlace};

@@ -177,7 +177,7 @@ pub fn check_marriage(
 /// diplomacy decides whether the AI proposes them).
 pub fn propose_marriage(
     state: &mut CampaignState,
-    _data: &GameData,
+    data: &GameData,
     character: &CharacterId,
     spouse: &CharacterId,
 ) -> Result<(), MarriageError> {
@@ -201,6 +201,7 @@ pub fn propose_marriage(
         state.characters[spouse].faction.clone(),
     ];
     crate::missions::note_marriage(state, [&factions[0], &factions[1]]);
+    crate::finance::dowry_for_marriage(state, data, character, spouse);
     // Orders apply immediately and are not part of the turn journal (like
     // `Build`/`AssignGeneral`): `end_turn` overwrites `CampaignState::events`
     // with the turn's own log, so an event pushed here would be silently
