@@ -104,6 +104,12 @@ pub struct EconomyRules {
     /// every season.
     #[serde(default)]
     pub opulence_high_percent: i64,
+    /// ECO (ADR 0749): further tiers of the idle-hoard drain, each adding
+    /// `percent` of what the treasury holds beyond `seasons` seasons of
+    /// income (the drain grows with the hoard, so no rich realm hoards
+    /// without limit).
+    #[serde(default)]
+    pub opulence_tiers: Vec<OpulenceTier>,
     /// RX equil (ADR 0257): each technology already owned slows research by
     /// this percentage (0: none), so that small realms do not exhaust the
     /// tree in a few decades.
@@ -232,6 +238,16 @@ pub struct EconomyRules {
     pub terrain_supply: BTreeMap<Terrain, TerrainSupply>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+/// ECO (ADR 0749): one extra tier of the idle-hoard drain.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OpulenceTier {
+    /// Seasons of income above which the tier applies.
+    pub seasons: i64,
+    /// Share (percent) of the excess over that threshold lost each season.
+    pub percent: i64,
 }
 
 /// OM3: how well a terrain feeds an army.
@@ -461,7 +477,12 @@ impl EconomyRules {
         } else {
             0
         };
-        base + high
+        let tiers: i64 = self
+            .opulence_tiers
+            .iter()
+            .map(|tier| (treasury - tier.seasons * income).max(0) * tier.percent / 100)
+            .sum();
+        base + high + tiers
     }
 }
 

@@ -19,6 +19,10 @@
     {
       "effect": "recruit_slots",
       "value": 1
+    },
+    {
+      "effect": "army_experience",
+      "value": 1
     }
   ],
   "description": "Terrain où les capitaines présentent leurs troupes à la montre, pour être comptées et payées. Voir [[cdx_ost_feodal]].",

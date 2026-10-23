@@ -24,6 +24,10 @@
       "effect": "tax_income",
       "value": 3,
       "mode": "percent"
+    },
+    {
+      "effect": "supply",
+      "value": 6
     }
   ],
   "description": "Grange où l'on entasse la dîme et les redevances en nature (abbayes cisterciennes, seigneuries) : réserves en cas de mauvaise récolte. Bâtiment des colonies mineures.",
