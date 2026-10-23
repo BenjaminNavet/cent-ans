@@ -26,7 +26,7 @@ const ANISOTROPY: u16 = 8;
 /// Asset path prefix of the generated campaign models (ADR 0211): their albedo is baked and opaque, so
 /// it is block-compressed (BC1) and kept on the GPU only (ADR 0776); 2048 px RGBA8 + mips was 21 MiB
 /// on the GPU and 21 MiB more in RAM for each of ~66 models.
-const COMPRESSED_PREFIX: &str = "models/dn/";
+const COMPRESSED_PREFIXES: [&str; 2] = ["models/dn/", "models/props_ga/"];
 /// Smallest side (texels) worth compressing.
 const MIN_COMPRESS_SIDE: usize = 256;
 
@@ -123,9 +123,11 @@ fn generate_queued_mips(
         }
         // Opaque baked albedo of the campaign models: chain + BC1 on a background thread.
         if compressible(image)
-            && server
-                .get_path(id)
-                .is_some_and(|p| p.path().starts_with(COMPRESSED_PREFIX))
+            && server.get_path(id).is_some_and(|p| {
+                COMPRESSED_PREFIXES
+                    .iter()
+                    .any(|prefix| p.path().starts_with(prefix))
+            })
             && let Some(data) = image.data.clone()
         {
             let (w, h) = (image.width() as usize, image.height() as usize);
@@ -174,6 +176,8 @@ fn collect_compressed(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<Ima
             None => {
                 if add_mips(&mut image) {
                     queue.done += 1;
+                    // Translucent albedo stays RGBA8 but only on the GPU.
+                    image.asset_usage = RenderAssetUsages::RENDER_WORLD;
                 }
             }
         }

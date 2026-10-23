@@ -11,6 +11,36 @@ use serde_json::{Value, json};
 
 use super::dump::DumpAppExt;
 
+/// Seconds after start when the allocator is asked to give its idle pages back (experiment,
+/// `CENT_ANS_RELIEF=<seconds>`).
+fn relief_at() -> Option<f32> {
+    std::env::var("CENT_ANS_RELIEF").ok()?.parse().ok()
+}
+
+#[cfg(target_os = "macos")]
+unsafe extern "C" {
+    fn malloc_zone_pressure_relief(zone: *mut std::ffi::c_void, goal: usize) -> usize;
+}
+
+fn relieve(time: Res<Time<Real>>, mut done: Local<bool>) {
+    let Some(at) = relief_at() else { return };
+    if *done || time.elapsed_secs() < at {
+        return;
+    }
+    *done = true;
+    let before = footprint_mib();
+    #[cfg(target_os = "macos")]
+    // SAFETY: documented libmalloc call; a null zone means every zone.
+    let freed = unsafe { malloc_zone_pressure_relief(std::ptr::null_mut(), 0) };
+    #[cfg(not(target_os = "macos"))]
+    let freed = 0usize;
+    info!(
+        "memory relief: footprint {before:.0} -> {:.0} MiB ({} MiB returned)",
+        footprint_mib(),
+        freed >> 20
+    );
+}
+
 /// Images listed in the dump.
 const TOP_IMAGES: usize = 10;
 
@@ -18,7 +48,7 @@ pub struct MemoryProbePlugin;
 
 impl Plugin for MemoryProbePlugin {
     fn build(&self, app: &mut App) {
-        app.register_dump(dump);
+        app.register_dump(dump).add_systems(Update, relieve);
     }
 }
 
@@ -50,9 +80,31 @@ pub fn peak_rss_mib() -> f64 {
     }
 }
 
+/// Physical footprint of this process in MiB (what Activity Monitor and the memory budget of
+/// ADR 0748 count: dirty and compressed pages, unified GPU memory included; `-1` off macOS).
+/// The RSS misleads on macOS (the compressor moves pages out of it without freeing them).
+pub fn footprint_mib() -> f64 {
+    #[cfg(target_os = "macos")]
+    {
+        // SAFETY: `proc_pid_rusage` only writes into the zeroed struct we hand it.
+        unsafe {
+            let mut info: libc::rusage_info_v4 = std::mem::zeroed();
+            let status = libc::proc_pid_rusage(
+                std::process::id() as libc::c_int,
+                libc::RUSAGE_INFO_V4,
+                (&raw mut info).cast::<libc::rusage_info_t>(),
+            );
+            if status == 0 {
+                return info.ri_phys_footprint as f64 / (1024.0 * 1024.0);
+            }
+        }
+    }
+    -1.0
+}
+
 /// `memory` block of the bench reports (checked by `tools/bevy_bench/perf_guard.sh`).
 pub fn report() -> Value {
-    json!({"rss_mib": rss_mib(), "peak_rss_mib": peak_rss_mib()})
+    json!({"rss_mib": rss_mib(), "peak_rss_mib": peak_rss_mib(), "footprint_mib": footprint_mib()})
 }
 
 /// Estimated bytes of the texture once uploaded (full mip chain as declared by the descriptor).
@@ -137,6 +189,7 @@ fn dump(world: &World) -> (String, Value) {
         json!({
             "rss_mib": rss_mib(),
             "peak_rss_mib": peak_rss_mib(),
+            "footprint_mib": footprint_mib(),
             "images": {
                 "count": rows.len(),
                 "gpu_estimate_mib": mib(gpu_images),
