@@ -6,7 +6,9 @@
 use std::collections::BTreeMap;
 
 use data_model::test_support::{fac, game_data};
-use data_model::{CharacterId, CharacterRef, Condition, EventEffect, EventId, GameData, ProvinceId};
+use data_model::{
+    CharacterId, CharacterRef, Condition, EventEffect, EventId, GameData, ProvinceId,
+};
 use sim_campaign::test_support::{idle, start};
 use sim_campaign::{ai_minimal, chronicle, CampaignState, EventContext, Order, Season};
 
@@ -54,6 +56,20 @@ fn staged(year: i32, season: Season) -> CampaignState {
     state.season = season;
     set_war(&mut state, "fac_england", "fac_france");
     state
+}
+
+/// Jean II on the throne, as he is from 1350.
+fn crown_jean(state: &mut CampaignState) {
+    let data = game_data();
+    apply(
+        state,
+        data,
+        "fac_france",
+        EventEffect::SetRuler {
+            character: chr("chr_jean_de_normandie"),
+            faction: Some(fac("fac_france")),
+        },
+    );
 }
 
 fn england_wins(state: &mut CampaignState, count: u32) {
@@ -162,6 +178,7 @@ fn field_victories_are_tallied_for_good() {
 fn poitiers_takes_the_king_only_after_an_english_victory() {
     let data = game_data();
     let mut state = staged(1356, Season::Autumn);
+    crown_jean(&mut state);
     england_wins(&mut state, 1);
     state.end_turn_with(data, idle);
     assert!(fired(&state, "evt_poitiers"));
@@ -234,7 +251,12 @@ fn bretigny_cedes_the_provinces_when_the_king_is_captive() {
     assert!(fired(&state, "evt_bretigny"));
     assert!(!fired(&state, "evt_bretigny_paix_blanche"));
     assert!(!fired(&state, "evt_bretigny_angleterre_a_bout"));
-    for p in ["prov_poitou", "prov_saintonge", "prov_agenais", "prov_boulonnais"] {
+    for p in [
+        "prov_poitou",
+        "prov_saintonge",
+        "prov_agenais",
+        "prov_boulonnais",
+    ] {
         assert_eq!(
             state.province_owner(&prov(p)),
             Some(&fac("fac_england")),
@@ -252,7 +274,12 @@ fn bretigny_is_a_white_peace_when_nobody_leads() {
     state.end_turn_with(data, idle);
     assert!(fired(&state, "evt_bretigny_paix_blanche"));
     assert!(!fired(&state, "evt_bretigny"));
-    for p in ["prov_poitou", "prov_saintonge", "prov_agenais", "prov_boulonnais"] {
+    for p in [
+        "prov_poitou",
+        "prov_saintonge",
+        "prov_agenais",
+        "prov_boulonnais",
+    ] {
         assert_eq!(state.province_owner(&prov(p)), Some(&fac("fac_france")));
     }
 }
@@ -261,7 +288,11 @@ fn bretigny_is_a_white_peace_when_nobody_leads() {
 fn bretigny_turns_when_england_is_broke() {
     let data = game_data();
     let mut state = staged(1360, Season::Spring);
-    state.factions.get_mut(&fac("fac_england")).unwrap().treasury = 0;
+    state
+        .factions
+        .get_mut(&fac("fac_england"))
+        .unwrap()
+        .treasury = 0;
     // France far stronger under arms: add idle men to its armies.
     for army in state.armies.values_mut() {
         if army.faction == fac("fac_england") {
@@ -284,7 +315,7 @@ fn joan_of_arc_needs_a_realm_on_the_brink() {
     let mut state = staged(1429, Season::Spring);
     for p in [
         "prov_normandie",
-        "prov_ile_de_france",
+        "prov_boulonnais",
         "prov_touraine",
         "prov_poitou",
         "prov_saintonge",
@@ -319,7 +350,7 @@ fn the_national_surge_needs_a_collapsed_domain() {
     assert!(!state.event_conditions_hold(data, event, &ctx));
     for p in [
         "prov_normandie",
-        "prov_ile_de_france",
+        "prov_boulonnais",
         "prov_touraine",
         "prov_poitou",
         "prov_saintonge",
@@ -345,6 +376,11 @@ fn the_national_surge_needs_a_collapsed_domain() {
 fn the_castilian_fork_leaves_a_claim_and_a_war() {
     let data = game_data();
     let mut state = staged(1371, Season::Autumn);
+    state
+        .characters
+        .get_mut(&chr("chr_jean_de_gand"))
+        .expect("John of Gaunt exists")
+        .alive = true;
     state.end_turn_with(data, idle);
     assert!(fired(&state, "evt_mariage_de_jean_de_gand"));
     // The AI weights take the claim: the flag stays for fifteen years.
@@ -441,7 +477,10 @@ fn every_flag_read_by_an_event_is_raised_by_another() {
         }
     }
     let orphans: Vec<_> = read.difference(&raised).collect();
-    assert!(orphans.is_empty(), "flags read but never raised: {orphans:?}");
+    assert!(
+        orphans.is_empty(),
+        "flags read but never raised: {orphans:?}"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -503,6 +542,22 @@ fn simulate(data: &GameData, player: &str, seed: u64) -> BTreeMap<EventId, i32> 
         for event in &state.chronicle.fired_events {
             fired.entry(event.clone()).or_insert(state.year);
         }
+        if std::env::var("EV_TRACE").is_ok() && state.season == Season::Spring {
+            let at_war = state.is_at_war(&fac("fac_england"), &fac("fac_france"));
+            let france = state.controlled_provinces(&fac("fac_france")).count();
+            let domain = state.domain_share_percent(data, &fac("fac_france"));
+            println!(
+                "{} war={at_war} france_provinces={france} domain={domain:?} tally={:?} jean_captive={}",
+                state.year,
+                state
+                    .chronicle
+                    .battle_tally
+                    .iter()
+                    .map(|t| format!("{}>{}:{}", &t.winner.as_str()[4..], &t.loser.as_str()[4..], t.victories))
+                    .collect::<Vec<_>>(),
+                state.characters[&chr("chr_jean_de_normandie")].captive
+            );
+        }
     }
     fired
 }
@@ -528,13 +583,21 @@ fn measure_the_share_of_history_drawn() {
             .copied()
             .filter(|id| fired.contains_key(&evt(id)))
             .collect();
-        println!("{player} seed {seed}: {}/{} {hits:?}", hits.len(), EVENTS_HISTORY.len());
+        println!(
+            "{player} seed {seed}: {}/{} {hits:?}",
+            hits.len(),
+            EVENTS_HISTORY.len()
+        );
         for id in hits {
             *drawn.entry(id).or_default() += 1;
         }
     }
     for id in EVENTS_HISTORY {
-        println!("{id}: {}/{}", drawn.get(id).copied().unwrap_or(0), runs.len());
+        println!(
+            "{id}: {}/{}",
+            drawn.get(id).copied().unwrap_or(0),
+            runs.len()
+        );
     }
 }
 

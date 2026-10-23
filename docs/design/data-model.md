@@ -510,7 +510,11 @@ F1 : ne part que programmé par `schedule_event`), `trigger`,
   `province_unrest_above {province?, amount}`, `province_besieged {province?, by?}`,
   `province_coastal {province?}`, `treasury_above {faction?, amount}`, `provinces_below {faction?, count}`,
   `religion_is {faction?, religion}`, `schism {active}`, `not_fired {event}`, `fired {event}`,
-  `season {season}`, `any_of {conditions[]}`. Un `faction`/`province` absent vaut la faction/province visée.
+  `season {season}`, `any_of {conditions[]}`, et (lot EVENTS, ADR 0779) `not {condition}`, `battle_balance
+  {faction?, rival, at_least}` (victoires terrestres de `faction` sur `rival` moins celles de `rival`),
+  `domain_below {faction?, percent}` (part des provinces de 1337 encore tenues), `strength_ratio {faction?,
+  rival, percent}` (hommes en armes), `flag {flag}` (levé par l'effet `set_flag {flag}`, sauvegardé).
+  Un `faction`/`province` absent vaut la faction/province visée.
 - Effets (`type`) : `treasury {faction?, amount}`, `unrest|health|wealth|devastation {province?, amount}`,
   `population {province?, percent}` (`province` : `"all"` = toutes les provinces contrôlées par la faction
   qui décide, un `prov_`, ou absent = province visée sinon toutes), `prestige|piety {character?, faction?,

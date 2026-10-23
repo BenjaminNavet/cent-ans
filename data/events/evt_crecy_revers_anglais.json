@@ -55,9 +55,8 @@
           "amount": -12
         },
         {
-          "type": "peace",
-          "a": "fac_england",
-          "b": "fac_france"
+          "type": "treasury",
+          "amount": 2000
         },
         {
           "type": "opinion",
