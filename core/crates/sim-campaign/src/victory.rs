@@ -358,7 +358,34 @@ pub(crate) fn resolve_victory(
         OutcomeKind::Defeat => EventKind::Defeat,
         OutcomeKind::Ended => EventKind::CampaignEnded,
     };
-    events.push(GameEvent::new(event_kind, format!("{text} Score : {score}.")).faction(&player));
+    // ADR 0748: the figures of the realm at the end of its campaign.
+    let end_cause = match kind {
+        OutcomeKind::Ended => None,
+        _ => {
+            let held = state
+                .provinces
+                .keys()
+                .filter(|id| state.controls_province(&player, id))
+                .count() as u32;
+            let done = objectives.iter().filter(|o| o.done).count() as u32;
+            Some(crate::cause_builders::game_end_cause(
+                if kind == OutcomeKind::Victory {
+                    crate::causes::CauseKind::GameWon
+                } else {
+                    crate::causes::CauseKind::GameLost
+                },
+                &player,
+                held,
+                (done, objectives.len() as u32),
+                i64::from(score),
+            ))
+        }
+    };
+    events.push(
+        GameEvent::new(event_kind, format!("{text} Score : {score}."))
+            .faction(&player)
+            .maybe_cause(end_cause),
+    );
     state.outcome = Some(Outcome {
         kind,
         turn: state.turn,

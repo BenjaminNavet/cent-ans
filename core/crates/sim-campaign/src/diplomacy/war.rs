@@ -76,6 +76,9 @@ impl CampaignState {
         // WH `diplob`: a non-aggression pact binds like a truce.
         let pact_broken = !truce_broken && self.has_non_aggression(attacker, target);
         let casus_belli = self.casus_belli(data, attacker, target);
+        // ADR 0748: the AI's named reason, read before the war and the vassal ties change.
+        let ai_war_reason = (self.ai_turn.as_ref() == Some(attacker))
+            .then(|| super::ai::war_reason(self, data, attacker, target));
         let others: Vec<FactionId> = self
             .factions
             .keys()
@@ -162,7 +165,26 @@ impl CampaignState {
             data.faction_name(attacker),
             data.faction_name(target)
         );
-        self.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(attacker));
+        // ADR 0748: why the war, for the player's wars (declared or suffered).
+        let cause =
+            (attacker == &self.player_faction || target == &self.player_faction).then(|| {
+                crate::cause_builders::war_cause(&crate::cause_builders::WarFacts {
+                    attacker,
+                    target,
+                    casus_belli: casus_belli.is_some(),
+                    truce_broken,
+                    pact_broken,
+                    sworn_bond,
+                    attacker_power: self.faction_power(attacker),
+                    target_power: self.faction_power(target),
+                    reason: ai_war_reason,
+                })
+            });
+        self.push_order_event(
+            GameEvent::new(EventKind::WarDeclared, text)
+                .faction(attacker)
+                .maybe_cause(cause),
+        );
         if excommunicate {
             religion::excommunicate(self, data, attacker);
         } else if truce_broken || pact_broken {
@@ -339,7 +361,22 @@ impl CampaignState {
             data.faction_name(ally),
             data.faction_name(defender)
         );
-        self.push_order_event(GameEvent::new(EventKind::AllianceBroken, text).faction(ally));
+        // ADR 0748: the ally who stays out is a betrayal for the player's alliances.
+        let cause = (ally == &self.player_faction || defender == &self.player_faction).then(|| {
+            crate::cause_builders::alliance_cause(
+                ally,
+                defender,
+                i64::from(-grudge.refuse_attitude),
+                None,
+            )
+            .factor("call_refused", 1, 80)
+            .ranked()
+        });
+        self.push_order_event(
+            GameEvent::new(EventKind::AllianceBroken, text)
+                .faction(ally)
+                .maybe_cause(cause),
+        );
     }
 
     /// Offer from the attacked `defender` to the player, its ally.

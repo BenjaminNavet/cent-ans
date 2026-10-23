@@ -155,6 +155,11 @@ pub struct EndView {
     pub lines: Vec<String>,
     /// Tooltip of the score: one line per component.
     pub breakdown: String,
+    /// ADR 0748: heading of the « three main causes » block (empty when there are none to tell).
+    pub causes_title: String,
+    /// The main causes of the outcome (at most three), one line each: the event and its heaviest
+    /// factors.
+    pub causes: Vec<String>,
 }
 
 fn count_text(value: i64, singular: &str) -> String {
@@ -213,6 +218,23 @@ pub fn end_view(data: &GameData, state: &CampaignState) -> Option<EndView> {
         ),
         OutcomeKind::Ended => ("Fin de la campagne", "art/endings/end_campaign_victory.jpg"),
     };
+    // ADR 0748: the three main causes of a victory or a defeat, from the journal of causes.
+    let favourable = outcome.kind == OutcomeKind::Victory;
+    let causes: Vec<String> = if outcome.kind == OutcomeKind::Ended {
+        Vec::new()
+    } else {
+        crate::causes::top_causes(state, data, favourable, 3)
+            .iter()
+            .enumerate()
+            .map(|(i, cause)| format!("{}. {}", i + 1, cause.one_line()))
+            .collect()
+    };
+    let causes_title = match (outcome.kind, causes.is_empty()) {
+        (OutcomeKind::Ended, _) => String::new(),
+        (_, true) => crate::causes::ui_text("top_causes_none"),
+        (OutcomeKind::Victory, false) => crate::causes::ui_text("top_causes_victory"),
+        (_, false) => crate::causes::ui_text("top_causes_defeat"),
+    };
     Some(EndView {
         kind: kind_key(outcome.kind).to_owned(),
         title: title.to_owned(),
@@ -222,6 +244,8 @@ pub fn end_view(data: &GameData, state: &CampaignState) -> Option<EndView> {
         art: art.to_owned(),
         lines,
         breakdown,
+        causes_title,
+        causes,
     })
 }
 

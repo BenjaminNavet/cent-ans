@@ -40,6 +40,8 @@ const CARD_W: f32 = 54.0;
 const CARD_H: f32 = 80.0;
 const RETURN_BUTTON: &str = "result:return";
 const WATCH_BUTTON: &str = "result:watch";
+/// ADR 0748: back to the campaign, on the chronicle of causes (why the battle went that way).
+const WHY_BUTTON: &str = "result:why";
 
 /// « Victoire », « Victoire à la Pyrrhus » or « Défaite » (`banner_title`).
 pub fn banner_title(won: bool, own_ratio: f32, enemy_ratio: f32) -> &'static str {
@@ -369,8 +371,15 @@ fn result_clicks(
     mut state: ResMut<ResultState>,
     mut leave: MessageWriter<LeaveBattle>,
     mut watch: MessageWriter<crate::battle::scene::replay::WatchAgain>,
+    mut causes: ResMut<crate::campaign::panels::chronicle::CausesRequest>,
 ) {
     for press in pressed.read() {
+        if press.name == WHY_BUTTON && state.view.is_some() && !state.returned {
+            // The campaign applies the result and records its cause; the chronicle opens on it.
+            state.returned = true;
+            causes.0 = Some(None);
+            leave.write(LeaveBattle { abandoned: false });
+        }
         if press.name == WATCH_BUTTON && state.view.is_some() && !state.returned {
             watch.write(crate::battle::scene::replay::WatchAgain);
         }
@@ -972,6 +981,16 @@ fn spawn_screen(
     if crate::battle::scene::replay::is_recording() {
         commands.spawn((
             button_small(theme, WATCH_BUTTON, "Revoir la bataille"),
+            ChildOf(foot),
+        ));
+    }
+    if !view.spectator {
+        commands.spawn((
+            button_small(
+                theme,
+                WHY_BUTTON,
+                &game_api::causes::ui_text("why_battle_button"),
+            ),
             ChildOf(foot),
         ));
     }

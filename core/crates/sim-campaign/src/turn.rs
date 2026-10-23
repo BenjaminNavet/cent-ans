@@ -233,6 +233,8 @@ impl CampaignState {
         crate::victory::resolve_victory(self, data, events);
         // NT3: the player's missions (success, deadline, new offers).
         crate::missions::resolve_missions(self, data, events);
+        // ADR 0748: the causes carried by the events enter the journal.
+        crate::causes::harvest(self, events);
         self.events = events.clone();
     }
 }

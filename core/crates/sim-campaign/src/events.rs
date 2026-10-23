@@ -111,6 +111,12 @@ pub struct GameEvent {
     /// The event is a loss for its `faction` (the interface's tone).
     #[serde(default, skip_serializing_if = "is_false")]
     pub loss: bool,
+    /// ADR 0748: the structured cause, until the end of the turn moves it into the journal.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cause: Option<Box<crate::causes::Cause>>,
+    /// ADR 0748: identifier of the cause in the journal (the notification's tooltip).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cause_id: Option<u32>,
 }
 
 fn is_false(value: &bool) -> bool {
@@ -127,6 +133,8 @@ impl GameEvent {
             faction: None,
             public: false,
             loss: false,
+            cause: None,
+            cause_id: None,
         }
     }
 
@@ -148,6 +156,18 @@ impl GameEvent {
     /// News for every faction (see [`GameEvent::public`]).
     pub fn public(mut self) -> Self {
         self.public = true;
+        self
+    }
+
+    /// Attaches the structured cause of the event (ADR 0748).
+    pub fn cause(mut self, cause: crate::causes::Cause) -> Self {
+        self.cause = Some(Box::new(cause));
+        self
+    }
+
+    /// [`GameEvent::cause`] when there is one (producers that only explain the player's events).
+    pub fn maybe_cause(mut self, cause: Option<crate::causes::Cause>) -> Self {
+        self.cause = cause.map(Box::new);
         self
     }
 

@@ -236,7 +236,7 @@ fn title_holdings_survive_a_save_and_older_saves_are_refused() {
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).expect("round trip");
     assert_eq!(loaded.feudal, state.feudal);
-    let old = json.replacen("\"state_version\":9", "\"state_version\":6", 1);
+    let old = json.replacen("\"state_version\":10", "\"state_version\":6", 1);
     assert!(matches!(
         CampaignState::load_json(&old),
         Err(sim_campaign::save::CampaignError::OlderSave { found: 6, .. })

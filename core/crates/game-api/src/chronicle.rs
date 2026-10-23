@@ -284,6 +284,8 @@ pub struct JournalEntry {
     pub public: bool,
     pub loss: bool,
     pub style: Option<LineStyle>,
+    /// ADR 0748: the cause in the journal of causes this line points to (tooltip, panel).
+    pub cause_id: Option<u32>,
 }
 
 /// A sealed letter (`NewsLetters.news_from_event`).
@@ -422,6 +424,7 @@ pub fn turn_journal(
             relevance_label: label.to_owned(),
             public: event.public,
             loss: event.loss,
+            cause_id: event.cause_id,
             kind,
         };
         if level == Relevance::Far && !event.public {
