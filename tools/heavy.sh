@@ -1,7 +1,7 @@
 #!/bin/zsh
-# Semaphore: at most 2 heavy jobs (cargo build/bench/clippy/test, client runs) at once across all worktrees.
+# Semaphore: at most 3 heavy jobs (cargo build/bench/clippy/test, client runs) at once across all worktrees.
 # Usage: heavy.sh <command...>   e.g. heavy.sh cargo check --features dev
-SLOTS=2; DIR=/private/tmp/claude-501/heavy-slots; mkdir -p $DIR
+SLOTS=3; DIR=/private/tmp/claude-501/heavy-slots; mkdir -p $DIR
 while true; do
   for i in $(seq 1 $SLOTS); do
     if mkdir $DIR/slot$i 2>/dev/null; then
