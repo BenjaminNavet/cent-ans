@@ -195,13 +195,18 @@ pub fn add_plugin(app: &mut App) {
         )
         .add_systems(
             OnExit(AppState::Campaign),
-            (reset_proxy, default_to_deferred_for_battle),
+            (
+                reset_proxy,
+                default_to_deferred_for_battle,
+                release_ui_camera,
+            ),
         )
         .add_systems(
             Update,
             (
                 poll_albedo,
                 light_camera,
+                match_ui_camera.after(light_camera),
                 build_proxy,
                 hide_terrain_nodes.after(super::update_lod),
                 force_msaa_off
@@ -586,6 +591,48 @@ fn light_camera(
             sky,
         ));
         stats.camera_deferred = true;
+    }
+}
+
+/// Solari forces the map camera HDR with storage-binding main-texture usages. Bevy keys a view's
+/// main texture by (target, format, usages, msaa): a UI camera that differs gets its own black
+/// texture and the final blit replaces the world with it (map invisible, HUD alone). The UI camera
+/// therefore mirrors the map camera, as the battle HUD camera does (`battle/scene/camera.rs`).
+fn match_ui_camera(
+    mut commands: Commands,
+    lit: Query<(), (With<CampaignCamera>, With<SolariLighting>)>,
+    ui_cameras: Query<(Entity, Has<bevy::camera::Hdr>), With<crate::ui::kit::UiCamera>>,
+) {
+    if lit.is_empty() {
+        return;
+    }
+    for (entity, hdr) in &ui_cameras {
+        if !hdr {
+            commands.entity(entity).insert((
+                bevy::camera::Hdr,
+                bevy::core_pipeline::tonemapping::Tonemapping::None,
+                CameraMainTextureUsages::default().with(TextureUsages::STORAGE_BINDING),
+                Msaa::Off,
+            ));
+        }
+    }
+}
+
+/// Back to the plain UI camera when the campaign is left (the battle sets its own).
+fn release_ui_camera(
+    mut commands: Commands,
+    ui_cameras: Query<(Entity, Has<bevy::camera::Hdr>), With<crate::ui::kit::UiCamera>>,
+) {
+    for (entity, hdr) in &ui_cameras {
+        if hdr {
+            commands
+                .entity(entity)
+                .remove::<bevy::camera::Hdr>()
+                .insert((
+                    bevy::core_pipeline::tonemapping::Tonemapping::Linear,
+                    CameraMainTextureUsages::default(),
+                ));
+        }
     }
 }
 
