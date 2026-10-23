@@ -73,6 +73,9 @@ const RIBBON_STEP: f32 = 1.0;
 const RIVER_STEP: f32 = 2.0;
 const RIBBON_MAIN_WIDTH: f32 = 0.55;
 const RIBBON_WIDTH: f32 = 0.38;
+/// Lateral wander of the dirt-road ribbons (map px) and its wavelength (ADR 0758).
+const ROAD_WANDER_AMPLITUDE: f32 = 0.45;
+const ROAD_WANDER_WAVELENGTH: f32 = 22.0;
 const MAIN_ROAD_WIDTH: f32 = 0.5;
 /// Lake outline growth under the shore (`LakesRenderer.shore_overlap_px`).
 const LAKE_SHORE_OVERLAP: f32 = 3.0;
@@ -787,12 +790,24 @@ fn build_roads(
         ),
     ] {
         let roads: Vec<&data::Road> = data.roads.iter().filter(|r| r.main == main).collect();
-        let widths: Vec<Vec<f32>> = roads.iter().map(|r| vec![width; r.points.len()]).collect();
-        let lines: Vec<RibbonLine> = roads
+        // Same wandering track as the near ribbons, so the tiers cross-fade on one line.
+        let shaped: Vec<Vec<Vec2>> = roads
+            .iter()
+            .map(|r| {
+                ribbon::wander(
+                    &r.points,
+                    RIBBON_STEP * 2.0,
+                    ROAD_WANDER_AMPLITUDE,
+                    ROAD_WANDER_WAVELENGTH,
+                )
+            })
+            .collect();
+        let widths: Vec<Vec<f32>> = shaped.iter().map(|p| vec![width; p.len()]).collect();
+        let lines: Vec<RibbonLine> = shaped
             .iter()
             .zip(&widths)
-            .map(|(r, w)| RibbonLine {
-                points: &r.points,
+            .map(|(points, w)| RibbonLine {
+                points,
                 widths: w,
                 importance: 0.0,
             })
@@ -811,7 +826,7 @@ fn build_roads(
         .iter()
         .map(|r| {
             (
-                r.points.clone(),
+                ribbon::wander(&r.points, RIBBON_STEP, ROAD_WANDER_AMPLITUDE, ROAD_WANDER_WAVELENGTH),
                 if r.main {
                     RIBBON_MAIN_WIDTH
                 } else {
