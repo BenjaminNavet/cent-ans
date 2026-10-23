@@ -53,6 +53,13 @@ pub struct PostFxFlags {
     pub soft_shadows: bool,
 }
 
+/// Dev variable (`1`) switching the auto exposure off so A/B captures use the fixed exposure.
+pub const FROZEN_EXPOSURE_ENV: &str = "CENT_ANS_FIXED_EXPOSURE";
+
+fn frozen_exposure(value: Option<&str>) -> bool {
+    value.is_some_and(|v| !v.is_empty() && v != "0")
+}
+
 impl PostFxFlags {
     /// `on` / `off` of a setting win; anything else (`auto`) follows the preset's list.
     pub fn resolve(settings: &Settings, preset: &[String]) -> Self {
@@ -62,9 +69,12 @@ impl PostFxFlags {
             _ => preset.iter().any(|enabled| enabled == id),
         };
         Self {
+            // Dev hook for A/B captures: the eye adaptation depends on what is on screen and
+            // when it finished loading, so it is the one lighting input a pixel diff cannot pin.
+            auto_exposure: !frozen_exposure(std::env::var(FROZEN_EXPOSURE_ENV).ok().as_deref())
+                && pick("auto_exposure", &settings.fx_auto_exposure),
             depth_of_field: pick("depth_of_field", &settings.fx_depth_of_field),
             motion_blur: pick("motion_blur", &settings.fx_motion_blur),
-            auto_exposure: pick("auto_exposure", &settings.fx_auto_exposure),
             color_grading: pick("color_grading", &settings.fx_color_grading),
             chromatic_aberration: pick("chromatic_aberration", &settings.fx_chromatic_aberration),
             sharpening: pick("sharpening", &settings.fx_sharpening),
@@ -482,6 +492,14 @@ pub fn dump(world: &World) -> (String, Value) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn frozen_exposure_reads_only_the_variable() {
+        assert!(!frozen_exposure(None));
+        assert!(!frozen_exposure(Some("")));
+        assert!(!frozen_exposure(Some("0")));
+        assert!(frozen_exposure(Some("1")));
+    }
     use crate::settings::QualityPresets;
 
     fn on(id: &str) -> Settings {

@@ -400,6 +400,15 @@ mod tests {
     }
 
     #[test]
+    fn same_inputs_give_the_same_sun() {
+        let rules = rules();
+        assert_eq!(
+            sun_light(&rules, "evening", Weather::Fog),
+            sun_light(&rules, "evening", Weather::Fog)
+        );
+    }
+
+    #[test]
     fn phases_map_to_presets() {
         let rules = rules();
         assert_eq!(time_key_for(&rules, "dawn"), "morning");
