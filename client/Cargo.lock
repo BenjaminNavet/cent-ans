@@ -2405,6 +2405,7 @@ dependencies = [
  "flate2",
  "game-api",
  "insta",
+ "libc",
  "naga",
  "png 0.18.1",
  "relief-lod",
