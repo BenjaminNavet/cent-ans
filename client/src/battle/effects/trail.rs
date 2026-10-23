@@ -207,7 +207,7 @@ mod tests {
         // Turned toward the camera: the width is along Z... no, across both flight and view (Y).
         let width = Vec3::from(positions[1]) - Vec3::from(positions[0]);
         assert!(width.dot(dir).abs() < 1e-4 && width.dot(Vec3::Z).abs() < 1e-3);
-        assert!((width.length() - 2.0 * HALF_WIDTH_M).abs() < 1e-4);
+        assert!((width.length() - 2.0 * (15.0 * HALF_WIDTH_PER_M).max(HALF_WIDTH_M)).abs() < 1e-4);
         assert_eq!(colors[0][3], TRAIL_ALPHA);
         assert_eq!(colors[2][3], 0.0);
     }
