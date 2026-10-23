@@ -52,6 +52,8 @@ use super::material::{SHADER_PATH, TerrainMaterial, perf_defs};
 pub const ALBEDO_FORMAT: TextureFormat = TextureFormat::Rgba8UnormSrgb;
 /// Baked normal offset (x, z).
 pub const DN_FORMAT: TextureFormat = TextureFormat::Rg16Float;
+/// Baked relief shade: sun visibility (r), horizon occlusion (g) (ADR 0745).
+pub const SHADE_FORMAT: TextureFormat = TextureFormat::Rg8Unorm;
 /// Layers of the atlas: more than the nodes drawn at once (selected + retiring).
 pub const LAYERS: u32 = 384;
 /// Nodes baked per frame at most once every node is shown (a refresh after an invalidation).
@@ -75,11 +77,16 @@ pub struct GroundCache {
     pub texels: u32,
     pub albedo: Handle<Image>,
     pub dn: Handle<Image>,
+    pub shade: Handle<Image>,
     free: Vec<u32>,
     next_ticket: u64,
     /// Bumped by an invalidation: every node with an older generation is baked again.
     pub generation: u64,
     signature: Option<u64>,
+    shade_signature: u64,
+    /// Rebakes of the whole cache caused by the relief shade (sun, scale, settings).
+    pub shade_rebakes: u64,
+    pub shade_enabled: bool,
     last_invalidation: f64,
     /// Bakes reported done by the render world (layer, ticket).
     pub done: Arc<Mutex<Vec<(u32, u64)>>>,
@@ -114,10 +121,14 @@ impl GroundCache {
             texels,
             albedo: atlas(ALBEDO_FORMAT),
             dn: atlas(DN_FORMAT),
+            shade: atlas(SHADE_FORMAT),
             free: (0..LAYERS).rev().collect(),
             next_ticket: 0,
             generation: 0,
             signature: None,
+            shade_signature: 0,
+            shade_rebakes: 0,
+            shade_enabled: false,
             last_invalidation: f64::NEG_INFINITY,
             done: Arc::new(Mutex::new(Vec::new())),
             bakes_done: 0,
@@ -167,6 +178,7 @@ pub struct GroundBakeQueue {
     pub texels: u32,
     pub albedo: Handle<Image>,
     pub dn: Handle<Image>,
+    pub shade: Handle<Image>,
     pub material: AssetId<TerrainMaterial>,
     pub jobs: Vec<BakeJob>,
     pub done: Arc<Mutex<Vec<(u32, u64)>>>,
@@ -198,9 +210,52 @@ pub fn publish_jobs(
     queue.texels = cache.texels;
     queue.albedo = cache.albedo.clone();
     queue.dn = cache.dn.clone();
+    queue.shade = cache.shade.clone();
     queue.material = material;
     queue.done = cache.done.clone();
     queue.jobs = jobs.into_iter().take(budget).map(|(_, job)| job).collect();
+}
+
+/// Signature of the relief shade inputs: quantised sun, scale, settings, heightfield handle.
+fn shade_signature(material: &TerrainMaterial) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    format!("{:?}", material.shade).hash(&mut hasher);
+    material.height_lod.as_ref().map(Handle::id).hash(&mut hasher);
+    hasher.finish()
+}
+
+/// Keeps the shade uniform of the material in step with the settings, the sun and the relief
+/// scale (all quantised in [`shade::params`]); writes only a real change.
+pub fn sync_shade(
+    settings: Option<Res<super::shade::ReliefShadeSettings>>,
+    mut commands: Commands,
+    cache: Option<ResMut<GroundCache>>,
+    handle: Option<Res<super::TerrainMaterialHandle>>,
+    mut materials: ResMut<Assets<TerrainMaterial>>,
+) {
+    let (Some(mut cache), Some(handle)) = (cache, handle) else {
+        return;
+    };
+    let Some(settings) = settings else {
+        commands.insert_resource(super::shade::ReliefShadeSettings::load());
+        return;
+    };
+    let Some(material) = materials.get(&handle.0) else {
+        return;
+    };
+    let wanted = super::shade::params(
+        &settings,
+        material.params.sun_dir.truncate(),
+        material.params.scale.x,
+        material.params.scale.y,
+        material.height_lod.is_some(),
+    );
+    cache.shade_enabled = wanted.sun.w > 0.5;
+    if material.shade != wanted
+        && let Some(mut material) = materials.get_mut(&handle.0)
+    {
+        material.shade = wanted;
+    }
 }
 
 /// Signature of what the regional ground reads; a change rebakes every node.
@@ -264,11 +319,16 @@ pub fn invalidate(
         return;
     };
     let sig = signature(material);
-    if cache.signature != Some(sig) {
+    let shade_sig = shade_signature(material);
+    if cache.signature != Some(sig) || cache.shade_signature != shade_sig {
         if cache.signature.is_some() {
             cache.generation += 1;
+            if cache.shade_signature != shade_sig {
+                cache.shade_rebakes += 1;
+            }
         }
         cache.signature = Some(sig);
+        cache.shade_signature = shade_sig;
         cache.last_invalidation = now;
     }
 }
@@ -321,6 +381,8 @@ struct Scratch {
     albedo_view: TextureView,
     dn: Texture,
     dn_view: TextureView,
+    shade: Texture,
+    shade_view: TextureView,
 }
 
 fn init_bake_pipeline(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -375,12 +437,15 @@ fn prepare_bake(
         };
         let (albedo, albedo_view) = target("ground_bake_albedo", ALBEDO_FORMAT);
         let (dn, dn_view) = target("ground_bake_dn", DN_FORMAT);
+        let (shade, shade_view) = target("ground_bake_shade", SHADE_FORMAT);
         pipeline.scratch = Some(Scratch {
             texels: queue.texels,
             albedo,
             albedo_view,
             dn,
             dn_view,
+            shade,
+            shade_view,
         });
     }
     if pipeline.id.is_some() {
@@ -450,7 +515,11 @@ fn prepare_bake(
             shader: pipeline.shader.clone(),
             shader_defs: defs,
             entry_point: Some("bake_fragment".into()),
-            targets: vec![target(ALBEDO_FORMAT), target(DN_FORMAT)],
+            targets: vec![
+                target(ALBEDO_FORMAT),
+                target(DN_FORMAT),
+                target(SHADE_FORMAT),
+            ],
             ..default()
         }),
         primitive: PrimitiveState {
@@ -491,8 +560,11 @@ fn bake_pass(
     let Some(render_pipeline) = pipeline_cache.get_render_pipeline(id) else {
         return;
     };
-    let (Some(albedo_atlas), Some(dn_atlas)) = (images.get(&queue.albedo), images.get(&queue.dn))
-    else {
+    let (Some(albedo_atlas), Some(dn_atlas), Some(shade_atlas)) = (
+        images.get(&queue.albedo),
+        images.get(&queue.dn),
+        images.get(&queue.shade),
+    ) else {
         return;
     };
     let Some(material) = materials.get(queue.material) else {
@@ -529,6 +601,7 @@ fn bake_pass(
                 color_attachments: &[
                     Some(clear_attachment(&scratch.albedo_view)),
                     Some(clear_attachment(&scratch.dn_view)),
+                    Some(clear_attachment(&scratch.shade_view)),
                 ],
                 ..default()
             };
@@ -555,6 +628,7 @@ fn bake_pass(
         for (source, atlas) in [
             (&scratch.albedo, &albedo_atlas.texture),
             (&scratch.dn, &dn_atlas.texture),
+            (&scratch.shade, &shade_atlas.texture),
         ] {
             encoder.copy_texture_to_texture(
                 source.as_image_copy(),
