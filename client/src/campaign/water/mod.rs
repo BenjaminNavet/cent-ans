@@ -826,7 +826,12 @@ fn build_roads(
         .iter()
         .map(|r| {
             (
-                ribbon::wander(&r.points, RIBBON_STEP, ROAD_WANDER_AMPLITUDE, ROAD_WANDER_WAVELENGTH),
+                ribbon::wander(
+                    &r.points,
+                    RIBBON_STEP,
+                    ROAD_WANDER_AMPLITUDE,
+                    ROAD_WANDER_WAVELENGTH,
+                ),
                 if r.main {
                     RIBBON_MAIN_WIDTH
                 } else {

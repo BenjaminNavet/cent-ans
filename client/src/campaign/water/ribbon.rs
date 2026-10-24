@@ -214,7 +214,8 @@ pub fn wander(points: &[Vec2], step: f32, amplitude: f32, wavelength: f32) -> Ve
         let edge = along[i].min(total - along[i]) / wavelength.max(1.0);
         let fade = edge.clamp(0.0, 1.0);
         let fade = fade * fade * (3.0 - 2.0 * fade);
-        let wave = (along[i] * k + phase).sin() * 0.65 + (along[i] * k * 2.7 + phase * 1.7).sin() * 0.35;
+        let wave =
+            (along[i] * k + phase).sin() * 0.65 + (along[i] * k * 2.7 + phase * 1.7).sin() * 0.35;
         let tangent = tangent_at(&smooth, i);
         out[i] = smooth[i] + perp(tangent) * (wave * amplitude * fade);
     }
@@ -271,7 +272,11 @@ mod tests {
         // Smoother than the input: smaller turning angles on average.
         let turn = |p: &[Vec2]| -> f32 {
             p.windows(3)
-                .map(|w| (w[1] - w[0]).normalize_or_zero().dot((w[2] - w[1]).normalize_or_zero()))
+                .map(|w| {
+                    (w[1] - w[0])
+                        .normalize_or_zero()
+                        .dot((w[2] - w[1]).normalize_or_zero())
+                })
                 .map(|d| 1.0 - d)
                 .sum::<f32>()
                 / (p.len() - 2) as f32
