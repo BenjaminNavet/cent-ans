@@ -255,14 +255,20 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
     fn assault_threshold(&self) -> u32 {
         (i64::from(self.rules.assault_odds)
             + i64::from(self.ctx.difficulty.ai_assault_odds_delta)
-            + i64::from(self.ctx.strategy.doctrine.doctrine.battle.assault_odds_delta))
+            + i64::from(
+                self.ctx
+                    .strategy
+                    .doctrine
+                    .doctrine
+                    .battle
+                    .assault_odds_delta,
+            ))
         .clamp(0, 100) as u32
     }
 
     /// Superiority demanded over a place's defence before besieging it.
     fn siege_superiority(&self) -> f64 {
-        self.rules.siege_superiority
-            * f64::from(self.ctx.difficulty.ai_siege_superiority_percent)
+        self.rules.siege_superiority * f64::from(self.ctx.difficulty.ai_siege_superiority_percent)
             / 100.0
             * self.ctx.strategy.siege_factor()
     }
@@ -637,10 +643,9 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
                             rules.defend_weight_other
                         };
                         // ADR 0782: a doctrine that holds security dear defends harder.
-                        let mut value = weight
-                            * ctx.strategy.security()
-                            * (ctx.settlement_income(id) + threat)
-                            / (1.0 + self.steps(reach.cost));
+                        let mut value =
+                            weight * ctx.strategy.security() * (ctx.settlement_income(id) + threat)
+                                / (1.0 + self.steps(reach.cost));
                         if Self::marching_to(turn) == Some(id) {
                             value *= rules.defence_target_persistence;
                         }

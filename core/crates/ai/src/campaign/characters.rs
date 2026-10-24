@@ -64,8 +64,8 @@ pub(super) fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
     // Marriages and the heir: once a year.
     // ADR 0782: a doctrine fond of marriages tries twice a year; a cold one every other year.
     let marriage = ctx.strategy.doctrine.doctrine.diplomacy.marriage_percent;
-    let season_ok = state.season == Season::Spring
-        || (marriage >= 150 && state.season == Season::Autumn);
+    let season_ok =
+        state.season == Season::Spring || (marriage >= 150 && state.season == Season::Autumn);
     let year_ok = marriage >= 100 || (state.year + ctx.faction.as_str().len() as i32) % 2 == 0;
     if season_ok && year_ok {
         arrange_marriage(ctx, orders);

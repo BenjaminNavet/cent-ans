@@ -73,7 +73,12 @@ impl Strategy {
     }
 
     /// Value added to a siege target held by a rival the faction wants to avenge itself on.
-    pub fn revenge_bonus(&self, state: &CampaignState, faction: &FactionId, holder: &FactionId) -> f64 {
+    pub fn revenge_bonus(
+        &self,
+        state: &CampaignState,
+        faction: &FactionId,
+        holder: &FactionId,
+    ) -> f64 {
         if doctrines::revenge_on(state, faction, holder).is_none() {
             return 0.0;
         }

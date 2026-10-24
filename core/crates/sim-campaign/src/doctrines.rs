@@ -8,9 +8,7 @@
 //!
 //! Everything here is a pure function of the state: deterministic, no random roll.
 
-use data_model::{
-    DoctrineCondition, FactionId, ProvinceId, StrategicDoctrine, StrategicDoctrines,
-};
+use data_model::{DoctrineCondition, FactionId, ProvinceId, StrategicDoctrine, StrategicDoctrines};
 
 use crate::state::CampaignState;
 
@@ -85,7 +83,11 @@ pub struct Revenge {
 
 /// Whether `target` beat `faction` in the field more often than `faction` beat it (by the
 /// threshold of the data): the faction then owes it a revenge (Crécy, Poitiers).
-pub fn revenge_on(state: &CampaignState, faction: &FactionId, target: &FactionId) -> Option<Revenge> {
+pub fn revenge_on(
+    state: &CampaignState,
+    faction: &FactionId,
+    target: &FactionId,
+) -> Option<Revenge> {
     let tally = &state.chronicle;
     let lost = tally.victories(target, faction);
     let won = tally.victories(faction, target);
@@ -108,8 +110,11 @@ pub fn revenge_war_factor(state: &CampaignState, faction: &FactionId, target: &F
         return 1.0;
     }
     let active = active(state, faction);
-    let discount = f64::from(StrategicDoctrines::bundled().tuning.revenge_war_discount_percent)
-        / 100.0
+    let discount = f64::from(
+        StrategicDoctrines::bundled()
+            .tuning
+            .revenge_war_discount_percent,
+    ) / 100.0
         * f64::from(active.doctrine.objectives.revenge.min(100))
         / 100.0;
     1.0 - discount

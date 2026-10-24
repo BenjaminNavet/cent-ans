@@ -5,8 +5,8 @@
 use data_model::test_support::fac;
 use data_model::{DifficultyModifiers, StrategicDoctrines};
 use sim_campaign::causes::CauseKind;
-use sim_campaign::doctrines;
 use sim_campaign::difficulty::Difficulty;
+use sim_campaign::doctrines;
 use sim_campaign::{CampaignState, Order};
 
 use crate::common::data;
@@ -76,7 +76,10 @@ fn a_new_sovereign_or_a_run_of_defeats_changes_the_doctrine() {
     // Charles V succeeds (the ruler of the assignment).
     state.factions.get_mut(&france).unwrap().ruler =
         Some(data_model::CharacterId::new("chr_charles_v").unwrap());
-    assert_eq!(doctrines::active(&state, &france).id, "attrition_fortresses");
+    assert_eq!(
+        doctrines::active(&state, &france).id,
+        "attrition_fortresses"
+    );
     state.factions.get_mut(&france).unwrap().ruler =
         Some(data_model::CharacterId::new("chr_philippe_vi").unwrap());
     assert_eq!(doctrines::active(&state, &france).id, "chivalric_battle");
@@ -86,7 +89,10 @@ fn a_new_sovereign_or_a_run_of_defeats_changes_the_doctrine() {
     }
     assert_eq!(doctrines::active(&state, &france).id, "chivalric_battle");
     state.chronicle.record_victory(&england, &france);
-    assert_eq!(doctrines::active(&state, &france).id, "attrition_fortresses");
+    assert_eq!(
+        doctrines::active(&state, &france).id,
+        "attrition_fortresses"
+    );
     // The English victories do not change England's doctrine.
     assert_eq!(doctrines::active(&state, &england).id, "chevauchee_pillage");
 }
@@ -135,7 +141,10 @@ fn the_doctrines_order_the_risk_taken_in_battle() {
     // Chivalry seeks battle, the merchant and the passive realm avoid it.
     assert!(engage("fac_france") < engage("fac_england"));
     assert!(engage("fac_england") < engage("fac_castile"));
-    assert!((engage("fac_castile") - 1.0).abs() < 1e-9, "balanced is neutral");
+    assert!(
+        (engage("fac_castile") - 1.0).abs() < 1e-9,
+        "balanced is neutral"
+    );
     assert!(engage("fac_castile") < engage("fac_flanders"));
     assert!(engage("fac_flanders") < engage("fac_swiss"));
     // The chivalric host falls back late; the passive one early.
@@ -146,7 +155,9 @@ fn the_doctrines_order_the_risk_taken_in_battle() {
     let mut attrition = start("fac_england");
     let france = fac("fac_france");
     for _ in 0..3 {
-        attrition.chronicle.record_victory(&fac("fac_england"), &france);
+        attrition
+            .chronicle
+            .record_victory(&fac("fac_england"), &france);
     }
     let strategy = strategy_of(&attrition, "fac_france");
     assert_eq!(strategy.doctrine.id, "attrition_fortresses");
@@ -158,10 +169,19 @@ fn the_doctrines_order_the_risk_taken_in_battle() {
 #[test]
 fn the_objectives_weigh_the_values_of_the_targets() {
     let state = start("fac_england");
-    assert!(strategy_of(&state, "fac_genoa").treasury() > strategy_of(&state, "fac_castile").treasury());
-    assert!(strategy_of(&state, "fac_swiss").security() > strategy_of(&state, "fac_england").security());
-    assert!(strategy_of(&state, "fac_england").conquest() > strategy_of(&state, "fac_flanders").conquest());
-    assert!(strategy_of(&state, "fac_france").prestige() > strategy_of(&state, "fac_swiss").prestige());
+    assert!(
+        strategy_of(&state, "fac_genoa").treasury() > strategy_of(&state, "fac_castile").treasury()
+    );
+    assert!(
+        strategy_of(&state, "fac_swiss").security() > strategy_of(&state, "fac_england").security()
+    );
+    assert!(
+        strategy_of(&state, "fac_england").conquest()
+            > strategy_of(&state, "fac_flanders").conquest()
+    );
+    assert!(
+        strategy_of(&state, "fac_france").prestige() > strategy_of(&state, "fac_swiss").prestige()
+    );
 }
 
 #[test]
@@ -206,9 +226,10 @@ fn revenge_is_owed_to_the_rival_that_won_more_battles() {
     state.chronicle.record_victory_at(
         &england,
         &france,
-        Some(&data_model::ProvinceId::new("prov_picardy").unwrap_or_else(|_| {
-            data().provinces.keys().next().expect("a province").clone()
-        })),
+        Some(
+            &data_model::ProvinceId::new("prov_picardy")
+                .unwrap_or_else(|_| data().provinces.keys().next().expect("a province").clone()),
+        ),
     );
     let revenge = doctrines::revenge_on(&state, &france, &england).expect("revenge");
     assert_eq!(revenge.net_defeats, 1);
@@ -227,8 +248,18 @@ fn an_ai_war_names_its_doctrine_and_the_revenge_in_the_cause_journal() {
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     let mut state = start("fac_england");
     // Peace first, so that a declaration is possible; England beat France twice at one place.
-    state.factions.get_mut(&france).unwrap().at_war_with.remove(&england);
-    state.factions.get_mut(&england).unwrap().at_war_with.remove(&france);
+    state
+        .factions
+        .get_mut(&france)
+        .unwrap()
+        .at_war_with
+        .remove(&england);
+    state
+        .factions
+        .get_mut(&england)
+        .unwrap()
+        .at_war_with
+        .remove(&france);
     let place = data.provinces.keys().next().expect("province").clone();
     for _ in 0..2 {
         state
@@ -325,7 +356,9 @@ fn the_levels_change_the_strategy_an_ai_plays_by() {
     let strategy = |state: &CampaignState| strategy_of(state, "fac_france");
     state.set_difficulty(Difficulty::Easy);
     let easy = strategy(&state);
-    assert!(easy.visible_provinces(&state, data, &fac("fac_france")).is_some());
+    assert!(easy
+        .visible_provinces(&state, data, &fac("fac_france"))
+        .is_some());
     assert!(!easy.anticipates() && !easy.coordinated());
     let mut hard_state = start("fac_england");
     hard_state.set_difficulty(Difficulty::VeryHard);
@@ -356,7 +389,10 @@ fn the_fog_of_war_hides_far_armies_from_the_easy_ai() {
         .keys()
         .filter(|p| state.holds_province(&france, p))
         .collect();
-    assert!(own.iter().all(|p| visible.contains(*p)), "its own lands are seen");
+    assert!(
+        own.iter().all(|p| visible.contains(*p)),
+        "its own lands are seen"
+    );
     assert!(
         visible.len() < state.provinces.len(),
         "the far provinces are hidden"

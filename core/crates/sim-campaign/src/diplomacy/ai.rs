@@ -266,9 +266,12 @@ pub fn plan_diplomacy(cache: &PlanCache, data: &GameData, faction: &FactionId) -
         .and_then(|p| p.aggression)
         .map_or(50, i32::from);
     // ADR 0782: the doctrine tempers the temper of the prince.
-    let aggression =
-        (aggression + crate::doctrines::active(state, faction).doctrine.war.aggression_delta)
-            .clamp(0, 100);
+    let aggression = (aggression
+        + crate::doctrines::active(state, faction)
+            .doctrine
+            .war
+            .aggression_delta)
+        .clamp(0, 100);
 
     // Peace: offer a white peace when we would accept one ourselves; when
     // clearly winning, ask for the occupied provinces; when losing,
@@ -464,8 +467,12 @@ fn war_target(
         None
     };
     let crusade_call = crate::papal_crusade::ai_call_target(state, data, faction);
-    let doctrine_war_ratio =
-        f64::from(crate::doctrines::active(state, faction).doctrine.war.war_ratio_percent) / 100.0;
+    let doctrine_war_ratio = f64::from(
+        crate::doctrines::active(state, faction)
+            .doctrine
+            .war
+            .war_ratio_percent,
+    ) / 100.0;
     state
         .factions
         .iter()
@@ -608,6 +615,13 @@ pub(crate) fn war_reason(
         RelationKind::Vassal | RelationKind::Suzerain
     ) {
         "independence"
+    } else if revenge.is_some() && doctrine.doctrine.objectives.revenge >= REVENGE_REASON_MIN {
+        place = revenge.and_then(|r| r.place);
+        if place.is_some() {
+            "revenge_at"
+        } else {
+            "revenge"
+        }
     } else if state
         .factions
         .get(attacker)
@@ -616,13 +630,6 @@ pub(crate) fn war_reason(
         "ally_war"
     } else if crate::negotiation::pretender_ready(state, data, attacker) {
         "crown_claim"
-    } else if revenge.is_some() && doctrine.doctrine.objectives.revenge >= REVENGE_REASON_MIN {
-        place = revenge.and_then(|r| r.place);
-        if place.is_some() {
-            "revenge_at"
-        } else {
-            "revenge"
-        }
     } else if state.faction_power(attacker) >= OPPORTUNIST_RATIO * state.faction_power(target) {
         "opportunism"
     } else {

@@ -469,8 +469,11 @@ fn nearby_friendly_armies_are_counted_once() {
         ours *= site.effect().attacker_factor(&data.river_crossing_rules);
     }
     let per_man = state.army_power(data, &french) / 100.0;
-    let ratio = data.ai_grid.attack_ratio;
     let england = fac("fac_england");
+    // ADR 0782: the superiority England demands is the grid's, scaled by its doctrine
+    // (chevauchée: it accepts battle a little earlier).
+    let ratio = data.ai_grid.attack_ratio
+        * ai::strategy::Strategy::of(&state, data, &england).engage_factor();
     // Enemy just too strong for the true odds (but not for doubled ones).
     let too_strong = ((ours * 1.1 / ratio) / per_man).ceil() as u32;
     state.armies.get_mut(&french).unwrap().units[0].strength = too_strong;
