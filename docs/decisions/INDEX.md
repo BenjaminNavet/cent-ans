@@ -340,3 +340,5 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0770 | [Forêts et hameaux de la campagne](0770-forets-hameaux-campagne.md) | accepté |
 | 0776 | [Mémoire de campagne : textures de modèles et allocateur](0776-memoire-campagne-textures-modeles.md) | accepté |
 | 0779 | [Histoire conditionnée et bifurcations](0779-histoire-conditionnee-et-bifurcations.md) | accepté |
+| 0784 | [L'arc de partie en trois actes](0784-arc-de-partie-en-trois-actes.md) | accepté |
+| 0785 | [Victoire par score de règne (amende 0245)](0785-victoire-par-score-de-regne.md) | accepté |

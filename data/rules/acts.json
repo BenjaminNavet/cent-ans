@@ -1,0 +1,2579 @@
+{
+  "description": "ACTES (ADR 0784, 0785) : l'arc de partie en trois actes. Chaque acte donne à la maison du joueur des objectifs (objective_sets : par faction `fac_*`, par gouvernement `gov_*`, sinon `default`) et des pressions (points de score quand la condition tient à la clôture de l'acte). Un acte se clôt avec l'année ou plus tôt (paix durable, effondrement). La victoire est le score de règne : moyenne des scores d'acte pondérée par `weight`, au moins victory_min_score. La défaite est la ruine de la maison (ruin) ou la perte de toutes les terres.",
+  "acts": [
+    {
+      "id": "act_1",
+      "name": "La querelle",
+      "subtitle": "1337-1360 : l'avènement de la guerre",
+      "start_year": 1337,
+      "end_year": 1360,
+      "weight": 25,
+      "intro": "Édouard III défie Philippe VI : la querelle de la couronne de France devient une guerre. Crécy, la peste, Poitiers et le traité de Brétigny vont dire qui tient le royaume.",
+      "closing": {
+        "year": "Brétigny (1360) clôt la querelle : une paix de papier, un royaume saigné.",
+        "peace": "La querelle s'apaise avant l'heure : les trêves tiennent, les armes se taisent.",
+        "collapse": "La maison s'effondre avant Brétigny : le domaine fond, les banquiers ne prêtent plus."
+      },
+      "early_end": {
+        "peace_seasons": 12,
+        "min_seasons": 24,
+        "collapse_domain_percent": 50,
+        "collapse_defaults": 2
+      },
+      "policies": [
+        {
+          "id": "pol_1_war",
+          "name": "Maisnie de guerre",
+          "category": "domain",
+          "factor_percent": 150,
+          "description": "Les capitaines d'abord : tenir et étendre le domaine compte une fois et demie."
+        },
+        {
+          "id": "pol_1_purse",
+          "name": "Maisnie des comptes",
+          "category": "treasury",
+          "factor_percent": 150,
+          "description": "Les clercs et les banquiers d'abord : des finances saines comptent une fois et demie."
+        },
+        {
+          "id": "pol_1_line",
+          "name": "Maisnie de la lignée",
+          "category": "dynasty",
+          "factor_percent": 150,
+          "description": "Les mariages et les héritiers d'abord : la lignée compte une fois et demie."
+        }
+      ],
+      "pressures": [
+        {
+          "id": "pr1_crown",
+          "title": "La couronne contestée",
+          "text": "L'Anglais tient une province du royaume : la légitimité du roi est discutée.",
+          "condition": {
+            "kind": "foreign_control_at_least",
+            "faction": "fac_england",
+            "provinces": [
+              "prov_ile_de_france",
+              "prov_normandie",
+              "prov_ponthieu",
+              "prov_boulonnais",
+              "prov_touraine",
+              "prov_poitou",
+              "prov_saintonge",
+              "prov_agenais",
+              "prov_guyenne",
+              "prov_carcassonne",
+              "prov_bretagne"
+            ],
+            "count": 1
+          },
+          "points": -10,
+          "audience": {
+            "factions": [
+              "fac_france"
+            ]
+          }
+        },
+        {
+          "id": "pr1_claim",
+          "title": "Le défi d'Édouard",
+          "text": "La guerre pour la couronne de France est ouverte : le roi d'Angleterre tient ses droits.",
+          "condition": {
+            "kind": "at_war",
+            "faction": "fac_france"
+          },
+          "points": 6,
+          "audience": {
+            "factions": [
+              "fac_england"
+            ]
+          }
+        },
+        {
+          "id": "pr1_purse",
+          "title": "Une fortune de guerre",
+          "text": "Un trésor garni permet de payer les soldes jusqu'à Brétigny.",
+          "condition": {
+            "kind": "treasury",
+            "min": 8000
+          },
+          "points": 5
+        }
+      ]
+    },
+    {
+      "id": "act_2",
+      "name": "La reprise et la ruine",
+      "subtitle": "1360-1415 : de Charles V à Azincourt",
+      "start_year": 1360,
+      "end_year": 1415,
+      "weight": 30,
+      "intro": "Charles V reprend ville à ville ce que Brétigny a cédé ; puis la folie de Charles VI, le Grand Schisme et la querelle des princes ruinent le royaume. Azincourt (1415) approche.",
+      "closing": {
+        "year": "Azincourt (1415) : la chevalerie française gît dans la boue, le royaume est à genoux.",
+        "peace": "Une longue paix s'installe : le royaume respire et prépare la suite.",
+        "collapse": "Le royaume se défait : provinces perdues, banquiers en fuite, princes en rébellion."
+      },
+      "early_end": {
+        "peace_seasons": 12,
+        "min_seasons": 32,
+        "collapse_domain_percent": 50,
+        "collapse_defaults": 2
+      },
+      "policies": [
+        {
+          "id": "pol_2_regain",
+          "name": "La reprise en main",
+          "category": "domain",
+          "factor_percent": 150,
+          "description": "Reprendre les places perdues, comme Du Guesclin : le domaine compte une fois et demie."
+        },
+        {
+          "id": "pol_2_rigor",
+          "name": "La rigueur des finances",
+          "category": "treasury",
+          "factor_percent": 150,
+          "description": "Alléger les dettes et garnir le trésor : les finances comptent une fois et demie."
+        },
+        {
+          "id": "pol_2_renown",
+          "name": "Le prestige du sage",
+          "category": "prestige",
+          "factor_percent": 150,
+          "description": "Tenir son rang et sa parole : le prestige compte une fois et demie."
+        }
+      ],
+      "pressures": [
+        {
+          "id": "pr2_line",
+          "title": "Le trône tient",
+          "text": "Malgré la folie du roi et la querelle des princes, la lignée est assurée.",
+          "condition": {
+            "kind": "dynasty_secure"
+          },
+          "points": 6,
+          "audience": {
+            "governments": [
+              "kingdom"
+            ]
+          }
+        },
+        {
+          "id": "pr2_wise",
+          "title": "Le sage gouvernement",
+          "text": "Une cour qui a du renom attire alliés et capitaines.",
+          "condition": {
+            "kind": "prestige",
+            "min": 130
+          },
+          "points": 6
+        },
+        {
+          "id": "pr2_debt",
+          "title": "Les coffres tiennent",
+          "text": "Les banquiers continuent de prêter.",
+          "condition": {
+            "kind": "debt_below",
+            "max": 5000
+          },
+          "points": 5
+        }
+      ]
+    },
+    {
+      "id": "act_3",
+      "name": "Le sursaut",
+      "subtitle": "1415-1453 : de Troyes à Castillon",
+      "start_year": 1415,
+      "end_year": 1453,
+      "weight": 45,
+      "intro": "Après Azincourt, le traité de Troyes livre le royaume au roi d'Angleterre ; Jeanne d'Arc, le sacre de Reims, Arras et Formigny préparent Castillon (1453). C'est l'acte qui décide du règne.",
+      "closing": {
+        "year": "Castillon (1453) : la guerre de Cent Ans s'achève ; l'histoire retient ce que le règne a tenu.",
+        "peace": "La paix gagne l'acte avant Castillon : le règne s'arrête sur son bilan.",
+        "collapse": "Le sursaut échoue : la maison s'effondre avant d'avoir pu reprendre la main."
+      },
+      "early_end": {
+        "peace_seasons": 20,
+        "min_seasons": 40,
+        "collapse_domain_percent": 50,
+        "collapse_defaults": 2
+      },
+      "policies": [
+        {
+          "id": "pol_3_arms",
+          "name": "Le sursaut des armes",
+          "category": "domain",
+          "factor_percent": 150,
+          "description": "Tout pour la reconquête : le domaine compte une fois et demie."
+        },
+        {
+          "id": "pol_3_union",
+          "name": "L'union des princes",
+          "category": "alliance",
+          "factor_percent": 150,
+          "description": "Réconcilier les princes et les alliés : les alliances comptent une fois et demie."
+        },
+        {
+          "id": "pol_3_war_chest",
+          "name": "Le trésor de guerre",
+          "category": "treasury",
+          "factor_percent": 150,
+          "description": "La taille perpétuelle et les armées de métier : le trésor compte une fois et demie."
+        }
+      ],
+      "pressures": [
+        {
+          "id": "pr3_reconquest",
+          "title": "La reconquête",
+          "text": "La Couronne tient la Guyenne ou la Normandie : le royaume se relève.",
+          "condition": {
+            "kind": "control_count",
+            "provinces": [
+              "prov_guyenne",
+              "prov_normandie"
+            ],
+            "count": 1
+          },
+          "points": 8,
+          "audience": {
+            "factions": [
+              "fac_france"
+            ]
+          }
+        },
+        {
+          "id": "pr3_french_return",
+          "title": "Les Français reviennent",
+          "text": "Le roi de France tient de nouveau Guyenne ou Normandie : l'Angleterre recule.",
+          "condition": {
+            "kind": "foreign_control_at_least",
+            "faction": "fac_france",
+            "provinces": [
+              "prov_guyenne",
+              "prov_normandie"
+            ],
+            "count": 1
+          },
+          "points": -10,
+          "audience": {
+            "factions": [
+              "fac_england"
+            ]
+          }
+        },
+        {
+          "id": "pr3_standing",
+          "title": "Le sursaut du domaine",
+          "text": "Le domaine est entier à l'heure du bilan.",
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          },
+          "points": 6
+        }
+      ]
+    }
+  ],
+  "categories": {
+    "domain": "Domaine",
+    "treasury": "Trésor",
+    "dynasty": "Lignée",
+    "prestige": "Prestige",
+    "alliance": "Alliances"
+  },
+  "objective_sets": {
+    "gov_kingdom": {
+      "act_1": [
+        {
+          "id": "gen_kingdom1_domain",
+          "title": "Le domaine tenu",
+          "description": "Tenir au moins 100 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          }
+        },
+        {
+          "id": "gen_kingdom1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_kingdom1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 15000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 15000
+          }
+        },
+        {
+          "id": "gen_kingdom1_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 100.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 100
+          }
+        },
+        {
+          "id": "gen_kingdom1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "gen_kingdom2_domain",
+          "title": "Un domaine qui s'étend",
+          "description": "Porter le domaine à 110 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 110
+          }
+        },
+        {
+          "id": "gen_kingdom2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_kingdom2_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 15000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 15000
+          }
+        },
+        {
+          "id": "gen_kingdom2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 120.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 120
+          }
+        },
+        {
+          "id": "gen_kingdom2_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "gen_kingdom3_domain",
+          "title": "Le sursaut du domaine",
+          "description": "Porter le domaine à 125 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 125
+          }
+        },
+        {
+          "id": "gen_kingdom3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_kingdom3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 20000 livres au trésor.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "treasury",
+            "min": 20000
+          }
+        },
+        {
+          "id": "gen_kingdom3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 150.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 150
+          }
+        },
+        {
+          "id": "gen_kingdom3_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ]
+    },
+    "gov_principality": {
+      "act_1": [
+        {
+          "id": "gen_principality1_domain",
+          "title": "Le domaine tenu",
+          "description": "Tenir au moins 100 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          }
+        },
+        {
+          "id": "gen_principality1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_principality1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 10000
+          }
+        },
+        {
+          "id": "gen_principality1_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 80.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 80
+          }
+        },
+        {
+          "id": "gen_principality1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 1 allié.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 1
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "gen_principality2_domain",
+          "title": "Un domaine qui s'étend",
+          "description": "Porter le domaine à 110 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 110
+          }
+        },
+        {
+          "id": "gen_principality2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_principality2_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 10000
+          }
+        },
+        {
+          "id": "gen_principality2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 100.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 100
+          }
+        },
+        {
+          "id": "gen_principality2_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "gen_principality3_domain",
+          "title": "Le sursaut du domaine",
+          "description": "Porter le domaine à 125 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 125
+          }
+        },
+        {
+          "id": "gen_principality3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_principality3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 12000 livres au trésor.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "treasury",
+            "min": 12000
+          }
+        },
+        {
+          "id": "gen_principality3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 130.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 130
+          }
+        },
+        {
+          "id": "gen_principality3_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ]
+    },
+    "gov_duchy": {
+      "act_1": [
+        {
+          "id": "gen_duchy1_domain",
+          "title": "Le domaine tenu",
+          "description": "Tenir au moins 100 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          }
+        },
+        {
+          "id": "gen_duchy1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_duchy1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 10000
+          }
+        },
+        {
+          "id": "gen_duchy1_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 80.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 80
+          }
+        },
+        {
+          "id": "gen_duchy1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 1 allié.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 1
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "gen_duchy2_domain",
+          "title": "Un domaine qui s'étend",
+          "description": "Porter le domaine à 110 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 110
+          }
+        },
+        {
+          "id": "gen_duchy2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_duchy2_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 10000
+          }
+        },
+        {
+          "id": "gen_duchy2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 100.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 100
+          }
+        },
+        {
+          "id": "gen_duchy2_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "gen_duchy3_domain",
+          "title": "Le sursaut du domaine",
+          "description": "Porter le domaine à 125 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 125
+          }
+        },
+        {
+          "id": "gen_duchy3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_duchy3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 12000 livres au trésor.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "treasury",
+            "min": 12000
+          }
+        },
+        {
+          "id": "gen_duchy3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 130.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 130
+          }
+        },
+        {
+          "id": "gen_duchy3_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ]
+    },
+    "gov_county": {
+      "act_1": [
+        {
+          "id": "gen_county1_domain",
+          "title": "Le domaine tenu",
+          "description": "Tenir au moins 100 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          }
+        },
+        {
+          "id": "gen_county1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_county1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 6000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 6000
+          }
+        },
+        {
+          "id": "gen_county1_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 60.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 60
+          }
+        },
+        {
+          "id": "gen_county1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 1 allié.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 1
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "gen_county2_domain",
+          "title": "Un domaine qui s'étend",
+          "description": "Porter le domaine à 110 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 110
+          }
+        },
+        {
+          "id": "gen_county2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_county2_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 6000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 6000
+          }
+        },
+        {
+          "id": "gen_county2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 80.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 80
+          }
+        },
+        {
+          "id": "gen_county2_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "gen_county3_domain",
+          "title": "Le sursaut du domaine",
+          "description": "Porter le domaine à 125 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 125
+          }
+        },
+        {
+          "id": "gen_county3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_county3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 8000 livres au trésor.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "treasury",
+            "min": 8000
+          }
+        },
+        {
+          "id": "gen_county3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 110.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 110
+          }
+        },
+        {
+          "id": "gen_county3_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ]
+    },
+    "gov_lordship": {
+      "act_1": [
+        {
+          "id": "gen_lordship1_domain",
+          "title": "Le domaine tenu",
+          "description": "Tenir au moins 100 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          }
+        },
+        {
+          "id": "gen_lordship1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_lordship1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 4000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 4000
+          }
+        },
+        {
+          "id": "gen_lordship1_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 50.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 50
+          }
+        },
+        {
+          "id": "gen_lordship1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 1 allié.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 1
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "gen_lordship2_domain",
+          "title": "Un domaine qui s'étend",
+          "description": "Porter le domaine à 110 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 110
+          }
+        },
+        {
+          "id": "gen_lordship2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_lordship2_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 4000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 4000
+          }
+        },
+        {
+          "id": "gen_lordship2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 70.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 70
+          }
+        },
+        {
+          "id": "gen_lordship2_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 1 allié.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 1
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "gen_lordship3_domain",
+          "title": "Le sursaut du domaine",
+          "description": "Porter le domaine à 125 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 125
+          }
+        },
+        {
+          "id": "gen_lordship3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_lordship3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 5000 livres au trésor.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "treasury",
+            "min": 5000
+          }
+        },
+        {
+          "id": "gen_lordship3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 100.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 100
+          }
+        },
+        {
+          "id": "gen_lordship3_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 1 allié.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 1
+          }
+        }
+      ]
+    },
+    "gov_empire": {
+      "act_1": [
+        {
+          "id": "gen_empire1_domain",
+          "title": "Le domaine tenu",
+          "description": "Tenir au moins 100 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          }
+        },
+        {
+          "id": "gen_empire1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 15,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_empire1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 20000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 20000
+          }
+        },
+        {
+          "id": "gen_empire1_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 100.",
+          "category": "prestige",
+          "weight": 20,
+          "condition": {
+            "kind": "prestige",
+            "min": 100
+          }
+        },
+        {
+          "id": "gen_empire1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "gen_empire2_domain",
+          "title": "Un domaine qui s'étend",
+          "description": "Porter le domaine à 110 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 110
+          }
+        },
+        {
+          "id": "gen_empire2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 15,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_empire2_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 20000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 20000
+          }
+        },
+        {
+          "id": "gen_empire2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 130.",
+          "category": "prestige",
+          "weight": 20,
+          "condition": {
+            "kind": "prestige",
+            "min": 130
+          }
+        },
+        {
+          "id": "gen_empire2_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "gen_empire3_domain",
+          "title": "Le sursaut du domaine",
+          "description": "Porter le domaine à 125 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 125
+          }
+        },
+        {
+          "id": "gen_empire3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 15,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_empire3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 25000 livres au trésor.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "treasury",
+            "min": 25000
+          }
+        },
+        {
+          "id": "gen_empire3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 160.",
+          "category": "prestige",
+          "weight": 20,
+          "condition": {
+            "kind": "prestige",
+            "min": 160
+          }
+        },
+        {
+          "id": "gen_empire3_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ]
+    },
+    "gov_republic": {
+      "act_1": [
+        {
+          "id": "gen_republic1_domain",
+          "title": "Le domaine tenu",
+          "description": "Tenir au moins 100 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 20,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          }
+        },
+        {
+          "id": "gen_republic1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 5,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_republic1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 12000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 25,
+          "condition": {
+            "kind": "debt_below",
+            "max": 12000
+          }
+        },
+        {
+          "id": "gen_republic1_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 60.",
+          "category": "prestige",
+          "weight": 10,
+          "condition": {
+            "kind": "prestige",
+            "min": 60
+          }
+        },
+        {
+          "id": "gen_republic1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 20,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "gen_republic2_domain",
+          "title": "Un domaine qui s'étend",
+          "description": "Porter le domaine à 110 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 20,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 110
+          }
+        },
+        {
+          "id": "gen_republic2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 5,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_republic2_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 12000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 25,
+          "condition": {
+            "kind": "debt_below",
+            "max": 12000
+          }
+        },
+        {
+          "id": "gen_republic2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 80.",
+          "category": "prestige",
+          "weight": 10,
+          "condition": {
+            "kind": "prestige",
+            "min": 80
+          }
+        },
+        {
+          "id": "gen_republic2_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 20,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "gen_republic3_domain",
+          "title": "Le sursaut du domaine",
+          "description": "Porter le domaine à 125 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 20,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 125
+          }
+        },
+        {
+          "id": "gen_republic3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 5,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_republic3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 25000 livres au trésor.",
+          "category": "treasury",
+          "weight": 25,
+          "condition": {
+            "kind": "treasury",
+            "min": 25000
+          }
+        },
+        {
+          "id": "gen_republic3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 100.",
+          "category": "prestige",
+          "weight": 10,
+          "condition": {
+            "kind": "prestige",
+            "min": 100
+          }
+        },
+        {
+          "id": "gen_republic3_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 20,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ]
+    },
+    "gov_theocracy": {
+      "act_1": [
+        {
+          "id": "gen_theocracy1_domain",
+          "title": "Le domaine tenu",
+          "description": "Tenir au moins 100 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 15,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          }
+        },
+        {
+          "id": "gen_theocracy1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 5,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_theocracy1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 8000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 8000
+          }
+        },
+        {
+          "id": "gen_theocracy1_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 100.",
+          "category": "prestige",
+          "weight": 30,
+          "condition": {
+            "kind": "prestige",
+            "min": 100
+          }
+        },
+        {
+          "id": "gen_theocracy1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 20,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "gen_theocracy2_domain",
+          "title": "Un domaine qui s'étend",
+          "description": "Porter le domaine à 110 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 15,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 110
+          }
+        },
+        {
+          "id": "gen_theocracy2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 5,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_theocracy2_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 8000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 8000
+          }
+        },
+        {
+          "id": "gen_theocracy2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 130.",
+          "category": "prestige",
+          "weight": 30,
+          "condition": {
+            "kind": "prestige",
+            "min": 130
+          }
+        },
+        {
+          "id": "gen_theocracy2_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 20,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "gen_theocracy3_domain",
+          "title": "Le sursaut du domaine",
+          "description": "Porter le domaine à 125 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 15,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 125
+          }
+        },
+        {
+          "id": "gen_theocracy3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 5,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_theocracy3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 10000 livres au trésor.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "treasury",
+            "min": 10000
+          }
+        },
+        {
+          "id": "gen_theocracy3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 160.",
+          "category": "prestige",
+          "weight": 30,
+          "condition": {
+            "kind": "prestige",
+            "min": 160
+          }
+        },
+        {
+          "id": "gen_theocracy3_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 20,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ]
+    },
+    "default": {
+      "act_1": [
+        {
+          "id": "gen_default1_domain",
+          "title": "Le domaine tenu",
+          "description": "Tenir au moins 100 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          }
+        },
+        {
+          "id": "gen_default1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_default1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 10000
+          }
+        },
+        {
+          "id": "gen_default1_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 80.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 80
+          }
+        },
+        {
+          "id": "gen_default1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 1 allié.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 1
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "gen_default2_domain",
+          "title": "Un domaine qui s'étend",
+          "description": "Porter le domaine à 110 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 110
+          }
+        },
+        {
+          "id": "gen_default2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_default2_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 10000
+          }
+        },
+        {
+          "id": "gen_default2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 100.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 100
+          }
+        },
+        {
+          "id": "gen_default2_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "gen_default3_domain",
+          "title": "Le sursaut du domaine",
+          "description": "Porter le domaine à 125 % de ce qu'il était en 1337.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 125
+          }
+        },
+        {
+          "id": "gen_default3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "gen_default3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 12000 livres au trésor.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "treasury",
+            "min": 12000
+          }
+        },
+        {
+          "id": "gen_default3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 130.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 130
+          }
+        },
+        {
+          "id": "gen_default3_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ]
+    },
+    "fac_france": {
+      "act_1": [
+        {
+          "id": "fr1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "fr1_domain",
+          "title": "Garder le domaine royal",
+          "description": "Tenir au moins 90 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 90
+          }
+        },
+        {
+          "id": "fr1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 15000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 15000
+          }
+        },
+        {
+          "id": "fr1_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 110.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 110
+          }
+        },
+        {
+          "id": "fr1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        },
+        {
+          "id": "fr1_flanders",
+          "title": "La Flandre dans la main du roi",
+          "description": "Tenir la Flandre et l'Artois.",
+          "category": "domain",
+          "weight": 15,
+          "condition": {
+            "kind": "control_all",
+            "provinces": [
+              "prov_flandre",
+              "prov_artois"
+            ]
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "fr2_reconquest",
+          "title": "Chasser l'Anglais du royaume",
+          "description": "Reprendre Ponthieu, Boulonnais, Normandie, Touraine, Poitou et Saintonge aux Anglais.",
+          "category": "domain",
+          "weight": 30,
+          "condition": {
+            "kind": "no_foreign_control",
+            "faction": "fac_england",
+            "provinces": [
+              "prov_ponthieu",
+              "prov_boulonnais",
+              "prov_normandie",
+              "prov_touraine",
+              "prov_poitou",
+              "prov_saintonge"
+            ]
+          }
+        },
+        {
+          "id": "fr2_domain",
+          "title": "Le domaine rétabli",
+          "description": "Tenir au moins 100 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 15,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          }
+        },
+        {
+          "id": "fr2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 15,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "fr2_purse",
+          "title": "Le trésor du sage roi",
+          "description": "Garder 20000 livres au trésor, comme Charles V.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "treasury",
+            "min": 20000
+          }
+        },
+        {
+          "id": "fr2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 140.",
+          "category": "prestige",
+          "weight": 10,
+          "condition": {
+            "kind": "prestige",
+            "min": 140
+          }
+        },
+        {
+          "id": "fr2_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 15,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "fr3_expel",
+          "title": "Bouter les Anglais hors de France",
+          "description": "Aucune province du royaume ne doit rester aux mains de l'Angleterre.",
+          "category": "domain",
+          "weight": 35,
+          "condition": {
+            "kind": "no_foreign_control",
+            "faction": "fac_england",
+            "provinces": [
+              "prov_ile_de_france",
+              "prov_normandie",
+              "prov_ponthieu",
+              "prov_boulonnais",
+              "prov_touraine",
+              "prov_poitou",
+              "prov_saintonge",
+              "prov_agenais",
+              "prov_guyenne",
+              "prov_carcassonne",
+              "prov_bretagne"
+            ]
+          }
+        },
+        {
+          "id": "fr3_guyenne",
+          "title": "Reprendre la Guyenne",
+          "description": "Bordeaux et Bayonne reviennent à la Couronne, comme après Castillon.",
+          "category": "domain",
+          "weight": 15,
+          "condition": {
+            "kind": "control_all",
+            "provinces": [
+              "prov_guyenne"
+            ]
+          }
+        },
+        {
+          "id": "fr3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 15,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "fr3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 15000 livres au trésor.",
+          "category": "treasury",
+          "weight": 10,
+          "condition": {
+            "kind": "treasury",
+            "min": 15000
+          }
+        },
+        {
+          "id": "fr3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 160.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 160
+          }
+        },
+        {
+          "id": "fr3_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ]
+    },
+    "fac_england": {
+      "act_1": [
+        {
+          "id": "en1_foothold",
+          "title": "Prendre pied dans le royaume",
+          "description": "Tenir au moins 2 provinces du royaume de France.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "control_count",
+            "provinces": [
+              "prov_ile_de_france",
+              "prov_normandie",
+              "prov_ponthieu",
+              "prov_boulonnais",
+              "prov_touraine",
+              "prov_poitou",
+              "prov_saintonge",
+              "prov_agenais",
+              "prov_guyenne",
+              "prov_carcassonne",
+              "prov_bretagne"
+            ],
+            "count": 2
+          }
+        },
+        {
+          "id": "en1_aquitaine",
+          "title": "L'héritage des Plantagenêts",
+          "description": "Tenir la Guyenne, le Bazadais et la Gascogne.",
+          "category": "domain",
+          "weight": 20,
+          "condition": {
+            "kind": "control_all",
+            "provinces": [
+              "prov_guyenne",
+              "prov_bazadais",
+              "prov_gascogne"
+            ]
+          }
+        },
+        {
+          "id": "en1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 20,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "en1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 20000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 20000
+          }
+        },
+        {
+          "id": "en1_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 110.",
+          "category": "prestige",
+          "weight": 10,
+          "condition": {
+            "kind": "prestige",
+            "min": 110
+          }
+        },
+        {
+          "id": "en1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "en2_realm",
+          "title": "Un pied sur le continent",
+          "description": "Tenir au moins 4 provinces du royaume de France.",
+          "category": "domain",
+          "weight": 30,
+          "condition": {
+            "kind": "control_count",
+            "provinces": [
+              "prov_ile_de_france",
+              "prov_normandie",
+              "prov_ponthieu",
+              "prov_boulonnais",
+              "prov_touraine",
+              "prov_poitou",
+              "prov_saintonge",
+              "prov_agenais",
+              "prov_guyenne",
+              "prov_carcassonne",
+              "prov_bretagne"
+            ],
+            "count": 4
+          }
+        },
+        {
+          "id": "en2_aquitaine",
+          "title": "L'Aquitaine en pleine souveraineté",
+          "description": "Tenir la Guyenne, le Bazadais, la Gascogne et le Poitou.",
+          "category": "domain",
+          "weight": 20,
+          "condition": {
+            "kind": "control_all",
+            "provinces": [
+              "prov_guyenne",
+              "prov_bazadais",
+              "prov_gascogne",
+              "prov_poitou"
+            ]
+          }
+        },
+        {
+          "id": "en2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 15,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "en2_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 20000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 20000
+          }
+        },
+        {
+          "id": "en2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 130.",
+          "category": "prestige",
+          "weight": 10,
+          "condition": {
+            "kind": "prestige",
+            "min": 130
+          }
+        },
+        {
+          "id": "en2_scotland",
+          "title": "Soumettre l'Écosse",
+          "description": "L'Écosse vassale de l'Angleterre ou disparue.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "subjugate",
+            "faction": "fac_scotland"
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "en3_crown",
+          "title": "La couronne de France",
+          "description": "Détenir le titre de roi de France.",
+          "category": "prestige",
+          "weight": 30,
+          "condition": {
+            "kind": "hold_title",
+            "title": "tit_france"
+          }
+        },
+        {
+          "id": "en3_realm",
+          "title": "Le royaume tenu",
+          "description": "Tenir au moins 6 provinces du royaume de France.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "control_count",
+            "provinces": [
+              "prov_ile_de_france",
+              "prov_normandie",
+              "prov_ponthieu",
+              "prov_boulonnais",
+              "prov_touraine",
+              "prov_poitou",
+              "prov_saintonge",
+              "prov_agenais",
+              "prov_guyenne",
+              "prov_carcassonne",
+              "prov_bretagne"
+            ],
+            "count": 6
+          }
+        },
+        {
+          "id": "en3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 15,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "en3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 30000 livres au trésor.",
+          "category": "treasury",
+          "weight": 10,
+          "condition": {
+            "kind": "treasury",
+            "min": 30000
+          }
+        },
+        {
+          "id": "en3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 150.",
+          "category": "prestige",
+          "weight": 10,
+          "condition": {
+            "kind": "prestige",
+            "min": 150
+          }
+        },
+        {
+          "id": "en3_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ]
+    },
+    "fac_burgundy": {
+      "act_1": [
+        {
+          "id": "bu1_free",
+          "title": "Un duc sans suzerain",
+          "description": "Se libérer de la tutelle du roi de France.",
+          "category": "prestige",
+          "weight": 20,
+          "condition": {
+            "kind": "independent"
+          }
+        },
+        {
+          "id": "bu1_lowcountries",
+          "title": "Les Pays-Bas en vue",
+          "description": "Tenir au moins 3 des provinces des Pays-Bas.",
+          "category": "domain",
+          "weight": 25,
+          "condition": {
+            "kind": "control_count",
+            "provinces": [
+              "prov_flandre",
+              "prov_artois",
+              "prov_brabant",
+              "prov_hainaut",
+              "prov_namur",
+              "prov_liege"
+            ],
+            "count": 3
+          }
+        },
+        {
+          "id": "bu1_domain",
+          "title": "Le domaine tenu",
+          "description": "Tenir au moins 100 % des provinces du début de la campagne.",
+          "category": "domain",
+          "weight": 15,
+          "condition": {
+            "kind": "domain_percent",
+            "percent": 100
+          }
+        },
+        {
+          "id": "bu1_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 15,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "bu1_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 10000
+          }
+        },
+        {
+          "id": "bu1_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 2 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 2
+          }
+        }
+      ],
+      "act_2": [
+        {
+          "id": "bu2_lowcountries",
+          "title": "Le grand-duc d'Occident",
+          "description": "Tenir au moins 5 des provinces des Pays-Bas.",
+          "category": "domain",
+          "weight": 30,
+          "condition": {
+            "kind": "control_count",
+            "provinces": [
+              "prov_flandre",
+              "prov_artois",
+              "prov_brabant",
+              "prov_hainaut",
+              "prov_namur",
+              "prov_liege"
+            ],
+            "count": 5
+          }
+        },
+        {
+          "id": "bu2_free",
+          "title": "Un duc sans suzerain",
+          "description": "Ne relever de personne.",
+          "category": "prestige",
+          "weight": 20,
+          "condition": {
+            "kind": "independent"
+          }
+        },
+        {
+          "id": "bu2_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 15,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "bu2_debt",
+          "title": "Des finances saines",
+          "description": "Ne pas devoir plus de 12000 livres aux banquiers.",
+          "category": "treasury",
+          "weight": 15,
+          "condition": {
+            "kind": "debt_below",
+            "max": 12000
+          }
+        },
+        {
+          "id": "bu2_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 120.",
+          "category": "prestige",
+          "weight": 10,
+          "condition": {
+            "kind": "prestige",
+            "min": 120
+          }
+        },
+        {
+          "id": "bu2_allies",
+          "title": "Des alliés sûrs",
+          "description": "Compter 3 alliés.",
+          "category": "alliance",
+          "weight": 10,
+          "condition": {
+            "kind": "allies_at_least",
+            "count": 3
+          }
+        }
+      ],
+      "act_3": [
+        {
+          "id": "bu3_lowcountries",
+          "title": "Les Pays-Bas réunis",
+          "description": "Réunir Flandre, Artois, Brabant, Hainaut, Namur et Liège.",
+          "category": "domain",
+          "weight": 30,
+          "condition": {
+            "kind": "control_all",
+            "provinces": [
+              "prov_flandre",
+              "prov_artois",
+              "prov_brabant",
+              "prov_hainaut",
+              "prov_namur",
+              "prov_liege"
+            ]
+          }
+        },
+        {
+          "id": "bu3_link",
+          "title": "Le lien lorrain",
+          "description": "Tenir la Bourgogne, la Lorraine et l'Île-de-France.",
+          "category": "domain",
+          "weight": 20,
+          "condition": {
+            "kind": "control_all",
+            "provinces": [
+              "prov_bourgogne",
+              "prov_lorraine",
+              "prov_ile_de_france"
+            ]
+          }
+        },
+        {
+          "id": "bu3_free",
+          "title": "Un duc sans suzerain",
+          "description": "Ne relever de personne.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "independent"
+          }
+        },
+        {
+          "id": "bu3_dynasty",
+          "title": "Une lignée assurée",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "category": "dynasty",
+          "weight": 10,
+          "condition": {
+            "kind": "dynasty_secure"
+          }
+        },
+        {
+          "id": "bu3_purse",
+          "title": "Les coffres du roi",
+          "description": "Garder 12000 livres au trésor.",
+          "category": "treasury",
+          "weight": 10,
+          "condition": {
+            "kind": "treasury",
+            "min": 12000
+          }
+        },
+        {
+          "id": "bu3_prestige",
+          "title": "Le renom du prince",
+          "description": "Atteindre un prestige de 150.",
+          "category": "prestige",
+          "weight": 15,
+          "condition": {
+            "kind": "prestige",
+            "min": 150
+          }
+        }
+      ]
+    }
+  },
+  "grades": [
+    {
+      "min_score": 0,
+      "title": "un règne ruineux",
+      "text": "La maison a tout perdu ou presque : les chroniqueurs la citeront en exemple."
+    },
+    {
+      "min_score": 40,
+      "title": "un règne contesté",
+      "text": "Le règne laisse un royaume divisé et des comptes à régler."
+    },
+    {
+      "min_score": 55,
+      "title": "un règne honorable",
+      "text": "La maison a tenu son rang dans la tourmente."
+    },
+    {
+      "min_score": 70,
+      "title": "un règne couronné",
+      "text": "La maison sort de la guerre plus forte qu'elle n'y est entrée."
+    },
+    {
+      "min_score": 85,
+      "title": "un règne glorieux",
+      "text": "Les chroniqueurs en feront un modèle pour les siècles."
+    }
+  ],
+  "victory_min_score": 55,
+  "ruin": {
+    "defaults": 3,
+    "capital_lost_seasons": 8,
+    "dynastic_governments": [
+      "kingdom",
+      "principality",
+      "duchy",
+      "county",
+      "empire",
+      "lordship"
+    ]
+  },
+  "texts": {
+    "victory": "La maison a traversé les trois actes de la guerre.",
+    "ended": "Le bilan des trois actes n'a pas suffi à faire un règne victorieux.",
+    "defeat_dynasty": "la lignée s'éteint et la maison disparaît avec elle.",
+    "defeat_bankruptcy": "la banqueroute royale est consommée : les banquiers ont ruiné la Couronne.",
+    "defeat_capital": "la capitale est perdue et le trône n'a pas d'héritier.",
+    "act_label": "Acte {n} sur {total}",
+    "reign_score": "Score de règne",
+    "policy_prompt": "Choisissez la politique de la maisnie pour cet acte.",
+    "policy_none": "Aucune politique choisie.",
+    "transition_title": "Fin de l'acte {n}",
+    "causes_title": "Les trois causes principales",
+    "ended_by_year": "L'acte s'achève avec l'année.",
+    "ended_by_peace": "L'acte s'achève par une paix durable.",
+    "ended_by_collapse": "L'acte s'achève par l'effondrement de la maison."
+  }
+}

@@ -43,11 +43,19 @@ pub struct ObjectivesView {
     pub state: String,
     pub objectives: Vec<ObjectiveRow>,
     pub done_count: usize,
+    /// ADR 0784: the act in progress, whose objectives these are (`None` without the arc).
+    pub act: Option<crate::acts::ActView>,
 }
 
 impl ObjectivesView {
     /// Line under the panel title: summary, deadline and score.
     pub fn header_line(&self) -> String {
+        if let Some(act) = &self.act {
+            return format!(
+                "Acte {} sur {} : {} — {} — échéance {}\nScore de l'acte : {} — score de règne : {}",
+                act.number, act.total, act.name, act.subtitle, act.end_year, act.score, act.reign_score
+            );
+        }
         let mut line = format!(
             "{} — échéance {} — score actuel : {}",
             self.summary, self.end_year, self.score
@@ -93,21 +101,40 @@ pub fn end_year(data: &GameData, state: &CampaignState, faction: &FactionId) -> 
 /// Objectives panel of the player's faction.
 pub fn objectives_view(data: &GameData, state: &CampaignState) -> ObjectivesView {
     let faction = state.player_faction();
-    let objectives: Vec<ObjectiveRow> = state
-        .objectives(data, faction)
-        .into_iter()
-        .map(|o| ObjectiveRow {
-            id: o.id,
-            title: o.title,
-            description: o.description,
-            done: o.done,
-            progress: o.progress,
-        })
-        .collect();
+    // ADR 0784: with the arc in acts, the objectives are those of the act in progress.
+    let act = crate::acts::act_view(data, state);
+    let objectives: Vec<ObjectiveRow> = match &act {
+        Some(view) => view
+            .objectives
+            .iter()
+            .map(|o| ObjectiveRow {
+                id: o.id.clone(),
+                title: format!("{} ({})", o.title, o.category),
+                description: o.description.clone(),
+                done: o.done,
+                progress: o.progress.clone(),
+            })
+            .collect(),
+        None => state
+            .objectives(data, faction)
+            .into_iter()
+            .map(|o| ObjectiveRow {
+                id: o.id,
+                title: o.title,
+                description: o.description,
+                done: o.done,
+                progress: o.progress,
+            })
+            .collect(),
+    };
     let done_count = objectives.iter().filter(|o| o.done).count();
+    let act_enabled = act.is_some();
     let (score, state_key) = match &state.outcome {
         Some(outcome) => (outcome.score, kind_key(outcome.kind)),
-        None => (state.campaign_score(data, faction), "ongoing"),
+        None => match &act {
+            Some(view) => (i64::from(view.reign_score), "ongoing"),
+            None => (state.campaign_score(data, faction), "ongoing"),
+        },
     };
     ObjectivesView {
         summary: data
@@ -119,11 +146,12 @@ pub fn objectives_view(data: &GameData, state: &CampaignState) -> ObjectivesView
         end_year: end_year(data, state, faction),
         length: length_key(state.victory_length).to_owned(),
         score,
-        hold_turns: state.victory_hold_turns(data, faction),
+        hold_turns: if act_enabled { 1 } else { state.victory_hold_turns(data, faction) },
         streak: state.victory_streak,
         state: state_key.to_owned(),
         objectives,
         done_count,
+        act,
     }
 }
 
@@ -207,6 +235,17 @@ pub fn end_view(data: &GameData, state: &CampaignState) -> Option<EndView> {
         ),
         format!("Score : {}", breakdown.replace('\n', " · ")),
     ];
+    // ADR 0784: with the arc in acts, the score is the reign score of the three acts.
+    let (breakdown, lines) = if data.acts_rules.enabled() && state.acts.started {
+        let reign = crate::acts::reign_lines(data, state);
+        let breakdown = format!("{}\n= {}", reign.join("\n"), outcome.score);
+        let mut lines: Vec<String> = lines.into_iter().take(3).collect();
+        lines.extend(reign);
+        lines.push(format!("Score de règne : {} / 100", outcome.score));
+        (breakdown, lines)
+    } else {
+        (breakdown, lines)
+    };
     let (title, art) = match outcome.kind {
         OutcomeKind::Victory => (
             "Le royaume est à vous",

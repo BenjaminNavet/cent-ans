@@ -1,4 +1,4 @@
-//! Frozen real saves (wrapper v1 around campaign state v9 and v10, England, seed 1337, 10
+//! Frozen real saves (wrapper v1 around campaign state v9, v10 and v11, England, seed 1337, 10
 //! turns) must keep loading. Rule: every bump of `STATE_VERSION` or `SAVE_VERSION` adds a new fixture and
 //! keeps this one loading through the migration chain.
 //!
@@ -23,15 +23,20 @@ fn write_fixture() {
     }
     let dir = std::env::temp_dir().join(format!("cent-ans-fixture-{}", std::process::id()));
     let path =
-        game_api::saves::write_save(&dir, "save_v10", &state, "2026-10-22T00:00:00").unwrap();
-    std::fs::create_dir_all(fixture(10).parent().unwrap()).unwrap();
-    std::fs::copy(path, fixture(10)).unwrap();
+        game_api::saves::write_save(&dir, "save_v11", &state, "2026-10-22T00:00:00").unwrap();
+    std::fs::create_dir_all(fixture(11).parent().unwrap()).unwrap();
+    std::fs::copy(path, fixture(11)).unwrap();
     let _ = std::fs::remove_dir_all(dir);
 }
 
 #[test]
 fn frozen_v9_save_loads_plays_a_turn_and_resaves() {
     frozen_save_loads_plays_a_turn_and_resaves(9);
+}
+
+#[test]
+fn frozen_v11_save_loads_plays_a_turn_and_resaves() {
+    frozen_save_loads_plays_a_turn_and_resaves(11);
 }
 
 #[test]
