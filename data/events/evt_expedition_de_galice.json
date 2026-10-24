@@ -1,0 +1,95 @@
+{
+  "id": "evt_expedition_de_galice",
+  "title": "L’expédition de Lancastre en Galice",
+  "text": "Jean de Gand débarque à La Corogne avec cinq mille hommes et la bénédiction du roi de Portugal, allié des Anglais depuis 1386. L’armée anglaise est jeune, brillante, mais elle n’a pas de vivres ni de chevaux. La Castille est menacée au nord-ouest tandis que Jean Ier de Trastamare prépare la riposte.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1386,
+      "season": "summer"
+    },
+    "until_year": 1387,
+    "conditions": [
+      {
+        "type": "flag",
+        "flag": "gand_roi_de_castille"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_castile"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_england"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Débarquer en Galice et s’avancer vers León",
+      "effects": [
+        {
+          "type": "declare_war",
+          "a": "fac_england",
+          "b": "fac_castile"
+        },
+        {
+          "type": "treasury",
+          "amount": -8000
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "spawn_army",
+          "faction": "fac_england",
+          "province": "prov_galicia",
+          "units": [
+            "unit_longbowmen",
+            "unit_longbowmen",
+            "unit_men_at_arms_foot",
+            "unit_knights"
+          ]
+        },
+        {
+          "type": "set_flag",
+          "flag": "expedition_de_galice"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Renoncer à l’expédition faute d’argent",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 5
+        },
+        {
+          "type": "set_flag",
+          "flag": "gand_renonce"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1386-07-25"
+  },
+  "sources": [
+    "Jean de Gand",
+    "Pierre Ier de Castille",
+    "Peter E. Russell, The English Intervention in Spain and Portugal, 1955",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}

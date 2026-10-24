@@ -14,6 +14,12 @@
         "type": "at_war",
         "a": "fac_england",
         "b": "fac_france"
+      },
+      {
+        "type": "battle_balance",
+        "faction": "fac_england",
+        "rival": "fac_france",
+        "at_least": 1
       }
     ]
   },

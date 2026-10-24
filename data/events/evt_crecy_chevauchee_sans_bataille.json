@@ -1,0 +1,100 @@
+{
+  "id": "evt_crecy_chevauchee_sans_bataille",
+  "title": "La chevauchée d’Édouard III",
+  "text": "Le roi d’Angleterre a débarqué à Saint-Vaast-la-Hougue et ravagé le Cotentin, la Normandie et le Vexin sans que Philippe VI ne se résolve à lui livrer bataille. Les paysans fuient vers les villes, les villes ferment leurs portes. Reste à savoir qui, de l’archer ou du chevalier, saura forcer l’autre à livrer le combat.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1346,
+      "season": "summer"
+    },
+    "until_year": 1347,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "not",
+        "condition": {
+          "type": "battle_balance",
+          "faction": "fac_england",
+          "rival": "fac_france",
+          "at_least": 1
+        }
+      },
+      {
+        "type": "not",
+        "condition": {
+          "type": "battle_balance",
+          "faction": "fac_france",
+          "rival": "fac_england",
+          "at_least": 1
+        }
+      },
+      {
+        "type": "not_fired",
+        "event": "evt_crecy"
+      },
+      {
+        "type": "not_fired",
+        "event": "evt_crecy_victoire_francaise"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Lever l’arrière-ban et poursuivre sans engager",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "treasury",
+          "amount": -3000
+        },
+        {
+          "type": "devastation",
+          "province": "prov_normandie",
+          "amount": 12
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser faire et sauver les villes fortes",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "devastation",
+          "province": "prov_normandie",
+          "amount": 18
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 6
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1346-08-26"
+  },
+  "sources": [
+    "Bataille de Crécy",
+    "Jean Froissart, Chroniques, livre I",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}

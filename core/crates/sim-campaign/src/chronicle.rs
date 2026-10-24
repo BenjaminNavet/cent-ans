@@ -118,6 +118,50 @@ pub struct ChronicleState {
     /// FK1: recent events carrying a `map_scene`, by province (visual only).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub recent_scenes: Vec<RecentScene>,
+    /// EVENTS (ADR 0779): flags raised by `set_flag` effects, the lasting
+    /// memory of the choices made at the historical forks.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    pub flags: BTreeSet<String>,
+    /// EVENTS: field battles won so far, by winner and loser (unlike the
+    /// bounded `battle_history`, never purged): what the history events
+    /// read to know who really won.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub battle_tally: Vec<BattleTally>,
+}
+
+/// Field victories of `winner` over `loser` (see
+/// [`ChronicleState::battle_tally`]).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BattleTally {
+    pub winner: FactionId,
+    pub loser: FactionId,
+    pub victories: u32,
+}
+
+impl ChronicleState {
+    /// Records a field victory of `winner` over `loser`.
+    pub fn record_victory(&mut self, winner: &FactionId, loser: &FactionId) {
+        match self
+            .battle_tally
+            .iter_mut()
+            .find(|t| &t.winner == winner && &t.loser == loser)
+        {
+            Some(tally) => tally.victories += 1,
+            None => self.battle_tally.push(BattleTally {
+                winner: winner.clone(),
+                loser: loser.clone(),
+                victories: 1,
+            }),
+        }
+    }
+
+    /// Field victories of `winner` over `loser`.
+    pub fn victories(&self, winner: &FactionId, loser: &FactionId) -> u32 {
+        self.battle_tally
+            .iter()
+            .find(|t| &t.winner == winner && &t.loser == loser)
+            .map_or(0, |t| t.victories)
+    }
 }
 
 /// An event programmed by another one (F1), fired at the end of `turn` for
@@ -242,6 +286,31 @@ impl CampaignState {
         self.characters.get(ruler).filter(|c| c.alive)
     }
 
+    /// Men under arms of `faction`, all its armies together.
+    pub fn men_under_arms(&self, faction: &FactionId) -> u32 {
+        self.armies
+            .values()
+            .filter(|army| &army.faction == faction)
+            .map(|army| army.total_strength())
+            .sum()
+    }
+
+    /// Share, in percent, of the provinces `faction` held at the 1337 start
+    /// that it still controls; `None` when it started without province.
+    pub fn domain_share_percent(&self, data: &GameData, faction: &FactionId) -> Option<u32> {
+        let (kept, total) = data
+            .provinces
+            .values()
+            .filter(|p| &p.owner == faction)
+            .fold((0u32, 0u32), |(kept, total), p| {
+                (
+                    kept + u32::from(self.controls_province(faction, &p.id)),
+                    total + 1,
+                )
+            });
+        (total > 0).then(|| kept * 100 / total)
+    }
+
     /// Evaluates one condition in `ctx`; a condition that needs a faction or
     /// a province the context lacks is false.
     pub fn condition_holds(
@@ -328,6 +397,35 @@ impl CampaignState {
             Condition::AnyOf { conditions } => conditions
                 .iter()
                 .any(|inner| self.condition_holds(data, inner, ctx)),
+            Condition::RulerCaptive { faction } => scope_faction(faction)
+                .and_then(|f| self.ruler_state(&f))
+                .is_some_and(|ruler| ruler.captive),
+            Condition::Not { condition } => !self.condition_holds(data, condition, ctx),
+            Condition::BattleBalance {
+                faction,
+                rival,
+                at_least,
+            } => scope_faction(faction).is_some_and(|f| {
+                let won = i64::from(self.chronicle.victories(&f, rival));
+                let lost = i64::from(self.chronicle.victories(rival, &f));
+                won - lost >= i64::from(*at_least)
+            }),
+            Condition::DomainBelow { faction, percent } => {
+                scope_faction(faction).is_some_and(|f| {
+                    self.domain_share_percent(data, &f)
+                        .is_some_and(|share| share < *percent)
+                })
+            }
+            Condition::StrengthRatio {
+                faction,
+                rival,
+                percent,
+            } => scope_faction(faction).is_some_and(|f| {
+                let own = u64::from(self.men_under_arms(&f));
+                let other = u64::from(self.men_under_arms(rival));
+                own * 100 >= other * u64::from(*percent)
+            }),
+            Condition::Flag { flag } => self.chronicle.flags.contains(flag),
         }
     }
 

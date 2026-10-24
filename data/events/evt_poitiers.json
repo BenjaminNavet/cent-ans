@@ -1,7 +1,7 @@
 {
   "id": "evt_poitiers",
   "title": "La prise du roi à Poitiers",
-  "text": "À Maupertuis, près de Poitiers, le prince de Galles écrase l’armée de France. Le roi Jean, combattant à pied avec son jeune fils Philippe, est pris et emmené à [[cdx_bordeaux|Bordeaux]] puis à Londres. Le royaume est sans tête.",
+  "text": "Les armées de France ont perdu la bataille et le prince de Galles chevauche vers Bordeaux. À Maupertuis, près de Poitiers, il écrase l’ost du roi : le souverain, combattant à pied avec son plus jeune fils, est pris et mené à [[cdx_bordeaux|Bordeaux]] puis à Londres. Le royaume est sans tête.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -16,13 +16,17 @@
         "b": "fac_france"
       },
       {
-        "type": "character_alive",
-        "id": "chr_jean_de_normandie"
+        "type": "not",
+        "condition": {
+          "type": "ruler_captive",
+          "faction": "fac_france"
+        }
       },
       {
-        "type": "ruler_is",
-        "faction": "fac_france",
-        "character": "chr_jean_de_normandie"
+        "type": "battle_balance",
+        "faction": "fac_england",
+        "rival": "fac_france",
+        "at_least": 1
       }
     ]
   },
@@ -53,6 +57,14 @@
           "character": "chr_edward_of_woodstock",
           "faction": "fac_england",
           "amount": 25
+        },
+        {
+          "type": "set_flag",
+          "flag": "roi_jean_captif"
+        },
+        {
+          "type": "set_flag",
+          "flag": "roi_jean_captif"
         }
       ],
       "ai_weight": 2
@@ -88,6 +100,14 @@
           "type": "schedule_event",
           "event": "evt_rancon_du_roi",
           "delay": 4
+        },
+        {
+          "type": "set_flag",
+          "flag": "roi_jean_captif"
+        },
+        {
+          "type": "set_flag",
+          "flag": "roi_jean_captif"
         }
       ],
       "ai_weight": 1

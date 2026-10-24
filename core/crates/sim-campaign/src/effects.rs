@@ -267,6 +267,7 @@ impl CampaignState {
                     self.character_name(data, character)
                 )
             }
+            EventEffect::SetFlag { .. } => "Un tournant de l'histoire est pris".to_owned(),
             EventEffect::Marry { a, b } => format!(
                 "Mariage {} et {}",
                 crate::events::de(&self.character_name(data, a)),
@@ -709,6 +710,9 @@ pub fn apply_effect(
         }
         EventEffect::Marry { a, b } => {
             marry(state, data, a, b, events);
+        }
+        EventEffect::SetFlag { flag } => {
+            state.chronicle.flags.insert(flag.clone());
         }
         EventEffect::TransferProvince {
             province,

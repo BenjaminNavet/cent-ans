@@ -1,0 +1,91 @@
+{
+  "id": "evt_hommage_de_guerande",
+  "title": "Jean IV rend l’hommage",
+  "text": "Le traité de Guérande reconnaît Jean de Montfort pour duc, à charge d’hommage au roi de France. Charles V veut un vassal et non un allié d’Édouard III, et du Guesclin lui répond de la Bretagne ; mais Jean IV a passé vingt ans en Angleterre, et les barons bretons, qui ont soutenu Charles de Blois, ne lui pardonnent pas.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1365,
+      "season": "spring"
+    },
+    "until_year": 1366,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_brittany"
+      },
+      {
+        "type": "fired",
+        "event": "evt_auray"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_brittany"
+  },
+  "options": [
+    {
+      "text": "Faire hommage lige à Charles V",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 25,
+          "reason": "Hommage de Guérande"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -8
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": -15,
+          "reason": "Montfort se rallie à la France"
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretagne_hommage_france"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Garder l’alliance anglaise et un hommage de façade",
+      "effects": [
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 20,
+          "reason": "Alliance de Jean IV"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -15,
+          "reason": "Hommage de façade"
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 8
+        },
+        {
+          "type": "set_flag",
+          "flag": "bretagne_alliance_anglaise"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1365-04-12"
+  },
+  "sources": [
+    "Traité de Guérande (1365)",
+    "Jean IV de Bretagne",
+    "Michael Jones, Ducal Brittany 1364-1399, 1970"
+  ]
+}

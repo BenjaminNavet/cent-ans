@@ -1,0 +1,94 @@
+{
+  "id": "evt_crecy_triomphe_anglais",
+  "title": "Crécy : le triomphe des archers",
+  "text": "Retranchée sur la colline de Crécy-en-Ponthieu, l’armée du roi d’Angleterre a brisé les charges de la [[cdx_chevalerie|chevalerie]] de France à coups de flèches. Le roi de Bohême et le comte d’Alençon gisent sur le champ. Les barons réclament de profiter de la victoire, mais les caisses sont vides et la route de Calais est ouverte.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1346,
+      "season": "summer"
+    },
+    "until_year": 1347,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "battle_balance",
+        "faction": "fac_england",
+        "rival": "fac_france",
+        "at_least": 1
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Marcher sur Calais et l’assiéger jusqu’à la reddition",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "spawn_army",
+          "faction": "fac_england",
+          "province": "prov_ponthieu",
+          "units": [
+            "unit_longbowmen",
+            "unit_longbowmen",
+            "unit_men_at_arms_foot"
+          ]
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": -10,
+          "reason": "Siège de Calais"
+        },
+        {
+          "type": "set_flag",
+          "flag": "calais_assiege"
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Rentrer en Angleterre avec le butin",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 8
+        },
+        {
+          "type": "treasury",
+          "amount": 6000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1346-08-26"
+  },
+  "sources": [
+    "Bataille de Crécy",
+    "Jean Froissart, Chroniques, livre I",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980",
+    "Jonathan Sumption, The Hundred Years War, 5 vol., 1990-2023"
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "id": "evt_maupertuis_sans_bataille",
+  "title": "La chevauchée du prince de Galles",
+  "text": "Le prince de Galles a chevauché de Bordeaux jusqu’à la Loire, brûlant villes et moissons, mais le roi Jean a refusé de lui livrer bataille sur le terrain de l’adversaire. Près de Poitiers, les deux armées se regardent, négocient par l’entremise du cardinal de Périgord, puis se séparent sans que personne n’ait vaincu.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1356,
+      "season": "autumn"
+    },
+    "until_year": 1357,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "not",
+        "condition": {
+          "type": "battle_balance",
+          "faction": "fac_england",
+          "rival": "fac_france",
+          "at_least": 1
+        }
+      },
+      {
+        "type": "not",
+        "condition": {
+          "type": "battle_balance",
+          "faction": "fac_france",
+          "rival": "fac_england",
+          "at_least": 1
+        }
+      },
+      {
+        "type": "not_fired",
+        "event": "evt_poitiers"
+      },
+      {
+        "type": "not_fired",
+        "event": "evt_poitiers_victoire_francaise"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Laisser repartir les Anglais et lever une aide pour l’ost",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "treasury",
+          "amount": 4000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 8
+        },
+        {
+          "type": "devastation",
+          "province": "prov_poitou",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Réunir les États généraux et renforcer les garnisons",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 3
+        },
+        {
+          "type": "devastation",
+          "province": "prov_poitou",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1356-09-19"
+  },
+  "sources": [
+    "Bataille de Poitiers (1356)",
+    "Chevauchée de 1356",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

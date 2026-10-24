@@ -55,6 +55,14 @@
         {
           "type": "prestige",
           "amount": -10
+        },
+        {
+          "type": "set_flag",
+          "flag": "grande_ordonnance_acceptee"
+        },
+        {
+          "type": "set_flag",
+          "flag": "grande_ordonnance_acceptee"
         }
       ],
       "ai_weight": 1
@@ -73,6 +81,14 @@
         {
           "type": "prestige",
           "amount": 10
+        },
+        {
+          "type": "set_flag",
+          "flag": "paris_assiege_par_le_dauphin"
+        },
+        {
+          "type": "set_flag",
+          "flag": "paris_assiege_par_le_dauphin"
         }
       ],
       "ai_weight": 2

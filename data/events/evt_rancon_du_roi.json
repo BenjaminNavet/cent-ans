@@ -1,13 +1,13 @@
 {
   "id": "evt_rancon_du_roi",
   "title": "La rançon du roi Jean",
-  "text": "Depuis Londres, le roi Jean fait savoir ses conditions : les Anglais demandent une rançon énorme. Les États ont promis l’argent ; reste à le lever sur un royaume ravagé par les compagnies.",
+  "text": "Depuis Londres, le roi fait savoir ses conditions : les Anglais demandent une rançon énorme. Les États ont promis l’argent ; reste à le lever sur un royaume ravagé par les compagnies.",
   "kind": "chained",
   "trigger": {
     "conditions": [
       {
-        "type": "character_captive",
-        "id": "chr_jean_de_normandie"
+        "type": "ruler_captive",
+        "faction": "fac_france"
       }
     ]
   },
@@ -21,7 +21,7 @@
       "effects": [
         {
           "type": "release_character",
-          "id": "chr_jean_de_normandie",
+          "id": "ruler",
           "ransom": 30000
         },
         {

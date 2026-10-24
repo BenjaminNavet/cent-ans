@@ -1,0 +1,119 @@
+{
+  "id": "evt_poitiers_victoire_francaise",
+  "title": "Le prince de Galles cerné à Maupertuis",
+  "text": "Le prince de Galles, chargé de butin, a laissé l’armée de France se placer entre lui et la Garonne. Cette fois les batailles à pied ont tenu : à Maupertuis, près de Poitiers, ses archers n’ont plus de flèches et c’est lui qui rend son épée. Le royaume se souvient de Crécy, et cette victoire en efface une partie.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1356,
+      "season": "autumn"
+    },
+    "until_year": 1357,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_edward_of_woodstock"
+      },
+      {
+        "type": "not",
+        "condition": {
+          "type": "ruler_captive",
+          "faction": "fac_france"
+        }
+      },
+      {
+        "type": "battle_balance",
+        "faction": "fac_france",
+        "rival": "fac_england",
+        "at_least": 1
+      },
+      {
+        "type": "not_fired",
+        "event": "evt_poitiers"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_france"
+  },
+  "options": [
+    {
+      "text": "Exiger une rançon digne d’un fils de roi",
+      "effects": [
+        {
+          "type": "capture_character",
+          "id": "chr_edward_of_woodstock",
+          "captor": "fac_france"
+        },
+        {
+          "type": "prestige",
+          "amount": 25
+        },
+        {
+          "type": "treasury",
+          "amount": 8000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -10
+        },
+        {
+          "type": "prestige",
+          "amount": -25,
+          "faction": "fac_england",
+          "character": "chr_edward_of_woodstock"
+        },
+        {
+          "type": "set_flag",
+          "flag": "prince_noir_captif"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Traiter le prince avec courtoisie et négocier la paix",
+      "effects": [
+        {
+          "type": "capture_character",
+          "id": "chr_edward_of_woodstock",
+          "captor": "fac_france"
+        },
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "peace",
+          "a": "fac_england",
+          "b": "fac_france"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_england",
+          "amount": 15,
+          "reason": "Courtoisie envers le prince de Galles"
+        },
+        {
+          "type": "set_flag",
+          "flag": "prince_noir_captif"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1356-09-19"
+  },
+  "sources": [
+    "Bataille de Poitiers (1356)",
+    "Jean Froissart, Chroniques, livre I",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}

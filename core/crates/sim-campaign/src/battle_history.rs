@@ -146,6 +146,13 @@ pub(crate) fn record(
         },
         attacker_won: result.winner == Winner::Attacker,
     };
+    // EVENTS (ADR 0779): the permanent tally the history events read.
+    let (winner, loser) = if record.attacker_won {
+        (&record.attacker.faction, &record.defender.faction)
+    } else {
+        (&record.defender.faction, &record.attacker.faction)
+    };
+    state.chronicle.record_victory(winner, loser);
     state
         .battle_history
         .push(&data.battle_history_rules, record);

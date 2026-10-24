@@ -1,0 +1,79 @@
+{
+  "id": "evt_crecy_revers_anglais",
+  "title": "Crécy : la chevauchée repoussée",
+  "text": "Pressé par l’ost de Philippe VI, le roi d’Angleterre n’a pu franchir la Somme qu’au gué de Blanchetaque, au prix de lourdes pertes. Les archers, affamés et trempés, sont acculés près de Crécy-en-Ponthieu. Les victoires déjà remportées par la France font hésiter les barons : faut-il tenter une bataille perdue d’avance ?",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1346,
+      "season": "summer"
+    },
+    "until_year": 1347,
+    "conditions": [
+      {
+        "type": "at_war",
+        "a": "fac_england",
+        "b": "fac_france"
+      },
+      {
+        "type": "battle_balance",
+        "faction": "fac_france",
+        "rival": "fac_england",
+        "at_least": 1
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_england"
+  },
+  "options": [
+    {
+      "text": "Se retrancher en espérant le sursaut des archers",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -8
+        },
+        {
+          "type": "treasury",
+          "amount": -3000
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": 6
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Rembarquer en hâte et négocier",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -12
+        },
+        {
+          "type": "treasury",
+          "amount": 2000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_france",
+          "amount": 10,
+          "reason": "Repli d’Édouard III"
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "historical_date": {
+    "value": "1346-08-26"
+  },
+  "sources": [
+    "Bataille de Crécy",
+    "Jean Froissart, Chroniques, livre I",
+    "Jean Favier, La Guerre de Cent Ans, Fayard, 1980"
+  ]
+}
