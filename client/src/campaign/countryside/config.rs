@@ -417,7 +417,7 @@ mod tests {
         let doc: Value = serde_json::from_str(&text).unwrap();
         let projection = MapProjection::load(&root.join("data/map")).unwrap();
         let cfg = parse(&doc, &root.join("data"), &projection);
-        assert_eq!(cfg.props.len(), 43);
+        assert_eq!(cfg.props.len(), 50);
         assert!(cfg.rules.len() >= 25, "{} rules", cfg.rules.len());
         assert!(
             cfg.rules

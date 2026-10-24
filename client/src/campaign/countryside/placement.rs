@@ -433,6 +433,10 @@ fn villages(
         if !plain_ok(t, at) || !landscape_ok(t, at, rule) {
             continue;
         }
+        // Hamlet houses stay out of the forests (rule filter `forest_max`).
+        if rule.filters.forest_max < 1.0 && t.splat(at)[2] > rule.filters.forest_max {
+            continue;
+        }
         out.push(Instance {
             prop,
             rule: index,

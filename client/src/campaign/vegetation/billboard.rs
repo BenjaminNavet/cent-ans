@@ -159,7 +159,12 @@ impl Params {
             look.bare_openwork,
         );
         self.frost = look.frost.extend(look.frost_strength);
-        self.winter = Vec4::new(look.frost_altitude.x, look.frost_altitude.y, 0.0, 0.0);
+        self.winter = Vec4::new(
+            look.frost_altitude.x,
+            look.frost_altitude.y,
+            look.near_scale,
+            0.0,
+        );
         self.bare = look.bare.extend(1.0);
         self
     }

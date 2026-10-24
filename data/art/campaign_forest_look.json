@@ -31,7 +31,8 @@
   "far": {
     "grow_start_units": 140.0,
     "grow_end_units": 600.0,
-    "size_gain": 0.7
+    "size_gain": 0.7,
+    "near_scale": 0.8
   },
   "winter": {
     "frost": [

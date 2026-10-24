@@ -136,7 +136,11 @@ fn canopy_tone(p: vec2<f32>, seed: f32) -> vec3<f32> {
 fn canopy_size(p: vec2<f32>, origin: vec3<f32>) -> f32 {
     let h = 1.0 + params.shape.y * (2.0 * value_noise(p / max(params.shape.z, 1.0) + vec2<f32>(7.3, 1.9)) - 1.0);
     let d = distance(view.world_position, origin);
-    return h * (1.0 + params.far.z * smoothstep(params.far.x, max(params.far.y, params.far.x + 1.0), d));
+    // `winter.z`: size of the crowns near the camera (0 = unset = 1), the growth with the distance
+    // then brings them back to the full size.
+    let near = select(1.0, params.winter.z, params.winter.z > 0.0);
+    let grow = smoothstep(params.far.x, max(params.far.y, params.far.x + 1.0), d);
+    return h * mix(near, 1.0, grow) * (1.0 + params.far.z * grow);
 }
 
 // Darker, greener canopy (less uniform light olive): saturation, balance and value.
@@ -260,9 +264,12 @@ fn foliage_season(albedo: vec3<f32>, cls: f32, seed: f32, leaves: f32, up: f32, 
     let broadleaf = season_deciduous(cls);
     let conifer = cls > 1.5 && cls < 2.5;
     let hedge = cls > 2.5 && cls < 3.5;
-    var spring = albedo * vec3<f32>(1.03, 1.10, 0.9);
+    // Fresh yellow-green leaves in spring, deeper and cooler green in summer (broadleaves only).
+    var spring = albedo * vec3<f32>(1.10, 1.15, 0.80);
+    var summer = albedo * vec3<f32>(0.86, 0.96, 0.88);
     if conifer {
         spring = albedo;
+        summer = albedo;
     }
     var turn = smoothstep(0.15, 0.45, fract(seed * 7.13)) * mix(0.7, 1.0, leaves);
     if conifer {
@@ -296,7 +303,7 @@ fn foliage_season(albedo: vec3<f32>, cls: f32, seed: f32, leaves: f32, up: f32, 
         }
         winter = mix(albedo * 0.85, params.frost.rgb, frost);
     }
-    return spring * w.x + albedo * w.y + autumn * w.z + winter * w.w;
+    return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
 }
 
 // Camera haze (`DistanceFog`), as `camera_distance_fog` of the terrain shader.
@@ -429,7 +436,13 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         albedo = albedo * max(1.0, 0.045 / lum);
         let top = smoothstep(params.frame.y, 1.0, in.local.y);
         albedo = canopy_grade(albedo, top);
-        color = vec4<f32>(foliage_season(albedo, cls, seed, leaves, baked.y, in.misc.z, top), 1.0);
+        var seasoned = foliage_season(albedo, cls, seed, leaves, baked.y, in.misc.z, top);
+        // Winter, mid distance: the holes of the bare crown are not drawn (they would stipple); its
+        // twigs darken the mass instead, so the stands do not read as white balls of cotton.
+        if season_deciduous(cls) {
+            seasoned = seasoned * (1.0 - (0.2 + 0.4 * leaves) * smoothstep(0.8, 2.0, lod) * params.season.w);
+        }
+        color = vec4<f32>(seasoned, 1.0);
         occlusion = mix(0.55, 1.0, nt.a);
     } else if mode < 1.5 {
         let t = textureSample(albedo_texture, albedo_sampler, in.uv0);
