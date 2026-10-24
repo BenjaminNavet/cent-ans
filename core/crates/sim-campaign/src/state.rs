@@ -46,9 +46,9 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// `path`; field battles carry a point). `7`: feudal titles
 /// (`feudal`: title holders, primary titles, felony cases). `8`:
 /// Urals–Mediterranean map (ADR 0115: map pixels moved +1280 in y, same layout). `10`: journal of
-/// causes (ADR 0748, `causes`).
+/// causes (ADR 0748, `causes`). `11`: the arc in acts (ADR 0784, `acts`).
 /// [`CampaignState::load_json`] refuses any other version.
-pub const STATE_VERSION: u32 = 10;
+pub const STATE_VERSION: u32 = 11;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -1114,6 +1114,9 @@ pub struct CampaignState {
     /// ADR 0748: bounded journal of the causes of the major events.
     #[serde(default)]
     pub causes: crate::causes::CauseJournal,
+    /// ADR 0784: the campaign arc in three acts (bookkeeping of the player's house).
+    #[serde(default)]
+    pub acts: crate::acts::ActsState,
     /// The player's campaign outcome, once reached (M10).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub outcome: Option<crate::victory::Outcome>,
@@ -1222,6 +1225,7 @@ impl CampaignState {
             pending_events: Vec::new(),
             chronicle: crate::chronicle::ChronicleState::default(),
             causes: crate::causes::CauseJournal::default(),
+            acts: crate::acts::ActsState::default(),
             outcome: None,
             victory_streak: 0,
             victory_length: crate::victory::VictoryLength::default(),

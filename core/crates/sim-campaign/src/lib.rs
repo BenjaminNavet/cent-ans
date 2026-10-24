@@ -149,6 +149,7 @@ pub mod trait_triggers;
 pub mod treaty_explain;
 pub mod turn;
 pub mod victory;
+pub mod acts;
 pub mod vision;
 pub mod vocations;
 pub mod voyage;

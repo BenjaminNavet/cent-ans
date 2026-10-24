@@ -120,6 +120,10 @@ pub use entities::feudal_rules::{
     ArbitrationRules, ArbitrationWeights, EscalationRules, FelonyReason, FeudalRules, HostRules,
     LoyaltyWeights, ProtectionScore, StartFelony,
 };
+pub use entities::acts_rules::{
+    ActAudience, ActCondition, ActEarlyEnd, ActObjective, ActPolicy, ActPressure, ActRules,
+    ActsRules, ReignGrade, RuinRules,
+};
 pub use entities::finance_rules::{
     CreditRules, DefaultRules, DowryRules, FinanceAiRules, FinanceRules, HouseholdRules,
     HouseholdTier, Lender, Levy, OfficerRules, SiegeCostRules,

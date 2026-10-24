@@ -27,6 +27,7 @@ pub mod difficulty;
 pub mod diplomacy_rules;
 pub mod economy_rules;
 pub mod edict;
+pub mod acts_rules;
 pub mod encounter;
 pub mod event;
 pub mod faction;
