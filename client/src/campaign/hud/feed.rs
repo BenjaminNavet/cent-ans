@@ -159,7 +159,15 @@ pub fn shorten(text: &str, max_chars: usize) -> String {
         return flat;
     }
     let cut: String = flat.chars().take(max_chars.saturating_sub(1)).collect();
-    format!("{}…", cut.trim_end())
+    // Cut on a word boundary (never inside a word or a parenthesis opener);
+    // the full text stays in the tooltip.
+    let next_is_space = flat.chars().nth(cut.chars().count()) == Some(' ');
+    let cut = match cut.rfind(' ') {
+        Some(space) if !next_is_space && space * 2 >= cut.len() => cut[..space].to_owned(),
+        _ => cut,
+    };
+    let cut = cut.trim_end_matches(|c: char| c == '(' || c == ',' || c.is_whitespace());
+    format!("{cut}…")
 }
 
 fn escape(text: &str) -> String {
@@ -760,8 +768,12 @@ mod tests {
     fn long_texts_are_shortened_with_an_ellipsis() {
         assert_eq!(shorten("court", 10), "court");
         let cut = shorten("Bataille de Crécy remportée par le roi d’Angleterre", 20);
-        assert_eq!(cut.chars().count(), 20);
+        assert!(cut.chars().count() <= 20);
         assert!(cut.ends_with('…'));
+        assert_eq!(
+            shorten("Félonie d’Angleterre envers France (asile donné)", 40),
+            "Félonie d’Angleterre envers France…"
+        );
         assert_eq!(shorten("a\n  b", 10), "a b");
     }
 }
