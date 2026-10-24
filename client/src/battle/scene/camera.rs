@@ -372,6 +372,7 @@ fn restore_ui_clear(
 
 /// Spawns the camera (rendering to the offscreen target when asked) and its state, framed on the
 /// player's army looking at the enemy.
+#[allow(clippy::too_many_arguments)]
 pub fn spawn_battle_camera(
     commands: &mut Commands,
     field: &Battlefield,
