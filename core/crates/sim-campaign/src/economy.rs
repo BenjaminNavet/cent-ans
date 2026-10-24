@@ -721,7 +721,12 @@ pub(crate) fn resolve_economy(
             events.push(
                 GameEvent::new(
                     EventKind::Income,
-                    format!("Revenus : {income} livres, entretien : {upkeep} livres, trésor : {treasury} livres."),
+                    format!(
+                        "Revenus : {}, entretien : {}, trésor : {}.",
+                        crate::economy_balance::livres(income),
+                        crate::economy_balance::livres(upkeep),
+                        crate::economy_balance::livres(treasury)
+                    ),
                 )
                 .faction(&faction_id),
             );

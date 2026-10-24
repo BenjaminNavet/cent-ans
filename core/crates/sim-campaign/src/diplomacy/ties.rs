@@ -201,8 +201,9 @@ impl CampaignState {
         let value = ((amount / 100) as i32).clamp(1, 30);
         self.add_capped_modifier(data, target, faction, value, GIFT_REASON, 20);
         let text = format!(
-            "{} envoie {amount} livres de présents à {}.",
+            "{} envoie {} de présents à {}.",
             data.faction_name(faction),
+            crate::economy_balance::livres(amount),
             data.faction_name(target)
         );
         self.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(faction));

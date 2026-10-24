@@ -152,6 +152,17 @@ pub fn signed_livres(value: i64) -> String {
     format!("{sign}{grouped}\u{a0}{LIVRE_SIGN}")
 }
 
+/// Unsigned amount in livres tournois: `30018` → « 30 018 ₶ » (no-break spaces).
+pub fn livres<T: Into<i64>>(value: T) -> String {
+    let value: i64 = value.into();
+    let signed = signed_livres(value);
+    if value < 0 {
+        signed
+    } else {
+        signed.trim_start_matches('+').to_owned()
+    }
+}
+
 impl CampaignState {
     /// Net balance actually booked by the last resolved turn (receipts minus
     /// every upkeep, the Table included); `None` for an unknown faction.
@@ -250,6 +261,12 @@ mod tests {
         assert_eq!(signed_livres(1_250_000), "+1\u{a0}250\u{a0}000\u{a0}₶");
         assert_eq!(signed_livres(0), "+0\u{a0}₶");
         assert_eq!(signed_livres(999), "+999\u{a0}₶");
+    }
+
+    #[test]
+    fn livres_unsigned_for_event_texts() {
+        assert_eq!(livres(30018), "30\u{a0}018\u{a0}₶");
+        assert_eq!(livres(-5), "\u{2212}5\u{a0}₶");
     }
 
     #[test]

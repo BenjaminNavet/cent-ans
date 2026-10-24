@@ -81,8 +81,9 @@ fn pay_spoils(
             GameEvent::new(
                 EventKind::Battle,
                 format!(
-                    "Butin de l'ost {name} : {} ({gold} livres, {prestige} de prestige).",
-                    parts.join(", ")
+                    "Butin de l'ost {name} : {} ({}, {prestige} de prestige).",
+                    parts.join(", "),
+                    crate::economy_balance::livres(gold)
                 ),
             )
             .province(province)

@@ -720,6 +720,15 @@ fn plan_alliances(
     orders: &mut Vec<Order>,
 ) {
     let state = cache.state();
+    // A vassal has no foreign policy of its own: its suzerain speaks for it
+    // (Transylvania, voivodeship of Hungary, does not court France).
+    if state
+        .factions
+        .get(faction)
+        .is_some_and(|f| f.suzerain.is_some())
+    {
+        return;
+    }
     // WH `diplob`: a faction standing in the league looks for partners
     // twice as often, and counts the hegemon among its rivals.
     let in_league = state.league_target_of(data, faction).is_some();
