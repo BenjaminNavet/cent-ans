@@ -38,7 +38,7 @@
         "value": "1330",
         "uncertain": true
       },
-      "note": "Guerre quasi permanente avec le Pale voisin depuis l'évasion de Domhnall mac Airt Mac Murchada en janvier 1331."
+      "note": "Guerre quasi permanente avec les terres anglaises voisines depuis l'évasion de Domhnall mac Airt Mac Murchada en janvier 1331."
     },
     {
       "faction": "fac_england",
@@ -55,7 +55,7 @@
     "trade": 15,
     "piety": 45
   },
-  "description": "Domhnall mac Airt Mac Murchada, élu roi de Leinster en 1328, emprisonné à Dublin puis évadé en janvier 1331 : depuis, il mène une guérilla incessante dans les montagnes de Wicklow contre le Pale anglais. Le plus fragile des royaumes gaéliques, descendant de Diarmait Mac Murchada qui appela les Anglo-Normands en 1169.",
+  "description": "Domhnall mac Airt Mac Murchada, élu roi de Leinster en 1328, emprisonné à Dublin puis évadé en janvier 1331 : depuis, il mène une guérilla incessante dans les montagnes de Wicklow contre les terres anglaises de Dublin. Le plus fragile des royaumes gaéliques, descendant de Diarmait Mac Murchada qui appela les Anglo-Normands en 1169.",
   "sources": [
     "MacMurrough (Mac Murchadha), Domhnall (DIB)",
     "Royaume de Leinster"
