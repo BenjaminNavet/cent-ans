@@ -815,6 +815,9 @@ pub struct CharacterState {
     pub birth_year: i32,
     pub sex: Sex,
     pub house: String,
+    /// Vow of chastity (military order master): cannot marry.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub celibate: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub location: Option<ProvinceId>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -971,6 +974,7 @@ impl CharacterState {
             birth_year,
             sex,
             house,
+            celibate: false,
             location: None,
             army: None,
             skills,

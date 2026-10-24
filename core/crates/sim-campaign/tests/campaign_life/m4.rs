@@ -333,6 +333,24 @@ fn governor_and_general_are_exclusive_and_adults_only() {
 // ----- marriages ---------------------------------------------------------------
 
 #[test]
+fn military_order_masters_take_a_vow_of_chastity() {
+    let data = game_data();
+    let mut state = start(data, "fac_france", 6);
+    let master = chr("chr_juan_nunez_de_prado");
+    let jeanne = chr("chr_jeanne_de_bourgogne");
+    assert!(state.character(&master).unwrap().celibate);
+    let married = sim_campaign::dynasty::propose_marriage(&mut state, data, &master, &jeanne);
+    assert_eq!(married, Err(sim_campaign::MarriageError::Celibate));
+    assert!(state.marriage_candidates(data, &master).is_empty());
+    for (id, _) in state.characters.iter().filter(|(_, c)| c.celibate) {
+        assert!(
+            !state.marriage_candidates(data, &jeanne).contains(id),
+            "{id} offered as a husband"
+        );
+    }
+}
+
+#[test]
 fn marriage_valid_and_refused_cases() {
     let data = game_data();
     let mut state = start(data, "fac_france", 6);

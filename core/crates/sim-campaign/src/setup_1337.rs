@@ -384,6 +384,7 @@ fn init_characters(state: &mut CampaignState, data: &GameData) {
             CharacterState {
                 alive: died_before_start.is_none(),
                 location,
+                celibate: character.celibate,
                 captive: character.status == Some(CharacterStatus::Captive),
                 traits: character
                     .traits

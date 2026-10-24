@@ -9,6 +9,7 @@
   "house": "Villeneuve",
   "faction": "fac_hospitallers",
   "role": "ruler",
+  "celibate": true,
   "birth": {
     "value": "1270",
     "uncertain": true,
