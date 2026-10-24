@@ -163,6 +163,10 @@ pub fn rebuild(
     codex: Res<CodexStore>,
     mut panel: ResMut<FactionPanel>,
     roots: Query<Entity, With<FactionRoot>>,
+    texts: Res<super::finance::FinanceTexts>,
+    finance_ui: Res<super::finance::FinanceUi>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
+    settings: Option<Res<crate::settings::Settings>>,
 ) {
     if !panel.dirty {
         return;
@@ -176,6 +180,14 @@ pub fn rebuild(
     }
     refresh(&mut panel, &sim);
     let panel = &*panel;
+    let shortcut_label = match (&keymap, &settings) {
+        (Some(keymap), Some(settings)) => format!(
+            "{} : {}",
+            texts.s("shortcut"),
+            keymap.label(super::finance::SHORTCUT, &settings.keyboard_layout)
+        ),
+        _ => String::new(),
+    };
     commands
         .spawn((
             Name::new("FactionPanel"),
@@ -209,6 +221,7 @@ pub fn rebuild(
             ];
             if view.is_player {
                 tabs.push((TABS[3], "Cour"));
+                tabs.push((TABS[4], texts.s("tab")));
             }
             let selected = selected.min(tabs.len() - 1);
             root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));
@@ -257,6 +270,31 @@ pub fn rebuild(
                     pane.spawn(scroll_list_fill(&theme, "faction:scroll:court"))
                         .with_children(|list| {
                             court_tab(list, &theme, &assets, &codex, panel, view)
+                        });
+                });
+                root.spawn(tab_pane_fit(
+                    TAB_GROUP,
+                    TABS[4],
+                    selected == 4,
+                    TAB_HEIGHT,
+                    MIN_TAB_HEIGHT,
+                ))
+                .with_children(|pane| {
+                    pane.spawn(scroll_list_fill(&theme, "faction:scroll:finance"))
+                        .with_children(|list| {
+                            if let (Some(data), Some(state)) = (&sim.data, &sim.state) {
+                                super::finance::finance_tab(
+                                    list,
+                                    &theme,
+                                    &texts,
+                                    &finance_ui,
+                                    view,
+                                    data,
+                                    state.turn,
+                                    state.year,
+                                    &shortcut_label,
+                                );
+                            }
                         });
                 });
             }

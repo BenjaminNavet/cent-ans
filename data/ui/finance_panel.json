@@ -1,0 +1,126 @@
+{
+  "description": "Lot CREDIT-UI (ADR 0780) — textes de l’onglet « Finances » du panneau de faction : recettes et dépenses par poste, solde prévu, banquiers, emprunt et remboursement, impôts exceptionnels, jauge de banqueroute, historique, alertes du conseiller. Les {accolades} sont remplies par le client avec les chiffres du core ; aucune règle de jeu ici, seulement des textes et les seuils d’affichage (alerte, bandes de la jauge, paliers de montant).",
+  "tab": "Finances",
+  "title": "Finances royales",
+  "shortcut": "Raccourci",
+  "summary": {
+    "treasury": "Trésor",
+    "net": "Solde prévu de la saison",
+    "net_tip": "Recettes moins dépenses attendues à la prochaine saison, intérêts compris. Il ne compte ni emprunt ni impôt exceptionnel déjà levé.",
+    "debt": "Dette aux banquiers",
+    "interest": "Intérêts par saison",
+    "forecast": "Trésor après la saison",
+    "forecast_tip": "Trésor actuel plus le solde prévu : s’il passe sous zéro avec une lourde dette, la banqueroute guette."
+  },
+  "bars": {
+    "title": "Recettes et dépenses par poste",
+    "receipts": "Recettes",
+    "charges": "Dépenses",
+    "empty": "Aucun poste à afficher.",
+    "tip": "{value} par saison, soit {share} % des {side}. Saison passée : {last}.",
+    "tip_no_past": "{value} par saison, soit {share} % des {side}. Pas encore de saison passée.",
+    "side_receipts": "recettes",
+    "side_charges": "dépenses"
+  },
+  "rubrics": {
+    "receipts": { "label": "Impôts et commerce", "tip": "Impôts des colonies, commerce et seigneuriage, selon le taux d’imposition." },
+    "armies": { "label": "Armées", "tip": "Solde et vivres des armées et des garnisons." },
+    "buildings": { "label": "Bâtiments", "tip": "Entretien des bâtiments des colonies." },
+    "table": { "label": "Table", "tip": "Régimes alimentaires des provinces." },
+    "administration": { "label": "Cour, administration", "tip": "Part du revenu prise par la cour, l’administration et les édits." },
+    "household": { "label": "Maison du roi", "tip": "Croît avec le rang du royaume et le prestige du souverain." },
+    "wages": { "label": "Gages des officiers", "tip": "Gouverneurs de province et chefs d’armée." },
+    "siege": { "label": "Sièges", "tip": "Fascines, engins et fourrage des sièges en cours." },
+    "obligations": { "label": "Dot, tribut, saisies", "tip": "Versements dus : dot, tribut, saisie des banquiers après une banqueroute." },
+    "interest": { "label": "Intérêts", "tip": "Intérêts des prêts des banquiers ; le taux monte quand la cote de crédit baisse." }
+  },
+  "risk": {
+    "title": "Risque de banqueroute",
+    "tip": "La dette rapportée au seuil où un trésor vide déclenche la banqueroute royale. À 100 %, un trésor négatif déclare la banqueroute : une part de la dette est effacée, les banquiers saisissent une part du revenu, le crédit est gelé et les provinces grondent.",
+    "value": "{percent} % du seuil de banqueroute",
+    "warn_percent": 60,
+    "bands": [
+      { "max": 30, "label": "Maîtrisé" },
+      { "max": 60, "label": "À surveiller" },
+      { "max": 85, "label": "Dangereux" },
+      { "max": 100000, "label": "Critique" }
+    ],
+    "rating": "Cote de crédit : {rating} / 100",
+    "defaults": "Banqueroutes passées : {count}",
+    "ransom": "Rançons encore dues : {amount}",
+    "grievance": "Grogne des impôts exceptionnels et de la banqueroute : +{unrest} de mécontentement par province."
+  },
+  "lenders": {
+    "title": "Banquiers",
+    "terms": "taux {rate} % par saison · plafond restant {room} · prêt minimal {min}",
+    "tip": "{name} prête au plus {room} à ce jour, à {rate} % d’intérêt par saison. La cote de crédit renchérit le taux et réduit le plafond.",
+    "frozen": "Crédit gelé jusqu’au tour {turn} : les banquiers ne prêtent plus à la couronne après une banqueroute."
+  },
+  "loans": {
+    "title": "Dette par banquier",
+    "none": "Aucune dette.",
+    "line": "{name} : {principal} (taux {rate} %, intérêts {interest} par saison)",
+    "obligation_title": "Obligations en cours",
+    "obligation": "{kind} : {amount} par saison, encore {seasons} saisons",
+    "kinds": { "dowry": "Dot", "seizure": "Saisie des banquiers", "tribute": "Tribut" }
+  },
+  "borrow": {
+    "title": "Emprunter",
+    "steps": [
+      { "id": "min", "label": "Minimum", "percent": 0 },
+      { "id": "q1", "label": "¼", "percent": 25 },
+      { "id": "half", "label": "½", "percent": 50 },
+      { "id": "max", "label": "Plafond", "percent": 100 }
+    ],
+    "amount": "Montant : {amount}",
+    "go": "Emprunter {amount}",
+    "go_tip": "Reçoit {amount} de {name} tout de suite ; {interest} d’intérêts par saison ensuite.",
+    "frozen": "Crédit gelé jusqu’au tour {turn} (banqueroute récente).",
+    "no_room": "{name} ne prêtera plus rien : plafond atteint.",
+    "below_min": "Le plafond restant de {name} est sous son prêt minimal ({min}).",
+    "no_lender": "Aucun banquier disponible.",
+    "done": "Emprunt de {amount} auprès de {name}."
+  },
+  "repay": {
+    "title": "Rembourser",
+    "steps": [
+      { "id": "q1", "label": "¼", "percent": 25 },
+      { "id": "half", "label": "½", "percent": 50 },
+      { "id": "all", "label": "Tout", "percent": 100 }
+    ],
+    "amount": "Montant : {amount} (les prêts les plus chers d’abord)",
+    "go": "Rembourser {amount}",
+    "go_tip": "Rend {amount} aux banquiers, les prêts les plus chers d’abord, et réduit d’autant les intérêts.",
+    "no_debt": "Aucune dette à rembourser.",
+    "no_cash": "Le trésor est vide : rien à rembourser.",
+    "done": "Remboursement de {amount}."
+  },
+  "levies": {
+    "title": "Impôts exceptionnels",
+    "intro": "De l’argent tout de suite, de la grogne ensuite. Chaque impôt a son délai avant de pouvoir être levé de nouveau.",
+    "button": "{name} : +{amount}",
+    "line": "Mécontentement +{unrest} par province pendant {turns} saisons ; délai de {cooldown} saisons.",
+    "tip": "{name} rapporte {amount} tout de suite. Les provinces grondent : +{unrest} de mécontentement pendant {turns} saisons. Délai avant de le relever : {cooldown} saisons.",
+    "wait": "{name} : disponible dans {turns} saisons.",
+    "wait_tip": "{name} a été levé trop récemment ; on pourra le lever de nouveau dans {turns} saisons.",
+    "early": "{name} : n’existe pas avant {year}.",
+    "early_tip": "{name} n’est pas encore en usage : disponible dès {year}.",
+    "done": "{name} levé : +{amount}."
+  },
+  "history": {
+    "title": "Huit dernières saisons",
+    "head": ["Saison", "Trésor", "Solde", "Variation"],
+    "empty": "Aucune saison écoulée pour l’instant.",
+    "count": 8
+  },
+  "result": {
+    "refused": "Refusé : {reason}"
+  },
+  "advisor": {
+    "risk_title": "La dette des banquiers inquiète",
+    "risk": "La dette atteint {percent} % du seuil de banqueroute. Remboursez ou évitez d’emprunter, sinon un trésor vide déclarera la banqueroute royale.",
+    "risk_action": "Voir les finances",
+    "default_player": "Banqueroute royale ! Une part de la dette est effacée, les banquiers saisissent une part du revenu, le crédit est gelé et les provinces grondent.",
+    "default_other": "{name} fait banqueroute : ses banquiers perdent une part de leurs créances et son crédit est gelé."
+  }
+}
