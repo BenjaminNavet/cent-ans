@@ -137,11 +137,15 @@ fn england_in_boulonnais(stance: Stance, devastation: u8) -> (u8, String) {
 }
 
 fn loot_of(text: &str) -> i64 {
-    text.split(" livres de butin")
+    let digits: String = text
+        .split(" de butin")
         .next()
-        .and_then(|head| head.rsplit(' ').next())
-        .and_then(|n| n.parse().ok())
+        .and_then(|head| head.rsplit(": ").next())
         .expect("a loot figure")
+        .chars()
+        .filter(char::is_ascii_digit)
+        .collect();
+    digits.parse().expect("a loot figure")
 }
 
 #[test]
