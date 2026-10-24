@@ -13,7 +13,7 @@ Un onglet « Chantiers » dans le panneau de faction (`client/src/campaign/panel
 - Une ligne par colonie : nom (clic = ouvre la province), palier, emplacements libres/total, chantiers x/y. File pleine : ligne grisée. Menu des bâtiments constructibles (coût et durée en infobulle).
 - Filtres : colonies avec emplacement libre (défaut), région, type de colonie.
 - « Appliquer à tout » : un bâtiment choisi dans l'en-tête est posé dans chaque colonie où c'est possible. Récapitulatif : colonies concernées, coût total, colonies ignorées avec raison (fonds, file pleine, prérequis).
-- Bouton « Lancer (N chantiers, X écus) ». Fonds insuffisants : lancement dans l'ordre de la liste jusqu'à épuisement ; le récapitulatif l'annonce avant validation.
+- Bouton « Lancer (N chantiers, X écus) ». Fonds insuffisants : le lot suit l'ordre de la liste et une entrée refusée n'arrête pas les suivantes (un chantier moins cher peut passer) ; le récapitulatif montre chaque ligne lancée ou ignorée avec sa raison, le total et un avertissement avant validation.
 
 ## Règles (core/)
 - Aucune règle dans le client. Réutiliser `order_build` (`core/crates/sim-campaign/src/orders/build.rs`) pour chaque chantier : mêmes contrôles, même paiement.
@@ -27,3 +27,7 @@ Un onglet « Chantiers » dans le panneau de faction (`client/src/campaign/panel
 
 ## Hors périmètre
 Construction automatique par politique de colonie (écartée pour cette itération). Modification de l'onglet Bâtiments des provinces.
+
+## Réalisation (2026-10-24)
+- Noyau : `core/crates/sim-campaign/src/realm_works.rs` (`realm_works`, `plan_works_batch`, `apply_works_batch` sur `Order::Build`, pas de nouvel ordre).
+- Client : onglet `faction:tab:works` ; le « menu » par colonie est un bouton qui cycle entre les bâtiments disponibles.
