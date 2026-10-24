@@ -15,7 +15,7 @@
 #      CENT_ANS_FEATURES=dev       cargo features (e.g. dev = Bevy dynamic linking)
 #      CENT_ANS_PROFILE=debug      cargo profile dir (default: release)
 #      Every CENT_ANS_* variable is forwarded to the app (`open --env`).
-# Exit code: 1 if the log has a panic / AGENT_FATAL marker, else 0 (`open` hides the app's code).
+# Exit code: 1 if the log has a panic / AGENT_FATAL marker / shader error, else 0 (`open` hides the app's code).
 set -u
 here=${0:A:h}
 profile=${CENT_ANS_PROFILE:-release}
@@ -103,6 +103,11 @@ open -g -n -W "${env_args[@]}" --stdout "$log" --stderr "$log" "$app" --args "${
 cat "$log"
 fatal=0
 grep -q -e AGENT_FATAL -e "panicked at" -e "Quitting the application due to" "$log" && fatal=1
+# Shader errors (ADR 0774): wgpu logs them but keeps running (black ground, no test fails).
+if grep -q -e "failed to create shader module" -e "no definition in scope" -e "Shader compilation error" "$log"; then
+	echo "RUN_BG: shader error in the log (failed to create shader module / no definition in scope)" >&2
+	fatal=1
+fi
 rm -f "$log" ${tmp_script:+"$tmp_script"}
 (( fatal )) && exit 1
 exit 0

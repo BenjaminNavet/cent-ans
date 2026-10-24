@@ -517,17 +517,27 @@ fn turn_alerts(
         if !enabled(&settings) {
             continue;
         }
+        let player = sim.player.as_str().to_string();
         let events: Vec<(String, String)> = turn
             .events
             .iter()
             .filter_map(|event| {
-                let faction = event.faction.as_ref()?.as_str().to_string();
-                let kind = serde_json::to_value(event.kind).ok()?.as_str()?.to_string();
+                let mut faction = event.faction.as_ref()?.as_str().to_string();
+                let mut kind = serde_json::to_value(event.kind).ok()?.as_str()?.to_string();
+                // A siege put by someone else before one of the player's places: the advisor
+                // speaks for the defender too (ADR 0775), with advice for the besieged.
+                if kind == "siege_started"
+                    && faction != player
+                    && let (Some(state), Some(province)) = (&sim.state, &event.province)
+                    && state.province_owner(province).map(|f| f.as_str()) == Some(player.as_str())
+                {
+                    faction = player.clone();
+                    kind = "siege_against".to_owned();
+                }
                 Some((faction, kind))
             })
             .collect();
         let tuning = state.tuning;
-        let player = sim.player.as_str().to_string();
         if let Some(line) =
             state
                 .advisor
@@ -662,6 +672,7 @@ mod tests {
                 {"id": "adv_first_siege", "trigger": "first_siege", "text": "Un siège."},
                 {"id": "adv_plague", "trigger": "alert", "event": "plague", "text": "La mortalité."},
                 {"id": "adv_famine", "trigger": "alert", "event": "famine", "text": "La disette."},
+                {"id": "adv_siege_against", "trigger": "alert", "event": "siege_against", "text": "On nous assiège."},
             ]}),
         }
     }
@@ -727,6 +738,23 @@ mod tests {
                 .id,
             "adv_first_siege"
         );
+    }
+
+    #[test]
+    fn a_siege_against_the_player_gets_its_own_advice() {
+        let mut advisor = Advisor::new();
+        let data = data();
+        let besieged = vec![("fac_france".to_string(), "siege_against".to_string())];
+        let line = advisor
+            .turn_events(&data, &tuning(), &besieged, "fac_france", 3)
+            .unwrap();
+        assert_eq!(line.id, "adv_siege_against");
+        // The real data carries the line and the first-siege line.
+        let root = crate::paths::find_root().unwrap();
+        let text = std::fs::read_to_string(root.join("data/voice/advisor.json")).unwrap();
+        for id in ["adv_siege_against", "adv_siege_started", "adv_first_siege"] {
+            assert!(text.contains(id), "{id}");
+        }
     }
 
     #[test]

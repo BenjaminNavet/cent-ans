@@ -36,7 +36,7 @@ use crate::ui::kit::modal::{ModalQueue, ModalResult, ModalSpec, PRIORITY_DECISIO
 use crate::ui::kit::style::{self, UiType};
 use crate::ui::kit::{
     ButtonPressed, ListSelected, TabSelected, Toggled, UiTheme, button_primary, button_small,
-    heading, panel_page, scroll_list, tab_bar, tab_pane, toggle_button, typed,
+    heading, panel_page, scroll_body, scroll_list, tab_bar, tab_pane, toggle_button, typed,
 };
 
 /// The faction and difficulty currently chosen on the screen.
@@ -371,6 +371,11 @@ fn spawn_screen(
         .entry::<Node>()
         .and_modify(|mut n| n.overflow = Overflow::clip());
     let difficulty = framed(&mut commands, &theme, side, Some(360.0), 0.0);
+    // The difficulty keeps its whole height; the pitch above gives way (and scrolls).
+    commands
+        .entity(difficulty)
+        .entry::<Node>()
+        .and_modify(|mut n| n.flex_shrink = 0.0);
     commands.spawn((
         heading(&theme, "Difficulté de la campagne"),
         ChildOf(difficulty),
@@ -458,7 +463,9 @@ fn framed(
         flex_grow: grow,
         min_width: Val::Px(0.0),
         min_height: Val::Px(0.0),
-        padding: theme.padding("panel"),
+        // Painted border + content margin + 3 px of air: the layout probe measures 2 px short of
+        // the bare content margin once the screen is scaled below 1 (ADR 0775).
+        padding: theme.inner_padding("panel", 3.0),
         flex_direction: FlexDirection::Column,
         row_gap: Val::Px(6.0),
         ..default()
@@ -986,6 +993,10 @@ fn refresh_choice(
         TextColor(style::INK_TITLE),
         ChildOf(detail),
     ));
+    // The pitch scrolls when it is longer than the panel (ADR 0775: no more text poking out).
+    let scroll = commands
+        .spawn((scroll_body("DetailScroll"), ChildOf(detail)))
+        .id();
     let Some(pitch) = menu.front.pitch(&choice.faction) else {
         commands.spawn((
             typed(
@@ -993,7 +1004,7 @@ fn refresh_choice(
                 "Aucune présentation pour cette faction.",
                 UiType::Body,
             ),
-            ChildOf(detail),
+            ChildOf(scroll),
         ));
         return;
     };
@@ -1001,7 +1012,7 @@ fn refresh_choice(
         Text::new(pitch.tagline.clone()),
         theme.text_font(false, true, UiType::Body.size()),
         TextColor(style::FE_GULES),
-        ChildOf(detail),
+        ChildOf(scroll),
     ));
     if let Some(sheet) = start_sheets.get(&choice.faction) {
         ruler_row(
@@ -1011,11 +1022,11 @@ fn refresh_choice(
             &start_sheets,
             sheet,
             64.0,
-            detail,
+            scroll,
         );
-        key_figures(&mut commands, &theme, sheet, detail);
+        key_figures(&mut commands, &theme, sheet, scroll);
     }
-    commands.spawn((typed(&theme, &pitch.intro, UiType::Body), ChildOf(detail)));
+    commands.spawn((typed(&theme, &pitch.intro, UiType::Body), ChildOf(scroll)));
     for (title, lines) in [
         ("Forces", &pitch.strengths),
         ("Faiblesses", &pitch.weaknesses),
@@ -1023,11 +1034,11 @@ fn refresh_choice(
         if lines.is_empty() {
             continue;
         }
-        commands.spawn((heading(&theme, title), ChildOf(detail)));
+        commands.spawn((heading(&theme, title), ChildOf(scroll)));
         for line in lines {
             commands.spawn((
                 typed(&theme, &format!("• {line}"), UiType::Caption),
-                ChildOf(detail),
+                ChildOf(scroll),
             ));
         }
     }

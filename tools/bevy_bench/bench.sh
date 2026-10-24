@@ -13,6 +13,15 @@
 set -u
 here=${0:A:h}
 root=${here:h:h}
+calm_root=$root
+source "$here/calm.sh"
+# Through the shared heavy-command slots (tools/heavy.sh) once, then wait for a quiet machine (ADR 0774).
+if [[ -z ${BENCH_UNDER_HEAVY:-} ]]; then
+	export BENCH_UNDER_HEAVY=1
+	heavy_run "${0:A}" "$@"
+	exit $?
+fi
+wait_calm || exit 1
 label=${1:-release}
 (( $# )) && shift
 mode=map

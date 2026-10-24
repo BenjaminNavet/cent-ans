@@ -3,7 +3,7 @@
   "ui": {
     "tab_title": "Causes",
     "panel_title": "Chroniques et causes",
-    "empty": "Aucun événement notable à expliquer pour l’instant.",
+    "empty": "Rien à expliquer pour l’instant : la partie commence. Cette page se remplit au fil des saisons. Une bataille perdue, une province qui se révolte, une guerre déclarée par un voisin y apparaissent, avec leurs raisons classées du poids le plus lourd au plus léger. « Toute l’Europe » montre aussi les causes des autres royaumes.",
     "factors_heading": "Facteurs, du plus lourd au plus léger :",
     "reason_line": "Raison de l’IA : {reason}",
     "filter_mine": "Mon royaume",

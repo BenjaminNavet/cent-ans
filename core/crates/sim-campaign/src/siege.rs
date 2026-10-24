@@ -1553,6 +1553,21 @@ pub(crate) fn capture(
             },
         ));
     }
+    // UX2 (ADR 0775): « Affamée, la garnison capitule » / « se rend sans combattre » was a second
+    // line for the same fall (with no cause, then the line with it): one line carries both.
+    let merge = events.last().is_some_and(|last| {
+        last.kind == EventKind::ProvinceCaptured
+            && last.cause.is_none()
+            && last.province == fall.province
+            && last.faction == fall.faction
+            && (last.text_fr.starts_with("Affamée")
+                || last.text_fr.contains("se rend sans combattre"))
+    });
+    if merge {
+        if let Some(last) = events.pop() {
+            fall.text_fr = format!("{} {}", last.text_fr, fall.text_fr);
+        }
+    }
     events.push(fall);
     // JR1: a place of the Holy Land, or the city of the vow.
     crate::crusade::on_settlement_taken(state, data, new_controller, settlement_id, events);
