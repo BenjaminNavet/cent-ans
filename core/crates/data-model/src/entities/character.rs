@@ -108,6 +108,9 @@ pub struct Character {
     pub death: Option<HistoricalDate>,
     #[serde(default = "default_true")]
     pub historical: bool,
+    /// Vow of chastity (master of a military order): never married.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub celibate: bool,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub titles: Vec<Title>,
     pub skills: Skills,

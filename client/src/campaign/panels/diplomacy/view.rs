@@ -275,8 +275,8 @@ fn offers(root: &mut Kids, theme: &UiTheme, ui: &DiplomacyUi) {
                             row.spawn((
                                 Hovered::default(),
                                 Tooltip::new(&format!(
-                                    "Prendre le parti de {} : guerre contre l’autre vassal.",
-                                    side.name
+                                    "Prendre le parti {} : guerre contre l’autre vassal.",
+                                    crate::ui::kit::fr::de_place(&side.name)
                                 )),
                                 Node::default(),
                                 children![button_small(

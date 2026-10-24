@@ -306,7 +306,7 @@ mod tests {
             seen_ago: Some(2),
             ..Default::default()
         });
-        assert!(text.contains("Dernière position connue — Ost de Édouard"));
+        assert!(text.contains("Dernière position connue — Ost d’Édouard"));
         assert!(text.contains("Vue il y a 2 saisons"));
         assert!(!text.contains("Au repos"));
     }

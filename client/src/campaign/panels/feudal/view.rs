@@ -240,7 +240,7 @@ fn arms_block(
             if !sheet.house.is_empty() {
                 names.spawn(ink(
                     theme,
-                    &format!("Maison de {}", sheet.house),
+                    &format!("Maison {}", crate::ui::kit::fr::de_place(&sheet.house)),
                     UiType::Caption,
                     style::INK_FADED,
                 ));
@@ -587,9 +587,9 @@ fn selection(body: &mut Kids, theme: &UiTheme, ui: &FeudalUi) {
         ));
         let line = match &sheet.liege {
             Some(liege) => format!(
-                "{} — vassal de {}, loyauté {} ({})",
+                "{} — vassal {}, loyauté {} ({})",
                 sheet.primary_name,
-                liege.name,
+                crate::ui::kit::fr::de_place(&liege.name),
                 sheet.loyalty.unwrap_or(0),
                 sheet.status_label
             ),

@@ -108,6 +108,8 @@ pub enum MarriageError {
     AlreadyMarried,
     #[error("lien de parenté trop proche")]
     Related,
+    #[error("vœu de chasteté (maître d'un ordre militaire)")]
+    Celibate,
 }
 
 /// `true` when `a` and `b` are siblings (share a father or a mother). Direct
@@ -133,6 +135,9 @@ fn marriage_blocker(
 ) -> Option<MarriageError> {
     if !a.alive || !b.alive {
         return Some(MarriageError::Dead);
+    }
+    if a.celibate || b.celibate {
+        return Some(MarriageError::Celibate);
     }
     if a.sex == b.sex {
         return Some(MarriageError::SameSex);

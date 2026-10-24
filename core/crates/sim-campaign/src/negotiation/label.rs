@@ -68,13 +68,17 @@ impl Article {
                 to(giver)
             ),
             Article::CedeSettlement { giver, settlement } => format!(
-                "{} cède la place de {} à {}",
+                "{} cède la place {} à {}",
                 who(giver),
-                data.settlement_name(settlement),
+                crate::events::de(&data.settlement_name(settlement)),
                 to(giver)
             ),
             Article::Vassalage { giver } => {
-                format!("{} devient vassal de {}", who(giver), to(giver))
+                format!(
+                    "{} devient vassal {}",
+                    who(giver),
+                    crate::events::de(&to(giver))
+                )
             }
             Article::ReleaseCaptive { giver, character } => format!(
                 "{} libère {}",

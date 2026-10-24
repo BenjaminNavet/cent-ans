@@ -98,9 +98,9 @@ fn state_line(bubble: &ArmyBubble) -> Option<String> {
 pub fn army_text(bubble: &ArmyBubble) -> String {
     let general = bubble.general_name.as_str();
     let mut title = if general.is_empty() {
-        format!("Ost de {}", bubble.faction_name)
+        format!("Ost {}", crate::ui::kit::fr::de_place(&bubble.faction_name))
     } else {
-        format!("Ost de {general}")
+        format!("Ost {}", crate::ui::kit::fr::de_place(general))
     };
     if bubble.seen_ago.is_some() {
         title = format!("Dernière position connue — {title}");
@@ -108,7 +108,7 @@ pub fn army_text(bubble: &ArmyBubble) -> String {
     let mut lines = vec![format!("[b]{title}[/b]")];
     let mut faction_line = bubble.faction_name.clone();
     if let Some(liege) = bubble.liege_name.as_deref().filter(|l| !l.is_empty()) {
-        faction_line.push_str(&format!(" (vassal de {liege})"));
+        faction_line.push_str(&format!(" (vassal {})", crate::ui::kit::fr::de_place(liege)));
     }
     if !general.is_empty() && !faction_line.is_empty() {
         lines.push(faction_line);
@@ -275,7 +275,7 @@ mod tests {
     #[test]
     fn own_army_shows_supply_and_rest() {
         let text = army_text(&bubble());
-        assert!(text.starts_with("[b]Ost de Philippe[/b]\nFrance (vassal de Le Roi)\n"));
+        assert!(text.starts_with("[b]Ost de Philippe[/b]\nFrance (vassal du Roi)\n"));
         assert!(text.contains("1\u{202f}000 fantassins · 300 cavaliers"));
         assert!(text.ends_with("Au repos\nVivres : 80"));
     }

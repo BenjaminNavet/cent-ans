@@ -272,7 +272,7 @@ pub fn hover_and_input(
             let name = data.faction_name(&view.faction);
             war_asks.write(AskWarDeclaration {
                 target: view.faction.as_str().to_owned(),
-                target_label: format!("l'armée de {name}"),
+                target_label: format!("l'armée {}", crate::ui::kit::fr::de_place(&name)),
                 then: Some(Order::Attack {
                     army,
                     target_army: target,

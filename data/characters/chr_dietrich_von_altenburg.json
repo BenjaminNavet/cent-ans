@@ -9,6 +9,7 @@
   "house": "Ordre Teutonique",
   "faction": "fac_teutonic",
   "role": "ruler",
+  "celibate": true,
   "birth": {
     "value": "1290",
     "uncertain": true

@@ -195,9 +195,9 @@ fn spawn(
     };
     let title = format!("Flotte ennemie en vue : {waters}");
     let subtitle = format!(
-        "{} barre la traversée de {} · {}",
+        "{} barre la traversée {} · {}",
         view.interceptor_name,
-        view.faction_name,
+        crate::ui::kit::fr::de_place(&view.faction_name),
         season_fr(setup.season)
     );
     let withdraw_label = if player == SideId::Defender {

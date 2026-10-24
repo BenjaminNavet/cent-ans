@@ -9,6 +9,7 @@
   "house": "Ordre Livonien",
   "faction": "fac_livonian_order",
   "role": "ruler",
+  "celibate": true,
   "birth": {
     "value": "1285",
     "uncertain": true

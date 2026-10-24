@@ -359,9 +359,9 @@ pub fn battle_brief(
     };
     let ambush_victim = setup.opening.ambush_victim();
     let mut title = if view.siege {
-        format!("Assaut de {place}")
+        format!("Assaut {}", sim_campaign::events::de(place))
     } else if view.sortie {
-        format!("Sortie de {place}")
+        format!("Sortie {}", sim_campaign::events::de(place))
     } else {
         format!("Bataille en vue\u{a0}: {place}")
     };

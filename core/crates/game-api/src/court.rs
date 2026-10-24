@@ -406,7 +406,10 @@ fn activity(state: &CampaignState, data: &GameData, view: &CharacterView) -> Str
         return "Captif(ve)".to_owned();
     }
     if let Some(province) = &view.governor_of {
-        return format!("gouverneur de {}", data.province_name(province));
+        return format!(
+            "gouverneur {}",
+            sim_campaign::events::de(&data.province_name(province))
+        );
     }
     if let Some(army) = view.army.as_ref().and_then(|a| state.army(a)) {
         let place = state

@@ -15,6 +15,7 @@
       "type": "string",
       "enum": ["ruler", "consort", "heir", "prince", "commander", "noble", "prelate", "burgher", "exile", "claimant", "regent"]
     },
+    "celibate": { "type": "boolean", "description": "Vœu de chasteté (maître d'ordre militaire) : jamais marié, ni par l'IA ni en candidat." },
     "birth": { "$ref": "common.schema.json#/$defs/historical_date" },
     "death": {
       "$ref": "common.schema.json#/$defs/historical_date",

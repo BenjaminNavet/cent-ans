@@ -9,6 +9,7 @@
   "house": "Ordre de Calatrava",
   "faction": "fac_calatrava",
   "role": "ruler",
+  "celibate": true,
   "birth": {
     "value": "1300",
     "uncertain": true,
