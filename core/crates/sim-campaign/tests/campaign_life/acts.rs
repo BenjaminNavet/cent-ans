@@ -338,4 +338,15 @@ fn a_full_campaign_crosses_the_three_acts() {
             .collect::<Vec<_>>(),
         outcome.score
     );
+    for report in &state.acts.reports {
+        eprintln!(
+            "  {} {:?}",
+            report.act_id,
+            report
+                .objectives
+                .iter()
+                .map(|o| format!("{}:{}{}", o.id, o.percent, if o.met { "*" } else { "" }))
+                .collect::<Vec<_>>()
+        );
+    }
 }

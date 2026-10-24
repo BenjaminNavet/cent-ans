@@ -34,6 +34,7 @@
               "enemy_army",
               "debt",
               "research_idle",
+              "advice",
               "army_idle",
               "idle_treasury",
               "tutorial_postponed",
