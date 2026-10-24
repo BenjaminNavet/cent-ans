@@ -260,8 +260,9 @@ pub fn release_character(
     crate::dynasty::on_ransomed(state, data, id);
     let text = if ransom > 0 {
         format!(
-            "{} est libéré contre une rançon de {ransom} livres.",
-            state.character_name(data, id)
+            "{} est libéré contre une rançon de {}.",
+            state.character_name(data, id),
+            crate::economy_balance::livres(ransom)
         )
     } else {
         format!("{} est libéré.", state.character_name(data, id))

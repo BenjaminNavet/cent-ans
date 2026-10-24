@@ -1640,9 +1640,10 @@ pub(crate) fn resolve_raids(
             GameEvent::new(
                 EventKind::Raid,
                 format!(
-                    "Chevauchée de {} en {} : {loot} livres de butin.",
+                    "Chevauchée de {} en {} : {} de butin.",
                     data.faction_name(&faction),
-                    data.province_name(&province_id)
+                    data.province_name(&province_id),
+                    crate::economy_balance::livres(loot)
                 ),
             )
             .province(&province_id)

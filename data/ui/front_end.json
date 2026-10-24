@@ -469,10 +469,10 @@
     },
     {
       "id": "fac_kildare",
-      "tagline": "Les FitzGerald, maîtres du Pale",
-      "intro": "Maurice FitzGerald, 4e comte de Kildare, gouverne depuis Maynooth un comté anglo-irlandais au cœur du Pale. Rival des Butler d’Ormond pour l’oreille du roi, il doit défendre les marches du Leinster gaélique tout en jouant sa propre partition entre Dublin et Londres.",
+      "tagline": "Les FitzGerald, maîtres des terres anglaises de Dublin",
+      "intro": "Maurice FitzGerald, 4e comte de Kildare, gouverne depuis Maynooth un comté anglo-irlandais au cœur des terres anglaises de Dublin. Rival des Butler d’Ormond pour l’oreille du roi, il doit défendre les marches du Leinster gaélique tout en jouant sa propre partition entre Dublin et Londres.",
       "strengths": [
-        "Position centrale dans le Pale, proche du gouvernement de Dublin",
+        "Position centrale dans les terres anglaises de Dublin, proche du gouvernement de Dublin",
         "Chevalerie anglo-irlandaise expérimentée",
         "Rivalité avec Ormond qui laisse des marges de manœuvre"
       ],
@@ -495,7 +495,7 @@
       "weaknesses": [
         "Succession quasi immédiate par un comte mineur",
         "Frontière disputée avec le Thomond gaélique",
-        "Rivalité avec Kildare pour le gouvernement du Pale"
+        "Rivalité avec Kildare pour le gouvernement des terres anglaises de Dublin"
       ],
       "difficulty": 3
     },
@@ -518,7 +518,7 @@
     {
       "id": "fac_tyrone",
       "tagline": "Les Ó Néill, rois jamais soumis",
-      "intro": "Henry Ó Néill règne sur Tír Eoghain depuis 1325 : son royaume n’a jamais rendu hommage à la couronne d’Angleterre. Tenez la frontière du Pale, arbitrez les querelles des petits royaumes d’Ulster, et gardez votre trône face aux prétendants de votre propre parenté.",
+      "intro": "Henry Ó Néill règne sur Tír Eoghain depuis 1325 : son royaume n’a jamais rendu hommage à la couronne d’Angleterre. Tenez la frontière des terres anglaises de Dublin, arbitrez les querelles des petits royaumes d’Ulster, et gardez votre trône face aux prétendants de votre propre parenté.",
       "strengths": [
         "Royaume jamais entré dans la vassalité anglo-normande",
         "Site sacré d’inauguration de Tullyhogue, forte légitimité",
@@ -554,7 +554,7 @@
       "strengths": [
         "Vaste territoire, peu disputé par les Anglo-Normands",
         "Prestige de l’ancienne haute-royauté d’Irlande",
-        "Éloignement du Pale, relative tranquillité"
+        "Éloignement des terres anglaises de Dublin, relative tranquillité"
       ],
       "weaknesses": [
         "Dynastie divisée en branches rivales (Ó Conchobhair Donn et Ruadh)",
@@ -566,15 +566,15 @@
     {
       "id": "fac_leinster",
       "tagline": "La guérilla des montagnes de Wicklow",
-      "intro": "Domhnall mac Airt Mac Murchada, évadé des prisons de Dublin en 1331, mène depuis les montagnes de Wicklow une guerre incessante contre le Pale anglais. Le plus fragile des royaumes gaéliques, mais aussi le plus proche du cœur du pouvoir anglais en Irlande.",
+      "intro": "Domhnall mac Airt Mac Murchada, évadé des prisons de Dublin en 1331, mène depuis les montagnes de Wicklow une guerre incessante contre les terres anglaises de Dublin. Le plus fragile des royaumes gaéliques, mais aussi le plus proche du cœur du pouvoir anglais en Irlande.",
       "strengths": [
         "Terrain montagneux, quasi imprenable",
-        "Guérilla proche du Pale, pression constante sur Dublin",
+        "Guérilla proche des terres anglaises de Dublin, pression constante sur Dublin",
         "Rien à perdre : chaque raid affaiblit l’ennemi"
       ],
       "weaknesses": [
         "Le plus petit et le plus pauvre des royaumes gaéliques",
-        "Voisinage immédiat et hostile du Pale anglais",
+        "Voisinage immédiat et hostile des terres anglaises de Dublin anglais",
         "Aucune ville, aucune administration"
       ],
       "difficulty": 3

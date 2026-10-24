@@ -74,7 +74,7 @@
       }
     },
     "uncertain": true,
-    "note": "Restes du royaume de Leinster dans les montagnes de Wicklow et le sud du Pale ; population estimée, très incertaine."
+    "note": "Restes du royaume de Leinster dans les montagnes de Wicklow et le sud des terres anglaises de Dublin ; population estimée, très incertaine."
   },
   "buildings": [
     "bld_market",
@@ -83,7 +83,7 @@
   ],
   "fortification_level": 1,
   "base_supply": 1500,
-  "description": "Terres résiduelles du royaume gaélique de Leinster, tenues par les Mac Murchada dans les montagnes de Wicklow et le Carlow, en guerre intermittente avec le Pale voisin.",
+  "description": "Terres résiduelles du royaume gaélique de Leinster, tenues par les Mac Murchada dans les montagnes de Wicklow et le Carlow, en guerre intermittente avec les terres anglaises voisines.",
   "sources": [
     "MacMurrough (Mac Murchadha), Domhnall (DIB)",
     "Royaume de Leinster",

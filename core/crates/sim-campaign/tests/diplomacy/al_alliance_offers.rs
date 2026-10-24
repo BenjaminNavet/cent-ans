@@ -36,3 +36,30 @@ fn few_alliance_offers_reach_the_player() {
         assert!(count <= 6, "{player}: {count} alliance offers in 40 turns");
     }
 }
+
+/// A vassal has no foreign policy: Transylvania (voivodeship of Hungary)
+/// never offers France an alliance of its own accord (judge iter-04).
+#[test]
+fn vassals_never_offer_alliances() {
+    let data = game_data();
+    let mut state = CampaignState::new_1337(data, fac("fac_france"), 1).unwrap();
+    for _ in 0..40 {
+        state.end_turn(data);
+        for offer in &state.factions[&fac("fac_france")].offers {
+            let sender_is_vassal = state
+                .factions
+                .get(&offer.from)
+                .is_some_and(|f| f.suzerain.is_some());
+            let is_alliance = offer
+                .proposal
+                .articles
+                .iter()
+                .any(|a| matches!(a, Article::Alliance | Article::DefensiveAlliance));
+            assert!(
+                !(sender_is_vassal && is_alliance),
+                "vassal {} offered an alliance",
+                offer.from
+            );
+        }
+    }
+}
