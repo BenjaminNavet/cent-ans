@@ -23,9 +23,9 @@ use game_api::finance::{FinanceView, LenderView};
 use serde_json::{Value, json};
 use sim_campaign::Order;
 
+use super::FactionPanel;
 use super::chart::season_label;
 use super::view::{Kids, ink, pair, wrapped};
-use super::{FactionPanel, TABS};
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::hud::flow::TurnAdvanced;
@@ -445,6 +445,7 @@ fn handle_buttons(
 fn advisor_alerts(
     sim: Res<Sim>,
     texts: Res<FinanceTexts>,
+    ui: Res<FinanceUi>,
     mut advanced: MessageReader<TurnAdvanced>,
     mut says: MessageWriter<BandSay>,
     mut withdraws: MessageWriter<AdvisorWithdraw>,
@@ -455,7 +456,8 @@ fn advisor_alerts(
     let (Some(data), Some(state)) = (&sim.data, &sim.state) else {
         return;
     };
-    let turn_changed = advanced.read().count() > 0 || *last_turn != Some(state.turn);
+    let turn_changed =
+        advanced.read().count() > 0 || ui.is_changed() || *last_turn != Some(state.turn);
     if !turn_changed {
         return;
     }
@@ -634,7 +636,7 @@ fn bars_section(pane: &mut Kids, theme: &UiTheme, texts: &FinanceTexts, view: &F
     let lines: Vec<_> = economy
         .budget_lines
         .iter()
-        .filter(|l| known(&l.key) && (l.key == "receipts" || l.charge))
+        .filter(|l| known(&l.key) && (l.key == "receipts" || (l.charge && l.projected != 0)))
         .collect();
     if lines.is_empty() {
         pane.spawn(caption(theme, texts.s("bars.empty")));
@@ -1165,11 +1167,18 @@ pub(super) fn finance_tab(
         &fr::amount(economy.treasury),
         fr::color_of(economy.treasury),
     );
-    pane.spawn(Tooltip::new(&format!(
-        "[b]{}[/b]\n{}",
-        texts.s("summary.net"),
-        texts.s("summary.net_tip")
-    )))
+    pane.spawn((
+        Node {
+            flex_direction: FlexDirection::Column,
+            width: Val::Percent(100.0),
+            ..default()
+        },
+        Tooltip::new(&format!(
+            "[b]{}[/b]\n{}",
+            texts.s("summary.net"),
+            texts.s("summary.net_tip")
+        )),
+    ))
     .with_children(|row| {
         pair(
             row,
@@ -1180,11 +1189,18 @@ pub(super) fn finance_tab(
         );
     });
     let forecast = economy.treasury + economy.net_income;
-    pane.spawn(Tooltip::new(&format!(
-        "[b]{}[/b]\n{}",
-        texts.s("summary.forecast"),
-        texts.s("summary.forecast_tip")
-    )))
+    pane.spawn((
+        Node {
+            flex_direction: FlexDirection::Column,
+            width: Val::Percent(100.0),
+            ..default()
+        },
+        Tooltip::new(&format!(
+            "[b]{}[/b]\n{}",
+            texts.s("summary.forecast"),
+            texts.s("summary.forecast_tip")
+        )),
+    ))
     .with_children(|row| {
         pair(
             row,
@@ -1237,7 +1253,11 @@ fn dump_finance(world: &World) -> (String, Value) {
     let mut buttons = Vec::new();
     if let Some(mut query) = world.try_query::<(&Name, Option<&InteractionDisabled>)>() {
         for (name, disabled) in query.iter(world) {
-            if name.as_str().starts_with("faction:fin:") && !name.as_str().contains(":bar:") {
+            if name.as_str().starts_with("faction:fin:")
+                && !name.as_str().contains(":bar:")
+                && !name.as_str().ends_with(":gauge")
+                && !name.as_str().contains(":history:")
+            {
                 buttons.push((name.as_str().to_owned(), disabled.is_none()));
             }
         }
@@ -1297,6 +1317,7 @@ fn dump_finance(world: &World) -> (String, Value) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::campaign::panels::faction::TABS;
 
     fn lender(room: i64, min_loan: i64) -> LenderView {
         LenderView {
