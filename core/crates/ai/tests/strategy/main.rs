@@ -5,6 +5,7 @@ mod common;
 
 mod c7a;
 mod campaign_ai;
+mod doctrines;
 mod f4_war;
 mod feudal_ai;
 mod g2;
