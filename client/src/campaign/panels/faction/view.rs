@@ -155,6 +155,7 @@ fn status_text(key: &str) -> &str {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn rebuild(
     mut commands: Commands,
     theme: Res<UiTheme>,

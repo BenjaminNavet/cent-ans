@@ -562,6 +562,7 @@ fn step_button(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn bar_row(
     pane: &mut Kids,
     theme: &UiTheme,
@@ -1144,6 +1145,7 @@ fn history_section(
 }
 
 /// Fills the Finances pane.
+#[allow(clippy::too_many_arguments)]
 pub(super) fn finance_tab(
     pane: &mut Kids,
     theme: &UiTheme,
