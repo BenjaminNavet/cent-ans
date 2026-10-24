@@ -69,6 +69,8 @@ pub struct BakeJob {
     pub layer: u32,
     pub ticket: u64,
     pub mesh: AssetId<Mesh>,
+    /// Footprint in the real view (baked before the pre-baked border).
+    pub visible: bool,
 }
 
 /// Main-world state of the cache (present only while the cache is on).
@@ -210,7 +212,7 @@ pub fn publish_jobs(
     mut jobs: Vec<(bool, BakeJob)>,
 ) {
     let first = jobs.iter().filter(|(first, _)| *first).count();
-    jobs.sort_by_key(|(first, _)| !*first);
+    jobs.sort_by_key(|(first, job)| (!*first, !job.visible));
     let knob = |name: &str, default: usize| {
         crate::campaign::perf_switch::value(name).map_or(default, |v| v as usize)
     };

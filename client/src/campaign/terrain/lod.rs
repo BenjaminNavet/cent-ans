@@ -51,6 +51,8 @@ struct Node {
     /// Visibility set to `Visible` (a cache node shows before its first bake when no retiring
     /// node covers it: the shader draws the base ground until the layer is baked).
     shown: bool,
+    /// Footprint inside the real frustum (not only the widened selection one), this frame.
+    visible: bool,
 }
 
 impl Node {
@@ -65,6 +67,16 @@ impl Node {
         let (x, z) = self.spec.origin;
         (x, z, x + extent, z + extent)
     }
+}
+
+/// A footprint (full relief height range) touches the frustum given as outward planes.
+fn in_frustum(planes: &[(V3, f32)], rect: (f32, f32, f32, f32)) -> bool {
+    planes.iter().all(|(n, d)| {
+        let x = if n.x > 0.0 { rect.0 } else { rect.2 };
+        let y = if n.y > 0.0 { -10.0 } else { 500.0 };
+        let z = if n.z > 0.0 { rect.1 } else { rect.3 };
+        n.x * x + n.y * y + n.z * z - d <= 0.0
+    })
 }
 
 /// Two footprints share some area (touching edges do not count).
@@ -430,21 +442,37 @@ pub fn update_lod(
                 generation: 0,
                 mesh: None,
                 shown: false,
+                visible: true,
             },
         );
     }
     lod.peak_nodes = lod.peak_nodes.max(lod.nodes.len());
 
+    // Nodes of the real view come before the pre-baked border in every queue.
+    let real_planes = frustum_planes(
+        transform.translation,
+        *transform.right(),
+        *transform.up(),
+        *transform.forward(),
+        perspective.fov,
+        aspect,
+        perspective.near,
+        perspective.far,
+    );
+    for node in lod.nodes.values_mut() {
+        node.visible = in_frustum(&real_planes, node.rect());
+    }
+
     // Which nodes need a (re)build: new ones, or whose page changed. Coarse and near first.
-    let mut todo: Vec<(i32, f64, i64, i64)> = Vec::new();
+    let mut todo: Vec<(bool, i32, f64, i64, i64)> = Vec::new();
     for item in lod.selector.items() {
         if let Some(node) = lod.nodes.get(&item.key)
             && node.built_fine != item.fine
         {
-            todo.push((item.n, item.dist, item.key, item.fine));
+            todo.push((!node.visible, item.n, item.dist, item.key, item.fine));
         }
     }
-    todo.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.total_cmp(&b.1)));
+    todo.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)).then(a.2.total_cmp(&b.2)));
     lod.pending_builds = todo.len();
     let started = Instant::now();
     let mut built = 0usize;
@@ -453,13 +481,13 @@ pub fn update_lod(
     let uncovered = lod
         .nodes
         .values()
-        .any(|n| n.mesh.is_none() && !covering.iter().any(|r| overlaps(*r, n.rect())));
+        .any(|n| n.visible && n.mesh.is_none() && !covering.iter().any(|r| overlaps(*r, n.rect())));
     let budget_ms = if uncovered {
         HOLE_BUILD_BUDGET_MS
     } else {
         BUILD_BUDGET_MS
     };
-    for (_, _, key, fine) in todo {
+    for (_, _, _, key, fine) in todo {
         if built > 0 && started.elapsed().as_secs_f32() * 1000.0 > budget_ms {
             break;
         }
@@ -530,7 +558,7 @@ pub fn update_lod(
     lod.holes = lod
         .nodes
         .values()
-        .filter(|n| !n.shown && !covering.iter().any(|r| overlaps(*r, n.rect())))
+        .filter(|n| n.visible && !n.shown && !covering.iter().any(|r| overlaps(*r, n.rect())))
         .count();
     lod.holes_max = lod.holes_max.max(lod.holes);
     lod.holes_frames += u64::from(lod.holes > 0);
@@ -579,6 +607,7 @@ fn update_bakes(
                     layer: node.spec.cache_layer as u32,
                     ticket: node.bake_ticket,
                     mesh,
+                    visible: node.visible,
                 },
             ));
         }
