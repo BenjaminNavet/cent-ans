@@ -161,7 +161,11 @@ fn propose_from_report(path: &Path) -> Result<String, String> {
 }
 
 fn main() -> ExitCode {
-    let data_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+    // `CENT_ANS_DATA_DIR` plays another copy of the data (a deliberate regression of a rule).
+    let data_root = std::env::var_os("CENT_ANS_DATA_DIR").map_or_else(
+        || Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data"),
+        PathBuf::from,
+    );
     let args: Vec<String> = std::env::args().skip(1).collect();
     let command = match parse_args(&args, &data_root) {
         Ok(command) => command,

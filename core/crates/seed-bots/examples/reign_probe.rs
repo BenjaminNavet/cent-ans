@@ -4,22 +4,58 @@
 //!   [--profiles passive,moderate,active] [--turns 520]`
 //!
 //! - `passive`: no order, no offer answered (the player lets the realm run).
-//! - `moderate`: the strategic AI plays the house (`ai::plan_turn`, offers answered as the AI
-//!   would) but never declares a war: a peaceful, builder-diplomat player.
-//! - `active`: the strategic AI plays the house in full.
+//! - `active`: the strategic AI plays the house (`ai::plan_turn`, offers answered as the AI
+//!   would): it builds, recruits, allies and fights, but does not pursue the act objectives.
+//! - `decisive`: `active`, and the player carries out one decisive campaign per act on the
+//!   territorial objectives (control of the provinces they name, expulsion of the foreign
+//!   occupiers) four years into the act: the conquests a good player makes, simulated by a change of
+//!   controller of the settlements involved.
 //!
 //! Prints, per run: the outcome, the final reign score, the act scores and the ending reasons.
 
 use std::path::Path;
 
-use data_model::{FactionId, GameData};
+use data_model::{ActCondition, FactionId, GameData};
 use sim_campaign::{CampaignState, Order};
 
 #[derive(Clone, Copy, PartialEq)]
 enum Profile {
     Passive,
-    Moderate,
     Active,
+    Decisive,
+}
+
+/// One decisive campaign per act, four years into the act: the settlements of the territorial objectives
+/// of the act pass under the player's control.
+fn conquer(state: &mut CampaignState, data: &GameData, player: &FactionId) {
+    let Some(status) = state.act_status(data) else {
+        return;
+    };
+    // Four years into the act: before any early end (24 seasons at the least).
+    let elapsed = state.turn.saturating_sub(state.acts.act_start_turn);
+    if elapsed != 16 {
+        return;
+    }
+    for line in status.objectives.iter().filter(|o| !o.met) {
+        match &line.objective.condition {
+            ActCondition::ControlAll { provinces } | ActCondition::ControlCount { provinces, .. } => {
+                for settlement in state.settlements.values_mut() {
+                    if provinces.contains(&settlement.province) {
+                        settlement.controller = player.clone();
+                    }
+                }
+            }
+            ActCondition::NoForeignControl { faction, provinces } => {
+                for settlement in state.settlements.values_mut() {
+                    if provinces.contains(&settlement.province) && &settlement.controller == faction
+                    {
+                        settlement.controller = player.clone();
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
 }
 
 fn play(data: &GameData, faction: &str, seed: u64, profile: Profile, turns: u32) -> String {
@@ -47,11 +83,11 @@ fn play(data: &GameData, faction: &str, seed: u64, profile: Profile, turns: u32)
                 );
             }
             for order in ai::plan_turn(&state, data, &id) {
-                if profile == Profile::Moderate && matches!(order, Order::DeclareWar { .. }) {
-                    continue;
-                }
                 let _ = state.submit_order(data, order);
             }
+        }
+        if profile == Profile::Decisive {
+            conquer(&mut state, data, &id);
         }
         state.end_turn_with(data, ai::plan_turn);
         played += 1;
@@ -83,8 +119,8 @@ fn play(data: &GameData, faction: &str, seed: u64, profile: Profile, turns: u32)
         "{faction} seed {seed} {:<8} -> {outcome:<8} year {} turn {} reign {:>3} acts [{}]",
         match profile {
             Profile::Passive => "passive",
-            Profile::Moderate => "moderate",
             Profile::Active => "active",
+            Profile::Decisive => "decisive",
         },
         state.year,
         state.turn,
@@ -101,7 +137,7 @@ fn play(data: &GameData, faction: &str, seed: u64, profile: Profile, turns: u32)
 fn main() {
     let mut seeds = vec![1u64];
     let mut faction = "fac_france".to_owned();
-    let mut profiles = vec![Profile::Passive, Profile::Moderate, Profile::Active];
+    let mut profiles = vec![Profile::Passive, Profile::Active, Profile::Decisive];
     let mut turns = 520;
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
@@ -123,7 +159,7 @@ fn main() {
                     .split(',')
                     .map(|p| match p {
                         "passive" => Profile::Passive,
-                        "moderate" => Profile::Moderate,
+                        "decisive" => Profile::Decisive,
                         _ => Profile::Active,
                     })
                     .collect();

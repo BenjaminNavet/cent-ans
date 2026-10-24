@@ -116,6 +116,20 @@ mod tests {
         assert!(bands.contains_key("revolts_per_game"));
     }
 
+    /// GAMEPLAY2 (ADR 0789): the quick pass has its own bands, every metric initialised and
+    /// bounded on both sides, so that the oracle can fail.
+    #[test]
+    fn quick_bands_are_all_active_and_bounded() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+        let bands = load(&root, true).expect("quick bands");
+        assert_eq!(bands.len(), METRIC_NAMES.len());
+        for name in METRIC_NAMES {
+            let band = bands.get(name).unwrap_or_else(|| panic!("{name} missing"));
+            assert!(band.is_active(), "{name} is not initialised");
+            assert!(band.min.is_some() && band.max.is_some(), "{name} unbounded");
+        }
+    }
+
     #[test]
     fn active_band_checks_bounds() {
         let band = parse(r#"{"m": {"min": 1.0, "max": 3.0, "status": "initialised"}}"#).unwrap()
