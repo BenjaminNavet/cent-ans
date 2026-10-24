@@ -3,8 +3,10 @@
 
 use std::process::ExitCode;
 
-// `--features system-alloc`: the platform allocator, for A/B measurements (ADR 0776).
-#[cfg(not(feature = "system-alloc"))]
+// `--features system-alloc`: the platform allocator, for A/B measurements (ADR 0776). Also the
+// allocator of the `dev` build: Bevy is then a dylib that allocates with the system allocator, and
+// a different global allocator in the binary aborts at the first cross-boundary free.
+#[cfg(not(any(feature = "system-alloc", feature = "dev")))]
 #[global_allocator]
 static ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
