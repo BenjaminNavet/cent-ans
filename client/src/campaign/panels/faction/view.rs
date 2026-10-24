@@ -209,6 +209,7 @@ pub fn rebuild(
             ];
             if view.is_player {
                 tabs.push((TABS[3], "Cour"));
+                tabs.push((TABS[4], "Chantiers"));
             }
             let selected = selected.min(tabs.len() - 1);
             root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));
@@ -258,6 +259,17 @@ pub fn rebuild(
                         .with_children(|list| {
                             court_tab(list, &theme, &assets, &codex, panel, view)
                         });
+                });
+                root.spawn(tab_pane_fit(
+                    TAB_GROUP,
+                    TABS[4],
+                    selected == 4,
+                    TAB_HEIGHT,
+                    MIN_TAB_HEIGHT,
+                ))
+                .with_children(|pane| {
+                    pane.spawn(scroll_list_fill(&theme, "faction:scroll:works"))
+                        .with_children(|list| works_tab(list, &theme, &sim, panel));
                 });
             }
         });
@@ -1173,4 +1185,157 @@ fn trade_tab(
             }
         });
     sections::partners(pane, theme, assets, panel, view);
+}
+
+/// « Chantiers » tab: header, filters, « Appliquer à tout », recap, one line per colony.
+fn works_tab(pane: &mut Kids, theme: &UiTheme, sim: &Sim, panel: &FactionPanel) {
+    use super::works as w;
+    let ui = &panel.works;
+    let Some(overview) = super::current_works(sim) else {
+        return;
+    };
+    let rows = w::visible(&overview, ui);
+    let entries = w::entries(&rows, ui);
+    let plan = match (&sim.data, &sim.state) {
+        (Some(data), Some(state)) if !entries.is_empty() => Some(
+            sim_campaign::realm_works::plan_works_batch(state, data, &sim.player, &entries),
+        ),
+        _ => None,
+    };
+    pane.spawn((
+        Name::new("works:header"),
+        wrapped(ink(
+            theme,
+            &w::header_text(&overview),
+            UiType::Body,
+            style::INK,
+        )),
+    ));
+    let cost = plan.as_ref().map_or(0, |p| p.total_cost());
+    pane.spawn(ink(
+        theme,
+        &format!("Coût de la sélection : {cost} écus"),
+        UiType::Caption,
+        if cost > overview.treasury {
+            style::ERROR
+        } else {
+            style::INK_SOFT
+        },
+    ));
+    // Filters.
+    pane.spawn(Node {
+        column_gap: Val::Px(6.0),
+        flex_wrap: FlexWrap::Wrap,
+        align_items: AlignItems::Center,
+        ..default()
+    })
+    .with_children(|bar| {
+        bar.spawn(toggle_button(
+            theme,
+            "works:filter:free",
+            "Avec emplacement libre",
+            ui.only_free,
+        ));
+        let province = ui
+            .province
+            .as_ref()
+            .and_then(|id| w::provinces(&overview).into_iter().find(|p| &p.0 == id))
+            .map_or_else(|| "Toutes".to_owned(), |p| p.1);
+        bar.spawn(button_small(
+            theme,
+            "works:filter:province",
+            &format!("Province : {province}"),
+        ));
+        let kind = ui.kind.map_or("Tous", w::kind_label);
+        bar.spawn(button_small(
+            theme,
+            "works:filter:kind",
+            &format!("Type : {kind}"),
+        ));
+    });
+    // Apply to all.
+    let global_name = ui
+        .global
+        .as_ref()
+        .and_then(|id| w::global_choices(&rows).into_iter().find(|c| &c.0 == id))
+        .map_or_else(|| "aucun".to_owned(), |c| c.1);
+    pane.spawn(Node {
+        column_gap: Val::Px(6.0),
+        align_items: AlignItems::Center,
+        ..default()
+    })
+    .with_children(|bar| {
+        bar.spawn((
+            Tooltip::new(
+                "Pose le bâtiment choisi dans chaque colonie listée où il est constructible.",
+            ),
+            button_small(
+                theme,
+                "works:all",
+                &format!("Appliquer à tout : {global_name}"),
+            ),
+        ));
+        if let Some(plan) = &plan {
+            bar.spawn(button_small(theme, "works:launch", &w::launch_label(plan)));
+        }
+    });
+    if let Some(plan) = &plan {
+        for line in w::recap_lines(plan, &rows, overview.treasury) {
+            pane.spawn(wrapped(ink(theme, &line, UiType::Caption, style::INK_SOFT)));
+        }
+        if plan.started() < plan.entries.len() {
+            pane.spawn(wrapped(ink(
+                theme,
+                "Fonds ou files insuffisants : seuls les chantiers listés comme lancés le seront, dans l’ordre de la liste.",
+                UiType::Caption,
+                style::ERROR,
+            )));
+        }
+    }
+    pane.spawn(separator(theme));
+    if rows.is_empty() {
+        pane.spawn(caption(theme, "Aucune colonie ne correspond aux filtres."));
+    }
+    for row in rows {
+        let full = row.queue_full();
+        let ink_color = if full { style::INK_FADED } else { style::INK };
+        pane.spawn((
+            Name::new(format!("works:row:{}", row.settlement)),
+            Node {
+                column_gap: Val::Px(8.0),
+                align_items: AlignItems::Center,
+                ..default()
+            },
+        ))
+        .with_children(|line| {
+            line.spawn((
+                Tooltip::new(&format!("Ouvrir la province {}", row.province_name)),
+                button_small(theme, &format!("works:open:{}", row.province), &row.name),
+            ));
+            line.spawn(ink(
+                theme,
+                &format!(
+                    "palier {}  ·  empl. {}  ·  chantiers {}/{}",
+                    row.tier,
+                    w::slots_text(row),
+                    row.queue_len,
+                    row.queue_size
+                ),
+                UiType::Caption,
+                ink_color,
+            ));
+            if full {
+                line.spawn(ink(theme, "file pleine", UiType::Caption, style::INK_FADED));
+            } else {
+                line.spawn((
+                    Tooltip::new(&w::options_tooltip(row)),
+                    button_small(
+                        theme,
+                        &format!("works:pick:{}", row.settlement),
+                        &w::pick_label(row, ui),
+                    ),
+                ));
+            }
+        });
+    }
 }

@@ -24,11 +24,18 @@
 //! icons of goods / agreements / orders, the papal call (`faction:join_crusade`, two presses, and
 //! `faction:crusade_target`) in the Court tab.
 //!
+//! Fifth tab « Chantiers » (player only, `faction:tab:works`, `works.rs`): construction overview of
+//! every colony (free slots, queue, menu of buildable buildings per row), filters, « Appliquer à
+//! tout » and a launch recap planned by `sim_campaign::realm_works`. Widget names:
+//! `works:filter:free|province|kind`, `works:pick:<settlement>`, `works:open:<province>`,
+//! `works:all`, `works:launch`. Dump section `works` of `panel_faction`.
+//!
 //! Not ported: the ransoms window and the routes overlay of the map.
 
 pub(crate) mod chart;
 pub(crate) mod sections;
 pub(crate) mod view;
+pub(crate) mod works;
 
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
@@ -53,11 +60,12 @@ use crate::ui::kit::{ButtonPressed, TabSelected, ToggleChanged};
 /// Id of the panel in the panel stack.
 pub const PANEL_ID: &str = "faction";
 const TAB_GROUP: &str = "faction_tab";
-const TABS: [&str; 4] = [
+const TABS: [&str; 5] = [
     "faction:tab:sheet",
     "faction:tab:budget",
     "faction:tab:trade",
     "faction:tab:court",
+    "faction:tab:works",
 ];
 
 pub struct PanelFactionPlugin;
@@ -96,6 +104,8 @@ pub struct FactionPanel {
     pub break_armed: Option<String>,
     /// « Rejoindre la croisade » asked its confirmation.
     pub join_armed: bool,
+    /// Choices of the « Chantiers » tab.
+    pub works: works::WorksUi,
     dirty: bool,
     last_turn: u32,
     pub view: Option<FactionPanelView>,
@@ -111,6 +121,7 @@ impl Default for FactionPanel {
             result: None,
             break_armed: None,
             join_armed: false,
+            works: works::WorksUi::default(),
             dirty: false,
             last_turn: 0,
             view: None,
@@ -194,6 +205,7 @@ fn open_close(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_input(
     mut pressed: MessageReader<ButtonPressed>,
     mut tabs: MessageReader<TabSelected>,
@@ -202,6 +214,7 @@ fn handle_input(
     mut panel: ResMut<FactionPanel>,
     mut sim: ResMut<Sim>,
     mut focus: MessageWriter<FocusCamera>,
+    mut open_panel: MessageWriter<OpenPanel>,
 ) {
     for tab in tabs.read() {
         if tab.group == TAB_GROUP {
@@ -212,12 +225,19 @@ fn handle_input(
         if toggle.name == "faction:mine_only" {
             panel.mine_only = toggle.on;
             panel.dirty = true;
+        } else if toggle.name == "works:filter:free" {
+            panel.works.only_free = toggle.on;
+            panel.dirty = true;
         }
     }
     if !panel.open {
         return;
     }
     for press in pressed.read() {
+        if let Some(name) = press.name.strip_prefix("works:") {
+            works_press(name, &mut panel, &mut sim, &mut open_panel);
+            continue;
+        }
         let Some(name) = press.name.strip_prefix("faction:") else {
             continue;
         };
@@ -341,6 +361,73 @@ fn handle_input(
             }
         }
     }
+}
+
+/// Current overview of the player's colonies (`None` before the campaign runs).
+pub(crate) fn current_works(sim: &Sim) -> Option<sim_campaign::realm_works::RealmWorks> {
+    let (data, state) = (sim.data.as_ref()?, sim.state.as_ref()?);
+    Some(sim_campaign::realm_works::realm_works(
+        state,
+        data,
+        &sim.player,
+    ))
+}
+
+/// A press on a widget of the « Chantiers » tab (`works:<name>`).
+fn works_press(
+    name: &str,
+    panel: &mut FactionPanel,
+    sim: &mut Sim,
+    open_panel: &mut MessageWriter<OpenPanel>,
+) {
+    let Some(overview) = current_works(sim) else {
+        return;
+    };
+    let rows = works::visible(&overview, &panel.works);
+    if let Some(province) = name.strip_prefix("open:") {
+        open_panel.write(OpenPanel::Province(province.to_owned()));
+        return;
+    } else if name == "filter:province" {
+        let ids: Vec<String> = works::provinces(&overview)
+            .into_iter()
+            .map(|p| p.0)
+            .collect();
+        panel.works.province = works::cycle(panel.works.province.as_ref(), &ids);
+    } else if name == "filter:kind" {
+        let kinds = works::kinds(&overview);
+        panel.works.kind = works::cycle(panel.works.kind.as_ref(), &kinds);
+    } else if let Some(settlement) = name.strip_prefix("pick:") {
+        if let Some(row) = overview
+            .rows
+            .iter()
+            .find(|r| r.settlement.as_str() == settlement)
+        {
+            let ids = works::available_ids(row);
+            let current = panel.works.picks.get(settlement).cloned();
+            match works::cycle(current.as_ref(), &ids) {
+                Some(next) => panel.works.picks.insert(settlement.to_owned(), next),
+                None => panel.works.picks.remove(settlement),
+            };
+        }
+    } else if name == "all" {
+        let ids: Vec<String> = works::global_choices(&rows)
+            .into_iter()
+            .map(|c| c.0)
+            .collect();
+        panel.works.global = works::cycle(panel.works.global.as_ref(), &ids);
+    } else if name == "launch" {
+        let entries = works::entries(&rows, &panel.works);
+        if entries.is_empty() {
+            panel.result = Some((false, "Aucun chantier choisi.".to_owned()));
+        } else if let (Some(data), Some(state)) = (sim.data.clone(), sim.state.as_mut()) {
+            let report =
+                sim_campaign::realm_works::apply_works_batch(state, &data, &sim.player, &entries);
+            panel.result = Some(works::result_message(&report));
+            panel.works.picks.clear();
+            panel.works.global = None;
+        }
+    }
+    panel.dirty = true;
 }
 
 /// A click on a `[[cdx_…]]` link of the panel opens that Codex entry.
@@ -470,6 +557,47 @@ fn dump_faction(world: &World) -> (String, Value) {
             "break_armed": panel.break_armed,
             "result": panel.result.as_ref().map(|(ok, text)| json!({"ok": ok, "text": text})),
             "view": summary,
+            "works": dump_works(world, panel),
         }),
     )
+}
+
+/// Section `works` of the dump: counters and the first rows of the tab (not the whole map).
+fn dump_works(world: &World, panel: &FactionPanel) -> Value {
+    let ui = &panel.works;
+    let Some(overview) = current_works(world.resource::<Sim>()) else {
+        return Value::Null;
+    };
+    let rows = works::visible(&overview, ui);
+    let entries = works::entries(&rows, ui);
+    let sim = world.resource::<Sim>();
+    let plan = match (&sim.data, &sim.state) {
+        (Some(data), Some(state)) if !entries.is_empty() => Some(
+            sim_campaign::realm_works::plan_works_batch(state, data, &sim.player, &entries),
+        ),
+        _ => None,
+    };
+    json!({
+        "free_slots": overview.free_slots,
+        "in_progress": overview.works_in_progress,
+        "treasury": overview.treasury,
+        "colonies": overview.rows.len(),
+        "visible": rows.len(),
+        "only_free": ui.only_free,
+        "province": ui.province,
+        "kind": ui.kind.map(|k| k.key()),
+        "global": ui.global,
+        "picks": ui.picks.len(),
+        "entries": entries.len(),
+        "plan": plan.as_ref().map(|p| json!({"started": p.started(), "cost": p.total_cost(), "refused": p.entries.len() - p.started()})),
+        "first_rows": rows.iter().take(5).map(|r| json!({
+            "settlement": r.settlement.as_str(),
+            "name": r.name,
+            "province": r.province.as_str(),
+            "tier": r.tier,
+            "slots": works::slots_text(r),
+            "queue": format!("{}/{}", r.queue_len, r.queue_size),
+            "available": works::available_ids(r).len(),
+        })).collect::<Vec<_>>(),
+    })
 }
