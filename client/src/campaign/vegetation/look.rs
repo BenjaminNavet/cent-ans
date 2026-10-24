@@ -307,7 +307,7 @@ impl Default for ForestLook {
             grow_start: 140.0,
             grow_end: 600.0,
             far_size_gain: 0.7,
-            near_scale: 1.0,
+            near_scale: 0.8,
             frost: Vec3::new(0.8, 0.84, 0.88),
             frost_strength: 0.85,
             green_share: 0.3,

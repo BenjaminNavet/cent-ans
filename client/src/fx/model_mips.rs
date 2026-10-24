@@ -262,7 +262,7 @@ fn compressible(image: &Image) -> bool {
 /// is at most `max_side`), `None` when a texel is not opaque.
 fn bc1_chain(rgba: &[u8], w: usize, h: usize, max_side: usize) -> Option<(Vec<u8>, UVec2)> {
     use crate::campaign::terrain::bc1;
-    if rgba.chunks_exact(4).any(|p| p[3] != 255) {
+    if rgba.as_chunks::<4>().0.iter().any(|p| p[3] != 255) {
         return None;
     }
     let mut out = Vec::new();
