@@ -12,6 +12,9 @@
 //! included, then a weighted desaturation that spares the vivid, warm and bright hues. The UI has
 //! its own camera and is never touched. Everything fades out on the parchment (ADR 0124).
 
+use bevy::anti_alias::contrast_adaptive_sharpening::cas;
+use bevy::anti_alias::fxaa::fxaa;
+use bevy::anti_alias::smaa::smaa;
 use bevy::core_pipeline::FullscreenShader;
 use bevy::core_pipeline::schedule::Core3d;
 use bevy::core_pipeline::{Core3dSystems, tonemapping::tonemapping};
@@ -432,7 +435,12 @@ pub fn add_plugin(app: &mut App) {
             Core3d,
             campaign_post_pass
                 .in_set(Core3dSystems::PostProcess)
-                .after(tonemapping),
+                .after(tonemapping)
+                // The anti-aliasing and sharpening passes also run after the tonemapper with no order
+                // against this one: when they ran first, a frame came out ungraded (dark flashes).
+                .before(fxaa)
+                .before(smaa)
+                .before(cas),
         );
 }
 
