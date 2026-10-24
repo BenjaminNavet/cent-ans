@@ -46,7 +46,7 @@ const AXIS_WIDTH: f32 = 58.0;
 const NUMBER_WIDTH: f32 = 92.0;
 const TABLE_ROWS: usize = 12;
 
-const RUBRICS: [(&str, &str, &str); 6] = [
+const RUBRICS: [(&str, &str, &str); 13] = [
     (
         "receipts",
         "Impôts et commerce",
@@ -71,6 +71,41 @@ const RUBRICS: [(&str, &str, &str); 6] = [
         "administration",
         "Cour et administration",
         "Part du revenu prise par la cour et l’administration, refonte des monnaies et prix des édits en vigueur compris.",
+    ),
+    (
+        "household",
+        "Maison du roi",
+        "Part du revenu brut qui croît avec le rang du royaume et le prestige du souverain (cour, fêtes, escorte).",
+    ),
+    (
+        "wages",
+        "Gages des officiers",
+        "Gouverneurs de province et chefs d’armée.",
+    ),
+    (
+        "siege",
+        "Coût des sièges",
+        "Fascines, engins et fourrage des sièges en cours ; croît avec leur durée.",
+    ),
+    (
+        "obligations",
+        "Dot, tribut et saisies",
+        "Versements dus : dot de mariage, tribut, saisie des banquiers après une banqueroute.",
+    ),
+    (
+        "interest",
+        "Intérêts de la dette",
+        "Intérêts des prêts des banquiers ; le taux monte quand la cote de crédit baisse.",
+    ),
+    (
+        "levies",
+        "Impôts exceptionnels",
+        "Aide, gabelle, fouage levés la saison passée : de l’argent tout de suite, de la grogne ensuite.",
+    ),
+    (
+        "loans",
+        "Emprunts et remboursements",
+        "Prêts reçus moins remboursements de la saison passée.",
     ),
     (
         "other",
@@ -686,9 +721,32 @@ pub(crate) fn budget_table(pane: &mut Kids, theme: &UiTheme, view: &FactionPanel
     for line in economy
         .budget_lines
         .iter()
-        .filter(|l| l.key == "other" && has_past)
+        .filter(|l| matches!(l.key.as_str(), "levies" | "loans" | "other") && has_past)
     {
         budget_row(pane, theme, line, has_past, &view.table);
+    }
+    if let Some(finance) = view
+        .finance
+        .as_ref()
+        .filter(|f| f.debt > 0 || f.defaults > 0)
+    {
+        let risk = format!("{} %", finance.default_risk_percent);
+        table_row(
+            pane,
+            theme,
+            [
+                "   Dette aux banquiers",
+                &fr::signed(-finance.debt),
+                &risk,
+                "",
+            ],
+            UiType::Body,
+            [style::INK, style::POOR, style::INK_SOFT, style::INK],
+            Some((
+                "Dette aux banquiers",
+                "Capital dû ; la deuxième colonne donne le risque de banqueroute royale (100 % : le trésor vide la déclenche). Emprunts, remboursements et impôts exceptionnels se décident par ordres.",
+            )),
+        );
     }
     if economy.mercenary_premium != 0 || economy.mercenary_premium_last_turn != 0 {
         table_row(

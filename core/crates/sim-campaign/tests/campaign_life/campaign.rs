@@ -749,7 +749,10 @@ fn france_income_is_positive_and_in_target_range() {
     let treasury_before = state.faction_state(&france_id).unwrap().treasury;
     let effective_upkeep = state.faction_upkeep(data, &france_id)
         + state.faction_building_upkeep(data, &france_id)
-        + state.faction_administration_upkeep(data, &france_id);
+        + state.faction_administration_upkeep(data, &france_id)
+        // ECO2 (ADR 0777): the crown's recurring charges.
+        + sim_campaign::finance::structural_costs(&state, data, &france_id, effective_income)
+            .total();
     let events = state.end_turn_with(data, idle);
     assert!(events.iter().any(|e| e.kind == EventKind::Income));
     let summary = state.faction_summary(&france_id).unwrap();

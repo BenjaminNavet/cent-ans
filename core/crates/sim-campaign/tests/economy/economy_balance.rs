@@ -23,6 +23,11 @@ fn projected_net_income_is_the_booked_balance() {
             - economy.building_upkeep
             - economy.administration_upkeep
             - economy.table_upkeep
+            - economy.household
+            - economy.wages
+            - economy.siege
+            - economy.obligations
+            - economy.interest
     );
     state.end_turn_with(data, idle);
     assert_eq!(state.faction_net_last_turn(&france), Some(net));

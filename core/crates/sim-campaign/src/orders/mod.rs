@@ -445,6 +445,18 @@ impl CampaignState {
                 crate::province_tax::set_province_tax(self, faction, &province, rate)?;
                 Ok(())
             }
+            Order::Borrow { lender, amount } => {
+                crate::finance::borrow(self, data, faction, &lender, amount)?;
+                Ok(())
+            }
+            Order::Repay { amount } => {
+                crate::finance::repay(self, data, faction, amount)?;
+                Ok(())
+            }
+            Order::LevyExtraordinary { levy } => {
+                crate::finance::levy(self, data, faction, &levy)?;
+                Ok(())
+            }
             Order::SetCoinage { level } => {
                 crate::coinage::set_coinage(self, data, faction, level)?;
                 Ok(())

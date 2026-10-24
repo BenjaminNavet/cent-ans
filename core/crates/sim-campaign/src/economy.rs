@@ -114,6 +114,20 @@ pub struct FactionEconomy {
     /// C5: trade income paid during the last resolved turn.
     #[serde(default)]
     pub trade_income_last_turn: i64,
+    /// ECO2 (ADR 0777): the recurring charges of the crown this season.
+    #[serde(default)]
+    pub household: i64,
+    #[serde(default)]
+    pub wages: i64,
+    #[serde(default)]
+    pub siege: i64,
+    #[serde(default)]
+    pub obligations: i64,
+    #[serde(default)]
+    pub interest: i64,
+    /// ECO2: principal owed to the bankers.
+    #[serde(default)]
+    pub debt: i64,
 }
 
 /// The purse of one faction for one season, in livres: what
@@ -142,6 +156,29 @@ pub struct TurnBudget {
     /// Armies kept (empty ones apart), for the budget detail.
     #[serde(default)]
     pub army_count: u32,
+    /// ECO2 (ADR 0777): the king's household, part of the upkeep.
+    #[serde(default)]
+    pub household: i64,
+    /// ECO2: wages of governors and commanders.
+    #[serde(default)]
+    pub wages: i64,
+    /// ECO2: cost of the sieges under way.
+    #[serde(default)]
+    pub siege: i64,
+    /// ECO2: dowry, tribute and seizures being paid.
+    #[serde(default)]
+    pub obligations: i64,
+    /// ECO2: interest on the bankers' loans.
+    #[serde(default)]
+    pub interest: i64,
+    /// ECO2: extraordinary taxes raised during the season (not in `income`).
+    #[serde(default)]
+    pub levy_income: i64,
+    /// ECO2: loans taken and repaid during the season (not in `income`).
+    #[serde(default)]
+    pub borrowed: i64,
+    #[serde(default)]
+    pub repaid: i64,
 }
 
 impl TurnBudget {
@@ -153,6 +190,7 @@ impl TurnBudget {
         let seigniorage = crate::coinage::seigniorage(state, data, faction);
         let recoinage = crate::coinage::recoinage(state, data, faction);
         let tax_income = state.faction_income(data, faction);
+        let structural = crate::finance::structural_costs(state, data, faction, tax_income);
         TurnBudget {
             income: tax_income + seigniorage,
             seigniorage,
@@ -167,12 +205,28 @@ impl TurnBudget {
             trade_income: 0,
             army_surcharge: state.faction_army_surcharge(data, faction),
             army_count: state.faction_army_count(faction) as u32,
+            household: structural.household,
+            wages: structural.wages,
+            siege: structural.siege,
+            obligations: structural.obligations,
+            interest: structural.interest,
+            levy_income: 0,
+            borrowed: 0,
+            repaid: 0,
         }
     }
 
     /// Everything the faction pays.
     pub fn upkeep(&self) -> i64 {
-        self.army_upkeep + self.building_upkeep + self.administration + self.table
+        self.army_upkeep
+            + self.building_upkeep
+            + self.administration
+            + self.table
+            + self.household
+            + self.wages
+            + self.siege
+            + self.obligations
+            + self.interest
     }
 
     /// Taxes plus trade.
@@ -673,6 +727,12 @@ impl CampaignState {
             goods_categories,
             trade_income: crate::trade::faction_trade_income(self, data, id),
             trade_income_last_turn: last.trade_income,
+            household: projected.household,
+            wages: projected.wages,
+            siege: projected.siege,
+            obligations: projected.obligations,
+            interest: projected.interest,
+            debt: faction.finance.debt(),
         })
     }
 }
@@ -693,15 +753,15 @@ pub(crate) fn resolve_economy(
         // H5: seigniorage is income, the recoinage of strong money upkeep.
         let mut budget = TurnBudget::compute(state, data, &faction_id);
         // WH econ: edicts the purse cannot carry are dropped.
-        let balance = state.factions[&faction_id].treasury + budget.income
-            - (budget.army_upkeep + budget.building_upkeep + budget.administration);
+        let balance =
+            state.factions[&faction_id].treasury + budget.income - (budget.upkeep() - budget.table);
         if balance < 0
             && crate::edicts::drop_unaffordable(state, data, &faction_id, -balance, events)
         {
             budget = TurnBudget::compute(state, data, &faction_id);
         }
-        let available = state.factions[&faction_id].treasury + budget.income
-            - (budget.army_upkeep + budget.building_upkeep + budget.administration);
+        let available =
+            state.factions[&faction_id].treasury + budget.income - (budget.upkeep() - budget.table);
         // H3: the diets of the provinces (« Table »), those the purse cannot
         // cover fall back to the default.
         budget.table = crate::table::pay_table(state, data, &faction_id, available, events);
@@ -715,6 +775,11 @@ pub(crate) fn resolve_economy(
         };
         // Trade is credited after the taxes (`trade::resolve_trade`).
         budget.trade_income = faction.last_budget.trade_income;
+        // ECO2: the money moved by orders during the season.
+        let ledger = std::mem::take(&mut faction.finance.ledger);
+        budget.levy_income = ledger.levied;
+        budget.borrowed = ledger.borrowed;
+        budget.repaid = ledger.repaid;
         faction.last_budget = budget;
         let treasury = faction.treasury;
         if faction_id == state.player_faction {
@@ -779,6 +844,11 @@ pub(crate) fn resolve_economy(
                         building_upkeep: budget.building_upkeep,
                         administration: budget.administration,
                         table: budget.table,
+                        household: budget.household,
+                        wages: budget.wages,
+                        siege: budget.siege,
+                        obligations: budget.obligations,
+                        interest: budget.interest,
                         deficit_seasons: faction.deficit_seasons,
                     },
                 ));

@@ -118,7 +118,9 @@ impl<'a> Context<'a> {
         let income = gross_income
             - state.administration_upkeep_for(data, faction, gross_income)
             - tribute
-            - commitments(state, faction);
+            - commitments(state, faction)
+            // ECO2 (ADR 0777): household, wages, sieges, obligations, interest.
+            - sim_campaign::finance::structural_costs(state, data, faction, gross_income).total();
         Some(Context {
             anchors,
             grid,
@@ -410,7 +412,16 @@ fn state_plans(
                     },
                     || {
                         (
-                            sim_campaign::coinage::ai_choose_coinage(cache, data, faction),
+                            {
+                                // ECO2: loans, repayments and extraordinary taxes
+                                // come before the coinage.
+                                let mut orders =
+                                    sim_campaign::finance::ai_finance_orders(cache, data, faction);
+                                orders.extend(sim_campaign::coinage::ai_choose_coinage(
+                                    cache, data, faction,
+                                ));
+                                orders
+                            },
                             sim_campaign::ransom::ai_ransom_orders(cache, data, faction),
                             {
                                 // JR1: the crusader faction preaches the

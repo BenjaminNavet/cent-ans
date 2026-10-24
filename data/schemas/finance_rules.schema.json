@@ -1,0 +1,400 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/finance_rules.schema.json",
+  "title": "Règles des finances royales",
+  "description": "Fichier data/rules/finance.json (lot ECO2, ADR 0777) : maison du roi, gages, coût des sièges, crédit des banquiers, banqueroute royale, impôts exceptionnels, dot, IA. Lu par sim-campaign::finance (FinanceRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "household": {
+      "type": "object",
+      "properties": {
+        "tiers": {
+          "type": "array",
+          "description": "Paliers de rang : un royaume d'au moins min_provinces provinces paie percent % de son revenu brut.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "min_provinces": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000,
+                "description": "Seuil de provinces."
+              },
+              "percent": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Pour cent du revenu brut."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "min_provinces",
+              "percent"
+            ]
+          }
+        },
+        "percent_per_10_prestige": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Pour cent du revenu brut en plus par 10 points de prestige du souverain."
+        },
+        "max_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Plafond de la maison du roi, pour cent du revenu brut."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "tiers",
+        "percent_per_10_prestige",
+        "max_percent"
+      ]
+    },
+    "officers": {
+      "type": "object",
+      "properties": {
+        "governor_wage": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000,
+          "description": "Livres par saison pour chaque gouverneur de province."
+        },
+        "commander_wage": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000,
+          "description": "Livres par saison pour chaque armée menée par un général."
+        },
+        "max_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Plafond des gages, pour cent du revenu brut."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "governor_wage",
+        "commander_wage",
+        "max_percent"
+      ]
+    },
+    "siege": {
+      "type": "object",
+      "properties": {
+        "per_siege": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000,
+          "description": "Livres par saison pour chaque siège en cours."
+        },
+        "growth_percent_per_season": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "Hausse en pour cent par saison de siège écoulée."
+        },
+        "growth_max_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Plafond de la hausse, pour cent."
+        },
+        "max_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Plafond des coûts de siège, pour cent du revenu brut."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "per_siege",
+        "growth_percent_per_season",
+        "growth_max_percent",
+        "max_percent"
+      ]
+    },
+    "credit": {
+      "type": "object",
+      "properties": {
+        "lenders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "rate_permille": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000,
+                "description": "Intérêt par saison, en millièmes du capital, à cote pleine."
+              },
+              "limit_seasons": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Plafond de prêt en saisons de revenu brut (tous les prêts de cette maison)."
+              },
+              "min_loan": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000000,
+                "description": "Plus petit prêt."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "rate_permille",
+              "limit_seasons",
+              "min_loan"
+            ]
+          }
+        },
+        "start_rating": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Cote de crédit initiale (0-100)."
+        },
+        "rating_recovery": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Points regagnés par saison sans banqueroute."
+        },
+        "rate_penalty_permille_per_point": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Intérêt en plus (millièmes par saison) par point de cote perdu."
+        },
+        "rating_scales_limit": {
+          "type": "boolean",
+          "description": "Le plafond de prêt est multiplié par cote/100."
+        },
+        "default": {
+          "type": "object",
+          "properties": {
+            "debt_seasons": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Banqueroute quand le trésor est négatif et la dette dépasse ce nombre de saisons de revenu brut."
+            },
+            "write_off_percent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Part de la dette effacée, pour cent."
+            },
+            "clear_treasury": {
+              "type": "boolean",
+              "description": "Le trésor négatif est effacé."
+            },
+            "freeze_turns": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000,
+              "description": "Tours sans prêt."
+            },
+            "rating_loss": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Points de cote perdus."
+            },
+            "seizure_percent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Part du revenu brut saisie chaque saison."
+            },
+            "seizure_turns": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000,
+              "description": "Saisons de saisie."
+            },
+            "unrest": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Grogne ajoutée à chaque province."
+            },
+            "unrest_turns": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000,
+              "description": "Saisons de grogne."
+            },
+            "prestige_loss": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000,
+              "description": "Prestige perdu par le souverain."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "debt_seasons",
+            "write_off_percent",
+            "clear_treasury",
+            "freeze_turns",
+            "rating_loss",
+            "seizure_percent",
+            "seizure_turns",
+            "unrest",
+            "unrest_turns",
+            "prestige_loss"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "lenders",
+        "start_rating",
+        "rating_recovery",
+        "rate_penalty_permille_per_point",
+        "rating_scales_limit",
+        "default"
+      ]
+    },
+    "levies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "from_year": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2000
+          },
+          "income_seasons": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Rendement immédiat en saisons de revenu brut."
+          },
+          "unrest": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Grogne ajoutée à chaque province."
+          },
+          "unrest_turns": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Saisons de grogne."
+          },
+          "cooldown_turns": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Saisons avant de relever le même impôt."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "income_seasons",
+          "unrest",
+          "unrest_turns",
+          "cooldown_turns"
+        ]
+      }
+    },
+    "dowry": {
+      "type": "object",
+      "properties": {
+        "income_seasons": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Total en saisons de revenu brut de la maison qui paie."
+        },
+        "installments": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Nombre de versements saisonniers."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "income_seasons",
+        "installments"
+      ]
+    },
+    "ai": {
+      "type": "object",
+      "properties": {
+        "borrow_below_seasons": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "L'IA emprunte sous ce nombre de saisons de revenu en trésor."
+        },
+        "borrow_seasons": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Montant emprunté, en saisons de revenu."
+        },
+        "repay_above_seasons": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "L'IA rembourse au-dessus de ce nombre de saisons de revenu en trésor."
+        },
+        "levy_max_unrest": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Grogne moyenne maximale pour lever un impôt exceptionnel."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "borrow_below_seasons",
+        "borrow_seasons",
+        "repay_above_seasons",
+        "levy_max_unrest"
+      ]
+    }
+  },
+  "required": [
+    "household",
+    "officers",
+    "siege",
+    "credit",
+    "levies",
+    "dowry",
+    "ai"
+  ],
+  "additionalProperties": false
+}

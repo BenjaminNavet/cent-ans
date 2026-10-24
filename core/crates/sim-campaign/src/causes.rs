@@ -44,6 +44,12 @@ pub enum CauseKind {
     AllianceBroken,
     /// A ruler dies and the crown passes (or is lost).
     Succession,
+    /// The crown stops paying its bankers (royal default, ADR 0777).
+    RoyalDefault,
+    /// An extraordinary tax is raised (`subject` is the taxing faction).
+    ExtraordinaryTax,
+    /// The money is debased (`subject` is the minting faction).
+    Debasement,
     /// The player's campaign is won.
     GameWon,
     /// The player's campaign is lost.
@@ -62,6 +68,9 @@ impl CauseKind {
             CauseKind::WarDeclared => "war_declared",
             CauseKind::AllianceBroken => "alliance_broken",
             CauseKind::Succession => "succession",
+            CauseKind::RoyalDefault => "royal_default",
+            CauseKind::ExtraordinaryTax => "extraordinary_tax",
+            CauseKind::Debasement => "debasement",
             CauseKind::GameWon => "game_won",
             CauseKind::GameLost => "game_lost",
         }

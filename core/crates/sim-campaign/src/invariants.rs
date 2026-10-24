@@ -226,6 +226,26 @@ fn check_factions(state: &CampaignState, data: &GameData, out: &mut Vec<Violatio
                 format!("Le trésor de {fid} est démesuré : {}.", faction.treasury),
             );
         }
+        // ECO2 (ADR 0777): loans are positive, owed to a known banker.
+        for loan in &faction.finance.loans {
+            if loan.principal <= 0 || data.finance_rules.lender(&loan.lender).is_none() {
+                push(
+                    out,
+                    "finance_loans",
+                    format!(
+                        "{fid} doit {} livres à « {} » : prêt invalide.",
+                        loan.principal, loan.lender
+                    ),
+                );
+            }
+        }
+        if faction.finance.rating.is_some_and(|r| r > 100) {
+            push(
+                out,
+                "finance_loans",
+                format!("La cote de crédit de {fid} dépasse 100."),
+            );
+        }
         if !data.provinces.contains_key(&faction.capital) {
             push(
                 out,
@@ -484,6 +504,24 @@ mod tests {
         let mut state = fixture().1.clone();
         state.factions.values_mut().next().unwrap().treasury = i64::MAX;
         assert!(keys(&state).contains(&"treasury_finite"));
+    }
+
+    #[test]
+    fn loan_to_an_unknown_banker() {
+        let mut state = fixture().1.clone();
+        state
+            .factions
+            .values_mut()
+            .next()
+            .unwrap()
+            .finance
+            .loans
+            .push(crate::finance::Loan {
+                lender: "nobody".into(),
+                principal: 100,
+                since: 0,
+            });
+        assert!(keys(&state).contains(&"finance_loans"));
     }
 
     #[test]

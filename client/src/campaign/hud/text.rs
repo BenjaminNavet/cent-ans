@@ -55,6 +55,13 @@ pub fn rubric_label(key: &str) -> &str {
         "buildings" => "Entretien des bâtiments",
         "table" => "Table des provinces",
         "administration" => "Cour et administration",
+        "household" => "Maison du roi",
+        "wages" => "Gages des officiers",
+        "siege" => "Coût des sièges",
+        "obligations" => "Dot, tribut et saisies",
+        "interest" => "Intérêts de la dette",
+        "levies" => "Impôts exceptionnels",
+        "loans" => "Emprunts et remboursements",
         "other" => "Autres mouvements",
         other => other,
     }
@@ -169,7 +176,11 @@ pub fn budget_tooltip(economy: &EconomyView) -> String {
     let has_past = economy.net_change.is_some();
     let mut biggest_key = "";
     let mut biggest = 0i64;
-    for line in economy.budget_lines.iter().filter(|l| l.key != "other") {
+    for line in economy
+        .budget_lines
+        .iter()
+        .filter(|l| !matches!(l.key.as_str(), "other" | "levies" | "loans"))
+    {
         let mut text = format!("{} : {}", rubric_label(&line.key), tinted(line.projected));
         if let (true, Some(last)) = (has_past, line.last) {
             text.push_str(&format!(" (saison passée {})", fr::signed(last)));

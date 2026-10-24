@@ -322,6 +322,8 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0755 | [Palette unique, six heures de bataille, voile de campagne réduit](0755-palette-unique-et-heures-de-bataille.md) | accepté |
 | 0750 | [Eau, côtes et neige de la campagne](0750-eau-cotes-neige-de-la-campagne.md) | accepté |
 | 0748 | [Budget mémoire du client Bevy](0748-budget-memoire.md) | accepté |
-| 0749 | [Puits d'argent : épargne progressive](0749-puits-d-argent-epargne-progressive.md) | accepté |
+| 0749 | [Puits d'argent : épargne progressive](0749-puits-d-argent-epargne-progressive.md) | accepté (paliers amendés par 0777) |
 | 0754 | [Journal des causes](0754-journal-des-causes.md) | accepté |
 | 0760 | [Masse et cadrage des armées en bataille](0760-masse-et-cadrage-des-armees-en-bataille.md) | accepté |
+| 0777 | [Le roi et sa dette : charges, crédit, impôts exceptionnels, banqueroute royale](0777-le-roi-et-sa-dette.md) | accepté |
+| 0778 | [Éco-guerre et budget lisible](0778-eco-guerre-et-budget-lisible.md) | accepté |

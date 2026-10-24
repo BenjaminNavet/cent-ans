@@ -407,6 +407,19 @@ pub enum Order {
         #[serde(default)]
         rate: Option<TaxRate>,
     },
+    /// ECO2 (ADR 0777): borrows `amount` livres from the banker `lender`.
+    Borrow {
+        lender: String,
+        amount: i64,
+    },
+    /// ECO2: repays up to `amount` livres of the debt (dearest loans first).
+    Repay {
+        amount: i64,
+    },
+    /// ECO2: raises the extraordinary tax `levy` (taille, gabelle, fouage...).
+    LevyExtraordinary {
+        levy: String,
+    },
     /// H5: strikes the faction's money at `level`; one change per year.
     SetCoinage {
         level: crate::coinage::CoinageLevel,

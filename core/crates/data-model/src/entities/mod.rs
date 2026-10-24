@@ -31,6 +31,7 @@ pub mod encounter;
 pub mod event;
 pub mod faction;
 pub mod feudal_rules;
+pub mod finance_rules;
 pub mod landmark;
 pub mod loyalty;
 pub mod map_scenes;

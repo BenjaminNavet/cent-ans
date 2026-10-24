@@ -35,6 +35,29 @@ pub struct BudgetRecord {
     pub administration: i64,
     /// H3 « Table »: diets actually paid.
     pub table: i64,
+    /// ECO2 (ADR 0777): the king's household.
+    #[serde(default)]
+    pub household: i64,
+    /// ECO2: wages of governors and commanders.
+    #[serde(default)]
+    pub wages: i64,
+    /// ECO2: cost of the sieges.
+    #[serde(default)]
+    pub siege: i64,
+    /// ECO2: dowry, tribute and seizures.
+    #[serde(default)]
+    pub obligations: i64,
+    /// ECO2: interest on the bankers' loans.
+    #[serde(default)]
+    pub interest: i64,
+    /// ECO2: extraordinary taxes raised (outside `receipts`).
+    #[serde(default)]
+    pub levies: i64,
+    /// ECO2: loans taken and repaid (outside `receipts`).
+    #[serde(default)]
+    pub borrowed: i64,
+    #[serde(default)]
+    pub repaid: i64,
     #[serde(default)]
     pub other: i64,
 }
@@ -42,7 +65,16 @@ pub struct BudgetRecord {
 impl BudgetRecord {
     /// Receipts minus every upkeep: what the budget added to the treasury.
     pub fn net(&self) -> i64 {
-        self.receipts - self.armies - self.buildings - self.administration - self.table
+        self.receipts
+            - self.armies
+            - self.buildings
+            - self.administration
+            - self.table
+            - self.household
+            - self.wages
+            - self.siege
+            - self.obligations
+            - self.interest
     }
 
     /// Whole change of the treasury over the season (`net` plus `other`).
@@ -60,6 +92,13 @@ pub enum BudgetLineKind {
     Buildings => "buildings",
     Table => "table",
     Administration => "administration",
+    Household => "household",
+    Wages => "wages",
+    Siege => "siege",
+    Obligations => "obligations",
+    Interest => "interest",
+    Levies => "levies",
+    Loans => "loans",
     Other => "other",
 }
 }
@@ -67,7 +106,13 @@ pub enum BudgetLineKind {
 impl BudgetLineKind {
     /// Receipts are positive, charges negative, `Other` either.
     pub fn is_charge(self) -> bool {
-        !matches!(self, BudgetLineKind::Receipts | BudgetLineKind::Other)
+        !matches!(
+            self,
+            BudgetLineKind::Receipts
+                | BudgetLineKind::Other
+                | BudgetLineKind::Levies
+                | BudgetLineKind::Loans
+        )
     }
 }
 
@@ -99,6 +144,11 @@ impl FactionEconomy {
             - self.building_upkeep
             - self.administration_upkeep
             - self.table_upkeep
+            - self.household
+            - self.wages
+            - self.siege
+            - self.obligations
+            - self.interest
     }
 
     /// Signed budget lines (receipts +, charges −) with the season just
@@ -121,6 +171,16 @@ impl FactionEconomy {
                     BudgetLineKind::Administration => {
                         (-self.administration_upkeep, last.map(|r| -r.administration))
                     }
+                    BudgetLineKind::Household => (-self.household, last.map(|r| -r.household)),
+                    BudgetLineKind::Wages => (-self.wages, last.map(|r| -r.wages)),
+                    BudgetLineKind::Siege => (-self.siege, last.map(|r| -r.siege)),
+                    BudgetLineKind::Obligations => {
+                        (-self.obligations, last.map(|r| -r.obligations))
+                    }
+                    BudgetLineKind::Interest => (-self.interest, last.map(|r| -r.interest)),
+                    // Raised by orders: no projection.
+                    BudgetLineKind::Levies => (0, last.map(|r| r.levies)),
+                    BudgetLineKind::Loans => (0, last.map(|r| r.borrowed - r.repaid)),
                     BudgetLineKind::Other => (0, last.map(|r| r.other)),
                 };
                 BudgetLine {
@@ -185,22 +245,33 @@ impl CampaignState {
             let table = faction.last_budget.table;
             let armies = faction.last_budget.army_upkeep;
             let buildings = faction.last_budget.building_upkeep;
+            let b = faction.last_budget;
             let mut record = BudgetRecord {
                 turn,
                 treasury: faction.treasury,
                 // C5: trade routes are credited after the taxes, apart.
-                receipts: faction.last_budget.income + faction.last_budget.trade_income,
+                receipts: b.income + b.trade_income,
                 armies,
                 buildings,
-                administration: faction.last_budget.upkeep() - armies - buildings - table,
+                administration: b.administration,
                 table,
+                household: b.household,
+                wages: b.wages,
+                siege: b.siege,
+                obligations: b.obligations,
+                interest: b.interest,
+                levies: b.levy_income,
+                borrowed: b.borrowed,
+                repaid: b.repaid,
                 other: 0,
             };
             let before = purses_before
                 .get(id)
                 .copied()
                 .unwrap_or(faction.treasury - record.net());
-            record.other = faction.treasury - before - record.net();
+            record.other =
+                faction.treasury - before - record.net() - record.levies - record.borrowed
+                    + record.repaid;
             faction.budget_history.push(record);
             let excess = faction
                 .budget_history
@@ -239,6 +310,7 @@ mod tests {
             administration: 40,
             table: 10,
             other: -120,
+            ..BudgetRecord::default()
         };
         assert_eq!(record.net(), 200);
         assert_eq!(record.change(), 80);

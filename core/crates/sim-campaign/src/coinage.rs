@@ -174,9 +174,20 @@ pub fn set_coinage(
             level.label_fr().to_lowercase()
         ),
     };
-    state
-        .pending_events
-        .push(GameEvent::new(EventKind::Coinage, text).faction(faction));
+    let mut event = GameEvent::new(EventKind::Coinage, text).faction(faction);
+    if faction == &state.player_faction
+        && matches!(level, CoinageLevel::Debased | CoinageLevel::HeavilyDebased)
+    {
+        event = event.cause(crate::cause_builders::debasement_cause(
+            &crate::cause_builders::DebasementFacts {
+                faction,
+                seigniorage_gain: seigniorage_for(state, data, faction, level),
+                price_level: i64::from(state.factions[faction].price_level),
+                treasury: state.factions[faction].treasury,
+            },
+        ));
+    }
+    state.pending_events.push(event);
     Ok(())
 }
 

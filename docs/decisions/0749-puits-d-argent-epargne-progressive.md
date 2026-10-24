@@ -1,6 +1,6 @@
 # ADR 0749 — Puits d'argent : ponction progressive sur l'épargne dormante (lot ECO)
 
-Date : 2026-10-23. Statut : accepté. Amende les ADR 0183 (§ administration, trésors) et 0257 (opulence progressive).
+Date : 2026-10-23. Statut : accepté. Amende les ADR 0183 (§ administration, trésors) et 0257 (opulence progressive). Paliers resserrés par l'ADR 0777 (1, 2 et 4 saisons de revenu).
 
 ## Contexte
 

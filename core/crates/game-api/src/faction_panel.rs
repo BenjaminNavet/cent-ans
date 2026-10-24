@@ -235,6 +235,8 @@ pub struct FactionPanelView {
     pub table: Vec<TableProvince>,
     /// The pope's call to crusade, if any (player only).
     pub papal_call: Option<PapalCallView>,
+    /// ECO2 (ADR 0777): bankers, loans, extraordinary taxes and obligations.
+    pub finance: Option<crate::finance::FinanceView>,
 }
 
 fn category_label(category: ResourceCategory) -> &'static str {
@@ -600,6 +602,7 @@ pub fn faction_panel(
         } else {
             None
         },
+        finance: crate::finance::finance_view(data, state, faction),
         is_player,
         sheet,
         economy,

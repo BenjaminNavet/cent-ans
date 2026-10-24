@@ -373,6 +373,7 @@ fn province_inputs(
     ));
     effects[EffectKind::Unrest].flat += state.political_unrest(id);
     effects[EffectKind::Unrest].flat += state.interdict_unrest(data, &controller);
+    effects[EffectKind::Unrest].flat += crate::finance::finance_unrest(state, &controller);
     // DF1: the player's provinces are calmer (easy) or quicker to
     // grumble (hard).
     effects[EffectKind::Unrest].flat += state.difficulty_unrest(data, &controller);

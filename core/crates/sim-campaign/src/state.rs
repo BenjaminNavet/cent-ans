@@ -707,6 +707,12 @@ pub struct FactionState {
     /// Year of the last `set_coinage` (one change per year).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub coinage_changed_year: Option<i32>,
+    /// ECO2 (ADR 0777): loans, obligations, grievances of the crown.
+    #[serde(
+        default,
+        skip_serializing_if = "crate::finance::FinanceState::is_default"
+    )]
+    pub finance: crate::finance::FinanceState,
     // ----- H6: ransoms and chivalric orders -----------------------------------
     /// Ransoms being paid by installments (this faction owes them).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -781,6 +787,7 @@ impl FactionState {
             coinage: crate::coinage::CoinageLevel::default(),
             price_level: crate::coinage::default_price_level(),
             coinage_changed_year: None,
+            finance: crate::finance::FinanceState::default(),
             ransom_debts: Vec::new(),
             chivalric_order: None,
             budget_history: Vec::new(),
@@ -1350,7 +1357,7 @@ impl CampaignState {
     }
 
     /// Population-weighted mean unrest (0-100) of the provinces `id` controls.
-    fn mean_unrest(&self, id: &FactionId) -> u8 {
+    pub(crate) fn mean_unrest(&self, id: &FactionId) -> u8 {
         let (mut weighted, mut total) = (0.0_f64, 0.0_f64);
         for (province_id, province) in &self.provinces {
             if !self.controls_province(id, province_id) {

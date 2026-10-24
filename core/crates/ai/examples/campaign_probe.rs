@@ -259,7 +259,7 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         {
             let f = &state.factions[&france];
             let b = &f.last_budget;
-            let net = b.income - b.army_upkeep - b.building_upkeep - b.administration;
+            let net = b.income - b.upkeep();
             france_treasury.push(
                 json!({"turn": state.turn, "treasury": f.treasury, "income": b.income, "net": net}),
             );
@@ -362,6 +362,7 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
             }
             match e.kind {
                 EventKind::Revolt if !e.text_fr.contains("passe aux mains") => revolts += 1,
+                EventKind::Bankruptcy if e.text_fr.starts_with("Banqueroute royale") => {}
                 EventKind::Bankruptcy => bankruptcies += 1,
                 EventKind::Battle => battles += 1,
                 EventKind::WarDeclared => declarations += 1,
@@ -485,6 +486,12 @@ fn run(data: &GameData, seed: u64, turns: u32, full: bool, top: usize) -> Value 
         "province_share_unrest_over_60": unrest_hot as f64 / (unrest_seen.max(1) as f64),
         "province_tax_overrides_mean": override_turns as f64 / denom,
         "bankruptcies": bankruptcies,
+        "royal_defaults": state.factions.values().map(|f| f.finance.defaults).sum::<u32>(),
+        "levies_raised": state.factions.values().map(|f| f.finance.levies_raised).sum::<u32>(),
+        "factions_in_debt": state.factions.values().filter(|f| f.finance.debt() > 0).count(),
+        "debt_total": state.factions.values().map(|f| f.finance.debt()).sum::<i64>(),
+        "france_debt": state.factions[&france].finance.debt(),
+        "factions_in_deficit_end": state.factions.values().filter(|f| f.alive && f.treasury < 0).count(),
         "battles": battles,
         "armies_mean": armies_sum as f64 / denom,
         "chiefless_armies_mean": chiefless_sum as f64 / denom,
@@ -605,6 +612,15 @@ fn main() {
             r["surrenders"],
             r["surrender_refusals"],
             r["seconds_per_turn"].as_f64().unwrap_or(0.0),
+        );
+        println!(
+            "    finance: royal defaults {}, levies {}, factions in debt {} (total {} livres, France {}), factions with a negative treasury {}",
+            r["royal_defaults"],
+            r["levies_raised"],
+            r["factions_in_debt"],
+            r["debt_total"],
+            r["france_debt"],
+            r["factions_in_deficit_end"],
         );
         println!(
             "    agent strikes (assassinations + poisonings): {} total, {} at most for one faction",

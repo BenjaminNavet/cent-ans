@@ -78,8 +78,10 @@ pub(crate) mod compute {
         let income = state.faction_income(data, faction);
         let treasury = state.factions.get(faction).map_or(0, |f| f.treasury);
         let opulence = rules.opulence(treasury, income);
+        // ECO2 (ADR 0777): the household and the wages are not forces the
+        // levers below can send home; the fit measures the military budget.
         (
-            economy.net_income() + opulence,
+            economy.net_income() + opulence + economy.household + economy.wages,
             economy.projected_income + economy.trade_income,
         )
     }

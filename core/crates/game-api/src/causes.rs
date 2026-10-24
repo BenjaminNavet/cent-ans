@@ -255,7 +255,11 @@ pub fn notification_tooltip(state: &CampaignState, data: &GameData, id: u32) -> 
 /// counts among the main causes of the end of the campaign.
 fn explains(cause: &Cause, player: &data_model::FactionId, favourable: bool) -> bool {
     match cause.kind {
-        CauseKind::GameWon | CauseKind::GameLost | CauseKind::UnrestWarning => false,
+        CauseKind::GameWon
+        | CauseKind::GameLost
+        | CauseKind::UnrestWarning
+        | CauseKind::ExtraordinaryTax
+        | CauseKind::Debasement => false,
         CauseKind::Battle | CauseKind::PlaceTaken => {
             if favourable {
                 cause.actor.as_ref() == Some(player)
@@ -268,9 +272,10 @@ fn explains(cause: &Cause, player: &data_model::FactionId, favourable: bool) -> 
         CauseKind::WarDeclared | CauseKind::AllianceBroken => {
             !favourable && cause.subject.as_ref() == Some(player)
         }
-        CauseKind::Bankruptcy | CauseKind::Revolt | CauseKind::Succession => {
-            !favourable && cause.subject.as_ref() == Some(player)
-        }
+        CauseKind::Bankruptcy
+        | CauseKind::RoyalDefault
+        | CauseKind::Revolt
+        | CauseKind::Succession => !favourable && cause.subject.as_ref() == Some(player),
     }
 }
 
@@ -429,6 +434,11 @@ mod tests {
             building_upkeep: 3,
             administration: 4,
             table: 5,
+            household: 0,
+            wages: 0,
+            siege: 0,
+            obligations: 0,
+            interest: 0,
             deficit_seasons: 3,
         }));
         let terms: Vec<(&str, f64)> = [
