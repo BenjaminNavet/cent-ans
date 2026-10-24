@@ -177,8 +177,12 @@ impl CampaignState {
                     sworn_bond,
                     attacker_power: self.faction_power(attacker),
                     target_power: self.faction_power(target),
-                    reason: ai_war_reason,
+                    reason: ai_war_reason.as_ref().map(|r| r.key),
                 })
+                .doctrine(
+                    ai_war_reason.as_ref().map(|r| r.doctrine),
+                    ai_war_reason.as_ref().and_then(|r| r.place.as_ref()),
+                )
             });
         self.push_order_event(
             GameEvent::new(EventKind::WarDeclared, text)

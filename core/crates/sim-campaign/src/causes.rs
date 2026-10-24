@@ -90,6 +90,9 @@ pub struct Factor {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AiReason {
     pub key: String,
+    /// ADR 0782: key of the strategic doctrine the AI followed when it decided.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub doctrine: Option<String>,
 }
 
 /// Why something happened, structured.
@@ -157,7 +160,20 @@ impl Cause {
     pub fn reason(mut self, key: &str) -> Self {
         self.reason = Some(AiReason {
             key: key.to_owned(),
+            doctrine: None,
         });
+        self
+    }
+
+    /// ADR 0782: names the doctrine behind the reason and, for a revenge, the place of the
+    /// defeat avenged (the province of the cause). No effect without a reason.
+    pub fn doctrine(mut self, doctrine: Option<&str>, place: Option<&ProvinceId>) -> Self {
+        if let Some(reason) = self.reason.as_mut() {
+            reason.doctrine = doctrine.map(str::to_owned);
+            if let Some(place) = place {
+                self.province = Some(place.clone());
+            }
+        }
         self
     }
 

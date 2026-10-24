@@ -193,8 +193,28 @@ pub fn cause_view(state: &CampaignState, data: &GameData, record: &CauseRecord) 
         })
         .collect();
     let reason = cause.reason.as_ref().map(|r| {
-        let sentence = t.reasons.get(&r.key).map_or(r.key.as_str(), String::as_str);
-        fill(&ui_text("reason_line"), &[("reason", sentence)])
+        let sentence = fill(
+            t.reasons.get(&r.key).map_or(r.key.as_str(), String::as_str),
+            &[
+                ("lieu", &place),
+                ("de_lieu", &optional_de(&place)),
+                ("acteur", &actor),
+                ("sujet", &subject),
+            ],
+        );
+        let line = fill(&ui_text("reason_line"), &[("reason", &sentence)]);
+        // ADR 0782: the doctrine the AI followed, named by the catalogue.
+        match r
+            .doctrine
+            .as_ref()
+            .and_then(|id| data_model::StrategicDoctrines::bundled().doctrines.get(id))
+        {
+            Some(doctrine) => format!(
+                "{line} {}",
+                fill(&ui_text("doctrine_line"), &[("doctrine", &doctrine.label)])
+            ),
+            None => line,
+        }
     });
     CauseView {
         id: record.id,
@@ -470,6 +490,8 @@ mod tests {
             "crown_claim",
             "opportunism",
             "ambition",
+            "revenge",
+            "revenge_at",
         ] {
             every_key_resolves(&build::war_cause(&build::WarFacts {
                 attacker: &a,

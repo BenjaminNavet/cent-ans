@@ -23,6 +23,7 @@ pub mod parallel;
 mod salts;
 pub mod spatial;
 pub mod stances;
+pub mod strategy;
 pub mod support;
 pub mod traditions;
 

@@ -253,14 +253,46 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
     /// Assault odds demanded before storming (RX iaplay: the difficulty
     /// shifts it for the AI).
     fn assault_threshold(&self) -> u32 {
-        (i64::from(self.rules.assault_odds) + i64::from(self.ctx.difficulty.ai_assault_odds_delta))
-            .clamp(0, 100) as u32
+        (i64::from(self.rules.assault_odds)
+            + i64::from(self.ctx.difficulty.ai_assault_odds_delta)
+            + i64::from(self.ctx.strategy.doctrine.doctrine.battle.assault_odds_delta))
+        .clamp(0, 100) as u32
     }
 
     /// Superiority demanded over a place's defence before besieging it.
     fn siege_superiority(&self) -> f64 {
-        self.rules.siege_superiority * f64::from(self.ctx.difficulty.ai_siege_superiority_percent)
+        self.rules.siege_superiority
+            * f64::from(self.ctx.difficulty.ai_siege_superiority_percent)
             / 100.0
+            * self.ctx.strategy.siege_factor()
+    }
+
+    /// ADR 0782/0783: share of strength under which an army falls back (the doctrine's
+    /// stubbornness, the prudence of the level).
+    fn retreat_strength(&self) -> f64 {
+        self.rules.retreat_strength * self.ctx.strategy.retreat_factor()
+    }
+
+    /// ADR 0783 (coordination): the power the army counts on at `target`: its own, and, from
+    /// the level that coordinates, that of the other armies of the realm standing at its anchor
+    /// or marching to the same place.
+    fn joint_power(&self, turn: &ArmyTurn, target: &SettlementId) -> f64 {
+        if !self.ctx.strategy.coordinated() {
+            return turn.power;
+        }
+        let state = self.ctx.state;
+        let allies: f64 = self
+            .armies
+            .iter()
+            .filter(|(id, _)| *id != *turn.id && !self.merged.contains(id))
+            .filter(|(id, _)| {
+                let army = &state.armies[id];
+                matches!(&army.destination, Some(sim_campaign::MoveTarget::Settlement(s)) if s == target)
+                    || self.ctx.anchors.get(id) == Some(&turn.anchor)
+            })
+            .map(|(_, power)| power)
+            .sum();
+        turn.power + allies
     }
 
     /// RX iaplay: the settlement the army is already marching to, if any
@@ -328,6 +360,10 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
         self.lie_in_wait(&turn)?;
         self.keep_siege(&turn)?;
         self.pick_defence(&mut turn);
+        // ADR 0782: the chevauchée doctrines ravage before they besiege.
+        if self.ctx.strategy.doctrine.doctrine.war.raid_first {
+            self.pick_raid(&mut turn);
+        }
         self.pick_siege(&mut turn);
         self.pick_raid(&mut turn);
         self.go_home_from_trespass(&turn)?;
@@ -383,7 +419,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
             table,
             besieging,
             broken: max_strength > 0
-                && f64::from(strength) < self.rules.retreat_strength * f64::from(max_strength),
+                && f64::from(strength) < self.retreat_strength() * f64::from(max_strength),
             here: state.army_province(data, army),
             trespassing,
             hopeless: false,
@@ -591,7 +627,7 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
                 let threat = ctx.threat_at(id);
                 let local = state.settlement_defensive_power(data, id);
                 (threat > local * rules.defence_local_factor
-                    && turn.power >= rules.defence_ratio * threat)
+                    && self.joint_power(turn, id) >= rules.defence_ratio * threat)
                     .then(|| {
                         let weight = if Some(id) == self.my_capital.as_ref() {
                             rules.defend_weight_capital
@@ -600,7 +636,10 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
                         } else {
                             rules.defend_weight_other
                         };
-                        let mut value = weight * (ctx.settlement_income(id) + threat)
+                        // ADR 0782: a doctrine that holds security dear defends harder.
+                        let mut value = weight
+                            * ctx.strategy.security()
+                            * (ctx.settlement_income(id) + threat)
                             / (1.0 + self.steps(reach.cost));
                         if Self::marching_to(turn) == Some(id) {
                             value *= rules.defence_target_persistence;
@@ -628,7 +667,8 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
                 state.is_hostile_settlement(ctx.faction, id) && !self.targeted.contains(*id)
             })
             .filter(|(id, _)| {
-                state.settlement_defensive_power(data, id) * self.siege_superiority() < turn.power
+                state.settlement_defensive_power(data, id) * self.siege_superiority()
+                    < self.joint_power(turn, id)
             })
             .filter_map(|(id, reach)| {
                 state
@@ -646,20 +686,25 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
                 self.claims.contains(p) || ctx.owned_de_jure(id) || !self.last_bastions.contains(p)
             })
             .map(|(id, reach, p)| {
-                let mut value = ctx.settlement_income(id) / 100.0 + 10.0;
+                // ADR 0782: each aim of the doctrine weighs its own part of the value.
+                let strategy = &ctx.strategy;
+                let mut value = ctx.settlement_income(id) / 100.0 * strategy.treasury() + 10.0;
                 if ctx.is_city(id) {
-                    value += rules.city_target_bonus;
+                    value += rules.city_target_bonus * strategy.conquest();
                 }
                 if ctx.owned_de_jure(id) {
-                    value += rules.reclaim_target_bonus;
+                    value += rules.reclaim_target_bonus * strategy.revenge();
+                }
+                if let Some(holder) = state.settlements.get(id).map(|s| &s.controller) {
+                    value += strategy.revenge_bonus(state, ctx.faction, holder);
                 }
                 value -= rules.fortification_target_penalty
                     * f64::from(state.fortification_level(data, id));
                 if self.enemy_capitals.contains(id) {
-                    value += rules.enemy_capital_target_bonus;
+                    value += rules.enemy_capital_target_bonus * strategy.prestige();
                 }
                 if self.claims.contains(&p) {
-                    value += rules.throne_claim_target_bonus;
+                    value += rules.throne_claim_target_bonus * strategy.prestige();
                 }
                 if crosses_sea(data, table, id) {
                     value *= rules.sea_invasion_factor;
