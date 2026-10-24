@@ -344,3 +344,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0783 | [Paliers de comportement de la difficulté de l'IA](0783-paliers-de-comportement-de-la-difficulte-ia.md) | accepté |
 | 0784 | [L'arc de partie en trois actes](0784-arc-de-partie-en-trois-actes.md) | accepté |
 | 0785 | [Victoire par score de règne (amende 0245)](0785-victoire-par-score-de-regne.md) | accepté |
+| 0780 | [Interface du crédit et des impôts exceptionnels](0780-interface-du-credit.md) | accepté |

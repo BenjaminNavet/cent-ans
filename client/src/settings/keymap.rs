@@ -393,6 +393,12 @@ pub const ACTIONS: &[ActionDef] = &[
     ),
     action(
         "Fenêtres",
+        "campaign_toggle_finances",
+        "Finances royales (crédit, impôts exceptionnels)",
+        &["Maj+J"],
+    ),
+    action(
+        "Fenêtres",
         "codex_open",
         "Codex (histoire et règles)",
         &["K"],

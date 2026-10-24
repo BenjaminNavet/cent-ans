@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "finance_panel.schema.json",
+  "title": "Textes de l’onglet Finances (CREDIT-UI, ADR 0780)",
+  "description": "Textes français et seuils d’affichage de l’onglet Finances du panneau de faction. Aucune règle de jeu : les chiffres viennent du core.",
+  "type": "object",
+  "required": ["tab", "title", "summary", "bars", "rubrics", "risk", "lenders", "loans", "borrow", "repay", "levies", "history", "result", "advisor"],
+  "properties": {
+    "description": {"type": "string"},
+    "tab": {"type": "string", "minLength": 1, "maxLength": 20},
+    "title": {"type": "string", "minLength": 1},
+    "shortcut": {"type": "string", "minLength": 1},
+    "summary": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+    "bars": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+    "rubrics": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["label", "tip"],
+        "additionalProperties": false,
+        "properties": {
+          "label": {"type": "string", "minLength": 1, "maxLength": 28},
+          "tip": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "required": ["title", "tip", "value", "warn_percent", "bands"],
+      "properties": {
+        "warn_percent": {"type": "integer", "minimum": 1, "maximum": 100},
+        "bands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["max", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "max": {"type": "integer", "minimum": 1},
+              "label": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      },
+      "additionalProperties": {"type": ["string", "integer", "array"]}
+    },
+    "lenders": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+    "loans": {"type": "object", "additionalProperties": {"type": ["string", "object"]}},
+    "borrow": {
+      "type": "object",
+      "required": ["title", "steps"],
+      "properties": {"steps": {"$ref": "#/$defs/steps"}},
+      "additionalProperties": {"type": ["string", "array"]}
+    },
+    "repay": {
+      "type": "object",
+      "required": ["title", "steps"],
+      "properties": {"steps": {"$ref": "#/$defs/steps"}},
+      "additionalProperties": {"type": ["string", "array"]}
+    },
+    "levies": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+    "history": {
+      "type": "object",
+      "required": ["title", "head", "empty", "count"],
+      "properties": {
+        "head": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "string"}},
+        "count": {"type": "integer", "minimum": 1, "maximum": 16}
+      },
+      "additionalProperties": {"type": ["string", "array", "integer"]}
+    },
+    "result": {"type": "object", "additionalProperties": {"type": "string"}},
+    "advisor": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "percent"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "label": {"type": "string", "minLength": 1, "maxLength": 12},
+          "percent": {"type": "integer", "minimum": 0, "maximum": 100}
+        }
+      }
+    }
+  }
+}
