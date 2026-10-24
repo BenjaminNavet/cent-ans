@@ -152,7 +152,9 @@ pub(crate) fn record(
     } else {
         (&record.defender.faction, &record.attacker.faction)
     };
-    state.chronicle.record_victory(winner, loser);
+    state
+        .chronicle
+        .record_victory_at(winner, loser, Some(province));
     state
         .battle_history
         .push(&data.battle_history_rules, record);

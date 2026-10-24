@@ -265,6 +265,13 @@ pub fn plan_diplomacy(cache: &PlanCache, data: &GameData, faction: &FactionId) -
         .and_then(|f| f.ai_personality.as_ref())
         .and_then(|p| p.aggression)
         .map_or(50, i32::from);
+    // ADR 0782: the doctrine tempers the temper of the prince.
+    let aggression = (aggression
+        + crate::doctrines::active(state, faction)
+            .doctrine
+            .war
+            .aggression_delta)
+        .clamp(0, 100);
 
     // Peace: offer a white peace when we would accept one ourselves; when
     // clearly winning, ask for the occupied provinces; when losing,
@@ -460,6 +467,12 @@ fn war_target(
         None
     };
     let crusade_call = crate::papal_crusade::ai_call_target(state, data, faction);
+    let doctrine_war_ratio = f64::from(
+        crate::doctrines::active(state, faction)
+            .doctrine
+            .war
+            .war_ratio_percent,
+    ) / 100.0;
     state
         .factions
         .iter()
@@ -486,7 +499,10 @@ fn war_target(
             let demand = if neutral {
                 1.0
             } else {
+                // ADR 0782: the doctrine's boldness and the revenge owed to a rival that beat us.
                 state.difficulty_war_ratio_factor(data, id)
+                    * doctrine_war_ratio
+                    * crate::doctrines::revenge_war_factor(state, faction, id)
             };
             let attitude = cache.attitude(data, faction, id).0
                 - if neutral {
@@ -568,6 +584,18 @@ enum UltimatumStep {
     Wait,
 }
 
+/// ADR 0748 / 0782: the named reason of a war declared by the AI, with the doctrine it follows
+/// and, for a revenge, the place of the defeat it avenges.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WarReason {
+    /// A key of `data/ui/causes.fr.json` (`reasons`).
+    pub key: &'static str,
+    /// Key of the doctrine followed (`chevauchee_pillage`...).
+    pub doctrine: &'static str,
+    /// Province of the defeat avenged, for a revenge.
+    pub place: Option<data_model::ProvinceId>,
+}
+
 /// ADR 0748: the named reason (doctrine or objective, a key of `data/ui/causes.fr.json`) of the
 /// war `attacker` declares on `target`. The AI plans on a read-only state and returns orders, so
 /// the reason is derived when the order is applied, by the same pure tests as the planner's.
@@ -576,14 +604,24 @@ pub(crate) fn war_reason(
     data: &GameData,
     attacker: &FactionId,
     target: &FactionId,
-) -> &'static str {
-    if ultimatum_war(state, attacker).as_ref() == Some(target) {
+) -> WarReason {
+    let doctrine = crate::doctrines::active(state, attacker);
+    let revenge = crate::doctrines::revenge_on(state, attacker, target);
+    let mut place = None;
+    let key = if ultimatum_war(state, attacker).as_ref() == Some(target) {
         "ultimatum_refused"
     } else if matches!(
         state.relation(attacker, target),
         RelationKind::Vassal | RelationKind::Suzerain
     ) {
         "independence"
+    } else if revenge.is_some() && doctrine.doctrine.objectives.revenge >= REVENGE_REASON_MIN {
+        place = revenge.and_then(|r| r.place);
+        if place.is_some() {
+            "revenge_at"
+        } else {
+            "revenge"
+        }
     } else if state
         .factions
         .get(attacker)
@@ -596,8 +634,16 @@ pub(crate) fn war_reason(
         "opportunism"
     } else {
         "ambition"
+    };
+    WarReason {
+        key,
+        doctrine: doctrine.id,
+        place,
     }
 }
+
+/// Revenge weight from which a doctrine names a revenge as the reason of a war.
+const REVENGE_REASON_MIN: u8 = 50;
 
 /// The target `faction` declares war on because it refused its ultimatum.
 fn ultimatum_war(state: &CampaignState, faction: &FactionId) -> Option<FactionId> {
@@ -754,7 +800,14 @@ fn plan_alliances(
     // WH `diplob`: a faction standing in the league looks for partners
     // twice as often, and counts the hegemon among its rivals.
     let in_league = state.league_target_of(data, faction).is_some();
-    let period = if in_league { 2 } else { 4 };
+    // ADR 0782: a doctrine fond of alliances looks for partners more often (and the other less).
+    let appetite = crate::doctrines::active(state, faction)
+        .doctrine
+        .diplomacy
+        .alliance_percent
+        .max(10);
+    let base_period = if in_league { 2 } else { 4 };
+    let period = (base_period * 100 / appetite).clamp(1, 12);
     let most = if in_league {
         data.ai_diplomacy.league.max_alliances.min(MAX_ALLIANCES)
     } else {

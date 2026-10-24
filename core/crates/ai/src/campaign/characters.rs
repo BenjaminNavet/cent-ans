@@ -62,8 +62,15 @@ pub(super) fn plan_characters(ctx: &Context, orders: &mut Vec<Order>) {
         ctx.faction,
     ));
     // Marriages and the heir: once a year.
-    if state.season == Season::Spring {
+    // ADR 0782: a doctrine fond of marriages tries twice a year; a cold one every other year.
+    let marriage = ctx.strategy.doctrine.doctrine.diplomacy.marriage_percent;
+    let season_ok =
+        state.season == Season::Spring || (marriage >= 150 && state.season == Season::Autumn);
+    let year_ok = marriage >= 100 || (state.year + ctx.faction.as_str().len() as i32) % 2 == 0;
+    if season_ok && year_ok {
         arrange_marriage(ctx, orders);
+    }
+    if state.season == Season::Spring {
         // TW ai-camp (ADR 0334): name a clearly better heir.
         orders.extend(sim_campaign::dynasty::ai_designate_heir(
             state,

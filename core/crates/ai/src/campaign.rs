@@ -49,6 +49,8 @@ struct Context<'a> {
     /// RX iaplay: the difficulty levers an AI faction plays by (neutral for
     /// the player's own faction).
     difficulty: DifficultyModifiers,
+    /// ADR 0782: the doctrine of the faction and the behaviour tiers of the level.
+    strategy: crate::strategy::Strategy,
     income: i64,
     /// Gross income of the season (the unit of « seasons of income »).
     gross_income: i64,
@@ -88,12 +90,12 @@ impl<'a> Context<'a> {
             .and_then(|f| f.ai_personality.as_ref())
             .and_then(|p| p.aggression)
             .map_or(50, i32::from);
-        let difficulty = if faction == &state.player_faction {
-            DifficultyModifiers::NEUTRAL
-        } else {
-            state.difficulty_modifiers(data)
-        };
-        let aggression = (aggression + difficulty.ai_aggression_delta).clamp(0, 100);
+        let strategy = crate::strategy::Strategy::of(state, data, faction);
+        let difficulty = strategy.difficulty;
+        let aggression = (aggression
+            + difficulty.ai_aggression_delta
+            + strategy.doctrine.doctrine.war.aggression_delta)
+            .clamp(0, 100);
         let (grid, (anchors, gross_income)) = mode.join(
             || crate::grid::GridPlanner::with_mode(mode, cache, data, faction),
             || {
@@ -126,7 +128,7 @@ impl<'a> Context<'a> {
             grid,
             mode,
             rules: AiCampaign::bundled(),
-            hostile_power: hostile_power_by_province(state, data, faction),
+            hostile_power: hostile_power_by_province(state, data, faction, &strategy),
             state,
             cache,
             data,
@@ -134,6 +136,7 @@ impl<'a> Context<'a> {
             enemies: me.at_war_with.clone(),
             aggression,
             difficulty,
+            strategy,
             income,
             gross_income,
             army_upkeep: upkeep.0,
@@ -279,17 +282,32 @@ fn hostile_power_by_province(
     state: &CampaignState,
     data: &GameData,
     faction: &FactionId,
+    strategy: &crate::strategy::Strategy,
 ) -> BTreeMap<ProvinceId, Vec<f64>> {
     let mut by_province: BTreeMap<ProvinceId, Vec<f64>> = BTreeMap::new();
+    // ADR 0783: fog of war of the lower levels.
+    let visible = strategy.visible_provinces(state, data, faction);
     for (id, army) in &state.armies {
         if !state.is_at_war(faction, &army.faction) {
             continue;
         }
         if let Some(province) = state.army_province(data, army) {
-            by_province
-                .entry(province)
-                .or_default()
-                .push(state.army_power(data, id));
+            if visible.as_ref().is_some_and(|v| !v.contains(&province)) {
+                continue;
+            }
+            let power = state.army_power(data, id);
+            // ADR 0783: from the level that anticipates, an army marching on a place is
+            // already counted in the province of its destination.
+            if strategy.anticipates() {
+                if let Some(sim_campaign::MoveTarget::Settlement(target)) = &army.destination {
+                    if let Some(goal) = state.settlement_province(target) {
+                        if goal != &province {
+                            by_province.entry(goal.clone()).or_default().push(power);
+                        }
+                    }
+                }
+            }
+            by_province.entry(province).or_default().push(power);
         }
     }
     by_province
@@ -415,8 +433,11 @@ fn state_plans(
                             {
                                 // ECO2: loans, repayments and extraordinary taxes
                                 // come before the coinage.
-                                let mut orders =
-                                    sim_campaign::finance::ai_finance_orders(cache, data, faction);
+                                let mut orders = crate::strategy::filter_finance_orders(
+                                    state,
+                                    faction,
+                                    sim_campaign::finance::ai_finance_orders(cache, data, faction),
+                                );
                                 orders.extend(sim_campaign::coinage::ai_choose_coinage(
                                     cache, data, faction,
                                 ));

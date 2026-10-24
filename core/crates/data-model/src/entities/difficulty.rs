@@ -42,6 +42,23 @@ pub struct DifficultyModifiers {
     /// military planning (raids, ambushes).
     #[serde(default)]
     pub ai_aggression_delta: i32,
+    /// ADR 0783 (behaviour tiers): prudence in the field, per cent of normal. It scales the
+    /// superiority an AI army demands before attacking an enemy army and the share of strength
+    /// under which it falls back (below 100: reckless, above: it picks its fights).
+    #[serde(default = "neutral_percent")]
+    pub ai_prudence_percent: u32,
+    /// ADR 0783: anticipation. From 1, the AI counts the hostile armies marching on a province
+    /// as already there when it weighs a threat (it reads the enemy's destination).
+    #[serde(default)]
+    pub ai_anticipation: u8,
+    /// ADR 0783: coordination. From 1, the AI armies count the armies of their own realm
+    /// standing with them or marching to the same target when they weigh a siege or a defence.
+    #[serde(default)]
+    pub ai_coordination: u8,
+    /// ADR 0783: fog of war for the AI. 0 sees every hostile army; n > 0 sees only those within n
+    /// land provinces of its own provinces or armies.
+    #[serde(default)]
+    pub ai_vision_provinces: u32,
 }
 
 fn neutral_percent() -> u32 {
@@ -63,6 +80,10 @@ impl DifficultyModifiers {
         ai_assault_odds_delta: 0,
         ai_decision_noise_percent: 0,
         ai_aggression_delta: 0,
+        ai_prudence_percent: 100,
+        ai_anticipation: 0,
+        ai_coordination: 0,
+        ai_vision_provinces: 0,
     };
 
     pub fn is_neutral(&self) -> bool {

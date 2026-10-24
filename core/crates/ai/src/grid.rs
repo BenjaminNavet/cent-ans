@@ -51,6 +51,9 @@ pub struct GridPlanner<'a> {
     data: &'a GameData,
     faction: &'a FactionId,
     rules: &'a AiGrid,
+    /// ADR 0782/0783: superiority demanded before attacking an enemy army (the grid's
+    /// `attack_ratio` scaled by the doctrine's taste for battle and the level's prudence).
+    attack_ratio: f64,
     px_per_km: f32,
     enemies: Vec<Enemy>,
     /// Settlements held by an enemy or holding an enemy army: reached (a
@@ -242,10 +245,20 @@ impl<'a> GridPlanner<'a> {
         let avoid_px = rules.avoid_radius_km as f32 * px_per_km;
         let mut lands = PassageLands::read(cache, data, faction);
         let points = PointGrid::new(data, avoid_px);
+        let strategy = crate::strategy::Strategy::of(state, data, faction);
+        let visible = strategy.visible_provinces(state, data, faction);
         let hostile: Vec<(&ArmyId, &Army)> = state
             .armies
             .iter()
             .filter(|(_, a)| state.is_at_war(faction, &a.faction))
+            // ADR 0783: fog of war of the lower levels.
+            .filter(|(_, a)| {
+                visible.as_ref().is_none_or(|v| {
+                    state
+                        .army_province(data, a)
+                        .is_some_and(|province| v.contains(&province))
+                })
+            })
             // CV3-6: an army hidden in ambush is neither attacked nor
             // avoided: the AI does not know it is there.
             .filter(|(_, a)| !sim_campaign::posture::is_hidden_from(state, data, a, faction))
@@ -288,6 +301,7 @@ impl<'a> GridPlanner<'a> {
             data,
             faction,
             rules,
+            attack_ratio: rules.attack_ratio * strategy.engage_factor(),
             px_per_km,
             enemies,
             stops,
@@ -564,7 +578,7 @@ impl<'a> GridPlanner<'a> {
                         ours += other_power;
                     }
                 }
-                let needed = self.rules.attack_ratio * theirs.max(e.power);
+                let needed = self.attack_ratio * theirs.max(e.power);
                 if ours < needed {
                     return None;
                 }

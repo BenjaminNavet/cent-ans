@@ -58,6 +58,10 @@ pub use entities::ai_feudal::AiFeudal;
 pub use entities::ai_grid::{
     AiAmbush, AiEncounters, AiEntrenched, AiForcedMarch, AiGrid, AiPostures,
 };
+pub use entities::ai_strategic_doctrine::{
+    DoctrineAssignment, DoctrineBattle, DoctrineCondition, DoctrineDiplomacy, DoctrineFinance,
+    DoctrineObjectives, DoctrineTuning, DoctrineWar, StrategicDoctrine, StrategicDoctrines,
+};
 pub use entities::army_rules::{ArmyRules, BuiltEngineKind, SiegeEngineRule, SiegeEngineRules};
 pub use entities::army_traditions::{
     ArmyExperienceRules, ArmyTradition, ArmyTraditionRules, BranchWeights, TraditionAiWeights,
