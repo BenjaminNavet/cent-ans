@@ -418,12 +418,12 @@
     "lum_band": 0.15,
     "cell_jitter": 0.07,
     "cell_hue": 0.12,
-    "patch_gain": 0.85,
+    "patch_gain": 0.5,
     "patch_start": 0.0,
     "patch_end": 0.08,
     "far_hedge": 0.4,
     "open_farm": 0.8,
-    "cell_scale": 2.0, "sole_scale": 0.38, "sole_share": 0.4, "far_gain": 1.0, "far_start": 2.5, "far_end": 6.0, "terroir_scale": 0.45, "terroir_start": 1.0, "terroir_end": 2.2, "far_edge": 0.35, "patch_sat": 1.35
+    "cell_scale": 2.0, "sole_scale": 0.38, "sole_share": 0.4, "far_gain": 1.0, "far_start": 2.5, "far_end": 6.0, "terroir_scale": 0.45, "terroir_start": 1.0, "terroir_end": 2.2, "far_edge": 0.35, "patch_sat": 1.1
   },
   "parcels_source": "tx",
   "tx_overrides": {

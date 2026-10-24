@@ -1,12 +1,12 @@
 # TERRAIN2 : patchwork de rectangles du sol de campagne (ADR 0787)
 
-Mandat 24/10 : constats 2, 3 et « Ressenti » de `out/juge/iter-04-art.md` (sol en grands rectangles aux bords nets, verts contrastés, campagne plus terne que la bataille).
+Mandat 24/10 : constats 2, 3 et « Ressenti » de `out/juge/iter-04-art.md`.
 Branche `worktree-agent-a5b8a4d63f0744bce` (base main 62aa11193).
 
-## État
-- Squelette : note seule. Cause non encore établie.
-## Plan
-1. Build release, captures contrôlées d = 25/60/200 (Paris 2.35,48.85 et côte), `CENT_ANS_WEATHER=clear`.
-2. Bissection `CENT_ANS_PERF_OFF` (tnogdk, tnogdmacro, tnofields, tnofp…) puis cache de sol par nœud (ADR 0742), masques de biome.
-3. Correction (données/shader, sans nouveau sampler), mesure A/B `tools/bevy_bench/ab.sh`, ADR 0787.
-## Captures utilisées : 0 / 10
+## État : FAIT (à fusionner)
+- Cause : parcelles (`gd_parcel_k` + patch de culture) trop contrastées, flou de bord < pixel ; pas le cache, ni la LOD, ni les masques (voir ADR 0787).
+- Correction : `data/fx/ground_detail.json`, `data/art/ground_biome_mix.json`, `ground_detail.wesl` (warp 3e octave, rampe de bord bruitée).
+- Mesures : bench pan d30 p50 10,72 (avant) / 10,77 ms (après) ; `cargo test --release --lib shader_check` vert ; 0 erreur de shader au lancement.
+- Captures utilisées : 7 / 10 (montages out/t2/m*.png, non versionnés).
+## Reste
+Fusion par l'intégrateur ; smoke et clippy complets non lancés (consigne).

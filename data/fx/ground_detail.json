@@ -11,8 +11,8 @@
     ]
   },
   "parcel": {
-    "luma_contrast": 0.6,
-    "saturation": 0.45,
+    "luma_contrast": 0.18,
+    "saturation": 0.1,
     "jitter": 0.2,
     "fade_start_footprint": 0.12,
     "fade_end_footprint": 0.45
@@ -25,8 +25,8 @@
     "plough_share": 0.8
   },
   "stage": {
-    "amp": 1.0,
-    "amp_wild": 0.45,
+    "amp": 0.5,
+    "amp_wild": 0.25,
     "shares": {
       "spring": [
         0.38,
@@ -50,9 +50,9 @@
       ]
     },
     "tints": {
-      "green": [0.84, 1.2, 0.76],
-      "gold": [1.28, 1.14, 0.7],
-      "brown": [1.06, 0.97, 0.74]
+      "green": [0.97, 1.07, 0.9],
+      "gold": [1.14, 1.07, 0.86],
+      "brown": [1.1, 0.97, 0.86]
     }
   },
   "mottle": {
@@ -61,11 +61,11 @@
     "fade_end_footprint": 0.3
   },
   "inner": {
-    "amp": 0.06,
-    "period_m": 700.0
+    "amp": 0.12,
+    "period_m": 300.0
   },
   "edges": {
-    "soft_m": 35.0,
+    "soft_m": 160.0,
     "line_amp": 0.2,
     "line_width_m": 5.0,
     "warp_amp_cells": 0.9,
