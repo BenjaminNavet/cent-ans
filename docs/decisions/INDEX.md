@@ -337,3 +337,6 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0760 | [Masse, variété et cadrage des armées en bataille](0760-masse-et-cadrage-des-armees-en-bataille.md) | n/d |
 | 0774 | [Garde-fous : shaders validés par test, journaux de shader fatals, bancs sur machine calme](0774-garde-fous-shaders-et-bancs.md) | accepté |
 | 0775 | [Focus du HUD (F9, portée unique), focus initial sûr, avis ordonnés, libellés abrégés, aide de siège](0775-focus-hud-avis-ordonnes-et-aide-de-siege.md) | accepté |
+| 0770 | [Forêts et hameaux de la campagne](0770-forets-hameaux-campagne.md) | accepté |
+| 0776 | [Mémoire de campagne : textures de modèles et allocateur](0776-memoire-campagne-textures-modeles.md) | accepté |
+| 0779 | [Histoire conditionnée et bifurcations](0779-histoire-conditionnee-et-bifurcations.md) | accepté |
