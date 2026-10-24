@@ -448,7 +448,11 @@ pub fn update_lod(
         .nodes
         .values()
         .any(|n| n.mesh.is_none() && !covering.iter().any(|r| overlaps(*r, n.rect())));
-    let budget_ms = if uncovered { HOLE_BUILD_BUDGET_MS } else { BUILD_BUDGET_MS };
+    let budget_ms = if uncovered {
+        HOLE_BUILD_BUDGET_MS
+    } else {
+        BUILD_BUDGET_MS
+    };
     for (_, _, key, fine) in todo {
         if built > 0 && started.elapsed().as_secs_f32() * 1000.0 > budget_ms {
             break;
@@ -522,9 +526,6 @@ pub fn update_lod(
         .values()
         .filter(|n| !n.shown && !covering.iter().any(|r| overlaps(*r, n.rect())))
         .count();
-    if lod.holes > lod.holes_max {
-        warn!("terrain holes: {} hidden nodes uncovered (pending builds {}, bakes {})", lod.holes, lod.pending_builds, lod.pending_bakes);
-    }
     lod.holes_max = lod.holes_max.max(lod.holes);
     lod.holes_frames += u64::from(lod.holes > 0);
     lod.meshes_built += built as u64;
