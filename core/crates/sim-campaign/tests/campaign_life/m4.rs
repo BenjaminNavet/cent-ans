@@ -342,11 +342,9 @@ fn military_order_masters_take_a_vow_of_chastity() {
     let married = sim_campaign::dynasty::propose_marriage(&mut state, data, &master, &jeanne);
     assert_eq!(married, Err(sim_campaign::MarriageError::Celibate));
     assert!(state.marriage_candidates(data, &master).is_empty());
+    let candidates = state.marriage_candidates(data, &jeanne);
     for (id, _) in state.characters.iter().filter(|(_, c)| c.celibate) {
-        assert!(
-            !state.marriage_candidates(data, &jeanne).contains(id),
-            "{id} offered as a husband"
-        );
+        assert!(!candidates.contains(id), "{id} offered as a husband");
     }
 }
 
