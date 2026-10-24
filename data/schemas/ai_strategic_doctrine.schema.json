@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/ai_strategic_doctrine.schema.json",
+  "title": "Doctrines stratégiques de l'IA de campagne",
+  "description": "Fichier data/ai/strategic_doctrines.json (ADR 0782) : catalogue de doctrines nommées (objectifs, risque en bataille, sièges et chevauchées, diplomatie, finances) et liste d'affectation par faction, souverain, époque ou défaites.",
+  "type": "object",
+  "$defs": {
+    "weight": { "type": "integer", "minimum": 0, "maximum": 100, "description": "0-100, 50 neutre." },
+    "percent": { "type": "integer", "minimum": 10, "maximum": 300, "description": "Pourcentage du normal (100 neutre)." },
+    "doctrine": {
+      "type": "object",
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "objectives": {
+          "type": "object",
+          "properties": {
+            "conquest": { "$ref": "#/$defs/weight" },
+            "revenge": { "$ref": "#/$defs/weight" },
+            "security": { "$ref": "#/$defs/weight" },
+            "treasury": { "$ref": "#/$defs/weight" },
+            "prestige": { "$ref": "#/$defs/weight" }
+          },
+          "required": ["conquest", "revenge", "security", "treasury", "prestige"],
+          "additionalProperties": false
+        },
+        "battle": {
+          "type": "object",
+          "properties": {
+            "engage_ratio_percent": { "$ref": "#/$defs/percent" },
+            "retreat_percent": { "$ref": "#/$defs/percent" },
+            "siege_superiority_percent": { "$ref": "#/$defs/percent" },
+            "assault_odds_delta": { "type": "integer", "minimum": -30, "maximum": 30 }
+          },
+          "required": ["engage_ratio_percent", "retreat_percent", "siege_superiority_percent", "assault_odds_delta"],
+          "additionalProperties": false
+        },
+        "war": {
+          "type": "object",
+          "properties": {
+            "aggression_delta": { "type": "integer", "minimum": -50, "maximum": 50 },
+            "war_ratio_percent": { "$ref": "#/$defs/percent" },
+            "raid_first": { "type": "boolean" }
+          },
+          "required": ["aggression_delta", "war_ratio_percent", "raid_first"],
+          "additionalProperties": false
+        },
+        "diplomacy": {
+          "type": "object",
+          "properties": {
+            "alliance_percent": { "$ref": "#/$defs/percent" },
+            "marriage_percent": { "$ref": "#/$defs/percent" }
+          },
+          "required": ["alliance_percent", "marriage_percent"],
+          "additionalProperties": false
+        },
+        "finance": {
+          "type": "object",
+          "properties": {
+            "borrow_percent": { "$ref": "#/$defs/percent" },
+            "levy_percent": { "$ref": "#/$defs/percent" }
+          },
+          "required": ["borrow_percent", "levy_percent"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["label", "description", "objectives", "battle", "war", "diplomacy", "finance"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "default": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "tuning": {
+      "type": "object",
+      "properties": {
+        "revenge_min_net_defeats": { "type": "integer", "minimum": 1, "description": "Batailles gagnées par un rival sur la faction, en plus de celles qu'elle a gagnées sur lui, pour qu'il devienne cible de revanche." },
+        "revenge_war_discount_percent": { "type": "integer", "minimum": 0, "maximum": 80, "description": "Rabais (en %, pour un poids de revanche de 100) sur le rapport de forces exigé avant de déclarer la guerre à un rival qui a battu le royaume." },
+        "revenge_target_bonus": { "type": "number", "minimum": 0, "description": "Valeur ajoutée à une cible de siège tenue par un rival de revanche (pour un poids de revanche de 50)." }
+      },
+      "required": ["revenge_min_net_defeats", "revenge_war_discount_percent", "revenge_target_bonus"],
+      "additionalProperties": false
+    },
+    "doctrines": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z0-9_]+$" },
+      "additionalProperties": { "$ref": "#/$defs/doctrine" }
+    },
+    "assignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "if": {
+            "type": "object",
+            "properties": {
+              "faction": { "type": "string", "pattern": "^fac_[a-z0-9_]+$" },
+              "ruler": { "type": "string", "pattern": "^chr_[a-z0-9_]+$" },
+              "from_year": { "type": "integer" },
+              "to_year": { "type": "integer" },
+              "min_defeats": { "type": "integer", "minimum": 1 }
+            },
+            "additionalProperties": false
+          },
+          "doctrine": { "type": "string", "pattern": "^[a-z0-9_]+$" }
+        },
+        "required": ["if", "doctrine"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["default", "tuning", "doctrines", "assignments"],
+  "additionalProperties": false
+}

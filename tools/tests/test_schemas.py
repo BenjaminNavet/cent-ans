@@ -18,6 +18,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "ai_doctrine.schema.json": ("ai/doctrines.json",),
     "ai_feudal.schema.json": ("ai/feudal.json",),
     "ai_grid.schema.json": ("ai/grid.json",),
+    "ai_strategic_doctrine.schema.json": ("ai/strategic_doctrines.json",),
     "ai_turn_replay.schema.json": ("ui/ai_turn_replay.json",),
     "army_rules.schema.json": ("rules/armies.json",),
     "army_traditions_rules.schema.json": ("rules/army_traditions.json",),

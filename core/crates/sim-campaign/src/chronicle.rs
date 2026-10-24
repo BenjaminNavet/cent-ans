@@ -136,21 +136,41 @@ pub struct BattleTally {
     pub winner: FactionId,
     pub loser: FactionId,
     pub victories: u32,
+    /// ADR 0782: province of the latest of these victories (the place the AI's revenge
+    /// remembers).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_province: Option<data_model::ProvinceId>,
 }
 
 impl ChronicleState {
     /// Records a field victory of `winner` over `loser`.
     pub fn record_victory(&mut self, winner: &FactionId, loser: &FactionId) {
+        self.record_victory_at(winner, loser, None);
+    }
+
+    /// [`ChronicleState::record_victory`] remembering where it was won.
+    pub fn record_victory_at(
+        &mut self,
+        winner: &FactionId,
+        loser: &FactionId,
+        province: Option<&data_model::ProvinceId>,
+    ) {
         match self
             .battle_tally
             .iter_mut()
             .find(|t| &t.winner == winner && &t.loser == loser)
         {
-            Some(tally) => tally.victories += 1,
+            Some(tally) => {
+                tally.victories += 1;
+                if province.is_some() {
+                    tally.last_province = province.cloned();
+                }
+            }
             None => self.battle_tally.push(BattleTally {
                 winner: winner.clone(),
                 loser: loser.clone(),
                 victories: 1,
+                last_province: province.cloned(),
             }),
         }
     }

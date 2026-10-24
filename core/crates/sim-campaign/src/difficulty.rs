@@ -242,6 +242,24 @@ pub fn effect_summary(m: &DifficultyModifiers) -> Vec<String> {
             m.ai_aggression_delta
         ));
     }
+    if m.ai_prudence_percent != 100 {
+        lines.push(format!(
+            "Prudence des armées de l'IA au combat : {} %",
+            m.ai_prudence_percent
+        ));
+    }
+    if m.ai_anticipation != 0 {
+        lines.push("L'IA lit la destination de vos armées et anticipe vos marches".to_owned());
+    }
+    if m.ai_coordination != 0 {
+        lines.push("Les armées de l'IA coordonnent sièges et défenses".to_owned());
+    }
+    if m.ai_vision_provinces != 0 {
+        lines.push(format!(
+            "Brume de guerre : l'IA ne voit vos armées qu'à {} provinces de ses terres",
+            m.ai_vision_provinces
+        ));
+    }
     if lines.is_empty() {
         lines.push("Aucun modificateur.".to_owned());
     }

@@ -24,7 +24,11 @@
         "ai_siege_superiority_percent": { "$ref": "#/$defs/percent", "description": "Supériorité qu'une armée IA exige sur la défense d'une place avant de l'assiéger, en % du normal (plus = plus prudente). Optionnel, 100 par défaut." },
         "ai_assault_odds_delta": { "type": "integer", "minimum": -30, "maximum": 30, "description": "Points ajoutés aux chances d'assaut qu'une armée IA exige avant de donner l'assaut (plus = plus prudente). Optionnel, 0 par défaut." },
         "ai_decision_noise_percent": { "type": "integer", "minimum": 0, "maximum": 80, "description": "Qualité de décision : amplitude (en %) de l'erreur déterministe sur la valeur que l'IA attribue à ses cibles de siège (0 = toujours la meilleure cible). Optionnel, 0 par défaut." },
-        "ai_aggression_delta": { "type": "integer", "minimum": -50, "maximum": 50, "description": "Points ajoutés à l'agressivité de chaque faction IA dans sa planification militaire (chevauchées, embuscades). Optionnel, 0 par défaut." }
+        "ai_aggression_delta": { "type": "integer", "minimum": -50, "maximum": 50, "description": "Points ajoutés à l'agressivité de chaque faction IA dans sa planification militaire (chevauchées, embuscades). Optionnel, 0 par défaut." },
+        "ai_prudence_percent": { "type": "integer", "minimum": 50, "maximum": 200, "description": "ADR 0783, prudence au combat : échelle la supériorité exigée avant d'attaquer une armée ennemie et la part de force sous laquelle l'armée se replie, en % du normal (moins = téméraire, plus = choisit ses combats). Optionnel, 100 par défaut." },
+        "ai_anticipation": { "type": "integer", "minimum": 0, "maximum": 2, "description": "ADR 0783, anticipation : dès 1, l'IA compte les armées ennemies en marche vers une province comme déjà arrivées. Optionnel, 0 par défaut." },
+        "ai_coordination": { "type": "integer", "minimum": 0, "maximum": 2, "description": "ADR 0783, coordination : dès 1, les armées de l'IA comptent les armées de leur royaume présentes ou en marche vers la même cible pour juger un siège ou une défense. Optionnel, 0 par défaut." },
+        "ai_vision_provinces": { "type": "integer", "minimum": 0, "maximum": 10, "description": "ADR 0783, brume de guerre de l'IA : 0 voit toutes les armées ennemies ; n > 0 ne voit que celles à n provinces terrestres de ses terres ou de ses armées. Optionnel, 0 par défaut." }
       },
       "required": [
         "id",

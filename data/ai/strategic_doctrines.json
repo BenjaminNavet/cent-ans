@@ -1,0 +1,104 @@
+{
+  "description": "Doctrines stratégiques de l’IA de campagne (lot IA-DOCTRINES, ADR 0782-0783) : des personnalités historiques nommées et lisibles. Chaque doctrine pondère les objectifs (0-100, 50 neutre), la prise de risque en bataille, l’usage des sièges et des chevauchées, la diplomatie et les finances (pourcentages neutres à 100). « balanced » est exactement neutre : les factions sans doctrine propre jouent comme avant. L’affectation (assignments) est lue de haut en bas, la première ligne dont toutes les conditions tiennent l’emporte : faction, souverain, années, défaites subies.",
+  "default": "balanced",
+  "tuning": { "revenge_min_net_defeats": 1, "revenge_war_discount_percent": 30, "revenge_target_bonus": 30.0 },
+  "doctrines": {
+    "balanced": {
+      "label": "Prudence ordinaire",
+      "description": "Un prince sans dessein marqué : il saisit les occasions, évite les risques inutiles et ne s’endette pas à la légère.",
+      "objectives": { "conquest": 50, "revenge": 50, "security": 50, "treasury": 50, "prestige": 50 },
+      "battle": { "engage_ratio_percent": 100, "retreat_percent": 100, "siege_superiority_percent": 100, "assault_odds_delta": 0 },
+      "war": { "aggression_delta": 0, "war_ratio_percent": 100, "raid_first": false },
+      "diplomacy": { "alliance_percent": 100, "marriage_percent": 100 },
+      "finance": { "borrow_percent": 100, "levy_percent": 100 }
+    },
+    "chevauchee_pillage": {
+      "label": "Chevauchée et pillage",
+      "description": "Édouard III et le Prince Noir : des colonnes rapides qui ravagent le pays pour ruiner l’ennemi et remplir les coffres, un siège seulement quand la place est faible, la bataille sur un terrain choisi. Des alliances nombreuses aux Pays-Bas, des emprunts sans scrupule.",
+      "objectives": { "conquest": 70, "revenge": 40, "security": 35, "treasury": 80, "prestige": 70 },
+      "battle": { "engage_ratio_percent": 90, "retreat_percent": 90, "siege_superiority_percent": 115, "assault_odds_delta": 5 },
+      "war": { "aggression_delta": 20, "war_ratio_percent": 90, "raid_first": true },
+      "diplomacy": { "alliance_percent": 140, "marriage_percent": 120 },
+      "finance": { "borrow_percent": 150, "levy_percent": 100 }
+    },
+    "attrition_fortresses": {
+      "label": "Guerre d’usure et de forteresses",
+      "description": "Charles V et Du Guesclin : éviter la bataille rangée, tenir les places, harceler, reprendre les villes une à une par le siège ou la négociation, et venger les défaites sans les répéter.",
+      "objectives": { "conquest": 55, "revenge": 85, "security": 75, "treasury": 60, "prestige": 40 },
+      "battle": { "engage_ratio_percent": 140, "retreat_percent": 115, "siege_superiority_percent": 85, "assault_odds_delta": 0 },
+      "war": { "aggression_delta": -5, "war_ratio_percent": 105, "raid_first": false },
+      "diplomacy": { "alliance_percent": 110, "marriage_percent": 100 },
+      "finance": { "borrow_percent": 100, "levy_percent": 120 }
+    },
+    "chivalric_battle": {
+      "label": "Chevalerie et bataille rangée",
+      "description": "Philippe VI et Jean II : l’honneur d’un roi est de chercher l’ennemi et de le vaincre en bataille, quel que soit le terrain. On poursuit l’adversaire, on se replie tard, on rend coup pour coup.",
+      "objectives": { "conquest": 55, "revenge": 70, "security": 45, "treasury": 35, "prestige": 85 },
+      "battle": { "engage_ratio_percent": 70, "retreat_percent": 70, "siege_superiority_percent": 100, "assault_odds_delta": -5 },
+      "war": { "aggression_delta": 10, "war_ratio_percent": 95, "raid_first": false },
+      "diplomacy": { "alliance_percent": 100, "marriage_percent": 100 },
+      "finance": { "borrow_percent": 100, "levy_percent": 100 }
+    },
+    "feudal_marriage": {
+      "label": "Expansion féodale par mariage",
+      "description": "Habsbourg, Luxembourg, Bourgogne : on agrandit le patrimoine par les alliances et les héritages plus que par les armes, on ne fait la guerre qu’avec des alliés et à coup sûr.",
+      "objectives": { "conquest": 40, "revenge": 30, "security": 60, "treasury": 55, "prestige": 70 },
+      "battle": { "engage_ratio_percent": 110, "retreat_percent": 105, "siege_superiority_percent": 100, "assault_odds_delta": 0 },
+      "war": { "aggression_delta": -10, "war_ratio_percent": 110, "raid_first": false },
+      "diplomacy": { "alliance_percent": 170, "marriage_percent": 180 },
+      "finance": { "borrow_percent": 100, "levy_percent": 100 }
+    },
+    "merchant_credit": {
+      "label": "Marchand et crédit",
+      "description": "Flandre, Gênes, Venise : le commerce fait la richesse et la richesse la sécurité. On évite la guerre qui ferme les routes, on achète des alliés, on emprunte sans crainte, on ne risque pas ses soldats.",
+      "objectives": { "conquest": 25, "revenge": 25, "security": 65, "treasury": 95, "prestige": 30 },
+      "battle": { "engage_ratio_percent": 130, "retreat_percent": 120, "siege_superiority_percent": 115, "assault_odds_delta": 5 },
+      "war": { "aggression_delta": -20, "war_ratio_percent": 130, "raid_first": false },
+      "diplomacy": { "alliance_percent": 140, "marriage_percent": 100 },
+      "finance": { "borrow_percent": 200, "levy_percent": 100 }
+    },
+    "crusade_frontier": {
+      "label": "Croisade et frontière",
+      "description": "Ordre teutonique, Hospitaliers, Hongrie : la guerre sainte aux marges de la chrétienté est un état permanent. On cherche la bataille contre l’infidèle, on bâtit des châteaux, on économise sur les emprunts.",
+      "objectives": { "conquest": 75, "revenge": 55, "security": 50, "treasury": 40, "prestige": 75 },
+      "battle": { "engage_ratio_percent": 85, "retreat_percent": 85, "siege_superiority_percent": 95, "assault_odds_delta": -3 },
+      "war": { "aggression_delta": 15, "war_ratio_percent": 95, "raid_first": false },
+      "diplomacy": { "alliance_percent": 90, "marriage_percent": 80 },
+      "finance": { "borrow_percent": 60, "levy_percent": 100 }
+    },
+    "passive_defence": {
+      "label": "Défense passive",
+      "description": "Un petit royaume ou une cité qui veut surtout survivre : on s’enferme derrière les murs, on achète la paix, on ne déclare jamais la guerre sans nécessité et on ne s’endette que ruiné.",
+      "objectives": { "conquest": 15, "revenge": 25, "security": 95, "treasury": 60, "prestige": 20 },
+      "battle": { "engage_ratio_percent": 150, "retreat_percent": 130, "siege_superiority_percent": 130, "assault_odds_delta": 10 },
+      "war": { "aggression_delta": -30, "war_ratio_percent": 150, "raid_first": false },
+      "diplomacy": { "alliance_percent": 130, "marriage_percent": 100 },
+      "finance": { "borrow_percent": 40, "levy_percent": 40 }
+    }
+  },
+  "assignments": [
+    { "if": { "faction": "fac_france", "ruler": "chr_charles_v" }, "doctrine": "attrition_fortresses" },
+    { "if": { "faction": "fac_france", "min_defeats": 3 }, "doctrine": "attrition_fortresses" },
+    { "if": { "faction": "fac_france" }, "doctrine": "chivalric_battle" },
+    { "if": { "faction": "fac_england" }, "doctrine": "chevauchee_pillage" },
+    { "if": { "faction": "fac_lancaster" }, "doctrine": "chevauchee_pillage" },
+    { "if": { "faction": "fac_burgundy" }, "doctrine": "feudal_marriage" },
+    { "if": { "faction": "fac_austria" }, "doctrine": "feudal_marriage" },
+    { "if": { "faction": "fac_bohemia" }, "doctrine": "feudal_marriage" },
+    { "if": { "faction": "fac_brabant" }, "doctrine": "feudal_marriage" },
+    { "if": { "faction": "fac_flanders" }, "doctrine": "merchant_credit" },
+    { "if": { "faction": "fac_genoa" }, "doctrine": "merchant_credit" },
+    { "if": { "faction": "fac_venice" }, "doctrine": "merchant_credit" },
+    { "if": { "faction": "fac_florence" }, "doctrine": "merchant_credit" },
+    { "if": { "faction": "fac_teutonic" }, "doctrine": "crusade_frontier" },
+    { "if": { "faction": "fac_livonian_order" }, "doctrine": "crusade_frontier" },
+    { "if": { "faction": "fac_hospitallers" }, "doctrine": "crusade_frontier" },
+    { "if": { "faction": "fac_crusaders" }, "doctrine": "crusade_frontier" },
+    { "if": { "faction": "fac_hungary" }, "doctrine": "crusade_frontier" },
+    { "if": { "faction": "fac_swiss" }, "doctrine": "passive_defence" },
+    { "if": { "faction": "fac_byzantium" }, "doctrine": "passive_defence" },
+    { "if": { "faction": "fac_granada" }, "doctrine": "passive_defence" },
+    { "if": { "faction": "fac_ragusa" }, "doctrine": "passive_defence" },
+    { "if": { "faction": "fac_novgorod" }, "doctrine": "passive_defence" }
+  ]
+}

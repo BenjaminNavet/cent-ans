@@ -5,6 +5,7 @@ pub mod ai_alignment;
 pub mod ai_campaign;
 pub mod ai_diplomacy;
 pub mod ai_doctrine;
+pub mod ai_strategic_doctrine;
 pub mod ai_feudal;
 pub mod ai_grid;
 pub mod army_rules;

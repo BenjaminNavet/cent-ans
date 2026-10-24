@@ -17,7 +17,9 @@
       "ai_siege_superiority_percent": 130,
       "ai_assault_odds_delta": 10,
       "ai_decision_noise_percent": 35,
-      "ai_aggression_delta": -15
+      "ai_aggression_delta": -15,
+      "ai_prudence_percent": 80,
+      "ai_vision_provinces": 2
     },
     {
       "id": "normal",
@@ -51,7 +53,9 @@
       "ai_siege_superiority_percent": 90,
       "ai_assault_odds_delta": -5,
       "ai_decision_noise_percent": 0,
-      "ai_aggression_delta": 10
+      "ai_aggression_delta": 10,
+      "ai_prudence_percent": 115,
+      "ai_anticipation": 1
     },
     {
       "id": "very_hard",
@@ -68,7 +72,10 @@
       "ai_siege_superiority_percent": 80,
       "ai_assault_odds_delta": -10,
       "ai_decision_noise_percent": 0,
-      "ai_aggression_delta": 20
+      "ai_aggression_delta": 20,
+      "ai_prudence_percent": 130,
+      "ai_anticipation": 1,
+      "ai_coordination": 1
     }
   ]
 }

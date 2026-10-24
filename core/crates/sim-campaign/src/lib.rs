@@ -76,6 +76,7 @@ pub mod crusade;
 pub mod development_tier;
 pub mod difficulty;
 pub mod diplomacy;
+pub mod doctrines;
 pub mod dynasty;
 pub mod economy;
 pub mod economy_balance;
