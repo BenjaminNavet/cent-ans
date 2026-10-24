@@ -181,6 +181,9 @@ pub struct ActsRules {
     pub grades: Vec<ReignGrade>,
     /// Reign score (0-100) from which the campaign is won.
     pub victory_min_score: u32,
+    /// GAMEPLAY2 (ADR 0788): share (0-100) of an act's score that depends on keeping the
+    /// objectives already met when the act began. 0: every objective earns points (first version).
+    pub hold_guard_percent: u32,
     pub ruin: RuinRules,
     /// Interface texts.
     pub texts: BTreeMap<String, String>,

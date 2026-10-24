@@ -1121,6 +1121,9 @@ pub struct CampaignState {
     /// ADR 0784: the campaign arc in three acts (bookkeeping of the player's house).
     #[serde(default)]
     pub acts: crate::acts::ActsState,
+    /// ADR 0789: the counsellor's notes of the season and the postures last announced.
+    #[serde(default)]
+    pub advisor: crate::advisor::AdvisorState,
     /// The player's campaign outcome, once reached (M10).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub outcome: Option<crate::victory::Outcome>,
@@ -1230,6 +1233,7 @@ impl CampaignState {
             chronicle: crate::chronicle::ChronicleState::default(),
             causes: crate::causes::CauseJournal::default(),
             acts: crate::acts::ActsState::default(),
+            advisor: crate::advisor::AdvisorState::default(),
             outcome: None,
             victory_streak: 0,
             victory_length: crate::victory::VictoryLength::default(),

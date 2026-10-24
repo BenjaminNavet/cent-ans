@@ -55,9 +55,15 @@ pub fn parse(text: &str) -> Result<Bands, String> {
     serde_json::from_str(text).map_err(|error| format!("bandes d'équilibre invalides : {error}"))
 }
 
-/// Loads `<data_root>/balance/seed_bots_bands.json`.
-pub fn load(data_root: &Path) -> Result<Bands, String> {
-    let path = data_root.join("balance/seed_bots_bands.json");
+/// Loads `<data_root>/balance/seed_bots_bands.json` (long pass) or, for the quick pass (few
+/// turns, so smaller counts), `seed_bots_bands_quick.json`.
+pub fn load(data_root: &Path, quick: bool) -> Result<Bands, String> {
+    let name = if quick {
+        "seed_bots_bands_quick.json"
+    } else {
+        "seed_bots_bands.json"
+    };
+    let path = data_root.join("balance").join(name);
     let text = std::fs::read_to_string(&path)
         .map_err(|error| format!("{} illisible : {error}", path.display()))?;
     parse(&text)
@@ -105,9 +111,23 @@ mod tests {
     #[test]
     fn repository_bands_load() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-        let bands = load(&root).expect("bands");
+        let bands = load(&root, false).expect("bands");
         assert_eq!(bands.len(), METRIC_NAMES.len());
         assert!(bands.contains_key("revolts_per_game"));
+    }
+
+    /// GAMEPLAY2 (ADR 0789): the quick pass has its own bands, every metric initialised and
+    /// bounded on both sides, so that the oracle can fail.
+    #[test]
+    fn quick_bands_are_all_active_and_bounded() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+        let bands = load(&root, true).expect("quick bands");
+        assert_eq!(bands.len(), METRIC_NAMES.len());
+        for name in METRIC_NAMES {
+            let band = bands.get(name).unwrap_or_else(|| panic!("{name} missing"));
+            assert!(band.is_active(), "{name} is not initialised");
+            assert!(band.min.is_some() && band.max.is_some(), "{name} unbounded");
+        }
     }
 
     #[test]

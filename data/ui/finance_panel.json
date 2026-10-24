@@ -27,7 +27,7 @@
     "armies": { "label": "Armées", "tip": "Solde et vivres des armées et des garnisons." },
     "buildings": { "label": "Bâtiments", "tip": "Entretien des bâtiments des colonies." },
     "table": { "label": "Table", "tip": "Régimes alimentaires des provinces." },
-    "administration": { "label": "Cour, administration", "tip": "Part du revenu prise par la cour, l’administration et les édits." },
+    "administration": { "label": "Cour, administration", "tip": "Part du revenu prise par la cour, l’administration et les édits, plus une part croissante de l’épargne dormante (trésor moins dettes, au-delà d’une saison de revenu). L’argent emprunté ne compte pas dans cette épargne : emprunter ne gonfle pas cette charge." },
     "household": { "label": "Maison du roi", "tip": "Croît avec le rang du royaume et le prestige du souverain." },
     "wages": { "label": "Gages des officiers", "tip": "Gouverneurs de province et chefs d’armée." },
     "siege": { "label": "Sièges", "tip": "Fascines, engins et fourrage des sièges en cours." },

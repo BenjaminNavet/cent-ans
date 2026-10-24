@@ -38,8 +38,11 @@ pub struct RunConfig {
     pub max_minutes: u32,
     /// Slow-turn limit, milliseconds.
     pub slow_turn_ms: u64,
-    /// Whether to check balance drift (long pass only).
+    /// Whether to check balance drift.
     pub balance: bool,
+    /// Quick pass: the drift is checked against the quick bands (`seed_bots_bands_quick.json`,
+    /// few turns), not the long-pass ones.
+    pub quick: bool,
     /// The `data/` directory.
     pub data_root: PathBuf,
 }
@@ -266,7 +269,7 @@ fn play(
         }
     }
     if !played.cut {
-        played.metrics = tracker.map(|tracker| tracker.finish(&state));
+        played.metrics = tracker.map(|tracker| tracker.finish(&state, game.data));
     }
     played
 }
@@ -355,7 +358,7 @@ fn run_with_hook(config: &RunConfig, hook: Hook<'_>) -> RunResult {
     }
     if config.balance {
         result.metrics = metrics::aggregate(&played_metrics);
-        match bands::load(&config.data_root) {
+        match bands::load(&config.data_root, config.quick) {
             Ok(loaded) => result
                 .findings
                 .extend(balance::check(&result.metrics, &loaded)),
@@ -426,6 +429,7 @@ mod tests {
             max_minutes: 10,
             slow_turn_ms: 600_000,
             balance: false,
+            quick: false,
             data_root: data_root(),
         }
     }

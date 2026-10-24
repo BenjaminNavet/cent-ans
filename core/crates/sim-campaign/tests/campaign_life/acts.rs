@@ -73,8 +73,35 @@ fn the_arc_starts_in_the_first_act_with_live_objectives() {
     let status = state.act_status(data).unwrap();
     assert_eq!(status.index, 0);
     assert!(status.objectives.len() >= 5);
-    assert!(status.score > 0 && status.score < 100, "{}", status.score);
+    // GAMEPLAY2 (ADR 0788): what the house holds at the start is an acquis to keep, not points;
+    // an idle house starts the act with nothing earned.
+    assert_eq!(status.score, 0, "{status:?}");
+    let held: Vec<&str> = status
+        .objectives
+        .iter()
+        .filter(|o| o.hold)
+        .map(|o| o.objective.id.as_str())
+        .collect();
+    assert!(
+        held.contains(&"fr1_dynasty") && held.contains(&"fr1_debt"),
+        "{held:?}"
+    );
+    assert!(status.objectives.iter().any(|o| !o.hold));
     assert!(state.outcome.is_none());
+}
+
+/// GAMEPLAY2 (ADR 0788), judge finding C4: the arc is open from turn 0, so the first screen
+/// shows the objectives of the act (not the abandoned rule of 40 seasons).
+#[test]
+fn the_act_is_open_before_the_first_end_of_turn() {
+    let data = game_data();
+    let state = CampaignState::new_1337(data, fac("fac_france"), 7).unwrap();
+    assert!(state.acts.started);
+    let status = state
+        .act_status(data)
+        .expect("the first act is live at turn 0");
+    assert_eq!(status.index, 0);
+    assert_eq!(state.turn, 0);
 }
 
 #[test]
@@ -152,6 +179,12 @@ fn pressures_follow_the_state_of_the_realm() {
     let mut state = started(data, "fac_france");
     let france = fac("fac_france");
     let england = fac("fac_england");
+    // The house has earned something (Flanders and Artois), so that the pressure shows.
+    for settlement in state.settlements.values_mut() {
+        if matches!(settlement.province.as_str(), "prov_flandre" | "prov_artois") {
+            settlement.controller = france.clone();
+        }
+    }
     // In 1337 the English hold lands of the realm: the crown is contested.
     let contested = state.act_status(data).unwrap();
     assert!(contested
@@ -305,4 +338,15 @@ fn a_full_campaign_crosses_the_three_acts() {
             .collect::<Vec<_>>(),
         outcome.score
     );
+    for report in &state.acts.reports {
+        eprintln!(
+            "  {} {:?}",
+            report.act_id,
+            report
+                .objectives
+                .iter()
+                .map(|o| format!("{}:{}{}", o.id, o.percent, if o.met { "*" } else { "" }))
+                .collect::<Vec<_>>()
+        );
+    }
 }

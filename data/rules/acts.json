@@ -1,5 +1,5 @@
 {
-  "description": "ACTES (ADR 0784, 0785) : l'arc de partie en trois actes. Chaque acte donne à la maison du joueur des objectifs (objective_sets : par faction `fac_*`, par gouvernement `gov_*`, sinon `default`) et des pressions (points de score quand la condition tient à la clôture de l'acte). Un acte se clôt avec l'année ou plus tôt (paix durable, effondrement). La victoire est le score de règne : moyenne des scores d'acte pondérée par `weight`, au moins victory_min_score. La défaite est la ruine de la maison (ruin) ou la perte de toutes les terres.",
+  "description": "ACTES (ADR 0784, 0785) : l'arc de partie en trois actes. Chaque acte donne à la maison du joueur des objectifs (objective_sets : par faction `fac_*`, par gouvernement `gov_*`, sinon `default`) et des pressions (points de score quand la condition tient à la clôture de l'acte). Un acte se clôt avec l'année ou plus tôt (paix durable, effondrement). La victoire est le score de règne : moyenne des scores d'acte pondérée par `weight`, au moins victory_min_score. La défaite est la ruine de la maison (ruin) ou la perte de toutes les terres. ADR 0788 : un objectif déjà rempli à l'ouverture de l'acte est un acquis (hold_guard_percent) : il ne rapporte aucun point mais sa perte retranche cette part du score ; seuls les autres objectifs, comptés à partir de leur état de départ, font le score.",
   "acts": [
     {
       "id": "act_1",
@@ -2856,6 +2856,7 @@
       "text": "Les chroniqueurs en feront un modèle pour les siècles."
     }
   ],
+  "hold_guard_percent": 35,
   "victory_min_score": 72,
   "ruin": {
     "defaults": 3,
@@ -2883,6 +2884,7 @@
     "causes_title": "Les trois causes principales",
     "ended_by_year": "L'acte s'achève avec l'année.",
     "ended_by_peace": "L'acte s'achève par une paix durable.",
-    "ended_by_collapse": "L'acte s'achève par l'effondrement de la maison."
+    "ended_by_collapse": "L'acte s'achève par l'effondrement de la maison.",
+    "hold_suffix": " — acquis à conserver"
   }
 }

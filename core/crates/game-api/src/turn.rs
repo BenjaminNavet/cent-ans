@@ -25,7 +25,7 @@ pub enum Severity {
 pub struct Alert {
     pub id: String,
     /// `siege`, `enemy_army`, `debt`, `research_idle`, `idle_army`, `free_slot`,
-    /// `diplomacy_offer`, `chronicle_decision`.
+    /// `diplomacy_offer`, `chronicle_decision`, `advice` (the counsellor, ADR 0789).
     pub kind: String,
     pub severity: Severity,
     pub text: String,
@@ -197,14 +197,34 @@ pub fn turn_readiness(
         }
     }
     if free_slots > 0 {
+        // GAMEPLAY2 (ADR 0789), judge finding C3: free sites are an investment opportunity,
+        // not a counter among others: the text says what the treasury could do.
         let mut a = alert(
             "free_slot".to_owned(),
             "free_slot",
             Severity::Info,
-            format!("{free_slots} colonie(s) sans chantier en cours"),
+            format!(
+                "{free_slots} colonie(s) sans chantier : {} livres peuvent y travailler",
+                sim_campaign::advisor::fr_number(treasury)
+            ),
         );
         a.province = first_province;
         alerts.push(a);
+    }
+    // ADR 0789: what the counsellor says this season (first line: title).
+    if faction == state.player_faction() {
+        for note in &state.advisor.notes {
+            alerts.push(alert(
+                format!("advice:{}", note.id),
+                "advice",
+                if note.kind == "danger" {
+                    Severity::Warning
+                } else {
+                    Severity::Info
+                },
+                format!("{}\n{}", note.title, note.text),
+            ));
+        }
     }
     let offers = state.valid_offers(data, faction).len();
     if offers > 0 {
@@ -262,6 +282,22 @@ mod tests {
         );
         assert!(!ready.idle_armies.is_empty(), "armies start without orders");
         assert!(serde_json::to_string(&ready).is_ok());
+        // ADR 0789: the counsellor's notes of the season are served as `advice` alerts, the
+        // first line being the title.
+        state
+            .advisor
+            .notes
+            .push(sim_campaign::advisor::AdvisorNote {
+                id: "t".to_owned(),
+                kind: "danger".to_owned(),
+                title: "Titre".to_owned(),
+                text: "Corps".to_owned(),
+            });
+        let advised = turn_readiness(data, &state, &france);
+        let advice = advised.alerts.iter().find(|a| a.kind == "advice").unwrap();
+        assert_eq!(advice.text, "Titre\nCorps");
+        assert_eq!(advice.severity, Severity::Warning);
+        state.advisor.notes.clear();
         state.factions.get_mut(&france).unwrap().treasury = -100;
         let debt = turn_readiness(data, &state, &france);
         assert!(debt

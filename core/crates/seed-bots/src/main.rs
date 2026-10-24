@@ -49,7 +49,7 @@ fn parse_args(args: &[String], data_root: &Path) -> Result<Command, String> {
             _ => Err("bands-propose attend un fichier report.json".into()),
         },
         Some("run") => {
-            let (mut quick, mut balance) = (false, false);
+            let mut quick = false;
             let (mut seeds, mut turns, mut bot_names, mut max_minutes, mut out) =
                 (None, None, None, None, None);
             let mut iter = args[1..].iter();
@@ -60,7 +60,8 @@ fn parse_args(args: &[String], data_root: &Path) -> Result<Command, String> {
                 };
                 match flag.as_str() {
                     "--quick" => quick = true,
-                    "--balance" => balance = true,
+                    // Kept for the old command lines: the balance is now always checked.
+                    "--balance" => {}
                     "--seeds" => seeds = Some(parse_seeds(value()?)?),
                     "--turns" => {
                         turns = Some(value()?.parse::<u32>().map_err(|_| "--turns invalide")?)
@@ -91,7 +92,8 @@ fn parse_args(args: &[String], data_root: &Path) -> Result<Command, String> {
                 bots: bot_names,
                 max_minutes: max_minutes.unwrap_or(if quick { 1 } else { 15 }),
                 slow_turn_ms: 5000,
-                balance: balance || !quick,
+                balance: true,
+                quick,
                 data_root: data_root.to_path_buf(),
             };
             Ok(Command::Run { config, out })
@@ -159,7 +161,11 @@ fn propose_from_report(path: &Path) -> Result<String, String> {
 }
 
 fn main() -> ExitCode {
-    let data_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+    // `CENT_ANS_DATA_DIR` plays another copy of the data (a deliberate regression of a rule).
+    let data_root = std::env::var_os("CENT_ANS_DATA_DIR").map_or_else(
+        || Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data"),
+        PathBuf::from,
+    );
     let args: Vec<String> = std::env::args().skip(1).collect();
     let command = match parse_args(&args, &data_root) {
         Ok(command) => command,
@@ -235,8 +241,8 @@ mod tests {
     fn quick_defaults() {
         let c = config(&["run", "--quick"]);
         assert_eq!(
-            (c.seeds.clone(), c.turns, c.max_minutes, c.balance),
-            (vec![1], 20, 1, false)
+            (c.seeds.clone(), c.turns, c.max_minutes, c.balance, c.quick),
+            (vec![1], 20, 1, true, true)
         );
         assert_eq!(c.bots.len(), 8);
     }
@@ -245,8 +251,8 @@ mod tests {
     fn long_defaults_and_overrides() {
         let c = config(&["run"]);
         assert_eq!(
-            (c.seeds.len(), c.turns, c.max_minutes, c.balance),
-            (4, 150, 15, true)
+            (c.seeds.len(), c.turns, c.max_minutes, c.balance, c.quick),
+            (4, 150, 15, true, false)
         );
         let c = config(&[
             "run",

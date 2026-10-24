@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use sim_campaign::{CampaignState, EventKind, GameEvent};
 
 /// Names of the metrics, as keys of the bands file.
-pub const METRIC_NAMES: [&str; 14] = [
+pub const METRIC_NAMES: [&str; 18] = [
     "revolts_per_game",
     "bankruptcies_per_game",
     "war_turns_mean",
@@ -36,6 +36,10 @@ pub const METRIC_NAMES: [&str; 14] = [
     "unrest_warnings_per_game",
     "revolts_put_down_per_game",
     "uprisings_per_game",
+    "battles_per_game",
+    "provinces_held_end",
+    "treasury_end",
+    "reign_score",
 ];
 
 /// The metrics of one game.
@@ -76,11 +80,24 @@ pub struct GameMetrics {
     /// B4: uprisings (a rebel army raised: [`EventKind::Revolt`] carrying an army).
     #[serde(default)]
     pub uprisings: u32,
+    /// GAMEPLAY2: battles fought (field battles reported by the end of turn), all factions.
+    #[serde(default)]
+    pub battles: u32,
+    /// GAMEPLAY2: provinces the bot's house controls at the end.
+    #[serde(default)]
+    pub provinces_held_end: u32,
+    /// GAMEPLAY2: treasury of the bot's house at the end (livres).
+    #[serde(default)]
+    pub treasury_end: i64,
+    /// GAMEPLAY2 (ADR 0788): reign score (0-100) of the bot's house at the end, the act in
+    /// progress included.
+    #[serde(default)]
+    pub reign_score: u32,
 }
 
 impl GameMetrics {
     /// The values by metric name (same names as [`METRIC_NAMES`]).
-    pub fn values(&self) -> [(&'static str, f64); 14] {
+    pub fn values(&self) -> [(&'static str, f64); 18] {
         [
             (METRIC_NAMES[0], f64::from(self.revolts)),
             (METRIC_NAMES[1], f64::from(self.bankruptcies)),
@@ -99,6 +116,10 @@ impl GameMetrics {
             (METRIC_NAMES[11], f64::from(self.unrest_warnings)),
             (METRIC_NAMES[12], f64::from(self.revolts_put_down)),
             (METRIC_NAMES[13], f64::from(self.uprisings)),
+            (METRIC_NAMES[14], f64::from(self.battles)),
+            (METRIC_NAMES[15], f64::from(self.provinces_held_end)),
+            (METRIC_NAMES[16], self.treasury_end as f64),
+            (METRIC_NAMES[17], f64::from(self.reign_score)),
         ]
     }
 }
@@ -113,6 +134,7 @@ pub struct MetricsTracker {
     unrest_warnings: u32,
     revolts_put_down: u32,
     uprisings: u32,
+    battles: u32,
     bankruptcies: u32,
     turns: u32,
     /// War pairs in progress, with the turn they were first seen.
@@ -164,6 +186,7 @@ impl MetricsTracker {
             unrest_warnings: 0,
             revolts_put_down: 0,
             uprisings: 0,
+            battles: 0,
             bankruptcies: 0,
             turns: 0,
             wars: BTreeMap::new(),
@@ -188,6 +211,7 @@ impl MetricsTracker {
                 EventKind::Unrest if event.loss => self.unrest_warnings += 1,
                 EventKind::Unrest => self.revolts_put_down += 1,
                 EventKind::Bankruptcy => self.bankruptcies += 1,
+                EventKind::Battle => self.battles += 1,
                 _ => {}
             }
         }
@@ -246,7 +270,7 @@ impl MetricsTracker {
     }
 
     /// Closes the game and returns its metrics.
-    pub fn finish(mut self, state: &CampaignState) -> GameMetrics {
+    pub fn finish(mut self, state: &CampaignState, data: &data_model::GameData) -> GameMetrics {
         for (_, start) in std::mem::take(&mut self.wars) {
             self.durations.push(self.turns - start);
         }
@@ -277,6 +301,13 @@ impl MetricsTracker {
             unrest_warnings: self.unrest_warnings,
             revolts_put_down: self.revolts_put_down,
             uprisings: self.uprisings,
+            battles: self.battles,
+            provinces_held_end: state.controlled_provinces(&state.player_faction).count() as u32,
+            treasury_end: state
+                .factions
+                .get(&state.player_faction)
+                .map_or(0, |f| f.treasury),
+            reign_score: state.reign_score(data, true),
         }
     }
 }
@@ -403,7 +434,7 @@ mod tests {
         // Turn 4: a-b again, still on at the end of the game.
         set_war(&mut state, "fac_a", "fac_b", true);
         tracker.observe(&state, &[]);
-        let metrics = tracker.finish(&state);
+        let metrics = tracker.finish(&state, data_model::test_support::game_data());
         assert_eq!((metrics.revolts, metrics.bankruptcies), (2, 1));
         assert_eq!(metrics.factions_eliminated, 1);
         // Wars: 2 turns, then 1 turn (closed by the end): mean 1.5.
@@ -416,7 +447,12 @@ mod tests {
         let state = world();
         let mut tracker = MetricsTracker::new(&state);
         tracker.observe(&state, &[]);
-        assert_eq!(tracker.finish(&state).war_turns_mean, 0.0);
+        assert_eq!(
+            tracker
+                .finish(&state, data_model::test_support::game_data())
+                .war_turns_mean,
+            0.0
+        );
     }
 
     #[test]

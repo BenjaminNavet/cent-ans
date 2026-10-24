@@ -34,6 +34,12 @@
       "action": "alert"
     },
     {
+      "id": "advice",
+      "title": "{title}",
+      "text": "{text}",
+      "action": "alert"
+    },
+    {
       "id": "army_idle",
       "title": "Votre armée attend vos ordres",
       "text": "Sélectionnez {army} et faites un clic droit sur la carte pour la déplacer.",

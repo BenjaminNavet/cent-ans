@@ -63,6 +63,34 @@ fn borrowing_credits_the_treasury_and_costs_interest() {
     assert_eq!(budget.borrowed, 10_000);
 }
 
+/// GAMEPLAY2 (ADR 0788), judge finding C2: the court's levy on a dormant hoard counts the
+/// treasury net of the principal owed. Borrowing used to push the "administration" charge up
+/// (the bankers' coin was taxed as the house's own savings).
+#[test]
+fn borrowing_does_not_raise_the_administration_charge() {
+    let data = game_data();
+    let mut state = start_quiet(data, "fac_france", 5);
+    let france = fac("fac_france");
+    let income = state.faction_income(data, &france);
+    let before = state.administration_upkeep_for(data, &france, income);
+    state
+        .submit_order(
+            data,
+            Order::Borrow {
+                lender: "lombards".into(),
+                amount: 31_000,
+            },
+        )
+        .expect("a loan");
+    let after = state.administration_upkeep_for(data, &france, income);
+    assert_eq!(after, before, "the borrowed coin is not dormant savings");
+    // The same sum earned instead of borrowed is still taxed.
+    let mut state = start_quiet(data, "fac_france", 5);
+    state.factions.get_mut(&france).unwrap().treasury += 31_000;
+    let earned = state.administration_upkeep_for(data, &france, income);
+    assert!(earned > before, "a hoard of one's own is still taxed");
+}
+
 #[test]
 fn credit_has_a_limit_a_minimum_and_a_known_banker() {
     let data = game_data();

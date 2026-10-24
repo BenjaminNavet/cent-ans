@@ -244,7 +244,7 @@
       "body": "Monnaie du royaume : la livre tournois (₶). Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, toutes les troupes perdent {rule.bankruptcy_morale_penalty} de moral chaque saison.",
       "why": "Tout se paie comptant : recrutement, construction, renforts des armées (payés par homme regagné). Sans fonds, l’ordre est refusé. En dette : {rule.bankruptcy_morale_penalty} de moral en moins par saison pour toutes les troupes, édits abandonnés, généraux et gouverneurs moins loyaux, lassitude de guerre qui grimpe, et votre or pèse moins dans les négociations.",
       "raise": "• Garder un solde positif (voir Solde).\n• Butin des chevauchées, rançon ou sac des villes prises.\n• Rançons des captifs et tributs obtenus en diplomatie.",
-      "control": "Ne thésaurisez pas : au-delà de {rule.opulence_seasons} saisons de revenu dormant, {rule.opulence_percent} % de l’excédent part en frais de cour. Dépensez-le en bâtiments et en troupes. Détail des mouvements : clic sur le nom de la faction."
+      "control": "Ne thésaurisez pas : au-delà de {rule.opulence_seasons} saisons de revenu dormant, {rule.opulence_percent} % de l’excédent part en frais de cour. L’épargne s’entend nette de vos dettes : emprunter ne la fait pas croître. Dépensez-la en bâtiments et en troupes. Détail des mouvements : clic sur le nom de la faction."
     },
     "hud_income": {
       "title": "Solde",
