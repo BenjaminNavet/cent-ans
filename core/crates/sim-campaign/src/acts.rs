@@ -16,7 +16,7 @@ use crate::events::{EventKind, GameEvent};
 use crate::state::CampaignState;
 
 /// Fraction of the weight an unmet objective still earns per unit of progress.
-const PARTIAL_CREDIT: f64 = 0.5;
+const PARTIAL_CREDIT: f64 = 0.25;
 /// Causes kept in the bilan of an act.
 const BILAN_CAUSES: usize = 3;
 
@@ -276,7 +276,9 @@ impl CampaignState {
                     .is_some_and(|c| c.alive && !c.captive);
                 let heir = f.is_some_and(|f| f.heir.is_some());
                 let no_regency = f.is_some_and(|f| !f.regency);
-                let r = 0.4 * f64::from(ruler_free) + 0.4 * f64::from(heir) + 0.2 * f64::from(no_regency);
+                let r = 0.4 * f64::from(ruler_free)
+                    + 0.4 * f64::from(heir)
+                    + 0.2 * f64::from(no_regency);
                 let text = match (ruler_free, heir, no_regency) {
                     (true, true, true) => "lignée assurée".to_owned(),
                     (false, _, _) => "roi captif ou absent".to_owned(),
@@ -289,7 +291,12 @@ impl CampaignState {
                 let held = crate::feudal::holder_of(self, title) == Some(faction);
                 (
                     f64::from(held),
-                    if held { "titre détenu" } else { "titre à obtenir" }.to_owned(),
+                    if held {
+                        "titre détenu"
+                    } else {
+                        "titre à obtenir"
+                    }
+                    .to_owned(),
                 )
             }
             ActCondition::Independent => {
@@ -452,7 +459,8 @@ impl CampaignState {
         if ruin.defaults > 0 && faction.finance.defaults >= ruin.defaults && faction.treasury < 0 {
             return Some(Ruin::Bankruptcy);
         }
-        if ruin.capital_lost_seasons > 0 && self.acts.capital_lost_seasons >= ruin.capital_lost_seasons
+        if ruin.capital_lost_seasons > 0
+            && self.acts.capital_lost_seasons >= ruin.capital_lost_seasons
         {
             return Some(Ruin::Capital);
         }
@@ -506,7 +514,11 @@ fn score_of(objectives: &[ObjectiveLine], pressures: &[PressureLine]) -> u32 {
         total += weight;
         earned += weight * credit;
     }
-    let base = if total > 0.0 { earned / total * 100.0 } else { 0.0 };
+    let base = if total > 0.0 {
+        earned / total * 100.0
+    } else {
+        0.0
+    };
     let adjust: i32 = pressures
         .iter()
         .filter(|p| p.active)
@@ -638,7 +650,11 @@ pub(crate) fn advance(state: &mut CampaignState, data: &GameData, events: &mut V
             .iter()
             .any(|o| o.as_str() != crate::diplomacy::REBELS_FACTION)
     });
-    state.acts.peace_streak = if at_war { 0 } else { state.acts.peace_streak + 1 };
+    state.acts.peace_streak = if at_war {
+        0
+    } else {
+        state.acts.peace_streak + 1
+    };
     if let Some(faction) = state.factions.get(&player) {
         let capital_lost = !state.controls_province(&player, &faction.capital);
         state.acts.capital_lost_seasons = if capital_lost && faction.heir.is_none() {

@@ -146,7 +146,11 @@ pub fn objectives_view(data: &GameData, state: &CampaignState) -> ObjectivesView
         end_year: end_year(data, state, faction),
         length: length_key(state.victory_length).to_owned(),
         score,
-        hold_turns: if act_enabled { 1 } else { state.victory_hold_turns(data, faction) },
+        hold_turns: if act_enabled {
+            1
+        } else {
+            state.victory_hold_turns(data, faction)
+        },
         streak: state.victory_streak,
         state: state_key.to_owned(),
         objectives,

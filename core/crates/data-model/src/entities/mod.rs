@@ -1,5 +1,6 @@
 //! One module per entity type, each mirroring `data/schemas/<entity>.schema.json`.
 
+pub mod acts_rules;
 pub mod agent;
 pub mod ai_alignment;
 pub mod ai_campaign;
@@ -27,7 +28,6 @@ pub mod difficulty;
 pub mod diplomacy_rules;
 pub mod economy_rules;
 pub mod edict;
-pub mod acts_rules;
 pub mod encounter;
 pub mod event;
 pub mod faction;

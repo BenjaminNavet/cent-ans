@@ -224,12 +224,21 @@ pub fn transition_view(data: &GameData, state: &CampaignState) -> Option<Transit
         title: fill(&text(data, "transition_title"), &[("n", &number)]),
         act_name: act.name.clone(),
         ended_by: report.ended_by.clone(),
-        closing: act.closing.get(&report.ended_by).cloned().unwrap_or_default(),
+        closing: act
+            .closing
+            .get(&report.ended_by)
+            .cloned()
+            .unwrap_or_default(),
         ended_line: text(data, &format!("ended_by_{}", report.ended_by)),
         score: report.score,
         score_line: format!("{} : {} / 100", act.name, report.score),
         grade_line: grade.map_or_else(String::new, |g| {
-            format!("{} : {} — {}", text(data, "reign_score"), reign_score, g.title)
+            format!(
+                "{} : {} — {}",
+                text(data, "reign_score"),
+                reign_score,
+                g.title
+            )
         }),
         reign_score,
         objectives,

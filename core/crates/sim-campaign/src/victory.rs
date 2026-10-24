@@ -364,7 +364,15 @@ pub(crate) fn resolve_victory(
     };
     let score = state.campaign_score(data, &player);
     let done = objectives.iter().filter(|o| o.done).count() as u32;
-    finish(state, data, events, kind, text, score, (done, objectives.len() as u32));
+    finish(
+        state,
+        data,
+        events,
+        kind,
+        text,
+        score,
+        (done, objectives.len() as u32),
+    );
 }
 
 /// ADR 0784: with the arc in acts, the victory is the reign score of the three acts; the
@@ -392,14 +400,12 @@ fn resolve_with_acts(
     }
     // The act in progress counts while the campaign is cut short.
     let score = i64::from(state.reign_score(data, !state.acts.finished));
-    let counts = state
-        .act_status(data)
-        .map_or((0, 0), |s| {
-            (
-                s.objectives.iter().filter(|o| o.met).count() as u32,
-                s.objectives.len() as u32,
-            )
-        });
+    let counts = state.act_status(data).map_or((0, 0), |s| {
+        (
+            s.objectives.iter().filter(|o| o.met).count() as u32,
+            s.objectives.len() as u32,
+        )
+    });
     let grade = rules.grade(score as u32);
     let text_of = |key: &str| rules.texts.get(key).cloned().unwrap_or_default();
     let (kind, text) = if !alive {

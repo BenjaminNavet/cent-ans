@@ -26,27 +26,41 @@ fn the_data_describe_three_consistent_acts() {
     assert_eq!(rules.acts[2].end_year, 1453);
     for act in &rules.acts {
         for policy in &act.policies {
-            assert!(rules.categories.contains_key(&policy.category), "{policy:?}");
+            assert!(
+                rules.categories.contains_key(&policy.category),
+                "{policy:?}"
+            );
         }
     }
     // Every faction, whatever its government, has objectives in each act.
     for (id, faction) in &data.factions {
         for act in &rules.acts {
-            let list = rules.objectives(id, &format!("{:?}", faction.government).to_lowercase(), &act.id);
+            let list = rules.objectives(
+                id,
+                &format!("{:?}", faction.government).to_lowercase(),
+                &act.id,
+            );
             assert!(!list.is_empty(), "{id} {}", act.id);
-            assert!(list.iter().all(|o| rules.categories.contains_key(&o.category)));
+            assert!(list
+                .iter()
+                .all(|o| rules.categories.contains_key(&o.category)));
         }
     }
     // The named provinces and titles exist.
     let json = serde_json::to_string(&rules.objective_sets).unwrap();
     for word in json.split('"').filter(|w| w.starts_with("prov_")) {
         assert!(
-            data.provinces.contains_key(&data_model::ProvinceId::new(word).unwrap()),
+            data.provinces
+                .contains_key(&data_model::ProvinceId::new(word).unwrap()),
             "unknown {word}"
         );
     }
     for word in json.split('"').filter(|w| w.starts_with("tit_")) {
-        assert!(data.titles.contains_key(&data_model::TitleId::new(word).unwrap()), "unknown {word}");
+        assert!(
+            data.titles
+                .contains_key(&data_model::TitleId::new(word).unwrap()),
+            "unknown {word}"
+        );
     }
 }
 
@@ -99,7 +113,10 @@ fn a_lasting_peace_closes_the_act_early() {
     for _ in 0..4 {
         state.end_turn_with(data, idle);
     }
-    assert_eq!(state.acts.reports.first().map(|r| r.ended_by.as_str()), Some("peace"));
+    assert_eq!(
+        state.acts.reports.first().map(|r| r.ended_by.as_str()),
+        Some("peace")
+    );
     assert_eq!(state.acts.current, 1);
     assert!(state.year < 1360);
 }
@@ -137,14 +154,20 @@ fn pressures_follow_the_state_of_the_realm() {
     let england = fac("fac_england");
     // In 1337 the English hold lands of the realm: the crown is contested.
     let contested = state.act_status(data).unwrap();
-    assert!(contested.pressures.iter().any(|p| p.active && p.pressure.id == "pr1_crown"));
+    assert!(contested
+        .pressures
+        .iter()
+        .any(|p| p.active && p.pressure.id == "pr1_crown"));
     for settlement in state.settlements.values_mut() {
         if settlement.controller == england {
             settlement.controller = france.clone();
         }
     }
     let relieved = state.act_status(data).unwrap();
-    assert!(!relieved.pressures.iter().any(|p| p.active && p.pressure.id == "pr1_crown"));
+    assert!(!relieved
+        .pressures
+        .iter()
+        .any(|p| p.active && p.pressure.id == "pr1_crown"));
     assert!(relieved.score > contested.score);
 }
 
@@ -161,7 +184,11 @@ fn a_royal_bankruptcy_that_cannot_be_undone_ends_the_campaign() {
     state.end_turn_with(data, idle);
     let outcome = state.outcome.clone().expect("ruin is a defeat");
     assert_eq!(outcome.kind, OutcomeKind::Defeat);
-    assert!(outcome.text_fr.contains("banqueroute"), "{}", outcome.text_fr);
+    assert!(
+        outcome.text_fr.contains("banqueroute"),
+        "{}",
+        outcome.text_fr
+    );
 }
 
 #[test]
@@ -184,7 +211,7 @@ fn losing_the_capital_without_an_heir_ends_the_campaign() {
     let player = fac("fac_france");
     let capital = state.factions[&player].capital.clone();
     state.factions.get_mut(&player).unwrap().heir = None;
-    for (_, settlement) in state.settlements.iter_mut() {
+    for settlement in state.settlements.values_mut() {
         if settlement.province == capital {
             settlement.controller = fac("fac_england");
         }
@@ -226,7 +253,10 @@ fn the_state_with_its_reports_survives_a_save() {
     state.choose_act_policy(data, "pol_2_regain").unwrap();
     let loaded = CampaignState::load_json(&state.save_json()).unwrap();
     assert_eq!(loaded.acts, state.acts);
-    assert_eq!(loaded.reign_score(data, true), state.reign_score(data, true));
+    assert_eq!(
+        loaded.reign_score(data, true),
+        state.reign_score(data, true)
+    );
 }
 
 #[test]
@@ -267,7 +297,12 @@ fn a_full_campaign_crosses_the_three_acts() {
         "full campaign: {:?} year {} acts {:?} score {}",
         outcome.kind,
         state.year,
-        state.acts.reports.iter().map(|r| (&r.act_id, &r.ended_by, r.score)).collect::<Vec<_>>(),
+        state
+            .acts
+            .reports
+            .iter()
+            .map(|r| (&r.act_id, &r.ended_by, r.score))
+            .collect::<Vec<_>>(),
         outcome.score
     );
 }
