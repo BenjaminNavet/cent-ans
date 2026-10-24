@@ -816,6 +816,8 @@ fn dump_terrain(world: &World) -> (String, Value) {
         value["node_entities"] = json!(lod.node_count());
         value["built_nodes"] = json!(lod.built_nodes());
         value["peak_nodes"] = json!(lod.peak_nodes);
+        value["holes"] =
+            json!({"now": lod.holes, "max": lod.holes_max, "frames": lod.holes_frames});
         value["triangles"] = json!(lod.triangles());
         value["pending_builds"] = json!(lod.pending_builds);
         value["pending_bakes"] = json!(lod.pending_bakes);

@@ -28,6 +28,8 @@ pub const MAX_PAGES: usize = 256;
 pub const MAX_JOBS: usize = 4;
 /// Time budget for building node meshes each frame.
 pub const BUILD_BUDGET_MS: f32 = 6.0;
+/// Budget while some node has no mesh and nothing under it (a visible hole).
+pub const HOLE_BUILD_BUDGET_MS: f32 = 14.0;
 /// A node left by the selector stays drawn this long at most while its replacements build.
 pub const RETIRE_MAX_S: f64 = 2.0;
 
@@ -92,6 +94,10 @@ pub struct TerrainLod {
     pub peak_nodes: usize,
     /// Ground cache bakes still wanted (ADR 0742).
     pub pending_bakes: usize,
+    /// Nodes of the selection hidden with no retiring node under them, now / worst / frames with any.
+    pub holes: usize,
+    pub holes_max: usize,
+    pub holes_frames: u64,
     /// Longest frame since the last bake log line (s, `CENT_ANS_GC_LOG`).
     pub dt_max: f32,
 }
@@ -134,6 +140,9 @@ impl TerrainLod {
             pending_builds: 0,
             peak_nodes: 0,
             pending_bakes: 0,
+            holes: 0,
+            holes_max: 0,
+            holes_frames: 0,
             dt_max: 0.0,
         }
     }
@@ -359,7 +368,7 @@ pub fn update_lod(
     // Nodes removed (kept until replaced, see `retiring`) and added.
     for key in &update.removed {
         if let Some(node) = lod.nodes.remove(key) {
-            if !node.ready() {
+            if node.mesh.is_none() || !node.shown {
                 commands.entity(node.entity).despawn();
                 if let Some(cache) = cache.as_mut() {
                     cache.release(node.spec.cache_layer);
@@ -433,8 +442,15 @@ pub fn update_lod(
     lod.pending_builds = todo.len();
     let started = Instant::now();
     let mut built = 0usize;
+    // Uncovered nodes without a mesh are black holes: spend more than the usual budget on them.
+    let covering: Vec<_> = lod.retiring.iter().map(|(n, _)| n.rect()).collect();
+    let uncovered = lod
+        .nodes
+        .values()
+        .any(|n| n.mesh.is_none() && !covering.iter().any(|r| overlaps(*r, n.rect())));
+    let budget_ms = if uncovered { HOLE_BUILD_BUDGET_MS } else { BUILD_BUDGET_MS };
     for (_, _, key, fine) in todo {
-        if built > 0 && started.elapsed().as_secs_f32() * 1000.0 > BUILD_BUDGET_MS {
+        if built > 0 && started.elapsed().as_secs_f32() * 1000.0 > budget_ms {
             break;
         }
         let Some(node) = lod.nodes.get_mut(&key) else {
@@ -500,6 +516,17 @@ pub fn update_lod(
             }
         }
     }
+    let covering: Vec<_> = lod.retiring.iter().map(|(n, _)| n.rect()).collect();
+    lod.holes = lod
+        .nodes
+        .values()
+        .filter(|n| !n.shown && !covering.iter().any(|r| overlaps(*r, n.rect())))
+        .count();
+    if lod.holes > lod.holes_max {
+        warn!("terrain holes: {} hidden nodes uncovered (pending builds {}, bakes {})", lod.holes, lod.pending_builds, lod.pending_bakes);
+    }
+    lod.holes_max = lod.holes_max.max(lod.holes);
+    lod.holes_frames += u64::from(lod.holes > 0);
     lod.meshes_built += built as u64;
     lod.build_ms_last = started.elapsed().as_secs_f32() * 1000.0;
 }

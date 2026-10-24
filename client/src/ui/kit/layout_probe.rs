@@ -79,9 +79,9 @@ pub fn dump(world: &World) -> Value {
                     continue; // hidden tab pane / display:none
                 }
                 // A popup hanging off the frame (absolute) is not its content.
-                let floating = child_entity
-                    .get::<Node>()
-                    .is_some_and(|n| n.position_type == PositionType::Absolute && n.bottom == Val::Percent(100.0));
+                let floating = child_entity.get::<Node>().is_some_and(|n| {
+                    n.position_type == PositionType::Absolute && n.bottom == Val::Percent(100.0)
+                });
                 if child_entity.contains::<Scrollbar>()
                     || child_entity.contains::<super::resize_grip::ResizeGrip>()
                     || floating
