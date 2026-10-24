@@ -119,6 +119,7 @@ pub mod province_policy;
 pub mod province_tax;
 pub mod ransom;
 pub mod reach;
+pub mod realm_works;
 pub mod recruit_pool;
 pub mod religion;
 pub mod replenish;

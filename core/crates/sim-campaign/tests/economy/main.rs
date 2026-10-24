@@ -31,6 +31,7 @@ mod m3;
 mod m6;
 mod m8_build_queue;
 mod p1_tin;
+mod realm_works;
 mod rg10_vocations;
 mod rg11_building_tree;
 mod rg4_rg5;
