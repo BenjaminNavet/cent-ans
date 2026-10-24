@@ -342,3 +342,5 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0779 | [Histoire conditionnée et bifurcations](0779-histoire-conditionnee-et-bifurcations.md) | accepté |
 | 0782 | [Doctrines stratégiques de l'IA de campagne](0782-doctrines-strategiques-de-l-ia.md) | accepté |
 | 0783 | [Paliers de comportement de la difficulté de l'IA](0783-paliers-de-comportement-de-la-difficulte-ia.md) | accepté |
+| 0784 | [L'arc de partie en trois actes](0784-arc-de-partie-en-trois-actes.md) | accepté |
+| 0785 | [Victoire par score de règne (amende 0245)](0785-victoire-par-score-de-regne.md) | accepté |

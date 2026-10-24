@@ -235,6 +235,12 @@ impl CampaignState {
     /// Year at which the campaign of `faction` ends, for the chosen length (same rule as the
     /// objectives set: own `victory` block, else the generic one).
     pub fn victory_end_year(&self, data: &GameData, faction: &FactionId) -> i32 {
+        // ADR 0784: with the arc in acts, a long campaign ends with the last act.
+        if self.victory_length == VictoryLength::Long {
+            if let Some(year) = self.acts_end_year(data) {
+                return year;
+            }
+        }
         self.victory_set(data, faction).end_year
     }
 
@@ -250,7 +256,7 @@ impl CampaignState {
     }
 
     /// Prestige of the faction's ruler (0 without one).
-    fn victory_prestige(&self, faction: &FactionId) -> i64 {
+    pub(crate) fn victory_prestige(&self, faction: &FactionId) -> i64 {
         self.factions
             .get(faction)
             .and_then(|f| f.ruler.as_ref())
@@ -289,6 +295,10 @@ pub(crate) fn resolve_victory(
         && state.settlements.values().any(|s| s.controller == player);
     if state.victory_start_provinces == 0 {
         state.victory_start_provinces = (state.controlled_provinces(&player).count() as u32).max(1);
+    }
+    if data.acts_rules.enabled() {
+        resolve_with_acts(state, data, events, alive);
+        return;
     }
     let objectives = state.objectives(data, &player);
     let set = state.victory_set(data, &player);
@@ -353,12 +363,103 @@ pub(crate) fn resolve_victory(
         return;
     };
     let score = state.campaign_score(data, &player);
+    let done = objectives.iter().filter(|o| o.done).count() as u32;
+    finish(
+        state,
+        data,
+        events,
+        kind,
+        text,
+        score,
+        (done, objectives.len() as u32),
+    );
+}
+
+/// ADR 0784: with the arc in acts, the victory is the reign score of the three acts; the
+/// ruin of the house (lands, dynasty, bankruptcy, capital) is the defeat.
+fn resolve_with_acts(
+    state: &mut CampaignState,
+    data: &GameData,
+    events: &mut Vec<GameEvent>,
+    alive: bool,
+) {
+    let player = state.player_faction.clone();
+    let name = data.faction_name(&player);
+    let rules = &data.acts_rules;
+    crate::acts::advance(state, data, events);
+    let short = state.victory_length == VictoryLength::Short;
+    let end_year = if short {
+        state.victory_end_year(data, &player)
+    } else {
+        state.acts_end_year(data).unwrap_or(i32::MAX)
+    };
+    let ruin = if alive { state.acts_ruin(data) } else { None };
+    let over = state.year > end_year;
+    if alive && ruin.is_none() && !over {
+        return;
+    }
+    // The act in progress counts while the campaign is cut short.
+    let score = i64::from(state.reign_score(data, !state.acts.finished));
+    let counts = state.act_status(data).map_or((0, 0), |s| {
+        (
+            s.objectives.iter().filter(|o| o.met).count() as u32,
+            s.objectives.len() as u32,
+        )
+    });
+    let grade = rules.grade(score as u32);
+    let text_of = |key: &str| rules.texts.get(key).cloned().unwrap_or_default();
+    let (kind, text) = if !alive {
+        (
+            OutcomeKind::Defeat,
+            format!("Défaite : {name} a perdu toutes ses terres."),
+        )
+    } else if let Some(ruin) = ruin {
+        (
+            OutcomeKind::Defeat,
+            format!("Défaite : {} ({name})", text_of(ruin.key())),
+        )
+    } else if score >= i64::from(rules.victory_min_score) {
+        (
+            OutcomeKind::Victory,
+            format!(
+                "Victoire ! {name} : {}. {}",
+                grade.map_or("règne accompli", |g| g.title.as_str()),
+                text_of("victory")
+            )
+            .trim_end()
+            .to_owned(),
+        )
+    } else {
+        (
+            OutcomeKind::Ended,
+            format!(
+                "Fin de la campagne : {name}, {}. {}",
+                grade.map_or("règne achevé", |g| g.title.as_str()),
+                text_of("ended")
+            )
+            .trim_end()
+            .to_owned(),
+        )
+    };
+    finish(state, data, events, kind, text, score, counts);
+}
+
+/// Records the outcome and its event (ADR 0748: the figures of the realm at the end).
+fn finish(
+    state: &mut CampaignState,
+    _data: &GameData,
+    events: &mut Vec<GameEvent>,
+    kind: OutcomeKind,
+    text: String,
+    score: i64,
+    objectives: (u32, u32),
+) {
+    let player = state.player_faction.clone();
     let event_kind = match kind {
         OutcomeKind::Victory => EventKind::Victory,
         OutcomeKind::Defeat => EventKind::Defeat,
         OutcomeKind::Ended => EventKind::CampaignEnded,
     };
-    // ADR 0748: the figures of the realm at the end of its campaign.
     let end_cause = match kind {
         OutcomeKind::Ended => None,
         _ => {
@@ -367,7 +468,6 @@ pub(crate) fn resolve_victory(
                 .keys()
                 .filter(|id| state.controls_province(&player, id))
                 .count() as u32;
-            let done = objectives.iter().filter(|o| o.done).count() as u32;
             Some(crate::cause_builders::game_end_cause(
                 if kind == OutcomeKind::Victory {
                     crate::causes::CauseKind::GameWon
@@ -376,7 +476,7 @@ pub(crate) fn resolve_victory(
                 },
                 &player,
                 held,
-                (done, objectives.len() as u32),
+                objectives,
                 score,
             ))
         }

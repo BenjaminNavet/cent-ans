@@ -34,7 +34,10 @@ fn france_starts_with_no_objective_done() {
 
 #[test]
 fn meeting_every_objective_wins() {
-    let data = game_data();
+    // ADR 0785: the hold-the-objectives victory is the rule of data without the arc in acts.
+    let mut legacy = game_data().clone();
+    legacy.acts_rules = Default::default();
+    let data = &legacy;
     let mut state = CampaignState::new_1337(data, fac("fac_france"), 3).unwrap();
     // F9: the objectives must hold `hold_turns` (40) seasons in a row.
     let hold = data.factions[&fac("fac_france")]

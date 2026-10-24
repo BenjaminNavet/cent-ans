@@ -280,6 +280,8 @@ fn vacant_title_frees_its_vassals() {
 #[test]
 fn victory_by_independence() {
     let mut data = game_data().clone();
+    // ADR 0785: the feudal victory is the rule of data without the arc in acts.
+    data.acts_rules = Default::default();
     data.feudal_rules.independence_turns = 2;
     data.feudal_rules.generic_victory_min_year = 0;
     let brittany = fac("fac_brittany");

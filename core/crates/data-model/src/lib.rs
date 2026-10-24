@@ -39,6 +39,10 @@ pub use common::{
     Sources, UncertainInteger, UnitCategory,
 };
 pub use cover::{CoverClass, CoverMap};
+pub use entities::acts_rules::{
+    ActAudience, ActCondition, ActEarlyEnd, ActObjective, ActPolicy, ActPressure, ActRules,
+    ActsRules, ReignGrade, RuinRules,
+};
 pub use entities::agent::{
     ActionAim, ActionCheck, ActionCondition, ActionCost, ActionEffect, ActionSpec, AgentActionKind,
     AgentKind, AgentRules, AgentTypeRules, AiAgentRules, EffectSubject,

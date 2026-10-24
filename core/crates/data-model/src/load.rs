@@ -107,6 +107,8 @@ pub mod folders {
     pub const REVOLT_RULES: &str = "revolt.json";
     /// Royal finances (ADR 0777), inside `rules/`; optional.
     pub const FINANCE_RULES: &str = "finance.json";
+    /// The campaign arc in acts (ADR 0784), inside `rules/`; optional.
+    pub const ACTS_RULES: &str = "acts.json";
     pub const ECONOMY_RULES: &str = "economy.json";
     /// Diplomacy tuning (opinion caps), inside `rules/`; optional.
     pub const DIPLOMACY_RULES: &str = "diplomacy.json";
@@ -372,6 +374,8 @@ pub struct GameData {
     pub revolt_rules: crate::entities::revolt_rules::RevoltRules,
     /// `data/rules/finance.json` (ADR 0777).
     pub finance_rules: crate::entities::finance_rules::FinanceRules,
+    /// `data/rules/acts.json` (ADR 0784).
+    pub acts_rules: crate::entities::acts_rules::ActsRules,
     /// `data/rules/economy.json`; [`crate::EconomyRules::default`]
     /// when absent.
     pub economy_rules: crate::entities::economy_rules::EconomyRules,
@@ -542,6 +546,7 @@ impl GameData {
             population_rules: Default::default(),
             revolt_rules: Default::default(),
             finance_rules: Default::default(),
+            acts_rules: Default::default(),
             economy_rules: Default::default(),
             diplomacy_rules: Default::default(),
             campaign_weather: Default::default(),
@@ -675,6 +680,10 @@ impl GameData {
         read_into(
             &mut data.finance_rules,
             &root.join(folders::RULES).join(folders::FINANCE_RULES),
+        )?;
+        read_into(
+            &mut data.acts_rules,
+            &root.join(folders::RULES).join(folders::ACTS_RULES),
         )?;
         read_into(
             &mut data.economy_rules,

@@ -48,6 +48,7 @@
 //!   factions can act; minor factions get 3 units.
 //! - Vassal/overlord relations are treated as alliances (friendly territory).
 
+pub mod acts;
 pub mod agents;
 pub mod ai_minimal;
 pub mod ai_replay;

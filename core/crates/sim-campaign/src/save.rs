@@ -12,7 +12,10 @@ pub const OLDEST_MIGRATABLE_VERSION: u32 = 9;
 /// One step `vN -> vN+1` on the raw JSON tree. `MIGRATIONS[i]` upgrades a
 /// save of version `OLDEST_MIGRATABLE_VERSION + i`; it must not touch
 /// `state_version` (the chain sets it). Empty while no format change needs one.
-pub const MIGRATIONS: &[fn(&mut serde_json::Value)] = &[crate::causes::migrate_v9_to_v10];
+pub const MIGRATIONS: &[fn(&mut serde_json::Value)] = &[
+    crate::causes::migrate_v9_to_v10,
+    crate::acts::migrate_v10_to_v11,
+];
 
 /// Applies the migration chain from `from` up to [`STATE_VERSION`].
 fn migrate_to_current(value: &mut serde_json::Value, from: u32) -> Result<(), CampaignError> {

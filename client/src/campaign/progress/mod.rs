@@ -16,6 +16,7 @@
 
 use bevy::prelude::*;
 
+pub mod acts;
 pub mod ending;
 pub mod objectives;
 pub mod target;
@@ -64,6 +65,7 @@ impl Plugin for CampaignProgressPlugin {
             .add_message::<StartTutorial>()
             .add_plugins((
                 objectives::plugin,
+                acts::plugin,
                 ending::plugin,
                 traditions::plugin,
                 target::plugin,

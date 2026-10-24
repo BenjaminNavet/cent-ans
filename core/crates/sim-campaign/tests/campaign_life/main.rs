@@ -1,5 +1,6 @@
 //! Tests d'intégration de sim-campaign : campaign_life (un seul binaire, données chargées une fois).
 
+mod acts;
 mod campaign;
 mod df1_difficulty;
 mod ev_history;

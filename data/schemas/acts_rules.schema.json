@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/acts_rules.schema.json",
+  "title": "Règles de l'arc de partie en actes",
+  "description": "Fichier data/rules/acts.json (lot ACTES, ADR 0784, 0785) : trois actes, objectifs de la maison par acte, pressions, politiques de la maisnie, score de règne, ruine. Lu par sim-campaign::acts (ActsRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "acts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/act" }
+    },
+    "categories": {
+      "type": "object",
+      "description": "Nom affiché de chaque catégorie d'objectif.",
+      "additionalProperties": { "type": "string" }
+    },
+    "objective_sets": {
+      "type": "object",
+      "description": "Objectifs par maison : clé fac_* (une faction), gov_* (un gouvernement) ou default ; puis par identifiant d'acte.",
+      "propertyNames": { "pattern": "^(fac_[a-z0-9_]+|gov_[a-z]+|default)$" },
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": { "pattern": "^act_[0-9]+$" },
+        "additionalProperties": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/objective" }
+        }
+      }
+    },
+    "grades": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "min_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "title": { "type": "string" },
+          "text": { "type": "string" }
+        },
+        "required": ["min_score", "title", "text"],
+        "additionalProperties": false
+      }
+    },
+    "victory_min_score": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Score de règne (0-100) à partir duquel la campagne est gagnée." },
+    "ruin": {
+      "type": "object",
+      "properties": {
+        "defaults": { "type": "integer", "minimum": 0, "description": "Banqueroute irréversible : ce nombre de banqueroutes royales, trésor encore négatif (0 : désactivé)." },
+        "capital_lost_seasons": { "type": "integer", "minimum": 0, "description": "Capitale perdue sans héritier depuis ce nombre de saisons (0 : désactivé)." },
+        "dynastic_governments": { "type": "array", "items": { "type": "string", "enum": ["kingdom", "duchy", "county", "principality", "republic", "theocracy", "empire", "lordship"] } }
+      },
+      "additionalProperties": false
+    },
+    "texts": {
+      "type": "object",
+      "description": "Textes d'interface (défaites, victoire, écran de transition).",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "required": ["acts", "objective_sets", "victory_min_score"],
+  "additionalProperties": false,
+  "$defs": {
+    "province_list": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/province_id" } },
+    "condition": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["control_all", "control_count", "no_foreign_control", "foreign_control_at_least", "province_count", "domain_percent", "prestige", "treasury", "debt_below", "allies_at_least", "dynasty_secure", "hold_title", "independent", "subjugate", "at_war"]
+        },
+        "provinces": { "$ref": "#/$defs/province_list" },
+        "faction": { "$ref": "common.schema.json#/$defs/faction_id" },
+        "count": { "type": "integer", "minimum": 1 },
+        "percent": { "type": "integer", "minimum": 1 },
+        "min": { "type": "integer", "minimum": 0 },
+        "max": { "type": "integer", "minimum": 0 },
+        "title": { "$ref": "common.schema.json#/$defs/title_id" }
+      },
+      "required": ["kind"],
+      "additionalProperties": false
+    },
+    "objective": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string", "enum": ["domain", "treasury", "dynasty", "prestige", "alliance"] },
+        "weight": { "type": "integer", "minimum": 1 },
+        "condition": { "$ref": "#/$defs/condition" }
+      },
+      "required": ["id", "title", "description", "category", "weight", "condition"],
+      "additionalProperties": false
+    },
+    "act": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^act_[0-9]+$" },
+        "name": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "start_year": { "type": "integer" },
+        "end_year": { "type": "integer" },
+        "weight": { "type": "integer", "minimum": 1, "description": "Poids de l'acte dans le score de règne." },
+        "intro": { "type": "string" },
+        "closing": {
+          "type": "object",
+          "description": "Texte de clôture selon la manière dont l'acte s'achève.",
+          "properties": {
+            "year": { "type": "string" },
+            "peace": { "type": "string" },
+            "collapse": { "type": "string" }
+          },
+          "required": ["year", "peace", "collapse"],
+          "additionalProperties": false
+        },
+        "early_end": {
+          "type": "object",
+          "description": "Fins anticipées de l'acte (0 : test désactivé).",
+          "properties": {
+            "peace_seasons": { "type": "integer", "minimum": 0 },
+            "min_seasons": { "type": "integer", "minimum": 0 },
+            "collapse_domain_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "collapse_defaults": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "policies": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "pattern": "^pol_[a-z0-9_]+$" },
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "category": { "type": "string", "enum": ["domain", "treasury", "dynasty", "prestige", "alliance"] },
+              "factor_percent": { "type": "integer", "minimum": 100, "maximum": 300 }
+            },
+            "required": ["id", "name", "description", "category", "factor_percent"],
+            "additionalProperties": false
+          }
+        },
+        "pressures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "pattern": "^pr[a-z0-9_]+$" },
+              "title": { "type": "string" },
+              "text": { "type": "string" },
+              "audience": {
+                "type": "object",
+                "description": "À qui la pression s'applique (listes vides : tous).",
+                "properties": {
+                  "factions": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/faction_id" } },
+                  "governments": { "type": "array", "items": { "type": "string" } }
+                },
+                "additionalProperties": false
+              },
+              "condition": { "$ref": "#/$defs/condition" },
+              "points": { "type": "integer", "minimum": -50, "maximum": 50, "description": "Points de score d'acte ajoutés quand la condition tient à la clôture." }
+            },
+            "required": ["id", "title", "text", "condition", "points"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["id", "name", "subtitle", "start_year", "end_year", "weight", "intro", "closing", "policies"],
+      "additionalProperties": false
+    }
+  }
+}

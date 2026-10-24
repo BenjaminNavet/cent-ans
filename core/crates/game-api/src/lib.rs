@@ -2,6 +2,7 @@
 //! `CampaignState`, shared by every client. No engine dependency (no Bevy, no Godot); each
 //! view is unit-tested here by `cargo test -p game-api`.
 
+pub mod acts;
 pub mod army;
 pub mod causes;
 pub mod chronicle;
