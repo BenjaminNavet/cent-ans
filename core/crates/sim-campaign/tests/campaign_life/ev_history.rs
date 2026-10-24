@@ -663,15 +663,15 @@ fn simulate(data: &GameData, player: &str, seed: u64) -> BTreeMap<EventId, i32> 
 fn a_simulated_game_draws_the_neutral_readings() {
     let data = game_data();
     let fired = simulate(data, "fac_france", 1341);
-    for id in [
-        "evt_maupertuis_sans_bataille",
-        "evt_crecy_chevauchee_sans_bataille",
-    ] {
+    // ECO2 (ADR 0777): the minimal AI's England-France war now ends in 1351 (tight
+    // finances), so "Maupertuis sans bataille" (autumn 1356, needs the war) is no longer
+    // drawn by this game; it keeps its own fabricated-state test above.
+    for id in ["evt_crecy_chevauchee_sans_bataille"] {
         assert!(fired.contains_key(&evt(id)), "{id} did not fire");
     }
     let hits = EVENTS_HISTORY
         .iter()
         .filter(|id| fired.contains_key(&evt(id)))
         .count();
-    assert!(hits >= 4, "only {hits}/{} fired", EVENTS_HISTORY.len());
+    assert!(hits >= 3, "only {hits}/{} fired", EVENTS_HISTORY.len());
 }
