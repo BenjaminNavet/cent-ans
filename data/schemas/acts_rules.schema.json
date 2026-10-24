@@ -42,6 +42,7 @@
         "additionalProperties": false
       }
     },
+    "hold_guard_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "ADR 0788 : part (0-100) du score d'un acte qui dépend de la conservation des objectifs déjà remplis à l'ouverture de l'acte (acquis). Ces acquis ne rapportent aucun point ; seuls les autres objectifs font le score. 0 : tous les objectifs rapportent des points." },
     "victory_min_score": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Score de règne (0-100) à partir duquel la campagne est gagnée." },
     "ruin": {
       "type": "object",

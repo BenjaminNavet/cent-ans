@@ -111,6 +111,12 @@ pub struct ActsState {
     /// The transition screen of `last_transition_turn` has been seen.
     pub transition_seen: bool,
     pub reports: Vec<ActReport>,
+    /// GAMEPLAY2 (ADR 0788): progress of each objective of the act, in per-mille of its target,
+    /// when the act began. An objective already met then is an acquis to keep (a guard), not
+    /// points to earn; the progress of the others is counted from here. Empty in older saves
+    /// (every objective then counts from zero, as before).
+    #[serde(default)]
+    pub start_permille: std::collections::BTreeMap<String, u32>,
 }
 
 /// Errors of the player's act choices.
@@ -140,6 +146,11 @@ pub struct ObjectiveLine {
     pub progress: String,
     /// Multiplier of its weight from the chosen policy, in percent.
     pub factor_percent: u32,
+    /// GAMEPLAY2 (ADR 0788): already met when the act began, so an acquis to keep (it guards the
+    /// score but earns no points).
+    pub hold: bool,
+    /// Progress made since the act began toward the target, 0-100 (the credit of an unmet one).
+    pub gain_percent: u32,
 }
 
 /// A pressure with its live state.
@@ -378,9 +389,27 @@ impl CampaignState {
             .objectives(player, government_key(data, player), &rules.acts[index].id)
             .iter()
             .map(|objective| {
-                let (ratio, progress) = self.act_condition(player, &objective.condition);
+                let (ratio, mut progress) = self.act_condition(player, &objective.condition);
+                let start = self
+                    .acts
+                    .start_permille
+                    .get(&objective.id)
+                    .map_or(0.0, |p| f64::from(*p) / 1000.0);
+                let hold = start >= 0.999 && rules.hold_guard_percent > 0;
+                let gain = if ratio >= 0.999 {
+                    1.0
+                } else if hold || start >= 0.999 {
+                    0.0
+                } else {
+                    ((ratio - start) / (1.0 - start)).clamp(0.0, 1.0)
+                };
+                if hold {
+                    progress.push_str(&rules.texts.get("hold_suffix").cloned().unwrap_or_default());
+                }
                 ObjectiveLine {
                     met: ratio >= 0.999,
+                    hold,
+                    gain_percent: (gain * 100.0).round() as u32,
                     percent: (ratio * 100.0).round() as u32,
                     progress,
                     factor_percent: Self::policy_factor(rules, index, policy, &objective.category),
@@ -396,7 +425,7 @@ impl CampaignState {
                 pressure: pressure.clone(),
             })
             .collect();
-        let score = score_of(&objectives, &pressures);
+        let score = score_of(&objectives, &pressures, rules.hold_guard_percent);
         Some(ActStatus {
             index,
             objectives,
@@ -501,30 +530,56 @@ impl CampaignState {
     }
 }
 
-fn score_of(objectives: &[ObjectiveLine], pressures: &[PressureLine]) -> u32 {
-    let mut total = 0.0;
-    let mut earned = 0.0;
-    for line in objectives {
-        let weight = f64::from(line.objective.weight) * f64::from(line.factor_percent) / 100.0;
-        let credit = if line.met {
+/// Score of an act (0-100). GAMEPLAY2 (ADR 0788): the objectives to earn (not met when the act
+/// began) make the score; those already met at the start are acquis to keep and only guard it:
+/// losing them all costs `guard_percent` of what was earned. With `guard_percent` at 0 every
+/// objective earns points as in the first version of the arc.
+fn score_of(objectives: &[ObjectiveLine], pressures: &[PressureLine], guard_percent: u32) -> u32 {
+    let weight_of = |line: &ObjectiveLine| {
+        f64::from(line.objective.weight) * f64::from(line.factor_percent) / 100.0
+    };
+    let credit_of = |line: &ObjectiveLine| {
+        if line.met {
             1.0
         } else {
-            PARTIAL_CREDIT * f64::from(line.percent) / 100.0
-        };
-        total += weight;
-        earned += weight * credit;
+            PARTIAL_CREDIT * f64::from(line.gain_percent) / 100.0
+        }
+    };
+    let (mut earn_total, mut earn_got) = (0.0, 0.0);
+    let (mut guard_total, mut guard_got) = (0.0, 0.0);
+    for line in objectives {
+        let weight = weight_of(line);
+        if line.hold {
+            guard_total += weight;
+            // A lost acquis keeps nothing: the guard is all or nothing per objective, scaled by
+            // how much of it remains.
+            guard_got += weight * if line.met { 1.0 } else { f64::from(line.percent) / 100.0 };
+        } else {
+            earn_total += weight;
+            earn_got += weight * credit_of(line);
+        }
     }
-    let base = if total > 0.0 {
-        earned / total * 100.0
+    let base = if earn_total > 0.0 {
+        earn_got / earn_total * 100.0
+    } else if guard_total > 0.0 {
+        // Nothing left to earn: the act is the keeping of what the house holds.
+        100.0
     } else {
         0.0
     };
+    let guard = if guard_total > 0.0 {
+        guard_got / guard_total
+    } else {
+        1.0
+    };
+    let g = f64::from(guard_percent.min(100)) / 100.0;
+    let scaled = base * (1.0 - g + g * guard);
     let adjust: i32 = pressures
         .iter()
         .filter(|p| p.active)
         .map(|p| p.pressure.points)
         .sum();
-    (base.round() as i32 + adjust).clamp(0, 100) as u32
+    (scaled.round() as i32 + adjust).clamp(0, 100) as u32
 }
 
 /// The heaviest causes touching the player's house since `since_turn` (at most two of a kind
@@ -571,6 +626,33 @@ fn act_causes(state: &CampaignState, since_turn: u32) -> Vec<CauseRecord> {
 }
 
 /// Enters the arc on the first season: the act that covers the current year begins.
+/// Opens the first act at the creation of a campaign (no-op without the arc).
+pub(crate) fn start(state: &mut CampaignState, data: &GameData) {
+    if data.acts_rules.enabled() && !state.acts.started {
+        enter(state, data);
+    }
+}
+
+/// Records where each objective of the act in progress stands, as the baseline of its progress
+/// (GAMEPLAY2, ADR 0788). Called when an act opens.
+fn record_start(state: &mut CampaignState, data: &GameData) {
+    let rules = &data.acts_rules;
+    let player = state.player_faction.clone();
+    let index = state.acts.current.min(rules.acts.len().saturating_sub(1));
+    let Some(act) = rules.acts.get(index) else {
+        return;
+    };
+    let starts = rules
+        .objectives(&player, government_key(data, &player), &act.id)
+        .iter()
+        .map(|o| {
+            let ratio = state.act_condition(&player, &o.condition).0;
+            (o.id.clone(), (ratio.clamp(0.0, 1.0) * 1000.0).floor() as u32)
+        })
+        .collect();
+    state.acts.start_permille = starts;
+}
+
 fn enter(state: &mut CampaignState, data: &GameData) {
     let rules = &data.acts_rules;
     let player = state.player_faction.clone();
@@ -595,6 +677,7 @@ fn enter(state: &mut CampaignState, data: &GameData) {
         .and_then(|r| state.characters.get(r))
         .map(|c| c.house.clone())
         .unwrap_or_default();
+    record_start(state, data);
 }
 
 /// Why the act in progress closes this season, if it does.
@@ -758,4 +841,5 @@ fn close_act(
         .get(&player)
         .map_or(0, |f| f.finance.defaults);
     state.acts.policy = None;
+    record_start(state, data);
 }

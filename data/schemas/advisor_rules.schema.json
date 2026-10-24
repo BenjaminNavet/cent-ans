@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/advisor_rules.schema.json",
+  "title": "Conseils de saison du conseiller",
+  "description": "Fichier data/rules/advisor.json (lot GAMEPLAY2, ADR 0789) : quand le conseiller parle (opportunité, danger, fin d'année), à quelle cadence, ce qu'il dit, et la ligne de chronique annonçant le changement de posture d'une maison voisine (doctrine, ADR 0782). Lu par sim-campaign::advisor (AdvisorRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "max_per_season": { "type": "integer", "minimum": 1, "description": "Nombre maximal de conseils dits en une saison (anti-bavardage)." },
+    "quiet_seasons": { "type": "integer", "minimum": 0, "description": "Saisons de silence au début d'une campagne (le guide parle d'abord)." },
+    "advices": { "type": "array", "items": { "$ref": "#/$defs/advice" } },
+    "posture": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string", "description": "Ligne de chronique. Variables : {faction}, {doctrine}, {intent}." },
+        "intents": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Par id de doctrine : ce que la maison semble préparer." },
+        "default_intent": { "type": "string" }
+      },
+      "required": ["text"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["advices", "posture"],
+  "additionalProperties": false,
+  "$defs": {
+    "trigger": {
+      "oneOf": [
+        { "type": "object", "properties": { "kind": { "const": "idle_sites" }, "min_sites": { "type": "integer", "minimum": 1 } }, "required": ["kind", "min_sites"], "additionalProperties": false },
+        { "type": "object", "properties": { "kind": { "const": "idle_hoard" }, "seasons": { "type": "integer", "minimum": 1 }, "min": { "type": "integer", "minimum": 0 } }, "required": ["kind", "seasons", "min"], "additionalProperties": false },
+        { "type": "object", "properties": { "kind": { "const": "runway_short" }, "max_seasons": { "type": "integer", "minimum": 1 } }, "required": ["kind", "max_seasons"], "additionalProperties": false },
+        { "type": "object", "properties": { "kind": { "const": "year_end" } }, "required": ["kind"], "additionalProperties": false },
+        { "type": "object", "properties": { "kind": { "const": "act_score_low" }, "below": { "type": "integer", "minimum": 1, "maximum": 100 } }, "required": ["kind", "below"], "additionalProperties": false }
+      ]
+    },
+    "advice": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "type": "string", "enum": ["opportunity", "danger", "season_end"] },
+        "trigger": { "$ref": "#/$defs/trigger" },
+        "cooldown_seasons": { "type": "integer", "minimum": 1 },
+        "title": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "required": ["id", "kind", "trigger", "cooldown_seasons", "title", "text"],
+      "additionalProperties": false
+    }
+  }
+}

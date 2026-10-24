@@ -49,6 +49,7 @@
 //! - Vassal/overlord relations are treated as alliances (friendly territory).
 
 pub mod acts;
+pub mod advisor;
 pub mod agents;
 pub mod ai_minimal;
 pub mod ai_replay;

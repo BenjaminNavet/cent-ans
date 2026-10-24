@@ -22,12 +22,14 @@ use crate::ui::kit::fr;
 use sim_campaign::ArmyId;
 
 /// Conditions served by an alert of the same kind.
-const ALERT_KINDS: [&str; 5] = [
+const ALERT_KINDS: [&str; 6] = [
     "chronicle_decision",
     "siege",
     "enemy_army",
     "debt",
     "research_idle",
+    // GAMEPLAY2 (ADR 0789): the counsellor's season advice; `text` = title, then body.
+    "advice",
 ];
 
 #[derive(Debug, Clone, PartialEq)]
@@ -146,7 +148,15 @@ pub fn choose(input: &HintInput, config: &HintConfig) -> Option<Hint> {
                 .map(|(_, name)| name.clone())
                 .unwrap_or_else(|| "une de vos provinces".to_owned());
             alert = Some(found.clone());
-            vec![("province", province)]
+            let (title, body) = found
+                .text
+                .split_once('\n')
+                .unwrap_or(("", found.text.as_str()));
+            vec![
+                ("province", province),
+                ("title", title.to_owned()),
+                ("text", body.to_owned()),
+            ]
         } else {
             match def.id.as_str() {
                 "army_idle" => {

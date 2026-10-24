@@ -70,6 +70,7 @@ impl CampaignState {
         }
 
         self.resolve_end_of_turn(data, &mut events);
+        crate::advisor::update(self, data, &mut events);
         self.ai_replay_finish(data);
         self.record_budget_history(&purses, resolved_turn);
         (events, timings)

@@ -55,9 +55,15 @@ pub fn parse(text: &str) -> Result<Bands, String> {
     serde_json::from_str(text).map_err(|error| format!("bandes d'équilibre invalides : {error}"))
 }
 
-/// Loads `<data_root>/balance/seed_bots_bands.json`.
-pub fn load(data_root: &Path) -> Result<Bands, String> {
-    let path = data_root.join("balance/seed_bots_bands.json");
+/// Loads `<data_root>/balance/seed_bots_bands.json` (long pass) or, for the quick pass (few
+/// turns, so smaller counts), `seed_bots_bands_quick.json`.
+pub fn load(data_root: &Path, quick: bool) -> Result<Bands, String> {
+    let name = if quick {
+        "seed_bots_bands_quick.json"
+    } else {
+        "seed_bots_bands.json"
+    };
+    let path = data_root.join("balance").join(name);
     let text = std::fs::read_to_string(&path)
         .map_err(|error| format!("{} illisible : {error}", path.display()))?;
     parse(&text)
@@ -105,7 +111,7 @@ mod tests {
     #[test]
     fn repository_bands_load() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
-        let bands = load(&root).expect("bands");
+        let bands = load(&root, false).expect("bands");
         assert_eq!(bands.len(), METRIC_NAMES.len());
         assert!(bands.contains_key("revolts_per_game"));
     }

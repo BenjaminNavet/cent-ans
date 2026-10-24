@@ -176,6 +176,10 @@ impl CampaignState {
         init_feudal_ties(&mut state, data);
         // RG13a: every realm starts with its best councillors.
         crate::council::init_councils(&mut state, data);
+        // GAMEPLAY2 (ADR 0788): the first act is open from turn 0, so the player reads the
+        // objectives of the arc (not the abandoned 40-season rule) on the first screen.
+        crate::acts::start(&mut state, data);
+        crate::advisor::init(&mut state);
         Ok(state)
     }
 

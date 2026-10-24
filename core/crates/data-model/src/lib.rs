@@ -43,6 +43,7 @@ pub use entities::acts_rules::{
     ActAudience, ActCondition, ActEarlyEnd, ActObjective, ActPolicy, ActPressure, ActRules,
     ActsRules, ReignGrade, RuinRules,
 };
+pub use entities::advisor_rules::{Advice, AdviceTrigger, AdvisorRules, PostureNews};
 pub use entities::agent::{
     ActionAim, ActionCheck, ActionCondition, ActionCost, ActionEffect, ActionSpec, AgentActionKind,
     AgentKind, AgentRules, AgentTypeRules, AiAgentRules, EffectSubject,
