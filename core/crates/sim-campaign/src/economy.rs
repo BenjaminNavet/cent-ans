@@ -687,9 +687,14 @@ impl CampaignState {
         let rules = &data.economy_rules;
         let provinces = self.controlled_provinces(faction).count();
         let share = (income as f64 * rules.administration_rate(provinces)).round() as i64;
-        // An idle hoard feeds court luxury, patronage and embezzlement.
-        let treasury = self.factions.get(faction).map_or(0, |f| f.treasury);
-        share + rules.opulence(treasury, income)
+        // An idle hoard feeds court luxury, patronage and embezzlement. GAMEPLAY2 (ADR 0788):
+        // only the hoard that is the house's own counts, the treasury net of the principal it
+        // owes: borrowed coin is the bankers', so borrowing does not raise the court's levy.
+        let net_hoard = self
+            .factions
+            .get(faction)
+            .map_or(0, |f| f.treasury - f.finance.debt());
+        share + rules.opulence(net_hoard, income)
     }
 
     /// Full economic snapshot for the bridge (spec § 2).
