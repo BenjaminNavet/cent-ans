@@ -56,3 +56,31 @@ n'est valable que sur machine calme (même règle que les temps d'image).
   relit.
 - Découper le décodage des feuilles de sol en bandes ou pré-cuire en KTX2 (ADR 0724 : consommateurs CPU à adapter).
 - Décharger les ressources de campagne à l'entrée en bataille (mesurer `footprint` avant/après).
+
+## Amendement ADR 0776 (lot MEM2, 23/10) : régression de campagne
+Les « mesures de base » ci-dessus avaient été prises sans les modèles de lieux `models/dn/*` (assets non suivis absents
+du worktree de mesure). Avec eux, la campagne montait à 6,5-6,8 Go d'empreinte (juge : 10-12 Go sur machine chargée).
+Cause : 66 textures 2048x2048 RGBA8 (21 Mo GPU + 21 Mo CPU chacune) + ~1 Go de tampons de décodage retenus.
+**Attention de mesure** : copier `game/assets` (non suivi) et `out/ktx2_cache` depuis le checkout principal dans un
+worktree avant de mesurer (`rsync -a --ignore-existing`).
+
+| Campagne, release, Ultra, masqué | Empreinte (Mo) | Pic RSS (Mo) |
+|---|---|---|
+| Avant (c26909646) | 6 550-6 760 | ~4 900 |
+| + BC1 / GPU seul des textures dn | 4 200-4 850 (variance libmalloc) | ~5 000 |
+| + capture avant premier envoi GPU | 2 400-3 800 (variance libmalloc) | 3 100 |
+| + mimalloc (état final) | 2 750-2 820 | 3 600 |
+
+Images : copies CPU 1 537 -> ~180 Mo, estimation GPU 1 916 -> ~690 Mo. Maillages : copies CPU 118 Mo (inchangé).
+fps (A/B alternés, système vs mimalloc, charge 10-25) : carte pan d30 p50 7,6-8,2 vs 7,8-9,0 ms (référence juge
+9,8-10,2) ; bataille calm 73-76 vs 75-77 fps, mêlée 52-59 vs 56-59 fps (bruit de charge, pas de régression).
+Mesure : `memory.footprint_mib` (dump et rapports de banc, `proc_pid_rusage`), `footprint <pid>`, `vmmap -summary`.
+
+### Points ouverts
+- Bataille : l'empreinte oscille de 3,8 Go à 5,8-6,3 Go selon `IOAccelerator (graphics)` (0,4 <-> 2,3 Go, par
+  tranches de ~1 min), avec ou sans mimalloc, avec ou sans volumétrique (`CENT_ANS_VOLUMETRIC=off` : pics plus rares).
+  Hors tas et hors textures ; cause non identifiée (ressources Metal en vol sous vsync coupé / fenêtre masquée ?).
+  Plancher bataille 3,8 Go > budget 3,5 Go ; le garde bataille est donc large (7 000) en attendant.
+- Décharge des ressources de campagne à l'entrée en bataille : non mesurée.
+- Feuilles de sol de campagne (JPEG 185 Mo RGBA8 décodés, transitoires) : pré-cuisson KTX2/BC7 non faite (le pipeline
+  `bake-ktx2` exclut la campagne) ; mimalloc rend les tampons à l'OS, l'enjeu restant est le temps de chargement.

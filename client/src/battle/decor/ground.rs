@@ -1065,6 +1065,8 @@ fn strip_to_array_inner(image: &mut Image, layers: u32, anisotropy: u16) -> bool
         anisotropy_clamp: anisotropy.max(1),
         ..default()
     });
+    // Sampled by the shaders only: the CPU copy goes once uploaded (ADR 0776).
+    image.asset_usage = bevy::asset::RenderAssetUsages::RENDER_WORLD;
     true
 }
 

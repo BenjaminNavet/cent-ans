@@ -153,6 +153,8 @@ fn mipmap_repeat(image: &mut Image) -> bool {
         anisotropy_clamp: 8,
         ..default()
     });
+    // Sampled by the shader only: the CPU copy goes once uploaded (ADR 0776).
+    image.asset_usage = RenderAssetUsages::RENDER_WORLD;
     true
 }
 

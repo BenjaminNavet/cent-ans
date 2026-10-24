@@ -8,6 +8,8 @@ fenêtre masquée) : pic RSS 2,7 Go en campagne, 2,2 Go en bataille ; empreinte 
 1,36 Go de graphiques et ~1,3 Go de gros blocs CPU, dont ~0,7 Go libéré mais resté résident.
 
 ## Décision
+**Amendée par l'ADR 0776** : le budget porte sur l'empreinte physique (`memory.footprint_mib`), campagne 4 000 Mo, bataille 3 500 Mo (cible) ; le pic RSS reste indicatif.
+
 - Budget : pic RSS **3 500 Mo en campagne, 3 000 Mo en bataille**, vérifié par `tools/bevy_bench/perf_guard.sh`
   (clé `memory` de `perf_thresholds.json`, lue dans `memory.peak_rss_mib` des rapports de banc).
 - La référence fiable est `footprint` ; le RSS de `ps` est biaisé par le compresseur macOS.

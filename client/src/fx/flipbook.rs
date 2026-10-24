@@ -556,6 +556,8 @@ fn build_looks(
             .load_builder()
             .with_settings(|settings: &mut ImageLoaderSettings| {
                 settings.is_srgb = false;
+                // Sampled by the shader only: no CPU copy (ADR 0776).
+                settings.asset_usage = bevy::asset::RenderAssetUsages::RENDER_WORLD;
             })
             .load(path)
     };
