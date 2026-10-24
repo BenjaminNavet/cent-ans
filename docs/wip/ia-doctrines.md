@@ -17,7 +17,7 @@ Branche `worktree-agent-abd99ac4866467ce0` (avancée en fast-forward sur main ap
 | France | 4/24 événements, batailles Angleterre>France 44, France>Angleterre 14 ; pas de Crécy ni Poitiers tirés | 7/24, 29 / 6 ; Crécy 1346, Poitiers 1356, Brétigny 1360 |
 | Angleterre | 4/24, 7 / 23 ; Poitiers (victoire française) 1356 | 4/24, 21 / 22 ; Crécy 1347 |
 
-Seed bots rapide : 8 parties, 0 constat. Passe longue : voir rapport.
+Seed bots rapide : 8 parties, 0 constat. Passe longue : 32 parties (4598 tours), 0 constat, aucune dérive d'équilibre.
 
 ## Points ouverts
 
