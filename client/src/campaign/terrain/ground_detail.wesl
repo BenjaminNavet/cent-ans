@@ -75,7 +75,9 @@ fn gd_warp(g: GdParams, uu: vec2<f32>) -> vec2<f32> {
     let f = 1.0 / max(g.h.z, 0.05);
     let w1 = vec2<f32>(gd_noise(uu * f + vec2<f32>(3.1, 7.7)), gd_noise(uu * f + vec2<f32>(21.3, 5.9))) - 0.5;
     let w2 = vec2<f32>(gd_noise(uu * f * 2.7 + vec2<f32>(13.7, 1.1)), gd_noise(uu * f * 2.7 + vec2<f32>(8.8, 27.5))) - 0.5;
-    return (w1 + w2 * 0.35) * 2.0 * g.h.y;
+    // TERRAIN2: a third, fine octave frays the facets (no straight Voronoi edge survives).
+    let w3 = vec2<f32>(gd_noise(uu * f * 7.3 + vec2<f32>(5.2, 19.4)), gd_noise(uu * f * 7.3 + vec2<f32>(31.7, 2.3))) - 0.5;
+    return (w1 + w2 * 0.6 + w3 * 0.3) * 2.0 * g.h.y;
 }
 
 fn gd_ratio(col: vec3<f32>, base: vec3<f32>) -> vec3<f32> {
@@ -86,8 +88,10 @@ fn gd_ratio(col: vec3<f32>, base: vec3<f32>) -> vec3<f32> {
 // pixels, so it is band-limited), then a thin dark line (balk, hedge, tree line) on the boundary,
 // heavier in the bocage rows; its energy is kept when sub-pixel (amp scaled by width / pixel) and it
 // vanishes with `fade`.
-fn gd_edges(g: GdParams, k: vec3<f32>, edge_m: f32, px_m: f32, fade: f32, bocage: f32) -> vec3<f32> {
-    let soft = max(g.g.z, px_m * 2.0);
+fn gd_edges(g: GdParams, k: vec3<f32>, edge_m: f32, px_m: f32, fade: f32, bocage: f32, ragged: f32) -> vec3<f32> {
+    // TERRAIN2: the width of the soft ramp wanders with a low-frequency noise (`ragged` in 0..1), so
+    // the parcel tone fades into its neighbours along an irregular, fuzzy front, never a straight edge.
+    let soft = max(g.g.z * mix(0.35, 1.65, ragged), px_m * 3.0);
     var out = mix(vec3<f32>(1.0), k, smoothstep(0.0, soft, edge_m));
     let lw = max(g.h.x, 0.1);
     let cover = 1.0 - smoothstep(0.0, max(lw, px_m * 1.5), edge_m);
@@ -106,6 +110,7 @@ fn gd_parcel_k(g: GdParams, col_in: vec3<f32>, p: vec2<f32>, id: vec2<f32>, ang:
     }
     var col = col_in;
     let px_m = max(footprint * mpp, 0.01);
+    let ragged = gd_noise(p * mpp / 140.0 + id * 2.3) * 0.6 + gd_noise(p * mpp / 45.0 + id * 5.1) * 0.4;
     let fade = 1.0 - smoothstep(g.d.z, g.b.w, footprint);
     // Tone and saturation of the parcel (contrast about the mean luminance of the open ground).
     let lum = max(gd_luma(col), 1e-3);
@@ -132,7 +137,7 @@ fn gd_parcel_k(g: GdParams, col_in: vec3<f32>, p: vec2<f32>, id: vec2<f32>, ang:
     let inner = (gd_noise(p * mpp / g.g.y + id * 3.1) * 0.7 + gd_noise(p * mpp / (g.g.y * 0.33) + id * 1.3) * 0.3 - 0.5) * 2.0;
     col = col * (1.0 + inner * g.g.x * fade);
     if (g.a.x < 1.5 || fade <= 0.0) {
-        return gd_edges(g, gd_ratio(col, col_in), edge_m, px_m, fade, bocage);
+        return gd_edges(g, gd_ratio(col, col_in), edge_m, px_m, fade, bocage, ragged);
     }
     // Strips: bands across the parcel, tone of their own (maturity, sowing date), dark balks.
     let width = mix(g.c.z, g.c.w, gd_hash(id + vec2<f32>(2.9, 8.1)));
@@ -154,5 +159,5 @@ fn gd_parcel_k(g: GdParams, col_in: vec3<f32>, p: vec2<f32>, id: vec2<f32>, ang:
     // Soil and crop mottling at 20 to 200 m.
     let mott = (gd_noise(p * mpp / g.d.y + id) * 0.65 + gd_noise(p * mpp / (g.d.y * 0.27) + id * 1.7) * 0.35 - 0.5) * 2.0;
     col = col * (1.0 + mott * g.d.x * (1.0 - smoothstep(g.d.z, g.d.w, footprint)));
-    return gd_edges(g, gd_ratio(col, col_in), edge_m, px_m, fade, bocage);
+    return gd_edges(g, gd_ratio(col, col_in), edge_m, px_m, fade, bocage, ragged);
 }
