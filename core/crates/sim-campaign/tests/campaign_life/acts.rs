@@ -82,7 +82,10 @@ fn the_arc_starts_in_the_first_act_with_live_objectives() {
         .filter(|o| o.hold)
         .map(|o| o.objective.id.as_str())
         .collect();
-    assert!(held.contains(&"fr1_dynasty") && held.contains(&"fr1_debt"), "{held:?}");
+    assert!(
+        held.contains(&"fr1_dynasty") && held.contains(&"fr1_debt"),
+        "{held:?}"
+    );
     assert!(status.objectives.iter().any(|o| !o.hold));
     assert!(state.outcome.is_none());
 }
@@ -94,7 +97,9 @@ fn the_act_is_open_before_the_first_end_of_turn() {
     let data = game_data();
     let state = CampaignState::new_1337(data, fac("fac_france"), 7).unwrap();
     assert!(state.acts.started);
-    let status = state.act_status(data).expect("the first act is live at turn 0");
+    let status = state
+        .act_status(data)
+        .expect("the first act is live at turn 0");
     assert_eq!(status.index, 0);
     assert_eq!(state.turn, 0);
 }

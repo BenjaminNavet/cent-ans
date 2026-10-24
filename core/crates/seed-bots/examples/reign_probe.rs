@@ -38,7 +38,8 @@ fn conquer(state: &mut CampaignState, data: &GameData, player: &FactionId) {
     }
     for line in status.objectives.iter().filter(|o| !o.met) {
         match &line.objective.condition {
-            ActCondition::ControlAll { provinces } | ActCondition::ControlCount { provinces, .. } => {
+            ActCondition::ControlAll { provinces }
+            | ActCondition::ControlCount { provinces, .. } => {
                 for settlement in state.settlements.values_mut() {
                     if provinces.contains(&settlement.province) {
                         settlement.controller = player.clone();

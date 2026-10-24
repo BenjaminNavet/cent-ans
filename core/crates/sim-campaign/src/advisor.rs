@@ -47,7 +47,7 @@ pub fn fr_number(value: i64) -> String {
     let digits = value.unsigned_abs().to_string();
     let mut out = String::new();
     for (i, c) in digits.chars().enumerate() {
-        if i > 0 && (digits.len() - i) % 3 == 0 {
+        if i > 0 && (digits.len() - i).is_multiple_of(3) {
             out.push('\u{202f}');
         }
         out.push(c);
@@ -154,7 +154,12 @@ fn evaluate(
                 return None;
             }
             let values = act_values(state, data)?;
-            let score = values.iter().find(|(k, _)| *k == "score")?.1.parse::<u32>().ok()?;
+            let score = values
+                .iter()
+                .find(|(k, _)| *k == "score")?
+                .1
+                .parse::<u32>()
+                .ok()?;
             (score < *below).then_some(values)
         }
     }
@@ -213,7 +218,10 @@ pub(crate) fn update(state: &mut CampaignState, data: &GameData, events: &mut Ve
         }
         ready.sort_by_key(|(advice, _)| rank(&advice.kind));
         for (advice, values) in ready.into_iter().take(rules.max_per_season.max(1) as usize) {
-            state.advisor.last_said.insert(advice.id.clone(), state.turn);
+            state
+                .advisor
+                .last_said
+                .insert(advice.id.clone(), state.turn);
             state.advisor.notes.push(AdvisorNote {
                 id: advice.id.clone(),
                 kind: advice.kind.clone(),
@@ -305,7 +313,10 @@ mod tests {
 
     #[test]
     fn placeholders_are_filled() {
-        let text = fill("{a} et {b}", &[("a", "x".to_owned()), ("b", "y".to_owned())]);
+        let text = fill(
+            "{a} et {b}",
+            &[("a", "x".to_owned()), ("b", "y".to_owned())],
+        );
         assert_eq!(text, "x et y");
     }
 }

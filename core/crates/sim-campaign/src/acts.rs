@@ -553,7 +553,12 @@ fn score_of(objectives: &[ObjectiveLine], pressures: &[PressureLine], guard_perc
             guard_total += weight;
             // A lost acquis keeps nothing: the guard is all or nothing per objective, scaled by
             // how much of it remains.
-            guard_got += weight * if line.met { 1.0 } else { f64::from(line.percent) / 100.0 };
+            guard_got += weight
+                * if line.met {
+                    1.0
+                } else {
+                    f64::from(line.percent) / 100.0
+                };
         } else {
             earn_total += weight;
             earn_got += weight * credit_of(line);
@@ -647,7 +652,10 @@ fn record_start(state: &mut CampaignState, data: &GameData) {
         .iter()
         .map(|o| {
             let ratio = state.act_condition(&player, &o.condition).0;
-            (o.id.clone(), (ratio.clamp(0.0, 1.0) * 1000.0).floor() as u32)
+            (
+                o.id.clone(),
+                (ratio.clamp(0.0, 1.0) * 1000.0).floor() as u32,
+            )
         })
         .collect();
     state.acts.start_permille = starts;

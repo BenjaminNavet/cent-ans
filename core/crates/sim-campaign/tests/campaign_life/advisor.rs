@@ -9,7 +9,10 @@ use sim_campaign::EventKind;
 fn the_counsellor_points_out_idle_sites_once_in_a_while() {
     let data = game_data();
     let mut state = start_quiet(data, "fac_france", 11);
-    assert!(state.advisor.notes.is_empty(), "silent before the first season");
+    assert!(
+        state.advisor.notes.is_empty(),
+        "silent before the first season"
+    );
     let mut said: Vec<(u32, String)> = Vec::new();
     for _ in 0..10 {
         state.end_turn_with(data, idle);
@@ -26,7 +29,10 @@ fn the_counsellor_points_out_idle_sites_once_in_a_while() {
         .filter(|(_, id)| id == "build_opportunity")
         .map(|(turn, _)| *turn)
         .collect();
-    assert!(!build.is_empty(), "France starts rich with idle sites: {said:?}");
+    assert!(
+        !build.is_empty(),
+        "France starts rich with idle sites: {said:?}"
+    );
     let cooldown = data
         .advisor_rules
         .advices
@@ -45,22 +51,33 @@ fn a_change_of_doctrine_of_a_neighbour_is_announced() {
     let mut state = start_quiet(data, "fac_france", 11);
     let england = fac("fac_england");
     // England was following another posture last time the counsellor looked.
-    let now = sim_campaign::doctrines::active(&state, &england).id.to_owned();
+    let now = sim_campaign::doctrines::active(&state, &england)
+        .id
+        .to_owned();
     let before = if now == "balanced" {
         "chevauchee_pillage"
     } else {
         "balanced"
     };
-    state.advisor.doctrines.insert(england.clone(), before.to_owned());
+    state
+        .advisor
+        .doctrines
+        .insert(england.clone(), before.to_owned());
     let events = state.end_turn_with(data, idle);
     let news: Vec<_> = events
         .iter()
         .filter(|e| e.kind == EventKind::Diplomacy && e.text_fr.contains("change de posture"))
         .collect();
     assert_eq!(news.len(), 1, "{events:#?}");
-    assert!(news[0].text_fr.contains(&data.faction_name(&england)), "{}", news[0].text_fr);
+    assert!(
+        news[0].text_fr.contains(&data.faction_name(&england)),
+        "{}",
+        news[0].text_fr
+    );
     assert_eq!(state.advisor.doctrines[&england], now);
     // Said once: the next season is silent.
     let again = state.end_turn_with(data, idle);
-    assert!(!again.iter().any(|e| e.text_fr.contains("change de posture")));
+    assert!(!again
+        .iter()
+        .any(|e| e.text_fr.contains("change de posture")));
 }

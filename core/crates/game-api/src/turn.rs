@@ -284,12 +284,15 @@ mod tests {
         assert!(serde_json::to_string(&ready).is_ok());
         // ADR 0789: the counsellor's notes of the season are served as `advice` alerts, the
         // first line being the title.
-        state.advisor.notes.push(sim_campaign::advisor::AdvisorNote {
-            id: "t".to_owned(),
-            kind: "danger".to_owned(),
-            title: "Titre".to_owned(),
-            text: "Corps".to_owned(),
-        });
+        state
+            .advisor
+            .notes
+            .push(sim_campaign::advisor::AdvisorNote {
+                id: "t".to_owned(),
+                kind: "danger".to_owned(),
+                title: "Titre".to_owned(),
+                text: "Corps".to_owned(),
+            });
         let advised = turn_readiness(data, &state, &france);
         let advice = advised.alerts.iter().find(|a| a.kind == "advice").unwrap();
         assert_eq!(advice.text, "Titre\nCorps");
