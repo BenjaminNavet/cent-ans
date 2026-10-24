@@ -438,8 +438,8 @@ mod tests {
         // Landscape 8 (first of agri_landscapes) -> row 15, openfield_north: cell 260 m, no hedge.
         assert_eq!(p.rows_a[15].x, 260.0);
         assert_eq!(p.rows_a[15].z, 0.0);
-        // `view` block: patch gain 0.85, far gain 1.0.
-        assert!((p.v0.z - 0.85).abs() < 1e-5);
+        // `view` block: patch gain 0.5 (TERRAIN2, ADR 0787), far gain 1.0.
+        assert!((p.v0.z - 0.5).abs() < 1e-5);
         assert!((p.v2.w - 1.0).abs() < 1e-5);
         assert_eq!(p.v6.y, 1.0, "geo rules on");
         assert_eq!(p.vine.w, 1.0);
