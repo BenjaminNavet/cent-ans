@@ -381,7 +381,7 @@ fn sheet_tab(pane: &mut Kids, theme: &UiTheme, ui: &CourtUi, sheet: &CharacterSh
     if sheet.captive {
         pane.spawn(ink(
             theme,
-            &format!("Captif de {}.", sheet.captor_name),
+            &format!("Captif {}.", crate::ui::kit::fr::de_place(&sheet.captor_name)),
             UiType::Body,
             style::RUBRIC,
         ));

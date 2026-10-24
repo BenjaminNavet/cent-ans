@@ -71,7 +71,7 @@ pub fn the_army(faction_name: &str) -> String {
     match faction_name {
         "Angleterre" => "les Anglais".to_owned(),
         "France" => "les Français".to_owned(),
-        other => format!("l’armée de {other}"),
+        other => format!("l’armée {}", crate::ui::kit::fr::de_place(other)),
     }
 }
 

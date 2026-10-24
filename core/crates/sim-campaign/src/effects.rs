@@ -614,8 +614,8 @@ pub fn apply_effect(
                 GameEvent::new(
                     EventKind::Chronicle,
                     format!(
-                        "Une nouvelle armée de {} se lève en {}.",
-                        data.faction_name(&faction),
+                        "Une nouvelle armée {} se lève en {}.",
+                        crate::events::de(&data.faction_name(&faction)),
                         data.province_name(&location)
                     ),
                 )

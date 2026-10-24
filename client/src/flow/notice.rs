@@ -80,8 +80,8 @@ pub fn aftermath_lines(after: &Aftermath) -> Vec<String> {
     }
     for lost in &after.lost {
         lines.push(format!(
-            "Prisonnier de {} : {}, rançon {}.",
-            lost.faction,
+            "Prisonnier {} : {}, rançon {}.",
+            crate::ui::kit::fr::de_place(&lost.faction),
             lost.name,
             fr::amount(lost.ransom)
         ));

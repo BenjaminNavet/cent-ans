@@ -305,9 +305,9 @@ impl CampaignState {
     ) {
         self.start_war(ally, aggressor);
         let text = format!(
-            "{} répond à l'appel aux armes de {} contre {}.",
+            "{} répond à l'appel aux armes {} contre {}.",
             data.faction_name(ally),
-            data.faction_name(defender),
+            crate::events::de(&data.faction_name(defender)),
             data.faction_name(aggressor)
         );
         self.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(ally));
@@ -343,9 +343,9 @@ impl CampaignState {
             grudge.refuse_duration,
         );
         let refusal = format!(
-            "{} refuse l'appel aux armes de {} contre {}.",
+            "{} refuse l'appel aux armes {} contre {}.",
             data.faction_name(ally),
-            data.faction_name(defender),
+            crate::events::de(&data.faction_name(defender)),
             data.faction_name(aggressor)
         );
         crate::negotiation::record_rupture(
@@ -643,9 +643,9 @@ impl CampaignState {
         // ADR 0114: the feudal tie stands for an alliance.
         crate::feudal::drop_alliance(self, vassal, suzerain);
         let text = format!(
-            "{} devient vassal de {}.",
+            "{} devient vassal {}.",
             data.faction_name(vassal),
-            data.faction_name(suzerain)
+            crate::events::de(&data.faction_name(suzerain))
         );
         self.push_order_event(GameEvent::new(EventKind::Vassalage, text).faction(vassal));
     }

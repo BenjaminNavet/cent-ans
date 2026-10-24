@@ -184,7 +184,7 @@ pub fn army_entry(
     let title = if sheet.general_name.is_empty() {
         "Ost sans chef".to_owned()
     } else {
-        format!("Ost de {}", sheet.general_name)
+        format!("Ost {}", crate::ui::kit::fr::de_place(&sheet.general_name))
     };
     let left = sheet.movement_left;
     let allowance = sheet.movement_max.max(1);

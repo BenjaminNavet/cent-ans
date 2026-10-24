@@ -65,8 +65,9 @@ pub fn engines_text(engines: &[EngineView]) -> String {
 fn role_line(sheet: &SiegeSheet) -> String {
     match sheet.role {
         SiegeRole::Attacker => format!(
-            "Vous assiégez {} (garnison de {}).",
-            sheet.settlement_name, sheet.defender_name
+            "Vous assiégez {} (garnison {}).",
+            sheet.settlement_name,
+            crate::ui::kit::fr::de_place(&sheet.defender_name)
         ),
         SiegeRole::Defender => format!(
             "{} est assiégée par {}.",
@@ -151,7 +152,7 @@ pub fn spawn_siege_panel(
             ..default()
         })
         .with_children(|h| {
-            h.spawn((Name::new("siege:title"), heading(theme, &format!("Siège de {}", sheet.settlement_name))));
+            h.spawn((Name::new("siege:title"), heading(theme, &format!("Siège {}", crate::ui::kit::fr::de_place(&sheet.settlement_name)))));
             h.spawn(Node {
                 flex_grow: 1.0,
                 ..default()

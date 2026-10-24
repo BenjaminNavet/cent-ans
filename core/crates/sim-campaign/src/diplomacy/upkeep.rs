@@ -52,7 +52,10 @@ pub(crate) fn resolve_diplomacy(
         events.push(
             GameEvent::new(
                 EventKind::DiplomaticOffer,
-                format!("L'offre de {} a expiré.", data.faction_name(&offer.from)),
+                format!(
+                    "L'offre {} a expiré.",
+                    crate::events::de(&data.faction_name(&offer.from))
+                ),
             )
             .faction(&offer.from),
         );
@@ -207,9 +210,9 @@ pub(crate) fn on_line_extinct(
         return;
     }
     let text = format!(
-        "{} hérite d'une prétention au trône de {} par sa mère.",
+        "{} hérite d'une prétention au trône {} par sa mère.",
         state.character_name(data, &character),
-        data.faction_name(faction)
+        crate::events::de(&data.faction_name(faction))
     );
     state
         .factions
@@ -233,9 +236,9 @@ pub(crate) fn on_line_extinct(
             GameEvent::new(
                 EventKind::Vassalage,
                 format!(
-                    "Union personnelle : {} passe sous l'autorité de {}.",
+                    "Union personnelle : {} passe sous l'autorité {}.",
                     data.faction_name(faction),
-                    data.faction_name(&claimant_faction)
+                    crate::events::de(&data.faction_name(&claimant_faction))
                 ),
             )
             .faction(faction),

@@ -252,8 +252,8 @@ impl CampaignState {
             attacker_side = setup.sallying;
             defender_side = setup.besieging;
             modifiers.push(format!(
-                "Sortie de la garnison de {} contre les assiégeants",
-                data.settlement_name(&request.location)
+                "Sortie de la garnison {} contre les assiégeants",
+                crate::events::de(&data.settlement_name(&request.location))
             ));
         } else if request.siege {
             let setup = crate::siege::assault_setup(self, data, &request.attacker)?;
