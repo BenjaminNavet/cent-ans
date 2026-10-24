@@ -1,12 +1,26 @@
 # Lot IA : doctrines stratégiques de l'IA de campagne (ADR 0782-0783)
 
-Branche `worktree-agent-abd99ac4866467ce0` (rebasée par fast-forward sur main après ECO2/CAUSES). Sources : `out/juge/iter-03-design.md`, ADR 0348/0350 (seed bots), 0754 (causes).
+Branche `worktree-agent-abd99ac4866467ce0` (avancée en fast-forward sur main après ECO2/CAUSES). Sources : `out/juge/iter-03-design.md`, ADR 0348/0350 (seed bots), 0754 (causes).
 
-## État
+## État : terminé (vérifications finales en cours)
 
-- Fait : catalogue `data/ai/strategic_doctrines.json` (8 doctrines, 23 affectations) + schéma ; types `data-model::ai_strategic_doctrine` ; résolveur `sim-campaign::doctrines` (faction, souverain, années, défaites) ; revanche (`BattleTally::last_province`) ; câblage `ai::strategy::Strategy` (armées, grille, cibles de siège, défense, chevauchée d'abord, mariages, finances), diplomatie (`war_target`, `plan_alliances`, agressivité) ; cause de guerre avec doctrine et revanche ; paliers de difficulté (prudence, anticipation, coordination, brume) ; ADR 0782, 0783 ; tests `core/crates/ai/tests/strategy/doctrines.rs`.
-- À faire : mesures (events_probe, campaign_probe, seed bots rapide puis longue), tests dépendant de la dynamique (ev_history, f7_events), fmt/clippy/test workspace, pytest schémas, nettoyage `core/target`.
+- Catalogue `data/ai/strategic_doctrines.json` (8 doctrines, 23 affectations) + schéma ; types `data-model::ai_strategic_doctrine` ; résolveur `sim-campaign::doctrines` (faction, souverain, années, défaites) ; revanche (`BattleTally::last_province`).
+- Câblage : `ai::strategy::Strategy` (armées : repli, assaut, seuil de siège, cibles de siège par objectifs, défense, chevauchée d'abord ; grille : supériorité avant d'attaquer ; mariages ; filtre des ordres de finance), diplomatie (`war_target` : audace et revanche, `plan_alliances` : cadence, agressivité).
+- Journal des causes : la guerre déclarée par l'IA consigne la doctrine et la raison (`revenge_at` « Revanche d'une défaite subie en {lieu} »).
+- Difficulté (ADR 0783) : `ai_prudence_percent`, `ai_anticipation`, `ai_coordination`, `ai_vision_provinces` (brume), neutres au niveau normal.
+- Tests : `core/crates/ai/tests/strategy/doctrines.rs` (13 tests, graine 1337) ; `m3_grid_ai::nearby_friendly_armies_are_counted_once` suit le ratio de la doctrine anglaise.
 
-## Prochaine étape
+## Mesures (events_probe, graine 1, IA stratégique partout, 1337-1453)
 
-Lancer les tests, mesurer, régler les valeurs du catalogue si les batailles Angleterre/France disparaissent.
+| Joueur | Avant (main) | Après |
+|---|---|---|
+| France | 4/24 événements, batailles Angleterre>France 44, France>Angleterre 14 ; pas de Crécy ni Poitiers tirés | 7/24, 29 / 6 ; Crécy 1346, Poitiers 1356, Brétigny 1360 |
+| Angleterre | 4/24, 7 / 23 ; Poitiers (victoire française) 1356 | 4/24, 21 / 22 ; Crécy 1347 |
+
+Seed bots rapide : 8 parties, 0 constat. Passe longue : voir rapport.
+
+## Points ouverts
+
+- `cargo clippy --all-targets` échoue sur `ev_history.rs:669` (`for id in [..]` à un élément, lot EVENTS, hors périmètre).
+- La doctrine n'est consignée que pour les guerres déclarées ; le changement de doctrine (nouveau souverain, défaites) n'est pas un événement du journal.
+- Le « lieu » de la revanche est la province de la dernière défaite, pas le nom de la bataille.
