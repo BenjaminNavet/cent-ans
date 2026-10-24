@@ -30,6 +30,8 @@ pub const MAX_JOBS: usize = 4;
 pub const BUILD_BUDGET_MS: f32 = 6.0;
 /// Budget while some node has no mesh and nothing under it (a visible hole).
 pub const HOLE_BUILD_BUDGET_MS: f32 = 14.0;
+/// Widening of the selection frustum (tangent of the half angle), for the pre-baked border.
+pub const FRUSTUM_MARGIN: f32 = 1.25;
 /// A node left by the selector stays drawn this long at most while its replacements build.
 pub const RETIRE_MAX_S: f64 = 2.0;
 
@@ -331,10 +333,13 @@ pub fn update_lod(
         }
     }
 
-    // CDLOD selection.
-    let view = make_view(
+    // CDLOD selection over a frustum a little wider than the screen: nodes just outside it are
+    // built and baked ahead of a pan, a rotation or a zoom, so they are ready when they enter.
+    // The level of detail still follows the real field of view (`k`).
+    let wide_fov = 2.0 * ((perspective.fov * 0.5).tan() * FRUSTUM_MARGIN).atan();
+    let mut view = make_view(
         transform,
-        perspective.fov,
+        wide_fov,
         aspect,
         perspective.near,
         perspective.far,
@@ -343,6 +348,7 @@ pub fn update_lod(
         now,
         frame,
     );
+    view.k = viewport.y as f64 * 0.5 / (perspective.fov as f64 * 0.5).tan();
     let config = lod.config;
     let update = lod.selector.update(&view, config);
     lod.selected_items = update.items;

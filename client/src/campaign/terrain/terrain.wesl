@@ -2513,6 +2513,13 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
                 albedo = cache_texel.rgb;
                 forest_f = saturate(cache_texel.a * 2.0 - 1.0);
                 n = normalize(n + vec3<f32>(dn.x, 0.0, dn.y));
+            } else {
+                // Not baked yet: the same ground computed directly, so a node entering the view
+                // already looks like its final self (the base ground showed as pale squares).
+                let r = regional_ground(in.world.xz, ground_footprint, in.altitude, in.slope_xz, base_albedo);
+                albedo = r.albedo;
+                forest_f = r.forest_f;
+                n = normalize(n + vec3<f32>(r.dn.x, 0.0, r.dn.y));
             }
         }
         @if(!GROUND_CACHE) {

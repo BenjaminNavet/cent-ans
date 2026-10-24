@@ -55,7 +55,7 @@ pub const DN_FORMAT: TextureFormat = TextureFormat::Rg16Float;
 /// Baked relief shade: sun visibility (r), horizon occlusion (g) (ADR 0745).
 pub const SHADE_FORMAT: TextureFormat = TextureFormat::Rg8Unorm;
 /// Layers of the atlas: more than the nodes drawn at once (selected + retiring).
-pub const LAYERS: u32 = 384;
+pub const LAYERS: u32 = 448;
 /// Nodes baked per frame at most once every node is shown (a refresh after an invalidation).
 const REFRESH_PER_FRAME: usize = 2;
 /// Nodes baked per frame at most while some node waits for its first bake.

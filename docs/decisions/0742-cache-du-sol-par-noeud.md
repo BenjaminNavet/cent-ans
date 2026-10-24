@@ -88,3 +88,17 @@ au banc).
   Sinon, la tuile en retrait reste affichée jusqu'à la cuisson, comme avant.
 - `FIRST_PER_FRAME` passe de 6 à 10 cuissons par image, pour que le sol de base plat dure moins
   longtemps.
+
+## Correctif du 24/10 : carrés beiges, cuisson d'avance
+
+Le sol de base affiché avant la première cuisson (correctif du 23/10) faisait des carrés beiges
+visibles en panoramique et au zoom. Deux changements :
+
+- Une tuile non cuite calcule le sol régional directement dans le fragment (`regional_ground`, le
+  même calcul que la cuisson) au lieu du sol de base : même aspect final, seulement plus cher
+  pendant les quelques images avant la cuisson.
+- Le sélecteur travaille sur un champ élargi (`FRUSTUM_MARGIN` 1,25, tangente du demi-angle) :
+  les nœuds juste hors écran sont construits et cuits avant d'entrer ; le niveau de détail suit
+  toujours le vrai champ (`k`). L'atlas passe de 384 à 448 couches (+ 51 Mo à N = 320).
+- Mesure : banc de descente (machine chargée, load 21-46, comparaison approximative) : 181 images
+  de plus de 50 ms avec le calcul direct seul, 68 avec la marge. Non mesuré : coût mémoire réel.
