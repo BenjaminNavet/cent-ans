@@ -11,6 +11,7 @@ pub mod bevy_tools;
 pub mod cli;
 pub mod devtools;
 pub mod dump;
+pub mod gpu_pacing;
 pub mod memory;
 pub mod perf_probe;
 pub mod profile;
@@ -131,6 +132,9 @@ impl Plugin for AgentPlugin {
         .add_systems(Last, drive)
         .add_systems(Update, hide_named);
         app.add_plugins((perf_probe::PerfProbePlugin, memory::MemoryProbePlugin));
+        if cli.wants_offscreen() {
+            app.add_plugins(gpu_pacing::GpuPacingPlugin);
+        }
         app.add_plugins(texture_census::TextureCensusPlugin);
         bench::add(app, cli);
         // With `dev`, BrpExtrasPlugin (devtools) installs the same transport with a chosen port.

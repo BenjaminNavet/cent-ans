@@ -67,7 +67,7 @@ print("run %s t+%3ss footprint %7.0f MiB | IOAccel %6.0f IOSurf %6.0f MALLOC_LAR
   % (sys.argv[2], sys.argv[3], d["footprint_mib"], g("IOAccelerator (graphics)", "IOAccelerator"), g("IOSurface"),
      g("MALLOC_LARGE", "MALLOC_LARGE (empty)"), g("MALLOC_SMALL"), g("MALLOC_TINY"),
      g("untagged (VM_ALLOCATE)"), g("mapped file")))' "$json" "$1" "$2"
-	[[ ${4:-0} == 1 ]] && vmmap -summary "$3" > "$out/vmmap-run$1-t$2.txt" 2> /dev/null
+	[[ ${4:-0} == 1 ]] && { vmmap -summary "$3" > "$out/vmmap-run$1-t$2.txt" 2> /dev/null; [[ -n ${VMMAP_FULL:-} ]] && vmmap -v "$3" > "$out/vmmapv-run$1-t$2.txt" 2> /dev/null; }
 	return 0
 }
 
@@ -79,7 +79,7 @@ for run in $(seq 1 $runs); do
 	for kv in ${=MEM_ENV:-}; do envs+=(--env "$kv"); done
 	case $mode in
 	idle)
-		args=(--state Campaign --exit-after 1000000 --offscreen)
+		args=(--state ${STATE:-Campaign} --exit-after 1000000 --offscreen)
 		;;
 	bench)
 		args=(--state Campaign --bench-map --bench-out "$out/bench-run$run.json" --exit-after 20000 --offscreen)

@@ -41,6 +41,84 @@ fn relieve(time: Res<Time<Real>>, mut done: Local<bool>) {
     );
 }
 
+/// Bytes the Metal device reports as allocated by this process (`MTLDevice.currentAllocatedSize`:
+/// textures, buffers, heaps, i.e. everything wgpu created; the share of the footprint the image and
+/// mesh counts of the dump cannot see). `None` off macOS.
+pub fn metal_allocated_mib() -> Option<f64> {
+    #[cfg(target_os = "macos")]
+    {
+        use std::ffi::{c_char, c_void};
+        use std::sync::OnceLock;
+        #[link(name = "Metal", kind = "framework")]
+        unsafe extern "C" {
+            fn MTLCreateSystemDefaultDevice() -> *mut c_void;
+        }
+        #[link(name = "objc")]
+        unsafe extern "C" {
+            fn sel_registerName(name: *const c_char) -> *mut c_void;
+            fn objc_msgSend();
+        }
+        static DEVICE: OnceLock<usize> = OnceLock::new();
+        let device = *DEVICE.get_or_init(|| {
+            // SAFETY: plain Metal call, the device lives for the whole process.
+            unsafe { MTLCreateSystemDefaultDevice() as usize }
+        }) as *mut c_void;
+        if device.is_null() {
+            return None;
+        }
+        // SAFETY: `currentAllocatedSize` is a `NSUInteger` getter of MTLDevice; the transmuted
+        // `objc_msgSend` has exactly that signature.
+        let bytes = unsafe {
+            let selector = sel_registerName(c"currentAllocatedSize".as_ptr());
+            let send: unsafe extern "C" fn(*mut c_void, *mut c_void) -> usize =
+                std::mem::transmute(objc_msgSend as unsafe extern "C" fn());
+            send(device, selector)
+        };
+        Some(bytes as f64 / (1024.0 * 1024.0))
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        None
+    }
+}
+
+/// Seconds between two `memlog` lines (`CENT_ANS_MEMLOG=<seconds>`, off by default).
+fn memlog_every() -> Option<f32> {
+    std::env::var("CENT_ANS_MEMLOG").ok()?.parse().ok()
+}
+
+/// Periodic one-line memory log: footprint, Metal allocation, image / mesh counts, frame number.
+/// Lets a footprint jump be dated against the other log lines (protocol: `docs/performance-memoire.md`).
+fn memlog(
+    time: Res<Time<Real>>,
+    frames: Res<bevy::diagnostic::FrameCount>,
+    images: Option<Res<Assets<Image>>>,
+    meshes: Option<Res<Assets<Mesh>>>,
+    mut next: Local<f32>,
+) {
+    let Some(every) = memlog_every() else { return };
+    if time.elapsed_secs() < *next {
+        return;
+    }
+    *next = time.elapsed_secs() + every;
+    let (mut gpu, mut count) = (0u64, 0usize);
+    if let Some(images) = images {
+        for (_, image) in images.iter() {
+            gpu += gpu_bytes(image);
+            count += 1;
+        }
+    }
+    info!(
+        "memlog t={:.0}s frame={} footprint={:.0} metal={:.0} images={count} gpu_est={:.0} meshes={}",
+        time.elapsed_secs(),
+        frames.0,
+        footprint_mib(),
+        metal_allocated_mib().unwrap_or(-1.0),
+        gpu as f64 / (1024.0 * 1024.0),
+        meshes.map_or(0, |m| m.len())
+    );
+}
+
 /// Images listed in the dump.
 const TOP_IMAGES: usize = 10;
 
@@ -48,7 +126,7 @@ pub struct MemoryProbePlugin;
 
 impl Plugin for MemoryProbePlugin {
     fn build(&self, app: &mut App) {
-        app.register_dump(dump).add_systems(Update, relieve);
+        app.register_dump(dump).add_systems(Update, (relieve, memlog));
     }
 }
 
@@ -190,6 +268,7 @@ fn dump(world: &World) -> (String, Value) {
             "rss_mib": rss_mib(),
             "peak_rss_mib": peak_rss_mib(),
             "footprint_mib": footprint_mib(),
+            "metal_allocated_mib": metal_allocated_mib(),
             "images": {
                 "count": rows.len(),
                 "gpu_estimate_mib": mib(gpu_images),
