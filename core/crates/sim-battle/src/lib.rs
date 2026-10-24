@@ -161,8 +161,8 @@ pub use siege_fx::{SiegeFx, SiegeFxKind};
 pub use siege_layout::{LayoutError, LayoutGate, SiegeLandmark, SiegeLayout};
 pub use sim::{
     AmbushLayout, BattleSim, CampState, DeploymentZone, Ladder, SetupError, SiegeEngineKind,
-    SiegeEngineView, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD, SIEGE_STANDOFF,
-    ZONE_DEPTH,
+    SiegeEngineView, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD, MIN_DURATION,
+    SIEGE_STANDOFF, ZONE_DEPTH,
 };
 pub use site::{Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind};
 pub use time_of_day::{DayPhase, TimeOfDayRules};

@@ -58,6 +58,10 @@ pub struct BattleCameraState {
     /// `(min_x, min_z, max_x, max_z)` the pivot stays within.
     pub bounds: [f32; 4],
     pub last_pitch_deg: f32,
+    /// Seconds since the player last moved the camera by hand.
+    pub idle_s: f32,
+    /// The camera drifts towards the main engagement while the player leaves it alone.
+    pub auto_follow: bool,
 }
 
 impl BattleCameraState {
@@ -75,6 +79,8 @@ impl BattleCameraState {
                 field.depth as f32 + 200.0,
             ],
             last_pitch_deg: PITCH_NEAR_DEG,
+            idle_s: 0.0,
+            auto_follow: true,
         }
     }
 
@@ -191,13 +197,72 @@ fn follow_melee(
     }
 }
 
+/// Seconds without camera input before the view drifts to the engagement.
+const FOLLOW_IDLE_S: f32 = 5.0;
+/// Rate (1/s) of the drift of the pivot towards the engagement.
+const FOLLOW_RATE: f32 = 0.7;
+/// Radius (m) of the knot of fighters the camera follows.
+const FOLLOW_CLUSTER_M: f32 = 120.0;
+
+/// Centre of the densest knot of fighters in melee (`None` without a melee): the engagement the
+/// camera follows. Pure, so it is testable.
+pub fn engagement_centre(fighters: &[Vec2]) -> Option<Vec2> {
+    let best = fighters.iter().max_by_key(|p| {
+        fighters
+            .iter()
+            .filter(|q| p.distance(**q) <= FOLLOW_CLUSTER_M)
+            .count()
+    })?;
+    let knot: Vec<Vec2> = fighters
+        .iter()
+        .copied()
+        .filter(|q| best.distance(*q) <= FOLLOW_CLUSTER_M)
+        .collect();
+    Some(knot.iter().copied().sum::<Vec2>() / knot.len() as f32)
+}
+
+/// ADR 0773: when the player leaves the camera alone, the melee is brought to the middle of the
+/// screen (the engagement used to play out at the edge of the frame).
+fn follow_engagement(
+    time: Res<Time>,
+    mut session: ResMut<BattleSession>,
+    state: Option<ResMut<BattleCameraState>>,
+) {
+    let Some(mut state) = state else { return };
+    if !state.auto_follow || state.idle_s < FOLLOW_IDLE_S {
+        return;
+    }
+    let sim = &*session.sim_mut();
+    if sim.ticks() == 0 {
+        return;
+    }
+    let fighters: Vec<Vec2> = sim
+        .units()
+        .iter()
+        .filter(|u| u.state == sim_battle::UnitState::Melee && !u.synthetic)
+        .map(|u| Vec2::new(u.x as f32, u.z as f32))
+        .collect();
+    let Some(centre) = engagement_centre(&fighters) else {
+        return;
+    };
+    let blend = 1.0 - (-FOLLOW_RATE * time.delta_secs()).exp();
+    state.target.x += (centre.x - state.target.x) * blend;
+    state.target.z += (centre.y - state.target.z) * blend;
+    state.clamp_target();
+}
+
 pub struct BattleCameraPlugin;
 
 impl Plugin for BattleCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (control_camera, follow_melee, apply_camera)
+            (
+                control_camera,
+                follow_melee,
+                follow_engagement,
+                apply_camera,
+            )
                 .chain()
                 .run_if(in_state(AppState::Battle))
                 .run_if(resource_exists::<BattleSession>),
@@ -314,10 +379,14 @@ pub fn spawn_battle_camera(
     sky: Color,
     centre: Vec3,
     yaw: f32,
+    distance: f32,
+    pitch_deg: Option<f32>,
 ) {
-    let mut state = BattleCameraState::new(centre, yaw, OPENING_DISTANCE, field);
+    let mut state = BattleCameraState::new(centre, yaw, distance, field);
+    state.manual_pitch_deg = pitch_deg;
     // Dev hook: `CENT_ANS_BATTLE_CAM=<distance>[,<dx>,<dz>[,<yaw_deg>]]` frames the proof shots.
     if let Ok(spec) = std::env::var("CENT_ANS_BATTLE_CAM") {
+        state.auto_follow = false;
         let v: Vec<f32> = spec
             .split(',')
             .filter_map(|p| p.trim().parse().ok())
@@ -481,6 +550,12 @@ pub fn control_camera(
             );
         }
     }
+    let touched = movement != Vec2::ZERO
+        || scroll.delta.y != 0.0
+        || buttons.pressed(MouseButton::Middle)
+        || held("map_rotate_left", KeyCode::KeyQ)
+        || held("map_rotate_right", KeyCode::KeyE);
+    state.idle_s = if touched { 0.0 } else { state.idle_s + delta };
     let blend = 1.0 - (-ZOOM_DAMPING * delta).exp();
     state.distance += (state.target_distance - state.distance) * blend;
 }
@@ -505,6 +580,16 @@ pub(crate) fn apply_camera(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn engagement_is_the_densest_knot_of_fighters() {
+        use super::{Vec2, engagement_centre};
+        assert!(engagement_centre(&[]).is_none());
+        let mut fighters = vec![Vec2::new(900.0, 900.0)];
+        fighters.extend((0..5).map(|i| Vec2::new(100.0 + i as f32 * 10.0, 100.0)));
+        let centre = engagement_centre(&fighters).unwrap();
+        assert!((centre.x - 120.0).abs() < 1e-3 && (centre.y - 100.0).abs() < 1e-3);
+    }
+
     #[test]
     fn camera_keys_follow_the_key_map() {
         let mut stored = std::collections::BTreeMap::new();
@@ -558,6 +643,8 @@ mod tests {
             distance,
             target_distance: distance,
             manual_pitch_deg: None,
+            idle_s: 0.0,
+            auto_follow: true,
             bounds: [0.0, 0.0, 1200.0, 800.0],
             last_pitch_deg: 6.0,
         }

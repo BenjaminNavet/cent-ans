@@ -32,6 +32,18 @@ pub const CARD_WIDTH: f32 = 64.0;
 /// Painted part of a card; with the « bataille » caption above and the ability row under it,
 /// the column fills [`super::geometry::BAND_INNER`] (unit test).
 pub const CARD_HEIGHT: f32 = 90.0;
+/// Height of a card not selected (compact frieze, ADR 0773).
+pub const CARD_HEIGHT_COMPACT: f32 = 58.0;
+
+/// Card height: full when selected, compact otherwise.
+pub fn card_height(selected: bool) -> f32 {
+    if selected {
+        CARD_HEIGHT
+    } else {
+        CARD_HEIGHT_COMPACT
+    }
+}
+
 /// Height of the « Avant-garde » / « Bataille » caption over a group of cards.
 pub const GROUP_CAPTION_H: f32 = 16.0;
 /// Margin + rule + margin between the seal, the cards and the commands.
@@ -287,6 +299,7 @@ pub fn spawn_band(commands: &mut Commands, root: Entity, ctx: &BuildCtx, texts: 
                 Node {
                     flex_direction: FlexDirection::Row,
                     column_gap: Val::Px(3.0),
+                    align_items: AlignItems::FlexEnd,
                     ..default()
                 },
                 ChildOf(column),
@@ -335,7 +348,7 @@ fn spawn_card(
             Tooltip::new(&unit_bbcode(unit, &display, texts)),
             Node {
                 width: Val::Px(CARD_WIDTH),
-                height: Val::Px(CARD_HEIGHT),
+                height: Val::Px(CARD_HEIGHT_COMPACT),
                 border: UiRect::all(Val::Px(3.0)),
                 overflow: Overflow::clip(),
                 flex_shrink: 0.0,
@@ -756,21 +769,26 @@ fn update_cards(
     texts: Res<HudTexts>,
     palette: Option<Res<crate::settings::palette::Palette>>,
     mut symbols: Query<(&CardMoraleSymbol, &mut Text), (Without<CardCount>, Without<CardState>)>,
-    mut roots: Query<(&UnitCard, &mut BorderColor, &mut Tooltip)>,
+    mut roots: Query<(&UnitCard, &mut BorderColor, &mut Tooltip, &mut Node)>,
     mut counts: Query<(&CardCount, &mut Text), (Without<CardState>, Without<CardMoraleSymbol>)>,
     mut states: Query<(&CardState, &mut Text), (Without<CardCount>, Without<CardMoraleSymbol>)>,
-    mut bars: Query<(&CardBar, &mut Node, &mut BackgroundColor), Without<CardVeil>>,
+    mut bars: Query<
+        (&CardBar, &mut Node, &mut BackgroundColor),
+        (Without<CardVeil>, Without<UnitCard>),
+    >,
     mut veils: Query<(&CardVeil, &mut BackgroundColor), Without<CardBar>>,
 ) {
     let blink = (time.elapsed_secs() % 0.6) < 0.3;
     let chosen = highlighted(&selection, &data);
     let refresh_text = data.is_changed();
-    for (card, mut border, mut tooltip) in &mut roots {
-        *border = BorderColor::all(if chosen.contains(&card.0) {
-            BORDER_SELECTED
-        } else {
-            BORDER_IDLE
-        });
+    for (card, mut border, mut tooltip, mut node) in &mut roots {
+        let picked = chosen.contains(&card.0);
+        *border = BorderColor::all(if picked { BORDER_SELECTED } else { BORDER_IDLE });
+        // ADR 0773: compact frieze, full size for the selection only.
+        let height = Val::Px(card_height(picked));
+        if node.height != height {
+            node.height = height;
+        }
         if refresh_text && let Some(unit) = data.own.iter().find(|u| u.id == card.0) {
             let name = data.name_of(card.0);
             let display = if unit.is_general {

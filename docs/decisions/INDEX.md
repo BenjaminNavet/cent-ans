@@ -345,3 +345,5 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0784 | [L'arc de partie en trois actes](0784-arc-de-partie-en-trois-actes.md) | accepté |
 | 0785 | [Victoire par score de règne (amende 0245)](0785-victoire-par-score-de-regne.md) | accepté |
 | 0780 | [Interface du crédit et des impôts exceptionnels](0780-interface-du-credit.md) | accepté |
+| 0772 | [Le compteur « Nuit dans » suit l'heure de départ](0772-compteur-nuit-lie-a-l-heure-de-depart.md) | n/d |
+| 0773 | [Mise en scène des batailles : cadrage de siège, suivi, cartes compactes, premier plan](0773-mise-en-scene-des-batailles.md) | n/d |

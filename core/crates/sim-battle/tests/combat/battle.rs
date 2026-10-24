@@ -418,10 +418,26 @@ fn time_left_counts_down_from_the_maximum_duration() {
         vec![unit(data, "unit_men_at_arms_foot")],
         vec![unit(data, "unit_urban_militia")],
     );
+    sim.set_start_hour(5.5);
     assert_eq!(sim.time_left_s(), sim_battle::MAX_DURATION);
     sim.step();
     assert!(sim.time_left_s() < sim_battle::MAX_DURATION);
     assert!((sim.time_left_s() + sim.elapsed() - sim_battle::MAX_DURATION).abs() < 1e-9);
+}
+
+#[test]
+fn time_left_follows_the_starting_hour() {
+    let data = game_data();
+    let mut sim = lab(
+        vec![unit(data, "unit_men_at_arms_foot")],
+        vec![unit(data, "unit_urban_militia")],
+    );
+    // Midday: 8.5 h to nightfall (20:30) at 0,2 min of day per second.
+    sim.set_start_hour(12.0);
+    assert!((sim.time_left_s() - 2550.0).abs() < 1e-6);
+    // Dusk: nightfall comes first, but never under the minimum.
+    sim.set_start_hour(18.5);
+    assert_eq!(sim.time_left_s(), sim_battle::MIN_DURATION);
 }
 
 #[test]

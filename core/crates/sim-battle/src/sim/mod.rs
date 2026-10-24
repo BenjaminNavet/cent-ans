@@ -70,6 +70,8 @@ use width::move_group_tag;
 pub const DT: f64 = 0.1;
 /// A battle lasts at most one simulated hour; the defender then wins.
 pub const MAX_DURATION: f64 = 3600.0;
+/// Shortest battle when nightfall is close (ADR 0772).
+pub const MIN_DURATION: f64 = 900.0;
 /// Seconds between two battle-AI decisions (M9: every 2 simulated seconds).
 pub const AI_PERIOD: f64 = 2.0;
 /// Upper bound of fixed steps run by a single [`BattleSim::tick`] call.
@@ -463,7 +465,20 @@ impl BattleSim {
 
     /// TW bfeel: seconds left before nightfall (`MAX_DURATION` - elapsed).
     pub fn time_left_s(&self) -> f64 {
-        (MAX_DURATION - self.elapsed).max(0.0)
+        (self.deadline_s() - self.elapsed).max(0.0)
+    }
+
+    /// Battle seconds at which the fighting stops: the 60 min cap, or nightfall
+    /// when the battle began late in the day (ADR 0772), never before
+    /// [`MIN_DURATION`].
+    pub fn deadline_s(&self) -> f64 {
+        let rules = crate::time_of_day::TimeOfDayRules::bundled();
+        let Some(night) = rules.phase("night") else {
+            return MAX_DURATION;
+        };
+        let hours_to_night = (night.from_hour - self.start_hour).rem_euclid(24.0);
+        let seconds = hours_to_night * 60.0 / rules.minutes_per_battle_second;
+        seconds.clamp(MIN_DURATION, MAX_DURATION)
     }
 
     pub fn ticks(&self) -> u64 {

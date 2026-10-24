@@ -248,6 +248,79 @@ pub fn plan_plantings(field: &Battlefield) -> Vec<Planting> {
     out
 }
 
+/// Bush clumps behind each army (ADR 0773): the camera opens behind the player's line, and the
+/// lower half of the frame used to be a bare meadow. Render only (no obstacle): clumps of one to
+/// three bushes in a band 25-95 m behind the rearmost regiment, spread across the front.
+pub fn plan_foreground(sim: &sim_battle::BattleSim) -> Vec<Planting> {
+    use sim_battle::SideId;
+    let field = sim.field();
+    if sim.siege().is_some() {
+        return Vec::new();
+    }
+    let bush = species_index("bush");
+    let mut rng = Lcg(4242);
+    let mut out = Vec::new();
+    let centroid = |side: SideId| -> Option<Vec2> {
+        let pts: Vec<Vec2> = sim
+            .units()
+            .iter()
+            .filter(|u| u.side == side && !u.synthetic)
+            .map(|u| Vec2::new(u.x as f32, u.z as f32))
+            .collect();
+        (!pts.is_empty()).then(|| pts.iter().copied().sum::<Vec2>() / pts.len() as f32)
+    };
+    for (own_side, other_side) in [
+        (SideId::Attacker, SideId::Defender),
+        (SideId::Defender, SideId::Attacker),
+    ] {
+        let (Some(own), Some(other)) = (centroid(own_side), centroid(other_side)) else {
+            continue;
+        };
+        let Some(rear) = (own - other).try_normalize() else {
+            continue;
+        };
+        let side_axis = Vec2::new(-rear.y, rear.x);
+        let edge = sim
+            .units()
+            .iter()
+            .filter(|u| u.side == own_side && !u.synthetic)
+            .map(|u| (Vec2::new(u.x as f32, u.z as f32) - own).dot(rear))
+            .fold(0.0_f32, f32::max);
+        for _ in 0..FOREGROUND_CLUMPS {
+            let back = edge + rng.range(25.0, 95.0);
+            let across = rng.range(-170.0, 170.0);
+            let base = own + rear * back + side_axis * across;
+            for _ in 0..1 + (rng.next() * 3.0) as usize {
+                let at = base + Vec2::new(rng.range(-4.0, 4.0), rng.range(-4.0, 4.0));
+                let (x, z) = (at.x, at.y);
+                if x < 4.0
+                    || z < 4.0
+                    || x > field.width as f32 - 4.0
+                    || z > field.depth as f32 - 4.0
+                    || near_road(field, x, z, 6.0)
+                    || field.water_at(f64::from(x), f64::from(z)).is_some()
+                    || in_decor_area(field, x, z)
+                {
+                    continue;
+                }
+                out.push(Planting {
+                    species: bush,
+                    x,
+                    z,
+                    yaw: rng.next() * TAU,
+                    scale: rng.range(0.7, 1.5),
+                    tint: (rng.next() * 3.0) as u8 % 3,
+                    ring: false,
+                });
+            }
+        }
+    }
+    out
+}
+
+/// Clumps of bushes behind each army.
+const FOREGROUND_CLUMPS: usize = 24;
+
 /// Height of the ground at `(x, z)` beyond the field edge: the edge extended flat (the horizon
 /// ring is the same up to 700 m from the field).
 pub fn ground_height(field: &Battlefield, x: f32, z: f32) -> f32 {
@@ -721,6 +794,7 @@ fn plant(
     let weather = sim.weather();
     let relief = relief.as_deref();
     let mut plan = plan_plantings(field);
+    plan.extend(plan_foreground(sim));
     plan.extend(plan_orchards(field, &look));
     let ring_trees = plan_ring_woods(field, &look, seed);
     let ring_count = ring_trees.len();
