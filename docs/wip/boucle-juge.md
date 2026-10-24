@@ -27,3 +27,11 @@ Outils : `tools/heavy.sh` (sémaphore 2 emplacements), `tools/full_check.sh [dos
 PROCHAINE ÉTAPE : itération 3 du juge (4 angles : DA, design, histoire/UX, gameplay/IA ; captures campagne en `CENT_ANS_WEATHER=clear`, fps sur machine calme) + smoke + seed bots sur main.
 Restes : hameaux + ADR terrain, densité/imposteurs/premier plan des armées (ARMEES partiel), vérification visuelle campagne (LUM, EAU : captures campagne inexploitables sous charge), refontes de design (IA à doctrines, arcs de partie, scénarios), pistes mémoire (copies CPU, KTX2 sol), données de faction Dauphiné (barks etc.).
 DISQUE : 19 Go libres (98 %) ; client/target = 57 Go (main), core/target 6,9 Go ; snapshots Time Machine locaux (3). Ne rien supprimer sans accord (voir mémoire disque).
+
+## Itérations 3 et 4 (24/10)
+Itération 3 : juges DA 4,8/10 (sol noir, corrigé fb6b6e23d), design 6,0, histoire 7,7 / UX 6,4, technique (fps OK : campagne ~95 fps, bataille ~60 ; mémoire campagne 10-12 Go → corrigée par MEM2 : 2,75 Go).
+Fusionnés dans main (3000200eb, ff-only, rien de poussé) : DATA2, UX2 (garde-fous shader, ADR 0774/0775), EVENTS (ADR 0779), MEM2 (ADR 0776), ECO2 (ADR 0777/0778), FORET (ADR 0770). Contrôle complet vert : clippy+tests cœur et client, pytest 2941. Dérogation : smoke et seed bots non passés sur cette intégration (le juge technique a passé les seed bots quick avant : 0 constat).
+Ajustements d'intégration : ev_history (la guerre Angleterre-France de la partie simulée finit en 1351 avec ECO2 → Maupertuis couvert par son test à état fabriqué), forest look défaut near_scale 0.8, clippy as_chunks, cathédrales retirées d'Orléans/Nidaros/Polotsk.
+EN COURS : lot BATAILLE (worktree agent-a8d4b4abbbb986309 : siège, mêlée, masse, ADR 0772/0773) ; à fusionner puis banc bataille sur machine calme.
+RESTES : boutons client emprunter/rembourser/lever un impôt (ECO2), haies/cours de hameaux, KTX2 sol de campagne, mémoire bataille (plancher 3,8 Go, pics IOAccelerator), IA à doctrines stratégiques, arc de partie en actes, recherche/espionnage/peste, cohérence palette campagne/bataille à rejuger (sol visible), Murcie (renommer ou créer colonie), mariage de maître de Calatrava (règle IA Rust), tributs de traité sans producteur.
+PROCHAINE ÉTAPE : fusion de BATAILLE, itération 4 du juge (4 angles), smoke + seed bots.
