@@ -51,6 +51,7 @@ def build_job(
     gamma: float | None = None,
     budget_scale: float = 1.0,
     faithful: bool = False,
+    lod_method: str | None = None,
 ) -> dict:
     """Validate the request against the class table and return the Blender job document.
 
@@ -76,6 +77,10 @@ def build_job(
     axis, target = next(iter(targets.items()))
     if target <= 0:
         raise IngestError("la taille cible doit être positive")
+    if lod_method not in (None, "collapse", "voxel_bake"):
+        raise IngestError(
+            f"méthode de LOD inconnue {lod_method!r} (collapse, voxel_bake)"
+        )
     if budget_scale <= 0:
         raise IngestError("budget_scale doit être positif")
     if not 1 <= lods <= 3:
@@ -110,6 +115,8 @@ def build_job(
         if faithful
         else spec.get("island_min", classes["island_min"]),
         "faithful": faithful,
+        "lod_method": lod_method or spec.get("lod_method", "collapse"),
+        "lod_voxels": spec.get("lod_voxels", 200),
         "saturation_cap": classes["grade"]["saturation_cap"],
         "luma_range": [
             classes["grade"]["albedo_mean_min"],
@@ -170,6 +177,8 @@ def manifest_entry(
     }
     if job.get("faithful"):
         entry["faithful"] = True
+    if "voxel_bake" in result.get("lod_methods", []):
+        entry["lod_methods"] = result["lod_methods"]
     if result.get("grade"):
         entry["grade"] = result["grade"]
     for key, value in (

@@ -43,6 +43,10 @@ def dn_ingest_command(
         "--faithful",
         help="Modèle conservé tel quel (Meshy) : ni étalonnage ni socle retiré, LOD0 brut",
     ),
+    lod_method: str | None = typer.Option(
+        None,
+        help="LOD1-2 : collapse ou voxel_bake (défaut : classe, ADR 0790)",
+    ),
     source_image: str | None = typer.Option(None, help="Image source (manifeste)"),
     model_3d: str | None = typer.Option(None, help="Modèle 3D (manifeste)"),
     cost_usd: float | None = typer.Option(None, help="Coût en dollars (manifeste)"),
@@ -75,6 +79,7 @@ def dn_ingest_command(
             gamma=gamma,
             budget_scale=budget_scale,
             faithful=faithful,
+            lod_method=lod_method,
         )
         result = dn_ingest.run_ingest(job, classes)
     except (dn_ingest.IngestError, blender.BlenderError) as error:

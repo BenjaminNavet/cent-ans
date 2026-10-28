@@ -67,12 +67,20 @@ def test_build_job_reads_budgets() -> None:
         {"length": -1.0},
         {"lods": 4},
         {"asset_id": "Bad-Id"},
+        {"lod_method": "voxel"},
     ],
 )
 def test_build_job_rejects_bad_requests(overrides) -> None:
     """Unknown class, zero or two sizes, bad LOD count or id are refused."""
     with pytest.raises(dn_ingest.IngestError):
         _job(**overrides)
+
+
+def test_lod_method_comes_from_class_unless_overridden() -> None:
+    """Massive classes rebuild LOD1-2 by voxel bake; props keep collapse; the CLI overrides."""
+    assert _job()["lod_method"] == "voxel_bake"
+    assert _job(asset_class="prop", length=1.0)["lod_method"] == "collapse"
+    assert _job(lod_method="collapse")["lod_method"] == "collapse"
 
 
 def test_check_result_flags_overrun_and_saturation() -> None:

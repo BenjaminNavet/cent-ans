@@ -37,6 +37,8 @@
           "roughness": {"type": "number", "minimum": 0, "maximum": 1},
           "strip_base": {"type": "boolean"},
           "faithful_strip_base": {"type": "boolean", "description": "Socle retiré même en ingestion fidèle (--faithful, ADR 0349) : arbres."},
+          "lod_method": {"enum": ["collapse", "voxel_bake"], "description": "LOD1-2 : décimation directe (défaut) ou refonte en voxels + texture recuite depuis le LOD0 (ADR 0790)."},
+          "lod_voxels": {"type": "integer", "minimum": 50, "maximum": 1000, "description": "Voxels sur la plus grande dimension pour voxel_bake (défaut 200)."},
           "island_min": {"type": "number", "minimum": 0, "maximum": 0.2, "description": "Remplace island_min global pour cette classe (0 = aucun îlot supprimé : feuillages en cartes)."}
         }
       }

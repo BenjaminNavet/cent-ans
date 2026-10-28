@@ -3,7 +3,9 @@
 Run through ``cent-ans dn-ingest`` (never by hand): arguments after ``--`` are a single JSON
 document (see ``tools/cent_ans_tools/dn_ingest.py``). Steps: import, join meshes, bake
 transforms, yaw, uniform scale to the target size in metres, pivot at ground centre, +Y up,
-albedo grade, quadric decimation to each LOD budget, export one glb per LOD.
+albedo grade, quadric decimation to each LOD budget, export one glb per LOD. With
+``lod_method: voxel_bake`` (ADR 0790), LOD1-2 are rebuilt instead: voxel remesh of LOD0 into one
+closed surface, collapse to budget, new UVs, base colour baked from LOD0.
 Prints one ``DN_RESULT {json}`` line.
 """
 
@@ -305,6 +307,70 @@ def decimate(obj: "bpy.types.Object", target: int) -> int:
     return count
 
 
+def voxel_bake(source: "bpy.types.Object", target: int, tex: int, spec: dict):
+    """Rebuild ``source`` as a new object of about ``target`` triangles with a baked texture.
+
+    Collapse decimation shreds Meshy/TRELLIS meshes made of overlapping shells (roof tiles,
+    stones): the voxel remesh first melts them into one closed surface, which then collapses
+    cleanly; the base colour is baked from ``source`` onto fresh UVs (ADR 0790). Returns
+    ``None`` when the result stays over budget (thin parts), so the caller falls back.
+    """
+    bpy.ops.object.select_all(action="DESELECT")
+    source.select_set(True)
+    bpy.context.view_layer.objects.active = source
+    bpy.ops.object.duplicate()
+    low = bpy.context.view_layer.objects.active
+    low.data = low.data.copy()
+    low.data.materials.clear()
+    for layer in list(low.data.uv_layers):
+        low.data.uv_layers.remove(layer)
+    remesh = low.modifiers.new("dn_voxel", "REMESH")
+    remesh.mode = "VOXEL"
+    remesh.voxel_size = max(low.dimensions) / spec.get("lod_voxels", 200)
+    bpy.ops.object.modifier_apply(modifier=remesh.name)
+    count = collapse_passes(low, target)
+    if count > target * 1.04:
+        bpy.data.objects.remove(low, do_unlink=True)
+        return None
+    low.data.uv_layers.new(name="UVMap")
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.smart_project(angle_limit=1.15, island_margin=0.004)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    image = bpy.data.images.new(f"{spec['id']}_bake_{target}", tex, tex)
+    material = bpy.data.materials.new(f"{spec['id']}_lod_{target}")
+    material.use_nodes = True
+    tree = material.node_tree
+    texture = tree.nodes.new("ShaderNodeTexImage")
+    texture.image = image
+    tree.nodes.active = texture
+    low.data.materials.append(material)
+    scene = bpy.context.scene
+    engine = scene.render.engine
+    scene.render.engine = "CYCLES"
+    scene.cycles.device = "CPU"
+    scene.cycles.samples = 1
+    size = max(source.dimensions)
+    bake = scene.render.bake
+    bake.use_selected_to_active = True
+    bake.use_cage = False
+    bake.cage_extrusion = 0.02 * size
+    bake.max_ray_distance = 0.06 * size
+    bake.margin = 4
+    bpy.ops.object.select_all(action="DESELECT")
+    source.select_set(True)
+    low.select_set(True)
+    bpy.context.view_layer.objects.active = low
+    bpy.ops.object.bake(type="DIFFUSE", pass_filter={"COLOR"})
+    scene.render.engine = engine
+    tree.links.new(
+        texture.outputs["Color"], tree.nodes["Principled BSDF"].inputs["Base Color"]
+    )
+    image.pack()
+    set_surface(low, spec["roughness"])
+    return low
+
+
 def regrind(obj: "bpy.types.Object") -> dict:
     """Re-centre on the ground after decimation (vertices move slightly); return dimensions."""
     low, high = bounds(obj)
@@ -363,7 +429,36 @@ def main() -> None:
     triangles = []
     drift = []
     ref_box = None
+    methods = []
     for lod, target in enumerate(spec["lod_tris"][: spec["lods"]]):
+        baked = (
+            voxel_bake(obj, target, max(spec["tex"] >> (lod - 1), 256), spec)
+            if lod and spec.get("lod_method") == "voxel_bake"
+            else None
+        )
+        methods.append(
+            "voxel_bake"
+            if baked
+            else "raw"
+            if lod == 0 and spec.get("faithful")
+            else "collapse"
+        )
+        if baked:
+            count = len(baked.data.polygons)
+            regrind(baked)
+            low, high = bounds(baked)
+            box = [high[i] - low[i] for i in range(3)]
+            drift.append(
+                round(
+                    max(abs(box[i] - ref_box[i]) for i in range(3))
+                    / max(ref_box[2], 1e-6),
+                    4,
+                )
+            )
+            export(baked, str(out_dir / f"{spec['id']}_lod{lod}.glb"))
+            bpy.data.objects.remove(baked, do_unlink=True)
+            triangles.append(count)
+            continue
         count = (
             len(obj.data.polygons)
             if lod == 0 and spec.get("faithful")
@@ -394,6 +489,7 @@ def main() -> None:
                 "base_faces_removed": stripped,
                 "grade": grade,
                 "bbox_drift": drift,
+                "lod_methods": methods,
             }
         )
     )
