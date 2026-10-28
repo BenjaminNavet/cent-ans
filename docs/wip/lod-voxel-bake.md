@@ -1,8 +1,8 @@
 # LOD voxel_bake (ADR 0790) — reprise
 
-État (28/10) : TERMINÉ. 319/321 assets des classes massives ont leurs LOD1-2 refaits (épaississement,
-voxels 200 → 120 → 72, texture recuite) ; manifeste commité. Contrôles visuels bons (cabane, falaise, château
-byz, cathédrale, entrepôt du port, porte d'eau).
-Non traités : `env_glacier_ice_tongue`, `env_iceberg_floe` (budgets hors classe, l'outil les saute).
-Ouvert : LOD0 des assets TRELLIS non fidèles toujours en `collapse` ; les glb (`game/assets/models/dn/`)
-sont hors git, leur publication (release des modèles) attend le feu vert du joueur.
+État (28/10) : TERMINÉ. 563/565 assets (house, major_building, rock, bridge, landmark_city, prop, tree)
+refaits : LOD1-2 en voxel_bake, LOD0 aussi quand le brut dépasse 5× son budget (275 LOD0 refaits).
+Non traités : `env_glacier_ice_tongue`, `env_iceberg_floe` (budgets hors classe).
+Publication du paquet de modèles (v6, ≈ 1,4-1,7 Go) : feu vert du joueur donné, mais bloquée par le
+classifieur ; le joueur la lance : `uv run --project tools cent-ans art models-update --publish`.
+Ouvert : LOD1-2 des navires, charrettes, engins, animaux, champs (toujours `collapse`, non examinés).

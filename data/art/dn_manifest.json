@@ -2213,9 +2213,9 @@
         "height": 3.429
       },
       "triangles": [
-        1499,
+        1500,
         500,
-        151
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/baggage_wagon/3d/fal__s1337.glb",
@@ -2277,7 +2277,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "balbal_stones": {
       "id": "balbal_stones",
@@ -2360,7 +2365,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "bird_cormorant": {
       "id": "bird_cormorant",
@@ -3390,7 +3400,7 @@
       "triangles": [
         1500,
         500,
-        155
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/bivouac/3d/fal__s1337.glb",
@@ -3424,7 +3434,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "bombard": {
       "id": "bombard",
@@ -3823,7 +3838,7 @@
       "triangles": [
         1500,
         500,
-        128
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/bush_hawthorn/3d/fal__s1337.glb",
@@ -3885,7 +3900,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_baggage_pile": {
       "id": "camp_baggage_pile",
@@ -3901,7 +3921,7 @@
         "height": 1.717
       },
       "triangles": [
-        1499,
+        1500,
         500,
         150
       ],
@@ -3968,7 +3988,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_baggage_wagon_covered": {
       "id": "camp_baggage_wagon_covered",
@@ -4158,7 +4183,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_campfire_logs_seats": {
       "id": "camp_campfire_logs_seats",
@@ -4176,7 +4206,7 @@
       "triangles": [
         1500,
         500,
-        140
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_campfire_logs_seats/3d/fal__s1337.glb",
@@ -4241,7 +4271,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_chapel_tent_altar": {
       "id": "camp_chapel_tent_altar",
@@ -4359,7 +4394,7 @@
       },
       "triangles": [
         1500,
-        500,
+        498,
         150
       ],
       "tex": 512,
@@ -4425,7 +4460,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_field_forge_anvil": {
       "id": "camp_field_forge_anvil",
@@ -4443,7 +4483,7 @@
       "triangles": [
         1500,
         500,
-        101
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_field_forge_anvil/3d/fal__s1337.glb",
@@ -4508,7 +4548,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_field_kitchen_cauldrons": {
       "id": "camp_field_kitchen_cauldrons",
@@ -4591,7 +4636,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_fire_signal_pile": {
       "id": "camp_fire_signal_pile",
@@ -4608,8 +4658,8 @@
       },
       "triangles": [
         1500,
-        499,
-        132
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_fire_signal_pile/3d/fal__s1337.glb",
@@ -4674,7 +4724,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_fletcher_workshop": {
       "id": "camp_fletcher_workshop",
@@ -4691,8 +4746,8 @@
       },
       "triangles": [
         1500,
-        499,
-        153
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_fletcher_workshop/3d/fal__s1337.glb",
@@ -4757,7 +4812,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_horse_corral_rope": {
       "id": "camp_horse_corral_rope",
@@ -4775,7 +4835,7 @@
       "triangles": [
         1500,
         500,
-        155
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_horse_corral_rope/3d/fal__s1337.glb",
@@ -4840,7 +4900,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_horse_picket_line": {
       "id": "camp_horse_picket_line",
@@ -4923,7 +4988,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_lean_to_branches": {
       "id": "camp_lean_to_branches",
@@ -4940,8 +5010,8 @@
       },
       "triangles": [
         1500,
-        500,
-        155
+        498,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_lean_to_branches/3d/fal__s1337.glb",
@@ -5006,7 +5076,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_lord_pavilion_english": {
       "id": "camp_lord_pavilion_english",
@@ -5225,8 +5300,8 @@
       },
       "triangles": [
         1500,
-        499,
-        128
+        500,
+        156
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_palisade_stakes/3d/fal__s1337.glb",
@@ -5291,7 +5366,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_pitched_tent_pilgrim": {
       "id": "camp_pitched_tent_pilgrim",
@@ -5441,7 +5521,7 @@
       "triangles": [
         1500,
         500,
-        153
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_smith_tents_marching/3d/fal__s1337.glb",
@@ -5506,7 +5586,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_soldier_tent_ridge": {
       "id": "camp_soldier_tent_ridge",
@@ -5726,7 +5811,7 @@
       "triangles": [
         1500,
         500,
-        150
+        148
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_standard_pole/3d/fal__s1337.glb",
@@ -5791,7 +5876,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "camp_surgeon_tent_cots": {
       "id": "camp_surgeon_tent_cots",
@@ -6213,7 +6303,7 @@
       "triangles": [
         1500,
         500,
-        149
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/camp_wagon_laager/3d/fal__s1337.glb",
@@ -6278,7 +6368,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "campanile_romanesque": {
       "id": "campanile_romanesque",
@@ -6396,7 +6491,7 @@
       },
       "triangles": [
         1500,
-        500,
+        498,
         150
       ],
       "tex": 512,
@@ -6459,7 +6554,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "caravanserai_stone": {
       "id": "caravanserai_stone",
@@ -6921,7 +7021,12 @@
         "gamma": 0.793
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/cart_merchant/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "cart_prisoner_cage": {
       "id": "cart_prisoner_cage",
@@ -8014,7 +8119,7 @@
       "triangles": [
         1500,
         500,
-        115
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/chapel_romanesque/3d/fal__s1337.glb",
@@ -8048,7 +8153,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "church_stave": {
       "id": "church_stave",
@@ -8709,7 +8819,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_barley_ripe/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_bean_field": {
       "id": "crop_bean_field",
@@ -8726,8 +8841,8 @@
       },
       "triangles": [
         1500,
-        499,
-        144
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_bean_field/3d/fal__s1337.glb",
@@ -8792,7 +8907,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_flax_blooming": {
       "id": "crop_flax_blooming",
@@ -8808,9 +8928,9 @@
         "height": 0.921
       },
       "triangles": [
-        1499,
+        1500,
         500,
-        90
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_flax_blooming/3d/fal__s1337.glb",
@@ -8875,7 +8995,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_hemp_tall": {
       "id": "crop_hemp_tall",
@@ -8893,7 +9018,7 @@
       "triangles": [
         1500,
         500,
-        96
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_hemp_tall/3d/fal__s1337.glb",
@@ -8989,7 +9114,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_millet_steppe": {
       "id": "crop_millet_steppe",
@@ -9103,7 +9233,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_oats": {
       "id": "crop_oats",
@@ -9119,9 +9254,9 @@
         "height": 1.015
       },
       "triangles": [
-        1500,
+        1558,
         500,
-        81
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_oats/3d/fal__s1337.glb",
@@ -9217,7 +9352,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_rice_paddy": {
       "id": "crop_rice_paddy",
@@ -9234,8 +9374,8 @@
       },
       "triangles": [
         1500,
-        499,
-        108
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_rice_paddy/3d/fal__s1337.glb",
@@ -9331,7 +9471,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_rye_tall": {
       "id": "crop_rye_tall",
@@ -9347,9 +9492,9 @@
         "height": 1.496
       },
       "triangles": [
-        1500,
+        1514,
         500,
-        104
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_rye_tall/3d/fal__s1337.glb",
@@ -9414,7 +9559,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_sugarcane_stand": {
       "id": "crop_sugarcane_stand",
@@ -9432,7 +9582,7 @@
       "triangles": [
         1500,
         500,
-        100
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_sugarcane_stand/3d/fal__s1337.glb",
@@ -9497,7 +9647,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_turnip_cabbage_garden": {
       "id": "crop_turnip_cabbage_garden",
@@ -9580,7 +9735,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_vine_stakes_row": {
       "id": "crop_vine_stakes_row",
@@ -9612,7 +9772,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_vine_stakes_row/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_vine_tree_trained_italy": {
       "id": "crop_vine_tree_trained_italy",
@@ -9695,7 +9860,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_wheat_ripe": {
       "id": "crop_wheat_ripe",
@@ -9727,7 +9897,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_wheat_ripe/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "crop_woad_yellow": {
       "id": "crop_woad_yellow",
@@ -9745,7 +9920,7 @@
       "triangles": [
         1500,
         500,
-        156
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/crop_woad_yellow/3d/fal__s1338.glb",
@@ -9810,7 +9985,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "curtain_wall_segment": {
       "id": "curtain_wall_segment",
@@ -9991,7 +10171,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "debris_broken_lances": {
       "id": "debris_broken_lances",
@@ -10009,7 +10194,7 @@
       "triangles": [
         1500,
         500,
-        150
+        152
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/debris_broken_lances/3d/fal__s1337.glb",
@@ -10074,7 +10259,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "debris_broken_swords_shield": {
       "id": "debris_broken_swords_shield",
@@ -10090,7 +10280,7 @@
         "height": 1.118
       },
       "triangles": [
-        1499,
+        1500,
         500,
         150
       ],
@@ -10157,7 +10347,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "debris_cart_overturned": {
       "id": "debris_cart_overturned",
@@ -10280,7 +10475,7 @@
         "height": 0.637
       },
       "triangles": [
-        2999,
+        3000,
         1000,
         300
       ],
@@ -10349,7 +10544,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -10637,7 +10832,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "debris_siege_ladder_broken": {
       "id": "debris_siege_ladder_broken",
@@ -10655,7 +10855,7 @@
       "triangles": [
         1500,
         500,
-        149
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/debris_siege_ladder_broken/3d/fal__s1337.glb",
@@ -10720,7 +10920,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "debris_tower_wreck": {
       "id": "debris_tower_wreck",
@@ -11133,7 +11338,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -11421,7 +11626,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_bloomery_furnace": {
       "id": "econ_bloomery_furnace",
@@ -11741,7 +11951,7 @@
       },
       "triangles": [
         1500,
-        500,
+        498,
         150
       ],
       "tex": 512,
@@ -11807,7 +12017,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_bridge_pontoon_boats": {
       "id": "econ_bridge_pontoon_boats",
@@ -12532,7 +12747,7 @@
       "triangles": [
         1500,
         500,
-        118
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_charcoal_stack_burners/3d/fal__s1337.glb",
@@ -12597,7 +12812,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_cistern_arab_courtyard": {
       "id": "econ_cistern_arab_courtyard",
@@ -12680,7 +12900,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_cod_drying_station": {
       "id": "econ_cod_drying_station",
@@ -12798,7 +13023,7 @@
       },
       "triangles": [
         1500,
-        500,
+        498,
         150
       ],
       "tex": 512,
@@ -12864,7 +13089,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_dyers_vats_workshop": {
       "id": "econ_dyers_vats_workshop",
@@ -12880,7 +13110,7 @@
         "height": 8.739
       },
       "triangles": [
-        7999,
+        8000,
         2500,
         600
       ],
@@ -12962,7 +13192,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -13063,7 +13293,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -13082,7 +13312,7 @@
         "height": 11.96
       },
       "triangles": [
-        7999,
+        8000,
         2500,
         600
       ],
@@ -13164,7 +13394,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -13250,7 +13480,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_fulling_mill_cloth": {
       "id": "econ_fulling_mill_cloth",
@@ -13367,9 +13602,9 @@
         "height": 3.109
       },
       "triangles": [
-        1499,
+        1500,
         500,
-        119
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_fur_market_stall_rus/3d/fal__s1337.glb",
@@ -13434,7 +13669,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_fur_trapper_cabin": {
       "id": "econ_fur_trapper_cabin",
@@ -13450,7 +13690,7 @@
         "height": 5.309
       },
       "triangles": [
-        7999,
+        8000,
         2500,
         600
       ],
@@ -13532,7 +13772,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -13618,7 +13858,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_glass_pitch_ashworks": {
       "id": "econ_glass_pitch_ashworks",
@@ -13634,9 +13879,9 @@
         "height": 4.195
       },
       "triangles": [
-        1499,
+        1500,
         500,
-        150
+        148
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_glass_pitch_ashworks/3d/fal__s1337.glb",
@@ -13701,7 +13946,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_granary_stone_raised": {
       "id": "econ_granary_stone_raised",
@@ -14102,7 +14352,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -14205,7 +14455,7 @@
       "lod_methods": [
         "collapse",
         "voxel_bake",
-        "collapse"
+        "voxel_bake"
       ]
     },
     "econ_ironmine_styrian": {
@@ -14426,7 +14676,7 @@
       "triangles": [
         1500,
         500,
-        149
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_market_cross_covered/3d/fal__s1337.glb",
@@ -14491,7 +14741,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_market_hall_italian": {
       "id": "econ_market_hall_italian",
@@ -14589,7 +14844,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -14812,7 +15067,7 @@
       "triangles": [
         1500,
         500,
-        143
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_market_stalls_cluster/3d/fal__s1337.glb",
@@ -14877,7 +15132,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_mill_floating_boat": {
       "id": "econ_mill_floating_boat",
@@ -15398,7 +15658,7 @@
         "height": 8.132
       },
       "triangles": [
-        1499,
+        1500,
         500,
         150
       ],
@@ -15465,7 +15725,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_pillory_post_stone": {
       "id": "econ_pillory_post_stone",
@@ -15548,7 +15813,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_pillory_wheel_post": {
       "id": "econ_pillory_wheel_post",
@@ -15631,7 +15901,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_pitch_tar_kiln": {
       "id": "econ_pitch_tar_kiln",
@@ -15649,7 +15924,7 @@
       "triangles": [
         1500,
         500,
-        149
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_pitch_tar_kiln/3d/fal__s1337.glb",
@@ -15714,7 +15989,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_port_arsenal_galley_shed": {
       "id": "econ_port_arsenal_galley_shed",
@@ -16014,7 +16294,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -16115,7 +16395,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -16135,8 +16415,8 @@
       },
       "triangles": [
         1500,
-        438,
-        91
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_port_lime_kiln/3d/fal__s1337.glb",
@@ -16201,7 +16481,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_port_quay_timber_pier": {
       "id": "econ_port_quay_timber_pier",
@@ -16602,7 +16887,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -16623,7 +16908,7 @@
       "triangles": [
         1500,
         500,
-        88
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_postern_small/3d/fal__s1337.glb",
@@ -16688,7 +16973,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_quarry_crane_stone": {
       "id": "econ_quarry_crane_stone",
@@ -16704,9 +16994,9 @@
         "height": 15.017
       },
       "triangles": [
-        7999,
+        8000,
         2500,
-        600
+        620
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_quarry_crane_stone/3d/fal__s1338.glb",
@@ -16786,7 +17076,7 @@
         "chosen_seed": 1338
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -16887,7 +17177,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -17108,7 +17398,7 @@
         "height": 9.731
       },
       "triangles": [
-        7999,
+        8000,
         2500,
         600
       ],
@@ -17219,7 +17509,7 @@
         ]
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -17320,7 +17610,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -17421,7 +17711,7 @@
         "chosen_seed": 1338
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -17541,9 +17831,9 @@
         "height": 14.585
       },
       "triangles": [
-        7999,
+        8000,
         2500,
-        600
+        606
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_silk_house_mulberry/3d/fal__s1337.glb",
@@ -17623,7 +17913,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -17825,7 +18115,7 @@
         "chosen_seed": 1338
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -17926,7 +18216,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -18147,9 +18437,9 @@
         "height": 7.088
       },
       "triangles": [
-        578,
-        449,
-        117
+        1500,
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_terrace_olive_grove/rv2/3d/fal2__s1339.glb",
@@ -18211,7 +18501,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_terrace_wall_dry_stone": {
       "id": "econ_terrace_wall_dry_stone",
@@ -18228,7 +18523,7 @@
       },
       "triangles": [
         1500,
-        500,
+        498,
         150
       ],
       "tex": 512,
@@ -18294,7 +18589,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_timber_yard_logs": {
       "id": "econ_timber_yard_logs",
@@ -18310,7 +18610,7 @@
         "height": 5.392
       },
       "triangles": [
-        7999,
+        8000,
         2500,
         600
       ],
@@ -18392,7 +18692,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -19604,7 +19904,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -19826,8 +20126,8 @@
       },
       "triangles": [
         1500,
-        499,
-        95
+        498,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_well_covered_bruges/3d/fal__s1337.glb",
@@ -19892,7 +20192,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_well_sweep_shaduf": {
       "id": "econ_well_sweep_shaduf",
@@ -19975,7 +20280,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_wheat_stacks_rick": {
       "id": "econ_wheat_stacks_rick",
@@ -19993,7 +20303,7 @@
       "triangles": [
         1500,
         500,
-        110
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/econ_wheat_stacks_rick/3d/fal__s1337.glb",
@@ -20058,7 +20368,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "econ_wine_cellar_chai": {
       "id": "econ_wine_cellar_chai",
@@ -20156,7 +20471,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -20257,7 +20572,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -20277,8 +20592,8 @@
       },
       "triangles": [
         6000,
-        1199,
-        303
+        1200,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_autumn_beech_copper/3d/fal__s1337.glb",
@@ -20340,7 +20655,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_autumn_larch_gold": {
       "id": "env_autumn_larch_gold",
@@ -20358,7 +20678,7 @@
       "triangles": [
         6000,
         1200,
-        228
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_autumn_larch_gold/3d/fal__s1337.glb",
@@ -20420,7 +20740,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_autumn_oak_gold": {
       "id": "env_autumn_oak_gold",
@@ -20438,7 +20763,7 @@
       "triangles": [
         6000,
         1200,
-        182
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_autumn_oak_gold/3d/fal__s1337.glb",
@@ -20534,7 +20859,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_barge_river": {
       "id": "env_barge_river",
@@ -20800,7 +21130,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_battlefield_stakes_graves": {
       "id": "env_battlefield_stakes_graves",
@@ -20880,7 +21215,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_beacon_hill": {
       "id": "env_beacon_hill",
@@ -20896,9 +21236,9 @@
         "height": 5.996
       },
       "triangles": [
-        1499,
+        1498,
         500,
-        149
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_beacon_hill/3d/fal__s1337.glb",
@@ -20960,7 +21300,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_bergerie_cabane": {
       "id": "env_bergerie_cabane",
@@ -21462,7 +21807,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_bocage_hedge_bank__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_calvary_breton": {
       "id": "env_calvary_breton",
@@ -21542,7 +21892,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_cart_ox_peasant": {
       "id": "env_cart_ox_peasant",
@@ -21634,7 +21989,7 @@
       "triangles": [
         1500,
         500,
-        108
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_cattail_clump/3d/fal__s1338.glb",
@@ -21699,7 +22054,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_cave_mouth_limestone": {
       "id": "env_cave_mouth_limestone",
@@ -21781,7 +22141,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -21977,7 +22337,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -22096,7 +22456,7 @@
         ]
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -22181,7 +22541,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -22202,7 +22562,7 @@
       "triangles": [
         1500,
         500,
-        149
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_cross_wayside_stone/3d/fal__s1337.glb",
@@ -22264,7 +22624,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_dhow": {
       "id": "env_dhow",
@@ -22571,7 +22936,7 @@
       "triangles": [
         6000,
         1200,
-        305
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_dwarf_palm_chamaerops/3d/fal__s1337.glb",
@@ -22633,7 +22998,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_fallen_log_driftwood": {
       "id": "env_fallen_log_driftwood",
@@ -22649,7 +23019,7 @@
         "height": 4.758
       },
       "triangles": [
-        2999,
+        3000,
         1000,
         300
       ],
@@ -22715,7 +23085,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -22736,7 +23106,7 @@
       "triangles": [
         1500,
         500,
-        149
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_fallen_log_forest_mossy/3d/fal__s1337.glb",
@@ -22832,7 +23202,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_ferry_raft": {
       "id": "env_ferry_raft",
@@ -22953,8 +23328,8 @@
       },
       "triangles": [
         1500,
-        500,
-        111
+        502,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_fish_trap_stakes/3d/fal__s1337.glb",
@@ -23016,7 +23391,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_fishing_weir": {
       "id": "env_fishing_weir",
@@ -23033,8 +23413,8 @@
       },
       "triangles": [
         1500,
-        499,
-        118
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_fishing_weir/3d/fal__s1337.glb",
@@ -23096,7 +23476,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_ford_stepping_stones": {
       "id": "env_ford_stepping_stones",
@@ -23178,7 +23563,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -23359,7 +23744,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_gibbet_stone": {
       "id": "env_gibbet_stone",
@@ -23546,7 +23936,7 @@
         "height": 12.946
       },
       "triangles": [
-        7999,
+        8000,
         2500,
         600
       ],
@@ -23625,7 +24015,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -23710,7 +24100,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -23731,7 +24121,7 @@
       "triangles": [
         1500,
         500,
-        121
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_harvest_sheaves/sheaves2/3d/sf3d_s1337/0/mesh.glb",
@@ -23767,7 +24157,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_hay_meadow_flowers": {
       "id": "env_hay_meadow_flowers",
@@ -23785,7 +24180,7 @@
       "triangles": [
         1500,
         500,
-        153
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_hay_meadow_flowers/3d/fal__s1337.glb",
@@ -23847,7 +24242,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_haystack_pile_open": {
       "id": "env_haystack_pile_open",
@@ -23865,7 +24265,7 @@
       "triangles": [
         1500,
         500,
-        144
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_haystack_pile_open/3d/fal__s1337.glb",
@@ -23927,7 +24327,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_hermitage_cliff": {
       "id": "env_hermitage_cliff",
@@ -24022,7 +24427,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -24105,7 +24510,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_hospice_alpine": {
       "id": "env_hospice_alpine",
@@ -24285,7 +24695,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -24602,7 +25012,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -24687,7 +25097,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -24745,7 +25155,7 @@
       "triangles": [
         1500,
         500,
-        98
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_milestone/3d/fal__s1337.glb",
@@ -24807,7 +25217,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_mine_headframe": {
       "id": "env_mine_headframe",
@@ -25083,7 +25498,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_orchard_press_cider": {
       "id": "env_orchard_press_cider",
@@ -25261,7 +25681,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_peat_cut": {
       "id": "env_peat_cut",
@@ -25277,9 +25702,9 @@
         "height": 2.99
       },
       "triangles": [
-        1499,
+        1500,
         500,
-        93
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_peat_cut/3d/fal__s1337.glb",
@@ -25341,7 +25766,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_petra_ruins": {
       "id": "env_petra_ruins",
@@ -25396,7 +25826,7 @@
       "triangles": [
         1500,
         500,
-        149
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_pilgrim_group_staff/3d/fal__s1337.glb",
@@ -25458,7 +25888,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_pilgrim_hostel": {
       "id": "env_pilgrim_hostel",
@@ -25651,7 +26086,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -25734,7 +26169,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_quarry_face": {
       "id": "env_quarry_face",
@@ -25850,7 +26290,7 @@
       "triangles": [
         1500,
         500,
-        93
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_reed_bed_mass/3d/fal__s1337.glb",
@@ -25912,7 +26352,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_reed_cutter_thatched_hut": {
       "id": "env_reed_cutter_thatched_hut",
@@ -25928,7 +26373,7 @@
         "height": 5.993
       },
       "triangles": [
-        7999,
+        8000,
         2500,
         600
       ],
@@ -26007,7 +26452,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -26026,7 +26471,7 @@
         "height": 4.264
       },
       "triangles": [
-        936,
+        3000,
         1000,
         300
       ],
@@ -26089,7 +26534,7 @@
         ]
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -26174,7 +26619,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -26587,7 +27032,7 @@
       "triangles": [
         1500,
         500,
-        116
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_root_plate_windthrow/3d/fal__s1337.glb",
@@ -26683,7 +27128,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_ruin_burnt_hamlet": {
       "id": "env_ruin_burnt_hamlet",
@@ -27316,7 +27766,7 @@
       "triangles": [
         6000,
         1200,
-        299
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_snow_conifer/3d/fal__s1337.glb",
@@ -27378,7 +27828,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_steppe_camp_carts": {
       "id": "env_steppe_camp_carts",
@@ -27564,7 +28019,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -27943,7 +28398,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -28126,7 +28581,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -28146,8 +28601,8 @@
       },
       "triangles": [
         1500,
-        410,
-        96
+        498,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/env_wayside_shrine/3d/fal__s1337.glb",
@@ -28209,7 +28664,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "env_windmill_dutch_polder": {
       "id": "env_windmill_dutch_polder",
@@ -28500,7 +28960,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -29473,7 +29933,7 @@
       },
       "triangles": [
         1500,
-        499,
+        500,
         150
       ],
       "tex": 512,
@@ -29508,7 +29968,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "field_apple_orchard": {
       "id": "field_apple_orchard",
@@ -30053,7 +30518,7 @@
       },
       "triangles": [
         1500,
-        500,
+        498,
         150
       ],
       "tex": 512,
@@ -30116,7 +30581,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "field_rye_field": {
       "id": "field_rye_field",
@@ -30198,7 +30668,7 @@
       "triangles": [
         1500,
         500,
-        102
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/field_tent/3d/fal__s1337.glb",
@@ -30260,7 +30730,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "field_vineyard_rows": {
       "id": "field_vineyard_rows",
@@ -30379,7 +30854,7 @@
       },
       "triangles": [
         1500,
-        500,
+        498,
         150
       ],
       "tex": 512,
@@ -30400,7 +30875,12 @@
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/folk_market_stall/cut/s1337.png",
       "model_3d": "meshy-6-lite",
-      "cost_usd": 0.0
+      "cost_usd": 0.0,
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "folk_plough": {
       "id": "folk_plough",
@@ -30658,7 +31138,7 @@
       "triangles": [
         1500,
         500,
-        121
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/fort_cheval_de_frise/3d/fal__s1337.glb",
@@ -30723,7 +31203,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "fort_ditch_stakes": {
       "id": "fort_ditch_stakes",
@@ -30740,7 +31225,7 @@
       },
       "triangles": [
         1500,
-        499,
+        500,
         150
       ],
       "tex": 512,
@@ -30806,7 +31291,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "fort_drawbridge_lowered": {
       "id": "fort_drawbridge_lowered",
@@ -31024,7 +31514,7 @@
         "height": 1.724
       },
       "triangles": [
-        1499,
+        1500,
         500,
         150
       ],
@@ -31091,7 +31581,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "fort_fortified_church": {
       "id": "fort_fortified_church",
@@ -31535,7 +32030,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -31636,7 +32131,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -31959,8 +32454,8 @@
       },
       "triangles": [
         1500,
-        499,
-        154
+        498,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/fort_pavise_wall_planted/3d/fal__s1337.glb",
@@ -32025,7 +32520,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "fort_portcullis_gate": {
       "id": "fort_portcullis_gate",
@@ -32224,7 +32724,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -32344,7 +32844,7 @@
         "height": 4.381
       },
       "triangles": [
-        7998,
+        8000,
         2500,
         600
       ],
@@ -32426,7 +32926,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -32461,7 +32961,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/grove_conifer__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "grove_garrigue_maquis": {
       "id": "grove_garrigue_maquis",
@@ -32493,7 +32998,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/grove_garrigue_maquis__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "grove_riparian": {
       "id": "grove_riparian",
@@ -32525,7 +33035,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/grove_riparian__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "grove_temperate_deciduous": {
       "id": "grove_temperate_deciduous",
@@ -32557,7 +33072,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/grove_temperate_deciduous__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "hall_house_lowgerman": {
       "id": "hall_house_lowgerman",
@@ -32675,8 +33195,8 @@
       },
       "triangles": [
         1500,
-        510,
-        72
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/haystack/3d/fal__s1337.glb",
@@ -32710,7 +33230,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "hedge_bocage": {
       "id": "hedge_bocage",
@@ -32728,7 +33253,7 @@
       "triangles": [
         1500,
         500,
-        114
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/hedge_bocage/3d/fal__s1337.glb",
@@ -32790,7 +33315,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "herd_drover_cattle": {
       "id": "herd_drover_cattle",
@@ -33190,9 +33720,9 @@
         "height": 6.249
       },
       "triangles": [
-        1499,
+        1500,
         500,
-        115
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/horde_camp_carts/3d/fal__s1337.glb",
@@ -33257,7 +33787,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "house_alpine_chalet": {
       "id": "house_alpine_chalet",
@@ -33456,7 +33991,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -33790,7 +34325,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -33809,7 +34344,7 @@
         "height": 4.124
       },
       "triangles": [
-        7999,
+        8000,
         2500,
         600
       ],
@@ -33891,7 +34426,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -34225,7 +34760,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -34326,7 +34861,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -34427,7 +34962,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -34548,8 +35083,8 @@
       },
       "triangles": [
         1500,
-        500,
-        144
+        498,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/kurgan_mound/3d/fal__s1337.glb",
@@ -34614,7 +35149,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "landmark_avignon": {
       "id": "landmark_avignon",
@@ -35714,7 +36254,7 @@
       "triangles": [
         1500,
         500,
-        153
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/pavise_stack/3d/fal__s1337.glb",
@@ -35776,7 +36316,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "port_quay": {
       "id": "port_quay",
@@ -35794,7 +36339,7 @@
       "triangles": [
         1500,
         500,
-        150
+        152
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/port_quay/3d/fal__s1337.glb",
@@ -35828,7 +36373,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "rathaus_gothic_brick": {
       "id": "rathaus_gothic_brick",
@@ -36014,7 +36564,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -36102,7 +36652,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -36190,7 +36740,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -36247,7 +36797,7 @@
       },
       "triangles": [
         3000,
-        1006,
+        1000,
         300
       ],
       "tex": 1024,
@@ -36315,7 +36865,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -36403,7 +36953,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -36460,7 +37010,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -36548,7 +37098,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -36673,7 +37223,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -36692,9 +37242,9 @@
         "height": 1.565
       },
       "triangles": [
-        2999,
-        1000,
-        306
+        3000,
+        998,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/rock_hamada_desert/3d/fal__s1337.glb",
@@ -36761,7 +37311,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -36781,7 +37331,7 @@
       },
       "triangles": [
         3000,
-        998,
+        1000,
         300
       ],
       "tex": 1024,
@@ -36849,7 +37399,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -36906,7 +37456,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -36994,7 +37544,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37013,7 +37563,7 @@
         "height": 1.759
       },
       "triangles": [
-        2999,
+        3000,
         1000,
         300
       ],
@@ -37051,7 +37601,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37139,7 +37689,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37227,7 +37777,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37315,7 +37865,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37372,7 +37922,7 @@
       },
       "triangles": [
         3000,
-        1000,
+        998,
         300
       ],
       "tex": 1024,
@@ -37440,7 +37990,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37460,7 +38010,7 @@
       },
       "triangles": [
         3000,
-        1036,
+        1000,
         300
       ],
       "tex": 1024,
@@ -37497,7 +38047,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37554,7 +38104,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37611,7 +38161,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37699,7 +38249,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37787,7 +38337,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37875,7 +38425,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -37993,8 +38543,8 @@
       },
       "triangles": [
         1500,
-        500,
-        85
+        508,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/ruin_castle/3d/fal__s1337.glb",
@@ -38028,7 +38578,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "scaling_ladder": {
       "id": "scaling_ladder",
@@ -38184,7 +38739,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "sea_fish_school_leap": {
       "id": "sea_fish_school_leap",
@@ -38236,7 +38796,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "sea_whale_back": {
       "id": "sea_whale_back",
@@ -38253,7 +38818,7 @@
       },
       "triangles": [
         1500,
-        500,
+        498,
         150
       ],
       "tex": 512,
@@ -38288,7 +38853,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "ship_balinger_english": {
       "id": "ship_balinger_english",
@@ -41033,7 +41603,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_blackthorn": {
       "id": "shrub_blackthorn",
@@ -41051,7 +41626,7 @@
       "triangles": [
         6000,
         1200,
-        153
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_blackthorn/3d/fal__s1338.glb",
@@ -41117,7 +41692,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_box": {
       "id": "shrub_box",
@@ -41133,9 +41713,9 @@
         "height": 2.015
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        269
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_box/3d/fal__s1337.glb",
@@ -41169,7 +41749,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_bramble": {
       "id": "shrub_bramble",
@@ -41185,9 +41770,9 @@
         "height": 1.574
       },
       "triangles": [
-        5999,
-        1199,
-        299
+        6000,
+        1200,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_bramble/3d/fal__s1337.glb",
@@ -41221,7 +41806,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_broom": {
       "id": "shrub_broom",
@@ -41239,7 +41829,7 @@
       "triangles": [
         6000,
         1200,
-        288
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_broom/3d/fal__s1338.glb",
@@ -41305,7 +41895,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_caragana": {
       "id": "shrub_caragana",
@@ -41323,7 +41918,7 @@
       "triangles": [
         6000,
         1200,
-        184
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_caragana/3d/fal__s1337.glb",
@@ -41388,7 +41983,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_cistus": {
       "id": "shrub_cistus",
@@ -41406,7 +42006,7 @@
       "triangles": [
         6000,
         1200,
-        226
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_cistus/3d/fal__s1337.glb",
@@ -41471,7 +42071,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_desert_dead_thorn": {
       "id": "shrub_desert_dead_thorn",
@@ -41488,8 +42093,8 @@
       },
       "triangles": [
         6000,
-        1199,
-        237
+        1200,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_desert_dead_thorn/3d/fal__s1338.glb",
@@ -41554,7 +42159,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_euphorbia_desert": {
       "id": "shrub_euphorbia_desert",
@@ -41570,9 +42180,9 @@
         "height": 1.223
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        299
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_euphorbia_desert/3d/fal__s1337.glb",
@@ -41637,7 +42247,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_gorse": {
       "id": "shrub_gorse",
@@ -41653,9 +42268,9 @@
         "height": 1.507
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        140
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_gorse/3d/fal__s1338.glb",
@@ -41721,7 +42336,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_hawthorn": {
       "id": "shrub_hawthorn",
@@ -41739,7 +42359,7 @@
       "triangles": [
         6000,
         1200,
-        238
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_hawthorn/3d/fal__s1338.glb",
@@ -41805,7 +42425,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_hazel": {
       "id": "shrub_hazel",
@@ -41822,8 +42447,8 @@
       },
       "triangles": [
         6000,
-        1199,
-        293
+        1200,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_hazel/3d/fal__s1337.glb",
@@ -41857,7 +42482,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_hazel_coppice_stool": {
       "id": "shrub_hazel_coppice_stool",
@@ -41875,7 +42505,7 @@
       "triangles": [
         6000,
         1200,
-        288
+        310
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_hazel_coppice_stool/3d/fal__s1337.glb",
@@ -41940,7 +42570,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_heather": {
       "id": "shrub_heather",
@@ -41956,9 +42591,9 @@
         "height": 0.615
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        306
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_heather/3d/fal__s1337.glb",
@@ -41992,7 +42627,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_maquis": {
       "id": "shrub_maquis",
@@ -42010,7 +42650,7 @@
       "triangles": [
         6000,
         1200,
-        160
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_maquis/3d/fal__s1338.glb",
@@ -42076,7 +42716,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_mastic": {
       "id": "shrub_mastic",
@@ -42094,7 +42739,7 @@
       "triangles": [
         6000,
         1200,
-        181
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_mastic/3d/fal__s1338.glb",
@@ -42160,7 +42805,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_oleander": {
       "id": "shrub_oleander",
@@ -42178,7 +42828,7 @@
       "triangles": [
         6000,
         1200,
-        311
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_oleander/3d/fal__s1337.glb",
@@ -42243,7 +42893,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_osier_coppice": {
       "id": "shrub_osier_coppice",
@@ -42259,9 +42914,9 @@
         "height": 3.036
       },
       "triangles": [
-        5999,
-        1199,
-        310
+        6000,
+        1200,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_osier_coppice/3d/fal__s1337.glb",
@@ -42357,7 +43012,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_pine_mugo": {
       "id": "shrub_pine_mugo",
@@ -42375,7 +43035,7 @@
       "triangles": [
         6000,
         1200,
-        297
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_pine_mugo/3d/fal__s1337.glb",
@@ -42440,7 +43100,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_riparian_thicket": {
       "id": "shrub_riparian_thicket",
@@ -42457,8 +43122,8 @@
       },
       "triangles": [
         6000,
-        1199,
-        228
+        1200,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_riparian_thicket/3d/fal__s1337.glb",
@@ -42523,7 +43188,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_rosemary_lavender": {
       "id": "shrub_rosemary_lavender",
@@ -42541,7 +43211,7 @@
       "triangles": [
         6000,
         1200,
-        259
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_rosemary_lavender/3d/fal__s1337.glb",
@@ -42606,7 +43276,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_saltbush": {
       "id": "shrub_saltbush",
@@ -42624,7 +43299,7 @@
       "triangles": [
         6000,
         1200,
-        218
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_saltbush/3d/fal__s1337.glb",
@@ -42689,7 +43364,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_steppe_cherry": {
       "id": "shrub_steppe_cherry",
@@ -42707,7 +43387,7 @@
       "triangles": [
         6000,
         1200,
-        214
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_steppe_cherry/3d/fal__s1337.glb",
@@ -42772,7 +43452,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_tamarisk": {
       "id": "shrub_tamarisk",
@@ -42790,7 +43475,7 @@
       "triangles": [
         6000,
         1200,
-        291
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_tamarisk/3d/fal__s1337.glb",
@@ -42824,7 +43509,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_tamarisk_dune_mound": {
       "id": "shrub_tamarisk_dune_mound",
@@ -42907,7 +43597,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "shrub_wormwood": {
       "id": "shrub_wormwood",
@@ -42925,7 +43620,7 @@
       "triangles": [
         6000,
         1200,
-        216
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/shrub_wormwood/3d/fal__s1337.glb",
@@ -42990,7 +43685,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "siege_ammo_stone_pile": {
       "id": "siege_ammo_stone_pile",
@@ -43007,8 +43707,8 @@
       },
       "triangles": [
         1500,
-        499,
-        88
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_ammo_stone_pile/3d/fal__s1337.glb",
@@ -43073,7 +43773,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "siege_ballista_crossbow_great": {
       "id": "siege_ballista_crossbow_great",
@@ -43469,8 +44174,8 @@
       },
       "triangles": [
         1500,
-        499,
-        156
+        500,
+        154
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_camp/3d/fal__s1337.glb",
@@ -43504,7 +44209,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "siege_cannon_early_1340": {
       "id": "siege_cannon_early_1340",
@@ -43970,8 +44680,8 @@
       },
       "triangles": [
         1500,
-        323,
-        84
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_handgonne_pair/rv2/3d/fal2__s1339.glb",
@@ -44033,7 +44743,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "siege_ladder_array": {
       "id": "siege_ladder_array",
@@ -44116,7 +44831,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "siege_mine_entrance": {
       "id": "siege_mine_entrance",
@@ -44134,7 +44854,7 @@
       "triangles": [
         1500,
         500,
-        84
+        154
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_mine_entrance/3d/fal__s1337.glb",
@@ -44199,7 +44919,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "siege_powder_barrels_cart": {
       "id": "siege_powder_barrels_cart",
@@ -44686,7 +45411,7 @@
       "triangles": [
         1500,
         500,
-        130
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/siege_trench_sap_cover/3d/fal__s1337.glb",
@@ -44751,7 +45476,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "sled_hand_pulled": {
       "id": "sled_hand_pulled",
@@ -45152,7 +45882,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tent_bedouin_black": {
       "id": "tent_bedouin_black",
@@ -45169,8 +45904,8 @@
       },
       "triangles": [
         1500,
-        499,
-        102
+        498,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tent_bedouin_black/3d/fal__s1338.glb",
@@ -45235,7 +45970,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tent_bell_french": {
       "id": "tent_bell_french",
@@ -45318,7 +46058,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tent_felt_steppe_small": {
       "id": "tent_felt_steppe_small",
@@ -45335,8 +46080,8 @@
       },
       "triangles": [
         1500,
-        500,
-        151
+        498,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tent_felt_steppe_small/3d/fal__s1337.glb",
@@ -45401,7 +46146,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tent_hospital_cloister": {
       "id": "tent_hospital_cloister",
@@ -45419,7 +46169,7 @@
       "triangles": [
         1500,
         500,
-        119
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tent_hospital_cloister/3d/fal__s1337.glb",
@@ -45484,7 +46234,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tent_lord_pavilion_round": {
       "id": "tent_lord_pavilion_round",
@@ -45502,7 +46257,7 @@
       "triangles": [
         1500,
         500,
-        81
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tent_lord_pavilion_round/3d/fal__s1337.glb",
@@ -45567,7 +46322,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tent_ottoman_pavilion": {
       "id": "tent_ottoman_pavilion",
@@ -45585,7 +46345,7 @@
       "triangles": [
         1500,
         500,
-        153
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tent_ottoman_pavilion/3d/fal__s1337.glb",
@@ -45650,7 +46410,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tent_ridge_english": {
       "id": "tent_ridge_english",
@@ -45666,7 +46431,7 @@
         "height": 1.913
       },
       "triangles": [
-        1499,
+        1500,
         500,
         150
       ],
@@ -45733,7 +46498,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "terrain_barrels_stack_cooper": {
       "id": "terrain_barrels_stack_cooper",
@@ -45750,8 +46520,8 @@
       },
       "triangles": [
         1500,
-        499,
-        120
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/terrain_barrels_stack_cooper/3d/fal__s1337.glb",
@@ -45816,7 +46586,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "terrain_beehive_skeps_stand": {
       "id": "terrain_beehive_skeps_stand",
@@ -45834,7 +46609,7 @@
       "triangles": [
         1500,
         500,
-        152
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/terrain_beehive_skeps_stand/3d/fal__s1337.glb",
@@ -45899,7 +46674,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "terrain_dry_stone_wall_limestone": {
       "id": "terrain_dry_stone_wall_limestone",
@@ -46040,9 +46820,9 @@
         "height": 2.877
       },
       "triangles": [
-        1499,
+        1500,
         500,
-        90
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/terrain_haystack_round/3d/fal__s1337.glb",
@@ -46107,7 +46887,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "terrain_haywain_wagon": {
       "id": "terrain_haywain_wagon",
@@ -46227,7 +47012,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "terrain_olive_terrace_wall": {
       "id": "terrain_olive_terrace_wall",
@@ -46243,7 +47033,7 @@
         "height": 2.446
       },
       "triangles": [
-        2999,
+        3000,
         1000,
         300
       ],
@@ -46312,7 +47102,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -46331,7 +47121,7 @@
         "height": 2.558
       },
       "triangles": [
-        7999,
+        8000,
         2500,
         600
       ],
@@ -46413,7 +47203,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -46499,7 +47289,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "terrain_stone_cairn_boundary": {
       "id": "terrain_stone_cairn_boundary",
@@ -46584,7 +47379,7 @@
         "chosen_seed": 1337
       },
       "lod_methods": [
-        "collapse",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
       ]
@@ -46605,7 +47400,7 @@
       "triangles": [
         1500,
         500,
-        149
+        152
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/terrain_vat_wine_press/3d/fal__s1337.glb",
@@ -46670,7 +47465,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "terrain_village_well_stone": {
       "id": "terrain_village_well_stone",
@@ -46687,8 +47487,8 @@
       },
       "triangles": [
         1500,
-        500,
-        106
+        498,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/terrain_village_well_stone/3d/fal__s1337.glb",
@@ -46753,7 +47553,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "terrain_wayside_cross_calvary": {
       "id": "terrain_wayside_cross_calvary",
@@ -46836,7 +47641,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "terrain_wayside_cross_wood": {
       "id": "terrain_wayside_cross_wood",
@@ -46919,7 +47729,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "terrain_wheat_sheaves_stooks": {
       "id": "terrain_wheat_sheaves_stooks",
@@ -46937,7 +47752,7 @@
       "triangles": [
         1500,
         500,
-        149
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/terrain_wheat_sheaves_stooks/3d/fal__s1337.glb",
@@ -47002,7 +47817,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "terrain_wicker_fence_long": {
       "id": "terrain_wicker_fence_long",
@@ -47085,7 +47905,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "town_balt": {
       "id": "town_balt",
@@ -48076,7 +48901,7 @@
       "triangles": [
         6000,
         1200,
-        224
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_acacia_umbrella/3d/fal__s1337.glb",
@@ -48141,7 +48966,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_alder": {
       "id": "tree_alder",
@@ -48157,9 +48987,9 @@
         "height": 18.236
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        255
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_alder/3d/fal__s1337.glb",
@@ -48211,7 +49041,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_almond": {
       "id": "tree_almond",
@@ -48227,9 +49062,9 @@
         "height": 6.087
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        246
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_almond/3d/fal__s1337.glb",
@@ -48294,7 +49129,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_arbutus": {
       "id": "tree_arbutus",
@@ -48312,7 +49152,7 @@
       "triangles": [
         6000,
         1200,
-        207
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_arbutus/3d/fal__s1337.glb",
@@ -48377,7 +49217,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_argan": {
       "id": "tree_argan",
@@ -48393,9 +49238,9 @@
         "height": 7.059
       },
       "triangles": [
-        2855,
-        292,
-        292
+        6000,
+        1200,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_argan/rv2/3d/fal2__s1338.glb",
@@ -48457,7 +49302,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_ash": {
       "id": "tree_ash",
@@ -48473,9 +49323,9 @@
         "height": 24.747
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        212
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_ash/3d/fal__s1337.glb",
@@ -48509,7 +49359,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_aspen": {
       "id": "tree_aspen",
@@ -48527,7 +49382,7 @@
       "triangles": [
         6000,
         1200,
-        207
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_aspen/3d/fal__s1337.glb",
@@ -48592,7 +49447,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_beech": {
       "id": "tree_beech",
@@ -48624,7 +49484,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_beech__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_birch": {
       "id": "tree_birch",
@@ -48656,7 +49521,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_birch/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_burnt_charred": {
       "id": "tree_burnt_charred",
@@ -48739,7 +49609,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_carob": {
       "id": "tree_carob",
@@ -48757,7 +49632,7 @@
       "triangles": [
         6000,
         1200,
-        312
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_carob/3d/fal__s1337.glb",
@@ -48853,7 +49728,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_cedar_atlas": {
       "id": "tree_cedar_atlas",
@@ -48936,7 +49816,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_cedar_lebanon": {
       "id": "tree_cedar_lebanon",
@@ -48968,7 +49853,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_cedar_lebanon__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_chestnut": {
       "id": "tree_chestnut",
@@ -49000,7 +49890,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_chestnut__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_cypress": {
       "id": "tree_cypress",
@@ -49032,7 +49927,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_cypress__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_dead": {
       "id": "tree_dead",
@@ -49050,7 +49950,7 @@
       "triangles": [
         5999,
         1200,
-        299
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_dead/3d/fal__s1337.glb",
@@ -49084,7 +49984,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_dead_conifer_snag": {
       "id": "tree_dead_conifer_snag",
@@ -49167,7 +50072,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_elm": {
       "id": "tree_elm",
@@ -49183,9 +50093,9 @@
         "height": 25.532
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        254
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_elm/3d/fal__s1337.glb",
@@ -49219,7 +50129,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_fig": {
       "id": "tree_fig",
@@ -49302,7 +50217,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_fir_siberian": {
       "id": "tree_fir_siberian",
@@ -49385,7 +50305,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_fir_silver": {
       "id": "tree_fir_silver",
@@ -49417,7 +50342,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_fir_silver__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_hornbeam": {
       "id": "tree_hornbeam",
@@ -49435,7 +50365,7 @@
       "triangles": [
         6000,
         1200,
-        239
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_hornbeam/3d/fal__s1338.glb",
@@ -49501,7 +50431,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_juniper": {
       "id": "tree_juniper",
@@ -49533,7 +50468,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_juniper/cut/s1338.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_larch": {
       "id": "tree_larch",
@@ -49565,7 +50505,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_larch__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_larch_siberian": {
       "id": "tree_larch_siberian",
@@ -49648,7 +50593,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_lightning_split": {
       "id": "tree_lightning_split",
@@ -49731,7 +50681,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_linden": {
       "id": "tree_linden",
@@ -49747,9 +50702,9 @@
         "height": 22.394
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        271
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_linden/3d/fal__s1337.glb",
@@ -49783,7 +50738,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_maple_sycamore": {
       "id": "tree_maple_sycamore",
@@ -49801,7 +50761,7 @@
       "triangles": [
         6000,
         1200,
-        228
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_maple_sycamore/3d/fal__s1337.glb",
@@ -49866,7 +50826,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_mulberry_silk": {
       "id": "tree_mulberry_silk",
@@ -49882,9 +50847,9 @@
         "height": 6.053
       },
       "triangles": [
-        5999,
-        1199,
-        302
+        6000,
+        1200,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_mulberry_silk/3d/fal__s1337.glb",
@@ -49980,7 +50945,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_oak_cork": {
       "id": "tree_oak_cork",
@@ -50012,7 +50982,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_oak_cork__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_oak_holm": {
       "id": "tree_oak_holm",
@@ -50044,7 +51019,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_oak_holm__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_oak_kermes": {
       "id": "tree_oak_kermes",
@@ -50060,9 +51040,9 @@
         "height": 4.088
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        299
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_oak_kermes/3d/fal__s1337.glb",
@@ -50158,7 +51138,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_oak_pedunculate": {
       "id": "tree_oak_pedunculate",
@@ -50190,7 +51175,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_oak_pedunculate/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_oak_pubescent": {
       "id": "tree_oak_pubescent",
@@ -50207,8 +51197,8 @@
       },
       "triangles": [
         6000,
-        1199,
-        262
+        1200,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_oak_pubescent/3d/fal__s1337.glb",
@@ -50273,7 +51263,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_oak_valonia": {
       "id": "tree_oak_valonia",
@@ -50291,7 +51286,7 @@
       "triangles": [
         6000,
         1200,
-        218
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_oak_valonia/3d/fal__s1338.glb",
@@ -50356,7 +51351,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_oak_veteran_hollow": {
       "id": "tree_oak_veteran_hollow",
@@ -50374,7 +51374,7 @@
       "triangles": [
         6000,
         1200,
-        285
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_oak_veteran_hollow/3d/fal__s1337.glb",
@@ -50439,7 +51439,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_olive": {
       "id": "tree_olive",
@@ -50471,7 +51476,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_olive/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_orange_bitter": {
       "id": "tree_orange_bitter",
@@ -50488,7 +51498,7 @@
       },
       "triangles": [
         6000,
-        1199,
+        1200,
         300
       ],
       "tex": 1024,
@@ -50585,7 +51595,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_orchard_apple": {
       "id": "tree_orchard_apple",
@@ -50601,9 +51616,9 @@
         "height": 4.77
       },
       "triangles": [
-        4783,
-        796,
-        159
+        6000,
+        1200,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_orchard_apple/rv2/3d/fal2__s1339.glb",
@@ -50667,7 +51682,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_orchard_cherry": {
       "id": "tree_orchard_cherry",
@@ -50683,9 +51703,9 @@
         "height": 9.066
       },
       "triangles": [
-        5999,
-        1200,
-        309
+        6000,
+        1202,
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_orchard_cherry/3d/fal__s1338.glb",
@@ -50751,7 +51771,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_palm_date": {
       "id": "tree_palm_date",
@@ -50783,7 +51808,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_palm_date__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_palm_doum": {
       "id": "tree_palm_doum",
@@ -50866,7 +51896,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_palm_dwarf": {
       "id": "tree_palm_dwarf",
@@ -50884,7 +51919,7 @@
       "triangles": [
         6000,
         1200,
-        275
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_palm_dwarf/3d/fal__s1337.glb",
@@ -50949,7 +51984,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pear_wild_lone": {
       "id": "tree_pear_wild_lone",
@@ -50967,7 +52007,7 @@
       "triangles": [
         6000,
         1200,
-        259
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pear_wild_lone/3d/fal__s1337.glb",
@@ -51032,7 +52072,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pine_aleppo": {
       "id": "tree_pine_aleppo",
@@ -51050,7 +52095,7 @@
       "triangles": [
         6000,
         1200,
-        181
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pine_aleppo/3d/fal__s1337.glb",
@@ -51084,7 +52129,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pine_arolla": {
       "id": "tree_pine_arolla",
@@ -51102,7 +52152,7 @@
       "triangles": [
         6000,
         1200,
-        301
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pine_arolla/3d/fal__s1337.glb",
@@ -51167,7 +52217,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pine_black": {
       "id": "tree_pine_black",
@@ -51185,7 +52240,7 @@
       "triangles": [
         6000,
         1200,
-        195
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pine_black/3d/fal__s1337.glb",
@@ -51250,7 +52305,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pine_bog_stunted": {
       "id": "tree_pine_bog_stunted",
@@ -51333,7 +52393,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pine_brutia": {
       "id": "tree_pine_brutia",
@@ -51351,7 +52416,7 @@
       "triangles": [
         6000,
         1200,
-        306
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pine_brutia/3d/fal__s1337.glb",
@@ -51416,7 +52481,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pine_maritime": {
       "id": "tree_pine_maritime",
@@ -51448,7 +52518,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pine_maritime__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pine_scots": {
       "id": "tree_pine_scots",
@@ -51480,7 +52555,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pine_scots__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pine_siberian": {
       "id": "tree_pine_siberian",
@@ -51563,7 +52643,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pine_stone": {
       "id": "tree_pine_stone",
@@ -51595,7 +52680,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pine_stone/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_plane_oriental": {
       "id": "tree_plane_oriental",
@@ -51611,9 +52701,9 @@
         "height": 25.375
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        223
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_plane_oriental/3d/fal__s1337.glb",
@@ -51678,7 +52768,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pollard": {
       "id": "tree_pollard",
@@ -51696,7 +52791,7 @@
       "triangles": [
         6000,
         1200,
-        234
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pollard/3d/fal__s1337.glb",
@@ -51748,7 +52843,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_pomegranate": {
       "id": "tree_pomegranate",
@@ -51766,7 +52866,7 @@
       "triangles": [
         6000,
         1200,
-        116
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_pomegranate/rv2/3d/fal2__s1338.glb",
@@ -51828,7 +52928,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_poplar": {
       "id": "tree_poplar",
@@ -51844,9 +52949,9 @@
         "height": 26.985
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        246
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_poplar/3d/fal__s1337.glb",
@@ -51880,7 +52985,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_poplar_black_riparian": {
       "id": "tree_poplar_black_riparian",
@@ -51912,7 +53022,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_poplar_black_riparian__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_rowan": {
       "id": "tree_rowan",
@@ -51995,7 +53110,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_spruce": {
       "id": "tree_spruce",
@@ -52027,7 +53147,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_spruce/cut/s1338.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_spruce_siberian": {
       "id": "tree_spruce_siberian",
@@ -52045,7 +53170,7 @@
       "triangles": [
         6000,
         1200,
-        299
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_spruce_siberian/3d/fal__s1337.glb",
@@ -52141,7 +53266,12 @@
             "usd": 0.02
           }
         ]
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_spruce_subalpine_flagged": {
       "id": "tree_spruce_subalpine_flagged",
@@ -52224,7 +53354,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_stump": {
       "id": "tree_stump",
@@ -52276,7 +53411,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_stump_charred": {
       "id": "tree_stump_charred",
@@ -52293,7 +53433,7 @@
       },
       "triangles": [
         1500,
-        499,
+        500,
         150
       ],
       "tex": 512,
@@ -52359,7 +53499,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_stump_conifer_resin": {
       "id": "tree_stump_conifer_resin",
@@ -52377,7 +53522,7 @@
       "triangles": [
         1500,
         500,
-        136
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_stump_conifer_resin/3d/fal__s1337.glb",
@@ -52442,7 +53587,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_sycamore_fig": {
       "id": "tree_sycamore_fig",
@@ -52460,7 +53610,7 @@
       "triangles": [
         6000,
         1200,
-        227
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_sycamore_fig/3d/fal__s1337.glb",
@@ -52525,7 +53675,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_willow": {
       "id": "tree_willow",
@@ -52557,7 +53712,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_willow__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "tree_yew": {
       "id": "tree_yew",
@@ -52573,9 +53733,9 @@
         "height": 10.228
       },
       "triangles": [
-        5999,
+        6000,
         1200,
-        290
+        300
       ],
       "tex": 1024,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/tree_yew/3d/fal__s1338.glb",
@@ -52641,7 +53801,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "village_balt": {
       "id": "village_balt",
@@ -53652,7 +54817,12 @@
         }
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/vineyard_hut__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "raw",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "wagon_ammunition_bombard": {
       "id": "wagon_ammunition_bombard",
@@ -54010,7 +55180,12 @@
         "gamma": 0.8805
       },
       "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/wagon_four_wheel/cut/s1337.png",
-      "model_3d": "meshy-6-lite"
+      "model_3d": "meshy-6-lite",
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "wagon_hussite_war": {
       "id": "wagon_hussite_war",
@@ -54304,7 +55479,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "war_pavilion": {
       "id": "war_pavilion",
@@ -54322,7 +55502,7 @@
       "triangles": [
         1500,
         500,
-        122
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/war_pavilion/3d/fal__s1338.glb",
@@ -54387,7 +55567,12 @@
           }
         ],
         "chosen_seed": 1338
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "watchtower": {
       "id": "watchtower",
@@ -54403,9 +55588,9 @@
         "height": 14.09
       },
       "triangles": [
-        1499,
+        1500,
         500,
-        151
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/watchtower/3d/fal__s1337.glb",
@@ -54439,7 +55624,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "watermill": {
       "id": "watermill",
@@ -54457,7 +55647,7 @@
       "triangles": [
         1500,
         500,
-        105
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/watermill/3d/fal__s1337.glb",
@@ -54493,7 +55683,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "wattle_fence": {
       "id": "wattle_fence",
@@ -54511,7 +55706,7 @@
       "triangles": [
         1500,
         500,
-        125
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/wattle_fence/3d/fal__s1337.glb",
@@ -54573,7 +55768,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "wayside_cross": {
       "id": "wayside_cross",
@@ -54653,7 +55853,12 @@
           }
         ],
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "collapse",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "well_stone": {
       "id": "well_stone",
@@ -54671,7 +55876,7 @@
       "triangles": [
         1500,
         500,
-        93
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/well_stone/3d/fal__s1337.glb",
@@ -54705,7 +55910,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "windmill_post": {
       "id": "windmill_post",
@@ -54723,7 +55933,7 @@
       "triangles": [
         1500,
         500,
-        152
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/windmill_post/3d/fal__s1337.glb",
@@ -54757,7 +55967,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "worksite_scaffold": {
       "id": "worksite_scaffold",
@@ -54773,9 +55988,9 @@
         "height": 14.189
       },
       "triangles": [
-        1499,
-        504,
-        62
+        1500,
+        500,
+        150
       ],
       "tex": 512,
       "raw": "/Users/jean_hubert/dev/cent-ans-raw/dn/worksite_scaffold/3d/fal__s1337.glb",
@@ -54809,7 +56024,12 @@
         "image_endpoint": "fal-ai/z-image/turbo (enable_prompt_expansion=false, 1024x1024)",
         "reconstructed": true,
         "chosen_seed": 1337
-      }
+      },
+      "lod_methods": [
+        "voxel_bake",
+        "voxel_bake",
+        "voxel_bake"
+      ]
     },
     "yurt_khan_pavilion": {
       "id": "yurt_khan_pavilion",
