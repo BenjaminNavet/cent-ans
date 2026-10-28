@@ -117,6 +117,7 @@ def build_job(
         "faithful": faithful,
         "lod_method": lod_method or spec.get("lod_method", "collapse"),
         "lod_voxels": spec.get("lod_voxels", 200),
+        "lod0_voxel_ratio": classes.get("lod0_voxel_ratio", 5),
         "saturation_cap": classes["grade"]["saturation_cap"],
         "luma_range": [
             classes["grade"]["albedo_mean_min"],

@@ -35,3 +35,13 @@ Les assets déjà ingérés sont refaits par `tools/experiments/lod_voxel_rebake
 - Gratuit, ≈ 3 s par LOD ; qualité comparable à Meshy Remesh, qui reste une option payante au cas par cas.
 - Les LOD1-2 refaits ont une texture propre (UV neuves) au lieu de partager celle du LOD0.
 - Le LOD0 des assets non fidèles (TRELLIS) est encore décimé par `collapse` : non examiné ici.
+
+## Complément (28/10) : LOD0 TRELLIS, accessoires et arbres
+
+Contrôle des LOD0 TRELLIS (non fidèles) : maisons, grands bâtiments, navires, animaux, charrettes sont fidèles
+au brut (réduction ≤ 5×). 180 modèles sont réduits plus de 10× (110 accessoires, 49 arbres, 19 roches) et
+fondent (`ruin_castle` 62 816 → 1 500). `voxel_bake` refait donc aussi le LOD0 quand le brut dépasse
+`lod0_voxel_ratio` (5) fois son budget ; en deçà, l'effondrement garde les UV d'origine, plus nettes.
+Essais : four à chaux équivalent ; chanvre, échafaudage, ruine, arganier nettement mieux ; oranger équivalent.
+`prop` et `tree` passent en `voxel_bake` ; la grille peut descendre à 20 voxels pour les LOD2 de 150 triangles.
+Navires, charrettes, engins, animaux, champs restent en `collapse` (LOD1-2 non examinés).

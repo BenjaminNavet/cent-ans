@@ -77,9 +77,9 @@ def test_build_job_rejects_bad_requests(overrides) -> None:
 
 
 def test_lod_method_comes_from_class_unless_overridden() -> None:
-    """Massive classes rebuild LOD1-2 by voxel bake; props keep collapse; the CLI overrides."""
+    """Houses rebuild their LODs by voxel bake; ships keep collapse; the CLI overrides."""
     assert _job()["lod_method"] == "voxel_bake"
-    assert _job(asset_class="prop", length=1.0)["lod_method"] == "collapse"
+    assert _job(asset_class="ship", length=10.0)["lod_method"] == "collapse"
     assert _job(lod_method="collapse")["lod_method"] == "collapse"
 
 

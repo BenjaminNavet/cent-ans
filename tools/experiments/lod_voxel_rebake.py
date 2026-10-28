@@ -1,8 +1,9 @@
-"""Rebuild LOD1-2 of already ingested assets with ``voxel_bake`` (ADR 0790), LOD0 untouched.
+"""Rebuild the LODs of already ingested assets with ``voxel_bake`` (ADR 0790).
 
 Each asset of the given classes is re-ingested into a scratch folder with its manifest
-parameters; only its LOD1-2 files replace the shipped ones, and the manifest gets their
-triangle counts and ``lod_methods``. Usage:
+parameters; LOD1-2 and a rebuilt LOD0 (heavily cut TRELLIS models) replace the shipped
+files, and the manifest gets their triangle counts and ``lod_methods``; a LOD0 kept as raw
+or collapse stays the shipped file. Usage:
 ``uv run --project tools python tools/experiments/lod_voxel_rebake.py <scratch_dir> [-j 4] [ids...]``
 """
 
@@ -16,7 +17,7 @@ from pathlib import Path
 
 from cent_ans_tools import dn_ingest
 
-CLASSES = {"house", "major_building", "rock", "bridge", "landmark_city"}
+CLASSES = {"house", "major_building", "rock", "bridge", "landmark_city", "prop", "tree"}
 
 
 def rebake(asset: dict, classes: dict, scratch: Path) -> tuple[str, str, dict | None]:
@@ -59,8 +60,9 @@ def rebake(asset: dict, classes: dict, scratch: Path) -> tuple[str, str, dict | 
     if "voxel_bake" not in result["lod_methods"]:
         shutil.rmtree(work)
         return asset_id, "repli collapse (pièces fines)", None
+    methods = result["lod_methods"]
     for lod, rel in enumerate(asset["files"]):
-        if lod:
+        if lod or methods[0] == "voxel_bake":
             shutil.copyfile(
                 category / f"{asset_id}_lod{lod}.glb", dn_ingest.MODELS_DIR / rel
             )
@@ -69,7 +71,12 @@ def rebake(asset: dict, classes: dict, scratch: Path) -> tuple[str, str, dict | 
         asset_id,
         "ok",
         {
-            "triangles": [asset["triangles"][0], *result["triangles"][1:]],
+            "triangles": [
+                result["triangles"][0]
+                if methods[0] == "voxel_bake"
+                else asset["triangles"][0],
+                *result["triangles"][1:],
+            ],
             "lod_methods": result["lod_methods"],
         },
     )

@@ -340,7 +340,7 @@ def voxel_bake(source: "bpy.types.Object", target: int, tex: int, spec: dict):
     """
     voxels = spec.get("lod_voxels", 200)
     low = None
-    while voxels >= 50:
+    while voxels >= 20:
         low = voxel_shell(source, voxels)
         if collapse_passes(low, target) <= target * 1.04:
             break
@@ -450,43 +450,32 @@ def main() -> None:
     ref_box = None
     methods = []
     for lod, target in enumerate(spec["lod_tris"][: spec["lods"]]):
+        raw_lod0 = lod == 0 and spec.get("faithful")
+        # LOD0 is rebuilt only when collapse would cut it hard (ADR 0790): a mild collapse
+        # keeps the original UVs and texture sharper than a bake.
+        rebuild = spec.get("lod_method") == "voxel_bake" and (
+            lod > 0
+            or (
+                not raw_lod0
+                and len(obj.data.polygons) > target * spec.get("lod0_voxel_ratio", 5)
+            )
+        )
         baked = (
-            voxel_bake(obj, target, max(spec["tex"] >> (lod - 1), 256), spec)
-            if lod and spec.get("lod_method") == "voxel_bake"
+            voxel_bake(obj, target, max(spec["tex"] >> max(lod - 1, 0), 256), spec)
+            if rebuild
             else None
         )
-        methods.append(
-            "voxel_bake"
-            if baked
-            else "raw"
-            if lod == 0 and spec.get("faithful")
-            else "collapse"
-        )
+        methods.append("voxel_bake" if baked else "raw" if raw_lod0 else "collapse")
+        out = baked or obj
         if baked:
             count = len(baked.data.polygons)
-            regrind(baked)
-            low, high = bounds(baked)
-            box = [high[i] - low[i] for i in range(3)]
-            drift.append(
-                round(
-                    max(abs(box[i] - ref_box[i]) for i in range(3))
-                    / max(ref_box[2], 1e-6),
-                    4,
-                )
-            )
-            export(baked, str(out_dir / f"{spec['id']}_lod{lod}.glb"))
-            bpy.data.objects.remove(baked, do_unlink=True)
-            triangles.append(count)
-            continue
-        count = (
-            len(obj.data.polygons)
-            if lod == 0 and spec.get("faithful")
-            else decimate(obj, target)
-        )
-        dims = regrind(obj) if lod == 0 else dims
-        if lod:
-            regrind(obj)
-        low, high = bounds(obj)
+        else:
+            count = len(obj.data.polygons) if raw_lod0 else decimate(obj, target)
+        if lod == 0:
+            dims = regrind(out)
+        else:
+            regrind(out)
+        low, high = bounds(out)
         box = [high[i] - low[i] for i in range(3)]
         ref_box = ref_box or box
         drift.append(
@@ -495,7 +484,9 @@ def main() -> None:
                 4,
             )
         )
-        export(obj, str(out_dir / f"{spec['id']}_lod{lod}.glb"))
+        export(out, str(out_dir / f"{spec['id']}_lod{lod}.glb"))
+        if baked:
+            bpy.data.objects.remove(baked, do_unlink=True)
         triangles.append(count)
     print(
         "DN_RESULT "

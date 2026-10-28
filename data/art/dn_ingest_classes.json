@@ -9,6 +9,7 @@
   "lod_ratio_tolerance": 0.05,
   "classes": {
     "prop": {
+      "lod_method": "voxel_bake",
       "label": "Accessoire (tonneau, caisse, étal)",
       "category": "props",
       "lod_tris": [
@@ -102,6 +103,7 @@
       "strip_base": false
     },
     "tree": {
+      "lod_method": "voxel_bake",
       "label": "Arbre ou arbuste de bataille",
       "category": "vegetation",
       "lod_tris": [
@@ -172,5 +174,6 @@
       "strip_base": false
     }
   },
+  "lod0_voxel_ratio": 5,
   "island_min": 0.01
 }
