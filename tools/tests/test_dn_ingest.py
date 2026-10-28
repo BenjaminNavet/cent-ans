@@ -93,6 +93,15 @@ def test_check_result_flags_overrun_and_saturation() -> None:
     assert len(dn_ingest.check_result(job, bad, classes)) == 2
 
 
+def test_check_result_flags_sparse_bake() -> None:
+    """A baked LOD texture mostly left empty is reported (ADR 0790, 28/10)."""
+    classes = dn_ingest.load_classes()
+    job = _job()
+    result = {"triangles": [8000, 2000, 500], "bake_coverage": [None, 0.9, 0.3]}
+    problems = dn_ingest.check_result(job, result, classes)
+    assert len(problems) == 1 and problems[0].startswith("LOD2")
+
+
 def test_parse_result_and_manifest_roundtrip(tmp_path: Path) -> None:
     """DN_RESULT is parsed; manifest entries are inserted, replaced and schema-valid."""
     result = dn_ingest.parse_result(

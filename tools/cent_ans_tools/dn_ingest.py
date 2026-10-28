@@ -136,6 +136,12 @@ def check_result(job: dict, result: dict, classes: dict) -> list[str]:
         cap = job["lod_tris"][lod]
         if count > cap * (1 + tolerance):
             problems.append(f"LOD{lod} : {count} triangles > budget {cap}")
+    floor = classes.get("bake_coverage_min", 0.5)
+    for lod, coverage in enumerate(result.get("bake_coverage") or []):
+        if coverage is not None and coverage < floor:
+            problems.append(
+                f"LOD{lod} : texture recuite couverte à {coverage:.0%} < {floor:.0%}"
+            )
     grade = result.get("grade")
     if (
         grade

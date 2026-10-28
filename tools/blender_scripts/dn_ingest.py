@@ -353,9 +353,17 @@ def voxel_bake(source: "bpy.types.Object", target: int, tex: int, spec: dict):
     low.data.uv_layers.new(name="UVMap")
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.smart_project(angle_limit=1.15, island_margin=0.004)
+    # A voxel shell is a staircase: a narrow angle limit cuts it into thousands of tiny
+    # islands that each get a few texels over a black background (ADR 0790, 28/10).
+    bpy.ops.uv.smart_project(
+        angle_limit=math.radians(spec.get("bake_uv_angle_deg", 80)), island_margin=0.0
+    )
+    bpy.ops.uv.pack_islands(
+        rotate=True, margin=spec.get("bake_uv_margin", 0.002), shape_method="CONCAVE"
+    )
     bpy.ops.object.mode_set(mode="OBJECT")
-    image = bpy.data.images.new(f"{spec['id']}_bake_{target}", tex, tex)
+    image = bpy.data.images.new(f"{spec['id']}_bake_{target}", tex, tex, alpha=True)
+    image.generated_color = (0.0, 0.0, 0.0, 0.0)
     material = bpy.data.materials.new(f"{spec['id']}_lod_{target}")
     material.use_nodes = True
     tree = material.node_tree
@@ -375,7 +383,8 @@ def voxel_bake(source: "bpy.types.Object", target: int, tex: int, spec: dict):
     voxel_size = size / voxels
     bake.cage_extrusion = max(0.02 * size, 2 * voxel_size)
     bake.max_ray_distance = max(0.06 * size, 6 * voxel_size)
-    bake.margin = 4
+    bake.margin_type = "EXTEND"
+    bake.margin = 16
     bpy.ops.object.select_all(action="DESELECT")
     source.select_set(True)
     low.select_set(True)
@@ -385,9 +394,49 @@ def voxel_bake(source: "bpy.types.Object", target: int, tex: int, spec: dict):
     tree.links.new(
         texture.outputs["Color"], tree.nodes["Principled BSDF"].inputs["Base Color"]
     )
+    low["bake_coverage"] = fill_unbaked(image)
     image.pack()
     set_surface(low, spec["roughness"])
     return low
+
+
+def fill_unbaked(image: "bpy.types.Image") -> float:
+    """Fill the texels the bake left empty (alpha 0) from their neighbours; return coverage.
+
+    Background and missed rays would otherwise stay black and bleed into the islands at
+    a distance (mipmaps, filtering). Coverage is the share of texels the bake wrote.
+    """
+    width, height = image.size
+    pixels = np.empty(width * height * 4, dtype=np.float32)
+    image.pixels.foreach_get(pixels)
+    pixels = pixels.reshape(height, width, 4)
+    filled = pixels[..., 3] > 0.5
+    coverage = float(filled.mean())
+    if not filled.any():
+        return coverage
+    rgb = pixels[..., :3] * filled[..., None]
+    weight = filled.astype(np.float32)
+    mean = rgb[filled].mean(axis=0)
+    for _ in range(32):
+        if filled.all():
+            break
+        total = np.zeros_like(rgb)
+        count = np.zeros_like(weight)
+        for axis, shift in ((0, 1), (0, -1), (1, 1), (1, -1)):
+            total += np.roll(rgb, shift, axis)
+            count += np.roll(weight, shift, axis)
+        grow = ~filled & (count > 0)
+        if not grow.any():
+            break
+        rgb[grow] = total[grow] / count[grow, None]
+        weight[grow] = 1.0
+        filled |= grow
+    rgb[~filled] = mean
+    pixels[..., :3] = rgb
+    pixels[..., 3] = 1.0
+    image.pixels.foreach_set(pixels.ravel())
+    image.update()
+    return coverage
 
 
 def regrind(obj: "bpy.types.Object") -> dict:
@@ -449,6 +498,7 @@ def main() -> None:
     drift = []
     ref_box = None
     methods = []
+    coverage = []
     for lod, target in enumerate(spec["lod_tris"][: spec["lods"]]):
         raw_lod0 = lod == 0 and spec.get("faithful")
         # LOD0 is rebuilt only when collapse would cut it hard (ADR 0790): a mild collapse
@@ -485,6 +535,7 @@ def main() -> None:
             )
         )
         export(out, str(out_dir / f"{spec['id']}_lod{lod}.glb"))
+        coverage.append(round(baked["bake_coverage"], 3) if baked else None)
         if baked:
             bpy.data.objects.remove(baked, do_unlink=True)
         triangles.append(count)
@@ -500,6 +551,7 @@ def main() -> None:
                 "grade": grade,
                 "bbox_drift": drift,
                 "lod_methods": methods,
+                "bake_coverage": coverage,
             }
         )
     )

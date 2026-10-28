@@ -45,3 +45,13 @@ fondent (`ruin_castle` 62 816 → 1 500). `voxel_bake` refait donc aussi le LOD0
 Essais : four à chaux équivalent ; chanvre, échafaudage, ruine, arganier nettement mieux ; oranger équivalent.
 `prop` et `tree` passent en `voxel_bake` ; la grille peut descendre à 20 voxels pour les LOD2 de 150 triangles.
 Navires, charrettes, engins, animaux, champs restent en `collapse` (LOD1-2 non examinés).
+
+## Amendement (28/10) — textures recuites vides
+
+Le premier rebake laissait des textures à 50-70 % noires : le dépliage `smart_project` à 66° découpait la
+coque en escalier en milliers d'îlots minuscules, sur un fond noir avec 4 px de marge ; de loin, les villes
+paraissaient gris foncé uniforme. Désormais : angle de dépliage 80° (`bake_uv_angle_deg`), empaquetage
+`pack_islands` concave avec rotation, marge de cuisson de 16 px en extension, et les texels non écrits
+(fond, rayons perdus) sont remplis depuis leurs voisins puis à la couleur moyenne. Le script rend la
+part de texels cuits (`bake_coverage`) ; `check_result` refuse une couverture sous `bake_coverage_min`
+(0,5). Cathédrale ouest LOD1 : 68 % → 0,2 % de noir, couverture 90 %.

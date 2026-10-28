@@ -21,6 +21,7 @@
     "island_min": {"type": "number", "minimum": 0, "maximum": 0.2},
     "lod0_voxel_ratio": {"type": "number", "minimum": 1, "description": "voxel_bake refait aussi le LOD0 (non fidèle) quand le brut dépasse ce multiple de son budget (ADR 0790)."},
     "lod_ratio_tolerance": {"type": "number", "minimum": 0, "maximum": 0.5, "description": "Écart relatif toléré entre triangles visés et obtenus par LOD."},
+    "bake_coverage_min": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part minimale de texels écrits par la cuisson voxel_bake avant remplissage (ADR 0790)."},
     "classes": {
       "type": "object",
       "minProperties": 1,
