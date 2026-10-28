@@ -34,3 +34,14 @@ suivis absents du worktree de mesure).
   l'allocateur et des textures ; cause non élucidée (point ouvert).
 - Non fait : décharge des ressources de campagne à l'entrée en bataille (à mesurer sur le scénario campagne -> bataille),
   pré-cuisson KTX2 des feuilles de sol de campagne (décodage transitoire de 185 Mo par feuille, absorbé par mimalloc).
+
+## Amendement (28/10) — marqueur gris retiré
+
+Le marqueur 4×4 gris posé avant le premier envoi restait affiché pour de bon : la texture BC1 qui le
+remplace n'arrive jamais au GPU (vérifié avec un marqueur magenta ; cause dans Bevy 0.20 non élucidée).
+Tous les modèles `models/dn/` paraissaient gris uni en campagne. Le marqueur est retiré : la texture
+RGBA8 est envoyée telle quelle, ses pixels sont déplacés (non copiés) vers l'encodage BC1, et deux
+images après l'échange, les matériaux qui l'échantillonnent sont marqués modifiés pour que leur bind
+group pointe vers la texture BC1 (dump `model_mips.materials_refreshed`).
+Coût : empreinte de campagne à Berlin 5,8 → 7,1 Go (envoi transitoire des RGBA8) ; piste pour le
+regagner : comprendre pourquoi l'échange depuis le marqueur échoue.

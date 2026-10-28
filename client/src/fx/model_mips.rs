@@ -47,8 +47,7 @@ impl Plugin for ModelMipsPlugin {
                     collect_compressed,
                 )
                     .chain(),
-            )
-            .add_systems(Last, capture_model_images);
+            );
     }
 }
 
@@ -62,6 +61,11 @@ pub struct MipQueue {
     encoding: Vec<(AssetId<Image>, Task<Encoded>)>,
     /// Images stored as BC1 and dropped from RAM (dump probe).
     compressed: usize,
+    /// Swapped images whose materials still bind the RGBA8 texture, with the frames left before
+    /// the materials are flagged (the new `GpuImage` must be prepared first).
+    stale_materials: Vec<(AssetId<Image>, u8)>,
+    /// Materials flagged after a swap (dump probe).
+    materials_refreshed: usize,
 }
 
 /// Result of a background encode.
@@ -88,38 +92,6 @@ fn compressed_path(server: &AssetServer, id: AssetId<Image>) -> bool {
             .iter()
             .any(|prefix| p.path().starts_with(prefix))
     })
-}
-
-/// Takes the pixels of a model albedo the moment its image is added, before the first upload: the
-/// image keeps a 4 x 4 grey placeholder until the background BC1 encode lands. The 16 MiB RGBA8
-/// texture is then never created on the GPU and its pixels are moved, not cloned.
-fn capture_model_images(
-    mut events: MessageReader<AssetEvent<Image>>,
-    mut queue: ResMut<MipQueue>,
-    mut images: ResMut<Assets<Image>>,
-    server: Res<AssetServer>,
-) {
-    for event in events.read() {
-        let AssetEvent::Added { id } = event else {
-            continue;
-        };
-        let compressible_path =
-            images.get(*id).is_some_and(compressible) && compressed_path(&server, *id);
-        if !compressible_path || !queue.seen.insert(*id) {
-            continue;
-        }
-        let Some(mut image) = images.get_mut(*id) else {
-            continue;
-        };
-        let (w, h) = (image.width() as usize, image.height() as usize);
-        let Some(data) = image.data.take() else {
-            continue;
-        };
-        image.texture_descriptor.size.width = 4;
-        image.texture_descriptor.size.height = 4;
-        image.data = Some(vec![128; 4 * 4 * 4]);
-        queue.encoding.push((*id, spawn_encode(data, w, h)));
-    }
 }
 
 impl MipQueue {
@@ -183,13 +155,14 @@ fn generate_queued_mips(
         if !needs_mips(image) {
             continue;
         }
-        // Opaque baked albedo of the campaign models: chain + BC1 on a background thread.
-        if compressible(image)
-            && compressed_path(&server, id)
-            && let Some(data) = image.data.clone()
-        {
+        // Opaque baked albedo of the campaign models: chain + BC1 on a background thread. The
+        // pixels are moved, not cloned (16 MiB each); the uploaded RGBA8 texture is kept meanwhile
+        // (an image without data reuses its previous GPU texture).
+        if compressible(image) && compressed_path(&server, id) {
             let (w, h) = (image.width() as usize, image.height() as usize);
-            queue.encoding.push((id, spawn_encode(data, w, h)));
+            if let Some(data) = images.get_mut(id).and_then(|mut image| image.data.take()) {
+                queue.encoding.push((id, spawn_encode(data, w, h)));
+            }
             continue;
         }
         budget -= 1;
@@ -210,7 +183,17 @@ fn generate_queued_mips(
 /// Installs the finished BC1 chains: the image becomes `Bc1RgbaUnormSrgb` with its full mip chain and
 /// keeps no CPU copy (`RENDER_WORLD` only: Bevy drops `data` once uploaded). A chain that could not be
 /// built (translucent texels) falls back to the plain RGBA8 chain.
-fn collect_compressed(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<Image>>) {
+///
+/// The material bind groups built on the RGBA8 texture are not rebuilt by the image swap alone:
+/// the materials that sample a swapped image are flagged as changed a few frames later, once the
+/// new `GpuImage` exists. (A 4 x 4 grey placeholder installed before the first upload left the
+/// campaign models uniformly grey for good, 28/10, ADR 0776 amendment.)
+fn collect_compressed(
+    mut queue: ResMut<MipQueue>,
+    mut images: ResMut<Assets<Image>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    refresh_stale_materials(&mut queue, &mut materials);
     let mut pending = Vec::new();
     for (id, mut task) in std::mem::take(&mut queue.encoding) {
         let Some(result) = block_on(future::poll_once(&mut task)) else {
@@ -220,6 +203,7 @@ fn collect_compressed(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<Ima
         let Some(mut image) = images.get_mut(id) else {
             continue;
         };
+        queue.stale_materials.push((id, MATERIAL_REFRESH_FRAMES));
         match result {
             Encoded::Bc1(chain, size) => {
                 let (w, h) = (size.x, size.y);
@@ -245,6 +229,45 @@ fn collect_compressed(mut queue: ResMut<MipQueue>, mut images: ResMut<Assets<Ima
         }
     }
     queue.encoding = pending;
+}
+
+/// Frames between an image swap and the refresh of the materials that sample it.
+const MATERIAL_REFRESH_FRAMES: u8 = 2;
+
+/// Flags the materials of the images swapped `MATERIAL_REFRESH_FRAMES` ago as modified, so that
+/// their bind groups are rebuilt on the new texture.
+fn refresh_stale_materials(queue: &mut MipQueue, materials: &mut Assets<StandardMaterial>) {
+    if queue.stale_materials.is_empty() {
+        return;
+    }
+    let mut due = std::collections::HashSet::new();
+    queue.stale_materials.retain_mut(|(id, frames)| {
+        if *frames == 0 {
+            due.insert(*id);
+            false
+        } else {
+            *frames -= 1;
+            true
+        }
+    });
+    if due.is_empty() {
+        return;
+    }
+    let stale: Vec<_> = materials
+        .iter()
+        .filter(|(_, m)| {
+            m.base_color_texture
+                .as_ref()
+                .is_some_and(|t| due.contains(&t.id()))
+        })
+        .map(|(id, _)| id)
+        .collect();
+    for id in stale {
+        // A mutable access flags the material as modified: its bind group is rebuilt.
+        if materials.get_mut(id).is_some() {
+            queue.materials_refreshed += 1;
+        }
+    }
 }
 
 /// Opaque sRGB RGBA8 texture whose sides are multiples of the BC block.
@@ -307,7 +330,8 @@ fn dump(world: &World) -> (String, serde_json::Value) {
     (
         "model_mips".into(),
         serde_json::json!({"mipped": q.done, "waiting": q.waiting.len(), "seen": q.seen.len(),
-            "bc1_compressed": q.compressed, "bc1_encoding": q.encoding.len()}),
+            "bc1_compressed": q.compressed, "bc1_encoding": q.encoding.len(),
+            "materials_refreshed": q.materials_refreshed}),
     )
 }
 
