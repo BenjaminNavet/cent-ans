@@ -307,14 +307,8 @@ def decimate(obj: "bpy.types.Object", target: int) -> int:
     return count
 
 
-def voxel_bake(source: "bpy.types.Object", target: int, tex: int, spec: dict):
-    """Rebuild ``source`` as a new object of about ``target`` triangles with a baked texture.
-
-    Collapse decimation shreds Meshy/TRELLIS meshes made of overlapping shells (roof tiles,
-    stones): the voxel remesh first melts them into one closed surface, which then collapses
-    cleanly; the base colour is baked from ``source`` onto fresh UVs (ADR 0790). Returns
-    ``None`` when the result stays over budget (thin parts), so the caller falls back.
-    """
+def voxel_shell(source: "bpy.types.Object", voxels: int) -> "bpy.types.Object":
+    """A material-less, UV-less copy of ``source``, thickened and remeshed into one closed voxel surface."""
     bpy.ops.object.select_all(action="DESELECT")
     source.select_set(True)
     bpy.context.view_layer.objects.active = source
@@ -324,13 +318,37 @@ def voxel_bake(source: "bpy.types.Object", target: int, tex: int, spec: dict):
     low.data.materials.clear()
     for layer in list(low.data.uv_layers):
         low.data.uv_layers.remove(layer)
+    # Thicken first so thin roofs and walls survive a coarse voxel grid.
+    solid = low.modifiers.new("dn_solid", "SOLIDIFY")
+    solid.thickness = 1.5 * max(low.dimensions) / voxels
+    solid.offset = 0.0
+    bpy.ops.object.modifier_apply(modifier=solid.name)
     remesh = low.modifiers.new("dn_voxel", "REMESH")
     remesh.mode = "VOXEL"
-    remesh.voxel_size = max(low.dimensions) / spec.get("lod_voxels", 200)
+    remesh.voxel_size = max(low.dimensions) / voxels
     bpy.ops.object.modifier_apply(modifier=remesh.name)
-    count = collapse_passes(low, target)
-    if count > target * 1.04:
+    return low
+
+
+def voxel_bake(source: "bpy.types.Object", target: int, tex: int, spec: dict):
+    """Rebuild ``source`` as a new object of about ``target`` triangles with a baked texture.
+
+    Collapse decimation shreds Meshy/TRELLIS meshes made of overlapping shells (roof tiles,
+    stones): the voxel remesh first melts them into one closed surface, which then collapses
+    cleanly; the base colour is baked from ``source`` onto fresh UVs (ADR 0790). Returns
+    ``None`` when even a coarse shell stays over budget (thin parts), so the caller falls back.
+    """
+    voxels = spec.get("lod_voxels", 200)
+    low = None
+    while voxels >= 50:
+        low = voxel_shell(source, voxels)
+        if collapse_passes(low, target) <= target * 1.04:
+            break
+        # Collapse stalls on a high-genus shell (arches, windows): a coarser one closes them.
         bpy.data.objects.remove(low, do_unlink=True)
+        low = None
+        voxels = voxels * 3 // 5
+    if low is None:
         return None
     low.data.uv_layers.new(name="UVMap")
     bpy.ops.object.mode_set(mode="EDIT")
@@ -354,8 +372,9 @@ def voxel_bake(source: "bpy.types.Object", target: int, tex: int, spec: dict):
     bake = scene.render.bake
     bake.use_selected_to_active = True
     bake.use_cage = False
-    bake.cage_extrusion = 0.02 * size
-    bake.max_ray_distance = 0.06 * size
+    voxel_size = size / voxels
+    bake.cage_extrusion = max(0.02 * size, 2 * voxel_size)
+    bake.max_ray_distance = max(0.06 * size, 6 * voxel_size)
     bake.margin = 4
     bpy.ops.object.select_all(action="DESELECT")
     source.select_set(True)

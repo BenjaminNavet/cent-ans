@@ -18,7 +18,10 @@ Option de classe `lod_method` (`collapse` par défaut, `voxel_bake`), surchargea
 `voxel_bake` refait chaque LOD1-2 à partir du LOD0 : remaillage en voxels (`lod_voxels`, 200 sur la plus
 grande dimension) qui fond les coques en une surface fermée, effondrement au budget, UV neuves (projection
 intelligente), couleur de base recuite depuis le LOD0 (Cycles, sélection vers actif), texture de la classe au
-LOD1 et moitié au LOD2. Si le résultat dépasse le budget (pièces fines : tentes, piquets), repli sur
+LOD1 et moitié au LOD2. Le modèle est d'abord épaissi (1,5 voxel) pour que toits et murs fins survivent.
+Si l'effondrement cale (arches et fenêtres : surface trouée de partout), nouvel essai à grille plus grossière
+(200 → 120 → 72 voxels) qui referme les petites ouvertures ; la portée de cuisson suit la taille du voxel.
+Une soudure de repli sur la coque a été essayée puis écartée : elle déchiquette le LOD2. Si le résultat dépasse le budget (pièces fines : tentes, piquets), repli sur
 `collapse`. Le manifeste note `lod_methods` par LOD.
 
 Classes en `voxel_bake` : `house`, `major_building`, `rock`, `bridge`, `landmark_city`. Végétation, champs,
