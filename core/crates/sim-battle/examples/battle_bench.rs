@@ -118,9 +118,19 @@ struct Matrix {
 /// What a line plays.
 #[derive(Debug, Clone)]
 enum Scenario {
-    Field { terrain: Terrain, attacker: Roster, defender: Roster },
-    Siege { fortification: u32, attacker: Roster, defender: Roster },
-    Historical { map: String },
+    Field {
+        terrain: Terrain,
+        attacker: Roster,
+        defender: Roster,
+    },
+    Siege {
+        fortification: u32,
+        attacker: Roster,
+        defender: Roster,
+    },
+    Historical {
+        map: String,
+    },
 }
 
 /// One row of the bench: a scenario under one mode over `seeds` seeds.
@@ -250,7 +260,10 @@ fn expand(data: &GameData, roster: &Roster) -> Vec<UnitSetup> {
     let mut units = Vec::new();
     for (id, count) in roster {
         let key = UnitTypeId::new(format!("unit_{id}")).expect("unit id");
-        let t = data.unit_types.get(&key).unwrap_or_else(|| panic!("unknown unit type {id}"));
+        let t = data
+            .unit_types
+            .get(&key)
+            .unwrap_or_else(|| panic!("unknown unit type {id}"));
         for _ in 0..*count {
             units.push(UnitSetup::from_unit_type(t, t.soldiers, t.stats.morale, 0));
         }
@@ -295,12 +308,22 @@ fn load_map(data_dir: &Path, id: &str) -> HistoricalMap {
 
 fn build(data: &GameData, data_dir: &Path, line: &Line, seed: u64) -> BattleSim {
     match &line.scenario {
-        Scenario::Field { terrain, attacker, defender } => {
-            BattleSim::new(field_setup(data, *terrain, attacker, defender, None), seed)
-                .expect("battle starts")
-        }
-        Scenario::Siege { fortification, attacker, defender } => {
-            let siege = SiegeSetup { fortification: *fortification, breach: 0, ..Default::default() };
+        Scenario::Field {
+            terrain,
+            attacker,
+            defender,
+        } => BattleSim::new(field_setup(data, *terrain, attacker, defender, None), seed)
+            .expect("battle starts"),
+        Scenario::Siege {
+            fortification,
+            attacker,
+            defender,
+        } => {
+            let siege = SiegeSetup {
+                fortification: *fortification,
+                breach: 0,
+                ..Default::default()
+            };
             BattleSim::new(
                 field_setup(data, Terrain::Plains, attacker, defender, Some(siege)),
                 seed,
@@ -345,7 +368,12 @@ fn send_blob(sim: &mut BattleSim) {
             .map(|e| e.id);
         if let Some(target) = target {
             let _ = sim.apply_command(
-                Command::Attack { units: vec![id], target, run: false, queue: false },
+                Command::Attack {
+                    units: vec![id],
+                    target,
+                    run: false,
+                    queue: false,
+                },
                 Some(SideId::Attacker),
             );
         }
@@ -379,8 +407,16 @@ impl Flank {
         let ex = enemies.iter().map(|e| e.1).fold(f64::MIN, f64::max);
         let ez = enemies.iter().map(|e| e.2).sum::<f64>() / enemies.len() as f64;
         let n = horse.len() as f64;
-        let hx = horse.iter().map(|&h| sim.units()[h as usize].x).sum::<f64>() / n;
-        let hz = horse.iter().map(|&h| sim.units()[h as usize].z).sum::<f64>() / n;
+        let hx = horse
+            .iter()
+            .map(|&h| sim.units()[h as usize].x)
+            .sum::<f64>()
+            / n;
+        let hz = horse
+            .iter()
+            .map(|&h| sim.units()[h as usize].z)
+            .sum::<f64>()
+            / n;
         let wide = (ex + 150.0, ez);
         if self.phase == 0 {
             let _ = sim.apply_command(
@@ -402,12 +438,21 @@ impl Flank {
             let target = enemies
                 .iter()
                 .filter(|e| e.3)
-                .min_by(|p, q| (p.1 - hx).hypot(p.2 - hz).total_cmp(&(q.1 - hx).hypot(q.2 - hz)))
+                .min_by(|p, q| {
+                    (p.1 - hx)
+                        .hypot(p.2 - hz)
+                        .total_cmp(&(q.1 - hx).hypot(q.2 - hz))
+                })
                 .or(enemies.first())
                 .map(|e| e.0)
                 .expect("an enemy");
             let _ = sim.apply_command(
-                Command::Attack { units: horse, target, run: true, queue: false },
+                Command::Attack {
+                    units: horse,
+                    target,
+                    run: true,
+                    queue: false,
+                },
                 Some(SideId::Attacker),
             );
             self.phase = 2;
@@ -442,7 +487,10 @@ fn run_one(data: &GameData, data_dir: &Path, line: &Line, seed: u64) -> Run {
             contact_s = Some(sim.elapsed());
         }
         if first_rout_s.is_none() {
-            if let Some(u) = units.iter().find(|u| u.state == UnitState::Routing && !u.synthetic) {
+            if let Some(u) = units
+                .iter()
+                .find(|u| u.state == UnitState::Routing && !u.synthetic)
+            {
                 first_rout_s = Some(sim.elapsed());
                 first_rout_loss =
                     Some(1.0 - f64::from(u.soldiers()) / f64::from(start[u.id as usize].max(1)));
@@ -451,23 +499,38 @@ fn run_one(data: &GameData, data_dir: &Path, line: &Line, seed: u64) -> Run {
     }
     let loss = |side: SideId| {
         let (mut lost, mut total) = (0.0, 0.0);
-        for u in sim.units().iter().filter(|u| u.side == side && !u.synthetic) {
+        for u in sim
+            .units()
+            .iter()
+            .filter(|u| u.side == side && !u.synthetic)
+        {
             lost += f64::from(u.initial_soldiers.saturating_sub(u.soldiers()));
             total += f64::from(u.initial_soldiers);
         }
         lost / total.max(1.0)
     };
     let count = |side: SideId, fate: UnitFate| {
-        sim.units().iter().filter(|u| u.side == side && !u.synthetic && u.fate() == fate).count()
+        sim.units()
+            .iter()
+            .filter(|u| u.side == side && !u.synthetic && u.fate() == fate)
+            .count()
     };
     let (mut quiver, mut left) = (0.0, 0.0);
-    for u in sim.units().iter().filter(|u| !u.synthetic && u.stats.ammo > 0) {
+    for u in sim
+        .units()
+        .iter()
+        .filter(|u| !u.synthetic && u.stats.ammo > 0)
+    {
         quiver += f64::from(u.stats.ammo);
         left += f64::from(u.ammo.min(u.stats.ammo));
     }
     let _ = UnitCategory::Ranged;
     Run {
-        winner: if sim.is_finished() { sim.winner() } else { None },
+        winner: if sim.is_finished() {
+            sim.winner()
+        } else {
+            None
+        },
         end_s: sim.elapsed(),
         contact_s,
         first_rout_s,
@@ -528,7 +591,11 @@ fn median(mut values: Vec<f64>, digits: i32) -> Option<f64> {
     }
     values.sort_by(f64::total_cmp);
     let n = values.len();
-    let m = if n % 2 == 1 { values[n / 2] } else { (values[n / 2 - 1] + values[n / 2]) / 2.0 };
+    let m = if n % 2 == 1 {
+        values[n / 2]
+    } else {
+        (values[n / 2 - 1] + values[n / 2]) / 2.0
+    };
     Some(round(m, digits))
 }
 
@@ -577,7 +644,9 @@ fn play(data: &GameData, data_dir: &Path, lines: &[Line], threads: usize) -> Vec
         for _ in 0..threads.max(1) {
             scope.spawn(|| loop {
                 let t = next.fetch_add(1, Ordering::Relaxed);
-                let Some(&(line, seed)) = tasks.get(t) else { break };
+                let Some(&(line, seed)) = tasks.get(t) else {
+                    break;
+                };
                 let run = run_one(data, data_dir, &lines[line], seed);
                 results.lock().expect("results")[t] = Some(run);
             });
@@ -588,8 +657,10 @@ fn play(data: &GameData, data_dir: &Path, lines: &[Line], threads: usize) -> Vec
     let mut cursor = 0;
     for line in lines {
         let n = line.seeds as usize;
-        let runs: Vec<Run> =
-            results[cursor..cursor + n].iter().map(|r| r.clone().expect("run")).collect();
+        let runs: Vec<Run> = results[cursor..cursor + n]
+            .iter()
+            .map(|r| r.clone().expect("run"))
+            .collect();
         cursor += n;
         rows.push(row_of(line, &runs));
     }
@@ -597,7 +668,8 @@ fn play(data: &GameData, data_dir: &Path, lines: &[Line], threads: usize) -> Vec
 }
 
 fn summary(report: &Report) -> String {
-    let f = |x: Option<f64>, scale: f64| x.map_or("   -".to_owned(), |v| format!("{:4.0}", v * scale));
+    let f =
+        |x: Option<f64>, scale: f64| x.map_or("   -".to_owned(), |v| format!("{:4.0}", v * scale));
     let mut out = String::new();
     for row in &report.rows {
         out += &format!(
@@ -630,13 +702,22 @@ fn smoke(lines: Vec<Line>) -> Vec<Line> {
     let mut picked: Vec<Line> = Vec::new();
     for kind in ["duel", "army", "siege"] {
         if let Some(l) = lines.iter().find(|l| l.kind == kind) {
-            picked.push(Line { seeds: 1, ..l.clone() });
+            picked.push(Line {
+                seeds: 1,
+                ..l.clone()
+            });
         }
     }
     picked
 }
 
-fn report_of(matrix: &Matrix, data: &GameData, data_dir: &Path, lines: &[Line], threads: usize) -> Report {
+fn report_of(
+    matrix: &Matrix,
+    data: &GameData,
+    data_dir: &Path,
+    lines: &[Line],
+    threads: usize,
+) -> Report {
     Report {
         description: matrix.description.clone(),
         cap_s: matrix.cap_s,
@@ -673,8 +754,9 @@ fn load_matrix(path: &Path) -> Matrix {
 fn main() {
     let mut args = std::env::args().skip(1);
     let (mut smoke_only, mut out, mut filter, mut matrix_path) = (false, None, None, None);
-    let mut threads =
-        std::thread::available_parallelism().map_or(2, |n| n.get()).min(6);
+    let mut threads = std::thread::available_parallelism()
+        .map_or(2, |n| n.get())
+        .min(6);
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--smoke" => smoke_only = true,
@@ -710,7 +792,12 @@ fn main() {
     }
     let json = serde_json::to_string_pretty(&report).expect("serialise") + "\n";
     std::fs::write(&target, json).expect("write report");
-    eprintln!("{} rows, {:.0} s, written to {}", report.rows.len(), started.elapsed().as_secs_f64(), target.display());
+    eprintln!(
+        "{} rows, {:.0} s, written to {}",
+        report.rows.len(),
+        started.elapsed().as_secs_f64(),
+        target.display()
+    );
 }
 
 #[cfg(test)]
@@ -742,7 +829,10 @@ mod tests {
         let lines = smoke(lines_of(&m));
         let a = report_of(&m, game_data(), &data_dir(), &lines, 1);
         let b = report_of(&m, game_data(), &data_dir(), &lines, 3);
-        assert_eq!(serde_json::to_string(&a).unwrap(), serde_json::to_string(&b).unwrap());
+        assert_eq!(
+            serde_json::to_string(&a).unwrap(),
+            serde_json::to_string(&b).unwrap()
+        );
     }
 
     /// The matrix names only existing unit types and loadable maps, among them
@@ -752,17 +842,39 @@ mod tests {
         let m = matrix();
         let data = game_data();
         let known = |id: &String| {
-            data.unit_types.contains_key(&UnitTypeId::new(format!("unit_{id}")).unwrap())
+            data.unit_types
+                .contains_key(&UnitTypeId::new(format!("unit_{id}")).unwrap())
         };
         assert_eq!(m.duels.types.len(), 14);
         assert!(m.duels.types.iter().all(known));
         for l in &m.armies.lines {
-            assert!(l.attacker.iter().chain(&l.defender).all(|(id, _)| known(id)), "{}", l.id);
+            assert!(
+                l.attacker
+                    .iter()
+                    .chain(&l.defender)
+                    .all(|(id, _)| known(id)),
+                "{}",
+                l.id
+            );
         }
         for l in &m.sieges.lines {
-            assert!(l.attacker.iter().chain(&l.defender).all(|(id, _)| known(id)), "{}", l.id);
+            assert!(
+                l.attacker
+                    .iter()
+                    .chain(&l.defender)
+                    .all(|(id, _)| known(id)),
+                "{}",
+                l.id
+            );
         }
-        for id in ["crecy", "poitiers", "azincourt", "formigny", "castillon", "auray"] {
+        for id in [
+            "crecy",
+            "poitiers",
+            "azincourt",
+            "formigny",
+            "castillon",
+            "auray",
+        ] {
             assert!(m.historical.maps.iter().any(|m| m == id), "{id} missing");
         }
         for id in &m.historical.maps {

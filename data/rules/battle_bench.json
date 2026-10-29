@@ -2,7 +2,7 @@
   "description": "Matrice de référence du banc d'équilibre des batailles (lot BANC-1, ADR 0798) : duels 1 contre 1, armées de campagne types, cartes historiques, sièges. Lue par core/crates/sim-battle/examples/battle_bench.rs. Chaque section dit ses graines (numéros 0..n) et ses modes de pilotage ; le banc rejoue chaque ligne dans l'ordre et écrit out/bench/<date>.json.",
   "cap_s": 1800,
   "duels": {
-    "seeds": 2,
+    "seeds": 6,
     "terrain": "plains",
     "per_side": 1,
     "modes": ["ai_vs_ai"],
@@ -14,7 +14,7 @@
     ]
   },
   "armies": {
-    "seeds": 4,
+    "seeds": 12,
     "modes": ["ai_vs_ai", "passive_attacker", "passive_defender", "blob", "flank"],
     "lines": [
       {
@@ -50,12 +50,12 @@
     ]
   },
   "historical": {
-    "seeds": 4,
+    "seeds": 12,
     "modes": ["ai_vs_ai"],
     "maps": ["crecy", "poitiers", "azincourt", "formigny", "castillon", "auray"]
   },
   "sieges": {
-    "seeds": 3,
+    "seeds": 8,
     "cap_s": 900,
     "modes": ["ai_vs_ai", "passive_defender"],
     "lines": [

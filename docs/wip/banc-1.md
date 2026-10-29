@@ -1,9 +1,9 @@
 # BANC-1 — binaire de banc et matrice de référence
 
-Etat : exemple `core/crates/sim-battle/examples/battle_bench.rs`, matrice `data/rules/battle_bench.json`
-(schéma `data/schemas/battle_bench.schema.json`) écrits ; reste à compiler, lancer le banc complet, consigner la matrice.
+Etat : FAIT sauf validation finale (fmt, clippy OK ; tests workspace en cours). Banc complet 29 s release.
+
 
 Commande : `tools/heavy.sh cargo run --release -p sim-battle --example battle_bench` (options `--smoke`, `--filter`, `--threads`, `--out`).
 Sortie : `out/bench/<date>.json` + résumé texte.
 
-Prochaine étape : build, tests (`bench_smoke`, `bench_is_deterministic`), banc complet, ADR 0798, référence dans `docs/bench/`.
+Référence : docs/bench/reference-2026-10-29.{json,txt}, résumé dans ADR 0798. Suite : BANC-2 (--emit-auto-fixture, data_hash) et BANC-3 (bandes), hors de ce lot.
