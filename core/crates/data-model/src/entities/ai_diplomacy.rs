@@ -311,6 +311,13 @@ pub struct NegotiationRules {
     /// Truce (seasons) after a treaty peace (the Hundred Years' War was a
     /// string of short truces: Malestroit 1343, Bordeaux 1357).
     pub peace_truce_turns: u32,
+    /// ECO-R0: length (seasons) of the truce clause of the treaty menu; its label is derived
+    /// from it.
+    pub truce_turns: u32,
+    /// ECO-R0: opinion the creditor holds against a payer whose tribute is suspended for lack
+    /// of funds (negative), and for how many seasons.
+    pub unpaid_tribute_opinion: i32,
+    pub unpaid_tribute_seasons: u32,
     /// A pretender to the other's throne resists any peace that gives it
     /// no land, unless badly beaten.
     pub pretender_reluctance: i32,

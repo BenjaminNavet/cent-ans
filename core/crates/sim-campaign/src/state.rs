@@ -608,6 +608,10 @@ pub struct FactionState {
     pub allies: BTreeSet<FactionId>,
     /// Truce partner -> turn at which the truce ends.
     pub truces: BTreeMap<FactionId, u32>,
+    /// ECO-R0: truce partner -> turn the running truce was signed (read by `perjury::truce_age`;
+    /// absent in old saves, which fall back to the standard truce length).
+    #[serde(default)]
+    pub truce_started: BTreeMap<FactionId, u32>,
     pub alive: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ruler: Option<CharacterId>,
@@ -754,6 +758,7 @@ impl FactionState {
             at_war_with: BTreeSet::new(),
             allies: BTreeSet::new(),
             truces: BTreeMap::new(),
+            truce_started: BTreeMap::new(),
             alive: true,
             ruler: None,
             heir: None,

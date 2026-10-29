@@ -255,7 +255,9 @@ impl EventRefs<'_> {
                 self.faction("effects.faction", Some(faction));
                 self.faction("effects.towards", towards.as_ref());
             }
-            EventEffect::DeclareWar { a, b } | EventEffect::Peace { a, b } => {
+            EventEffect::DeclareWar { a, b }
+            | EventEffect::Peace { a, b }
+            | EventEffect::Alliance { a, b } => {
                 self.faction("effects.a", Some(a));
                 self.faction("effects.b", Some(b));
             }

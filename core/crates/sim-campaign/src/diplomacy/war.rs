@@ -523,13 +523,15 @@ impl CampaignState {
             let loser = if loss_a > loss_b { a } else { b };
             crate::feudal::record_liege_defeat(self, data, loser);
         }
-        let until = self.turn + truce_turns;
+        let signed = self.turn;
+        let until = signed + truce_turns;
         for (x, y) in [(a, b), (b, a)] {
             let f = self.factions.get_mut(x).expect("exists");
             f.at_war_with.remove(y);
             f.war_scores.remove(y);
             f.war_started.remove(y);
             f.truces.insert(y.clone(), until);
+            f.truce_started.insert(y.clone(), signed);
         }
         let mut ceded_names = Vec::new();
         for province in provinces {

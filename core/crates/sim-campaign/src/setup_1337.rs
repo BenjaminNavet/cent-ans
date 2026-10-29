@@ -337,6 +337,7 @@ fn init_relations(state: &mut CampaignState, data: &GameData) {
                 }
                 RelationStatus::Truce => link(state, id, other, |f, to| {
                     f.truces.insert(to.clone(), INITIAL_TRUCE_TURNS);
+                    f.truce_started.insert(to.clone(), 0);
                 }),
                 RelationStatus::Embargo => {
                     let own = state.factions.get_mut(id).expect("exists");

@@ -27,8 +27,6 @@ use crate::common::{faction_refs, FactionRef};
 
 /// Gift sent by the "Présents" action (livres).
 pub const GIFT_AMOUNT: i64 = 1000;
-/// Length (seasons) of the truce clause of the menu.
-pub const TRUCE_TURNS: u32 = 8;
 
 /// `{text, value, turns_left}`: one weighted reason (`turns_left` 0: permanent).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -589,13 +587,14 @@ fn clause_menu(data: &GameData, o: &TreatyOptions) -> Vec<ClauseChoice> {
         });
     };
     use ClauseSlot::{Common, Demand, Offer};
+    let truce_turns = data.ai_diplomacy.negotiation.truce_turns;
     if o.at_war {
         push(Common, "", "Paix".into(), Article::Peace);
         push(
             Common,
             "",
-            "Trêve de deux ans".into(),
-            Article::Truce { turns: TRUCE_TURNS },
+            negotiation::truce_label(truce_turns),
+            Article::Truce { turns: truce_turns },
         );
     }
     if !o.allied || o.defensive_alliance {

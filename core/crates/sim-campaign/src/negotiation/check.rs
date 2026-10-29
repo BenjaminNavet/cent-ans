@@ -44,6 +44,11 @@ impl Article {
                 if *per_season <= 0 || *seasons == 0 || *seasons > MAX_TRIBUTE_SEASONS {
                     return Err(DiplomacyError::InvalidAmount);
                 }
+                // ECO-R0: the first payment, with the gold of the same treaty, must be there.
+                let giver = deal.giver(self).expect("giver");
+                if deal.state.factions[giver].treasury < deal.committed_funds(self) {
+                    return Err(DiplomacyError::InsufficientFunds);
+                }
                 Ok(())
             }
             Article::Gold { amount, .. } => {
@@ -51,7 +56,7 @@ impl Article {
                     return Err(DiplomacyError::InvalidAmount);
                 }
                 let giver = deal.giver(self).expect("giver");
-                if deal.state.factions[giver].treasury < *amount {
+                if deal.state.factions[giver].treasury < deal.committed_funds(self) {
                     return Err(DiplomacyError::InsufficientFunds);
                 }
                 Ok(())

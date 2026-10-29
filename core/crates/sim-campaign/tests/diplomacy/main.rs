@@ -5,6 +5,7 @@ mod al_alliance_offers;
 mod dp1_negotiation;
 mod dp2_explain;
 mod dp2_passage;
+mod eco_r0;
 mod ep9_refused;
 mod eq3_truce_allies;
 mod eq6_main_claim;

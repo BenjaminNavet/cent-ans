@@ -418,6 +418,11 @@ pub enum EventEffect {
         a: FactionId,
         b: FactionId,
     },
+    /// Military alliance between `a` and `b` (no effect while at war or already allied).
+    Alliance {
+        a: FactionId,
+        b: FactionId,
+    },
     AddTrait {
         #[serde(default)]
         character: CharacterRef,

@@ -275,6 +275,7 @@ pub fn event_kind_key(event: &data_model::Event) -> String {
             EventEffect::PlagueWave { .. } => Some("plague"),
             EventEffect::DeclareWar { .. } => Some("war_declared"),
             EventEffect::Peace { .. } => Some("peace_signed"),
+            EventEffect::Alliance { .. } => Some("alliance_formed"),
             EventEffect::KillCharacter { .. } => Some("death"),
             EventEffect::CaptureCharacter { .. } => Some("general_captured"),
             _ => None,

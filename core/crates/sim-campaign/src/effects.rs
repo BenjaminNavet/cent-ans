@@ -127,6 +127,11 @@ impl CampaignState {
                 data.faction_name(a),
                 data.faction_name(b)
             ),
+            EventEffect::Alliance { a, b } => format!(
+                "Alliance entre {} et {}",
+                data.faction_name(a),
+                data.faction_name(b)
+            ),
             EventEffect::AddTrait {
                 character,
                 faction,
@@ -541,6 +546,16 @@ pub fn apply_effect(
         EventEffect::Peace { a, b } => {
             if state.is_at_war(a, b) {
                 state.make_peace(data, a, b, &[], 0, PEACE_TRUCE_TURNS);
+            }
+        }
+        EventEffect::Alliance { a, b } => {
+            if a != b
+                && state.faction_alive(a)
+                && state.faction_alive(b)
+                && !state.is_at_war(a, b)
+                && !state.is_allied(a, b)
+            {
+                state.form_alliance(data, a, b);
             }
         }
         EventEffect::AddTrait {

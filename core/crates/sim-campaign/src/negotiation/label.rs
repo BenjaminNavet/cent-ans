@@ -7,6 +7,12 @@ use super::{party_id, Article};
 use crate::diplomacy;
 use crate::state::CampaignState;
 
+/// French label of a truce clause of `turns` seasons ("Trêve de 5 ans").
+pub fn truce_label(turns: u32) -> String {
+    let years = (turns / 4).max(1);
+    format!("Trêve de {years} an{}", if years > 1 { "s" } else { "" })
+}
+
 impl Article {
     /// French label of the article from the proposer's point of view.
     pub fn label(
@@ -29,7 +35,7 @@ impl Article {
                 } / 4)
                     .max(1)
             ),
-            Article::Truce { turns } => format!("Trêve de {} an(s)", (turns / 4).max(1)),
+            Article::Truce { turns } => truce_label(*turns),
             Article::Mediation { turns } => {
                 format!("Trêve de {} an(s) par médiation", (turns / 4).max(1))
             }

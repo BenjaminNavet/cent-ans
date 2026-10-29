@@ -29,6 +29,11 @@
       "text": "Sceller le traité de Vincennes",
       "effects": [
         {
+          "type": "alliance",
+          "a": "fac_scotland",
+          "b": "fac_france"
+        },
+        {
           "type": "opinion",
           "faction": "fac_france",
           "amount": 25,

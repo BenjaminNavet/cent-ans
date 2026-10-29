@@ -42,6 +42,7 @@ mod label;
 mod reasons;
 mod value;
 
+pub use label::truce_label;
 pub use reasons::ReasonList;
 
 use crate::diplomacy::{self, DiplomacyError, RelationKind};
@@ -705,6 +706,20 @@ impl<'a> Deal<'a> {
             .count()
     }
 
+    /// Livres `article`'s giver commits in the whole treaty: every `Gold` article plus the first
+    /// payment of every `Tribute` article he gives (ECO-R0: checked against his treasury).
+    pub fn committed_funds(&self, article: &Article) -> i64 {
+        self.articles
+            .iter()
+            .filter(|a| a.giver() == article.giver())
+            .map(|a| match a {
+                Article::Gold { amount, .. } => *amount,
+                Article::Tribute { per_season, .. } => *per_season,
+                _ => 0,
+            })
+            .sum()
+    }
+
     /// Treaty points of a sum of livres, capped.
     pub fn gold_points(&self, amount: i64) -> i32 {
         let rules = self.rules();
@@ -1198,6 +1213,30 @@ pub(crate) fn resolve_negotiation(
         let dues: Vec<TributeDue> = state.factions[id].ledger.tributes.clone();
         for due in &dues {
             if !state.factions.get(&due.to).is_some_and(|f| f.alive) {
+                continue;
+            }
+            if state.factions[id].treasury < due.per_season {
+                // ECO-R0: the treasury never goes negative for a tribute: it is suspended, the
+                // creditor takes note.
+                state.add_modifier(
+                    &due.to,
+                    id,
+                    rules.unpaid_tribute_opinion,
+                    "Tribut impayé",
+                    rules.unpaid_tribute_seasons,
+                );
+                events.push(
+                    GameEvent::new(
+                        EventKind::Diplomacy,
+                        format!(
+                            "{} ne peut verser son tribut de {} livres à {} : il est suspendu cette saison.",
+                            data.faction_name(id),
+                            due.per_season,
+                            data.faction_name(&due.to)
+                        ),
+                    )
+                    .faction(id),
+                );
                 continue;
             }
             state.factions.get_mut(id).expect("listed").treasury -= due.per_season;

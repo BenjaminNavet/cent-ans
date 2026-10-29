@@ -37,11 +37,16 @@ pub struct EventPreview {
 }
 
 /// Seasons since `author` and `other` signed the truce running between
-/// them (the standard length is assumed: the state keeps only the end).
+/// them. The signing turn is kept in `truce_started`; an old save without it falls back to the
+/// standard truce length (ECO-R0).
 pub fn truce_age(state: &CampaignState, author: &FactionId, other: &FactionId) -> Option<u32> {
-    let until = *state.factions.get(author)?.truces.get(other)?;
+    let faction = state.factions.get(author)?;
+    let until = *faction.truces.get(other)?;
     let left = until.checked_sub(state.turn).filter(|l| *l > 0)?;
-    Some(TRUCE_TURNS.saturating_sub(left))
+    match faction.truce_started.get(other) {
+        Some(started) => Some(state.turn.saturating_sub(*started)),
+        None => Some(TRUCE_TURNS.saturating_sub(left)),
+    }
 }
 
 /// Id of the event breaking the truce between `author` and `other`: the

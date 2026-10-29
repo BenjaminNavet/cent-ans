@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use sim_campaign::{CampaignState, EventKind, GameEvent};
 
 /// Names of the metrics, as keys of the bands file.
-pub const METRIC_NAMES: [&str; 18] = [
+pub const METRIC_NAMES: [&str; 23] = [
     "revolts_per_game",
     "bankruptcies_per_game",
     "war_turns_mean",
@@ -40,6 +40,11 @@ pub const METRIC_NAMES: [&str; 18] = [
     "provinces_held_end",
     "treasury_end",
     "reign_score",
+    "army_spend_share",
+    "extraordinary_income_share",
+    "men_under_arms_peak",
+    "ransom_paid_max_seasons",
+    "provinces_controlled_end",
 ];
 
 /// The metrics of one game.
@@ -93,11 +98,30 @@ pub struct GameMetrics {
     /// progress included.
     #[serde(default)]
     pub reign_score: u32,
+    /// ECO-R0: share (0-1) of the house's total spending (all seasons) that goes to the armies
+    /// (upkeep and sieges).
+    #[serde(default)]
+    pub army_spend_share: f64,
+    /// ECO-R0: share (0-1) of the house's total receipts (all seasons) that is extraordinary
+    /// (levies and loans taken, outside the normal `income`).
+    #[serde(default)]
+    pub extraordinary_income_share: f64,
+    /// ECO-R0: most men under arms (strength of every army) the house had at once.
+    #[serde(default)]
+    pub men_under_arms_peak: u32,
+    /// ECO-R0: biggest ransom installment the house paid in one season, as a multiple of its
+    /// gross receipts of that season (0 when it never paid one).
+    #[serde(default)]
+    pub ransom_paid_max_seasons: f64,
+    /// ECO-R0: provinces the house controls (de facto) at the end; `provinces_held_end` counts
+    /// those it owns (de jure).
+    #[serde(default)]
+    pub provinces_controlled_end: u32,
 }
 
 impl GameMetrics {
     /// The values by metric name (same names as [`METRIC_NAMES`]).
-    pub fn values(&self) -> [(&'static str, f64); 18] {
+    pub fn values(&self) -> [(&'static str, f64); 23] {
         [
             (METRIC_NAMES[0], f64::from(self.revolts)),
             (METRIC_NAMES[1], f64::from(self.bankruptcies)),
@@ -120,6 +144,11 @@ impl GameMetrics {
             (METRIC_NAMES[15], f64::from(self.provinces_held_end)),
             (METRIC_NAMES[16], self.treasury_end as f64),
             (METRIC_NAMES[17], f64::from(self.reign_score)),
+            (METRIC_NAMES[18], self.army_spend_share),
+            (METRIC_NAMES[19], self.extraordinary_income_share),
+            (METRIC_NAMES[20], f64::from(self.men_under_arms_peak)),
+            (METRIC_NAMES[21], self.ransom_paid_max_seasons),
+            (METRIC_NAMES[22], f64::from(self.provinces_controlled_end)),
         ]
     }
 }
@@ -142,6 +171,16 @@ pub struct MetricsTracker {
     durations: Vec<u32>,
     alive: BTreeSet<FactionId>,
     eliminated: BTreeSet<FactionId>,
+    /// ECO-R0: house spending on the armies / in all, summed over the seasons.
+    army_spend: i64,
+    total_spend: i64,
+    /// ECO-R0: extraordinary receipts / all receipts, summed over the seasons.
+    extraordinary_receipts: i64,
+    total_receipts: i64,
+    men_peak: u32,
+    ransom_max_seasons: f64,
+    /// Ransom debts of the house seen at the previous end of turn: captive -> remaining.
+    ransom_remaining: BTreeMap<data_model::CharacterId, i64>,
 }
 
 fn alive_factions(state: &CampaignState) -> BTreeSet<FactionId> {
@@ -151,6 +190,20 @@ fn alive_factions(state: &CampaignState) -> BTreeSet<FactionId> {
         .filter(|(_, f)| f.alive)
         .map(|(id, _)| id.clone())
         .collect()
+}
+
+/// Ransom debts of the player's house: captive -> livres still owed.
+fn ransom_remaining(state: &CampaignState) -> BTreeMap<data_model::CharacterId, i64> {
+    state
+        .factions
+        .get(&state.player_faction)
+        .map(|f| {
+            f.ransom_debts
+                .iter()
+                .map(|debt| (debt.character.clone(), debt.remaining))
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 fn war_pairs(state: &CampaignState) -> BTreeSet<(FactionId, FactionId)> {
@@ -193,12 +246,54 @@ impl MetricsTracker {
             durations: Vec::new(),
             alive: alive_factions(state),
             eliminated: BTreeSet::new(),
+            army_spend: 0,
+            total_spend: 0,
+            extraordinary_receipts: 0,
+            total_receipts: 0,
+            men_peak: 0,
+            ransom_remaining: ransom_remaining(state),
+            ransom_max_seasons: 0.0,
         }
+    }
+
+    /// ECO-R0: books the house's season (budget, men under arms, ransom installments paid).
+    fn observe_house(&mut self, state: &CampaignState) {
+        let house = &state.player_faction;
+        let Some(faction) = state.factions.get(house) else {
+            return;
+        };
+        let budget = &faction.last_budget;
+        self.army_spend += budget.army_upkeep + budget.siege;
+        self.total_spend += budget.upkeep();
+        let ordinary = budget.receipts();
+        let extraordinary = budget.levy_income + budget.borrowed;
+        self.extraordinary_receipts += extraordinary;
+        self.total_receipts += ordinary + extraordinary;
+        let men: u32 = state
+            .armies
+            .values()
+            .filter(|army| &army.faction == house)
+            .map(|army| army.total_strength())
+            .sum();
+        self.men_peak = self.men_peak.max(men);
+        let now = ransom_remaining(state);
+        if ordinary > 0 {
+            for (captive, before) in &self.ransom_remaining {
+                // A debt that shrank or vanished was paid (a missed installment makes it grow).
+                let after = now.get(captive).copied().unwrap_or(0);
+                if after < *before {
+                    let seasons = (*before - after) as f64 / ordinary as f64;
+                    self.ransom_max_seasons = self.ransom_max_seasons.max(seasons);
+                }
+            }
+        }
+        self.ransom_remaining = now;
     }
 
     /// Takes one end of turn into account: the state after it and the events it returned.
     pub fn observe(&mut self, state: &CampaignState, events: &[GameEvent]) {
         self.turns += 1;
+        self.observe_house(state);
         for event in events {
             match event.kind {
                 EventKind::Revolt => {
@@ -302,13 +397,28 @@ impl MetricsTracker {
             revolts_put_down: self.revolts_put_down,
             uprisings: self.uprisings,
             battles: self.battles,
-            provinces_held_end: state.controlled_provinces(&state.player_faction).count() as u32,
+            provinces_held_end: state.owned_provinces(&state.player_faction).len() as u32,
+            provinces_controlled_end: state.controlled_provinces(&state.player_faction).count()
+                as u32,
+            army_spend_share: share(self.army_spend, self.total_spend),
+            extraordinary_income_share: share(self.extraordinary_receipts, self.total_receipts),
+            men_under_arms_peak: self.men_peak,
+            ransom_paid_max_seasons: self.ransom_max_seasons,
             treasury_end: state
                 .factions
                 .get(&state.player_faction)
                 .map_or(0, |f| f.treasury),
             reign_score: state.reign_score(data, true),
         }
+    }
+}
+
+/// `part / total` in 0-1, 0 when there is no total.
+fn share(part: i64, total: i64) -> f64 {
+    if total <= 0 {
+        0.0
+    } else {
+        (part as f64 / total as f64).clamp(0.0, 1.0)
     }
 }
 
@@ -463,6 +573,33 @@ mod tests {
             CampaignState::new_1337(&data, FactionId::new("fac_france").unwrap(), 1).unwrap();
         let share = leader_territory_share(&state);
         assert!(share > 0.0 && share < 1.0, "{share}");
+    }
+
+    #[test]
+    fn twenty_turn_game_fills_the_economic_metrics() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+        let (data, _) = data_model::GameData::load(&root).expect("data");
+        let france = fid("fac_france");
+        let mut state = CampaignState::new_1337(&data, france.clone(), 1).unwrap();
+        let mut tracker = MetricsTracker::new(&state);
+        for _ in 0..20 {
+            for order in ai::plan_turn(&state, &data, &france) {
+                let _ = state.submit_order(&data, order);
+            }
+            let events = state.end_turn_with(&data, ai::plan_turn);
+            tracker.observe(&state, &events);
+        }
+        let metrics = tracker.finish(&state, &data);
+        assert!(
+            metrics.army_spend_share > 0.0 && metrics.army_spend_share <= 1.0,
+            "{metrics:?}"
+        );
+        assert!((0.0..=1.0).contains(&metrics.extraordinary_income_share));
+        assert!(metrics.men_under_arms_peak > 0, "{metrics:?}");
+        assert!(metrics.ransom_paid_max_seasons >= 0.0);
+        assert!(metrics.provinces_controlled_end > 0, "{metrics:?}");
+        assert!(metrics.provinces_held_end > 0);
+        eprintln!("ECO-R0 20 turns: {metrics:?}");
     }
 
     fn game(revolts: u32, war: f64, share: f64) -> GameMetrics {
