@@ -540,7 +540,10 @@ fn update_fields(
         }
     };
     let [prestige_tip, men_tip, unrest_tip] = text::forecast_tooltips(hud.forecast.as_ref());
-    let reserve_tip = hud.reserve.as_ref().map_or_else(String::new, text::reserve_tooltip);
+    let reserve_tip = hud
+        .reserve
+        .as_ref()
+        .map_or_else(String::new, text::reserve_tooltip);
     let arrow = |gauge: Option<&game_api::hud::GaugeView>| {
         gauge.map_or_else(String::new, |g| format!(" {}", text::arrow(g)))
     };

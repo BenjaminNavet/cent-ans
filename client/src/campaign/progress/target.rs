@@ -491,8 +491,9 @@ mod tests {
     #[test]
     fn every_step_target_can_be_resolved() {
         let root = crate::paths::find_root().expect("repo root");
-        let text = std::fs::read_to_string(crate::paths::data_dir(&root).join("tutorial/steps.json"))
-            .expect("steps.json");
+        let text =
+            std::fs::read_to_string(crate::paths::data_dir(&root).join("tutorial/steps.json"))
+                .expect("steps.json");
         let raw: serde_json::Value = serde_json::from_str(&text).unwrap();
         let steps = raw["steps"].as_object().unwrap();
         for id in raw["step_ids"].as_array().unwrap() {
