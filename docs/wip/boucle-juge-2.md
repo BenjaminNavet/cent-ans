@@ -71,8 +71,12 @@ Suite : choisir les refontes prioritaires dans les audits et les lancer en lots 
 - Choix de mise en scène tranchés en autonomie : météo dégagée au 1er tour (oui) ; aube rose à chaque tour (non, garder le seul crépuscule). Réversibles.
 - Meshy prévu : 4 maquettes famille « ouest » (village, château, bourg, abbaye) × 30 = 120 crédits, avec le lot R6 (lieux génériques) ; images sources Z-Image.
 
-## PAUSE (29/10, demandée par le joueur)
+## PAUSE (29/10) — levée, reprise en autonomie totale
 - Main = 69c48fe9a + notes (MEM5 fusionné, ADR 0795) ; contrôle complet MEM5 lancé (out/check-mem5/status).
 - TUTO rebasé, ADR 0796 numéroté, prêt à fusionner (branche worktree-agent-a62be3909ca64d6f4).
 - Lots arrêtés en wip dans leurs worktrees : IA-CAV, FPS, HIST4, R1 renommée, BUG-HIST (vérif presque finie), ECO-R0, VIS-R2, VIS-R1.
 - Reprise : fusionner TUTO puis BUG-HIST ; relancer les autres lots depuis leur note docs/wip ; XP-POURQUOI/AUDIENCE après TUTO et R1.
+
+## Reprise (29/10 nuit, autonomie totale)
+- TUTO (ADR 0796) et BUG-HIST fusionnés ; contrôle complet out/check-tuto.
+- Relancés : VIS-R1, VIS-R2, R1 renommée, ECO-R0, HIST4, IA-CAV. FPS gardé pour la fin (mesures A/B illisibles sur machine chargée : à lancer seul).
