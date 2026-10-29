@@ -130,6 +130,8 @@ mod cover;
 pub use self::cover::*;
 mod horse;
 use self::horse::*;
+mod mass;
+use self::mass::*;
 mod plan_field;
 mod retreat;
 use self::plan_field::*;

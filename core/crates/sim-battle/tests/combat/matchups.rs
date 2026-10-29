@@ -148,12 +148,14 @@ fn trace() {
                 .iter()
                 .map(|u| {
                     format!(
-                        "{}{}:{:.0}/{:?}/m{:.0}",
+                        "{}{}:{:.0}/{:?}/m{:.0}@{:.0},{:.0}",
                         if u.side == SideId::Attacker { "A" } else { "D" },
                         u.id,
                         u.hp,
                         u.state,
-                        u.morale
+                        u.morale,
+                        u.x,
+                        u.z
                     )
                 })
                 .collect();
@@ -172,7 +174,11 @@ fn trace() {
                 sim.elapsed(),
                 sum(SideId::Attacker),
                 sum(SideId::Defender),
-                line.len()
+                if std::env::var("DETAIL").is_ok() {
+                    line.join(" ")
+                } else {
+                    line.len().to_string()
+                }
             );
         }
     }

@@ -393,8 +393,18 @@ pub(in crate::ai) fn plan_field(view: &mut View) {
     }
 
     // Cavalry.
+    let mass = plan_mass(view, &roles, facing, defensive, &enemy_melee);
     for &i in &roles.horse {
-        plan_horse(view, i, &roles, anchor, facing, defensive, &enemy_melee);
+        plan_horse(
+            view,
+            i,
+            &roles,
+            anchor,
+            facing,
+            defensive,
+            &enemy_melee,
+            mass.as_ref(),
+        );
     }
 
     plan_engines(view, &roles.engines, anchor);

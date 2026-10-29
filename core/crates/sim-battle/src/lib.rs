@@ -71,6 +71,7 @@ pub(crate) mod geom;
 pub mod group_formation;
 pub(crate) mod historical;
 pub(crate) mod horse_wait;
+pub(crate) mod mass_charge;
 pub(crate) mod hover;
 pub(crate) mod hydro;
 pub mod impact;

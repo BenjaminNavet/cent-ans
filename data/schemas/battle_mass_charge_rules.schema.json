@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_mass_charge_rules.schema.json",
+  "title": "Charge groupée de la cavalerie",
+  "description": "Fichier data/rules/battle_mass_charge.json (lot IA-CAV) : comment l'IA de bataille aligne puis lance ensemble ses escadrons contre des tireurs isolés. Lu par sim-battle (MassChargeRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "reach_m": {
+      "type": "number", "minimum": 100, "maximum": 2000,
+      "description": "Les tireurs visés sont à moins de cette distance (mètres) du centre du groupe."
+    },
+    "stage_margin_m": {
+      "type": "number", "minimum": 0, "maximum": 200,
+      "description": "Marge (mètres) au-delà de la portée effective des tireurs où les escadrons s'alignent."
+    },
+    "ready_m": {
+      "type": "number", "minimum": 5, "maximum": 200,
+      "description": "Un escadron à moins de cette distance (mètres) de sa place d'alignement est prêt."
+    },
+    "stalled_s": {
+      "type": "number", "minimum": 1, "maximum": 120,
+      "description": "Un escadron immobile depuis ce temps (secondes) à moins de 3 fois ready_m de sa place est compté prêt."
+    },
+    "min_power_ratio": {
+      "type": "number", "minimum": 0, "maximum": 10,
+      "description": "Puissance du groupe de cavalerie / puissance des tireurs visés au-dessous de laquelle la charge groupée n'est pas montée."
+    },
+    "cluster_m": {
+      "type": "number", "minimum": 20, "maximum": 600,
+      "description": "Les tireurs à moins de cette distance (mètres) de la cible forment sa grappe."
+    }
+  },
+  "required": ["reach_m", "stage_margin_m", "ready_m", "stalled_s", "min_power_ratio", "cluster_m"],
+  "additionalProperties": false
+}

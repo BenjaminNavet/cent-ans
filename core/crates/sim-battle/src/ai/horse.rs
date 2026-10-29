@@ -30,6 +30,7 @@ pub(super) fn plan_horse(
     facing: f64,
     defensive: bool,
     enemy_melee: &[usize],
+    mass: Option<&Mass>,
 ) {
     if !view.free(i) {
         return;
@@ -90,6 +91,12 @@ pub(super) fn plan_horse(
             if charge_or_detour(view, i, j, d < tuning().charge_distance * 3.0) {
                 return;
             }
+        }
+    }
+    // 1c. IA-CAV: the squadrons line up out of range and charge together.
+    if let Some(m) = mass {
+        if !general_only && ride(view, i, m) {
+            return;
         }
     }
     // 2. Isolated shooters (not behind stakes facing us).
