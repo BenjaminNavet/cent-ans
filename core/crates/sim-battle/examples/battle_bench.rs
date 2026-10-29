@@ -1,4 +1,4 @@
-//! Balance bench of the 3D battle simulation (lot BANC-1, ADR 0798).
+//! Balance bench of the 3D battle simulation (lot BANC-1, ADR 0800).
 //!
 //! Replays the matrix of `data/rules/battle_bench.json` (schema
 //! `data/schemas/battle_bench.schema.json`): 1-against-1 duels of the main

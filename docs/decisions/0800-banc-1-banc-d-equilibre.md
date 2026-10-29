@@ -1,4 +1,4 @@
-# ADR 0798 — BANC-1 : banc d'équilibre des batailles
+# ADR 0800 — BANC-1 : banc d'équilibre des batailles
 
 ## Contexte
 

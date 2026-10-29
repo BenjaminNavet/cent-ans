@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/battle_bench.schema.json",
   "title": "Matrice du banc d'équilibre des batailles",
-  "description": "Fichier data/rules/battle_bench.json (lot BANC-1, ADR 0798) lu par l'exemple battle_bench de sim-battle : quelles batailles rejouer, avec quelles graines et quels modes de pilotage.",
+  "description": "Fichier data/rules/battle_bench.json (lot BANC-1, ADR 0800) lu par l'exemple battle_bench de sim-battle : quelles batailles rejouer, avec quelles graines et quels modes de pilotage.",
   "type": "object",
   "properties": {
     "description": { "type": "string" },

@@ -6,4 +6,4 @@ Etat : FAIT sauf validation finale (fmt, clippy OK ; tests workspace en cours). 
 Commande : `tools/heavy.sh cargo run --release -p sim-battle --example battle_bench` (options `--smoke`, `--filter`, `--threads`, `--out`).
 Sortie : `out/bench/<date>.json` + résumé texte.
 
-Référence : docs/bench/reference-2026-10-29.{json,txt}, résumé dans ADR 0798. Suite : BANC-2 (--emit-auto-fixture, data_hash) et BANC-3 (bandes), hors de ce lot.
+Référence : docs/bench/reference-2026-10-29.{json,txt}, résumé dans ADR 0800. Suite : BANC-2 (--emit-auto-fixture, data_hash) et BANC-3 (bandes), hors de ce lot.
