@@ -2,7 +2,7 @@
 //! grey, 255 = land, one texel per map pixel). Without the file (tests, broken install) the
 //! displayed height <= 0 stands in, as before.
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, Weak};
 
 use bevy::prelude::*;
 
@@ -63,12 +63,32 @@ pub fn decode(file: impl std::io::Read + std::io::Seek) -> Option<LandMask> {
 }
 
 pub fn load_land_mask(mut commands: Commands) {
+    commands.insert_resource(shared_land_mask());
+}
+
+/// `data/map/land_mask.png`, decoded once while any holder keeps it (orders, freshwater: 43 MiB
+/// each when decoded twice, MEM5). Empty mask without the file.
+pub fn shared_land_mask() -> LandMask {
+    static CACHE: Mutex<Option<(usize, usize, Weak<Vec<u8>>)>> = Mutex::new(None);
+    let mut cache = CACHE.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+    if let Some((width, height, weak)) = cache.as_ref()
+        && let Some(bytes) = weak.upgrade()
+    {
+        return LandMask {
+            width: *width,
+            height: *height,
+            bytes,
+        };
+    }
     let mask = paths::find_root()
         .ok()
         .and_then(|root| std::fs::File::open(paths::data_dir(&root).join("map/land_mask.png")).ok())
         .and_then(decode)
         .unwrap_or_default();
-    commands.insert_resource(mask);
+    if mask.is_loaded() {
+        *cache = Some((mask.width, mask.height, Arc::downgrade(&mask.bytes)));
+    }
+    mask
 }
 
 /// Open water at `(x, z)`: the mask when loaded, else the displayed height.

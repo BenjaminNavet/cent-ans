@@ -7,6 +7,7 @@
 
 use std::sync::{Arc, Mutex};
 
+use bevy::asset::RenderAssetUsages;
 use bevy::image::{ImageFilterMode, ImageSampler, ImageSamplerDescriptor};
 use bevy::prelude::*;
 
@@ -237,8 +238,15 @@ fn build_atlas_mips_inner(render: &VegRender, mips: &mut AtlasMips, images: &mut
                 let Some(data) = slot.lock().expect("mip slot").take() else {
                     continue;
                 };
+                // Nothing reads the atlas pixels on the CPU once the chain is in (MEM5): the
+                // upload then takes them out of the main world (2 x 165 MiB). The albedo keeps
+                // them while the normal job still has to copy its coverage.
+                let gpu_only = n == 1 || !matches!(mips.jobs[1], Job::Idle);
                 if let Some(mut image) = images.get_mut(&handle) {
                     image.data = Some(data);
+                    if gpu_only {
+                        image.asset_usage = RenderAssetUsages::RENDER_WORLD;
+                    }
                     image.texture_descriptor.mip_level_count = levels;
                     image.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
                         mag_filter: ImageFilterMode::Linear,

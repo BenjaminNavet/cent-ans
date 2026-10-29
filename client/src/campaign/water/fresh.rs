@@ -40,7 +40,7 @@ use super::height::{GroundHeight as WaterGround, HeightSampler};
 use super::materials::linear;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
-use crate::campaign::armies::landmask::{LandMask, decode};
+use crate::campaign::armies::landmask::{LandMask, shared_land_mask};
 use crate::campaign::camera::rig::CampaignRig;
 use crate::campaign::markers::placement::stable_hash;
 use crate::campaign::terrain::relief_gpu::ReliefParams;
@@ -893,10 +893,7 @@ fn build_fresh(
         return;
     };
     let render = data.render.clone().expect("checked by load");
-    let land = std::fs::File::open(paths::data_dir(&root).join("map/land_mask.png"))
-        .ok()
-        .and_then(decode)
-        .unwrap_or_default();
+    let land = shared_land_mask();
     let manifest: Value = std::fs::read(paths::data_dir(&root).join("art/dn_manifest.json"))
         .ok()
         .and_then(|bytes| serde_json::from_slice(&bytes).ok())

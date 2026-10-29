@@ -70,7 +70,7 @@ pub mod style {
 }
 
 /// An 8-bit raster, `ch` interleaved channels.
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Plane {
     pub w: usize,
     pub h: usize,
@@ -119,6 +119,24 @@ pub fn read_png(path: &Path) -> Result<Plane, String> {
     data.truncate(frame.buffer_size());
     let ch = frame.color_type.samples();
     Ok(Plane { w, h, ch, data })
+}
+
+/// One-channel plane holding max(R, G) of `plane` (unchanged when it already has one channel).
+pub fn max_rg_plane(plane: Plane) -> Plane {
+    if plane.ch < 2 {
+        return plane;
+    }
+    let data = plane
+        .data
+        .chunks_exact(plane.ch)
+        .map(|px| px[0].max(px[1]))
+        .collect();
+    Plane {
+        w: plane.w,
+        h: plane.h,
+        ch: 1,
+        data,
+    }
 }
 
 /// A wetland site (`wetland_sites_px.json`).
@@ -501,7 +519,8 @@ pub fn load(root: &Path, heights: Arc<HeightGrid>) -> Result<VegetationWorld, St
     };
     let biomes = read_png(&map_dir.join("biomes.png")).unwrap_or_else(|_| Plane::empty());
     let land = read_png(&map_dir.join("land_mask.png")).unwrap_or_else(|_| Plane::empty());
-    let wet = read_png(&map_dir.join("wetlands.png")).unwrap_or_else(|_| Plane::empty());
+    // The mask only reads max(R, G) (`mask.rs`): one plane instead of RGB (-86 MiB, MEM5).
+    let wet = max_rg_plane(read_png(&map_dir.join("wetlands.png")).unwrap_or_else(|_| Plane::empty()));
 
     // Clearings: settlements (+ crown radius, as `Vegetation.build`).
     let crown = style::crown_radius();
@@ -619,6 +638,23 @@ mod tests {
         assert_eq!(table.dist.hedge_boost, style::HEDGE_BOOST);
         // Oak is drawn in the oceanic biome as a massif tree.
         assert!(table.base[ROLE_COUNT * table.count] > 0.0);
+    }
+
+    #[test]
+    fn max_rg_plane_keeps_the_wet_mask_reading() {
+        let rgb = Plane {
+            w: 2,
+            h: 1,
+            ch: 3,
+            data: vec![10, 200, 7, 90, 30, 255],
+        };
+        let one = max_rg_plane(rgb.clone());
+        assert_eq!((one.ch, one.data.clone()), (1, vec![200, 90]));
+        for x in [0.5, 1.5] {
+            let before = rgb.texel((2.0, 1.0), x, 0.5, 0).max(rgb.texel((2.0, 1.0), x, 0.5, 1));
+            let after = one.texel((2.0, 1.0), x, 0.5, 0).max(one.texel((2.0, 1.0), x, 0.5, 1));
+            assert_eq!(before, after);
+        }
     }
 
     #[test]
