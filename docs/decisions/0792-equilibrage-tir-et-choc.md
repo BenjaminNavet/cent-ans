@@ -1,4 +1,4 @@
-# XXXX — Combat : rééquilibrage du tir (lot COMBAT, boucle juge 1)
+# 0792 — Combat : rééquilibrage du tir (lot COMBAT, boucle juge 1)
 
 ## Contexte
 Le juge a relevé : arcs longs intouchables, chevaliers et archers montés qui écrasent l'infanterie, approche lente.

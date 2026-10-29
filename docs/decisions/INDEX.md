@@ -352,3 +352,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0787 | [Sol de campagne sans patchwork](0787-sol-de-campagne-sans-patchwork.md) | accepté |
 | 0790 | [LOD1-2 refaits par voxels et texture recuite](0790-lod-par-voxels-et-texture-recuite.md) | accepté |
 | 0791 | [Sol de campagne : aspect provisoire avant le chargement du sol texturé](0791-sol-aspect-provisoire-avant-chargement.md) | accepté |
+| 0792 | [Combat : rééquilibrage du tir (lot COMBAT, boucle juge 1)](0792-equilibrage-tir-et-choc.md) | accepté |
