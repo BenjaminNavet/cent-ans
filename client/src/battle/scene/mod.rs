@@ -353,7 +353,7 @@ fn open_historical(
             })
         }
         Err(error) => {
-            warn!("historical battle {id}: {error}; custom approximation used");
+            error!("historical battle {id} ({side}): {error}; custom approximation used");
             open_session(game, config, seed)
         }
     }
@@ -621,5 +621,33 @@ mod forced_hour_tests {
         assert_eq!(forced_hour(Some("17.5")), Some(17.5));
         assert_eq!(forced_hour(Some("midday")), Some(12.0));
         assert_eq!(forced_hour(Some("nonsense")), None);
+    }
+}
+
+#[cfg(test)]
+mod historical_launch_tests {
+    use super::*;
+
+    /// Every historical battle of `data/battle_maps/` builds its scripted simulation, for each
+    /// camp and for the AI-against-AI watch (`side` empty), as the launch from the menu does.
+    #[test]
+    fn every_historical_battle_builds_for_every_side() {
+        let root = paths::find_root().expect("repo root");
+        let data_dir = paths::data_dir(&root);
+        let (game, _) = GameData::load(&data_dir).expect("game data");
+        let maps = crate::menu::historical::load_maps(&data_dir);
+        assert!(maps.len() >= 6, "historical maps: {}", maps.len());
+        for map in &maps {
+            for side in ["attacker", "defender", ""] {
+                let (sim, _, built) = historical_start(&game, &data_dir, &map.id, side, 7)
+                    .unwrap_or_else(|e| panic!("{} ({side:?}): {e}", map.id));
+                assert_eq!(built.id, map.id);
+                assert!(
+                    sim.setup().attacker.faction != sim.setup().defender.faction,
+                    "{}",
+                    map.id
+                );
+            }
+        }
     }
 }
