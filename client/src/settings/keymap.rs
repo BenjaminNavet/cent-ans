@@ -366,18 +366,11 @@ pub const ACTIONS: &[ActionDef] = &[
         &["F3"],
     ),
     action("Fenêtres", "map_toggle_objectives", "Objectifs", &["O"]),
-    action("Fenêtres", "map_toggle_agents", "Agents", &["G"]),
     action(
         "Fenêtres",
         "map_toggle_units",
         "Mes unités (armées et agents)",
         &["U"],
-    ),
-    action(
-        "Fenêtres",
-        "map_toggle_holdings",
-        "Localités (revenus, chantiers, menaces)",
-        &["B"],
     ),
     action(
         "Fenêtres",
@@ -405,9 +398,21 @@ pub const ACTIONS: &[ActionDef] = &[
     ),
     action(
         "Fenêtres",
-        "encyclopedia_open",
-        "Codex, onglet Règles",
-        &["L"],
+        "map_toggle_recruitment",
+        "Recrutement (province de l’armée choisie, sinon capitale)",
+        &["Maj+R"],
+    ),
+    action(
+        "Fenêtres",
+        "map_toggle_faction",
+        "Ma faction (impôts, édits, lois)",
+        &["P"],
+    ),
+    action(
+        "Fenêtres",
+        "map_toggle_feudal",
+        "Féodalité (titres, vassaux, suzerains)",
+        &["Maj+F"],
     ),
     action("Fenêtres", "help_open", "Aide et raccourcis", &["F1"]),
     action(

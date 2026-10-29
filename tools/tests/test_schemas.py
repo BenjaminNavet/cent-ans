@@ -10,6 +10,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "captains_rules.schema.json": ("rules/captains.json",),
     "loyalty_rules.schema.json": ("rules/loyalty.json",),
     "trait_triggers.schema.json": ("rules/trait_triggers.json",),
+    "ui_glossary.schema.json": ("ui/glossary.json",),
     "royal_act.schema.json": ("royal_acts/*.json",),
     "agent_rules.schema.json": ("rules/agents.json",),
     "ai_alignment.schema.json": ("ai/alignment.json",),

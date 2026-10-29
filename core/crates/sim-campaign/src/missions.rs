@@ -904,7 +904,7 @@ pub fn treaty_tokens(state: &CampaignState, player: &FactionId) -> Vec<String> {
 
 // ----- labels ----------------------------------------------------------------
 
-/// "600 livres, +15 prestige, −10 agitation, une compagnie gratuite".
+/// "600 livres, +15 prestige, −10 mécontentement, une compagnie gratuite".
 pub fn reward_label(reward: &MissionReward) -> String {
     let mut parts = Vec::new();
     if reward.gold != 0 {
@@ -914,7 +914,7 @@ pub fn reward_label(reward: &MissionReward) -> String {
         parts.push(format!("+{} prestige", reward.prestige));
     }
     if reward.public_order > 0 {
-        parts.push(format!("−{} agitation", reward.public_order));
+        parts.push(format!("−{} mécontentement", reward.public_order));
     }
     if reward.free_unit {
         parts.push("une compagnie gratuite".to_owned());

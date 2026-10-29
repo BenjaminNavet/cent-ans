@@ -322,12 +322,19 @@ fn open_with_key(
     paused: Option<Res<crate::menu::pause::GamePaused>>,
     mut requests: MessageWriter<OpenCodex>,
     typing: Res<TextInputFocus>,
+    keymap: Option<Res<crate::settings::KeyMap>>,
 ) {
     if *state.get() == AppState::Campaign
         && !overlay.open
         && !paused.is_some_and(|paused| paused.0)
         && !typing.is_active()
-        && keys.just_pressed(KeyCode::KeyK)
+        && crate::campaign::hud::keys::action_down(
+            keymap.as_deref(),
+            "codex_open",
+            KeyCode::KeyK,
+            &keys,
+            true,
+        )
     {
         requests.write(OpenCodex::default());
     }

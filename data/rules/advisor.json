@@ -17,7 +17,7 @@
       "trigger": { "kind": "idle_sites", "min_sites": 3 },
       "cooldown_seasons": 4,
       "title": "Des chantiers vous attendent",
-      "text": "Messire, {sites} colonies n’ont aucun chantier et vous avez {treasury} livres en caisse : c’est là que l’argent doit travailler (près de {province}). Bâtir rapporte plus que thésauriser."
+      "text": "Messire, {sites} localités n’ont aucun chantier et vous avez {treasury} livres en caisse : c’est là que l’argent doit travailler (près de {province}). Bâtir rapporte plus que thésauriser."
     },
     {
       "id": "idle_hoard",

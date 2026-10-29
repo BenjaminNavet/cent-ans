@@ -243,6 +243,7 @@ impl Plugin for CampaignHudPlugin {
                     seal::sync_alert_rule,
                     seal::pill_visuals,
                     bar::launcher_visuals,
+                    keys::window_shortcuts,
                     handle_clicks,
                     publish_reserve,
                     publish_label_obstacles,

@@ -515,7 +515,7 @@ pub fn set_disabled(commands: &mut Commands, entity: Entity, disabled: bool) {
     }
 }
 
-/// Checkbox: inset box with a ✓ plus its label. Emits [`ToggleChanged`].
+/// Checkbox: inset box with an ink check mark (`oui`) plus its label. Emits [`ToggleChanged`].
 pub fn checkbox(theme: &UiTheme, name: &str, caption: &str, checked: bool) -> impl Bundle {
     (
         Name::new(name.to_owned()),
@@ -543,9 +543,15 @@ pub fn checkbox(theme: &UiTheme, name: &str, caption: &str, checked: bool) -> im
                 theme.sliced("inset"),
                 children![(
                     CheckMark,
-                    Text::new("✓"),
-                    theme.text_font(true, false, 18.0),
-                    TextColor(style::RUBRIC),
+                    super::icons::InkGlyph {
+                        id: "oui",
+                        color: style::RUBRIC,
+                    },
+                    Node {
+                        width: Val::Px(18.0),
+                        height: Val::Px(18.0),
+                        ..default()
+                    },
                     if checked {
                         Visibility::Inherited
                     } else {

@@ -127,7 +127,7 @@ pub const LAUNCHERS: [Launcher; 9] = [
         icon: "recruit",
         title: "Recrutement",
         detail: "Lever des troupes dans la province de l’armée choisie, sinon à la capitale.",
-        action: "",
+        action: "map_toggle_recruitment",
     },
     Launcher {
         name: "hud:open_economy",
@@ -141,14 +141,14 @@ pub const LAUNCHERS: [Launcher; 9] = [
         icon: "glyph_flag",
         title: "Ma faction",
         detail: "Impôts, édits, lois et état du royaume.",
-        action: "",
+        action: "map_toggle_faction",
     },
     Launcher {
         name: "hud:open_feudal",
         icon: "glyph_crown",
         title: "Féodalité",
         detail: "Titres, vassaux et suzerains.",
-        action: "",
+        action: "map_toggle_feudal",
     },
     Launcher {
         name: "hud:open_chronicle",
@@ -162,7 +162,7 @@ pub const LAUNCHERS: [Launcher; 9] = [
         icon: "hud_codex",
         title: "Codex",
         detail: "Encyclopédie : règles, unités, lieux et personnages.",
-        action: "",
+        action: "codex_open",
     },
 ];
 

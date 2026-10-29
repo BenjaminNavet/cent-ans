@@ -258,6 +258,46 @@ pub fn icon_tinted(
     build(theme, assets, name, size, tint)
 }
 
+/// A widget glyph drawn as an ink icon (`oui`, `non`, `hausse`…) instead of a font glyph: put it
+/// on a sized `Node`; [`resolve_ink_glyphs`] gives it its image once the theme is loaded, so
+/// builders that have no `AssetServer` at hand (checkbox, rows) can still use icons.
+#[derive(Component, Debug, Clone)]
+pub struct InkGlyph {
+    pub id: &'static str,
+    pub color: Color,
+}
+
+/// Fills the `ImageNode` of new [`InkGlyph`]s (tinted ink icon; transparent when unresolved, and
+/// then listed in the dump's `unresolved_on_screen`).
+pub fn resolve_ink_glyphs(
+    mut commands: Commands,
+    theme: Res<UiTheme>,
+    assets: Res<AssetServer>,
+    glyphs: Query<(Entity, &InkGlyph), Without<ImageNode>>,
+) {
+    for (entity, glyph) in &glyphs {
+        let entry = theme.icons.get(glyph.id);
+        let image = match entry {
+            Some(entry) => {
+                let tint = if entry.family == IconFamily::Ink {
+                    ink_tint(glyph.color)
+                } else {
+                    Color::WHITE
+                };
+                ImageNode::new(assets.load(entry.path.clone())).with_color(tint)
+            }
+            None => ImageNode::default().with_color(Color::NONE),
+        };
+        commands.entity(entity).insert((
+            image,
+            Icon {
+                id: glyph.id.to_owned(),
+                family: entry.map(|entry| entry.family),
+            },
+        ));
+    }
+}
+
 fn build(
     theme: &UiTheme,
     assets: &AssetServer,

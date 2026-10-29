@@ -344,7 +344,7 @@ impl Plugin for UiKitPlugin {
             .add_plugins((super::fader::plugin, super::art_plates::plugin))
             .add_plugins(super::advisor_band::AdvisorBandPlugin)
             .add_systems(Startup, (load_resources, spawn_ui_camera).chain())
-            .add_systems(Update, apply_text_scale)
+            .add_systems(Update, (apply_text_scale, icons::resolve_ink_glyphs))
             .add_observer(on_activate)
             .register_dump(dump_ui_kit);
     }

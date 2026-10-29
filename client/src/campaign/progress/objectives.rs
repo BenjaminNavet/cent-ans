@@ -267,20 +267,45 @@ fn spawn(
                                     ..default()
                                 })
                                 .with_children(|row| {
+                                    let ink = if objective.done {
+                                        style::GOOD
+                                    } else {
+                                        style::INK_SOFT
+                                    };
                                     row.spawn((
-                                        Name::new(format!("objective:{}", objective.id)),
-                                        Text::new(format!(
-                                            "{} {} — {}",
-                                            if objective.done { "✔" } else { "☐" },
-                                            objective.title,
-                                            objective.progress
-                                        )),
-                                        theme.text_font(true, false, UiType::Body.size()),
-                                        TextColor(if objective.done {
-                                            style::GOOD
-                                        } else {
-                                            style::INK_SOFT
-                                        }),
+                                        Node {
+                                            align_items: AlignItems::Center,
+                                            column_gap: Val::Px(6.0),
+                                            ..default()
+                                        },
+                                        children![
+                                            (
+                                                Node {
+                                                    width: Val::Px(18.0),
+                                                    height: Val::Px(18.0),
+                                                    flex_shrink: 0.0,
+                                                    ..default()
+                                                },
+                                                // Done: the ink check mark; open: an empty slot.
+                                                if objective.done {
+                                                    Some(crate::ui::kit::icons::InkGlyph {
+                                                        id: "oui",
+                                                        color: ink,
+                                                    })
+                                                } else {
+                                                    None
+                                                },
+                                            ),
+                                            (
+                                                Name::new(format!("objective:{}", objective.id)),
+                                                Text::new(format!(
+                                                    "{} — {}",
+                                                    objective.title, objective.progress
+                                                )),
+                                                theme.text_font(true, false, UiType::Body.size()),
+                                                TextColor(ink),
+                                            ),
+                                        ],
                                     ));
                                     row.spawn(caption(&theme, &objective.description));
                                 });

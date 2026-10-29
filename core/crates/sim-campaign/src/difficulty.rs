@@ -196,7 +196,7 @@ pub fn effect_summary(m: &DifficultyModifiers) -> Vec<String> {
     );
     if m.player_unrest != 0 {
         lines.push(format!(
-            "Agitation dans vos provinces : {:+}",
+            "Mécontentement dans vos provinces : {:+}",
             m.player_unrest
         ));
     }

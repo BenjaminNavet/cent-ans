@@ -208,7 +208,14 @@
     {"id": "glyph_hammer", "label": "Marteau", "group": "glyph", "subject": "a mason hammer crossed with a trowel", "targets": ["glyph_hammer"]},
     {"id": "glyph_letter", "label": "Lettre scellée", "group": "glyph", "subject": "a folded letter sealed with a round wax seal", "targets": ["glyph_letter"]},
     {"id": "glyph_hand", "label": "Main", "group": "glyph", "subject": "a single pointing hand with a cuff, index finger extended to the right, medieval manicule drawn in the margin of a manuscript, isolated on the plain background", "targets": ["glyph_hand"]},
-    {"id": "glyph_ship", "label": "Nef", "group": "glyph", "subject": "a small single-masted medieval cog ship with a square sail", "targets": ["glyph_ship"]}
+    {"id": "glyph_ship", "label": "Nef", "group": "glyph", "subject": "a small single-masted medieval cog ship with a square sail", "targets": ["glyph_ship"]},
+    {"id": "livre", "label": "Livre", "group": "glyph", "subject": "an open book with lines of text", "targets": ["livre"]},
+    {"id": "hausse", "label": "Hausse", "group": "glyph", "subject": "a bold arrow pointing up", "targets": ["hausse"]},
+    {"id": "baisse", "label": "Baisse", "group": "glyph", "subject": "a bold arrow pointing down", "targets": ["baisse"]},
+    {"id": "oui", "label": "Oui", "group": "glyph", "subject": "a bold check mark", "targets": ["oui"]},
+    {"id": "non", "label": "Non", "group": "glyph", "subject": "a bold saltire cross", "targets": ["non"]},
+    {"id": "fleche_droite", "label": "Flèche à droite", "group": "glyph", "subject": "a bold arrow pointing right", "targets": ["fleche_droite"]},
+    {"id": "fleche_gauche", "label": "Flèche à gauche", "group": "glyph", "subject": "a bold arrow pointing left", "targets": ["fleche_gauche"]}
   ],
   "cursors": [
     {"id": "move", "icon": "movement", "fill": "#dbcc85", "barred": false},

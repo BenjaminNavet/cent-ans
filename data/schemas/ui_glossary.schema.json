@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ui_glossary.schema.json",
+  "title": "Glossaire de l'interface",
+  "description": "Terme canonique et formes interdites pour chaque notion du jeu (audit XP-LISIBLE, M7). Lu par tools/tests/test_ui_glossary.py ; aucune règle de jeu.",
+  "type": "object",
+  "required": ["terms", "scopes"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "terms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["canonical", "forbidden"],
+        "additionalProperties": false,
+        "properties": {
+          "canonical": {"type": "string", "minLength": 1},
+          "forbidden": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "note": {"type": "string"}
+        }
+      }
+    },
+    "allow": {
+      "description": "Sous-chaînes (minuscules) qui exemptent une occurrence (noms de fichiers, citations).",
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "scopes": {
+      "description": "Où chercher : glob relatif à la racine du dépôt, champs JSON retenus (keys) ou ignorés (skip_keys), kind=rust pour les littéraux de chaîne du code.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["files"],
+        "additionalProperties": false,
+        "properties": {
+          "files": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["json", "rust"]},
+          "keys": {"type": "array", "items": {"type": "string"}},
+          "skip_keys": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

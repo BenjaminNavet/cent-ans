@@ -1,5 +1,5 @@
 {
-  "description": "Agents de campagne (lot C6, docs/design/2026-09-24-agents.md) : espions, hérauts et prédicateurs, recrutés dans les colonies, marchant sur le graphe des colonies (pas × points_per_step), une action par saison. Table `actions` (ADR 0209) : une entrée par action, lue par le moteur unique (conditions, coût, chance, effets, libellés). Chance de réussite = base + par_sceau × (sceau − 1) − malus de fortification (actions hostiles) − contre-espions − garnison, bornée min_chance-max_chance. Coûts et entretien suivent le niveau des prix de la faction (monnaie H5). Soulever (lot OMR R3, docs/archive/chantiers.md) : incite_unrest 12 (15 avant) ; sur la carte à 177 factions, un espion posté dans une cité ennemie la soulevait saison après saison (la jauge ne revient vers son équilibre que de 20 % par saison) : 16 révoltes / 200 tours sur 1337-1453 à 15, 8,1 à 12, 4,7 à 10 (464 tours × 10 graines), 1 sans l’incitation en début de partie.",
+  "description": "Agents de campagne (lot C6, docs/design/2026-09-24-agents.md) : espions, hérauts et prédicateurs, recrutés dans les localités, marchant sur le graphe des localités (pas × points_per_step), une action par saison. Table `actions` (ADR 0209) : une entrée par action, lue par le moteur unique (conditions, coût, chance, effets, libellés). Chance de réussite = base + par_sceau × (sceau − 1) − malus de fortification (actions hostiles) − contre-espions − garnison, bornée min_chance-max_chance. Coûts et entretien suivent le niveau des prix de la faction (monnaie H5). Soulever (lot OMR R3, docs/archive/chantiers.md) : incite_unrest 12 (15 avant) ; sur la carte à 177 factions, un espion posté dans une cité ennemie la soulevait saison après saison (la jauge ne revient vers son équilibre que de 20 % par saison) : 16 révoltes / 200 tours sur 1337-1453 à 15, 8,1 à 12, 4,7 à 10 (464 tours × 10 graines), 1 sans l’incitation en début de partie.",
   "types": {
     "spy": {
       "name": "Espion",
@@ -100,17 +100,17 @@
   "actions": {
     "scout": {
       "name": "Renseigner",
-      "description": "Rapport détaillé sur une colonie (garnison, armées, bâtiments, siège) et vue sur sa province pendant quelques saisons.",
+      "description": "Rapport détaillé sur une localité (garnison, armées, bâtiments, siège) et vue sur sa province pendant quelques saisons.",
       "base_chance": 75,
       "per_level": 5,
       "death_risk": 10,
       "hostile": true,
-      "conditions": [{"check": "foreign_master", "reason_fr": "colonie déjà à vous"}],
+      "conditions": [{"check": "foreign_master", "reason_fr": "localité déjà à vous"}],
       "success": [{"kind": "scout", "intel_turns": 4, "text_fr": "{agent} renseigne sur {place} : {report}"}]
     },
     "sabotage": {
       "name": "Saboter",
-      "description": "Colonie ennemie assiégée : brèche et vivres gâtés ; sinon chantier retardé et garnison démoralisée.",
+      "description": "Localité ennemie assiégée : brèche et vivres gâtés ; sinon chantier retardé et garnison démoralisée.",
       "base_chance": 45,
       "per_level": 7,
       "death_risk": 35,
@@ -165,14 +165,14 @@
     },
     "parley": {
       "name": "Ambassade",
-      "description": "Améliore l’opinion du maître de la colonie envers votre faction.",
+      "description": "Améliore l’opinion du maître de la localité envers votre faction.",
       "group": "embassy",
       "base_chance": 70,
       "per_level": 5,
       "reveals": true,
       "conditions": [
-        {"check": "foreign_master", "reason_fr": "il faut une colonie d'une autre faction"},
-        {"check": "not_rebels", "reason_fr": "il faut une colonie d'une autre faction"},
+        {"check": "foreign_master", "reason_fr": "il faut une localité d'une autre faction"},
+        {"check": "not_rebels", "reason_fr": "il faut une localité d'une autre faction"},
         {"check": "not_at_war", "reason_fr": "en guerre : le héraut ne peut porter qu'une trêve"},
         {"check": "no_embassy", "reason_fr": "une ambassade est déjà en cours auprès de cette cour"}
       ],
@@ -220,7 +220,7 @@
     },
     "bribe": {
       "name": "Soudoyer",
-      "description": "Achète la garnison d’une colonie ennemie, qui ouvre ses portes ; le prix est versé même en cas d’échec.",
+      "description": "Achète la garnison d’une localité ennemie, qui ouvre ses portes ; le prix est versé même en cas d’échec.",
       "base_chance": 35,
       "per_level": 7,
       "death_risk": 40,
@@ -307,7 +307,7 @@
     },
     "curia": {
       "name": "Plaider à la Curie",
-      "description": "Dans une colonie de la papauté, gagne la faveur pontificale.",
+      "description": "Dans une localité de la papauté, gagne la faveur pontificale.",
       "base_chance": 60,
       "per_level": 6,
       "conditions": [
@@ -327,7 +327,7 @@
     },
     "assassinate": {
       "name": "Assassiner",
-      "description": "Frappe un général posté dans la colonie ou le gouverneur de sa province, par le poignard ou la dague : mort ou blessure. Le crime se sait (Jean sans Peur fit tuer le duc d’Orléans en 1407) et brouille avec le maître des lieux ; le souverain n’est atteint qu’à partir du sceau 4.",
+      "description": "Frappe un général posté dans la localité ou le gouverneur de sa province, par le poignard ou la dague : mort ou blessure. Le crime se sait (Jean sans Peur fit tuer le duc d’Orléans en 1407) et brouille avec le maître des lieux ; le souverain n’est atteint qu’à partir du sceau 4.",
       "base_chance": 30,
       "per_level": 6,
       "death_risk": 50,
@@ -418,13 +418,13 @@
     },
     "guide_army": {
       "name": "Guider une armée",
-      "description": "Le héraut conduit par les bons chemins une armée amie postée près de la colonie : elle marche plus loin cette saison et sa province est mise en vue.",
+      "description": "Le héraut conduit par les bons chemins une armée amie postée près de la localité : elle marche plus loin cette saison et sa province est mise en vue.",
       "base_chance": 80,
       "per_level": 4,
       "conditions": [
         {
           "check": "friendly_army_near",
-          "reason_fr": "aucune armée amie près de cette colonie"
+          "reason_fr": "aucune armée amie près de cette localité"
         }
       ],
       "success": [
@@ -438,7 +438,7 @@
     },
     "ambush": {
       "name": "Tendre une embuscade",
-      "description": "Harcèle une armée ennemie postée près de la colonie : fausses alertes, ponts coupés, convois pillés ; sa marche est retardée et ses hommes abattus.",
+      "description": "Harcèle une armée ennemie postée près de la localité : fausses alertes, ponts coupés, convois pillés ; sa marche est retardée et ses hommes abattus.",
       "base_chance": 50,
       "per_level": 6,
       "death_risk": 30,
@@ -451,7 +451,7 @@
         },
         {
           "check": "hostile_army_near",
-          "reason_fr": "aucune armée ennemie près de cette colonie"
+          "reason_fr": "aucune armée ennemie près de cette localité"
         }
       ],
       "success": [

@@ -1,0 +1,47 @@
+{
+  "description": "Glossaire de l'interface (audit XP-LISIBLE, constat M7) : un seul mot par notion dans tout texte lu par le joueur. Chaque terme canonique liste les formes interdites ; tools/tests/test_ui_glossary.py balaie les champs de texte des fichiers de données et les littéraux français du code et échoue sur une forme interdite. Ajouter un terme ici, pas une exception ailleurs.",
+  "terms": [
+    {
+      "canonical": "mécontentement",
+      "forbidden": ["agitation", "agitations"],
+      "note": "Jauge de colère d'une province. « Troubles » désigne la révolte ouverte (ADR 0731), pas la jauge ; l'autre mot est banni (récompenses de mission, difficulté)."
+    },
+    {
+      "canonical": "localité",
+      "forbidden": ["colonie", "colonies"],
+      "note": "Ville, bourg ou village tenu : toujours « localité » dans l'interface. L'ancien mot reste permis dans les textes d'histoire (hors portée du balayage)."
+    }
+  ],
+  "allow": ["echelle-colonies"],
+  "scopes": [
+    {
+      "files": "data/ui/**/*.json",
+      "skip_keys": ["description", "forbidden"]
+    },
+    {
+      "files": "data/rules/advisor.json",
+      "keys": ["text"]
+    },
+    {
+      "files": "data/rules/agents.json",
+      "keys": ["description", "reason_fr", "label"]
+    },
+    {
+      "files": "data/codex/cdx_jeu_*.json"
+    },
+    {
+      "files": "data/missions.json"
+    },
+    {
+      "files": "data/tutorial/*.json"
+    },
+    {
+      "files": "client/src/**/*.rs",
+      "kind": "rust"
+    },
+    {
+      "files": "core/crates/*/src/**/*.rs",
+      "kind": "rust"
+    }
+  ]
+}

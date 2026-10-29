@@ -485,7 +485,7 @@
     },
     "difficulty_fixed_effects": {
       "title": "Figée pour toute la partie",
-      "body": "Revenus et entretien de l’IA, vos revenus, l’agitation de vos provinces, l’hostilité de l’IA et le moral de ses armées contre vous."
+      "body": "Revenus et entretien de l’IA, vos revenus, le mécontentement de vos provinces, l’hostilité de l’IA et le moral de ses armées contre vous."
     },
     "seed_same_draw": {
       "title": "Même graine, même tirage des événements et des batailles",
@@ -514,7 +514,7 @@
     "help_resume_tutorial": {"title": "Reprend le tutoriel à l’étape où vous l’aviez laissé, sinon le relance depuis le début."},
     "close_list_b": {"title": "Fermer la liste", "hint": "B"},
     "close_list_u": {"title": "Fermer la liste", "hint": "U"},
-    "holdings_weighted_unrest": {"title": "Agitation pondérée"},
+    "holdings_weighted_unrest": {"title": "Mécontentement pondéré"},
     "province_focus_open": {"title": "Centrer la caméra sur la province et ouvrir son panneau."},
     "close_legend": {"title": "Fermer la légende"},
     "map_mode_filters": {"title": "Filtres de la carte", "body": "Diplomatie, religion, ordre public, richesse…", "hint": "F"},
