@@ -52,3 +52,11 @@ ADR : les lots nomment `docs/decisions/XXXX-<lot>-titre.md`, numérotés à la f
 - Tutoriel : recrutement, siège, bataille, ravitaillement.
 - Bataille : plaques de régiments ennemis en grappe sur l'horizon ; barre du haut tronquée à 1280 px.
 - « Edimbourg » cuit dans menu_map.jpg ; Hainaut 1337 ; date de départ.
+
+## Itération 2 (29/10 soir) — virage vers les refontes
+Demande du joueur : changements plus importants, analyses plus profondes, parties du jeu révisables.
+En cours :
+- 4 audits de fond Opus (lecture seule) → `docs/audits/2026-10-29-{campagne,bataille,economie-politique,experience}.md` : diagnostic, 3-6 refontes, specs de lots ;
+- juges histoire/UX et technique (iter-02) ; juges DA et design arrêtés (couverts par les audits) ;
+- lots IA-CAV, FPS, TUTO (worktrees) ; MEM5 Opus (3 Go de mémoire de campagne).
+Suite : choisir les refontes prioritaires dans les audits et les lancer en lots larges.
