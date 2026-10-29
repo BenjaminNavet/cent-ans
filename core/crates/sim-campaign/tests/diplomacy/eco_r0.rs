@@ -4,10 +4,10 @@
 use data_model::test_support::{fac, game_data};
 use data_model::EventId;
 use sim_campaign::diplomacy::MEDIATION_TRUCE_TURNS;
-use sim_campaign::effects::{apply_effect, EventContext};
+use sim_campaign::effects::apply_effect;
 use sim_campaign::negotiation::{self, Article, Party, TributeDue};
 use sim_campaign::test_support::{idle, start};
-use sim_campaign::{perjury, EventKind};
+use sim_campaign::{perjury, EventContext, EventKind};
 
 #[test]
 fn mediation_truce_broken_at_once_is_major_perjury() {

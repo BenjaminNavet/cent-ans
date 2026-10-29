@@ -12,8 +12,8 @@ Spec : `docs/audits/2026-10-29-economie-politique.md`, section « R0 ».
   (`unpaid_tribute_*` en données), `EventEffect::Alliance` + `evt_auld_alliance.json`.
 - Tests : `core/crates/sim-campaign/tests/diplomacy/eco_r0.rs`, test de métriques dans `metrics.rs`.
 
-## Prochaine étape
-Compiler/tester, mesurer les cinq métriques (passe quick), écrire les bandes, passe rapide seed bots.
+## Prochaine étape (PAUSE joueur)
+Rien n'a encore été compilé complètement : un seul échec connu corrigé (import `EventContext` dans `tests/diplomacy/eco_r0.rs`). Compiler/tester (`cargo test -p sim-campaign --test diplomacy eco_r0`, `-p seed-bots metrics`), mesurer les cinq métriques (passe quick), écrire les bandes, passe rapide seed bots.
 
 ## Points ouverts / écarts
 - Le constat 1 de l'audit (« Trêve de deux ans » = 20 saisons) est inexact : la constante de `game-api`
