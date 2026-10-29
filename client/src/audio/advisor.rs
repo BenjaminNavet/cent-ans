@@ -216,7 +216,12 @@ fn speaker_for(advisor: &Value, faction: &str) -> String {
     };
     name_of(advisor.get("speakers").and_then(|s| s.get(faction)))
         .or_else(|| name_of(advisor.get("default_speaker")))
-        .or_else(|| advisor.get("name").and_then(Value::as_str).map(String::from))
+        .or_else(|| {
+            advisor
+                .get("name")
+                .and_then(Value::as_str)
+                .map(String::from)
+        })
         .unwrap_or_else(|| "Le conseiller".to_owned())
 }
 

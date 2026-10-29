@@ -136,7 +136,10 @@ pub fn section(
                 }
             });
         if snap.verdicts.is_empty() {
-            companion.spawn(caption(theme, "Aucune localité à vous dans cette province."));
+            companion.spawn(caption(
+                theme,
+                "Aucune localité à vous dans cette province.",
+            ));
         } else {
             companion.spawn(typed(
                 theme,

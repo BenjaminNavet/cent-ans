@@ -985,7 +985,11 @@ fn settlements_tab(
         &format!(
             "{} localité{}",
             snap.sheet.settlements.len(),
-            if snap.sheet.settlements.len() > 1 { "s" } else { "" }
+            if snap.sheet.settlements.len() > 1 {
+                "s"
+            } else {
+                ""
+            }
         ),
         UiType::Body,
     ));
