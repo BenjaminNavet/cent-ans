@@ -2413,6 +2413,20 @@
       "vassal_of": [
         "fac_castile"
       ]
+    },
+    {
+      "id": "eglise_d_angleterre",
+      "name": "Église d’Angleterre",
+      "blazon": "D'azur à un pal d'or accosté de deux croix pattées d'argent.",
+      "description": "Armes de substitution des prélats du royaume d'Angleterre : le siège de Cantorbéry porte un bâton archiépiscopal d'or sur un pallium ; figure simplifiée.",
+      "source": "en.wikipedia : Arms of the Archbishop of Canterbury",
+      "certainty": "substitution",
+      "factions": [
+        "fac_england"
+      ],
+      "vassal_of": [
+        "fac_england"
+      ]
     }
   ]
 }

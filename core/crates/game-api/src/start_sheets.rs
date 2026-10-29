@@ -121,7 +121,9 @@ fn sheet_of(data: &GameData, state: &CampaignState, id: &FactionId) -> StartShee
             .iter()
             .map(|o| StartObjective {
                 title: o.title.clone(),
-                description: o.description.replace("{money}", &data.currency_of(id).plural),
+                description: o
+                    .description
+                    .replace("{money}", &data.currency_of(id).plural),
             })
             .collect(),
         provinces: data

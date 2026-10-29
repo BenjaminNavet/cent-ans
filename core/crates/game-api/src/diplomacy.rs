@@ -877,7 +877,10 @@ fn actions_for(
     );
     add(
         "gift",
-        format!("Présents ({GIFT_AMOUNT} {})", data_model::currency::symbol()),
+        format!(
+            "Présents ({GIFT_AMOUNT} {})",
+            data_model::currency::symbol()
+        ),
         "Présents envoyés.",
         Order::SendGift {
             target: target.clone(),

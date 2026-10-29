@@ -85,6 +85,11 @@ pub struct CouncilOfficeDef {
     /// limited to the clergy.
     #[serde(default)]
     pub holder_roles: Vec<Role>,
+    /// Roles preferred for the office, tried before the others whatever their skill (the
+    /// chancellor and treasurer of a realm are clerics or civil lords, the constable a man of
+    /// war); anyone else still qualifies when none of them is left.
+    #[serde(default)]
+    pub preferred_roles: Vec<Role>,
     /// Word looked up in the historical titles of a character
     /// (`Character::titles`): a title that starts after the current year bars
     /// the character from the office (the constable of 1338 is no constable

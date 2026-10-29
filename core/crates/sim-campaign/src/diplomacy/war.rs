@@ -1,7 +1,7 @@
 //! War, peace, alliances and vassal ties (orders apply immediately).
 
-use data_model::currency::MONEY;
 use super::*;
+use data_model::currency::MONEY;
 
 /// Prestige the ruler loses declaring war without a casus belli.
 pub const AGGRESSION_PRESTIGE: i32 = -20;

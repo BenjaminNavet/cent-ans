@@ -1,5 +1,5 @@
 {
-  "description": "Charges du conseil du royaume (ADR 0341). Chaque charge est tenue par un personnage de la faction (jamais le souverain) ; ses effets croissent avec la compétence du titulaire ; une charge vacante n’a aucun effet. `advice_kinds` range chaque genre d’alerte, d’indice ou de journal déjà produit dans le domaine d’une charge : le conseiller présente ceux de son domaine. Une charge n’est tenue que par un personnage que son histoire n’exclut pas : jamais un rôle ou un trait exclu (`excluded_roles`, `excluded_traits`), un rôle hors `holder_roles` (l’aumônier est un clerc, chancelier et trésorier des civils ou clercs, le connétable un homme de guerre), ni un titre homonyme postérieur à la date courante (`title_keyword`).",
+  "description": "Charges du conseil du royaume (ADR 0341). Chaque charge est tenue par un personnage de la faction (jamais le souverain) ; ses effets croissent avec la compétence du titulaire ; une charge vacante n’a aucun effet. `advice_kinds` range chaque genre d’alerte, d’indice ou de journal déjà produit dans le domaine d’une charge : le conseiller présente ceux de son domaine. Une charge n’est tenue que par un personnage que son histoire n’exclut pas : ni un rôle ou un trait exclu (`excluded_roles`, `excluded_traits`), ni un rôle hors `holder_roles` (l’aumônier est un clerc), ni un titre homonyme postérieur à la date courante (`title_keyword`) ; `preferred_roles` passe d’abord (chancelier et trésorier : clercs ou civils, connétable : homme de guerre).",
   "dismissal_loyalty_penalty": 1,
   "excluded_roles": [
     "consort",
@@ -37,14 +37,11 @@
         "diplomatic_offer"
       ],
       "title_keyword": "chancelier",
-      "holder_roles": [
+      "preferred_roles": [
         "prelate",
         "noble",
         "burgher",
-        "heir",
-        "prince",
-        "regent",
-        "exile"
+        "regent"
       ]
     },
     {
@@ -84,13 +81,10 @@
         "general_captured"
       ],
       "title_keyword": "connétable",
-      "holder_roles": [
+      "preferred_roles": [
         "commander",
         "noble",
-        "heir",
-        "prince",
-        "regent",
-        "exile"
+        "prince"
       ]
     },
     {
@@ -118,14 +112,11 @@
         "building_completed"
       ],
       "title_keyword": "trésorier",
-      "holder_roles": [
+      "preferred_roles": [
         "prelate",
         "noble",
         "burgher",
-        "heir",
-        "prince",
-        "regent",
-        "exile"
+        "regent"
       ]
     },
     {

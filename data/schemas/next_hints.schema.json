@@ -43,6 +43,7 @@
           },
           "title": {"type": "string", "minLength": 1, "maxLength": 48},
           "text": {"type": "string", "minLength": 1, "maxLength": 160},
+          "text_foreign": {"type": "string", "minLength": 1, "maxLength": 160, "description": "Texte quand la province de l'alerte appartient à un autre (une armée ennemie chez un voisin) : pas de garnison à renforcer."},
           "action": {
             "description": "alert : même chemin qu'un clic sur la pastille de la cloche ; les autres ouvrent ou exécutent l'action.",
             "enum": ["alert", "select_army", "open_city", "resume_tutorial", "end_turn"]

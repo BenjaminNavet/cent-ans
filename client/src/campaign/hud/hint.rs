@@ -305,8 +305,8 @@ fn refresh(
         .filter(|id| {
             data_model::ProvinceId::new(id.clone())
                 .ok()
-                .and_then(|pid| state.provinces.get(&pid))
-                .is_some_and(|p| &p.owner != player)
+                .and_then(|pid| state.province_controller(&pid).cloned())
+                .is_some_and(|controller| &controller != player)
         })
         .collect();
     let constructions = state
@@ -504,6 +504,31 @@ mod tests {
         let hint = choose(&input, &config()).expect("hint");
         assert_eq!(hint.id, "siege");
         assert_eq!(hint.title, "Défendez Paris");
+    }
+
+    #[test]
+    fn an_enemy_at_a_foreign_province_does_not_ask_for_a_garrison() {
+        let config = HintConfig::parse(
+            r#"{"hints": [{"id":"enemy_army","title":"Ennemi","text":"Renforcez la garnison de {province}",
+            "text_foreign":"Couvrez vos marches près de {province}","action":"alert"}]}"#,
+        )
+        .expect("config");
+        let mut alert = siege_alert();
+        alert.kind = "enemy_army".into();
+        let mut input = HintInput {
+            alerts: vec![alert],
+            province_names: vec![("prov_paris".into(), "Paris".into())],
+            ..Default::default()
+        };
+        assert_eq!(
+            choose(&input, &config).expect("hint").text,
+            "Renforcez la garnison de Paris"
+        );
+        input.foreign_provinces = vec!["prov_paris".into()];
+        assert_eq!(
+            choose(&input, &config).expect("hint").text,
+            "Couvrez vos marches près de Paris"
+        );
     }
 
     #[test]

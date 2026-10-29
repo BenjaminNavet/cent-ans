@@ -30,11 +30,11 @@
 //!   a faction with a `fish` diet gains piety.
 //! - AI: [`ai_choose_diets`], shared by both planners (ADR 0003).
 
+use data_model::currency::MONEY;
 use data_model::{
     Diet, DietId, EffectKind, EffectMode, FactionId, GameData, LentRule, ProvinceId, SocialClass,
     WinterRule,
 };
-use data_model::currency::MONEY;
 use serde::{Deserialize, Serialize};
 
 use crate::buildings::EffectTotals;

@@ -226,9 +226,17 @@ pub fn candidates(
             current_office: office_of(state, faction, id),
         })
         .collect();
+    let preferred = |id: &CharacterId| {
+        let role = data
+            .characters
+            .get(id)
+            .map_or(Role::Noble, |record| record.role);
+        def.preferred_roles.is_empty() || def.preferred_roles.contains(&role)
+    };
     found.sort_by(|a, b| {
-        b.skill
-            .cmp(&a.skill)
+        preferred(&b.character)
+            .cmp(&preferred(&a.character))
+            .then_with(|| b.skill.cmp(&a.skill))
             .then_with(|| a.character.cmp(&b.character))
     });
     found

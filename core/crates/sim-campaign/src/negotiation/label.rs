@@ -38,11 +38,13 @@ impl Article {
         match self {
             Article::Peace => format!(
                 "Paix (trêve de {})",
-                years(if rules.enabled {
-                    rules.peace_truce_turns
-                } else {
-                    diplomacy::TRUCE_TURNS
-                } / 4)
+                years(
+                    if rules.enabled {
+                        rules.peace_truce_turns
+                    } else {
+                        diplomacy::TRUCE_TURNS
+                    } / 4
+                )
             ),
             Article::Truce { turns } => truce_label(*turns),
             Article::Mediation { turns } => {

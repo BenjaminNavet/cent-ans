@@ -84,14 +84,19 @@ fn a_new_game_seats_the_best_candidate_in_every_office() {
         assert!(!seen.contains(&holder), "one office per character");
         seen.push(holder);
     }
-    // The first office of the file takes the best of its skill.
+    // The chancellor is the first candidate of the list (preferred roles, then court skill) that
+    // no more restricted office (the chaplain) took before.
     let best = council::candidates(&state, data, &france, "chancellor");
     let chancellor = council::holder(&state, &france, "chancellor").unwrap();
-    let top = best.iter().map(|c| c.skill).max().unwrap();
-    assert_eq!(
-        council::skill_of(&state, chancellor, data_model::SkillBranch::Court),
-        top
-    );
+    let first_free = best
+        .iter()
+        .find(|c| {
+            c.current_office
+                .as_deref()
+                .is_none_or(|office| office == "chancellor")
+        })
+        .expect("a candidate");
+    assert_eq!(&first_free.character, chancellor);
 }
 
 #[test]

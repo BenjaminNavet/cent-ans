@@ -117,6 +117,27 @@
           "type": "string",
           "minLength": 1,
           "description": "Mot cherché dans les titres historiques : un titre homonyme postérieur à la date courante écarte le personnage."
+        },
+        "preferred_roles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "ruler",
+              "consort",
+              "heir",
+              "prince",
+              "commander",
+              "noble",
+              "prelate",
+              "burgher",
+              "exile",
+              "claimant",
+              "regent"
+            ]
+          },
+          "description": "Rôles essayés d'abord, quelle que soit la compétence ; les autres restent admis faute de mieux."
         }
       },
       "required": [
