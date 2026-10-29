@@ -35,7 +35,7 @@ images, aux pipelines, au terrain, à la végétation et à la qualité. Budget 
 
 ## Conséquences
 - Campagne au repos : tas 2 712 -> 2 337-2 389 Mo, empreinte 5 684-5 842 -> 5 382-5 486 Mo (2 runs chacun, même
-  machine, charge 19-26). Rendu inchangé (images GPU identiques au `gpucensus`).
+  machine, charge 19-26). Fin de banc carte (1 run chacun, charge 60-83, bruité) : empreinte 7 492 -> 7 426 Mo, pic RSS 7 137 -> 6 956 Mo ; seuils de `perf_thresholds.json` inchangés (gain dans le bruit des descentes, machine non calme). Rendu inchangé : `gpucensus` identique, une capture `camp_0600` (impostors lointains normaux).
 - Le budget de 4 Go reste hors d'atteinte sans toucher à la qualité : GPU ≈ 2,7 Go (textures 2 Go) + tas ≈ 2,3 Go.
   Pistes suivantes, par gain : doublons de rasters (provinces client/cœur 82, `river_bed` x3, hauteurs du semis 86 via
   `MapRasters.height` du cœur), rasters du semis à partager avec le terrain, copies CPU des glTF, compression BC des

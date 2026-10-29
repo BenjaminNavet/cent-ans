@@ -14,15 +14,18 @@ Branche `worktree-agent-a319572925dedf007`, base main 99d672914. Suite de MEM4 (
   124, ids de provinces client 82 + raster provinces/navgrid du cœur 82, polices 89, copies CPU des glTF 89, ECS 79,
   masque terre décodé 2 fois (48 + 41), countryside 92, coast rocks 41, LifeData 43, warp 42, rubans d'eau 64...
 
-## Fait (non mesuré encore)
+## Fait (mesuré)
 - Atlas d'imposteurs : `RENDER_WORLD` à l'installation de la chaîne de mips (-330 Mo attendus).
 - `wetlands.png` du semis : un plan max(R, G) au lieu de RGB (-86 Mo).
 - `land_mask.png` : décodé une fois (`shared_land_mask`, cache `Weak`) pour les ordres et l'eau douce (-43 Mo).
 - `mem_protocol.sh` : colonnes séparées GPU non mappé / GPU mappé / tas mimalloc.
 
+- Mesures : repos, tas 2 712 -> 2 337-2 389 Mo, empreinte 5 684-5 842 -> 5 382-5 486 Mo (2 runs) ; fin de banc
+  7 492 -> 7 426 Mo, pic RSS 7 137 -> 6 956 (charge 60-83). Capture `camp_0600` : végétation normale.
+- ADR `docs/decisions/XXXX-mem5-...` (numéroté à la fusion), `docs/performance-memoire.md` amendé.
+
 ## Prochaine étape
-1. Mesurer (release, `mem_protocol.sh idle`) avant/après ; vérifier le rendu (1 capture) de la végétation lointaine.
-2. ADR, `docs/performance-memoire.md`, seuils.
+- clippy/tests client, puis fusion. Seuils `perf_thresholds.json` inchangés (gain de banc dans le bruit).
 
 ## Points ouverts
 - Doublons restants : rasters provinces client/cœur (82 Mo), `river_bed` x3, octets de hauteur du semis (86 Mo,
