@@ -482,7 +482,9 @@ mod tests {
         let data = real();
         let palette: Value =
             serde_json::from_str(include_str!("../../../../data/fx/palette.json")).unwrap();
-        let ratio = palette["targets"]["campaign_sun_sky_ratio_min"].as_f64().unwrap() as f32;
+        let ratio = palette["targets"]["campaign_sun_sky_ratio_min"]
+            .as_f64()
+            .unwrap() as f32;
         assert!(ratio >= 1.8);
         for (i, season) in super::super::season::SEASONS.iter().enumerate() {
             let mut w = Vec4::ZERO;

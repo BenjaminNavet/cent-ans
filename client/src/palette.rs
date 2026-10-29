@@ -122,7 +122,12 @@ mod tests {
                 luminance(material(&doc, pair[0])),
                 luminance(material(&doc, pair[1])),
             );
-            assert!(dark < light, "{} ({dark}) must be darker than {} ({light})", pair[0], pair[1]);
+            assert!(
+                dark < light,
+                "{} ({dark}) must be darker than {} ({light})",
+                pair[0],
+                pair[1]
+            );
         }
         let forest = luminance(material(&doc, "forest_broadleaf"));
         for field in doc["campaign"]["fields"].as_array().unwrap() {

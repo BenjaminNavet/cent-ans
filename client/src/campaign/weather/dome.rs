@@ -13,9 +13,9 @@
 //! Settings: `data/fx/campaign_sky.json` (schema `fx_campaign_sky.schema.json`).
 
 use bevy::asset::uuid_handle;
+use bevy::camera::visibility::NoFrustumCulling;
 use bevy::mesh::MeshVertexBufferLayoutRef;
 use bevy::pbr::{MaterialPipeline, MaterialPipelineKey};
-use bevy::camera::visibility::NoFrustumCulling;
 use bevy::prelude::*;
 use bevy::reflect::TypePath;
 use bevy::render::render_resource::{
@@ -25,13 +25,13 @@ use bevy::shader::{Shader, ShaderRef};
 use bevy::state::state_scoped::DespawnOnExit;
 use serde_json::{Value, json};
 
+use super::WeatherView;
 use super::atmosphere::Atmosphere;
 use super::model::Kind;
-use super::WeatherView;
 use crate::app::AppState;
 use crate::campaign::terrain::lighting::{CampaignLight, toward_sun};
 
-const DOME_SHADER: Handle<Shader> = uuid_handle!("6f0b1a52-3c1e-4d0a-9d31-0a5f7c1e0101");
+const DOME_SHADER: Handle<Shader> = uuid_handle!("6f0b1a52-3c1e-4d0a-9d31-0a5f7c1e0f51");
 
 /// Sky settings (`data/fx/campaign_sky.json`) and the palette sky (`palette.json` `sky`).
 #[derive(Resource, Debug, Clone)]
@@ -112,7 +112,10 @@ impl SkyLook {
                 .and_then(|t| serde_json::from_str::<Value>(&t).ok())
                 .unwrap_or(Value::Null)
         };
-        SkyLook::from_json(&read("data/fx/campaign_sky.json"), &read("data/fx/palette.json"))
+        SkyLook::from_json(
+            &read("data/fx/campaign_sky.json"),
+            &read("data/fx/palette.json"),
+        )
     }
 
     /// Overcast share (0..1) of a weather entry.

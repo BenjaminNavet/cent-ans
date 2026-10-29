@@ -3,7 +3,7 @@
   "enabled": true,
   "legacy_adjust": {
     "contrast": 1.06,
-    "saturation": 1.08
+    "saturation": 1.16
   },
   "valley_mist": {
     "enabled": true,
@@ -53,8 +53,8 @@
   },
   "grade": {
     "enabled": true,
-    "desaturation": 0.06,
-    "green_desaturation": 0.06,
+    "desaturation": 0.03,
+    "green_desaturation": 0.03,
     "protect_chroma": [0.32, 0.6],
     "warm_protect": 0.85,
     "protect_luma": [0.88, 1.0],
