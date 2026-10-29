@@ -410,40 +410,39 @@
     },
     "abbey_west": {
       "id": "abbey_west",
-      "class": "major_building",
+      "class": "settlement_maquette",
       "files": [
         "dn/buildings/abbey_west_lod0.glb",
         "dn/buildings/abbey_west_lod1.glb",
         "dn/buildings/abbey_west_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 2.201,
-        "width": 2.201,
-        "height": 1.046
+        "length": 2.207,
+        "width": 2.127,
+        "height": 1.29
       },
       "triangles": [
-        30327,
-        15000,
-        4000
+        30000,
+        10000,
+        3000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/abbey_west/meshy.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/vis-r6/meshy/abbey_west.glb",
       "yaw_deg": 0.0,
-      "faithful": true,
-      "grade": {
-        "after": {
-          "mean_luma": 0.3966,
-          "mean_s": 0.1696,
-          "p95_s": 0.3286
-        }
-      },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/abbey_west__r3d/cut/s1337.png",
-      "model_3d": "meshy-6-lite",
       "lod_methods": [
-        "raw",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
-      ]
+      ],
+      "grade": {
+        "after": {
+          "mean_luma": 0.5241,
+          "mean_s": 0.3132,
+          "p95_s": 0.6044
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/vis-r6/abbey_s3.png",
+      "model_3d": "meshy-6"
     },
     "animal_auroch": {
       "id": "animal_auroch",
@@ -8011,40 +8010,39 @@
     },
     "castle_west": {
       "id": "castle_west",
-      "class": "major_building",
+      "class": "settlement_maquette",
       "files": [
         "dn/buildings/castle_west_lod0.glb",
         "dn/buildings/castle_west_lod1.glb",
         "dn/buildings/castle_west_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 1.899,
-        "width": 1.876,
-        "height": 1.274
+        "length": 1.904,
+        "width": 1.904,
+        "height": 1.124
       },
       "triangles": [
-        30346,
-        15000,
-        4000
+        30000,
+        10000,
+        3000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/castle_west/gen.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/vis-r6/meshy/castle_west.glb",
       "yaw_deg": 0.0,
-      "faithful": true,
-      "grade": {
-        "after": {
-          "mean_luma": 0.4889,
-          "mean_s": 0.2399,
-          "p95_s": 0.5745
-        }
-      },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/castle_west/cut/s1337.png",
-      "model_3d": "meshy-7.1",
       "lod_methods": [
-        "raw",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
-      ]
+      ],
+      "grade": {
+        "after": {
+          "mean_luma": 0.3953,
+          "mean_s": 0.2689,
+          "p95_s": 0.5684
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/vis-r6/castleB_s6.png",
+      "model_3d": "meshy-6"
     },
     "cathedral_west": {
       "id": "cathedral_west",
@@ -48752,40 +48750,39 @@
     },
     "town_west": {
       "id": "town_west",
-      "class": "major_building",
+      "class": "settlement_maquette",
       "files": [
         "dn/buildings/town_west_lod0.glb",
         "dn/buildings/town_west_lod1.glb",
         "dn/buildings/town_west_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 1.994,
-        "width": 1.989,
-        "height": 0.889
+        "length": 2.01,
+        "width": 2.01,
+        "height": 1.094
       },
       "triangles": [
-        30928,
-        15000,
-        4000
+        30000,
+        10000,
+        3000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/town_west/meshy.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/vis-r6/meshy/town_west.glb",
       "yaw_deg": 0.0,
-      "faithful": true,
-      "grade": {
-        "after": {
-          "mean_luma": 0.4003,
-          "mean_s": 0.2136,
-          "p95_s": 0.3364
-        }
-      },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/town_west/cut/s1337.png",
-      "model_3d": "meshy-6-lite",
       "lod_methods": [
-        "raw",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
-      ]
+      ],
+      "grade": {
+        "after": {
+          "mean_luma": 0.4871,
+          "mean_s": 0.2418,
+          "p95_s": 0.5319
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/vis-r6/town_s4.png",
+      "model_3d": "meshy-6"
     },
     "townhouse_siege": {
       "id": "townhouse_siege",
@@ -54651,40 +54648,39 @@
     },
     "village_west": {
       "id": "village_west",
-      "class": "major_building",
+      "class": "settlement_maquette",
       "files": [
         "dn/buildings/village_west_lod0.glb",
         "dn/buildings/village_west_lod1.glb",
         "dn/buildings/village_west_lod2.glb"
       ],
       "dimensions_m": {
-        "length": 2.0,
-        "width": 2.0,
-        "height": 0.461
+        "length": 2.005,
+        "width": 2.005,
+        "height": 1.032
       },
       "triangles": [
-        30898,
-        14998,
-        4000
+        30000,
+        10000,
+        3000
       ],
       "tex": 2048,
-      "raw": "/Users/jean_hubert/dev/cent-ans-raw/meshy/village_west/meshy.glb",
+      "raw": "/Users/jean_hubert/dev/cent-ans-raw/vis-r6/meshy/village_west.glb",
       "yaw_deg": 0.0,
-      "faithful": true,
-      "grade": {
-        "after": {
-          "mean_luma": 0.3455,
-          "mean_s": 0.3077,
-          "p95_s": 0.4524
-        }
-      },
-      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/dn/village_west/cut/s1337.png",
-      "model_3d": "meshy-6-lite",
       "lod_methods": [
-        "raw",
+        "voxel_bake",
         "voxel_bake",
         "voxel_bake"
-      ]
+      ],
+      "grade": {
+        "after": {
+          "mean_luma": 0.4873,
+          "mean_s": 0.3782,
+          "p95_s": 0.65
+        }
+      },
+      "source_image": "/Users/jean_hubert/dev/cent-ans-raw/vis-r6/village_s4.png",
+      "model_3d": "meshy-6"
     },
     "village_windmill_post_field": {
       "id": "village_windmill_post_field",
