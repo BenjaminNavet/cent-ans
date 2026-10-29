@@ -29,7 +29,6 @@
     "Grand Comnène"
   ],
   "treasury": 18000,
-  "prestige": 60,
   "starting_technologies": [
     "tech_masonry",
     "tech_letters_of_credit",

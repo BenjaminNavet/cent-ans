@@ -1,4 +1,4 @@
-//! First-turns tutorial (port of `tutorial_controller.gd` and `ui/tutorial_steps.gd`): 14 steps
+//! First-turns tutorial (port of `tutorial_controller.gd` and `ui/tutorial_steps.gd`): 18 steps
 //! (`data/tutorial/steps.json`), each with a text, an objective, the faction's historical advice,
 //! and a condition the controller watches; the next step opens as soon as it is met.
 //!
@@ -108,6 +108,9 @@ pub struct Tutorial {
     synced: bool,
     /// Progress last written to the settings: (step, done, postponed).
     persisted: Option<(u32, bool, bool)>,
+    /// The card steps aside because the diplomacy or recruitment panel is open (it would cover
+    /// it); the arrow of the step stays.
+    pub aside: bool,
 }
 
 #[derive(Component)]
@@ -234,7 +237,7 @@ impl Tutorial {
     pub fn arrow_target(&self) -> (&str, bool) {
         let step = self.index.and_then(|i| self.steps.get(i));
         let name = step.map_or("", |s| s.target.as_str());
-        let show = self.root.is_some() && self.done_timer.is_none() && !name.is_empty();
+        let show = (self.root.is_some() || self.aside) && self.done_timer.is_none() && !name.is_empty();
         (name, show)
     }
 
@@ -561,11 +564,20 @@ fn rebuild(
     modals: Option<Res<crate::ui::kit::modal::ModalQueue>>,
     keymap: Option<Res<crate::settings::KeyMap>>,
     settings: Option<Res<crate::settings::Settings>>,
+    stack: Option<Res<crate::ui::kit::panel_stack::PanelStack>>,
+    diplomacy: Option<Res<DiplomacyUi>>,
 ) {
     // One narrator at a time: the card waits while a modal (briefing, report) is up.
-    let covered = paused.is_some_and(|p| p.0)
+    let blocked = paused.is_some_and(|p| p.0)
         || settings_screen.is_some_and(|s| s.root.is_some())
         || modals.is_some_and(|m| m.is_busy());
+    // Wide panels the card would cover: it steps aside (the arrow stays) until they close.
+    let aside = stack.is_some_and(|s| s.is_open("recruitment"))
+        || diplomacy.is_some_and(|d| d.open);
+    if tutorial.aside != aside {
+        tutorial.aside = aside;
+    }
+    let covered = blocked || aside;
     let want = tutorial.index.filter(|_| !covered);
     let key = want.map(|i| {
         (

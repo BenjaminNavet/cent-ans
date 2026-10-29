@@ -672,6 +672,7 @@ pub fn spawn_recruit_panel(
     assets: &AssetServer,
     icons: &mut IconCache,
     view: &RecruitView,
+    reserve: &str,
     state: &PanelState,
 ) -> Entity {
     let wrapper = commands
@@ -679,10 +680,16 @@ pub fn spawn_recruit_panel(
             root_node("RecruitPanelRoot"),
             RecruitPanelRoot,
             StackedPanel::new(PanelTier::Docked, "recruitment"),
-            crate::ui::kit::layout::FitZone::Side,
+            crate::ui::kit::layout::FitZone::SideTall,
             Pickable::IGNORE,
+            // SideTall gives the wrapper a definite height (top and bottom set), so the panel's
+            // percentage cap below resolves and the card grid shrinks instead of the footer
+            // (« Sceller la levée ») being pushed out of the frame.
             Node {
                 position_type: PositionType::Absolute,
+                flex_direction: FlexDirection::Column,
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::FlexEnd,
                 ..default()
             },
         ))
@@ -697,7 +704,7 @@ pub fn spawn_recruit_panel(
         ))
         .insert(Node {
             width: Val::Px(620.0),
-            max_height: Val::Percent(88.0),
+            max_height: Val::Percent(100.0),
             padding: theme.inner_padding("panel", 2.0),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(6.0),
@@ -724,6 +731,13 @@ pub fn spawn_recruit_panel(
             });
             h.spawn(close_button(theme, "rec:close"));
         });
+        p.spawn((
+            Name::new("rec:reserve"),
+            Tooltip::new(
+                "Chaque place reconstitue sa réserve peu à peu : c’est elle, non la bourse, qui borne les levées.",
+            ),
+            text(theme, reserve, UiType::Caption, style::INK),
+        ));
         // Queue and slots.
         let queue_line = format!(
             "Recrues attendues : {}({} ce tour sur {}) · trésor {}",

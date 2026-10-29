@@ -7,6 +7,7 @@
     "open_province",
     "city_tab",
     "build",
+    "recruit",
     "research",
     "diplomacy",
     "end_turn",
@@ -14,6 +15,9 @@
     "chronicle",
     "tax",
     "governor",
+    "supply",
+    "siege",
+    "battle",
     "outro"
   ],
   "steps": {
@@ -54,9 +58,15 @@
       "objective": "Lancer une construction dans une de vos villes.",
       "target": "buildable"
     },
+    "recruit": {
+      "title": "Lever des hommes",
+      "text": "Une armée se lève place par place. Ouvrez le « Recrutement » (barre du haut), choisissez une unité, puis « Sceller la levée ». Ce n’est pas la bourse qui borne la levée, mais la réserve de recrues de chaque place ; elle se reconstitue peu à peu, saison après saison. La ligne « Réserve de recrues » du panneau en donne le compte.",
+      "objective": "Lever au moins une unité.",
+      "target": "recruit"
+    },
     "research": {
       "title": "Les technologies",
-      "text": "La jauge de recherche de la barre du haut indique la technologie en cours. Ouvrez l’arbre (touche T ou clic sur la jauge) : sans recherche, les points de la saison sont perdus.",
+      "text": "La jauge de recherche de la barre du haut indique la technologie en cours. Ouvrez l’arbre (touche {key:map_toggle_tech} ou clic sur la jauge) : sans recherche, les points de la saison sont perdus.",
       "objective": "Choisir une recherche.",
       "target": "research",
       "modal_ok": true
@@ -98,6 +108,26 @@
       "target": "governor",
       "modal_ok": true
     },
+    "supply": {
+      "title": "Vivres et usure",
+      "text": "Hors de vos terres et de celles de vos alliés, une armée vit sur ses vivres (survolez sa bannière : « Vivres »). Ils fondent à chaque saison, plus vite l’hiver ; et, vivres ou non, la maladie et la désertion rongent les rangs. En terre amie, les vivres se reconstituent. N’allez donc loin qu’avec un but, et rentrez avant que l’ost ne s’épuise.",
+      "objective": "Lire l’avis, puis cliquer sur « Continuer ».",
+      "target": "royal_army",
+      "manual": true
+    },
+    "siege": {
+      "title": "Assiéger une place",
+      "text": "Une place fortifiée ne se prend pas d’un coup : menez l’armée devant la localité ennemie (clic droit sur elle), posture « Siège » du bandeau. Les vivres de la place baissent chaque saison ; à zéro, elle capitule. Les engins ouvrent une brèche et permettent l’assaut.",
+      "objective": "Mettre le siège devant une localité ennemie (en guerre seulement : sinon, passez l’étape).",
+      "target": "royal_army"
+    },
+    "battle": {
+      "title": "La bataille",
+      "text": "Quand deux armées ennemies se rencontrent, un écran de bataille s’ouvre. « Combattre » vous mène sur le terrain, où vous donnez vos ordres en personne ; « Résolution automatique » laisse jouer le sort des armes ; « Retraite » tente de rompre le combat. Tenez les hauteurs, ménagez vos archers, gardez une réserve.",
+      "objective": "Lire l’avis, puis cliquer sur « Continuer ».",
+      "target": "royal_army",
+      "manual": true
+    },
     "outro": {
       "title": "À vous de jouer",
       "text": "Vous connaissez l’essentiel. L’encyclopédie ({key:encyclopedia_open}), l’aide (F1) et les objectifs (O) vous guideront. Bonne campagne !",
@@ -114,6 +144,7 @@
       "open_province": "Paris, la plus grande ville d’Occident, porte le trésor du royaume.",
       "city_tab": "Les bourgeois paient l’essentiel de l’impôt ; les paysans nourrissent les villes et fournissent les levées.",
       "build": "Un marché ou des moulins enrichissent la province ; les murailles de pierre usent les chevauchées anglaises.",
+      "recruit": "Le ban et l’arrière-ban fournissent le nombre ; gardez des places pleines de recrues pour remplacer les pertes d’une chevauchée.",
       "research": "Les pavois et les arbalètes à moufle répondent à l’arc long ; les compagnies d’ordonnance (1445) donneront au roi une armée permanente.",
       "diplomacy": "L’Écosse est votre alliée (Auld Alliance) ; la Flandre, votre vassale, dépend de la laine anglaise et pourrait basculer.",
       "end_turn": "La guerre est déclarée : surveillez la Manche, les Anglais peuvent débarquer à chaque saison.",
@@ -121,6 +152,9 @@
       "chronicle": "L’Écluse (1340), Crécy (1346), la Peste noire (1348) : vos décisions peuvent infléchir le cours de l’histoire.",
       "tax": "Un impôt lourd remplit le trésor, mais la Jacquerie (1358) et les Maillotins (1382) rappellent le prix du fardeau fiscal.",
       "governor": "Confiez les provinces lointaines (Languedoc, Poitou) à des princes du sang expérimentés.",
+      "supply": "Sur vos terres l’ost se ravitaille : laissez l’Anglais s’épuiser en Picardie et en Guyenne.",
+      "siege": "Les places de Guyenne et de Flandre sont fortes : affamez-les plutôt que de les assaillir.",
+      "battle": "À Crécy (1346), la charge sans ordre contre les archers ruina l’ost : ne chargez pas à l’aveugle.",
       "outro": "Tenez Paris et l’Île-de-France, reprenez la Guyenne : Castillon (1453) marque la fin de la guerre."
     },
     "fac_england": {
@@ -130,6 +164,7 @@
       "open_province": "Londres et Westminster : le Parlement y vote les subsides de la guerre.",
       "city_tab": "La laine anglaise fait vivre les drapiers flamands : c’est votre meilleur levier diplomatique.",
       "build": "Un port facilite les traversées ; des buttes de tir entretiennent l’adresse des archers.",
+      "recruit": "Les archers du roi se lèvent par commissions d’array : leur réserve est votre meilleur atout, ménagez-la.",
       "research": "L’arc long est votre arme ; la poudre et les bombardes changeront la donne au siècle suivant.",
       "diplomacy": "La Flandre (Jacques van Artevelde, 1338) et les princes d’Empire sont vos alliés naturels ; l’Écosse est l’alliée de la France.",
       "end_turn": "Les grandes chevauchées ravagent le pays ennemi : posture « Chevauchée » sur le sceau du chef, en bas à gauche.",
@@ -137,6 +172,9 @@
       "chronicle": "Crécy (1346), Poitiers (1356), Azincourt (1415) : les grandes victoires attendent vos décisions.",
       "tax": "Le Parlement consent l’impôt ; la révolte des Paysans (1381) est née d’une capitation trop lourde.",
       "governor": "La Guyenne est lointaine : un sénéchal compétent y vaut une armée.",
+      "supply": "Une chevauchée vit sur le pays, mais s’épuise vite : visez la Guyenne amie ou un port flamand pour vous refaire.",
+      "siege": "Calais tint onze mois (1346-1347) : le siège est long, prévoyez les vivres de votre ost.",
+      "battle": "À Crécy et à Poitiers, l’arc long sur terrain choisi a vaincu le nombre : combattez à pied, en défense.",
       "outro": "Faites-vous sacrer (à Reims, en Île-de-France), ce qu’Henri VI ne put faire (couronné à Paris en 1431), et gardez l’héritage des Plantagenêts."
     },
     "fac_burgundy": {
@@ -146,6 +184,7 @@
       "open_province": "Dijon, capitale du duché, au cœur des vignobles et des foires de Chalon.",
       "city_tab": "Clergé et bourgeois sont riches en Bourgogne : les abbayes de Cîteaux et Cluny pèsent dans la province.",
       "build": "Pressoirs et foires rapportent vite ; les murailles protégeront des Grandes Compagnies.",
+      "recruit": "Votre duché est petit : chaque levée pèse, ne la gaspillez pas.",
       "research": "Comptabilité et lettres de change : la cour de Bourgogne sera la plus riche d’Occident.",
       "diplomacy": "Vassal du roi de France, vous pouvez choisir votre camp : Philippe le Bon s’alliera aux Anglais après Montereau (1419) avant la paix d’Arras (1435).",
       "end_turn": "Laissez France et Angleterre s’épuiser : chaque saison de paix enrichit le duché.",
@@ -153,6 +192,9 @@
       "chronicle": "La querelle des Armagnacs et des Bourguignons (1407) fera de vous l’arbitre du royaume.",
       "tax": "Les villes flamandes, riches et turbulentes, supportent mal l’impôt : Gand se révoltera de 1449 à 1453.",
       "governor": "Un gouverneur habile tient les Pays-Bas pendant que le duc négocie à Paris.",
+      "supply": "Le duché est riche en vivres : une armée qui ne s’éloigne pas ne souffre guère.",
+      "siege": "Évitez les sièges lointains : ils usent un petit ost sans rien rapporter.",
+      "battle": "Mieux vaut ne livrer bataille qu’aux côtés de votre suzerain ou d’alliés sûrs.",
       "outro": "Indépendance, Pays-Bas et lien lorrain : l’échéance est 1477, l’année de Nancy."
     }
   },
@@ -162,6 +204,7 @@
     "open_province": "{capital} est le cœur de votre domaine : la perdre, c’est souvent tout perdre.",
     "city_tab": "Paysans, bourgeois, clergé, noblesse : quatre ordres dont les intérêts s’accordent rarement.",
     "build": "Moulins, marchés et halles paient les guerres de demain ; les murailles donnent le temps d’être secouru.",
+    "recruit": "Un prince lève plus qu’il ne peut payer : comptez la solde avant de sceller la levée.",
     "research": "Le siècle change la guerre : l’arc long et l’arbalète, puis la poudre, entament la suprématie du chevalier.",
     "diplomacy": "Sans suzerain au-dessus de vous, vos alliances et vos mariages sont votre meilleure garantie.",
     "diplomacy_vassal": "Votre suzerain : {liege}. L’hommage oblige, mais un vassal habile choisit ses querelles.",
@@ -170,6 +213,9 @@
     "chronicle": "La Peste noire (1347-1352) frappera presque toute l’Europe : peu de décisions pèseront autant que celles de ces années-là.",
     "tax": "Partout l’impôt nouveau fait gronder : villes et campagnes se soulèvent quand le fardeau paraît injuste.",
     "governor": "Un prince ne peut être partout : baillis, sénéchaux et capitaines tiennent le pays en son nom.",
+    "supply": "La faim a vaincu plus d’armées que le fer : on ne tient pas longtemps une chevauchée loin de ses vivres.",
+    "siege": "Un siège se gagne par la faim plus que par l’assaut : la patience coûte moins d’hommes.",
+    "battle": "Une bataille rangée se joue en un jour, mais ses suites durent des années : ne la livrez qu’à terrain favorable.",
     "outro": "Les objectifs de votre titre se lisent sur votre écu, en haut à gauche : section « Féodalité » du panneau de faction."
   },
   "army_names": {

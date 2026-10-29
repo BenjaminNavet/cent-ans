@@ -27,7 +27,6 @@
     "Princes de Kozelsk, Belev, Novossil et Odoïev"
   ],
   "treasury": 3000,
-  "prestige": 20,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

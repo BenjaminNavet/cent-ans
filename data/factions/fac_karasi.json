@@ -27,7 +27,6 @@
     "Bey de Karasi"
   ],
   "treasury": 7000,
-  "prestige": 40,
   "starting_technologies": [
     "tech_masonry",
     "tech_water_mills"

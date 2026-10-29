@@ -29,7 +29,6 @@
     "Margrave de Moravie"
   ],
   "treasury": 30000,
-  "prestige": 70,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

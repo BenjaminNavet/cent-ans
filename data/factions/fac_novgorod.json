@@ -28,7 +28,6 @@
     "Posadnik de Novgorod"
   ],
   "treasury": 18000,
-  "prestige": 60,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

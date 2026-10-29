@@ -158,6 +158,7 @@ struct Summary {
     queue: usize,
     slots: usize,
     slots_free: usize,
+    reserve_line: String,
     treasury: i64,
     settlement: String,
     armies_to_join: usize,
@@ -760,12 +761,16 @@ fn rebuild(
                 {
                     state.target = None;
                 }
+                let reserve = crate::campaign::hud::text::reserve_line(
+                    &game_api::hud::recruit_reserve(data, game_state, &sim.player),
+                );
                 view::spawn_recruit_panel(
                     &mut commands,
                     &theme,
                     &assets,
                     &mut icons,
                     &view,
+                    &reserve,
                     &state,
                 );
                 let summary = &mut state.summary;
@@ -779,6 +784,7 @@ fn rebuild(
                 summary.queue = view.queue.len();
                 summary.slots = view.slots;
                 summary.slots_free = view.slots_free;
+                summary.reserve_line = reserve;
                 summary.treasury = view.treasury;
                 summary.settlement = view.settlement.clone();
                 summary.armies_to_join = view.armies.len();
@@ -908,7 +914,7 @@ fn dump_panel(world: &World) -> (String, Value) {
         "recruit": state.recruit,
         "recruit_panel": {
             "settlement": s.settlement, "cards": s.recruit_cards, "available": s.recruit_available,
-            "soon": s.soon, "queue": s.queue, "slots": s.slots, "slots_free": s.slots_free,
+            "soon": s.soon, "queue": s.queue, "slots": s.slots, "slots_free": s.slots_free, "reserve": s.reserve_line,
             "treasury": view.as_ref().map_or(s.treasury, |v| v.treasury),
             "armies_to_join": s.armies_to_join,
             "available_units": view.as_ref().map(|v| v.options.iter().filter(|o| o.available).take(12).map(|o| json!({"id": o.unit_type, "cost": o.cost, "upkeep": o.upkeep, "pool": o.pool_available})).collect::<Vec<_>>()),

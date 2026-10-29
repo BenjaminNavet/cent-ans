@@ -28,7 +28,6 @@
     "Émir de Gabès"
   ],
   "treasury": 5000,
-  "prestige": 20,
   "starting_technologies": [
     "tech_water_mills",
     "tech_masonry"

@@ -27,7 +27,6 @@
     "Comte de Wurtemberg"
   ],
   "treasury": 5500,
-  "prestige": 30,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

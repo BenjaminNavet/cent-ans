@@ -29,7 +29,6 @@
     "Vicaire impérial"
   ],
   "treasury": 7000,
-  "prestige": 35,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

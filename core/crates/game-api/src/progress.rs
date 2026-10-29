@@ -573,6 +573,8 @@ pub struct TutorialSnapshot {
     /// Position and march of each army of the player.
     pub places: BTreeMap<String, String>,
     pub constructions: u32,
+    /// Units in the armies of the player plus recruits waiting in the queues of its places.
+    pub troops: u32,
     pub research: String,
     pub tax: String,
     /// Governed province of each character of the player's faction.
@@ -619,6 +621,33 @@ fn construction_count(state: &CampaignState) -> u32 {
         .count() as u32
 }
 
+/// Units under the banners of the player plus those still in training (a new recruit raises it).
+fn troop_count(state: &CampaignState) -> u32 {
+    let player = state.player_faction();
+    let in_armies: usize = state
+        .armies()
+        .iter()
+        .filter(|(_, a)| &a.faction == player)
+        .map(|(_, a)| a.units.len())
+        .sum();
+    let queued: usize = state
+        .settlements
+        .values()
+        .filter(|s| &s.controller == player)
+        .map(|s| s.recruit_queue.len())
+        .sum();
+    (in_armies + queued) as u32
+}
+
+/// A settlement the player is besieging.
+fn besieging(state: &CampaignState) -> bool {
+    let player = state.player_faction();
+    state
+        .settlements
+        .values()
+        .any(|s| s.siege.as_ref().is_some_and(|siege| &siege.attacker == player))
+}
+
 /// Snapshot taken when a step opens.
 pub fn tutorial_snapshot(state: &CampaignState) -> TutorialSnapshot {
     let player = state.player_faction();
@@ -632,6 +661,7 @@ pub fn tutorial_snapshot(state: &CampaignState) -> TutorialSnapshot {
             .map(|(id, a)| (id.as_str().to_owned(), army_place(a)))
             .collect(),
         constructions: construction_count(state),
+        troops: troop_count(state),
         research: faction
             .and_then(|f| f.research.as_ref())
             .map_or_else(String::new, ToString::to_string),
@@ -673,6 +703,8 @@ pub fn sim_objective_met(
                     .is_some_and(|p| *p != army_place(army))
         }),
         "build" => now.constructions > before.constructions,
+        "recruit" => now.troops > before.troops,
+        "siege" => besieging(state),
         "research" => !now.research.is_empty() && now.research != before.research,
         "end_turn" => now.turn > before.turn,
         "tax" => now.tax != before.tax,
@@ -764,9 +796,9 @@ mod tests {
     fn tutorial_steps_are_resolved() {
         let (data, state) = setup();
         let steps = tutorial_steps(&steps_json(), data, &state);
-        assert_eq!(steps.len(), 14);
+        assert_eq!(steps.len(), 18);
         assert_eq!(steps[0].id, "intro");
-        assert!(steps[0].manual && steps[13].manual);
+        assert!(steps[0].manual && steps[17].manual);
         assert!(steps
             .iter()
             .all(|s| !s.title.is_empty() && !s.text.is_empty()));
@@ -786,6 +818,31 @@ mod tests {
             .all(|s| !unresolved(&s.text) && !unresolved(&s.title)));
         assert!(steps[0].title.starts_with("Bienvenue"));
         assert!(!steps[1].advice.is_empty());
+    }
+
+    #[test]
+    fn recruiting_is_detected() {
+        let (data, mut state) = setup();
+        let before = tutorial_snapshot(&state);
+        assert_eq!(sim_objective_met("recruit", &before, &state), Some(false));
+        assert_eq!(sim_objective_met("siege", &before, &state), Some(false));
+        let city = sim_campaign::test_support::capital_city(&state, "fac_france");
+        let view = crate::recruit::recruit_view(data, &state, city.as_str()).unwrap();
+        let ready = view
+            .options
+            .iter()
+            .find(|o| o.available && i64::from(o.cost) <= view.treasury)
+            .expect("an available unit");
+        state
+            .submit_order_outcome(
+                data,
+                Order::Recruit {
+                    settlement: sim_campaign::Place::Settlement(city),
+                    unit_type: sim_campaign::test_support::unit_type(&ready.unit_type),
+                },
+            )
+            .unwrap();
+        assert_eq!(sim_objective_met("recruit", &before, &state), Some(true));
     }
 
     #[test]

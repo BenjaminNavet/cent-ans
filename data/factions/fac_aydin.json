@@ -29,7 +29,6 @@
     "Gouverneur de Smyrne"
   ],
   "treasury": 9500,
-  "prestige": 50,
   "starting_technologies": [
     "tech_masonry",
     "tech_water_mills",

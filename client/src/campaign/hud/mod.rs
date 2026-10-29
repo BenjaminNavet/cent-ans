@@ -95,6 +95,8 @@ pub struct HudData {
     pub top_provinces: Vec<ProvinceIncome>,
     pub readiness: Option<TurnReadiness>,
     pub forecast: Option<ForecastView>,
+    /// Recruitment reserve of the player (ADR 0793), shown in the « Hommes » tooltip.
+    pub reserve: Option<game_api::hud::RecruitReserveView>,
     pub armies: Vec<ArmyEntry>,
     /// Bumped by every refresh of the views.
     pub revision: u64,
@@ -197,6 +199,7 @@ impl Plugin for CampaignHudPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<HudData>()
             .init_resource::<bar::BarCompact>()
+            .init_resource::<bar::BarFit>()
             .init_resource::<bar::HudLabels>()
             .init_resource::<AlertCursor>()
             .configure_sets(
@@ -333,6 +336,7 @@ fn refresh_data(sim: Res<Sim>, time: Res<Time>, mut hud: ResMut<HudData>) {
         hud.top = game_api::top_bar(data, state, player);
         hud.economy = game_api::economy(data, state, player);
         hud.top_provinces = game_api::hud::income_top_provinces(data, state, player, 3);
+        hud.reserve = Some(game_api::hud::recruit_reserve(data, state, player));
         hud.readiness = Some(game_api::turn_readiness(data, state, player));
         hud.armies = game_api::army_ids(state)
             .iter()
@@ -536,6 +540,7 @@ fn update_fields(
         }
     };
     let [prestige_tip, men_tip, unrest_tip] = text::forecast_tooltips(hud.forecast.as_ref());
+    let reserve_tip = hud.reserve.as_ref().map_or_else(String::new, text::reserve_tooltip);
     let arrow = |gauge: Option<&game_api::hud::GaugeView>| {
         gauge.map_or_else(String::new, |g| format!(" {}", text::arrow(g)))
     };
@@ -600,7 +605,9 @@ fn update_fields(
                     arrow(forecast.map(|f| &f.men))
                 ),
                 style::INK,
-                format!("[b]Hommes disponibles[/b]\nRéserve de recrues de votre royaume : le nombre d’hommes que vos provinces peuvent encore lever.\n{men_tip}"),
+                format!(
+                    "[b]Hommes sous les armes[/b]\nTous les soldats de vos armées et garnisons.\n{reserve_tip}\n{men_tip}"
+                ),
             ),
             HudField::Prestige => (
                 format!(
@@ -1002,6 +1009,11 @@ fn dump_hud(world: &World) -> (String, Value) {
                 .collect()
         })
         .unwrap_or_default();
+    let bar = world.resource::<bar::BarFit>();
+    let bar = json!({
+        "width": bar.width.round(), "menu_right": bar.menu_right.round(),
+        "tight": bar.tight, "overflows": bar.overflows(),
+    });
     let top = hud.top.as_ref().map(|t| {
         json!({
             "turn": t.turn, "date": t.date_label, "season": t.season,
@@ -1014,11 +1026,16 @@ fn dump_hud(world: &World) -> (String, Value) {
         "hud".to_owned(),
         json!({
             "top": top,
+            "bar": bar,
             "alerts": alerts,
             "alerts_blocked": hud.readiness.as_ref().map(|r| r.blocked),
             "armies": hud.armies.iter().map(|a| json!({"id": a.id, "name": a.name, "men": a.men, "idle": a.idle})).collect::<Vec<_>>(),
             "forecast": hud.forecast.as_ref().map(|f| json!({
                 "prestige_next": f.prestige.next, "men_next": f.men.next, "unrest_next": f.unrest.next,
+            })),
+            "reserve": hud.reserve.as_ref().map(|r| json!({
+                "settlements": r.settlements, "available": r.available, "cap": r.cap,
+                "ready_settlements": r.ready_settlements, "gain_next_season": r.gain_next_season,
             })),
             "refreshes": hud.refreshes,
             "forecasts_computed": hud.forecasts_computed,

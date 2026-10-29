@@ -25,7 +25,6 @@
     "Capitaines du peuple de Gênes"
   ],
   "treasury": 35000,
-  "prestige": 50,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

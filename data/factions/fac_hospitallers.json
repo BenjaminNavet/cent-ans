@@ -28,7 +28,6 @@
     "Grand Maître de l'Hôpital"
   ],
   "treasury": 15000,
-  "prestige": 55,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

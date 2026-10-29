@@ -31,7 +31,6 @@
     "Prince de Novgorod (jusqu'en 1337)"
   ],
   "treasury": 14000,
-  "prestige": 55,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

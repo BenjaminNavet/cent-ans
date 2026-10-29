@@ -28,7 +28,6 @@
     "Roi de Portugal et de l'Algarve"
   ],
   "treasury": 10000,
-  "prestige": 45,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

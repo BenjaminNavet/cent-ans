@@ -28,7 +28,6 @@
     "Comte de Raguse (comes vénitien)"
   ],
   "treasury": 12000,
-  "prestige": 30,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

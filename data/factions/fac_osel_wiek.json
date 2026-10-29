@@ -29,7 +29,6 @@
     "Prince d'Empire"
   ],
   "treasury": 4000,
-  "prestige": 22,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

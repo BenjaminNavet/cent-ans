@@ -28,7 +28,6 @@
     "Cheikh de Tripoli"
   ],
   "treasury": 6000,
-  "prestige": 25,
   "starting_technologies": [
     "tech_water_mills",
     "tech_masonry",

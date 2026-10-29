@@ -28,7 +28,6 @@
     "Bey de Hamid"
   ],
   "treasury": 6000,
-  "prestige": 35,
   "starting_technologies": [
     "tech_masonry",
     "tech_water_mills"

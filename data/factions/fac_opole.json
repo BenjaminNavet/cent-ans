@@ -28,7 +28,6 @@
     "Vassal du roi de Bohême"
   ],
   "treasury": 3500,
-  "prestige": 22,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

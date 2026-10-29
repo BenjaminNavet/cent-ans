@@ -30,7 +30,6 @@
     "Serviteur des deux Villes saintes"
   ],
   "treasury": 40000,
-  "prestige": 80,
   "starting_technologies": [
     "tech_masonry",
     "tech_royal_taxation",

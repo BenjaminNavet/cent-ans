@@ -29,7 +29,6 @@
     "Seigneur de Cilicie"
   ],
   "treasury": 10000,
-  "prestige": 45,
   "starting_technologies": [
     "tech_masonry",
     "tech_letters_of_credit",

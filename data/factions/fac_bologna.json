@@ -25,7 +25,6 @@
     "Commune de Bologne"
   ],
   "treasury": 13000,
-  "prestige": 45,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

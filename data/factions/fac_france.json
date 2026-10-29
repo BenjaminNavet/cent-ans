@@ -27,7 +27,6 @@
     "Roi de France"
   ],
   "treasury": 16000,
-  "prestige": 90,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

@@ -28,7 +28,6 @@
     "Archichancelier du royaume d'Italie"
   ],
   "treasury": 10000,
-  "prestige": 58,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

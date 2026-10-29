@@ -27,7 +27,6 @@
     "Seigneur d'un quart et demi de l'Empire romain"
   ],
   "treasury": 45000,
-  "prestige": 60,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

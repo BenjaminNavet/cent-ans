@@ -30,7 +30,6 @@
     "Archichancelier du royaume de Bourgogne"
   ],
   "treasury": 7500,
-  "prestige": 55,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

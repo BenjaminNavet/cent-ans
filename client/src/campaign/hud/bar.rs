@@ -572,27 +572,114 @@ impl Default for HudLabels {
     }
 }
 
-/// Switches the bar compact from its laid-out width.
+/// Width under which the bar packs tighter (smaller launchers and gaps) so that the right-hand
+/// icons are no longer cut: 1280 px screens (MacBook 14 inch) and « Taille de l'interface » ≥ 115 %.
+/// The words before the figures stay whole; only the spacing and the round buttons shrink.
+pub const TIGHT_WIDTH: f32 = 1500.0;
+/// Diameter of the launchers of a tight bar.
+pub const TIGHT_LAUNCHER_SIZE: f32 = 26.0;
+/// Gap between two launchers: normal, tight.
+const LAUNCHER_GAP: f32 = 7.0;
+const TIGHT_LAUNCHER_GAP: f32 = 3.0;
+/// Gap between the items of the bar: normal, tight.
+const BAR_GAP: f32 = 14.0;
+const TIGHT_BAR_GAP: f32 = 7.0;
+
+/// Whether the bar packs tighter at `width`. Pure, tested.
+pub fn tight_bar(width: f32) -> bool {
+    width > 1.0 && width < TIGHT_WIDTH
+}
+
+/// Assigns `value` to a length of `node` only when it differs (no needless change detection).
+fn set_px(node: &mut Mut<Node>, pick: fn(&mut Node) -> &mut Val, value: f32) {
+    if *pick(&mut node.bypass_change_detection()) != Val::Px(value) {
+        *pick(node) = Val::Px(value);
+    }
+}
+
+/// What the last layout of the bar looked like (dump `hud.bar`): width, right edge of the last
+/// button (« Menu ») and whether it falls outside the bar (icons cut).
+#[derive(Resource, Default, Debug, Clone, Copy, PartialEq)]
+pub struct BarFit {
+    pub width: f32,
+    pub menu_right: f32,
+    pub tight: bool,
+}
+
+impl BarFit {
+    /// The « Menu » button ends beyond the bar (what is clipped is lost to the player).
+    pub fn overflows(&self) -> bool {
+        self.menu_right > self.width + 0.5
+    }
+}
+
+/// Switches the bar compact from its laid-out width, and tight below [`TIGHT_WIDTH`].
 pub(super) fn fit_top_bar(
-    bar: Query<&bevy::ui::ComputedNode, With<TopBarMark>>,
+    bar: Query<(Entity, &bevy::ui::ComputedNode), With<TopBarMark>>,
+    rows: Query<(Entity, &Children), With<PanelButtons>>,
+    launchers: Query<(), With<LauncherButton>>,
     mut compact: ResMut<BarCompact>,
-    mut chips: Query<(&HudField, &mut Node)>,
+    chips: Query<(Entity, &HudField)>,
+    mut nodes: Query<&mut Node>,
+    menu: Query<(&Name, &bevy::ui::ComputedNode, &bevy::ui::UiGlobalTransform), With<LauncherButton>>,
+    mut fit: ResMut<BarFit>,
 ) {
-    let Ok(node) = bar.single() else { return };
-    let wanted = compact_bar(node.size().x * node.inverse_scale_factor());
-    let words = node.size().x * node.inverse_scale_factor() >= LABELS_WIDTH;
+    let Ok((bar_entity, node)) = bar.single() else {
+        return;
+    };
+    let width = node.size().x * node.inverse_scale_factor();
+    let wanted = compact_bar(width);
+    let words = width >= LABELS_WIDTH;
     if compact.1 != words {
         compact.1 = words;
     }
     if compact.0 != wanted {
         compact.0 = wanted;
     }
-    for (field, mut chip) in &mut chips {
+    let tight = tight_bar(width);
+    let menu_right = menu
+        .iter()
+        .find(|(name, _, _)| name.as_str() == "hud:menu")
+        .map_or(0.0, |(_, node, transform)| {
+            (transform.translation.x + node.size().x * 0.5) * node.inverse_scale_factor
+        });
+    let seen = BarFit {
+        width,
+        menu_right,
+        tight,
+    };
+    if *fit != seen {
+        *fit = seen;
+    }
+    if let Ok(mut bar_node) = nodes.get_mut(bar_entity) {
+        let gap = if tight { TIGHT_BAR_GAP } else { BAR_GAP };
+        set_px(&mut bar_node, |n| &mut n.column_gap, gap);
+    }
+    let size = if tight {
+        TIGHT_LAUNCHER_SIZE
+    } else {
+        LAUNCHER_SIZE
+    };
+    for (row, children) in &rows {
+        if let Ok(mut row_node) = nodes.get_mut(row) {
+            let gap = if tight { TIGHT_LAUNCHER_GAP } else { LAUNCHER_GAP };
+            set_px(&mut row_node, |n| &mut n.column_gap, gap);
+        }
+        for child in children.iter().filter(|c| launchers.contains(*c)) {
+            if let Ok(mut button) = nodes.get_mut(child) {
+                set_px(&mut button, |n| &mut n.width, size);
+                set_px(&mut button, |n| &mut n.height, size);
+            }
+        }
+    }
+    for (chip, field) in &chips {
         if *field != HudField::Date {
             continue;
         }
         let display = if wanted { Display::None } else { Display::Flex };
-        if chip.display != display {
+        if let Ok(mut chip) = nodes.get_mut(chip)
+            && chip.display != display
+        {
             chip.display = display;
         }
     }
@@ -618,6 +705,14 @@ pub fn launcher_visuals(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn bar_packs_tighter_below_1500_logical_px() {
+        assert!(tight_bar(1280.0));
+        assert!(tight_bar(1499.0));
+        assert!(!tight_bar(1500.0));
+        assert!(!tight_bar(0.0));
+    }
 
     #[test]
     fn bar_turns_compact_on_narrow_logical_widths() {

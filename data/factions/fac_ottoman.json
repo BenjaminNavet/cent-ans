@@ -30,7 +30,6 @@
     "Gazi (guerrier de la foi)"
   ],
   "treasury": 9000,
-  "prestige": 55,
   "starting_technologies": [
     "tech_masonry",
     "tech_water_mills",

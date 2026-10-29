@@ -30,7 +30,6 @@
     "Ban de Croatie et de Dalmatie (incertain)"
   ],
   "treasury": 4500,
-  "prestige": 25,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

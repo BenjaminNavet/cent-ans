@@ -50,6 +50,8 @@ pub fn candidates(target: &str) -> &'static [Candidate] {
     match target {
         "city_tab" => &[Name("prov:tab_buildings")],
         "buildable" => &[Prefix("prov:build:"), Name("prov:tab_buildings")],
+        // The unit cards once the recruitment panel is open, else the launcher that opens it.
+        "recruit" => &[Prefix("rec:unit:"), Name("hud:open_recruitment")],
         "research" => &[Name("TechPanel"), Name("hud:open_tech")],
         "diplomacy" => &[Name("hud:open_diplomacy")],
         "end_turn" => &[Name("hud:end_turn")],
@@ -484,6 +486,31 @@ mod tests {
             assert!((0.0..=1.0).contains(&pulse(t, false)));
         }
         assert_eq!(pulse(0.4, true), 0.5);
+    }
+
+    #[test]
+    fn every_step_target_can_be_resolved() {
+        let root = crate::paths::find_root().expect("repo root");
+        let text = std::fs::read_to_string(crate::paths::data_dir(&root).join("tutorial/steps.json"))
+            .expect("steps.json");
+        let raw: serde_json::Value = serde_json::from_str(&text).unwrap();
+        let steps = raw["steps"].as_object().unwrap();
+        for id in raw["step_ids"].as_array().unwrap() {
+            let id = id.as_str().unwrap();
+            let target = steps[id]["target"].as_str().unwrap();
+            if target.is_empty() {
+                assert!(steps[id]["manual"].as_bool().unwrap_or(false), "{id}");
+            } else {
+                assert!(
+                    is_world_target(target) || !candidates(target).is_empty(),
+                    "step {id}: target {target} has no widget"
+                );
+            }
+        }
+        assert_eq!(
+            candidates("recruit").first(),
+            Some(&Candidate::Prefix("rec:unit:"))
+        );
     }
 
     #[test]

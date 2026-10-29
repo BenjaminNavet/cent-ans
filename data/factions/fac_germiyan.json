@@ -28,7 +28,6 @@
     "Bey de Germiyan"
   ],
   "treasury": 12000,
-  "prestige": 55,
   "starting_technologies": [
     "tech_masonry",
     "tech_water_mills",

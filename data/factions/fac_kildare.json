@@ -27,7 +27,6 @@
     "Baron d'Offaly"
   ],
   "treasury": 3500,
-  "prestige": 25,
   "starting_technologies": [
     "tech_water_mills",
     "tech_masonry"

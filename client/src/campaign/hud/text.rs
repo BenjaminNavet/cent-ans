@@ -2,7 +2,7 @@
 //! budget tooltip of `map_ui.gd`). Pure formatting of values computed by `game-api`.
 
 use bevy::prelude::*;
-use game_api::hud::{EconomyView, ForecastView, GaugeView, ProvinceIncome};
+use game_api::hud::{EconomyView, ForecastView, GaugeView, ProvinceIncome, RecruitReserveView};
 
 use crate::ui::kit::fr;
 
@@ -255,6 +255,36 @@ pub fn treasury_tooltip(economy: &EconomyView, provinces: &[ProvinceIncome]) -> 
     parts.join("\n")
 }
 
+/// One line on the recruitment reserve (recruitment panel header): what the realm can raise now.
+pub fn reserve_line(reserve: &RecruitReserveView) -> String {
+    format!(
+        "Réserve de recrues du royaume : {} levables (plafond {}), {} sur {} · +{} à la saison prochaine",
+        fr::count(i64::from(reserve.available), "unité", None),
+        reserve.cap,
+        fr::count(i64::from(reserve.ready_settlements), "place prête", Some("places prêtes")),
+        reserve.settlements,
+        reserve.gain_next_season,
+    )
+}
+
+/// Tooltip paragraph on the recruitment reserve (the real bottleneck of raising troops, not the
+/// purse, ADR 0793). Appended to the « Hommes » chip of the top bar.
+pub fn reserve_tooltip(reserve: &RecruitReserveView) -> String {
+    let verdict = if reserve.available == 0 {
+        "Aucune levée possible avant la prochaine saison."
+    } else {
+        "Ouvrez le recrutement pour les lever."
+    };
+    format!(
+        "[b]Réserve de recrues[/b]\n{} levables aujourd’hui, pour un plafond de {}.\n{} sur {} de vos places ont au moins une unité prête ; {} de plus la saison prochaine.\nC’est cette réserve, non la bourse, qui borne les levées : chaque place la reconstitue peu à peu. {verdict}",
+        fr::count(i64::from(reserve.available), "unité", None),
+        reserve.cap,
+        reserve.ready_settlements,
+        reserve.settlements,
+        fr::count(i64::from(reserve.gain_next_season), "unité", None),
+    )
+}
+
 /// French season name from `TopBar::season`.
 pub fn season_fr(season: &str) -> &'static str {
     match season {
@@ -275,6 +305,26 @@ mod tests {
         assert_eq!(signed_f(0.01, false), "0");
         assert_eq!(signed_f(3.0, false), "+3");
         assert_eq!(signed_f(-1.4, true), format!("{}1,4", fr::MINUS));
+    }
+
+    #[test]
+    fn reserve_texts_state_the_figures() {
+        let reserve = RecruitReserveView {
+            settlements: 9,
+            available: 14,
+            cap: 32,
+            ready_settlements: 6,
+            gain_next_season: 5,
+        };
+        let tip = reserve_tooltip(&reserve);
+        assert!(tip.contains("14 unités"), "{tip}");
+        assert!(tip.contains("plafond de 32"));
+        assert!(tip.contains("6 sur 9"));
+        assert!(tip.contains("non la bourse"));
+        let line = reserve_line(&reserve);
+        assert!(line.contains("14 unités") && line.contains("6 places prêtes sur 9"), "{line}");
+        let empty = RecruitReserveView { available: 0, ..reserve };
+        assert!(reserve_tooltip(&empty).contains("Aucune levée possible"));
     }
 
     #[test]

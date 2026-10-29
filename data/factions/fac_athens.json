@@ -29,7 +29,6 @@
     "Duc d'Athènes et de Néopatras"
   ],
   "treasury": 5000,
-  "prestige": 35,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

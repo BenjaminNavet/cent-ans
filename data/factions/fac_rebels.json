@@ -17,7 +17,6 @@
     "secondary_color": "#8B0000"
   },
   "treasury": 0,
-  "prestige": 0,
   "description": "Faction virtuelle et non jouable : provinces tombées en révolte ouverte (M3, § 1.1).",
   "sources": [
     "docs/design/m3-cities-economy.md"

@@ -216,8 +216,6 @@ pub struct Faction {
     pub titles: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub treasury: Option<u64>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub prestige: Option<u32>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub starting_technologies: Vec<TechnologyId>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]

@@ -28,7 +28,6 @@
     "Gagiste du Jutland et de la Fionie"
   ],
   "treasury": 15000,
-  "prestige": 45,
   "starting_technologies": [
     "tech_water_mills",
     "tech_three_field_rotation",

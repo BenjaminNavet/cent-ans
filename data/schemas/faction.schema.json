@@ -52,7 +52,6 @@
       "items": { "type": "string" }
     },
     "treasury": { "type": "integer", "minimum": 0, "description": "Trésor de départ en livres tournois." },
-    "prestige": { "type": "integer", "minimum": 0 },
     "starting_technologies": {
       "type": "array",
       "items": { "$ref": "common.schema.json#/$defs/technology_id" },
