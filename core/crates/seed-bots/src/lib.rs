@@ -14,4 +14,5 @@ pub mod metrics;
 pub mod oracles;
 pub mod report;
 pub mod runner;
+pub mod timeline;
 pub mod view;
