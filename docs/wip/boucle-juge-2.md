@@ -70,3 +70,9 @@ Suite : choisir les refontes prioritaires dans les audits et les lancer en lots 
 - Audit visuel campagne rendu (181f09eda, note 4,8/10) : pas de ciel, lumière froide, sol 360 m/texel + Voronoi gris-bleu, lavis politique qui noie. Refontes R2 bande → R1 ciel/lumière → R4 montagne/neige → R3 sol → R7 végétation → R5 eau → R6 lieux → R8 parchemin. Lots VIS-R2 et VIS-R1 (Sonnet) lancés.
 - Choix de mise en scène tranchés en autonomie : météo dégagée au 1er tour (oui) ; aube rose à chaque tour (non, garder le seul crépuscule). Réversibles.
 - Meshy prévu : 4 maquettes famille « ouest » (village, château, bourg, abbaye) × 30 = 120 crédits, avec le lot R6 (lieux génériques) ; images sources Z-Image.
+
+## PAUSE (29/10, demandée par le joueur)
+- Main = 69c48fe9a + notes (MEM5 fusionné, ADR 0795) ; contrôle complet MEM5 lancé (out/check-mem5/status).
+- TUTO rebasé, ADR 0796 numéroté, prêt à fusionner (branche worktree-agent-a62be3909ca64d6f4).
+- Lots arrêtés en wip dans leurs worktrees : IA-CAV, FPS, HIST4, R1 renommée, BUG-HIST (vérif presque finie), ECO-R0, VIS-R2, VIS-R1.
+- Reprise : fusionner TUTO puis BUG-HIST ; relancer les autres lots depuis leur note docs/wip ; XP-POURQUOI/AUDIENCE après TUTO et R1.
