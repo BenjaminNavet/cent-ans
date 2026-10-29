@@ -84,3 +84,20 @@ Mesure : `memory.footprint_mib` (dump et rapports de banc, `proc_pid_rusage`), `
 - Décharge des ressources de campagne à l'entrée en bataille : non mesurée.
 - Feuilles de sol de campagne (JPEG 185 Mo RGBA8 décodés, transitoires) : pré-cuisson KTX2/BC7 non faite (le pipeline
   `bake-ktx2` exclut la campagne) ; mimalloc rend les tampons à l'OS, l'enjeu restant est le temps de chargement.
+
+## Amendement ADR 0796 (lot MEM4, 29/10) : mesure avec relief, textures de modèles en assets neufs
+- **Piège de mesure n° 2** : un worktree sans `data/map/pyramid` démarre une campagne sans terrain (journal : « No such
+  file or directory » sur `relief_pyramid.json`). Les 2,8 Go de l'ADR 0776 étaient mesurés ainsi. Lier
+  `ln -s ~/dev/cent-ans-raw/compose/pyramid data/map/pyramid` avant toute mesure.
+- Campagne au repos (release, Ultra, hors écran, relief chargé), Mo d'empreinte : 6 200 (avant) -> 5 400 (après) ; Metal
+  alloué 2,96 -> 2,13 Go ; sans relief 2 760. En fin de banc carte (descentes) : 7 350 ; pic RSS 4 860.
+- Postes : `RenderAssets<GpuImage>` 1,6 Go, Metal alloué 2,1 Go, empreinte 5,4 Go : il reste ~3 Go de graphiques
+  possédés (`Owned physical footprint (unmapped) (graphics)` 2,4-2,7 Go) que ni les images, ni les pipelines (≈ 100), ni
+  la végétation, ni le terrain, ni la limite d'images en vol n'expliquent. Menu : 632 Mo (Metal 171).
+- Outils : `CENT_ANS_MEMLOG=<s>` (journal `memlog` + `gpucensus`), `tools/bevy_bench/mem_protocol.sh idle|bench|battle`,
+  `memlog_view.py`, `vmmap_regions.py`, `memory.metal_allocated_mib` du dump.
+- Mesure fps (bataille, `bench.sh` en build `profile`) : la mêlée est liée au GPU (le thread de rendu attend le GPU 6 ms par
+  image) ; volumétrique ~2 ms, ombres des figurines ~1,5 ms (A/B, machine chargée : lire en relatif). Carte : les pics
+  de 350 à 1 100 ms viennent de `PipelineCache::process_pipeline_queue_system` (compilation synchrone des pipelines sous
+  macOS, Bevy ne la rend pas asynchrone) au premier passage de chaque variante ; piste : préchauffer les pipelines
+  pendant le voile de chargement.

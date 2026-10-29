@@ -6,7 +6,7 @@
 //! memory (`IOAccelerator (graphics)`, command data and transient allocations), which showed up as
 //! footprint swings of 2.4 GB in agent runs only. This plugin counts the submitted frames whose
 //! work is not done yet and, past the limit, waits for the oldest. `CENT_ANS_GPU_LATENCY=<n>` sets
-//! the limit (default [`DEFAULT_LATENCY`], `0` = unlimited as before).
+//! the limit (default [`DEFAULT_LATENCY`] = 0, unlimited).
 
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -17,8 +17,9 @@ use bevy::render::render_resource::PollType;
 use bevy::render::renderer::{RenderDevice, RenderQueue};
 use bevy::render::{Render, RenderApp, RenderSystems};
 
-/// Frames allowed in flight when nothing is configured (the swapchain default is 2).
-pub const DEFAULT_LATENCY: usize = 2;
+/// Frames allowed in flight when nothing is configured: `0` = no limit (as before). The limit is opt-in
+/// (`CENT_ANS_GPU_LATENCY=2`): MEM4 measured no footprint gain with it (5 264 Mo unlimited, 5 394 Mo at 2).
+pub const DEFAULT_LATENCY: usize = 0;
 
 fn latency() -> usize {
     std::env::var("CENT_ANS_GPU_LATENCY")

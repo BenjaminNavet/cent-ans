@@ -144,6 +144,7 @@ impl Plugin for MemoryProbePlugin {
 /// the images whose asset was dropped or whose bind group keeps an old texture alive).
 fn gpu_census(
     gpu_images: Res<bevy::render::render_asset::RenderAssets<bevy::render::texture::GpuImage>>,
+    pipelines: Res<bevy::render::render_resource::PipelineCache>,
     mut next: Local<Option<std::time::Instant>>,
 ) {
     let Some(every) = memlog_every() else { return };
@@ -189,7 +190,8 @@ fn gpu_census(
         })
         .collect();
     info!(
-        "gpucensus images={} total={:.0} MiB | {}",
+        "gpucensus pipelines={} images={} total={:.0} MiB | {}",
+        pipelines.pipelines().count(),
         gpu_images.iter().count(),
         total as f64 / 1048576.0,
         top.join(" | ")
