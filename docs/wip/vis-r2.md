@@ -8,15 +8,8 @@ Spec : docs/audits/2026-10-29-visuel-campagne.md, lot R2. Worktree, non fusionn�
 - `fill.wesl` : 8 taps (4 directions x rayons 1 et 2 texels) sur la texture de remplissage (quart de raster) ; texture de bande (binding 6) = couleur de position, alpha = alpha au bord.
 - `overlay.rs` : peinture de la texture de bande, uniform `band` (largeur px, falloff, poids d'aplat, unité monde par texel).
 
-## Pause demandée par le joueur
-`cargo check --features dev` vert. Tests (`cargo test --features dev --lib provinces`, pytest schémas) lancés
-puis arrêtés avant résultat (file d'attente heavy.sh saturée). Aucun résultat de test, clippy, ni capture encore.
-Liens des données ignorées créés dans le worktree (data/map/pyramid, game/assets/models/dn).
-
-## Prochaine étape
-1. Relancer les tests ci-dessus, puis clippy `-D warnings` et `cargo test --features dev` (shader_check inclus).
-2. Ajouter le champ band au dump `dump_provinces` si utile aux mesures.
-3. Captures (3 max, 640 px, CENT_ANS_WEATHER=clear) camp_guyenne / camp_calais / camp_2600 via tools/compare_views.sh ;
-   critère 1 en chiffres (Guyenne vs Saintonge), critère 3 (d 2600 identique : poids d'aplat 1 = ancien chemin),
-   critère 4 banc pan d 300.
-4. ADR : renommer XXXX à la fusion.
+## Fait (reprise)
+Rebasé sur main. clippy -D warnings vert, `cargo test --features dev` vert (1510 lib dont shader_check, band.rs), captures camp_guyenne / camp_calais / camp_2600 prises (hors dépôt, scratchpad).
+Mesures : critère 1 Guyenne vs Saintonge (recadrages 300x150) saturation 0,152 vs 0,179 (-15 %), valeur 0,327 vs 0,406 (-19 %) ; le cœur n'a aucun lavis (r-g = 0), l'écart est le sol sombre (R1/R3).
+Critère 2 : transect x=900 sous la frontière, rouge r-g 70 -> 51 -> 24 -> 7 sur ~16 px (ruban compris). Critère 3 : à d 2600 le poids d'aplat vaut 1, la branche bande est sautée (ancien chemin exact), non comparé pixel à pixel. Critère 4 : banc GPU non mesuré.
+Restent : banc pan d 300, pytest schémas, renommage XXXX de l'ADR à la fusion.
