@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_bench.schema.json",
+  "title": "Matrice du banc d'équilibre des batailles",
+  "description": "Fichier data/rules/battle_bench.json (lot BANC-1, ADR 0798) lu par l'exemple battle_bench de sim-battle : quelles batailles rejouer, avec quelles graines et quels modes de pilotage.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "cap_s": { "type": "number", "exclusiveMinimum": 0, "description": "Durée maximale simulée d'une bataille (s), sauf surcharge de section." },
+    "duels": {
+      "type": "object",
+      "properties": {
+        "seeds": { "$ref": "#/$defs/seeds" },
+        "terrain": { "$ref": "#/$defs/terrain" },
+        "per_side": { "type": "integer", "minimum": 1, "description": "Régiments par camp dans un duel." },
+        "modes": { "$ref": "#/$defs/modes" },
+        "types": { "type": "array", "minItems": 2, "items": { "type": "string" }, "description": "Types d'unité (sans préfixe unit_) ; chaque paire non ordonnée donne un duel." }
+      },
+      "required": ["seeds", "terrain", "per_side", "modes", "types"],
+      "additionalProperties": false
+    },
+    "armies": {
+      "type": "object",
+      "properties": {
+        "seeds": { "$ref": "#/$defs/seeds" },
+        "modes": { "$ref": "#/$defs/modes" },
+        "lines": { "type": "array", "items": { "$ref": "#/$defs/army_line" } }
+      },
+      "required": ["seeds", "modes", "lines"],
+      "additionalProperties": false
+    },
+    "historical": {
+      "type": "object",
+      "properties": {
+        "seeds": { "$ref": "#/$defs/seeds" },
+        "modes": { "$ref": "#/$defs/modes" },
+        "maps": { "type": "array", "items": { "type": "string" }, "description": "Identifiants de data/battle_maps/." }
+      },
+      "required": ["seeds", "modes", "maps"],
+      "additionalProperties": false
+    },
+    "sieges": {
+      "type": "object",
+      "properties": {
+        "seeds": { "$ref": "#/$defs/seeds" },
+        "cap_s": { "type": "number", "exclusiveMinimum": 0 },
+        "modes": { "$ref": "#/$defs/modes" },
+        "lines": { "type": "array", "items": { "$ref": "#/$defs/siege_line" } }
+      },
+      "required": ["seeds", "modes", "lines"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["cap_s", "duels", "armies", "historical", "sieges"],
+  "additionalProperties": false,
+  "$defs": {
+    "seeds": { "type": "integer", "minimum": 1, "description": "Nombre de graines (0..n)." },
+    "terrain": { "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"] },
+    "modes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "enum": ["ai_vs_ai", "passive_attacker", "passive_defender", "blob", "flank"] },
+      "description": "ai_vs_ai : deux IA ; passive_attacker/defender : ce camp ne fait rien (le joueur inactif) ; blob : un seul ordre « tous à l'attaque » puis plus rien ; flank : IA, mais la cavalerie attaquante contourne par le flanc."
+    },
+    "roster": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "array",
+        "prefixItems": [{ "type": "string" }, { "type": "integer", "minimum": 1 }],
+        "items": false,
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "description": "Paires [type d'unité sans préfixe unit_, nombre de régiments]."
+    },
+    "army_line": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "terrain": { "$ref": "#/$defs/terrain" },
+        "attacker": { "$ref": "#/$defs/roster" },
+        "defender": { "$ref": "#/$defs/roster" }
+      },
+      "required": ["id", "label", "terrain", "attacker", "defender"],
+      "additionalProperties": false
+    },
+    "siege_line": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "fortification": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "attacker": { "$ref": "#/$defs/roster" },
+        "defender": { "$ref": "#/$defs/roster" }
+      },
+      "required": ["id", "label", "fortification", "attacker", "defender"],
+      "additionalProperties": false
+    }
+  }
+}

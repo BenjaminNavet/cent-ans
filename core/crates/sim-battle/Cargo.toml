@@ -10,6 +10,10 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 
+[[example]]
+name = "battle_bench"
+test = true
+
 [dev-dependencies]
 data-model = { path = "../data-model", features = ["test-support"] }
 serde_json.workspace = true

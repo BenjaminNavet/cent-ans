@@ -1,0 +1,79 @@
+{
+  "description": "Matrice de référence du banc d'équilibre des batailles (lot BANC-1, ADR 0798) : duels 1 contre 1, armées de campagne types, cartes historiques, sièges. Lue par core/crates/sim-battle/examples/battle_bench.rs. Chaque section dit ses graines (numéros 0..n) et ses modes de pilotage ; le banc rejoue chaque ligne dans l'ordre et écrit out/bench/<date>.json.",
+  "cap_s": 1800,
+  "duels": {
+    "seeds": 2,
+    "terrain": "plains",
+    "per_side": 1,
+    "modes": ["ai_vs_ai"],
+    "types": [
+      "knights", "mounted_sergeants", "hobelars", "mounted_archers",
+      "men_at_arms_foot", "urban_militia", "flemish_pikemen", "welsh_spearmen",
+      "goedendag_militia", "routiers", "longbowmen", "crossbowmen",
+      "genoese_crossbowmen", "francs_archers"
+    ]
+  },
+  "armies": {
+    "seeds": 4,
+    "modes": ["ai_vs_ai", "passive_attacker", "passive_defender", "blob", "flank"],
+    "lines": [
+      {
+        "id": "fr_en_plains", "label": "Campagne FR(7) contre EN(7), plaine", "terrain": "plains",
+        "attacker": [["knights", 2], ["mounted_sergeants", 1], ["crossbowmen", 2], ["urban_militia", 2]],
+        "defender": [["longbowmen", 3], ["men_at_arms_foot", 2], ["welsh_spearmen", 1], ["hobelars", 1]]
+      },
+      {
+        "id": "fr_en_hills", "label": "Campagne FR(7) contre EN(7), collines", "terrain": "hills",
+        "attacker": [["knights", 2], ["mounted_sergeants", 1], ["crossbowmen", 2], ["urban_militia", 2]],
+        "defender": [["longbowmen", 3], ["men_at_arms_foot", 2], ["welsh_spearmen", 1], ["hobelars", 1]]
+      },
+      {
+        "id": "en_fr_plains", "label": "EN(7) attaque FR(7), plaine", "terrain": "plains",
+        "attacker": [["longbowmen", 3], ["men_at_arms_foot", 2], ["welsh_spearmen", 1], ["hobelars", 1]],
+        "defender": [["knights", 2], ["mounted_sergeants", 1], ["crossbowmen", 2], ["urban_militia", 2]]
+      },
+      {
+        "id": "symmetric_7", "label": "Symétrique 7 contre 7, plaine", "terrain": "plains",
+        "attacker": [["knights", 1], ["men_at_arms_foot", 2], ["crossbowmen", 2], ["urban_militia", 2]],
+        "defender": [["knights", 1], ["men_at_arms_foot", 2], ["crossbowmen", 2], ["urban_militia", 2]]
+      },
+      {
+        "id": "great_battle", "label": "Grande bataille FR(24) contre EN(21), plaine", "terrain": "plains",
+        "attacker": [["knights", 6], ["mounted_sergeants", 3], ["crossbowmen", 6], ["urban_militia", 6], ["men_at_arms_foot", 3]],
+        "defender": [["longbowmen", 9], ["men_at_arms_foot", 6], ["welsh_spearmen", 3], ["hobelars", 2], ["knights", 1]]
+      },
+      {
+        "id": "knights_vs_militia", "label": "4 chevaliers contre 20 milices, plaine", "terrain": "plains",
+        "attacker": [["knights", 4]],
+        "defender": [["urban_militia", 20]]
+      }
+    ]
+  },
+  "historical": {
+    "seeds": 4,
+    "modes": ["ai_vs_ai"],
+    "maps": ["crecy", "poitiers", "azincourt", "formigny", "castillon", "auray"]
+  },
+  "sieges": {
+    "seeds": 3,
+    "cap_s": 900,
+    "modes": ["ai_vs_ai", "passive_defender"],
+    "lines": [
+      {
+        "id": "siege_fort1", "label": "Siège, enceinte niveau 1", "fortification": 1,
+        "attacker": [["men_at_arms_foot", 4], ["crossbowmen", 2], ["urban_militia", 2]],
+        "defender": [["urban_militia", 2], ["crossbowmen", 1]]
+      },
+      {
+        "id": "siege_fort2", "label": "Siège, enceinte niveau 2", "fortification": 2,
+        "attacker": [["men_at_arms_foot", 5], ["crossbowmen", 3], ["knights", 1]],
+        "defender": [["urban_militia", 3], ["crossbowmen", 2], ["longbowmen", 1]]
+      },
+      {
+        "id": "siege_fort3", "label": "Siège, enceinte niveau 3", "fortification": 3,
+        "attacker": [["men_at_arms_foot", 6], ["crossbowmen", 4], ["urban_militia", 3]],
+        "defender": [["men_at_arms_foot", 2], ["urban_militia", 3], ["crossbowmen", 3], ["longbowmen", 2]]
+      }
+    ]
+  }
+}
