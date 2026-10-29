@@ -13,6 +13,7 @@
   "capital_city": "Sienne",
   "religion": "rel_catholic",
   "culture": "cul_tuscan",
+  "currency": "florin",
   "succession_law": "elective",
   "primary_title": "tit_siena",
   "heraldry": {

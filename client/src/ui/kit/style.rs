@@ -14,7 +14,8 @@ pub const INK_FADED: Color = Color::srgb(0.38, 0.32, 0.24);
 /// Heading ink (titles, headings).
 pub const INK_TITLE: Color = Color::srgb(0.20, 0.13, 0.07);
 pub const RUBRIC: Color = Color::srgb(0.62, 0.13, 0.08);
-pub const GOLD: Color = Color::srgb(0.72, 0.56, 0.24);
+/// Gold ink: at least 4.5:1 on `PARCHMENT` (tested below).
+pub const GOLD: Color = Color::srgb(0.49, 0.36, 0.09);
 pub const GOLD_PALE: Color = Color::srgb(0.84, 0.72, 0.42);
 pub const WAX: Color = Color::srgb(0.55, 0.11, 0.08);
 pub const WAX_DARK: Color = Color::srgb(0.36, 0.06, 0.04);
@@ -22,9 +23,11 @@ pub const WAX_LIGHT: Color = Color::srgb(0.70, 0.22, 0.14);
 pub const WAX_GREEN: Color = Color::srgb(0.24, 0.34, 0.18);
 pub const SHADOW: Color = Color::srgba(0.0, 0.0, 0.0, 0.30);
 /// Gauges: good (grey-green ink), fair (ochre), poor (red).
-pub const GOOD: Color = Color::srgb(0.33, 0.42, 0.20);
-pub const FAIR: Color = Color::srgb(0.72, 0.52, 0.16);
-pub const POOR: Color = Color::srgb(0.62, 0.13, 0.08);
+/// All three reach 4.5:1 on `PARCHMENT`; `GOOD` and `POOR` also differ in luminance (about 1.7:1),
+/// so a green/red gauge stays readable without the colour-blind mode (lot HIST4).
+pub const GOOD: Color = Color::srgb(0.26, 0.42, 0.14);
+pub const FAIR: Color = Color::srgb(0.49, 0.34, 0.06);
+pub const POOR: Color = Color::srgb(0.46, 0.06, 0.04);
 
 // Front-end (menus) colours.
 pub const FE_GOLD: Color = Color::srgb(0.93, 0.78, 0.42);
@@ -44,7 +47,8 @@ pub const PRIMARY_HOVER_INK: Color = Color::srgb(1.0, 0.97, 0.88);
 pub const PRIMARY_PRESSED_INK: Color = Color::srgb(0.90, 0.84, 0.66);
 pub const PRIMARY_DISABLED_INK: Color = Color::srgba(0.82, 0.82, 0.86, 0.8);
 pub const TAB_SELECTED_INK: Color = Color::srgb(0.15, 0.09, 0.04);
-pub const TAB_UNSELECTED_INK: Color = Color::srgb(0.40, 0.32, 0.22);
+/// 4.5:1 or more on `PARCHMENT_DARK` (tab bar), tested below.
+pub const TAB_UNSELECTED_INK: Color = Color::srgb(0.29, 0.21, 0.11);
 /// Tooltip muted text (`RichTooltip.MUTED`).
 pub const MUTED: Color = Color::srgb(0.42, 0.353, 0.251);
 /// Error text on parchment (`PanelSection.ERROR_COLOR`).
@@ -151,6 +155,46 @@ mod tests {
         assert!(UiType::Heading.size() > UiType::Body.size());
         assert!(UiType::Body.size() > UiType::Caption.size());
         assert!(UiType::Caption.size() >= 15.0);
+    }
+
+    /// WCAG relative luminance of an sRGB colour.
+    fn luminance(color: Color) -> f32 {
+        let c = color.to_srgba();
+        let lin = |v: f32| {
+            if v <= 0.04045 {
+                v / 12.92
+            } else {
+                ((v + 0.055) / 1.055).powf(2.4)
+            }
+        };
+        0.2126 * lin(c.red) + 0.7152 * lin(c.green) + 0.0722 * lin(c.blue)
+    }
+
+    fn contrast(a: Color, b: Color) -> f32 {
+        let (la, lb) = (luminance(a), luminance(b));
+        (la.max(lb) + 0.05) / (la.min(lb) + 0.05)
+    }
+
+    #[test]
+    fn default_palette_meets_wcag_aa() {
+        // Text on parchment: 4.5:1.
+        for (name, ink) in [
+            ("GOLD", GOLD),
+            ("GOOD", GOOD),
+            ("FAIR", FAIR),
+            ("POOR", POOR),
+            ("INK_SOFT", INK_SOFT),
+            ("MUTED", MUTED),
+        ] {
+            let ratio = contrast(ink, PARCHMENT);
+            assert!(ratio >= 4.5, "{name} on parchment: {ratio:.2}");
+        }
+        // Unselected tabs on the tab bar.
+        let tabs = contrast(TAB_UNSELECTED_INK, PARCHMENT_DARK);
+        assert!(tabs >= 4.5, "tabs: {tabs:.2}");
+        // Green against red differ in luminance, not only in hue.
+        let pair = contrast(GOOD, POOR);
+        assert!(pair >= 1.6, "good/poor: {pair:.2}");
     }
 
     #[test]

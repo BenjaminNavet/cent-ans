@@ -6,8 +6,16 @@
 
 use bevy::color::Color;
 
-/// Livre tournois sign.
-pub const SYMBOL: &str = "₶";
+/// Symbol of the display currency: the livre ₶ unless the campaign names the player's money
+/// otherwise (`Sim::sync_currency`, lot HIST4).
+pub fn symbol() -> String {
+    data_model::currency::symbol()
+}
+
+/// Plural name of the display currency (« livres », « hyperpères »).
+pub fn money_plural() -> String {
+    data_model::currency::plural()
+}
 /// Typographic minus.
 pub const MINUS: char = '\u{2212}';
 /// No-break space.
@@ -27,11 +35,14 @@ pub const MONTHS_SHORT: [&str; 12] = [
 ];
 
 /// Place or faction name introduced by « de » with the right elision and article contraction:
-/// « France » -> « de France », « Île-de-France » -> « d’Île-de-France », « Le Caire » ->
+/// « France » -> « de France », « Île-de-France » -> « de l’Île-de-France », « Le Caire » ->
 /// « du Caire », « Les Landes » -> « des Landes », « L’Aigle » -> « de l’Aigle ». An initial h is
 /// taken as aspirated (« de Hongrie », « de Hainaut »).
 pub fn de_place(name: &str) -> String {
     let name = name.trim();
+    if name == "Île-de-France" {
+        return "de l’Île-de-France".to_owned();
+    }
     if let Some(rest) = name.strip_prefix("Le ") {
         return format!("du {rest}");
     }
@@ -71,24 +82,24 @@ pub fn digits(value: i64) -> String {
 
 /// `60000` -> « 60 000 ₶ ».
 pub fn amount(value: i64) -> String {
-    format!("{}{NBSP}{SYMBOL}", digits(value))
+    format!("{}{NBSP}{}", digits(value), symbol())
 }
 
 /// `3063` -> « +3 063 ₶ », `-1243` -> « −1 243 ₶ », `0` -> « 0 ₶ ».
 pub fn signed(value: i64) -> String {
     if value == 0 {
-        return format!("0{NBSP}{SYMBOL}");
+        return format!("0{NBSP}{}", symbol());
     }
     let sign = if value > 0 { '+' } else { MINUS };
-    format!("{sign}{}{NBSP}{SYMBOL}", digits(value.abs()))
+    format!("{sign}{}{NBSP}{}", digits(value.abs()), symbol())
 }
 
 /// A charge (positive value) -> « −9 930 ₶ »; « 0 ₶ » when zero.
 pub fn charge(value: i64) -> String {
     if value == 0 {
-        format!("0{NBSP}{SYMBOL}")
+        format!("0{NBSP}{}", symbol())
     } else {
-        format!("{MINUS}{}{NBSP}{SYMBOL}", digits(value.abs()))
+        format!("{MINUS}{}{NBSP}{}", digits(value.abs()), symbol())
     }
 }
 
@@ -205,7 +216,7 @@ mod tests {
 
     #[test]
     fn place_elision() {
-        assert_eq!(de_place("Île-de-France"), "d’Île-de-France");
+        assert_eq!(de_place("Île-de-France"), "de l’Île-de-France");
         assert_eq!(de_place("Île de Man"), "d’Île de Man");
         assert_eq!(de_place("Angleterre"), "d’Angleterre");
         assert_eq!(de_place("Évêché de Dorpat"), "d’Évêché de Dorpat");

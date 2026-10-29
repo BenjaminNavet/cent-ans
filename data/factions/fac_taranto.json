@@ -13,6 +13,7 @@
   "capital_city": "Tarente",
   "religion": "rel_catholic",
   "culture": "cul_neapolitan",
+  "currency": "carlin",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_taranto",
   "heraldry": {

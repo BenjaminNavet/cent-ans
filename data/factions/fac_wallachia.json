@@ -15,6 +15,7 @@
   "capital_city": "Curtea de Argeș",
   "religion": "rel_orthodox",
   "culture": "cul_romanian",
+  "currency": "ducat",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_wallachia",
   "heraldry": {

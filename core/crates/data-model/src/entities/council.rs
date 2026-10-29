@@ -7,7 +7,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::common::LocalizedName;
+use crate::entities::character::Role;
 use crate::entities::skill::SkillBranch;
+use crate::ids::TraitId;
 use crate::key_enum;
 
 /// Contents of `data/council/offices.json`.
@@ -19,6 +21,12 @@ pub struct CouncilOffices {
     /// Loyalty points a dismissed or replaced councillor loses.
     #[serde(default)]
     pub dismissal_loyalty_penalty: u8,
+    /// Roles that never sit on a council (e.g. the ruler's consort).
+    #[serde(default)]
+    pub excluded_roles: Vec<Role>,
+    /// Traits that bar a character from every office (e.g. disgrace).
+    #[serde(default)]
+    pub excluded_traits: Vec<TraitId>,
     /// Catalogue order is the order of the automatic assignment.
     pub offices: Vec<CouncilOfficeDef>,
 }
@@ -73,4 +81,14 @@ pub struct CouncilOfficeDef {
     /// Alert, hint and journal kinds the office advises on (each kind
     /// belongs to exactly one office).
     pub advice_kinds: Vec<String>,
+    /// Roles allowed to hold the office (empty: any). A clerical office is
+    /// limited to the clergy.
+    #[serde(default)]
+    pub holder_roles: Vec<Role>,
+    /// Word looked up in the historical titles of a character
+    /// (`Character::titles`): a title that starts after the current year bars
+    /// the character from the office (the constable of 1338 is no constable
+    /// in 1337).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title_keyword: Option<String>,
 }

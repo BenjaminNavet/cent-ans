@@ -193,9 +193,11 @@ impl FactionEconomy {
     }
 }
 
-/// Sign of the livre tournois (design § economy), used by every amount shown
-/// to the player.
-pub const LIVRE_SIGN: &str = "₶";
+/// Symbol of the display currency (the livre ₶ unless a front end set another,
+/// `data_model::currency::set_display`), used by every amount shown to the player.
+pub fn livre_sign() -> String {
+    data_model::currency::symbol()
+}
 
 /// `-6000` → « −6 000 ₶ », `1250` → « +1 250 ₶ »: explicit sign (true minus
 /// sign), digits grouped by three with no-break spaces.
@@ -209,7 +211,7 @@ pub fn signed_livres(value: i64) -> String {
         grouped.push(digit);
     }
     let sign = if value < 0 { '\u{2212}' } else { '+' };
-    format!("{sign}{grouped}\u{a0}{LIVRE_SIGN}")
+    format!("{sign}{grouped}\u{a0}{}", livre_sign())
 }
 
 /// Unsigned amount in livres tournois: `30018` → « 30 018 ₶ » (no-break spaces).

@@ -14,6 +14,7 @@
   "capital_city": "Vidin",
   "religion": "rel_orthodox",
   "culture": "cul_bulgarian",
+  "currency": "hyperpere",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_bulgaria",
   "primary_title": "tit_vidin",

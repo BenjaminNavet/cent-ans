@@ -40,6 +40,8 @@ pub struct StartSheet {
     /// Ids of the provinces owned in 1337.
     pub provinces: Vec<String>,
     pub treasury: i64,
+    /// Short symbol of the faction's money (« ₶ », « din. »).
+    pub currency_symbol: String,
     pub projected_income: i64,
     pub armies_count: usize,
 }
@@ -119,7 +121,7 @@ fn sheet_of(data: &GameData, state: &CampaignState, id: &FactionId) -> StartShee
             .iter()
             .map(|o| StartObjective {
                 title: o.title.clone(),
-                description: o.description.clone(),
+                description: o.description.replace("{money}", &data.currency_of(id).plural),
             })
             .collect(),
         provinces: data
@@ -129,6 +131,7 @@ fn sheet_of(data: &GameData, state: &CampaignState, id: &FactionId) -> StartShee
             .map(|p| p.id.as_str().to_owned())
             .collect(),
         treasury: economy.as_ref().map_or(0, |e| e.treasury),
+        currency_symbol: data.currency_of(id).symbol,
         projected_income: economy.as_ref().map_or(0, |e| e.projected_income),
         armies_count: summary.map_or(0, |s| s.armies_count),
     }

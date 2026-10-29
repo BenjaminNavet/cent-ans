@@ -15,6 +15,7 @@
   "capital_city": "Visegrád",
   "religion": "rel_catholic",
   "culture": "cul_hungarian",
+  "currency": "florin",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_hungary",
   "heraldry": {

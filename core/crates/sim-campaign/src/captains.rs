@@ -28,7 +28,7 @@ pub enum CaptainError {
     CapReached { cap: u32 },
     #[error("un capitaine a été engagé il y a peu : encore {0} tour(s)")]
     Cooldown(u32),
-    #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
+    #[error("trésor insuffisant : {needed} {money} nécessaires, {available} disponibles", money = data_model::currency::MONEY)]
     NotEnoughFunds { needed: i64, available: i64 },
 }
 

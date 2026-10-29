@@ -13,6 +13,7 @@
   "capital_city": "Urbin",
   "religion": "rel_catholic",
   "culture": "cul_tuscan",
+  "currency": "florin",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_urbino",
   "heraldry": {

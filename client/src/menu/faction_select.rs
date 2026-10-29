@@ -725,13 +725,18 @@ fn key_figures(
         ("Provinces", sheet.provinces.len().to_string()),
         (
             "Trésor",
-            format!("{} ₶", crate::ui::kit::fr::digits(sheet.treasury)),
+            format!(
+                "{} {}",
+                crate::ui::kit::fr::digits(sheet.treasury),
+                sheet.currency_symbol
+            ),
         ),
         (
             "Revenu",
             format!(
-                "{} ₶ / saison",
-                crate::ui::kit::fr::digits(sheet.projected_income)
+                "{} {} / saison",
+                crate::ui::kit::fr::digits(sheet.projected_income),
+                sheet.currency_symbol
             ),
         ),
         ("Armées", sheet.armies_count.to_string()),

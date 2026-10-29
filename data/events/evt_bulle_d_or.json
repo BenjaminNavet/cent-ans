@@ -5,10 +5,10 @@
   "kind": "historical",
   "trigger": {
     "date": {
-      "year": 1356,
-      "season": "spring"
+      "year": 1355,
+      "season": "winter"
     },
-    "until_year": 1357,
+    "until_year": 1356,
     "conditions": [
       {
         "type": "faction_exists",
@@ -67,7 +67,8 @@
     }
   ],
   "historical_date": {
-    "value": "1356-01-10"
+    "value": "1356-01-10",
+    "note": "Première partie de la Bulle à la diète de Nuremberg (10 janvier 1356), seconde à Metz (25 décembre 1356) ; l’hiver 1355-1356 est le tour de la promulgation."
   },
   "sources": [
     "Bulle d'or de 1356",

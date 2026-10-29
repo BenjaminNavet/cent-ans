@@ -16,6 +16,7 @@ use crate::chronicle::{
     set_ruler, transfer_province, transfer_title, EventContext, PlagueWave, ScheduledEvent,
     OPINION_TURNS, PEACE_TRUCE_TURNS,
 };
+use data_model::currency::MONEY;
 use crate::diplomacy::Claim;
 use crate::events::{EventKind, GameEvent};
 use crate::state::{Army, CampaignState, Unit, TURNS_PER_YEAR};
@@ -206,7 +207,7 @@ impl CampaignState {
             } => {
                 if *ransom > 0 {
                     format!(
-                        "Libération{} contre {ransom} livres de rançon",
+                        "Libération{} contre {ransom} {MONEY} de rançon",
                         who(id, faction)
                     )
                 } else {

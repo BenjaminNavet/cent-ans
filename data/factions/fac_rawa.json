@@ -14,6 +14,7 @@
   "capital_city": "Rawa Mazowiecka",
   "religion": "rel_catholic",
   "culture": "cul_polish",
+  "currency": "marc",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_rawa",
   "heraldry": {

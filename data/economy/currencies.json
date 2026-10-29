@@ -1,0 +1,126 @@
+{
+  "description": "Monnaies d’usage des factions (lot HIST4). Chaque faction nomme sa monnaie par `currency` ; la valeur reste une unité de compte commune à toutes (celle de la livre tournois, ADR 0793) : seul le nom affiché change. Sans `currency`, la livre.",
+  "default": "livre",
+  "currencies": [
+    {
+      "id": "livre",
+      "singular": "livre",
+      "plural": "livres",
+      "symbol": "₶"
+    },
+    {
+      "id": "sterling",
+      "singular": "livre sterling",
+      "plural": "livres sterling",
+      "symbol": "£"
+    },
+    {
+      "id": "lliura",
+      "singular": "livre barcelonaise",
+      "plural": "livres barcelonaises",
+      "symbol": "lb."
+    },
+    {
+      "id": "florin",
+      "singular": "florin",
+      "plural": "florins",
+      "symbol": "fl."
+    },
+    {
+      "id": "ducat",
+      "singular": "ducat",
+      "plural": "ducats",
+      "symbol": "duc."
+    },
+    {
+      "id": "genovin",
+      "singular": "génovin",
+      "plural": "génovins",
+      "symbol": "gén."
+    },
+    {
+      "id": "carlin",
+      "singular": "carlin",
+      "plural": "carlins",
+      "symbol": "car."
+    },
+    {
+      "id": "once",
+      "singular": "once",
+      "plural": "onces",
+      "symbol": "on."
+    },
+    {
+      "id": "marc",
+      "singular": "marc",
+      "plural": "marcs",
+      "symbol": "mk"
+    },
+    {
+      "id": "gros",
+      "singular": "gros",
+      "plural": "gros",
+      "symbol": "gr."
+    },
+    {
+      "id": "kopa",
+      "singular": "kopa",
+      "plural": "kopas",
+      "symbol": "kop."
+    },
+    {
+      "id": "grivna",
+      "singular": "grivna",
+      "plural": "grivnas",
+      "symbol": "grv."
+    },
+    {
+      "id": "hyperpere",
+      "singular": "hyperpère",
+      "plural": "hyperpères",
+      "symbol": "hyp."
+    },
+    {
+      "id": "dinar",
+      "singular": "dinar",
+      "plural": "dinars",
+      "symbol": "din."
+    },
+    {
+      "id": "dirham",
+      "singular": "dirham",
+      "plural": "dirhams",
+      "symbol": "dh"
+    },
+    {
+      "id": "akce",
+      "singular": "akçe",
+      "plural": "akçes",
+      "symbol": "ak."
+    },
+    {
+      "id": "maravedi",
+      "singular": "maravédi",
+      "plural": "maravédis",
+      "symbol": "mrv."
+    },
+    {
+      "id": "libra",
+      "singular": "libra",
+      "plural": "libras",
+      "symbol": "lb."
+    },
+    {
+      "id": "besant",
+      "singular": "besant",
+      "plural": "besants",
+      "symbol": "bes."
+    },
+    {
+      "id": "tram",
+      "singular": "tram",
+      "plural": "trams",
+      "symbol": "tr."
+    }
+  ]
+}

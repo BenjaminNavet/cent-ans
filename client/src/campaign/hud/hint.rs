@@ -37,6 +37,9 @@ pub struct HintDef {
     pub id: String,
     pub title: String,
     pub text: String,
+    /// Wording when the alert's province belongs to someone else (a neighbour of ours): no
+    /// garrison of ours to reinforce (lot HIST4). Falls back to `text`.
+    pub text_foreign: Option<String>,
     pub action: String,
 }
 
@@ -68,6 +71,10 @@ impl HintConfig {
                     id: s(h, "id"),
                     title: s(h, "title"),
                     text: s(h, "text"),
+                    text_foreign: h
+                        .get("text_foreign")
+                        .and_then(Value::as_str)
+                        .map(str::to_owned),
                     action: s(h, "action"),
                 })
                 .collect(),
@@ -93,6 +100,8 @@ pub struct HintInput {
     pub alerts: Vec<Alert>,
     /// `(province id, display name)` per alert province, for `{province}`.
     pub province_names: Vec<(String, String)>,
+    /// Alert provinces held by another faction.
+    pub foreign_provinces: Vec<String>,
     pub idle_army: Option<(String, String)>,
     pub treasury: i64,
     pub income: i64,
@@ -137,6 +146,7 @@ pub fn choose(input: &HintInput, config: &HintConfig) -> Option<Hint> {
         }
         let mut alert = None;
         let mut army = None;
+        let mut foreign = false;
         let values: Vec<(&str, String)> = if ALERT_KINDS.contains(&def.id.as_str()) {
             let Some(found) = input.alerts.iter().find(|a| a.kind == def.id) else {
                 continue;
@@ -147,6 +157,10 @@ pub fn choose(input: &HintInput, config: &HintConfig) -> Option<Hint> {
                 .and_then(|id| input.province_names.iter().find(|(p, _)| p == id))
                 .map(|(_, name)| name.clone())
                 .unwrap_or_else(|| "une de vos provinces".to_owned());
+            foreign = found
+                .province
+                .as_ref()
+                .is_some_and(|id| input.foreign_provinces.contains(id));
             alert = Some(found.clone());
             let (title, body) = found
                 .text
@@ -183,7 +197,13 @@ pub fn choose(input: &HintInput, config: &HintConfig) -> Option<Hint> {
         return Some(Hint {
             id: def.id.clone(),
             title: fill(&def.title, &values),
-            text: fill(&def.text, &values),
+            text: fill(
+                def.text_foreign
+                    .as_deref()
+                    .filter(|_| foreign)
+                    .unwrap_or(&def.text),
+                &values,
+            ),
             action: def.action.clone(),
             alert,
             army,
@@ -278,6 +298,17 @@ fn refresh(
         })
         .collect();
     let player = &sim.player;
+    let foreign_provinces = readiness
+        .alerts
+        .iter()
+        .filter_map(|a| a.province.clone())
+        .filter(|id| {
+            data_model::ProvinceId::new(id.clone())
+                .ok()
+                .and_then(|pid| state.provinces.get(&pid))
+                .is_some_and(|p| &p.owner != player)
+        })
+        .collect();
     let constructions = state
         .settlements
         .values()
@@ -286,6 +317,7 @@ fn refresh(
     let input = HintInput {
         alerts: readiness.alerts.clone(),
         province_names,
+        foreign_provinces,
         idle_army,
         treasury: top.treasury,
         income: top.net_income,

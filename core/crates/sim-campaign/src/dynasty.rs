@@ -323,7 +323,7 @@ pub enum HeirError {
     Unavailable,
     #[error("la faction n'a pas de souverain")]
     NoRuler,
-    #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
+    #[error("trésor insuffisant : {needed} {money} nécessaires, {available} disponibles", money = data_model::currency::MONEY)]
     InsufficientFunds { needed: i64, available: i64 },
 }
 

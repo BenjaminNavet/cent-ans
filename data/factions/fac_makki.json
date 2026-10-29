@@ -13,6 +13,7 @@
   "capital_city": "Gabès",
   "religion": "rel_islam",
   "culture": "cul_maghrebi",
+  "currency": "dinar",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_hafsids",
   "primary_title": "tit_makki",

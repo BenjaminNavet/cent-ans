@@ -1,16 +1,26 @@
 //! French wording of an article: its label in a treaty, and the sentence of
 //! an offer made of this article alone.
 
+use data_model::currency::MONEY;
 use data_model::{FactionId, GameData};
 
 use super::{party_id, Article};
 use crate::diplomacy;
 use crate::state::CampaignState;
 
-/// French label of a truce clause of `turns` seasons ("Trêve de 5 ans").
+/// French label of a truce clause of `turns` seasons ("Trêve de 2 ans").
 pub fn truce_label(turns: u32) -> String {
-    let years = (turns / 4).max(1);
-    format!("Trêve de {years} an{}", if years > 1 { "s" } else { "" })
+    format!("Trêve de {}", years(turns / 4))
+}
+
+/// « 1 an », « 2 ans »: a treaty lasts one year at least.
+fn years(count: u32) -> String {
+    let count = count.max(1);
+    if count == 1 {
+        "1 an".to_owned()
+    } else {
+        format!("{count} ans")
+    }
 }
 
 impl Article {
@@ -27,22 +37,21 @@ impl Article {
         let rules = &data.ai_diplomacy.negotiation;
         match self {
             Article::Peace => format!(
-                "Paix (trêve de {} ans)",
-                (if rules.enabled {
+                "Paix (trêve de {})",
+                years(if rules.enabled {
                     rules.peace_truce_turns
                 } else {
                     diplomacy::TRUCE_TURNS
                 } / 4)
-                    .max(1)
             ),
             Article::Truce { turns } => truce_label(*turns),
             Article::Mediation { turns } => {
-                format!("Trêve de {} an(s) par médiation", (turns / 4).max(1))
+                format!("Trêve de {} par médiation", years(turns / 4))
             }
             Article::Alliance => "Alliance militaire (défensive et offensive)".to_owned(),
             Article::DefensiveAlliance => "Alliance défensive".to_owned(),
             Article::NonAggression { turns } => {
-                format!("Pacte de non-agression de {} an(s)", (turns / 4).max(1))
+                format!("Pacte de non-agression de {}", years(turns / 4))
             }
             Article::JoinWar { giver, target } => format!(
                 "{} rejoint la guerre contre {}",
@@ -63,10 +72,10 @@ impl Article {
                 per_season,
                 seasons,
             } => format!(
-                "Tribut : {} verse {per_season} livres par saison pendant {seasons} saisons",
+                "Tribut : {} verse {per_season} {MONEY} par saison pendant {seasons} saisons",
                 who(giver)
             ),
-            Article::Gold { giver, amount } => format!("{} verse {amount} livres", who(giver)),
+            Article::Gold { giver, amount } => format!("{} verse {amount} {MONEY}", who(giver)),
             Article::CedeProvince { giver, province } => format!(
                 "{} cède {} à {}",
                 who(giver),
@@ -142,14 +151,14 @@ impl Article {
         Some(match self {
             Article::Peace => format!("{name} propose la paix."),
             Article::Truce { turns } | Article::Mediation { turns } => format!(
-                "Par la médiation du pape, {name} propose une trêve de {} ans.",
-                turns / 4
+                "Par la médiation du pape, {name} propose une trêve de {}.",
+                years(turns / 4)
             ),
             Article::Alliance => format!("{name} propose une alliance militaire."),
             Article::DefensiveAlliance => format!("{name} propose une alliance défensive."),
             Article::NonAggression { turns } => format!(
-                "{name} propose un pacte de non-agression de {} an(s).",
-                (turns / 4).max(1)
+                "{name} propose un pacte de non-agression de {}.",
+                years(turns / 4)
             ),
             Article::AllyCall { aggressor } => format!(
                 "{name}, votre allié, est attaqué par {} et réclame votre aide. Refuser, c'est \

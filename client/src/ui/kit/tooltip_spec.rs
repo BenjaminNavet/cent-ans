@@ -459,8 +459,18 @@ fn rule_or_plain(texts: &TooltipTexts, block: &str, key: &str, label: &str) -> S
     }
 }
 
-/// Replaces `{rule.<key>}` by `lookup(key)`; unknown keys stay as written.
+/// Replaces `{rule.<key>}` by `lookup(key)`; unknown keys stay as written. `{money}` and
+/// `{money_symbol}` name the player's currency (lot HIST4).
 pub fn fill_rules(text: &str, lookup: impl Fn(&str) -> Option<String>) -> String {
+    let named;
+    let text = if text.contains("{money") {
+        named = text
+            .replace("{money_symbol}", &data_model::currency::symbol())
+            .replace("{money}", &data_model::currency::plural());
+        named.as_str()
+    } else {
+        text
+    };
     let mut out = String::with_capacity(text.len());
     let mut rest = text;
     while let Some(start) = rest.find("{rule.") {

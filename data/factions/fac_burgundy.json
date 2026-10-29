@@ -15,6 +15,7 @@
   "capital_city": "Dijon",
   "religion": "rel_catholic",
   "culture": "cul_french",
+  "currency": "livre",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_france",
   "primary_title": "tit_burgundy",
@@ -120,7 +121,7 @@
       {
         "id": "obj_bu_purse",
         "title": "Le trésor des ducs",
-        "description": "Amasser 12 000 livres.",
+        "description": "Amasser 12 000 {money}.",
         "condition": {
           "kind": "treasury",
           "min": 12000

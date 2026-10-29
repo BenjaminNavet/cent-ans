@@ -1,7 +1,7 @@
 {
   "id": "evt_treve_de_leulinghen",
-  "title": "La trêve de Leulinghen",
-  "text": "Après des années de pourparlers sous les tentes de Leulinghen, entre Calais et Boulogne, Richard II et Charles VI signent une trêve de vingt-huit ans. Elle sera scellée par le mariage du roi d’Angleterre, veuf, avec la petite Isabelle de France, âgée de sept ans.",
+  "title": "La trêve de vingt-huit ans",
+  "text": "Depuis les trêves de Leulinghen (1389), sans cesse prolongées, les deux couronnes négocient la paix. En mars 1396, Richard II et Charles VI conviennent à Paris d’une trêve de vingt-huit ans ; elle est scellée à Calais, le 4 novembre, par le mariage du roi d’Angleterre, veuf, avec la petite Isabelle de France, âgée de sept ans.",
   "kind": "historical",
   "trigger": {
     "date": {
@@ -79,7 +79,8 @@
     }
   ],
   "historical_date": {
-    "value": "1396-10-29"
+    "value": "1396-11-04",
+    "note": "Trêve de vingt-huit ans conclue à Paris le 9 mars 1396 ; mariage d’Isabelle à Calais le 4 novembre 1396. Les trêves de Leulinghen datent de 1389."
   },
   "sources": [
     "Trêve de Leulinghen",

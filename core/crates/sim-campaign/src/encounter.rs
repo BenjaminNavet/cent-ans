@@ -12,6 +12,7 @@
 //! beside the army (fought through `movement::fight`, 3D or auto, whose
 //! result applies `on_win` / `on_loss`), or regiments joining the army.
 
+use data_model::currency::MONEY;
 use data_model::util::dist;
 use std::collections::BTreeSet;
 
@@ -561,7 +562,7 @@ pub fn option_availability(
         if !state.condition_holds(data, condition, &ctx) {
             return Err(match condition {
                 data_model::Condition::TreasuryAbove { amount, .. } => {
-                    format!("trésor insuffisant (plus de {amount} livres nécessaires)")
+                    format!("trésor insuffisant (plus de {amount} {MONEY} nécessaires)")
                 }
                 _ => "conditions non remplies".to_owned(),
             });

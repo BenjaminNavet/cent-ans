@@ -9,6 +9,7 @@
 //! campaign seed and the turn, and never draws from [`CampaignState::rng`]
 //! (the rest of the simulation is left untouched).
 
+use data_model::currency::MONEY;
 use data_model::key_enum;
 use std::collections::BTreeSet;
 
@@ -907,7 +908,7 @@ pub fn treaty_tokens(state: &CampaignState, player: &FactionId) -> Vec<String> {
 pub fn reward_label(reward: &MissionReward) -> String {
     let mut parts = Vec::new();
     if reward.gold != 0 {
-        parts.push(format!("{} livres", reward.gold));
+        parts.push(format!("{} {MONEY}", reward.gold));
     }
     if reward.prestige != 0 {
         parts.push(format!("+{} prestige", reward.prestige));

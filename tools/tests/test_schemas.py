@@ -217,6 +217,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "town_maquettes.schema.json": ("art/town_maquettes.json",),
     "towns_1340.schema.json": ("map/towns_1340.json",),
     "trade.schema.json": ("economy/trade.json",),
+    "currencies.schema.json": ("economy/currencies.json",),
     "ui_fa_assets.schema.json": ("ui/fa_ui_assets.json",),
     "tutorial_steps.schema.json": ("tutorial/steps.json",),
     "unit_formations_rules.schema.json": ("rules/unit_formations.json",),

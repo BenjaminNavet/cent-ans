@@ -585,7 +585,7 @@ fn update_fields(
                     style::INK
                 },
                 hud.economy.as_ref().map_or_else(
-                    || "[b]Trésor[/b]\nOr en caisse, en livres tournois.".to_owned(),
+                    || format!("[b]Trésor[/b]\nOr en caisse, en {}.", fr::money_plural()),
                     |economy| text::treasury_tooltip(economy, &hud.top_provinces),
                 ),
             ),

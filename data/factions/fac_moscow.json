@@ -15,6 +15,7 @@
   "capital_city": "Moscou",
   "religion": "rel_orthodox",
   "culture": "cul_russian",
+  "currency": "grivna",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_vladimir",
   "heraldry": {
@@ -119,7 +120,7 @@
       {
         "id": "obj_mo_purse",
         "title": "Le trésor du grand-prince",
-        "description": "Amasser 25 000 livres.",
+        "description": "Amasser 25 000 {money}.",
         "condition": {
           "kind": "treasury",
           "min": 25000

@@ -14,6 +14,7 @@
   "capital_city": "Meissen",
   "religion": "rel_catholic",
   "culture": "cul_german",
+  "currency": "florin",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_empire",
   "primary_title": "tit_meissen",

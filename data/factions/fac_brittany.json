@@ -15,6 +15,7 @@
   "capital_city": "Nantes",
   "religion": "rel_catholic",
   "culture": "cul_breton",
+  "currency": "livre",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_france",
   "primary_title": "tit_brittany",

@@ -14,6 +14,7 @@
   "capital_city": "Lisbonne",
   "religion": "rel_catholic",
   "culture": "cul_portuguese",
+  "currency": "libra",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_portugal",
   "heraldry": {

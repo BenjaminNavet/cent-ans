@@ -1,0 +1,50 @@
+{
+  "id": "chr_robert_de_stratford",
+  "name": {
+    "display": "Robert de Stratford",
+    "local": "Robert de Stratford",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Stratford",
+  "faction": "fac_england",
+  "role": "prelate",
+  "birth": {
+    "value": "1290",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1362-05-09"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Évêque de Chichester",
+      "from": {
+        "value": "1337"
+      }
+    },
+    {
+      "title": "Chancelier d’Angleterre",
+      "from": {
+        "value": "1337-07"
+      }
+    }
+  ],
+  "skills": {
+    "command": 0,
+    "governance": 5,
+    "court": 6
+  },
+  "traits": [
+    "trait_loyal",
+    "trait_scholar"
+  ],
+  "piety": 70,
+  "starting_location": "prov_middlesex",
+  "status": "at_court",
+  "description": "Frère de l’archevêque de Cantorbéry, évêque de Chichester ; il reçoit les sceaux de chancelier à l’été 1337.",
+  "sources": [
+    "Robert de Stratford"
+  ]
+}

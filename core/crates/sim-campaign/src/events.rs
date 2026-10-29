@@ -187,10 +187,14 @@ pub fn capitalize(text: &str) -> String {
 }
 
 /// French preposition "de" with elision before a vowel: `de("Île-de-France")`
-/// gives "d’Île-de-France", `de("Guyenne")` gives "de Guyenne". A leading "h"
+/// gives "de l’Île-de-France", `de("Guyenne")` gives "de Guyenne". A leading "h"
 /// is treated as aspirated ("de Hainaut"), as for most place names of the
 /// period.
 pub fn de(name: &str) -> String {
+    // The only region name that carries its article in everyday speech.
+    if name == "Île-de-France" {
+        return "de l’Île-de-France".to_owned();
+    }
     let starts_with_vowel = name
         .chars()
         .next()
@@ -208,7 +212,8 @@ mod elision_tests {
 
     #[test]
     fn elides_before_vowels_only() {
-        assert_eq!(de("Île-de-France"), "d’Île-de-France");
+        assert_eq!(de("Île-de-France"), "de l’Île-de-France");
+        assert_eq!(de("Île de Man"), "d’Île de Man");
         assert_eq!(de("Artois"), "d’Artois");
         assert_eq!(de("Guyenne"), "de Guyenne");
         assert_eq!(de("Hainaut"), "de Hainaut");

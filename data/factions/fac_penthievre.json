@@ -14,6 +14,7 @@
   "capital_city": "Lamballe",
   "religion": "rel_catholic",
   "culture": "cul_breton",
+  "currency": "livre",
   "succession_law": "cognatic_primogeniture",
   "suzerain": "fac_brittany",
   "primary_title": "tit_penthievre",

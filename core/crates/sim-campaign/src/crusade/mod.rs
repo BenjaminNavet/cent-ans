@@ -97,7 +97,7 @@ pub enum CrusadeError {
     NotCrusaders,
     #[error("Aucun port tenu pour accueillir les volontaires.")]
     NoPort,
-    #[error("Trésor insuffisant : {needed} livres nécessaires, {available} disponibles.")]
+    #[error("Trésor insuffisant : {needed} {money} nécessaires, {available} disponibles.", money = data_model::currency::MONEY)]
     InsufficientFunds { needed: i64, available: i64 },
     #[error("Passage déjà prêché : nouvel appel dans {}.", count_noun(*.0, "tour", "tours"))]
     Cooldown(u32),

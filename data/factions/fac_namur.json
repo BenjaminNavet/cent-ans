@@ -15,6 +15,7 @@
   "capital_city": "Namur",
   "religion": "rel_catholic",
   "culture": "cul_french",
+  "currency": "livre",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_empire",
   "primary_title": "tit_namur",

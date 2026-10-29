@@ -13,6 +13,7 @@
   "capital_city": "Barqa (Al-Marj)",
   "religion": "rel_islam",
   "culture": "cul_maghrebi",
+  "currency": "dinar",
   "succession_law": "elective",
   "primary_title": "tit_barqa",
   "heraldry": {

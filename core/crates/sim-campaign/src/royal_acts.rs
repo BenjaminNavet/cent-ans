@@ -45,7 +45,7 @@ pub enum RoyalActError {
     Cooldown(u32),
     #[error("prestige insuffisant : {needed} nécessaires, {available} disponibles")]
     NotEnoughPrestige { needed: i32, available: i32 },
-    #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
+    #[error("trésor insuffisant : {needed} {money} nécessaires, {available} disponibles", money = data_model::currency::MONEY)]
     NotEnoughFunds { needed: i64, available: i64 },
 }
 

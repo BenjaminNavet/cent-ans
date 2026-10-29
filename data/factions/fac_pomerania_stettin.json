@@ -15,6 +15,7 @@
   "capital_city": "Stettin",
   "religion": "rel_catholic",
   "culture": "cul_german",
+  "currency": "marc",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_pomerania_stettin",
   "heraldry": {

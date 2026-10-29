@@ -3,6 +3,7 @@
 //! all before `end_year` wins; losing every province loses; reaching the end
 //! year closes the campaign with a score. The player may keep playing.
 
+use data_model::currency::MONEY;
 use data_model::{FactionId, GameData, Objective, ObjectiveCondition, ObjectiveScope};
 use serde::{Deserialize, Serialize};
 
@@ -202,7 +203,7 @@ impl CampaignState {
             }
             ObjectiveCondition::Treasury { min } => {
                 let treasury = self.factions.get(faction).map_or(0, |f| f.treasury);
-                (treasury >= *min, format!("{treasury}/{min} livres"))
+                (treasury >= *min, format!("{treasury}/{min} {MONEY}"))
             }
             ObjectiveCondition::HoldTitle { title } => {
                 let held = crate::feudal::holder_of(self, title) == Some(faction);

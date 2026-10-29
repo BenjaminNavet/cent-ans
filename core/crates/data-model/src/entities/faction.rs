@@ -203,6 +203,9 @@ pub struct Faction {
     pub capital_city: Option<String>,
     pub religion: ReligionId,
     pub culture: CultureId,
+    /// Currency id of `data/economy/currencies.json` (display name only).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency: Option<String>,
     pub succession_law: SuccessionLaw,
     /// Faction this one is a vassal of at campaign start.
     #[serde(default, skip_serializing_if = "Option::is_none")]

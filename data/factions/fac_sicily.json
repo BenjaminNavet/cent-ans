@@ -13,6 +13,7 @@
   "capital_city": "Palerme",
   "religion": "rel_catholic",
   "culture": "cul_sicilian",
+  "currency": "once",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_sicily",
   "heraldry": {
@@ -115,7 +116,7 @@
       {
         "id": "obj_si_purse",
         "title": "Le trésor de Palerme",
-        "description": "Amasser 30 000 livres.",
+        "description": "Amasser 30 000 {money}.",
         "condition": {
           "kind": "treasury",
           "min": 30000

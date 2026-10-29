@@ -110,7 +110,7 @@ pub fn objectives_view(data: &GameData, state: &CampaignState) -> ObjectivesView
             .map(|o| ObjectiveRow {
                 id: o.id.clone(),
                 title: format!("{} ({})", o.title, o.category),
-                description: o.description.clone(),
+                description: data_model::currency::fill(&o.description),
                 // « Acquis à conserver » is not an accomplishment: the panel does not tick it
                 // (« 4 réussis » at turn 0 spoiled the motivation).
                 done: o.done && !o.held,
@@ -123,7 +123,7 @@ pub fn objectives_view(data: &GameData, state: &CampaignState) -> ObjectivesView
             .map(|o| ObjectiveRow {
                 id: o.id,
                 title: o.title,
-                description: o.description,
+                description: data_model::currency::fill(&o.description),
                 done: o.done,
                 progress: o.progress,
             })

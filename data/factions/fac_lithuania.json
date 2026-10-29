@@ -15,6 +15,7 @@
   "capital_city": "Vilnius",
   "religion": "rel_pagan",
   "culture": "cul_lithuanian",
+  "currency": "kopa",
   "succession_law": "elective",
   "primary_title": "tit_lithuania",
   "heraldry": {

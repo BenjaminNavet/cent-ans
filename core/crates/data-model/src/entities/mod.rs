@@ -24,6 +24,7 @@ pub mod capture;
 pub mod character;
 pub mod chivalric_order;
 pub mod council;
+pub mod currency;
 pub mod crusade;
 pub mod diet;
 pub mod difficulty;

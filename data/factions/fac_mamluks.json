@@ -15,6 +15,7 @@
   "capital_city": "Le Caire (al-Qahira)",
   "religion": "rel_islam",
   "culture": "cul_arabic",
+  "currency": "dinar",
   "succession_law": "elective",
   "primary_title": "tit_mamluks",
   "heraldry": {
@@ -126,7 +127,7 @@
       {
         "id": "obj_ma_purse",
         "title": "Le trésor des Mamelouks",
-        "description": "Amasser 60 000 livres.",
+        "description": "Amasser 60 000 {money}.",
         "condition": {
           "kind": "treasury",
           "min": 60000

@@ -530,6 +530,7 @@ pub fn load_into(sim: &mut Sim, path: &std::path::Path) -> Result<u32, String> {
     sim.player = state.player_faction().clone();
     let turn = state.turn();
     sim.state = Some(state);
+    sim.sync_currency();
     super::save_extras::stash_loaded(&wrapper.client);
     crate::flow::history::read_sidecar(path);
     Ok(turn)

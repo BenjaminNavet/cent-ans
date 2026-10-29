@@ -13,6 +13,7 @@
   "capital_city": "Gênes",
   "religion": "rel_catholic",
   "culture": "cul_ligurian",
+  "currency": "genovin",
   "succession_law": "elective",
   "primary_title": "tit_genoa",
   "heraldry": {

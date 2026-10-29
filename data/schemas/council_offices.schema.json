@@ -5,7 +5,9 @@
   "description": "Les cinq charges du conseil (ADR 0341) : compétence du titulaire, effets par point de compétence et domaines de conseil (data/council/offices.json).",
   "type": "object",
   "properties": {
-    "description": { "type": "string" },
+    "description": {
+      "type": "string"
+    },
     "dismissal_loyalty_penalty": {
       "type": "integer",
       "minimum": 0,
@@ -16,36 +18,114 @@
       "type": "array",
       "minItems": 1,
       "description": "L'ordre est celui de l'attribution automatique.",
-      "items": { "$ref": "#/$defs/office" }
+      "items": {
+        "$ref": "#/$defs/office"
+      }
+    },
+    "excluded_roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ruler",
+          "consort",
+          "heir",
+          "prince",
+          "commander",
+          "noble",
+          "prelate",
+          "burgher",
+          "exile",
+          "claimant",
+          "regent"
+        ]
+      },
+      "description": "Rôles qui ne siègent jamais au conseil."
+    },
+    "excluded_traits": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^trait_[a-z0-9_]+$"
+      },
+      "description": "Traits qui écartent de toute charge (disgrâce)."
     }
   },
-  "required": ["offices"],
+  "required": [
+    "offices"
+  ],
   "additionalProperties": false,
   "$defs": {
     "office": {
       "type": "object",
       "properties": {
-        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-        "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "name": {
+          "$ref": "common.schema.json#/$defs/localized_name"
+        },
         "skill": {
           "type": "string",
-          "enum": ["command", "governance", "court"],
+          "enum": [
+            "command",
+            "governance",
+            "court"
+          ],
           "description": "Compétence du titulaire qui règle la force des effets."
         },
         "effects": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/effect" }
+          "items": {
+            "$ref": "#/$defs/effect"
+          }
         },
         "advice_kinds": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
           "description": "Genres d'alerte, d'indice ou de journal que le conseiller présente (un genre n'appartient qu'à une charge)."
+        },
+        "holder_roles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "ruler",
+              "consort",
+              "heir",
+              "prince",
+              "commander",
+              "noble",
+              "prelate",
+              "burgher",
+              "exile",
+              "claimant",
+              "regent"
+            ]
+          },
+          "description": "Rôles admis à tenir la charge (vide : tous). Une charge cléricale est réservée aux clercs."
+        },
+        "title_keyword": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Mot cherché dans les titres historiques : un titre homonyme postérieur à la date courante écarte le personnage."
         }
       },
-      "required": ["id", "name", "skill", "effects", "advice_kinds"],
+      "required": [
+        "id",
+        "name",
+        "skill",
+        "effects",
+        "advice_kinds"
+      ],
       "additionalProperties": false
     },
     "effect": {
@@ -62,14 +142,21 @@
             "prestige_per_season"
           ]
         },
-        "per_point": { "type": "number", "description": "Valeur par point de compétence (0-10)." },
+        "per_point": {
+          "type": "number",
+          "description": "Valeur par point de compétence (0-10)."
+        },
         "text": {
           "type": "string",
           "pattern": "\\{value\\}",
           "description": "Libellé français ; {value} est remplacé par le chiffre signé."
         }
       },
-      "required": ["kind", "per_point", "text"],
+      "required": [
+        "kind",
+        "per_point",
+        "text"
+      ],
       "additionalProperties": false
     }
   }

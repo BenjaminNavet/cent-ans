@@ -111,8 +111,9 @@ pub fn mode_text(
         }),
         MapMode::Wealth => lens.map_or_else(String::new, |(income, _, _)| {
             format!(
-                "{} livres par saison (impôt de base)",
-                fr::digits(income.round() as i64)
+                "{} {} par saison (impôt de base)",
+                fr::digits(income.round() as i64),
+                fr::money_plural()
             )
         }),
         MapMode::Population => lens.map_or_else(String::new, |(_, population, _)| {

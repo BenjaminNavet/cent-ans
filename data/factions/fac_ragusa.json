@@ -13,6 +13,7 @@
   "capital_city": "Raguse",
   "religion": "rel_catholic",
   "culture": "cul_dalmatian",
+  "currency": "dinar",
   "succession_law": "elective",
   "suzerain": "fac_venice",
   "primary_title": "tit_ragusa",

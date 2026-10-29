@@ -122,6 +122,7 @@ fn fill(template: &str, pairs: &[(&str, &str)]) -> String {
         .fold(template.to_owned(), |text, (key, value)| {
             text.replace(&format!("{{{key}}}"), value)
         })
+        .replace("{money}", &data_model::currency::plural())
 }
 
 /// « de X » with elision (« d’Angleterre »); empty when there is no name.

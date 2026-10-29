@@ -58,7 +58,7 @@ pub enum OrderError {
     RecruitUnavailable(String),
     #[error("file de recrutement pleine : {slots} recrutement(s) par tour dans cette localité")]
     RecruitQueueFull { slots: usize },
-    #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
+    #[error("trésor insuffisant : {needed} {money} nécessaires, {available} disponibles", money = data_model::currency::MONEY)]
     InsufficientFunds { needed: i64, available: i64 },
     #[error("indice d'unité invalide : {0}")]
     InvalidUnitIndex(usize),

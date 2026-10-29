@@ -16,6 +16,7 @@
 //! construction for `ruin_turns` turns). Razing is refused on province cities
 //! and on the emblematic places listed in the data.
 
+use data_model::currency::MONEY;
 use data_model::key_enum;
 use std::collections::BTreeMap;
 
@@ -820,11 +821,11 @@ pub(crate) fn apply_outcome(
     };
     let text = match outcome {
         CaptureOutcome::Ransom => format!(
-            "{who} met {place_label} à rançon : {} livres d'appatis.",
+            "{who} met {place_label} à rançon : {} {MONEY} d'appatis.",
             effects.gold
         ),
         CaptureOutcome::Sack => format!(
-            "{who} livre {place_label} au pillage : {} livres de butin, {} âmes perdues.",
+            "{who} livre {place_label} au pillage : {} {MONEY} de butin, {} âmes perdues.",
             effects.gold, effects.population_lost
         ),
         _ if effects.becomes_ruin => {

@@ -285,7 +285,7 @@
         {
           "id": "gen_kingdom1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 15000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 15000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -352,7 +352,7 @@
         {
           "id": "gen_kingdom2_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 15000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 15000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -419,7 +419,7 @@
         {
           "id": "gen_kingdom3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 20000 livres au trésor.",
+          "description": "Garder 20000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -488,7 +488,7 @@
         {
           "id": "gen_principality1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 10000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -555,7 +555,7 @@
         {
           "id": "gen_principality2_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 10000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -622,7 +622,7 @@
         {
           "id": "gen_principality3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 12000 livres au trésor.",
+          "description": "Garder 12000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -691,7 +691,7 @@
         {
           "id": "gen_duchy1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 10000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -758,7 +758,7 @@
         {
           "id": "gen_duchy2_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 10000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -825,7 +825,7 @@
         {
           "id": "gen_duchy3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 12000 livres au trésor.",
+          "description": "Garder 12000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -894,7 +894,7 @@
         {
           "id": "gen_county1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 6000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 6000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -961,7 +961,7 @@
         {
           "id": "gen_county2_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 6000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 6000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1028,7 +1028,7 @@
         {
           "id": "gen_county3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 8000 livres au trésor.",
+          "description": "Garder 8000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1097,7 +1097,7 @@
         {
           "id": "gen_lordship1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 4000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 4000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1164,7 +1164,7 @@
         {
           "id": "gen_lordship2_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 4000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 4000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1231,7 +1231,7 @@
         {
           "id": "gen_lordship3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 5000 livres au trésor.",
+          "description": "Garder 5000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1300,7 +1300,7 @@
         {
           "id": "gen_empire1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 20000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 20000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1367,7 +1367,7 @@
         {
           "id": "gen_empire2_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 20000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 20000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1434,7 +1434,7 @@
         {
           "id": "gen_empire3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 25000 livres au trésor.",
+          "description": "Garder 25000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1503,7 +1503,7 @@
         {
           "id": "gen_republic1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 12000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 12000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1570,7 +1570,7 @@
         {
           "id": "gen_republic2_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 12000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 12000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1637,7 +1637,7 @@
         {
           "id": "gen_republic3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 25000 livres au trésor.",
+          "description": "Garder 25000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1706,7 +1706,7 @@
         {
           "id": "gen_theocracy1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 8000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 8000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1773,7 +1773,7 @@
         {
           "id": "gen_theocracy2_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 8000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 8000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1840,7 +1840,7 @@
         {
           "id": "gen_theocracy3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 10000 livres au trésor.",
+          "description": "Garder 10000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1909,7 +1909,7 @@
         {
           "id": "gen_default1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 10000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -1976,7 +1976,7 @@
         {
           "id": "gen_default2_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 10000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -2043,7 +2043,7 @@
         {
           "id": "gen_default3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 12000 livres au trésor.",
+          "description": "Garder 12000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -2101,7 +2101,7 @@
         {
           "id": "fr1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 15000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 15000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -2200,7 +2200,7 @@
         {
           "id": "fr2_purse",
           "title": "Le trésor du sage roi",
-          "description": "Garder 25000 livres au trésor, comme Charles V.",
+          "description": "Garder 25000 {money} au trésor, comme Charles V.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -2296,7 +2296,7 @@
         {
           "id": "fr3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 20000 livres au trésor.",
+          "description": "Garder 20000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -2382,7 +2382,7 @@
         {
           "id": "en1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 20000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 20000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -2478,7 +2478,7 @@
         {
           "id": "en2_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 20000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 20000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -2558,7 +2558,7 @@
         {
           "id": "en3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 40000 livres au trésor.",
+          "description": "Garder 40000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -2645,7 +2645,7 @@
         {
           "id": "bu1_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 10000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 10000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -2730,7 +2730,7 @@
         {
           "id": "bu2_debt",
           "title": "Des finances saines",
-          "description": "Ne pas devoir plus de 12000 livres aux banquiers.",
+          "description": "Ne pas devoir plus de 12000 {money} aux banquiers.",
           "category": "treasury",
           "weight": 10,
           "condition": {
@@ -2807,7 +2807,7 @@
         {
           "id": "bu3_purse",
           "title": "Les coffres du roi",
-          "description": "Garder 15000 livres au trésor.",
+          "description": "Garder 15000 {money} au trésor.",
           "category": "treasury",
           "weight": 10,
           "condition": {

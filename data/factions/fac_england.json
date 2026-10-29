@@ -15,6 +15,7 @@
   "capital_city": "Londres",
   "religion": "rel_catholic",
   "culture": "cul_english",
+  "currency": "sterling",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_england",
   "heraldry": {
@@ -185,7 +186,7 @@
       {
         "id": "obj_en_purse",
         "title": "Les coffres du roi",
-        "description": "Amasser 30 000 livres.",
+        "description": "Amasser 30 000 {money}.",
         "condition": {
           "kind": "treasury",
           "min": 30000

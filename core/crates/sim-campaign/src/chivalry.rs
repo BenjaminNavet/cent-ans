@@ -54,7 +54,7 @@ pub enum ChivalryError {
     TooEarly(i32),
     #[error("prestige insuffisant : {needed} requis, {current} actuellement")]
     NotEnoughPrestige { needed: i32, current: i32 },
-    #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
+    #[error("trésor insuffisant : {needed} {money} nécessaires, {available} disponibles", money = data_model::currency::MONEY)]
     InsufficientFunds { needed: i64, available: i64 },
     #[error("votre faction n'a pas de souverain")]
     NoRuler,

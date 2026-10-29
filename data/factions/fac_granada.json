@@ -14,6 +14,7 @@
   "capital_city": "Málaga",
   "religion": "rel_islam",
   "culture": "cul_andalusi",
+  "currency": "dirham",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_granada",
   "heraldry": {

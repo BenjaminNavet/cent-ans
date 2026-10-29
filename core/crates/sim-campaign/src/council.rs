@@ -24,7 +24,7 @@ use std::collections::BTreeMap;
 
 use data_model::{
     CharacterId, CouncilEffectKind, CouncilOfficeDef, CouncilOffices, EffectKind, FactionId,
-    GameData, SkillBranch,
+    GameData, Role, SkillBranch,
 };
 use serde::{Deserialize, Serialize};
 
@@ -69,6 +69,8 @@ pub enum CouncilError {
     IsRuler,
     #[error("ce personnage est trop jeune pour siéger")]
     TooYoung,
+    #[error("ce personnage ne peut tenir cette charge")]
+    Unfit,
     #[error("ce personnage tient déjà une autre charge : {0}")]
     AlreadyHoldsOffice(String),
     #[error("ce personnage tient déjà cette charge")]
@@ -116,6 +118,54 @@ pub fn check_eligible(
         return Err(CouncilError::TooYoung);
     }
     Ok(())
+}
+
+/// Does the history of `character` allow it to hold `def`? Roles and traits
+/// barred from every council, roles the office is limited to (clerical
+/// offices), and a historical title of the same name that starts later than
+/// the current year. Generated characters (no historical record) pass.
+fn office_allows(
+    state: &CampaignState,
+    data: &GameData,
+    character: &CharacterId,
+    def: &CouncilOfficeDef,
+) -> bool {
+    let Some(rules) = offices(data) else {
+        return true;
+    };
+    if let Some(c) = state.characters.get(character) {
+        if rules.excluded_traits.iter().any(|t| c.traits.contains(t)) {
+            return false;
+        }
+    }
+    // A generated courtier has no historical record: a layman of the nobility.
+    let role = data
+        .characters
+        .get(character)
+        .map_or(Role::Noble, |record| record.role);
+    if rules.excluded_roles.contains(&role) {
+        return false;
+    }
+    if !def.holder_roles.is_empty() && !def.holder_roles.contains(&role) {
+        return false;
+    }
+    let Some(record) = data.characters.get(character) else {
+        return true;
+    };
+    if let Some(keyword) = def.title_keyword.as_deref() {
+        let keyword = keyword.to_lowercase();
+        let starts_later = record.titles.iter().any(|t| {
+            t.title.to_lowercase().contains(&keyword)
+                && t.from
+                    .as_ref()
+                    .and_then(|d| d.year())
+                    .is_some_and(|y| y > state.year)
+        });
+        if starts_later {
+            return false;
+        }
+    }
+    true
 }
 
 /// The sitting holder of `office` (`None`: vacant, or the recorded holder no
@@ -169,6 +219,7 @@ pub fn candidates(
         .characters
         .keys()
         .filter(|id| check_eligible(state, faction, id).is_ok())
+        .filter(|id| office_allows(state, data, id, def))
         .map(|id| Candidate {
             character: id.clone(),
             skill: skill_of(state, id, def.skill),
@@ -197,6 +248,10 @@ pub fn appoint(
         return Err(CouncilError::UnknownOffice(office.to_owned()));
     }
     check_eligible(state, faction, character)?;
+    let def = rules.office(office).expect("checked above");
+    if !office_allows(state, data, character, def) {
+        return Err(CouncilError::Unfit);
+    }
     if let Some(other) = office_of(state, faction, character) {
         if other == office {
             return Err(CouncilError::AlreadyHolder);
@@ -254,7 +309,11 @@ pub fn auto_assign(state: &mut CampaignState, data: &GameData, faction: &Faction
     let Some(rules) = offices(data) else {
         return;
     };
-    for def in &rules.offices {
+    // The most restricted offices choose first (the chaplain among the few clerics), the rest
+    // in file order.
+    let mut order: Vec<&CouncilOfficeDef> = rules.offices.iter().collect();
+    order.sort_by_key(|def| (def.holder_roles.is_empty(), def.holder_roles.len()));
+    for def in order {
         if holder(state, faction, &def.id).is_some() {
             continue;
         }

@@ -164,7 +164,7 @@ pub fn route_tooltip(
             cut_reason.unwrap_or("")
         );
     }
-    let mut text = format!("{from} ↔ {to} — {total_value} livres/saison");
+    let mut text = format!("{from} ↔ {to} — {total_value} {}/saison", crate::ui::kit::fr::money_plural());
     if !goods.is_empty() {
         text.push_str(&format!(" ({})", goods.join(", ")));
     }

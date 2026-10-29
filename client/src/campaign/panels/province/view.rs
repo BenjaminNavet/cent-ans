@@ -749,7 +749,12 @@ fn node_row(
     .with_children(|line| {
         node_image(line, theme, assets, images, &node.building);
         let status = match node.state.as_str() {
-            "available" => format!("{} ₶ · {} t", fr::digits(i64::from(node.cost)), node.turns),
+            "available" => format!(
+                "{} {} · {} t",
+                fr::digits(i64::from(node.cost)),
+                fr::symbol(),
+                node.turns
+            ),
             "building" | "queued" => format!(
                 "{} ({} t)",
                 labels::node_state(&node.state),

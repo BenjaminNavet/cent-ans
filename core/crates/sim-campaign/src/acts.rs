@@ -8,6 +8,7 @@
 //! Only the player's house is followed. Nothing here changes the economy or the AI: the
 //! module reads the state and keeps its own bookkeeping ([`ActsState`]).
 
+use data_model::currency::MONEY;
 use data_model::{ActCondition, ActObjective, ActPressure, ActsRules, FactionId, GameData};
 use serde::{Deserialize, Serialize};
 
@@ -266,7 +267,7 @@ impl CampaignState {
                 let treasury = self.factions.get(faction).map_or(0, |f| f.treasury);
                 (
                     ratio(treasury.max(0) as usize, (*min).max(0) as usize),
-                    format!("{treasury}/{min} livres"),
+                    format!("{treasury}/{min} {MONEY}"),
                 )
             }
             ActCondition::DebtBelow { max } => {
@@ -276,7 +277,7 @@ impl CampaignState {
                 } else {
                     (*max as f64 / debt as f64).max(0.0)
                 };
-                (r, format!("dette {debt} livres (au plus {max})"))
+                (r, format!("dette {debt} {MONEY} (au plus {max})"))
             }
             ActCondition::AlliesAtLeast { count } => {
                 let allies = self.factions.get(faction).map_or(0, |f| f.allies.len());

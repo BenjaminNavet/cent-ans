@@ -20,6 +20,11 @@
     "capital_city": { "type": "string", "description": "Nom de la ville capitale (français)." },
     "religion": { "$ref": "common.schema.json#/$defs/religion_id" },
     "culture": { "$ref": "common.schema.json#/$defs/culture_id" },
+    "currency": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Monnaie d'usage (id de data/economy/currencies.json) : seul le nom affiché change, la valeur est l'unité de compte commune. Défaut : la livre."
+    },
     "succession_law": {
       "type": "string",
       "description": "Règle de succession : salique (agnatique stricte), primogéniture masculine préférentielle, cognatique, élective (empire, république, papauté).",

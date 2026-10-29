@@ -15,6 +15,7 @@
   "capital_city": "Bursa",
   "religion": "rel_islam",
   "culture": "cul_turkish",
+  "currency": "akce",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_ottoman",
   "heraldry": {

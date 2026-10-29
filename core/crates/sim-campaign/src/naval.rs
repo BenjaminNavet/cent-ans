@@ -10,6 +10,7 @@
 //! pools), control of the sea to the victor, blockade of the enemy's ports
 //! of a sea held (treasury toll each season).
 
+use data_model::currency::MONEY;
 use std::collections::{BTreeMap, VecDeque};
 
 use data_model::{
@@ -1076,7 +1077,7 @@ pub(crate) fn resolve_season(
         events.push(
             GameEvent::new(
                 EventKind::Income,
-                format!("Blocus : {ports} port(s) fermé(s) par l'ennemi, {toll} livres de commerce perdues."),
+                format!("Blocus : {ports} port(s) fermé(s) par l'ennemi, {toll} {MONEY} de commerce perdues."),
             )
             .faction(&faction),
         );

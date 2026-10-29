@@ -1,70 +1,196 @@
 {
-  "description": "Charges du conseil du royaume (ADR 0341). Chaque charge est tenue par un personnage de la faction (jamais le souverain) ; ses effets croissent avec la compétence du titulaire ; une charge vacante n’a aucun effet. `advice_kinds` range chaque genre d’alerte, d’indice ou de journal déjà produit dans le domaine d’une charge : le conseiller présente ceux de son domaine.",
+  "description": "Charges du conseil du royaume (ADR 0341). Chaque charge est tenue par un personnage de la faction (jamais le souverain) ; ses effets croissent avec la compétence du titulaire ; une charge vacante n’a aucun effet. `advice_kinds` range chaque genre d’alerte, d’indice ou de journal déjà produit dans le domaine d’une charge : le conseiller présente ceux de son domaine. Une charge n’est tenue que par un personnage que son histoire n’exclut pas : jamais un rôle ou un trait exclu (`excluded_roles`, `excluded_traits`), un rôle hors `holder_roles` (l’aumônier est un clerc, chancelier et trésorier des civils ou clercs, le connétable un homme de guerre), ni un titre homonyme postérieur à la date courante (`title_keyword`).",
   "dismissal_loyalty_penalty": 1,
+  "excluded_roles": [
+    "consort",
+    "claimant"
+  ],
+  "excluded_traits": [
+    "trait_disgraced"
+  ],
   "offices": [
     {
       "id": "chancellor",
-      "name": { "display": "Chancelier" },
+      "name": {
+        "display": "Chancelier"
+      },
       "skill": "court",
       "effects": [
-        { "kind": "diplomatic_acceptance", "per_point": 1.0, "text": "{value} pts d’acceptation diplomatique" }
+        {
+          "kind": "diplomatic_acceptance",
+          "per_point": 1.0,
+          "text": "{value} pts d’acceptation diplomatique"
+        }
       ],
       "advice_kinds": [
-        "diplomacy_offer", "crusade", "agent", "war_declared", "peace_signed",
-        "alliance_formed", "alliance_broken", "vassalage", "vassal_rebellion",
-        "embargo", "diplomacy", "diplomatic_offer"
+        "diplomacy_offer",
+        "crusade",
+        "agent",
+        "war_declared",
+        "peace_signed",
+        "alliance_formed",
+        "alliance_broken",
+        "vassalage",
+        "vassal_rebellion",
+        "embargo",
+        "diplomacy",
+        "diplomatic_offer"
+      ],
+      "title_keyword": "chancelier",
+      "holder_roles": [
+        "prelate",
+        "noble",
+        "burgher",
+        "heir",
+        "prince",
+        "regent",
+        "exile"
       ]
     },
     {
       "id": "constable",
-      "name": { "display": "Connétable" },
+      "name": {
+        "display": "Connétable"
+      },
       "skill": "command",
       "effects": [
-        { "kind": "recruit_experience", "per_point": 0.2, "text": "{value} d’expérience des recrues" },
-        { "kind": "army_morale", "per_point": 0.5, "text": "{value} % de moral d’armée" }
+        {
+          "kind": "recruit_experience",
+          "per_point": 0.2,
+          "text": "{value} d’expérience des recrues"
+        },
+        {
+          "kind": "army_morale",
+          "per_point": 0.5,
+          "text": "{value} % de moral d’armée"
+        }
       ],
       "advice_kinds": [
-        "siege", "enemy_army", "idle_army", "army_idle", "captain", "ransom", "loyalty",
-        "battle", "siege_started", "siege_lifted", "province_captured", "raid",
-        "attrition", "recruited", "army_destroyed", "general_captured"
+        "siege",
+        "enemy_army",
+        "idle_army",
+        "army_idle",
+        "captain",
+        "ransom",
+        "loyalty",
+        "battle",
+        "siege_started",
+        "siege_lifted",
+        "province_captured",
+        "raid",
+        "attrition",
+        "recruited",
+        "army_destroyed",
+        "general_captured"
+      ],
+      "title_keyword": "connétable",
+      "holder_roles": [
+        "commander",
+        "noble",
+        "heir",
+        "prince",
+        "regent",
+        "exile"
       ]
     },
     {
       "id": "treasurer",
-      "name": { "display": "Grand trésorier" },
+      "name": {
+        "display": "Grand trésorier"
+      },
       "skill": "governance",
       "effects": [
-        { "kind": "tax_income_percent", "per_point": 0.5, "text": "{value} % de recettes fiscales" }
+        {
+          "kind": "tax_income_percent",
+          "per_point": 0.5,
+          "text": "{value} % de recettes fiscales"
+        }
       ],
       "advice_kinds": [
-        "debt", "free_slot", "construction_done", "idle_treasury", "trade", "coinage",
-        "income", "bankruptcy", "building_completed"
+        "debt",
+        "free_slot",
+        "construction_done",
+        "idle_treasury",
+        "trade",
+        "coinage",
+        "income",
+        "bankruptcy",
+        "building_completed"
+      ],
+      "title_keyword": "trésorier",
+      "holder_roles": [
+        "prelate",
+        "noble",
+        "burgher",
+        "heir",
+        "prince",
+        "regent",
+        "exile"
       ]
     },
     {
       "id": "chaplain",
-      "name": { "display": "Aumônier" },
+      "name": {
+        "display": "Aumônier"
+      },
       "skill": "court",
       "effects": [
-        { "kind": "unrest_per_province", "per_point": -0.3, "text": "{value} pt de troubles par province" }
+        {
+          "kind": "unrest_per_province",
+          "per_point": -0.3,
+          "text": "{value} pt de troubles par province"
+        }
       ],
       "advice_kinds": [
-        "table", "medicine", "herbarium", "research_idle", "research_done",
-        "technology_researched", "revolt", "plague", "famine", "excommunication",
-        "schism", "heresy", "edict"
+        "table",
+        "medicine",
+        "herbarium",
+        "research_idle",
+        "research_done",
+        "technology_researched",
+        "revolt",
+        "plague",
+        "famine",
+        "excommunication",
+        "schism",
+        "heresy",
+        "edict"
+      ],
+      "holder_roles": [
+        "prelate"
       ]
     },
     {
       "id": "chamberlain",
-      "name": { "display": "Chambellan" },
+      "name": {
+        "display": "Chambellan"
+      },
       "skill": "court",
       "effects": [
-        { "kind": "prestige_per_season", "per_point": 0.1, "text": "{value} de prestige par saison" }
+        {
+          "kind": "prestige_per_season",
+          "per_point": 0.1,
+          "text": "{value} de prestige par saison"
+        }
       ],
       "advice_kinds": [
-        "chronicle_decision", "mission_due", "mission", "royal_act", "level_up", "chivalry",
-        "idle_character", "tutorial_postponed", "end_turn", "council_vacancy",
-        "chronicle", "succession", "no_heir", "regency", "marriage", "birth", "death",
+        "chronicle_decision",
+        "mission_due",
+        "mission",
+        "royal_act",
+        "level_up",
+        "chivalry",
+        "idle_character",
+        "tutorial_postponed",
+        "end_turn",
+        "council_vacancy",
+        "chronicle",
+        "succession",
+        "no_heir",
+        "regency",
+        "marriage",
+        "birth",
+        "death",
         "trait_acquired"
       ]
     }

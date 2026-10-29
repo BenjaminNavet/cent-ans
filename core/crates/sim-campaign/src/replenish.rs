@@ -19,6 +19,7 @@
 //! traditions raise the rate.
 //! Garrisons keep their own reinforcement (`economy`, `garrison` effect).
 
+use data_model::currency::MONEY;
 use data_model::key_enum;
 use data_model::EffectKind;
 use data_model::{FactionId, GameData};
@@ -403,7 +404,7 @@ pub fn resolve_replenishment(
         events.push(
             GameEvent::new(
                 EventKind::Recruited,
-                format!("Reconstitution : {armies} {player_men} hommes ({player_cost} livres)."),
+                format!("Reconstitution : {armies} {player_men} hommes ({player_cost} {MONEY})."),
             )
             .faction(&player),
         );

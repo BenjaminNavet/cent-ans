@@ -1,0 +1,50 @@
+{
+  "id": "chr_john_de_stratford",
+  "name": {
+    "display": "Jean de Stratford",
+    "local": "John de Stratford",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Stratford",
+  "faction": "fac_england",
+  "role": "prelate",
+  "birth": {
+    "value": "1275",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1348-08-23"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Archevêque de Cantorbéry",
+      "from": {
+        "value": "1333"
+      }
+    },
+    {
+      "title": "Chancelier d’Angleterre",
+      "from": {
+        "value": "1335"
+      }
+    }
+  ],
+  "skills": {
+    "command": 0,
+    "governance": 7,
+    "court": 8
+  },
+  "traits": [
+    "trait_scholar",
+    "trait_cunning"
+  ],
+  "piety": 70,
+  "starting_location": "prov_middlesex",
+  "status": "at_court",
+  "description": "Archevêque de Cantorbéry, chancelier d’Angleterre jusqu’à l’été 1337 ; il tient la plume du royaume pendant que le roi prépare la guerre, avant de s’opposer à lui en 1340.",
+  "sources": [
+    "John de Stratford"
+  ]
+}

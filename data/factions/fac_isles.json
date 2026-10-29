@@ -13,6 +13,7 @@
   "capital_city": "Finlaggan",
   "religion": "rel_catholic",
   "culture": "cul_scottish",
+  "currency": "livre",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_scotland",
   "primary_title": "tit_isles",

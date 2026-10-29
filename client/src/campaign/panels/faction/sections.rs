@@ -734,8 +734,11 @@ pub fn papal_call_text(call: &PapalCallView) -> String {
         call.join_favor, call.join_prestige
     ));
     lines.push(format!(
-        "[b]Vaincre :[/b] occuper la cible. Le premier prince catholique qui la tient clôt l’appel et reçoit [b]+{}[/b] de faveur, [b]+{}[/b] de prestige et jusqu’à [b]{}[/b] livres du trésor du pape.",
-        call.reward_favor, call.reward_prestige, call.reward_gold
+        "[b]Vaincre :[/b] occuper la cible. Le premier prince catholique qui la tient clôt l’appel et reçoit [b]+{}[/b] de faveur, [b]+{}[/b] de prestige et jusqu’à [b]{}[/b] {} du trésor du pape.",
+        call.reward_favor,
+        call.reward_prestige,
+        call.reward_gold,
+        crate::ui::kit::fr::money_plural()
     ));
     lines.push("[b]Sans suite :[/b] si personne ne la tient avant l’échéance, l’appel tombe sans récompense. La croisade n’impose aucune pénalité propre ; la guerre, elle, garde ses conséquences habituelles.".to_owned());
     lines.join("\n\n")

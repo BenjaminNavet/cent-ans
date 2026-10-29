@@ -5,6 +5,7 @@
 //! pending diplomatic offers and chronicle decisions. Fog of war is a client concern: the
 //! `enemy_army` alerts list every enemy army, the client filters the visible ones.
 
+use data_model::currency::MONEY;
 use data_model::{FactionId, GameData};
 use serde::Serialize;
 use sim_campaign::CampaignState;
@@ -127,8 +128,8 @@ pub fn turn_readiness(
             "enemy_army",
             Severity::Danger,
             format!(
-                "Armée ennemie près de {} ({strength} hommes)",
-                data.province_name(&location)
+                "Armée ennemie près {} ({strength} hommes)",
+                sim_campaign::events::de(&data.province_name(&location))
             ),
         );
         a.army = Some(army_id.to_string());
@@ -141,7 +142,7 @@ pub fn turn_readiness(
                 "debt".to_owned(),
                 "debt",
                 Severity::Danger,
-                format!("Trésor endetté : {} livres", summary.treasury),
+                format!("Trésor endetté : {} {MONEY}", summary.treasury),
             ));
         }
     }
@@ -204,7 +205,7 @@ pub fn turn_readiness(
             "free_slot",
             Severity::Info,
             format!(
-                "{free_slots} {} sans chantier : le trésor ({} livres) permet d’y bâtir",
+                "{free_slots} {} sans chantier : le trésor ({} {MONEY}) permet d’y bâtir",
                 if free_slots > 1 {
                     "localités"
                 } else {

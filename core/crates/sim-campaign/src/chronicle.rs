@@ -14,6 +14,7 @@
 //! [`crate::effects::apply_effect`]; an effect naming an unknown id does nothing (the loader
 //! already warned about it).
 
+use data_model::currency::MONEY;
 use std::collections::BTreeSet;
 
 use data_model::{
@@ -512,7 +513,7 @@ impl CampaignState {
                     && self.option_treasury_cost(data, o, ctx.faction.as_ref()) <= treasury
             });
             if others_payable {
-                return Some(format!("Trésor insuffisant ({cost} livres requis)"));
+                return Some(format!("Trésor insuffisant ({cost} {MONEY} requis)"));
             }
         }
         None

@@ -14,6 +14,7 @@
   "capital_city": "Balaguer",
   "religion": "rel_catholic",
   "culture": "cul_catalan",
+  "currency": "lliura",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_aragon",
   "primary_title": "tit_urgell",

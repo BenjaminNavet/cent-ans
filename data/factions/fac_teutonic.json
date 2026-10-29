@@ -14,6 +14,7 @@
   "capital_city": "Marienbourg",
   "religion": "rel_catholic",
   "culture": "cul_german",
+  "currency": "marc",
   "succession_law": "elective",
   "primary_title": "tit_teutonic",
   "heraldry": {
@@ -113,7 +114,7 @@
       {
         "id": "obj_te_purse",
         "title": "Le trésor de Marienbourg",
-        "description": "Amasser 30 000 livres.",
+        "description": "Amasser 30 000 {money}.",
         "condition": {
           "kind": "treasury",
           "min": 30000

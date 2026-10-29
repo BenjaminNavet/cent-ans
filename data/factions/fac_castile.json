@@ -14,6 +14,7 @@
   "capital_city": "Tolède",
   "religion": "rel_catholic",
   "culture": "cul_castilian",
+  "currency": "maravedi",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_castile",
   "heraldry": {

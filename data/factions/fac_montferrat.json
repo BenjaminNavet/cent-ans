@@ -13,6 +13,7 @@
   "capital_city": "Casal",
   "religion": "rel_catholic",
   "culture": "cul_lombard",
+  "currency": "florin",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_montferrat",
   "heraldry": {

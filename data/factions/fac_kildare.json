@@ -13,6 +13,7 @@
   "capital_city": "Kildare",
   "religion": "rel_catholic",
   "culture": "cul_english",
+  "currency": "sterling",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_england",
   "primary_title": "tit_kildare",

@@ -22,6 +22,7 @@
 //!   [`crate::table::ai_choose_diets`]'s scoring without the budget check
 //!   (edicts are free).
 
+use data_model::currency::MONEY;
 use data_model::{Edict, EdictId, EffectKind, EffectMode, FactionId, GameData, ProvinceId};
 use serde::{Deserialize, Serialize};
 
@@ -429,7 +430,7 @@ pub(crate) fn drop_unaffordable(
         missing -= cost;
         dropped = true;
         let text = format!(
-            "Édits : le trésor ne peut plus payer l'édit « {} » de {} ({cost} livres par saison) ; il cesse.",
+            "Édits : le trésor ne peut plus payer l'édit « {} » de {} ({cost} {MONEY} par saison) ; il cesse.",
             edict_name(data, &edict),
             data.province_name(&id),
         );

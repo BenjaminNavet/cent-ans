@@ -13,6 +13,7 @@
   "capital_city": "Beloozero",
   "religion": "rel_orthodox",
   "culture": "cul_russian",
+  "currency": "grivna",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_moscow",
   "primary_title": "tit_beloozero",

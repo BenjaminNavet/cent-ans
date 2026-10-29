@@ -15,6 +15,7 @@
   "capital_city": "Orthez",
   "religion": "rel_catholic",
   "culture": "cul_occitan",
+  "currency": "livre",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_bearn",
   "heraldry": {

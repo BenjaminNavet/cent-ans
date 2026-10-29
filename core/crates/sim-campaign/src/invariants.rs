@@ -3,6 +3,7 @@
 //! `docs/superpowers/specs/2026-10-13-seed-bots-design.md`) and usable by any
 //! test or client.
 
+use data_model::currency::MONEY;
 use std::collections::BTreeMap;
 
 use data_model::{CharacterId, GameData, ProvinceId, SettlementId};
@@ -233,7 +234,7 @@ fn check_factions(state: &CampaignState, data: &GameData, out: &mut Vec<Violatio
                     out,
                     "finance_loans",
                     format!(
-                        "{fid} doit {} livres à « {} » : prêt invalide.",
+                        "{fid} doit {} {MONEY} à « {} » : prêt invalide.",
                         loan.principal, loan.lender
                     ),
                 );

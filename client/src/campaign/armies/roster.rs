@@ -1021,10 +1021,11 @@ fn rebuild(
         .faction_economy(data, &sim.player)
         .map_or(0, |e| e.army_upkeep);
     let foot = format!(
-        "Montre du royaume : {} hommes · {} · entretien {} livres par saison",
+        "Montre du royaume : {} hommes · {} · entretien {} {} par saison",
         fr::digits(all.iter().map(|e| i64::from(e.men)).sum()),
         fr::count(all.len() as i64, "ost", None),
         fr::digits(army_upkeep),
+        fr::money_plural(),
     );
     roster.built_for = (
         state.turn,

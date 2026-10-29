@@ -14,6 +14,7 @@
 //! the ransom events (`evt_rancon_david_ii`...): a freed character is no
 //! longer captive, so a second release (order or event) is a no-op.
 
+use data_model::currency::MONEY;
 use data_model::key_enum;
 use data_model::{CharacterId, FactionId, GameData, ProvinceId};
 use serde::{Deserialize, Serialize};
@@ -143,13 +144,13 @@ pub enum RansomError {
     ProvinceDemanded(String),
     #[error("nombre d'échéances invalide (1 à {MAX_INSTALLMENTS})")]
     BadInstallments,
-    #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
+    #[error("trésor insuffisant : {needed} {money} nécessaires, {available} disponibles", money = data_model::currency::MONEY)]
     InsufficientFunds { needed: i64, available: i64 },
     #[error("province impossible : {0}")]
     BadProvince(String),
-    #[error("sa famille refuse : {offered} livres demandés, sa rançon est de {fair} livres")]
+    #[error("sa famille refuse : {offered} {money} demandés, sa rançon est de {fair} {money}", money = data_model::currency::MONEY)]
     RansomTooHigh { offered: i64, fair: i64 },
-    #[error("sa faction ne peut payer : {needed} livres demandées, {available} dans son trésor")]
+    #[error("sa faction ne peut payer : {needed} {money} demandées, {available} dans son trésor", money = data_model::currency::MONEY)]
     PayerCannotPay { needed: i64, available: i64 },
 }
 
@@ -304,10 +305,10 @@ pub fn pay_ransom(
                         missed: 0,
                     });
                 format!(
-                    "{name} est libéré : rançon de {total} livres en {installments} échéances annuelles de {first} livres."
+                    "{name} est libéré : rançon de {total} {MONEY} en {installments} échéances annuelles de {first} {MONEY}."
                 )
             } else {
-                format!("{name} est libéré contre une rançon de {total} livres.")
+                format!("{name} est libéré contre une rançon de {total} {MONEY}.")
             };
             push_news(state, faction, &captor, text);
             Ok(())
@@ -421,7 +422,7 @@ pub fn set_ransom_terms(
     let name = state.character_name(data, character);
     let text = match &terms {
         RansomTerms::Money => format!(
-            "{name} peut être racheté pour {} livres.",
+            "{name} peut être racheté pour {} {MONEY}.",
             ransom_amount(state, data, character)
         ),
         RansomTerms::Province { province } => format!(
@@ -533,7 +534,7 @@ pub fn release_for_ransom(
         }
     }
     let text = format!(
-        "{} est libéré contre une rançon de {offered} livres.",
+        "{} est libéré contre une rançon de {offered} {MONEY}.",
         state.character_name(data, character)
     );
     push_news(state, &owner, faction, text);
@@ -804,7 +805,7 @@ pub(crate) fn resolve_ransoms(
                 debt.remaining -= due;
                 let text = if debt.remaining > 0 {
                     format!(
-                        "Échéance de la rançon de {name} versée : {due} livres (reste {}).",
+                        "Échéance de la rançon de {name} versée : {due} {MONEY} (reste {}).",
                         debt.remaining
                     )
                 } else {
@@ -826,7 +827,7 @@ pub(crate) fn resolve_ransoms(
                     GameEvent::new(
                         EventKind::Ransom,
                         format!(
-                            "Échéance de la rançon de {name} impayée : la dette monte à {} livres, le prestige du souverain en souffre.",
+                            "Échéance de la rançon de {name} impayée : la dette monte à {} {MONEY}, le prestige du souverain en souffre.",
                             debt.remaining
                         ),
                     )

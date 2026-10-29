@@ -153,8 +153,9 @@ fn header(root: &mut Kids, theme: &UiTheme, ui: &DiplomacyUi) {
             row.spawn((
                 Name::new("dip:donate_tip"),
                 Tooltip::new(&format!(
-                    "Augmente la faveur pontificale (+1 par {} livres).",
-                    religion.livres_per_favor
+                    "Augmente la faveur pontificale (+1 par {} {}).",
+                    religion.livres_per_favor,
+                    crate::ui::kit::fr::money_plural()
                 )),
                 Hovered::default(),
                 Node::default(),

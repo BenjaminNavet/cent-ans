@@ -9,6 +9,7 @@
   "capital": "prov_ile_de_france",
   "religion": "rel_catholic",
   "culture": "cul_french",
+  "currency": "livre",
   "succession_law": "elective",
   "heraldry": {
     "blazon": "De sable plain.",

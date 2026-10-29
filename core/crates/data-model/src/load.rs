@@ -165,6 +165,8 @@ pub mod folders {
     pub const ECONOMY: &str = "economy";
     /// Trade catalogue, inside `economy/`; optional.
     pub const TRADE: &str = "trade.json";
+    /// Faction currencies, inside `economy/`; optional.
+    pub const CURRENCIES: &str = "currencies.json";
     pub const MAP: &str = "map";
     /// Free movement rules folder; optional.
     pub const MOVEMENT: &str = "movement";
@@ -467,6 +469,8 @@ pub struct GameData {
     /// `data/economy/trade.json`, absent until written: no trade
     /// route exists.
     pub trade: Option<TradeCatalog>,
+    /// `data/economy/currencies.json` (lot HIST4); the livre when absent.
+    pub currencies: Option<crate::entities::currency::Currencies>,
     /// Paths of the trade routes, precomputed by
     /// [`GameData::build_trade_paths`] (review point 18c).
     pub trade_paths: crate::trade_paths::TradePaths,
@@ -490,6 +494,19 @@ pub struct GameData {
 }
 
 impl GameData {
+    /// Currency a faction counts in (lot HIST4): its `currency`, the
+    /// catalogue default, or the livre.
+    pub fn currency_of(&self, faction: &FactionId) -> crate::entities::currency::CurrencyDef {
+        let id = self
+            .factions
+            .get(faction)
+            .and_then(|f| f.currency.as_deref());
+        match &self.currencies {
+            Some(catalogue) => catalogue.resolve(id),
+            None => crate::entities::currency::CurrencyDef::livre(),
+        }
+    }
+
     /// French display name of river `source` (`river_names.json`), the
     /// source name itself when unnamed or hidden.
     pub fn river_display_name<'a>(&'a self, source: &'a str) -> &'a str {
@@ -582,6 +599,7 @@ impl GameData {
             movement_graph: Default::default(),
             settlement_grid: Default::default(),
             trade: None,
+            currencies: None,
             trade_paths: Default::default(),
             free_movement: None,
             navigable_rivers: Default::default(),
@@ -802,6 +820,10 @@ impl GameData {
         read_some(
             &mut data.trade,
             &root.join(folders::ECONOMY).join(folders::TRADE),
+        )?;
+        read_some(
+            &mut data.currencies,
+            &root.join(folders::ECONOMY).join(folders::CURRENCIES),
         )?;
         read_some(
             &mut data.free_movement,

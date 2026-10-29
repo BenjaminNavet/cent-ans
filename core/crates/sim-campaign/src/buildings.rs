@@ -9,6 +9,7 @@
 //! recruitment), which the rest of the crate reads instead of touching
 //! `Building::effects` directly.
 
+use data_model::currency::MONEY;
 use std::collections::BTreeMap;
 
 use data_model::{
@@ -867,7 +868,7 @@ impl CampaignState {
             return Some(blocker.legacy_text(data));
         }
         if faction.treasury < cost {
-            return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
+            return Some(format!("trésor insuffisant ({cost} {MONEY} nécessaires)"));
         }
         None
     }

@@ -1169,6 +1169,7 @@ mod tests {
             objectives: Vec::new(),
             provinces: provinces.iter().map(|p| (*p).to_owned()).collect(),
             treasury: 0,
+            currency_symbol: String::new(),
             projected_income: 0,
             armies_count: 0,
         }

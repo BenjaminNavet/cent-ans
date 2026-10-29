@@ -1,0 +1,44 @@
+{
+  "id": "chr_richard_de_bury",
+  "name": {
+    "display": "Richard de Bury",
+    "local": "Richard de Bury",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Aungerville",
+  "faction": "fac_england",
+  "role": "prelate",
+  "birth": {
+    "value": "1287",
+    "uncertain": false
+  },
+  "death": {
+    "value": "1345-04-14"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Évêque de Durham",
+      "from": {
+        "value": "1333"
+      }
+    }
+  ],
+  "skills": {
+    "command": 0,
+    "governance": 7,
+    "court": 5
+  },
+  "traits": [
+    "trait_scholar",
+    "trait_loyal"
+  ],
+  "piety": 70,
+  "starting_location": "prov_middlesex",
+  "status": "at_court",
+  "description": "Évêque de Durham, ancien précepteur d’Édouard III, grand bibliophile (auteur du Philobiblon), chargé de missions diplomatiques et des finances du roi.",
+  "sources": [
+    "Richard de Bury"
+  ]
+}

@@ -96,7 +96,7 @@ pub fn act_view(data: &GameData, state: &CampaignState) -> Option<ActView> {
         .map(|o| ActObjectiveRow {
             id: o.objective.id.clone(),
             title: o.objective.title.clone(),
-            description: o.objective.description.clone(),
+            description: data_model::currency::fill(&o.objective.description),
             category: rules
                 .categories
                 .get(&o.objective.category)

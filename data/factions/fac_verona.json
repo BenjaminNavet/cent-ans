@@ -14,6 +14,7 @@
   "capital_city": "Vérone",
   "religion": "rel_catholic",
   "culture": "cul_lombard",
+  "currency": "florin",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_empire",
   "primary_title": "tit_verona",

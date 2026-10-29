@@ -34,6 +34,14 @@ impl Sim {
         self.data.is_some()
     }
 
+    /// Names the player's money after its faction (hyperpères, dinars, florins…): the display
+    /// currency read by `ui::kit::fr` and by the core's texts (lot HIST4). The value is the
+    /// common unit of account, only the name changes.
+    pub fn sync_currency(&self) {
+        let currency = self.data.as_ref().map(|data| data.currency_of(&self.player));
+        data_model::currency::set_display(currency);
+    }
+
     /// Starts a 1337 campaign for `player` (title holdings synced as in the Godot bridge).
     pub fn new_campaign(&mut self) -> Result<(), String> {
         let data = self.data.clone().ok_or("game data not loaded")?;
@@ -41,6 +49,7 @@ impl Sim {
             .map_err(|e| e.to_string())?;
         sim_campaign::feudal::sync_suzerains(&mut state, &data);
         self.state = Some(state);
+        self.sync_currency();
         Ok(())
     }
 }

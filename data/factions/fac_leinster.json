@@ -14,6 +14,7 @@
   "capital_city": "Ferns",
   "religion": "rel_catholic",
   "culture": "cul_irish",
+  "currency": "sterling",
   "succession_law": "elective",
   "primary_title": "tit_leinster",
   "heraldry": {

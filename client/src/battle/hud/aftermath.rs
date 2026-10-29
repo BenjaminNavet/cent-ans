@@ -155,16 +155,18 @@ pub fn cards(
                 format!(" ({})", captive.rank)
             };
             captives.push(format!(
-                "{}{rank} — rançon {} ₶",
+                "{}{rank} — rançon {} {}",
                 captive.name,
-                fr::digits(captive.ransom)
+                fr::digits(captive.ransom),
+                fr::symbol()
             ));
         }
         for captive in &aftermath.lost {
             captives.push(format!(
-                "Des nôtres pris : {} — rançon exigée {} ₶",
+                "Des nôtres pris : {} — rançon exigée {} {}",
                 captive.name,
-                fr::digits(captive.ransom)
+                fr::digits(captive.ransom),
+                fr::symbol()
             ));
         }
     }
@@ -241,7 +243,7 @@ pub fn cards(
     let mut loot = Vec::new();
     let total = aftermath.map_or(0, |a| a.ransom_total);
     loot.push(if total > 0 {
-        format!("{} ₶ de rançons à percevoir.", fr::digits(total))
+        format!("{} {} de rançons à percevoir.", fr::digits(total), fr::symbol())
     } else {
         "Aucun butin : pas de rançon à percevoir.".to_owned()
     });

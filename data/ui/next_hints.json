@@ -19,6 +19,7 @@
       "id": "enemy_army",
       "title": "L’ennemi approche",
       "text": "Une armée ennemie menace {province} : rassemblez vos troupes ou renforcez la garnison.",
+      "text_foreign": "Une armée ennemie approche de {province}, à votre frontière : rassemblez vos troupes pour couvrir vos marches.",
       "action": "alert"
     },
     {

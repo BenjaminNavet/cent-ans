@@ -1,5 +1,6 @@
 //! War, peace, alliances and vassal ties (orders apply immediately).
 
+use data_model::currency::MONEY;
 use super::*;
 
 /// Prestige the ruler loses declaring war without a casus belli.
@@ -605,7 +606,7 @@ impl CampaignState {
             text.push_str(&format!(" Cessions : {}.", ceded_names.join(", ")));
         }
         if tribute != 0 {
-            text.push_str(&format!(" Tribut : {} livres.", tribute.abs()));
+            text.push_str(&format!(" Tribut : {} {MONEY}.", tribute.abs()));
         }
         self.push_order_event(GameEvent::new(EventKind::PeaceSigned, text).faction(a));
     }

@@ -14,6 +14,7 @@
   "capital_city": "Smolensk",
   "religion": "rel_orthodox",
   "culture": "cul_russian",
+  "currency": "grivna",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_smolensk",
   "heraldry": {

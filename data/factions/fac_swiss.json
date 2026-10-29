@@ -13,6 +13,7 @@
   "capital_city": "Lucerne",
   "religion": "rel_catholic",
   "culture": "cul_german",
+  "currency": "florin",
   "succession_law": "elective",
   "suzerain": "fac_empire",
   "primary_title": "tit_swiss",

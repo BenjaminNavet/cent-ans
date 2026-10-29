@@ -34,6 +34,7 @@ use data_model::{
     Diet, DietId, EffectKind, EffectMode, FactionId, GameData, LentRule, ProvinceId, SocialClass,
     WinterRule,
 };
+use data_model::currency::MONEY;
 use serde::{Deserialize, Serialize};
 
 use crate::buildings::EffectTotals;
@@ -388,7 +389,7 @@ pub(crate) fn pay_table(
         }
         revert_to_default(state, &id);
         let text = format!(
-            "La Table : le trésor ne peut payer le régime « {} » de {} ({cost} livres) ; retour au {}.",
+            "La Table : le trésor ne peut payer le régime « {} » de {} ({cost} {MONEY}) ; retour au {}.",
             diet_name(data, &diet),
             data.province_name(&id),
             diet_name(data, &default_diet()).to_lowercase(),

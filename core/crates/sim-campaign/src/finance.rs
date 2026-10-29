@@ -7,6 +7,7 @@
 //! choose, not to hoard. The projected season is [`StructuralCosts`], added to
 //! [`crate::economy::TurnBudget`]; the loans and levies are orders.
 
+use data_model::currency::MONEY;
 use std::collections::BTreeMap;
 
 use data_model::{FactionId, FinanceRules, GameData, Sex};
@@ -149,15 +150,15 @@ pub enum FinanceError {
     UnknownLender(String),
     #[error("impôt inconnu : {0}")]
     UnknownLevy(String),
-    #[error("le prêt minimal est de {0} livres")]
+    #[error("le prêt minimal est de {0} {money}", money = data_model::currency::MONEY)]
     BelowMinimum(i64),
     #[error("les banquiers ne prêtent plus à la couronne avant le tour {0}")]
     CreditFrozen(u32),
-    #[error("{lender} ne prêtera pas plus de {room} livres à la couronne")]
+    #[error("{lender} ne prêtera pas plus de {room} {money} à la couronne", money = data_model::currency::MONEY)]
     OverLimit { lender: String, room: i64 },
     #[error("rien à rembourser")]
     NoDebt,
-    #[error("le trésor ne couvre pas {0} livres")]
+    #[error("le trésor ne couvre pas {0} {money}", money = data_model::currency::MONEY)]
     CannotAfford(i64),
     #[error("{0} ne peut pas encore être levé (disponible au tour {1})")]
     LevyNotReady(String, u32),
@@ -380,7 +381,7 @@ pub fn borrow(
         faction,
         GameEvent::new(
             EventKind::Income,
-            format!("{label} emprunte {amount} livres à {name}."),
+            format!("{label} emprunte {amount} {MONEY} à {name}."),
         )
         .faction(faction),
     );
@@ -511,7 +512,7 @@ pub fn levy(
         faction,
         GameEvent::new(
             EventKind::Income,
-            format!("{label} lève {name} : {amount} livres, mais les provinces grondent."),
+            format!("{label} lève {name} : {amount} {MONEY}, mais les provinces grondent."),
         )
         .faction(faction)
         .cause(cause),
@@ -673,7 +674,7 @@ fn maybe_default(
     let mut event = GameEvent::new(
         EventKind::Bankruptcy,
         format!(
-            "Banqueroute royale : {label} cesse de payer ses banquiers ({written_off} livres effacés, crédit gelé jusqu'au tour {}).",
+            "Banqueroute royale : {label} cesse de payer ses banquiers ({written_off} {MONEY} effacés, crédit gelé jusqu'au tour {}).",
             turn + rule.freeze_turns
         ),
     )

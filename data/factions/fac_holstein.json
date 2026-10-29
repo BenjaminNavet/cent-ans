@@ -11,9 +11,10 @@
   "playable": false,
   "ruler": "chr_gerhard_iii_de_holstein",
   "capital": "prov_holstein",
-  "capital_city": "Lübeck",
+  "capital_city": "Rendsburg",
   "religion": "rel_catholic",
   "culture": "cul_german",
+  "currency": "marc",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_denmark",
   "heraldry": {

@@ -420,3 +420,42 @@ fn a_save_without_a_council_is_seated_on_load() {
         "deterministic: same seats as a fresh game"
     );
 }
+
+// ----- historical fitness (lot HIST4) -------------------------------------------
+
+#[test]
+fn the_english_council_of_1337_is_historically_plausible() {
+    let data = game_data();
+    let state = start_quiet(data, "fac_england", 1);
+    let england = fac("fac_england");
+    let who = |office: &str| -> String {
+        council::holder(&state, &england, office)
+            .map(|c| c.as_str().to_owned())
+            .unwrap_or_default()
+    };
+    // The dowager queen is disgraced, the consort is no minister, the
+    // constable's title only starts in 1338, the chaplain is a cleric.
+    for office in OFFICES {
+        let holder = who(office);
+        assert_ne!(holder, "chr_isabelle_de_france", "{office}");
+        assert_ne!(holder, "chr_philippa_of_hainault", "{office}");
+    }
+    assert_ne!(who("constable"), "chr_william_de_bohun");
+    let chaplain = who("chaplain");
+    assert!(!chaplain.is_empty(), "England has clerics for the chaplain");
+    let record = &data.characters[&CharacterId::new(&chaplain).unwrap()];
+    assert_eq!(record.role, data_model::Role::Prelate);
+}
+
+#[test]
+fn a_layman_cannot_be_appointed_chaplain() {
+    let (data, mut state, france) = france_state();
+    let layman = spare_adult(&state, &france);
+    let record = &data.characters[&layman];
+    if record.role != data_model::Role::Prelate {
+        assert!(matches!(
+            council::appoint(&mut state, data, &france, "chaplain", &layman),
+            Err(CouncilError::Unfit)
+        ));
+    }
+}

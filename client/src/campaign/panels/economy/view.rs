@@ -37,7 +37,7 @@ const HISTORY_SHOWN: usize = 8;
 const MAX_ROUTES: usize = 14;
 const MAX_PARTNERS: usize = 12;
 
-const CURRENCY_INTRO: &str = "La monnaie de compte du royaume est la livre tournois (₶). Les rois « muent » la monnaie : moins d’argent fin dans chaque pièce rapporte un seigneuriage immédiat, mais les prix montent et les rentes fixes des bourgeois et du clergé fondent. Une monnaie affaiblie ralentit aussi le commerce. Pour changer de monnaie : section « Monnaie » du panneau de faction.";
+const CURRENCY_INTRO: &str = "Les rois « muent » la monnaie : moins d’argent fin dans chaque pièce rapporte un seigneuriage immédiat, mais les prix montent et les rentes fixes des bourgeois et du clergé fondent. Une monnaie affaiblie ralentit aussi le commerce. Pour changer de monnaie : section « Monnaie » du panneau de faction.";
 const REVENUE_HELP: &str = "Les recettes viennent de l’impôt des provinces (taille des classes, production, bâtiments), du commerce (routes et accords), du seigneuriage de la frappe et des aumônes de la croisade ; les embargos, la dévastation et la difficulté les modèrent.";
 /// Sources of income listed at the bottom of the currency tab (`IncomeLines.LABELS`).
 const INCOME_KEYS: [&str; 16] = [
@@ -506,14 +506,40 @@ fn partner_row(
 
 // ---------------------------------------------------------------- currency
 
+/// « la livre tournois » or the name of the player's money (« le dinar »), with its article.
+fn currency_title() -> String {
+    let currency = data_model::currency::display();
+    if currency.id == "livre" {
+        "la livre tournois".to_owned()
+    } else {
+        format!("le {}", currency.singular)
+    }
+}
+
+/// Heading of the currency tab: « Livre tournois (₶) », « Dinar (din.) ».
+fn currency_heading() -> String {
+    let currency = data_model::currency::display();
+    let name = if currency.id == "livre" {
+        "Livre tournois".to_owned()
+    } else {
+        let mut chars = currency.singular.chars();
+        chars.next().map_or_else(String::new, |c| c.to_uppercase().chain(chars).collect())
+    };
+    format!("{name} ({})", currency.symbol)
+}
+
 fn currency_tab(pane: &mut Kids, theme: &UiTheme, view: &FactionPanelView) {
     pane.spawn((
         Name::new("economy:currency_name"),
-        heading(theme, "Monnaie : Livre tournois (₶)"),
+        heading(theme, &format!("Monnaie : {}", currency_heading())),
     ));
     pane.spawn(wrapped(ink(
         theme,
-        CURRENCY_INTRO,
+        &format!(
+            "La monnaie de compte du royaume est {} ({}). {CURRENCY_INTRO}",
+            currency_title(),
+            fr::symbol()
+        ),
         UiType::Caption,
         style::INK,
     )));

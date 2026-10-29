@@ -14,6 +14,7 @@
   "capital_city": "Fès",
   "religion": "rel_islam",
   "culture": "cul_maghrebi",
+  "currency": "dinar",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_marinids",
   "heraldry": {

@@ -15,6 +15,7 @@
   "capital_city": "Nicosie",
   "religion": "rel_catholic",
   "culture": "cul_french",
+  "currency": "besant",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_cyprus",
   "heraldry": {

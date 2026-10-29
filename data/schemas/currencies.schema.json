@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/currencies.schema.json",
+  "title": "Monnaies des factions",
+  "description": "Catalogue des monnaies d'usage (data/economy/currencies.json, lot HIST4). La valeur est une unité de compte commune ; seul le nom affiché varie.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "default": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Monnaie des factions sans `currency`." },
+    "currencies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "singular": { "type": "string", "minLength": 1 },
+          "plural": { "type": "string", "minLength": 1 },
+          "symbol": { "type": "string", "minLength": 1, "maxLength": 6, "description": "Abréviation courte pour la barre du haut et les tableaux." }
+        },
+        "required": ["id", "singular", "plural", "symbol"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["default", "currencies"],
+  "additionalProperties": false
+}

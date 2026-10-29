@@ -15,6 +15,7 @@
   "capital_city": "Paris",
   "religion": "rel_catholic",
   "culture": "cul_french",
+  "currency": "livre",
   "succession_law": "salic",
   "primary_title": "tit_france",
   "heraldry": {

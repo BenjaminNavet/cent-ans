@@ -6,6 +6,7 @@
 //! computed a single time and shared by the player's order, the panel, the
 //! AI's planning and the missions that probe the options.
 
+use data_model::currency::MONEY;
 use std::collections::BTreeMap;
 
 use data_model::{EffectKind, FactionId, GameData, ResourceId, SettlementId, UnitType, UnitTypeId};
@@ -397,7 +398,7 @@ impl<'a> RecruitContext<'a> {
             });
         }
         if self.faction_state.treasury < i64::from(cost) {
-            return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
+            return Some(format!("trésor insuffisant ({cost} {MONEY} nécessaires)"));
         }
         None
     }

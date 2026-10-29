@@ -23,6 +23,7 @@
 //! cap (band → region → thousandths); an absent reserve is full, so old
 //! saves and the 1337 start begin with full reserves.
 
+use data_model::currency::MONEY;
 use std::collections::BTreeMap;
 
 use data_model::{FactionId, GameData, MercenaryBand, ProvinceId, UnitTypeId};
@@ -235,7 +236,7 @@ impl CampaignState {
                     None => "réserve épuisée".to_owned(),
                 })
             } else if treasury < i64::from(cost) {
-                Some(format!("trésor insuffisant ({cost} livres nécessaires)"))
+                Some(format!("trésor insuffisant ({cost} {MONEY} nécessaires)"))
             } else {
                 None
             };
@@ -337,7 +338,7 @@ impl CampaignState {
                 GameEvent::new(
                     EventKind::Recruited,
                     format!(
-                        "{} rejoignent l'ost pour {cost} livres ({}).",
+                        "{} rejoignent l'ost pour {cost} {MONEY} ({}).",
                         unit.name.display, option.band_name
                     ),
                 )

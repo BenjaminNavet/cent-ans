@@ -13,6 +13,7 @@
   "capital_city": "Ciudad Real",
   "religion": "rel_catholic",
   "culture": "cul_castilian",
+  "currency": "maravedi",
   "succession_law": "elective",
   "suzerain": "fac_castile",
   "primary_title": "tit_calatrava",

@@ -14,6 +14,7 @@
   "capital_city": "Wenden",
   "religion": "rel_catholic",
   "culture": "cul_german",
+  "currency": "marc",
   "succession_law": "elective",
   "suzerain": "fac_teutonic",
   "primary_title": "tit_livonian_order",

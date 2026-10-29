@@ -15,6 +15,7 @@
   "capital_city": "Édimbourg",
   "religion": "rel_catholic",
   "culture": "cul_scottish",
+  "currency": "livre",
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_scotland",
   "heraldry": {
