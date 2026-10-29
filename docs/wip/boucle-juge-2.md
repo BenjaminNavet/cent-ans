@@ -84,3 +84,7 @@ Suite : choisir les refontes prioritaires dans les audits et les lancer en lots 
 - VIS-R2 fusionné (ADR 0797) : lavis retiré du cœur, bande au bord ; critère valeur Guyenne/Saintonge −19 % accepté (sol sombre, R1/R3) ; coût GPU à mesurer avec le lot FPS.
 - Lancés : XP-LISIBLE, BANC-1, VIS-R7 (végétation), VIS-R6a (images Z-Image des 4 maquettes, hors dépôt ~/dev/cent-ans-raw/vis-r6/, Meshy ensuite). En attente de VIS-R1 : R4 montagne, R3 sol, R5 eau (mêmes shaders).
 - ECO-R0 fusionné (diplomatie : trêve en données, truce_started, contrôle or/tribut, Auld Alliance ; sonde eco_series ; 5 métriques, bandes provisoires à recalibrer sur la passe longue). Lancé : ECO-R2a (semonce féodale).
+- Meshy : 4 maquettes générées (~/dev/cent-ans-raw/vis-r6/meshy/), intégration VIS-R6b lancée.
+- VIS-R1 fusionné (ADR 0799) : dôme dégradé (Atmosphere Bevy écartée : exige Hdr, pas d'échelle), caméra 20-28°, soleil chaud ≥ 1,8 × ciel, brume unique, 1er tour dégagé. Coût GPU illisible (machine chargée) : à refaire avec FPS.
+- Nouveau défaut vu après VIS-R1 : plaques des villes lointaines (Édimbourg…) en rang sur l'horizon → correctif PLAQUES-HORIZON lancé.
+- Lancés : VIS-R3a (carte de couleur, publication du paquet par la session principale), VIS-R3b (parcellaire typé). En attente : R4 montagne (terrain.wesl, après R3b), R5 eau, R8 parchemin.
