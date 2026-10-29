@@ -316,9 +316,9 @@ pub const SEASON_CLASSES: [&str; 5] = ["oak", "beech", "conifer", "hedge", "gold
 impl Default for ForestLook {
     fn default() -> Self {
         ForestLook {
-            value: 0.88,
+            value: 0.6,
             saturation: 0.85,
-            balance: Vec3::new(0.94, 0.98, 0.9),
+            balance: Vec3::new(0.82, 1.0, 0.95),
             tree_value_spread: 0.3,
             stand_value_spread: 0.5,
             stand_period: 18.0,
