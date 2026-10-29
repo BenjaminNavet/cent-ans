@@ -470,6 +470,33 @@ mod tests {
     }
 
     #[test]
+    fn destroyed_army_leaves_no_pending_battle() {
+        // Regression (judge 2, seed 1 mirror, army_0414): an army destroyed
+        // by attrition after a battle was staged left a dangling request.
+        let (data, base) = fixture();
+        let mut state = base.clone();
+        let mut ids = state.armies.keys().cloned();
+        let (a, b) = (ids.next().unwrap(), ids.next().unwrap());
+        let place = state.settlements.keys().next().unwrap().clone();
+        let province = state.settlement_province(&place).unwrap().clone();
+        state.pending_battles.push(crate::state::BattleRequest {
+            attacker: a,
+            defender: b.clone(),
+            location: place,
+            province,
+            siege: false,
+            sortie: false,
+            opening: Default::default(),
+        });
+        state.armies.remove(&b);
+        assert!(keys(&state).contains(&"army_refs"));
+        let mut events = Vec::new();
+        state.resolve_end_of_turn(data, &mut events);
+        assert!(!keys(&state).contains(&"army_refs"));
+        assert!(state.pending_battles.is_empty());
+    }
+
+    #[test]
     fn general_commanding_two_armies() {
         let mut state = fixture().1.clone();
         let mut with_general = state

@@ -91,6 +91,15 @@ impl CampaignState {
         if source_army.units.len() + target_army.units.len() > cap {
             return Err(OrderError::ArmyFull { cap });
         }
+        // A battle already staged names the source army: merging it away
+        // would leave the request dangling (invariant `army_refs`).
+        if self
+            .pending_battles
+            .iter()
+            .any(|b| &b.attacker == source || &b.defender == source)
+        {
+            return Err(OrderError::WouldEmptyArmy);
+        }
         let source_army = self.armies.remove(source).expect("checked");
         let general = source_army.general.clone();
         let target_mut = self.armies.get_mut(target).expect("checked");
@@ -167,6 +176,14 @@ impl CampaignState {
             if settlement.garrison.len() + indices.len() > *cap {
                 return Err(OrderError::GarrisonFull { cap: *cap });
             }
+        }
+        if indices.len() == self.armies[army_id].units.len()
+            && self
+                .pending_battles
+                .iter()
+                .any(|b| &b.attacker == army_id || &b.defender == army_id)
+        {
+            return Err(OrderError::WouldEmptyArmy);
         }
         let units = take_indices(
             &mut self.armies.get_mut(army_id).expect("checked").units,

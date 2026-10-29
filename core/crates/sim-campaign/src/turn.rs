@@ -202,6 +202,10 @@ impl CampaignState {
         // FE (F3): felony cases, generic victory streaks, objectives.
         crate::feudal::resolve_feudal(self, data, events);
 
+        // ECO: an army destroyed this season (starvation, desertion, dissolved
+        // company, routed rebels) can no longer be named by a pending battle.
+        battle_request::purge_stale_pending(self);
+
         // 11. New season (step 4 of § 3.4): movement points are refilled,
         // then the player plays.
         self.advance_date();

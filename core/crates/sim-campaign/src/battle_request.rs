@@ -226,6 +226,21 @@ pub(crate) fn defer_player_battle(
     true
 }
 
+/// Drops the pending battles that name an army (or a place) that no longer
+/// exists. Armies can vanish between the moment a battle is staged and the
+/// next turn (attrition, desertion, dissolved companies, dispersed rebels);
+/// without this the state would keep a dangling reference (invariant
+/// `army_refs`).
+pub(crate) fn purge_stale_pending(state: &mut CampaignState) {
+    let armies = &state.armies;
+    let settlements = &state.settlements;
+    state.pending_battles.retain(|b| {
+        armies.contains_key(&b.attacker)
+            && armies.contains_key(&b.defender)
+            && settlements.contains_key(&b.location)
+    });
+}
+
 /// Start of `end_turn`: auto-resolves every battle still pending.
 pub(crate) fn auto_resolve_all_pending(
     state: &mut CampaignState,
