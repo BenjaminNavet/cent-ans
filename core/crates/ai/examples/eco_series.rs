@@ -73,7 +73,6 @@ fn parse_options(args: &[String]) -> Options {
 fn run_seed(data: &GameData, seed: u64, options: &Options, out: &mut impl FnMut(String)) {
     let france = fid("fac_france");
     let mut state = CampaignState::new_1337(data, france.clone(), seed).expect("state");
-    let data = data;
     let turns = options.turns;
     let passive = options.passive;
     let watch: Vec<&str> = options.factions.iter().map(String::as_str).collect();
@@ -197,5 +196,27 @@ fn main() {
     let (data, _) = GameData::load(&root).expect("data");
     for &seed in &options.seeds {
         run_seed(&data, seed, &options, &mut |line| println!("{line}"));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[ignore = "plays 4 turns of the real campaign, slow without --release"]
+    fn probe_runs_four_turns() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+        let (data, _) = GameData::load(&root).expect("data");
+        let options = Options {
+            seeds: vec![1],
+            turns: 4,
+            passive: false,
+            factions: vec!["fac_france".to_owned()],
+        };
+        let mut lines = Vec::new();
+        run_seed(&data, 1, &options, &mut |line| lines.push(line));
+        assert_eq!(lines.len(), 4);
+        assert!(lines[3].contains("\"fac_france\""));
     }
 }

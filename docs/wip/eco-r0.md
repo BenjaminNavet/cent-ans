@@ -12,8 +12,17 @@ Spec : `docs/audits/2026-10-29-economie-politique.md`, section « R0 ».
   (`unpaid_tribute_*` en données), `EventEffect::Alliance` + `evt_auld_alliance.json`.
 - Tests : `core/crates/sim-campaign/tests/diplomacy/eco_r0.rs`, test de métriques dans `metrics.rs`.
 
-## Prochaine étape (PAUSE joueur)
-Rien n'a encore été compilé complètement : un seul échec connu corrigé (import `EventContext` dans `tests/diplomacy/eco_r0.rs`). Compiler/tester (`cargo test -p sim-campaign --test diplomacy eco_r0`, `-p seed-bots metrics`), mesurer les cinq métriques (passe quick), écrire les bandes, passe rapide seed bots.
+## Terminé (reprise)
+Tests diplomatie (6) et métriques verts, `cargo test --workspace` vert, clippy -D warnings propre, passe rapide seed bots : 0 constat.
+
+## Mesure « avant » (passe quick : 8 bots, 20 tours, graine 1, maison du bot)
+- army_spend_share : 0,16 - 0,34 (miroir 0,30)
+- extraordinary_income_share : 0 partout (aucune levée ni emprunt en 20 tours)
+- men_under_arms_peak : 537 - 1983 (540 pour la plupart ; miroir/IA stratégique 1983)
+- ransom_paid_max_seasons : 0 partout (aucune rançon en 20 tours)
+- provinces_controlled_end : 10 - 11 (provinces_held_end 10 - 11, droit)
+Bandes initialisées (provisoires, 20 tours seulement) : army 0,1-0,45 ; extraordinary 0-0,25 ; men 400-2500 ;
+ransom 0-2 ; controlled 5-16 (quick) / 3-16 (longue). À recalibrer sur la passe longue / sonde séculaire.
 
 ## Points ouverts / écarts
 - Le constat 1 de l'audit (« Trêve de deux ans » = 20 saisons) est inexact : la constante de `game-api`

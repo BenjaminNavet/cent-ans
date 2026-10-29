@@ -16,5 +16,10 @@
   "battles_per_game": { "min": 30.0, "max": 150.0, "status": "initialised" },
   "provinces_held_end": { "min": 3.0, "max": 16.0, "status": "initialised" },
   "treasury_end": { "min": 0.0, "max": 120000.0, "status": "initialised" },
-  "reign_score": { "min": 6.0, "max": 40.0, "status": "initialised" }
+  "reign_score": { "min": 6.0, "max": 40.0, "status": "initialised" },
+  "army_spend_share": { "min": 0.1, "max": 0.45, "status": "initialised" },
+  "extraordinary_income_share": { "min": 0.0, "max": 0.25, "status": "initialised" },
+  "men_under_arms_peak": { "min": 400.0, "max": 2500.0, "status": "initialised" },
+  "ransom_paid_max_seasons": { "min": 0.0, "max": 2.0, "status": "initialised" },
+  "provinces_controlled_end": { "min": 3.0, "max": 16.0, "status": "initialised" }
 }
