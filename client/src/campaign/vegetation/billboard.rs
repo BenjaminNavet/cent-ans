@@ -45,7 +45,7 @@ const SHADER_PATH: &str = "embedded://cent_ans_client/campaign/vegetation/billbo
 /// Bytes of one record: x, y, z, yaw (deg), scale, 0, seed, r, g, b.
 pub const RECORD_BYTES: usize = 40;
 /// Bytes of the parameter block (`Params` of `billboard.wesl`: twenty-seven `vec4`).
-const PARAM_BYTES: u64 = 352;
+const PARAM_BYTES: u64 = 432;
 
 /// What a batch draws (`params.frame.w`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
