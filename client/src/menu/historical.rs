@@ -286,6 +286,14 @@ fn spawn_entry(commands: &mut Commands, theme: &UiTheme, parent: Entity, map: &H
     }
 }
 
+/// A launch that cannot happen is loud: `error!` in the log (the smoke fails on it) and a toast.
+fn fail(toasts: &mut MessageWriter<crate::ui::kit::modal::ToastRequest>, message: &str) {
+    error!("historical battle not launched: {message}");
+    toasts.write(crate::ui::kit::modal::ToastRequest::new(&format!(
+        "Bataille historique impossible : {message}"
+    )));
+}
+
 fn handle_buttons(
     mut commands: Commands,
     mut pressed: MessageReader<ButtonPressed>,
@@ -310,14 +318,20 @@ fn handle_buttons(
             continue;
         };
         let Some((id, side)) = rest.rsplit_once('_') else {
+            fail(&mut toasts, &format!("bouton « {name} » mal formé"));
             continue;
         };
         let side = if side == "watch" { "" } else { side };
-        let (Some(map), Some(game), Some(dir)) = (
-            list.maps.iter().find(|m| m.id == id),
-            sim.data.as_deref(),
-            data_dir(),
-        ) else {
+        let Some(map) = list.maps.iter().find(|m| m.id == id) else {
+            fail(&mut toasts, &format!("bataille « {id} » introuvable"));
+            continue;
+        };
+        let Some(game) = sim.data.as_deref() else {
+            fail(&mut toasts, "données de jeu non chargées");
+            continue;
+        };
+        let Some(dir) = data_dir() else {
+            fail(&mut toasts, "dossier data/ introuvable");
             continue;
         };
         match to_custom(game, &dir, map, side) {
@@ -328,10 +342,7 @@ fn handle_buttons(
                     &format!("historical:{id}:{side}"),
                 ));
             }
-            Err(message) => {
-                warn!("historical {id}: {message}");
-                toasts.write(crate::ui::kit::modal::ToastRequest::new(&message));
-            }
+            Err(message) => fail(&mut toasts, &format!("{id} : {message}")),
         }
     }
 }
