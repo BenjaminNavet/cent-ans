@@ -48,6 +48,17 @@ impl DnEntry {
     }
 }
 
+/// Regional colour grade (`tints`): linear RGB multiplier of the albedo of a generated maquette
+/// (red brick in the Low Countries, slate in the west and in Britain, warm tile in the south).
+#[derive(Debug, Clone, Default)]
+pub struct TintRule {
+    pub id: String,
+    pub cultures: Vec<String>,
+    pub regions: Vec<String>,
+    pub religions: Vec<String>,
+    pub tint: [f32; 3],
+}
+
 /// Sub-family rule (`subfamilies`, order = priority).
 #[derive(Debug, Clone, Default)]
 pub struct SubfamilyRule {
@@ -65,6 +76,8 @@ pub struct DnModels {
     /// kind -> family key -> entries.
     pub table: HashMap<String, HashMap<String, Vec<DnEntry>>>,
     pub subfamilies: Vec<SubfamilyRule>,
+    /// Regional colour grades of the generated maquettes (`tints`, VIS-R6b), first match wins.
+    pub tints: Vec<TintRule>,
     pub near_distance: f32,
     pub fade_margin: f32,
     pub banner_pole_ratio: f32,
@@ -127,9 +140,29 @@ impl DnModels {
                     .collect()
             })
             .unwrap_or_default();
+        let tints = doc["tints"]
+            .as_array()
+            .map(|rules| {
+                rules
+                    .iter()
+                    .filter_map(|r| {
+                        let t = r["tint"].as_array()?;
+                        let c = |i: usize| t.get(i).and_then(Value::as_f64).map(|x| x as f32);
+                        Some(TintRule {
+                            id: r["id"].as_str().unwrap_or_default().to_string(),
+                            cultures: strings(r.get("cultures")),
+                            regions: strings(r.get("regions")),
+                            religions: strings(r.get("religions")),
+                            tint: [c(0)?, c(1)?, c(2)?],
+                        })
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
         Self {
             table,
             subfamilies,
+            tints,
             near_distance: num("near_distance", 400.0),
             fade_margin: num("fade_margin", 60.0).max(0.001),
             banner_pole_ratio: num("banner_pole_ratio", 0.12),
@@ -155,6 +188,18 @@ impl DnModels {
                         || has(&r.religions, religion))
             })
             .map_or("", |r| r.id.as_str())
+    }
+
+    /// Albedo tint of a place by culture, region or religion (first rule that matches; neutral
+    /// `[1, 1, 1]` otherwise).
+    pub fn tint_for(&self, culture: &str, region: &str, religion: &str) -> [f32; 3] {
+        let has = |list: &[String], v: &str| list.iter().any(|x| x == v);
+        self.tints
+            .iter()
+            .find(|r| {
+                has(&r.cultures, culture) || has(&r.regions, region) || has(&r.religions, religion)
+            })
+            .map_or([1.0; 3], |r| r.tint)
     }
 
     /// Lookup keys by priority: sub-family, its `also`, family, `*` (`lookup_keys`).
@@ -314,6 +359,9 @@ pub fn assign(
         let settlement = data.settlements.get(&sid);
         let port = settlement.is_some_and(|s| s.port);
         let province = settlement.and_then(|s| data.provinces.get(&s.province));
+        let tint = province.map_or([1.0; 3], |pr| {
+            dn.tint_for(pr.culture.as_str(), &pr.region, pr.religion.as_str())
+        });
         let subfamily = province.map_or("", |pr| {
             dn.subfamily_for(
                 &p.family,
@@ -346,6 +394,7 @@ pub fn assign(
             scale: maquettes.width(p.shown_kind) * gain_factor * entry.scale / width,
             top,
             gain: dn.gain(entry),
+            tint,
             banner: entry.banner,
             model,
         });
@@ -375,6 +424,21 @@ mod tests {
                 {"id": "west_carpathian", "family": "west", "also": ["west_hansa"], "regions": ["transylvanie"]}
             ]
         }))
+    }
+
+    #[test]
+    fn tint_follows_region_else_neutral() {
+        let d = DnModels::from_value(&json!({
+            "defaults": {},
+            "table": {},
+            "tints": [
+                {"id": "brick", "regions": ["pays_bas"], "tint": [1.1, 0.9, 0.8]},
+                {"id": "slate", "cultures": ["cul_english"], "tint": [0.9, 1.0, 1.1]}
+            ]
+        }));
+        assert_eq!(d.tint_for("cul_flemish", "pays_bas", ""), [1.1, 0.9, 0.8]);
+        assert_eq!(d.tint_for("cul_english", "x", ""), [0.9, 1.0, 1.1]);
+        assert_eq!(d.tint_for("cul_french", "france_nord", ""), [1.0; 3]);
     }
 
     #[test]

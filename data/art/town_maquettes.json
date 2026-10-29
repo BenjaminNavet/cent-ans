@@ -80,7 +80,7 @@
     "town": 900.0,
     "castle": 500.0,
     "abbey": 400.0,
-    "village": 900.0,
+    "village": 350.0,
     "fade_margin": 60.0
   },
   "shadow_range": {
@@ -92,7 +92,9 @@
   "collision": {
     "min_scale": 0.6,
     "margin": 0.3,
-    "absorb_ratio": 0.9
+    "absorb_ratio": 0.9,
+    "landmark_clearance": 10.0,
+    "landmark_min_factor": 0.75
   },
   "tile_size": 256.0,
   "variants": [

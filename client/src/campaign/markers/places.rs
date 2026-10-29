@@ -20,6 +20,9 @@ pub struct LandmarkPlan {
     pub settlement: String,
     /// `scale.core_radius_px`: radius of the core in map units (1 unit = 1 px).
     pub core_radius: f32,
+    /// Scale applied to the landmark maquette so that its neighbours stay clear of it
+    /// (`collision.landmark_clearance`, VIS-R6b); 1 = untouched.
+    pub yield_factor: f32,
     /// Generated glb (`dn_campaign_models.json` `landmarks.<id>`), asset path relative to
     /// `game/assets`, with its `width_factor` and `yaw_deg`.
     pub generated: Option<GeneratedLandmark>,
@@ -82,6 +85,7 @@ pub fn load_landmarks(data_dir: &Path, assets_dir: &Path) -> Vec<LandmarkPlan> {
             id: id.to_string(),
             settlement: settlement.to_string(),
             core_radius: doc["scale"]["core_radius_px"].as_f64().unwrap_or(5.0) as f32,
+            yield_factor: 1.0,
             generated,
             fallback_model: format!("models/landmarks/{id}.glb"),
         });
@@ -135,6 +139,8 @@ pub struct DnPlace {
     pub scale: f32,
     pub top: f32,
     pub gain: f32,
+    /// Regional linear RGB multiplier of the albedo (`tints`), `[1, 1, 1]` = none.
+    pub tint: [f32; 3],
     pub banner: bool,
 }
 
@@ -162,7 +168,7 @@ pub fn build_places(
     data: &GameData,
     catalog: MarkerCatalog,
     maquettes: Maquettes,
-    landmarks: Vec<LandmarkPlan>,
+    mut landmarks: Vec<LandmarkPlan>,
     model_exists: &dyn Fn(&str) -> bool,
 ) -> Places {
     let mut places: Vec<Place> = Vec::new();
@@ -241,6 +247,28 @@ pub fn build_places(
         }
     }
     let centers: Vec<Vec2> = places.iter().map(|p| p.px).collect();
+    // The big maquette yields too (VIS-R6b): keep `landmark_clearance` of free ground between a
+    // landmark and its nearest non-village neighbour, down to `landmark_min_factor`.
+    if maquettes.collision.landmark_clearance > 0.0 {
+        for i in 0..count {
+            let Some(l) = places[i].landmark else {
+                continue;
+            };
+            let room = (0..count)
+                .filter(|&j| {
+                    j != i && places[j].landmark.is_none() && places[j].shown_kind != "village"
+                })
+                .map(|j| {
+                    centers[i].distance(centers[j])
+                        - radius[j]
+                        - maquettes.collision.landmark_clearance
+                })
+                .fold(f32::INFINITY, f32::min);
+            let factor = (room / radius[i]).clamp(maquettes.collision.landmark_min_factor, 1.0);
+            landmarks[l].yield_factor = factor;
+            radius[i] *= factor;
+        }
+    }
     let factor = solve_collisions(
         &centers,
         &radius,

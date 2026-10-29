@@ -397,13 +397,16 @@ fn build_markers(
                     g.model.clone(),
                     g.yaw_deg.to_radians(),
                     Some(l.fallback_model.clone()),
-                    2.0 * l.core_radius * places.maquettes.landmark_scale * g.width_factor,
+                    2.0 * l.core_radius
+                        * places.maquettes.landmark_scale
+                        * l.yield_factor
+                        * g.width_factor,
                 ),
                 None => (
                     l.fallback_model.clone(),
                     0.0,
                     None,
-                    2.0 * l.core_radius * places.maquettes.landmark_scale,
+                    2.0 * l.core_radius * places.maquettes.landmark_scale * l.yield_factor,
                 ),
             };
             let handle = scene(&path);
@@ -475,7 +478,12 @@ fn build_markers(
             ));
             entity.observe(lod::prepare_maquette);
             if let Some(d) = &p.dn {
-                entity.insert(DnScene { gain: d.gain }).observe(brighten_dn);
+                entity
+                    .insert(DnScene {
+                        gain: d.gain,
+                        tint: d.tint,
+                    })
+                    .observe(brighten_dn);
                 if d.banner {
                     let colour = heraldic
                         .get(&p.controller)
@@ -628,6 +636,8 @@ fn build_markers(
 #[derive(Component)]
 struct DnScene {
     gain: f32,
+    /// Regional colour grade, linear RGB multiplier (VIS-R6b).
+    tint: [f32; 3],
 }
 
 /// Procedural banner on top of a generated glb, in the colour of the place's controller.
@@ -646,14 +656,20 @@ fn brighten_dn(
     mut nodes: Query<&mut MeshMaterial3d<StandardMaterial>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut cache: Local<
-        std::collections::HashMap<(AssetId<StandardMaterial>, u32), Handle<StandardMaterial>>,
+        std::collections::HashMap<(AssetId<StandardMaterial>, [u32; 4]), Handle<StandardMaterial>>,
     >,
     mut stats: ResMut<MarkerStats>,
 ) {
     let Ok(scene) = scenes.get(ready.entity) else {
         return;
     };
-    let key_gain = (scene.gain * 1000.0) as u32;
+    let quant = |x: f32| (x * 1000.0) as u32;
+    let key_gain = [
+        quant(scene.gain),
+        quant(scene.tint[0]),
+        quant(scene.tint[1]),
+        quant(scene.tint[2]),
+    ];
     for entity in children.iter_descendants(ready.entity) {
         let Ok(mut handle) = nodes.get_mut(entity) else {
             continue;
@@ -666,7 +682,8 @@ fn brighten_dn(
                     continue;
                 };
                 let g = scene.gain;
-                material.base_color = Color::linear_rgb(g, g, g);
+                material.base_color =
+                    Color::linear_rgb(g * scene.tint[0], g * scene.tint[1], g * scene.tint[2]);
                 material.perceptual_roughness = 1.0;
                 material.metallic = 0.0;
                 let h = materials.add(material);

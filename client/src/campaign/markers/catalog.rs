@@ -214,6 +214,13 @@ pub struct Collision {
     pub margin: f32,
     #[serde(default)]
     pub absorb_ratio: f32,
+    /// VIS-R6b: free ground (world units) kept between the edge of a landmark maquette and the
+    /// disc of the nearest non-village neighbour; the big maquette yields too. 0 = off.
+    #[serde(default)]
+    pub landmark_clearance: f32,
+    /// Lowest landmark scale factor the clearance may impose.
+    #[serde(default = "one_f")]
+    pub landmark_min_factor: f32,
 }
 
 fn one_f() -> f32 {

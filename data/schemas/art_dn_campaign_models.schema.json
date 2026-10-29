@@ -36,6 +36,22 @@
         "banner_pole_ratio": {"type": "number", "minimum": 0, "description": "Hauteur de la bannière procédurale en part de la hauteur du modèle."}
       }
     },
+    "tints": {
+      "type": "array",
+      "description": "VIS-R6b : teintes régionales des maquettes générées (toits de brique aux Pays-Bas, d'ardoise à l'ouest et en Bretagne insulaire, de tuile au sud). Première règle dont culture, région ou religion correspond ; tint = multiplicateur RGB linéaire de l'albédo (moyenne proche de 1).",
+      "items": {
+        "type": "object",
+        "required": ["id", "tint"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z_]+$"},
+          "cultures": {"type": "array", "items": {"type": "string"}},
+          "regions": {"type": "array", "items": {"type": "string"}},
+          "religions": {"type": "array", "items": {"type": "string"}},
+          "tint": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0.5, "maximum": 1.5}}
+        }
+      }
+    },
     "subfamilies": {
       "type": "array",
       "description": "DN-MAQ : sous-familles d'architecture, évaluées dans l'ordre (priorité) ; première règle de la famille de la province dont culture, région ou religion correspond. Clé de `table` = id.",
