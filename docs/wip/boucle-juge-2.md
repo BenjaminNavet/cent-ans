@@ -80,3 +80,5 @@ Suite : choisir les refontes prioritaires dans les audits et les lancer en lots 
 ## Reprise (29/10 nuit, autonomie totale)
 - TUTO (ADR 0796) et BUG-HIST fusionnés ; contrôle complet out/check-tuto.
 - Relancés : VIS-R1, VIS-R2, R1 renommée, ECO-R0, HIST4, IA-CAV. FPS gardé pour la fin (mesures A/B illisibles sur machine chargée : à lancer seul).
+- VIS-R2 fusionné (ADR 0797) : lavis retiré du cœur, bande au bord ; critère valeur Guyenne/Saintonge −19 % accepté (sol sombre, R1/R3) ; coût GPU à mesurer avec le lot FPS.
+- Lancés : XP-LISIBLE, BANC-1, VIS-R7 (végétation), VIS-R6a (images Z-Image des 4 maquettes, hors dépôt ~/dev/cent-ans-raw/vis-r6/, Meshy ensuite). En attente de VIS-R1 : R4 montagne, R3 sol, R5 eau (mêmes shaders).
