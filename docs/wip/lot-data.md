@@ -12,3 +12,6 @@ Source : `out/juge2/iter-01-tech.md` (sections données et audio).
 - Choix de conception : pattern des ids élargi à 2-3 lettres (pour `ady`) plutôt que renommage ; à confirmer.
 - Le test `test_every_bank_file_exists_and_is_generated` accepte désormais les effets `audio.SFX` (`sfx/<nom>`).
 - Le juge a noté aussi `fanfare` à -12,7 LUFS : non traité (hors demande).
+
+## Vérification
+- `uv run --project tools pytest` : 4018 passed, 3 skipped. ruff check et format OK sur les fichiers touchés.
