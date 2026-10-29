@@ -114,7 +114,27 @@
       "description": "Vassaux directs que l'ost peut convoquer (lot F8, ADR 0114) : un vassal trop loin à la fois de la capitale de son suzerain et des terres de l'ennemi, ou assez puissant pour être indépendant de fait, n'est pas convoqué (et ne commet pas de félonie).",
       "properties": {
         "max_muster_km": { "type": "number", "minimum": 0, "description": "Distance maximale (km) entre une place du vassal et la capitale de son suzerain ou une place de l'ennemi. 0 : sans limite." },
-        "independent_power_ratio": { "type": "number", "minimum": 0, "description": "Puissance du vassal, en part de celle de son suzerain, à partir de laquelle il est indépendant de fait et n'est pas convoqué. 0 : sans limite." }
+        "independent_power_ratio": { "type": "number", "minimum": 0, "description": "Puissance du vassal, en part de celle de son suzerain, à partir de laquelle il est indépendant de fait et n'est pas convoqué. 0 : sans limite." },
+        "contingent_percent_of_income": { "type": "integer", "minimum": 0, "maximum": 400, "description": "ECO-R2a (ADR 0798) : le vassal qui répond lève un contingent dont l'entretien de saison vaut au plus cette part (en %) de sa recette de saison. 0 : la réponse ne fait que déclarer la guerre." },
+        "min_units": { "type": "integer", "minimum": 0, "description": "Moins de régiments d'un contingent (si le panachage est abordable)." },
+        "max_units": { "type": "integer", "minimum": 0, "description": "Plus de régiments d'un contingent." },
+        "unit_mix": {
+          "type": "array",
+          "description": "Régiments du contingent, par part du budget d'entretien.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "unit_type": { "$ref": "common.schema.json#/$defs/unit_type_id" },
+              "share_percent": { "type": "integer", "minimum": 1, "maximum": 100, "description": "Part (en %) du budget d'entretien dépensée pour ce type." }
+            },
+            "required": ["unit_type", "share_percent"],
+            "additionalProperties": false
+          }
+        },
+        "free_seasons": { "type": "integer", "minimum": 0, "description": "Saisons de service aux frais du vassal (la saison de la semonce comprise)." },
+        "paid_seasons": { "type": "integer", "minimum": 0, "description": "Saisons que le contingent peut rester ensuite à la solde du suzerain (0 : il rentre)." },
+        "wage_percent": { "type": "integer", "minimum": 0, "maximum": 400, "description": "Part (en %) de l'entretien du contingent que le suzerain verse au vassal pendant la solde." },
+        "resummon_delay_seasons": { "type": "integer", "minimum": 0, "description": "Saisons entre deux semonces de l'ost par le même suzerain (ordre SummonHost)." }
       },
       "additionalProperties": false
     },

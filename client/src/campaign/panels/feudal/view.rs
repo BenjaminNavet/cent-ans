@@ -601,6 +601,24 @@ fn selection(body: &mut Kids, theme: &UiTheme, ui: &FeudalUi) {
             return;
         }
         section.spawn(row()).with_children(|actions| {
+            let summons = match (&duties.host_enemy, duties.host_wait) {
+                (None, _) => Some("Vous n’êtes en guerre contre personne : il n’y a pas d’ost à convoquer.".to_owned()),
+                (Some(_), wait) if wait > 0 => Some(format!(
+                    "L’ost a été convoqué il y a peu : encore {wait} saison(s) à attendre."
+                )),
+                _ => None,
+            };
+            disabled_button(
+                actions,
+                theme,
+                "feudal:summon",
+                "Convoquer l’ost",
+                match (&summons, &duties.host_enemy) {
+                    (Some(reason), _) => reason.as_str(),
+                    _ => "Vos vassaux directs lèvent un contingent contre votre ennemi ; il sert une saison à leurs frais, puis rentre ou passe à votre solde.",
+                },
+                summons.is_some(),
+            );
             let felon = duties.felons.iter().any(|c| c.vassal.id == sheet.id);
             disabled_button(
                 actions,

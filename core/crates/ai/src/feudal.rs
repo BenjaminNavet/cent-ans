@@ -306,6 +306,7 @@ pub fn plan_feudal(cache: &PlanCache, data: &GameData, faction: &FactionId) -> V
         }
     }
     orders.extend(plan_commise(cache, data, faction));
+    orders.extend(plan_summon_host(cache, data, faction));
     if let Some(order) =
         plan_revolt(cache, data, faction).or_else(|| plan_homage(cache, data, faction))
     {
@@ -318,6 +319,48 @@ pub fn plan_feudal(cache: &PlanCache, data: &GameData, faction: &FactionId) -> V
 /// No army raised and no war: the light evaluation applies.
 fn idle(state: &CampaignState, faction: &FactionId) -> bool {
     wars(state, faction) == 0 && !state.armies.values().any(|a| &a.faction == faction)
+}
+
+/// ECO-R2a: calls the host again against an enemy at war with us when some direct vassal that
+/// already fights it has no contingent in the field (the delay of the order is in the data).
+pub fn plan_summon_host(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Option<Order> {
+    let state = cache.state();
+    let delay = data.feudal_rules.host.resummon_delay_seasons;
+    if state
+        .feudal
+        .host_summoned
+        .get(faction)
+        .is_some_and(|last| state.turn < last + delay)
+    {
+        return None;
+    }
+    let vassals = sim_campaign::feudal::direct_vassals(state, data, faction);
+    if vassals.is_empty() {
+        return None;
+    }
+    let me = state.factions.get(faction)?;
+    let without_contingent = |vassal: &FactionId| {
+        !state.armies.values().any(|a| {
+            &a.faction == vassal
+                && a.host_service
+                    .as_ref()
+                    .is_some_and(|s| &s.liege == faction)
+        })
+    };
+    me.at_war_with
+        .iter()
+        .filter(|enemy| alive(state, enemy) && !enemy.is_rebels())
+        .find(|enemy| {
+            vassals.iter().any(|v| {
+                v != *enemy
+                    && state.is_at_war(v, enemy)
+                    && without_contingent(v)
+                    && sim_campaign::feudal::can_serve(state, data, v, faction, enemy)
+            })
+        })
+        .map(|enemy| Order::SummonHost {
+            enemy: enemy.clone(),
+        })
 }
 
 /// Forfeiture against a felon under an open case, when the odds allow it.

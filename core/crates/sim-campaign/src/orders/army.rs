@@ -81,6 +81,9 @@ impl CampaignState {
         if source == target {
             return Err(OrderError::NotSameProvince);
         }
+        if source_army.host_service.is_some() || target_army.host_service.is_some() {
+            return Err(OrderError::HostContingent);
+        }
         // The same settlement, or two armies within reach of an
         // engagement.
         if !self.armies_together(data, source_army, target_army) {
@@ -123,6 +126,9 @@ impl CampaignState {
         indices: &[usize],
     ) -> Result<(), OrderError> {
         let army = self.own_army(faction, army_id)?;
+        if army.host_service.is_some() {
+            return Err(OrderError::HostContingent);
+        }
         let indices = unique_sorted(indices, army.units.len())?;
         if indices.len() == army.units.len() {
             return Err(OrderError::WouldEmptyArmy);
@@ -158,6 +164,9 @@ impl CampaignState {
         indices: &[usize],
     ) -> Result<(), OrderError> {
         let army = self.own_army(faction, army_id)?;
+        if army.host_service.is_some() {
+            return Err(OrderError::HostContingent);
+        }
         let location = army
             .settlement()
             .cloned()

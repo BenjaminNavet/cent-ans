@@ -362,6 +362,9 @@ impl CampaignState {
             Order::ArbitratePrivateWar { offer, verdict } => {
                 Ok(self.arbitrate(data, faction, offer, verdict)?)
             }
+            Order::SummonHost { enemy } => Ok(crate::feudal::order_summon_host(
+                self, data, faction, &enemy,
+            )?),
             Order::DeclareCommise { vassal } => Ok(crate::feudal::declare_commise(
                 self, data, faction, &vassal,
             )?),

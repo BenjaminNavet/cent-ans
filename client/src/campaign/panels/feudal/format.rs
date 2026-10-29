@@ -312,6 +312,8 @@ mod tests {
             own_felonies: vec![],
             grantable_titles: vec![],
             homage_candidates: vec![],
+            host_enemy: None,
+            host_wait: 0,
         }
     }
 

@@ -272,7 +272,10 @@ impl MetricsTracker {
         let men: u32 = state
             .armies
             .values()
-            .filter(|army| &army.faction == house)
+            .filter(|army| {
+                &army.faction == house
+                    || army.host_service.as_ref().is_some_and(|s| &s.liege == house)
+            })
             .map(|army| army.total_strength())
             .sum();
         self.men_peak = self.men_peak.max(men);

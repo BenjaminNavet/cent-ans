@@ -6,6 +6,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::UnitTypeId;
+
 /// Contents of `data/rules/feudal.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -98,6 +100,42 @@ pub struct HostRules {
     /// A vassal whose power reaches this share of its suzerain's is
     /// independent in fact and not summoned. `0` removes the limit.
     pub independent_power_ratio: f64,
+    /// ECO-R2a (ADR 0798): a vassal that answers raises a contingent whose seasonal
+    /// upkeep is at most this share (per cent) of its own seasonal income. `0`: the
+    /// answer only declares the war (pre-R2a behaviour).
+    #[serde(default)]
+    pub contingent_percent_of_income: u32,
+    /// Fewest regiments of a contingent (when its unit mix is affordable at all).
+    #[serde(default)]
+    pub min_units: u32,
+    /// Most regiments of a contingent.
+    #[serde(default)]
+    pub max_units: u32,
+    /// Regiments of a contingent, by share of its upkeep budget.
+    #[serde(default)]
+    pub unit_mix: Vec<HostUnitShare>,
+    /// Seasons the vassal serves at its own expense (counting the season of the summons).
+    #[serde(default)]
+    pub free_seasons: u32,
+    /// Seasons the contingent may stay on afterwards at the suzerain's pay (`0`: it goes home).
+    #[serde(default)]
+    pub paid_seasons: u32,
+    /// Share (per cent) of the contingent's upkeep that the suzerain pays to the vassal while
+    /// the contingent stays on at its pay.
+    #[serde(default)]
+    pub wage_percent: u32,
+    /// Seasons between two summons of the host by the same suzerain (`Order::SummonHost`).
+    #[serde(default)]
+    pub resummon_delay_seasons: u32,
+}
+
+/// One line of the contingent's unit mix.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct HostUnitShare {
+    pub unit_type: UnitTypeId,
+    /// Share (per cent) of the upkeep budget spent on this unit type.
+    pub share_percent: u32,
 }
 
 crate::bundled_rules!(HostRules, "rules/feudal.json", at "/host", default);

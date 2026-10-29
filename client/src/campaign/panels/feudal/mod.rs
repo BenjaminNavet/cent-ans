@@ -287,6 +287,14 @@ fn press_button(name: &str, ui: &mut FeudalUi, sim: &mut Sim) {
             let result = run(sim, |d, s| feudal::switch_allegiance(d, s, &lord));
             report(ui, result, "Hommage prêté.");
         }
+        "summon" => {
+            let result = run(sim, feudal::summon_host);
+            report(
+                ui,
+                result,
+                "L’ost est convoqué : les vassaux qui répondent lèvent leurs hommes.",
+            );
+        }
         "commise" => {
             let Some(target) = ui.selected.clone() else {
                 return;

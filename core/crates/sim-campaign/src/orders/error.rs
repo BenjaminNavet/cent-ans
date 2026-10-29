@@ -66,6 +66,8 @@ pub enum OrderError {
     NoUnitsSelected,
     #[error("une armée doit garder au moins une unité")]
     WouldEmptyArmy,
+    #[error("ce contingent féodal est levé pour la durée de son service : on ne le fond pas, ne le scinde pas et ne le verse pas à la garnison")]
+    HostContingent,
     #[error("les deux armées doivent être au même endroit")]
     NotSameProvince,
     #[error("les deux armées doivent appartenir à la même faction")]

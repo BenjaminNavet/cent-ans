@@ -1,5 +1,6 @@
 //! Tests d'intégration de sim-campaign : feudal (un seul binaire, données chargées une fois).
 
+mod eco_r2a;
 mod f4_succession;
 mod f9_history;
 mod feudal_deductions;

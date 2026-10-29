@@ -160,12 +160,20 @@ fn run_seed(data: &GameData, seed: u64, options: &Options, out: &mut impl FnMut(
                 .filter(|a| a.faction == id)
                 .map(|a| a.units.len())
                 .sum();
-            let men: u64 = state
+            // ECO-R2a: the men under arms count the contingents of the vassals' host.
+            let host_men: u64 = state
+                .armies
+                .values()
+                .filter(|a| a.faction != id && a.host_service.as_ref().is_some_and(|s| s.liege == id))
+                .map(|a| u64::from(a.total_strength()))
+                .sum();
+            let own_men: u64 = state
                 .armies
                 .values()
                 .filter(|a| a.faction == id)
                 .map(|a| u64::from(a.total_strength()))
                 .sum();
+            let men = own_men + host_men;
             fac.insert(w.to_string(), json!({
                 "alive": f.alive, "tr": f.treasury, "inc": b.income, "up": b.upkeep(), "army": b.army_upkeep,
                 "bld": b.building_upkeep, "adm": b.administration, "hh": b.household, "wag": b.wages, "sie": b.siege,
@@ -174,7 +182,7 @@ fn run_seed(data: &GameData, seed: u64, options: &Options, out: &mut impl FnMut(
                 "debt": f.finance.debt(), "defaults": f.finance.defaults, "levies": f.finance.levies_raised,
                 "rating": f.finance.rating, "coin": format!("{:?}", f.coinage), "price": f.price_level,
                 "prov": provs.len(), "pop": pop, "unrest": if pop > 0 { unrest_w / pop as f64 } else { 0.0 },
-                "units": units, "men": men,
+                "units": units, "men": men, "host_men": host_men,
                 "wars": f.at_war_with.iter().map(|x| x.as_str().to_string()).collect::<Vec<_>>(),
                 "allies": f.allies.len(), "suz": f.suzerain.as_ref().map(|s| s.as_str().to_string()), "loy": f.loyalty,
                 "vassals": state.factions.iter().filter(|(_, o)| o.alive && o.suzerain.as_ref() == Some(&id)).count(),

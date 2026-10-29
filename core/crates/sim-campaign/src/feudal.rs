@@ -18,6 +18,7 @@ use crate::negotiation::{Article, Treaty};
 use crate::state::CampaignState;
 
 mod acts;
+mod host;
 mod felony;
 mod inherit;
 mod objectives;
@@ -84,6 +85,9 @@ pub struct FeudalState {
     /// Remembered events weighing on vassal loyalty (§ 4.2), fed by F2/F3.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub loyalty_events: Vec<LoyaltyEvent>,
+    /// ECO-R2a: turn at which each suzerain last summoned its host (delay of `Order::SummonHost`).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub host_summoned: BTreeMap<FactionId, u32>,
     /// `FactionState::suzerain` is derived from the titles. `false` in the
     /// version 7 saves written before F1: [`sync_suzerains`] then adopts
     /// their stored suzerains as liege overrides once.
@@ -120,6 +124,7 @@ impl FeudalState {
             objectives_met: BTreeMap::new(),
             liege_overrides: BTreeMap::new(),
             loyalty_events: Vec::new(),
+            host_summoned: BTreeMap::new(),
             derived: true,
         }
     }
@@ -194,6 +199,12 @@ pub enum FeudalError {
     War(String),
     #[error("on ne concède pas son titre principal {0}")]
     PrimaryTitle(TitleId),
+    #[error("l'ost ne se convoque que contre un ennemi en guerre : {0}")]
+    HostNoWar(FactionId),
+    #[error("l'ost a été convoqué il y a peu : encore {0} saison(s) à attendre")]
+    HostTooSoon(u32),
+    #[error("aucun vassal direct à convoquer")]
+    HostNoVassal,
 }
 
 key_enum! {
@@ -921,41 +932,34 @@ pub(crate) fn shirk(
 
 /// `liege` summons the host of its direct vassals against `enemy` (never
 /// its rear vassals). Whether a vassal answers is [`answers_host`]; a
-/// refusal opens a felony case (§ 4.4).
+/// refusal opens a felony case (§ 4.4). ECO-R2a (ADR 0798): a vassal that
+/// answers also raises a contingent ([`HostService`]).
 pub fn summon_host(
     state: &mut CampaignState,
     data: &GameData,
     liege: &FactionId,
     enemy: &FactionId,
 ) {
-    use crate::events::{EventKind, GameEvent};
-    for vassal in direct_vassals(state, data, liege) {
-        if &vassal == enemy || state.is_at_war(&vassal, enemy) || state.is_allied(&vassal, enemy) {
-            continue;
-        }
-        if !can_serve(state, data, &vassal, liege, enemy) {
-            continue; // out of reach or independent in fact: not summoned (ADR 0114)
-        }
-        if answers_host(state, data, &vassal, liege, enemy) {
-            state.start_war(&vassal, enemy);
-            let text = format!(
-                "{} répond à l'ost de son suzerain {} contre {}.",
-                data.faction_name(&vassal),
-                data.faction_name(liege),
-                data.faction_name(enemy)
-            );
-            state.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(&vassal));
-        } else {
-            let text = format!(
-                "{} refuse l'ost de son suzerain {}.",
-                data.faction_name(&vassal),
-                data.faction_name(liege)
-            );
-            state.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(&vassal));
-            felony::on_host_refused(state, data, &vassal, liege);
-        }
-    }
+    host::summon(state, data, liege, enemy, false);
+    let turn = state.turn;
+    state.feudal.host_summoned.insert(liege.clone(), turn);
 }
+
+/// ECO-R2a: `Order::SummonHost`. `liege`, at war with `enemy`, calls its direct
+/// vassals again (those without a contingent in the field raise one), at
+/// most once every `host.resummon_delay_seasons` seasons.
+pub fn order_summon_host(
+    state: &mut CampaignState,
+    data: &GameData,
+    liege: &FactionId,
+    enemy: &FactionId,
+) -> Result<(), FeudalError> {
+    host::order_summon(state, data, liege, enemy)
+}
+
+pub use host::HostService;
+pub use host::{contingent_units, resolve_host_service};
+
 
 /// Can `vassal` be summoned to the host of `liege` against `enemy` (ADR 0114, `feudal_rules.host`)? Not when it is independent in fact (its
 /// power reaches `independent_power_ratio` of its suzerain's), nor when none

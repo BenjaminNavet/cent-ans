@@ -64,6 +64,11 @@ pub struct DutiesView {
     pub own_felonies: Vec<FelonyRow>,
     pub grantable_titles: Vec<TitleRef>,
     pub homage_candidates: Vec<FactionRef>,
+    /// ECO-R2a: the enemy the host would be summoned against (the first foe at war with
+    /// the faction), if the faction has direct vassals and is at war.
+    pub host_enemy: Option<FactionRef>,
+    /// ECO-R2a: seasons before the host can be summoned again (0: now).
+    pub host_wait: u32,
 }
 
 /// `{id, name, rank}` reference to a title.
@@ -309,7 +314,37 @@ pub fn duties(data: &GameData, state: &CampaignState, faction: &FactionId) -> Du
             .map(|t| title_ref(data, t))
             .collect(),
         homage_candidates: faction_refs(data, &feudal::homage_candidates(state, data, faction)),
+        host_enemy: host_enemy(state, data, faction).map(|e| faction_ref(data, &e)),
+        host_wait: state
+            .feudal
+            .host_summoned
+            .get(faction)
+            .map_or(0, |last| {
+                (last + data.feudal_rules.host.resummon_delay_seasons).saturating_sub(state.turn)
+            }),
     }
+}
+
+/// ECO-R2a: the foe at war with `faction` against which its host would be summoned (not the
+/// rebels), when the faction has direct vassals.
+fn host_enemy(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<FactionId> {
+    if feudal::direct_vassals(state, data, faction).is_empty() {
+        return None;
+    }
+    state
+        .factions
+        .get(faction)?
+        .at_war_with
+        .iter()
+        .find(|e| !e.is_rebels() && state.factions.get(*e).is_some_and(|f| f.alive))
+        .cloned()
+}
+
+/// ECO-R2a: the player summons the host of its direct vassals against its first foe at war.
+pub fn summon_host(data: &GameData, state: &mut CampaignState) -> OrderResult {
+    let order = host_enemy(state, data, state.player_faction())
+        .map(|enemy| Order::SummonHost { enemy });
+    send(data, state, order)
 }
 
 fn node_view(state: &CampaignState, data: &GameData, node: &FeudalNode) -> TreeNodeView {

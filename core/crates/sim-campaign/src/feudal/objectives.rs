@@ -184,6 +184,7 @@ pub(crate) fn resolve_feudal(
 ) {
     super::felony::expire_felonies(state);
     super::felony::detect_enemy_alliances(state, data);
+    super::host::resolve_host_service(state, data, events);
     let starters: Vec<(FactionId, TitleId)> = state
         .feudal
         .start_crowns

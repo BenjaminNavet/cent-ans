@@ -321,6 +321,11 @@ pub enum Order {
         offer: u32,
         verdict: crate::feudal::Arbitration,
     },
+    /// ECO-R2a (ADR 0798): the liege, at war with `enemy`, summons the host of its
+    /// direct vassals again (those without a contingent in the field raise one).
+    SummonHost {
+        enemy: FactionId,
+    },
     /// FE5 (§ 4.4): the liege declares forfeiture against `vassal`, which
     /// must be under an open felony case.
     DeclareCommise {
