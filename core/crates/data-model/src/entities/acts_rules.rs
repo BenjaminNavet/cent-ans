@@ -1,14 +1,14 @@
 //! The campaign arc in three acts, mirroring `data/schemas/acts_rules.schema.json`
 //! (`data/rules/acts.json`, ADR 0784): the acts and their dates, the objectives of a
-//! house per act, the pressures that change from act to act, the policies the player
-//! chooses at each transition, and the weights of the reign score.
-//! The whole file is optional: without it the campaign has no acts.
+//! house per act, the pressures that change from act to act, the ambitions the player
+//! chooses at each transition (R1-2), the renown of the house (R1-1) and the weights of the
+//! reign score. The whole file is optional: without it the campaign has no acts.
 
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{FactionId, ProvinceId, TitleId};
+use crate::{Effect, FactionId, ProvinceId, TitleId};
 
 /// A condition of an act objective or pressure, evaluated on the state of the player's realm.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -79,8 +79,8 @@ pub struct ActAudience {
     pub governments: Vec<String>,
 }
 
-/// A pressure of the act: a standing condition that adds or removes score points when it holds
-/// at the end of the act.
+/// A pressure of the act: a standing condition that adds renown while it holds during the act
+/// (R1-1: added when it starts to hold, removed when it ends).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ActPressure {
@@ -91,34 +91,67 @@ pub struct ActPressure {
     #[serde(default)]
     pub audience: ActAudience,
     pub condition: ActCondition,
-    /// Score points (act score, 0-100) added when the condition holds (negative: a penalty).
+    /// Renown while the condition holds (negative: a penalty), scaled by the `pressure` source.
     pub points: i32,
 }
 
-/// A policy of the household chosen at the start of an act: it counts one category of
-/// objectives `factor_percent` percent as much.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+/// R1-2: an ambition of the household, chosen at the opening of an act (`ambitions_to_choose`).
+/// It changes the simulation through the shared effect vocabulary (merged into the realm's
+/// effects like a technology) and earns more renown from the facts and objectives it names.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct ActPolicy {
+pub struct ActAmbition {
     pub id: String,
     pub name: String,
     pub description: String,
-    pub category: String,
-    pub factor_percent: u32,
+    /// Effects on the realm while the ambition is held (never empty: a pure weighting is refused).
+    pub effects: Vec<Effect>,
+    /// Extra renown, in percent, from the sources and objective categories below.
+    pub renown_bonus_percent: u32,
+    /// Renown sources the bonus applies to (`battle_won`, `place_taken`...).
+    #[serde(default)]
+    pub renown_sources: Vec<String>,
+    /// Objective categories the bonus applies to (`domain`, `treasury`...).
+    #[serde(default)]
+    pub objective_categories: Vec<String>,
 }
 
-/// Early ends of an act (besides its closing year); `0` disables a test.
+/// R1-1: one source of renown: points per fact and the most a season can bring (absolute value;
+/// 0: no cap). For `objective_met`, `objective_lost` and `pressure`, `points` is a percent of the
+/// objective weight or of the pressure points.
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RenownSource {
+    pub points: i32,
+    #[serde(default)]
+    pub season_cap: u32,
+}
+
+/// R1-1: the renown of the house, accumulated season by season from facts.
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
-pub struct ActEarlyEnd {
-    /// Seasons at peace (no war) that close the act.
-    pub peace_seasons: u32,
-    /// An act never ends by peace before it ran this many seasons.
-    pub min_seasons: u32,
-    /// Collapse: fewer than this percent of the provinces held at the start of the act.
-    pub collapse_domain_percent: u32,
-    /// Collapse: this many royal defaults in the act.
-    pub collapse_defaults: u32,
+pub struct RenownRules {
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub description: String,
+    /// Sources by name (`battle_won`, `battle_lost`, `place_taken`, `place_lost`, `raid_season`,
+    /// `ransom_received`, `ransom_paid`, `truce_imposed`, `objective_met`, `objective_lost`,
+    /// `pressure`).
+    pub sources: BTreeMap<String, RenownSource>,
+    /// Wear of the renown of facts of the act in progress, per mille per season.
+    pub decay_permille_per_season: u32,
+    /// Facts kept in the journal (the oldest leave).
+    pub journal_len: u32,
+    /// A treaty ending a war is a truce imposed when the house's war score is at least this.
+    pub truce_min_war_score: i32,
+    /// French label of each source (journal lines).
+    pub labels: BTreeMap<String, String>,
+}
+
+impl RenownRules {
+    /// The rule of a source (`None`: the source earns nothing).
+    pub fn source(&self, name: &str) -> Option<&RenownSource> {
+        self.sources.get(name)
+    }
 }
 
 /// One act.
@@ -129,17 +162,16 @@ pub struct ActRules {
     pub name: String,
     pub subtitle: String,
     pub start_year: i32,
-    /// Last year of the act: it closes when the year is past it.
+    /// Last year of the act: it closes when the year is past it, and only then (R1-1).
     pub end_year: i32,
     /// Weight of the act in the reign score.
     pub weight: u32,
     /// Opening text (transition screen).
     pub intro: String,
-    /// Closing text per way the act ended: `year`, `peace`, `collapse`.
+    /// Closing text per way the act ended (R1-1: `year` only).
     pub closing: BTreeMap<String, String>,
-    #[serde(default)]
-    pub early_end: ActEarlyEnd,
-    pub policies: Vec<ActPolicy>,
+    /// R1-1: renown earned in the act that makes an act score of 100.
+    pub renown_target: u32,
     #[serde(default)]
     pub pressures: Vec<ActPressure>,
 }
@@ -166,7 +198,7 @@ pub struct RuinRules {
 }
 
 /// Contents of `data/rules/acts.json`.
-#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct ActsRules {
     #[serde(skip_serializing_if = "String::is_empty")]
@@ -177,16 +209,40 @@ pub struct ActsRules {
     /// Objectives per house: key `fac_...` (one faction), `gov_...` (a government) or
     /// `default`; then per act id.
     pub objective_sets: BTreeMap<String, BTreeMap<String, Vec<ActObjective>>>,
+    /// R1-2: ambitions per house (same keys as `objective_sets`), then per act id.
+    pub ambition_sets: BTreeMap<String, BTreeMap<String, Vec<ActAmbition>>>,
+    /// R1-2: ambitions the player holds per act.
+    pub ambitions_to_choose: u32,
+    /// R1-2: seasons after the opening of an act during which chosen ambitions may still change.
+    pub ambition_choice_seasons: u32,
+    /// R1-1: renown sources, caps and wear.
+    pub renown: RenownRules,
     /// Reign grades, any order (the highest threshold reached wins).
     pub grades: Vec<ReignGrade>,
-    /// Reign score (0-100) from which the campaign is won.
+    /// Reign score (0-100) from which the campaign is won (in 1453 only).
     pub victory_min_score: u32,
-    /// GAMEPLAY2 (ADR 0788): share (0-100) of an act's score that depends on keeping the
-    /// objectives already met when the act began. 0: every objective earns points (first version).
-    pub hold_guard_percent: u32,
     pub ruin: RuinRules,
     /// Interface texts.
     pub texts: BTreeMap<String, String>,
+}
+
+fn lookup<'a, T>(
+    sets: &'a BTreeMap<String, BTreeMap<String, Vec<T>>>,
+    faction: &FactionId,
+    government: &str,
+    act: &str,
+) -> &'a [T] {
+    let keys = [
+        faction.to_string(),
+        format!("gov_{government}"),
+        "default".to_owned(),
+    ];
+    for key in keys {
+        if let Some(list) = sets.get(&key).and_then(|set| set.get(act)) {
+            return list;
+        }
+    }
+    &[]
 }
 
 impl ActsRules {
@@ -197,17 +253,13 @@ impl ActsRules {
 
     /// Objectives of `act` for a house: its faction set, else its government's, else the default.
     pub fn objectives(&self, faction: &FactionId, government: &str, act: &str) -> &[ActObjective] {
-        let keys = [
-            faction.to_string(),
-            format!("gov_{government}"),
-            "default".to_owned(),
-        ];
-        for key in keys {
-            if let Some(list) = self.objective_sets.get(&key).and_then(|set| set.get(act)) {
-                return list;
-            }
-        }
-        &[]
+        lookup(&self.objective_sets, faction, government, act)
+    }
+
+    /// R1-2: ambitions of `act` for a house: its faction set, else its government's, else the
+    /// default.
+    pub fn ambitions(&self, faction: &FactionId, government: &str, act: &str) -> &[ActAmbition] {
+        lookup(&self.ambition_sets, faction, government, act)
     }
 
     /// Grade reached by a reign score.

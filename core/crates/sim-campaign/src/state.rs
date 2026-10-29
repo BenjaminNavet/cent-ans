@@ -48,7 +48,7 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// Urals–Mediterranean map (ADR 0115: map pixels moved +1280 in y, same layout). `10`: journal of
 /// causes (ADR 0748, `causes`). `11`: the arc in acts (ADR 0784, `acts`).
 /// [`CampaignState::load_json`] refuses any other version.
-pub const STATE_VERSION: u32 = 11;
+pub const STATE_VERSION: u32 = 12;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

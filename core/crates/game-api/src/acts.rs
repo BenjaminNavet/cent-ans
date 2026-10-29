@@ -1,5 +1,6 @@
-//! The arc in three acts (ADR 0784, 0785): the act in progress, the transition screen with the
-//! bilan of the act that has just closed, and the policy choice of the household. Pure views over
+//! The arc in three acts (ADR 0784, refit R1): the act in progress, the renown of the house, the
+//! transition screen with the bilan of the act that has just closed, and the ambitions of the
+//! household (the `policies` rows keep their name for the client). Pure views over
 //! `sim_campaign::acts`; the texts come from `data/rules/acts.json`.
 
 use data_model::GameData;
@@ -32,13 +33,15 @@ pub struct ActPressureRow {
     pub points: i32,
 }
 
-/// A policy the player may choose.
+/// An ambition the player may choose (R1-2; the row keeps its old name for the client).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ActPolicyRow {
     pub id: String,
     pub name: String,
     pub description: String,
     pub chosen: bool,
+    /// Extra renown, in percent, from the facts and objectives the ambition names.
+    pub renown_bonus_percent: u32,
 }
 
 /// The act in progress.
@@ -53,12 +56,18 @@ pub struct ActView {
     pub end_year: i32,
     /// Score of the act as it stands (0-100).
     pub score: u32,
-    /// Reign score as it stands (acts over + this one).
+    /// Reign score as it stands (every act, R1-1: it moves until 1453).
     pub reign_score: u32,
+    /// R1-1: renown earned in this act.
+    pub renown: i32,
+    /// R1-1: renown of the house, every act together.
+    pub house_renown: i32,
+    /// R1-1: the last three facts of renown, newest first, one line each.
+    pub renown_recent: Vec<String>,
     pub objectives: Vec<ActObjectiveRow>,
     pub pressures: Vec<ActPressureRow>,
     pub policies: Vec<ActPolicyRow>,
-    /// A policy is still to be chosen.
+    /// An ambition is still to be chosen.
     pub policy_pending: bool,
 }
 
@@ -72,16 +81,43 @@ fn fill(template: &str, pairs: &[(&str, &str)]) -> String {
     })
 }
 
-fn policy_rows(data: &GameData, act: usize, chosen: Option<&str>) -> Vec<ActPolicyRow> {
-    data.acts_rules.acts[act]
-        .policies
+/// The ambitions of the act in progress, the held ones marked.
+fn policy_rows(data: &GameData, state: &CampaignState) -> Vec<ActPolicyRow> {
+    state
+        .act_ambitions(data)
         .iter()
-        .map(|p| ActPolicyRow {
-            id: p.id.clone(),
-            name: p.name.clone(),
-            description: p.description.clone(),
-            chosen: chosen == Some(p.id.as_str()),
+        .map(|a| ActPolicyRow {
+            id: a.id.clone(),
+            name: a.name.clone(),
+            description: a.description.clone(),
+            chosen: state.acts.ambitions.contains(&a.id),
+            renown_bonus_percent: a.renown_bonus_percent,
         })
+        .collect()
+}
+
+/// R1-1: one fact of renown as a line (« Bataille gagnée +3 (Angleterre) »).
+pub fn renown_line(data: &GameData, fact: &sim_campaign::acts::RenownFact) -> String {
+    let label = data
+        .acts_rules
+        .renown
+        .labels
+        .get(&fact.source)
+        .cloned()
+        .unwrap_or_else(|| fact.source.clone());
+    if fact.cause.is_empty() {
+        format!("{label} {:+}", fact.points)
+    } else {
+        format!("{label} {:+} ({})", fact.points, fact.cause)
+    }
+}
+
+/// R1-1: the last `count` facts of renown, newest first.
+pub fn renown_recent(data: &GameData, state: &CampaignState, count: usize) -> Vec<String> {
+    state
+        .renown_recent(count)
+        .into_iter()
+        .map(|fact| renown_line(data, fact))
         .collect()
 }
 
@@ -120,7 +156,6 @@ pub fn act_view(data: &GameData, state: &CampaignState) -> Option<ActView> {
             points: p.pressure.points,
         })
         .collect();
-    let chosen = state.acts.policy.as_deref();
     Some(ActView {
         number: status.index + 1,
         total: rules.acts.len(),
@@ -129,17 +164,25 @@ pub fn act_view(data: &GameData, state: &CampaignState) -> Option<ActView> {
         intro: act.intro.clone(),
         end_year: act.end_year,
         score: status.score,
-        reign_score: state.reign_score(data, true),
+        reign_score: state.reign_score(data),
+        renown: status.renown,
+        house_renown: state.house_renown(data),
+        renown_recent: renown_recent(data, state, 3),
         objectives,
         pressures,
-        policies: policy_rows(data, status.index, chosen),
-        policy_pending: !state.acts.finished && chosen.is_none(),
+        policies: if state.acts.finished {
+            Vec::new()
+        } else {
+            policy_rows(data, state)
+        },
+        policy_pending: state.ambitions_pending(data) > 0,
     })
 }
 
-/// Chooses the policy of the act in progress; `false` for an unknown policy or no act.
+/// Takes an ambition for the act in progress (R1-2: two among four; beyond, it replaces the
+/// oldest while the choice is open); `false` for an unknown ambition, no act, or a closed choice.
 pub fn choose_policy(data: &GameData, state: &mut CampaignState, policy: &str) -> bool {
-    state.choose_act_policy(data, policy).is_ok()
+    state.choose_act_ambition(data, policy).is_ok()
 }
 
 /// The transition screen: the bilan of the act that has just closed, and the act that begins.
@@ -148,7 +191,7 @@ pub struct TransitionView {
     pub title: String,
     /// Name of the act that closed.
     pub act_name: String,
-    /// How it closed: `year`, `peace` or `collapse`.
+    /// How it closed: `year` (R1-1; older saves may hold `peace` or `collapse`).
     pub ended_by: String,
     pub closing: String,
     pub ended_line: String,
@@ -156,6 +199,11 @@ pub struct TransitionView {
     pub score_line: String,
     pub grade_line: String,
     pub reign_score: u32,
+    /// R1-1: renown earned in the act that closed, and of the house.
+    pub renown: i32,
+    pub house_renown: i32,
+    /// R1-1: the last three facts of renown, newest first.
+    pub renown_recent: Vec<String>,
     /// Objectives of the act: `(title, met)`.
     pub objectives: Vec<(String, bool)>,
     /// Pressures that held at the closing, with their points.
@@ -219,7 +267,7 @@ pub fn transition_view(data: &GameData, state: &CampaignState) -> Option<Transit
             )
         })
         .collect::<Vec<_>>();
-    let reign_score = state.reign_score(data, false);
+    let reign_score = state.reign_score(data);
     let next = rules.acts.get(index + 1);
     let grade = rules.grade(reign_score);
     let number = (index + 1).to_string();
@@ -234,7 +282,13 @@ pub fn transition_view(data: &GameData, state: &CampaignState) -> Option<Transit
             .unwrap_or_default(),
         ended_line: text(data, &format!("ended_by_{}", report.ended_by)),
         score: report.score,
-        score_line: format!("{} : {} / 100", act.name, report.score),
+        score_line: format!(
+            "{} : {} / 100 — {} {}",
+            act.name,
+            report.score,
+            text(data, "renown"),
+            report.renown
+        ),
         grade_line: grade.map_or_else(String::new, |g| {
             format!(
                 "{} : {} — {}",
@@ -244,6 +298,9 @@ pub fn transition_view(data: &GameData, state: &CampaignState) -> Option<Transit
             )
         }),
         reign_score,
+        renown: report.renown,
+        house_renown: state.house_renown(data),
+        renown_recent: renown_recent(data, state, 3),
         objectives,
         pressures,
         causes_title: if causes.is_empty() {
@@ -261,7 +318,7 @@ pub fn transition_view(data: &GameData, state: &CampaignState) -> Option<Transit
             String::new()
         },
         policies: if next.is_some() {
-            policy_rows(data, index + 1, state.acts.policy.as_deref())
+            policy_rows(data, state)
         } else {
             Vec::new()
         },

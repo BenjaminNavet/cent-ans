@@ -2,172 +2,523 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/acts_rules.schema.json",
   "title": "Règles de l'arc de partie en actes",
-  "description": "Fichier data/rules/acts.json (lot ACTES, ADR 0784, 0785) : trois actes, objectifs de la maison par acte, pressions, politiques de la maisnie, score de règne, ruine. Lu par sim-campaign::acts (ActsRules).",
+  "description": "Fichier data/rules/acts.json (ADR 0784, refonte R1) : trois actes à dates fixes, objectifs de la maison par acte, pressions, ambitions de la maisnie (effets sur la simulation), renommée accumulée, score de règne, ruine. Lu par sim-campaign::acts (ActsRules).",
   "type": "object",
   "properties": {
-    "description": { "type": "string" },
+    "description": {
+      "type": "string"
+    },
     "acts": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/act" }
+      "items": {
+        "$ref": "#/$defs/act"
+      }
     },
     "categories": {
       "type": "object",
       "description": "Nom affiché de chaque catégorie d'objectif.",
-      "additionalProperties": { "type": "string" }
+      "additionalProperties": {
+        "type": "string"
+      }
     },
     "objective_sets": {
       "type": "object",
       "description": "Objectifs par maison : clé fac_* (une faction), gov_* (un gouvernement) ou default ; puis par identifiant d'acte.",
-      "propertyNames": { "pattern": "^(fac_[a-z0-9_]+|gov_[a-z]+|default)$" },
+      "propertyNames": {
+        "pattern": "^(fac_[a-z0-9_]+|gov_[a-z]+|default)$"
+      },
       "additionalProperties": {
         "type": "object",
-        "propertyNames": { "pattern": "^act_[0-9]+$" },
+        "propertyNames": {
+          "pattern": "^act_[0-9]+$"
+        },
         "additionalProperties": {
           "type": "array",
-          "items": { "$ref": "#/$defs/objective" }
+          "items": {
+            "$ref": "#/$defs/objective"
+          }
         }
       }
+    },
+    "ambitions_to_choose": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4,
+      "description": "R1-2 : nombre d'ambitions que la maison tient pendant un acte."
+    },
+    "ambition_choice_seasons": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "R1-2 : saisons après l'ouverture d'un acte pendant lesquelles les ambitions choisies peuvent encore changer."
+    },
+    "ambition_sets": {
+      "type": "object",
+      "description": "R1-2 : ambitions par maison (clé fac_*, gov_* ou default), puis par identifiant d'acte.",
+      "propertyNames": {
+        "pattern": "^(fac_[a-z0-9_]+|gov_[a-z]+|default)$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": {
+          "pattern": "^act_[0-9]+$"
+        },
+        "additionalProperties": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/ambition"
+          }
+        }
+      }
+    },
+    "renown": {
+      "$ref": "#/$defs/renown"
     },
     "grades": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "min_score": { "type": "integer", "minimum": 0, "maximum": 100 },
-          "title": { "type": "string" },
-          "text": { "type": "string" }
+          "min_score": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "title": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
         },
-        "required": ["min_score", "title", "text"],
+        "required": [
+          "min_score",
+          "title",
+          "text"
+        ],
         "additionalProperties": false
       }
     },
-    "hold_guard_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "ADR 0788 : part (0-100) du score d'un acte qui dépend de la conservation des objectifs déjà remplis à l'ouverture de l'acte (acquis). Ces acquis ne rapportent aucun point ; seuls les autres objectifs font le score. 0 : tous les objectifs rapportent des points." },
-    "victory_min_score": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Score de règne (0-100) à partir duquel la campagne est gagnée." },
+    "victory_min_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Score de règne (0-100) à partir duquel la campagne est gagnée, jugé en 1453 seulement."
+    },
     "ruin": {
       "type": "object",
       "properties": {
-        "defaults": { "type": "integer", "minimum": 0, "description": "Banqueroute irréversible : ce nombre de banqueroutes royales, trésor encore négatif (0 : désactivé)." },
-        "capital_lost_seasons": { "type": "integer", "minimum": 0, "description": "Capitale perdue sans héritier depuis ce nombre de saisons (0 : désactivé)." },
-        "dynastic_governments": { "type": "array", "items": { "type": "string", "enum": ["kingdom", "duchy", "county", "principality", "republic", "theocracy", "empire", "lordship"] } }
+        "defaults": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Banqueroute irréversible : ce nombre de banqueroutes royales, trésor encore négatif (0 : désactivé)."
+        },
+        "capital_lost_seasons": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Capitale perdue sans héritier depuis ce nombre de saisons (0 : désactivé)."
+        },
+        "dynastic_governments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "kingdom",
+              "duchy",
+              "county",
+              "principality",
+              "republic",
+              "theocracy",
+              "empire",
+              "lordship"
+            ]
+          }
+        }
       },
       "additionalProperties": false
     },
     "texts": {
       "type": "object",
       "description": "Textes d'interface (défaites, victoire, écran de transition).",
-      "additionalProperties": { "type": "string" }
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   },
-  "required": ["acts", "objective_sets", "victory_min_score"],
+  "required": [
+    "acts",
+    "objective_sets",
+    "victory_min_score",
+    "renown",
+    "ambition_sets",
+    "ambitions_to_choose"
+  ],
   "additionalProperties": false,
   "$defs": {
-    "province_list": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/province_id" } },
+    "province_list": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/province_id"
+      }
+    },
     "condition": {
       "type": "object",
       "properties": {
         "kind": {
           "type": "string",
-          "enum": ["control_all", "control_count", "no_foreign_control", "foreign_control_at_least", "province_count", "domain_percent", "prestige", "treasury", "debt_below", "allies_at_least", "dynasty_secure", "hold_title", "independent", "subjugate", "at_war"]
+          "enum": [
+            "control_all",
+            "control_count",
+            "no_foreign_control",
+            "foreign_control_at_least",
+            "province_count",
+            "domain_percent",
+            "prestige",
+            "treasury",
+            "debt_below",
+            "allies_at_least",
+            "dynasty_secure",
+            "hold_title",
+            "independent",
+            "subjugate",
+            "at_war"
+          ]
         },
-        "provinces": { "$ref": "#/$defs/province_list" },
-        "faction": { "$ref": "common.schema.json#/$defs/faction_id" },
-        "count": { "type": "integer", "minimum": 1 },
-        "percent": { "type": "integer", "minimum": 1 },
-        "min": { "type": "integer", "minimum": 0 },
-        "max": { "type": "integer", "minimum": 0 },
-        "title": { "$ref": "common.schema.json#/$defs/title_id" }
+        "provinces": {
+          "$ref": "#/$defs/province_list"
+        },
+        "faction": {
+          "$ref": "common.schema.json#/$defs/faction_id"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "percent": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "min": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "title": {
+          "$ref": "common.schema.json#/$defs/title_id"
+        }
       },
-      "required": ["kind"],
+      "required": [
+        "kind"
+      ],
       "additionalProperties": false
     },
     "objective": {
       "type": "object",
       "properties": {
-        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "category": { "type": "string", "enum": ["domain", "treasury", "dynasty", "prestige", "alliance"] },
-        "weight": { "type": "integer", "minimum": 1 },
-        "condition": { "$ref": "#/$defs/condition" }
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "domain",
+            "treasury",
+            "dynasty",
+            "prestige",
+            "alliance"
+          ]
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "condition": {
+          "$ref": "#/$defs/condition"
+        }
       },
-      "required": ["id", "title", "description", "category", "weight", "condition"],
+      "required": [
+        "id",
+        "title",
+        "description",
+        "category",
+        "weight",
+        "condition"
+      ],
       "additionalProperties": false
     },
     "act": {
       "type": "object",
       "properties": {
-        "id": { "type": "string", "pattern": "^act_[0-9]+$" },
-        "name": { "type": "string" },
-        "subtitle": { "type": "string" },
-        "start_year": { "type": "integer" },
-        "end_year": { "type": "integer" },
-        "weight": { "type": "integer", "minimum": 1, "description": "Poids de l'acte dans le score de règne." },
-        "intro": { "type": "string" },
+        "id": {
+          "type": "string",
+          "pattern": "^act_[0-9]+$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "start_year": {
+          "type": "integer"
+        },
+        "end_year": {
+          "type": "integer"
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Poids de l'acte dans le score de règne."
+        },
+        "intro": {
+          "type": "string"
+        },
         "closing": {
           "type": "object",
-          "description": "Texte de clôture selon la manière dont l'acte s'achève.",
+          "description": "Texte de clôture de l'acte (R1 : un acte ne se clôt qu'avec son année).",
           "properties": {
-            "year": { "type": "string" },
-            "peace": { "type": "string" },
-            "collapse": { "type": "string" }
+            "year": {
+              "type": "string"
+            }
           },
-          "required": ["year", "peace", "collapse"],
+          "required": [
+            "year"
+          ],
           "additionalProperties": false
         },
-        "early_end": {
-          "type": "object",
-          "description": "Fins anticipées de l'acte (0 : test désactivé).",
-          "properties": {
-            "peace_seasons": { "type": "integer", "minimum": 0 },
-            "min_seasons": { "type": "integer", "minimum": 0 },
-            "collapse_domain_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
-            "collapse_defaults": { "type": "integer", "minimum": 0 }
-          },
-          "additionalProperties": false
-        },
-        "policies": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": { "type": "string", "pattern": "^pol_[a-z0-9_]+$" },
-              "name": { "type": "string" },
-              "description": { "type": "string" },
-              "category": { "type": "string", "enum": ["domain", "treasury", "dynasty", "prestige", "alliance"] },
-              "factor_percent": { "type": "integer", "minimum": 100, "maximum": 300 }
-            },
-            "required": ["id", "name", "description", "category", "factor_percent"],
-            "additionalProperties": false
-          }
+        "renown_target": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "R1-1 : renommée gagnée dans l'acte qui vaut un score d'acte de 100."
         },
         "pressures": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "id": { "type": "string", "pattern": "^pr[a-z0-9_]+$" },
-              "title": { "type": "string" },
-              "text": { "type": "string" },
+              "id": {
+                "type": "string",
+                "pattern": "^pr[a-z0-9_]+$"
+              },
+              "title": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
               "audience": {
                 "type": "object",
                 "description": "À qui la pression s'applique (listes vides : tous).",
                 "properties": {
-                  "factions": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/faction_id" } },
-                  "governments": { "type": "array", "items": { "type": "string" } }
+                  "factions": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "common.schema.json#/$defs/faction_id"
+                    }
+                  },
+                  "governments": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
                 },
                 "additionalProperties": false
               },
-              "condition": { "$ref": "#/$defs/condition" },
-              "points": { "type": "integer", "minimum": -50, "maximum": 50, "description": "Points de score d'acte ajoutés quand la condition tient à la clôture." }
+              "condition": {
+                "$ref": "#/$defs/condition"
+              },
+              "points": {
+                "type": "integer",
+                "minimum": -50,
+                "maximum": 50,
+                "description": "R1-1 : renommée ajoutée quand la condition se met à tenir pendant l'acte, retirée quand elle cesse (négatif : une pénalité)."
+              }
             },
-            "required": ["id", "title", "text", "condition", "points"],
+            "required": [
+              "id",
+              "title",
+              "text",
+              "condition",
+              "points"
+            ],
             "additionalProperties": false
           }
         }
       },
-      "required": ["id", "name", "subtitle", "start_year", "end_year", "weight", "intro", "closing", "policies"],
+      "required": [
+        "id",
+        "name",
+        "subtitle",
+        "start_year",
+        "end_year",
+        "weight",
+        "intro",
+        "closing",
+        "renown_target"
+      ],
+      "additionalProperties": false
+    },
+    "ambition": {
+      "type": "object",
+      "description": "R1-2 : une ambition de la maisnie. Elle change la simulation (effets fusionnés dans ceux du royaume, comme une technologie) et rapporte plus de renommée. Une ambition sans effet (simple pondération) est refusée.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(pol|amb|fr[0-9]_amb|en[0-9]_amb|bu[0-9]_amb)_[a-z0-9_]+$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "effects": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "common.schema.json#/$defs/effect"
+          }
+        },
+        "renown_bonus_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "renown_sources": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "battle_won",
+              "battle_lost",
+              "place_taken",
+              "place_lost",
+              "raid_season",
+              "ransom_received",
+              "ransom_paid",
+              "truce_imposed",
+              "objective_met",
+              "objective_lost",
+              "pressure"
+            ]
+          }
+        },
+        "objective_categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "domain",
+              "treasury",
+              "dynasty",
+              "prestige",
+              "alliance"
+            ]
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "effects",
+        "renown_bonus_percent"
+      ],
+      "additionalProperties": false
+    },
+    "renown": {
+      "type": "object",
+      "description": "R1-1 : renommée de la maison, accumulée saison par saison à partir de faits.",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "battle_won",
+              "battle_lost",
+              "place_taken",
+              "place_lost",
+              "raid_season",
+              "ransom_received",
+              "ransom_paid",
+              "truce_imposed",
+              "objective_met",
+              "objective_lost",
+              "pressure"
+            ]
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "points": {
+                "type": "integer",
+                "minimum": -200,
+                "maximum": 200
+              },
+              "season_cap": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "points"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "decay_permille_per_season": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "journal_len": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "truce_min_war_score": {
+          "type": "integer"
+        },
+        "labels": {
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "battle_won",
+              "battle_lost",
+              "place_taken",
+              "place_lost",
+              "raid_season",
+              "ransom_received",
+              "ransom_paid",
+              "truce_imposed",
+              "objective_met",
+              "objective_lost",
+              "pressure"
+            ]
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "sources",
+        "decay_permille_per_season"
+      ],
       "additionalProperties": false
     }
   }

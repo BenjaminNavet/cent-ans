@@ -4,11 +4,12 @@ Branche : `worktree-agent-adc1d3f985235a4e2` (worktree agent). Source : `docs/au
 
 ## État
 - [x] R1-0 sonde officielle : `core/crates/seed-bots/src/timeline.rs` + `examples/campaign_timeline.rs`
-- [ ] Mesures « avant » (sonde, 3 graines × FR/EN/BU, IA + passif France)
-- [ ] R1-1 renommée accumulée + actes à dates fixes (squelette, puis implémentation)
-- [ ] R1-2 ambitions à effets
-- [ ] Sauvegarde v12 + fixture
-- [ ] ADR (remplace 0785, 0788 ; amende 0784, 0793 seuil)
+- [ ] Mesures « avant » (sonde, 3 graines × FR/EN/BU, IA + passif France) — données d'origine extraites dans
+      `out/r1/data_before/data` (le binaire « avant » refuse le nouvel acts.json), en cours
+- [x] R1-1 renommée accumulée + actes à dates fixes (sim-campaign/src/acts.rs, accroches rançon, traité, recherche)
+- [x] R1-2 ambitions à effets (données + schéma ; test seed-bots/tests/ambitions.rs)
+- [x] Sauvegarde v12 + migration (fixture v12 à générer)
+- [~] ADR brouillon docs/decisions/XXXX-r1-renommee-actes-a-dates-fixes-ambitions.md (mesures à compléter)
 - [ ] Mesures « après », seuil de victoire
 
 ## Coordination avec le lot TUTO (prestige de faction)
@@ -17,4 +18,5 @@ La renommée de maison sera `CampaignState::house_renown(data)` (entier, jauge) 
 provisoire ; à terme il sera remplacé par cette renommée (pas de doublon de règle dans `core/`).
 
 ## Prochaine étape
-Mesures « avant » avec la sonde.
+cargo check workspace → tests acts, timeline, ambitions → fixture v12 → sonde « après » (out/r1/run_probe.sh out/r1/after)
+→ calibrage renown_target / points → seuil victoire → ADR + INDEX.

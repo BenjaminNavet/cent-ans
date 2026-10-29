@@ -245,6 +245,7 @@ pub fn release_character(
         }
         if let Some(captor) = &captor {
             crate::missions::note_ransom(state, &owner, captor);
+            crate::acts::note_ransom(state, data, &owner, captor);
         }
         // C7: a Lombard banker may follow the money to the captor's ruler.
         if let Some(captor) = &captor {

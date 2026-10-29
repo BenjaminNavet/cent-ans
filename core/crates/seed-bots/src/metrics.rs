@@ -408,7 +408,7 @@ impl MetricsTracker {
                 .factions
                 .get(&state.player_faction)
                 .map_or(0, |f| f.treasury),
-            reign_score: state.reign_score(data, true),
+            reign_score: state.reign_score(data),
         }
     }
 }

@@ -51,10 +51,23 @@ impl ObjectivesView {
     /// Line under the panel title: summary, deadline and score.
     pub fn header_line(&self) -> String {
         if let Some(act) = &self.act {
-            return format!(
-                "Acte {} sur {} : {} — {} — échéance {}\nScore de l'acte : {} — score de règne : {}",
-                act.number, act.total, act.name, act.subtitle, act.end_year, act.score, act.reign_score
+            let mut line = format!(
+                "Acte {} sur {} : {} — {} — échéance {}\nRenommée : {} (acte : {}) — score de l'acte : {} — score de règne : {}",
+                act.number,
+                act.total,
+                act.name,
+                act.subtitle,
+                act.end_year,
+                act.house_renown,
+                act.renown,
+                act.score,
+                act.reign_score
             );
+            if !act.renown_recent.is_empty() {
+                line.push('\n');
+                line.push_str(&act.renown_recent.join(" · "));
+            }
+            return line;
         }
         let mut line = format!(
             "{} — échéance {} — score actuel : {}",

@@ -50,6 +50,12 @@ pub struct ProbeConfig {
     pub turns: u32,
     /// Ambitions chosen for the player's house at every act opening (R1-2), in order.
     pub ambitions: Vec<String>,
+    /// Start the campaign at this year (the acts before it close at the first season).
+    pub start_year: Option<i32>,
+    /// The other houses play the minimal AI (faster; the R1-2 ambition test).
+    pub minimal_others: bool,
+    /// The AI profile takes the first ambitions offered when none are forced (default).
+    pub auto_ambitions: bool,
 }
 
 impl ProbeConfig {
@@ -60,6 +66,9 @@ impl ProbeConfig {
             profile,
             turns: 470,
             ambitions: Vec::new(),
+            start_year: None,
+            minimal_others: false,
+            auto_ambitions: true,
         }
     }
 }
@@ -99,6 +108,8 @@ pub struct YearRow {
     /// Men in the field of the player's house.
     pub player_men: u32,
     pub player_treasury: i64,
+    pub player_prestige: i32,
+    pub player_provinces: u32,
     /// Events of the year that touch the player's house, plus wars, peaces, plague and schism.
     pub events: BTreeMap<String, u32>,
 }
@@ -197,6 +208,13 @@ pub fn run(data: &GameData, config: &ProbeConfig) -> Timeline {
     let mut state =
         CampaignState::new_1337(data, player.clone(), config.seed).expect("campaign starts");
     state.chronicle.disabled = false;
+    if let Some(year) = config.start_year {
+        state.year = year;
+        // Close the acts before it now, so that the ambitions below are those of its act.
+        state.end_turn_with(data, |_: &CampaignState, _: &GameData, _: &FactionId| {
+            Vec::<Order>::new()
+        });
+    }
     let (fr, en, bu) = (
         faction("fac_france"),
         faction("fac_england"),
@@ -214,10 +232,22 @@ pub fn run(data: &GameData, config: &ProbeConfig) -> Timeline {
     let mut ambitions_act = usize::MAX;
     while state.outcome.is_none() && timeline.turns < config.turns {
         // R1-2: the ambitions of the act, chosen once at its opening.
-        if !config.ambitions.is_empty() && state.acts.current != ambitions_act {
+        // The AI profile without a forced list takes the first ambitions offered.
+        if state.acts.started && !state.acts.finished && state.acts.current != ambitions_act {
             ambitions_act = state.acts.current;
-            for ambition in &config.ambitions {
-                let _ = state.choose_act_policy(data, ambition);
+            let wanted: Vec<String> =
+                if config.ambitions.is_empty() && config.auto_ambitions && config.profile == Profile::Ai {
+                    state
+                        .act_ambitions(data)
+                        .iter()
+                        .take(data.acts_rules.ambitions_to_choose as usize)
+                        .map(|a| a.id.clone())
+                        .collect()
+                } else {
+                    config.ambitions.clone()
+                };
+            for ambition in &wanted {
+                let _ = state.choose_act_ambition(data, ambition);
             }
         }
         let offers = state.factions[&player].offers.clone();
@@ -246,7 +276,11 @@ pub fn run(data: &GameData, config: &ProbeConfig) -> Timeline {
                 }
             }
         }
-        let events = state.end_turn_with(data, ai::plan_turn);
+        let events = if config.minimal_others {
+            state.end_turn(data)
+        } else {
+            state.end_turn_with(data, ai::plan_turn)
+        };
         timeline.turns += 1;
         for event in &events {
             let kind = format!("{:?}", event.kind);
@@ -295,10 +329,12 @@ pub fn run(data: &GameData, config: &ProbeConfig) -> Timeline {
                 player_flips,
                 act,
                 act_score,
-                reign_score: state.reign_score(data, true),
-                renown: 0,
+                reign_score: state.reign_score(data),
+                renown: state.house_renown(data),
                 player_men: player_row.men,
                 player_treasury: player_row.treasury,
+                player_prestige: player_row.prestige,
+                player_provinces: player_row.provinces,
                 events: std::mem::take(&mut year_events),
             });
             flips = 0;
@@ -390,6 +426,20 @@ impl Timeline {
         out.insert(
             "treasury_end",
             self.rows.last().map_or(0.0, |r| r.player_treasury as f64),
+        );
+        // R1-2: figures an ambition may move (the ambition test).
+        out.insert(
+            "prestige_end",
+            f64::from(self.rows.last().map_or(0, |r| r.player_prestige)),
+        );
+        out.insert(
+            "provinces_end",
+            f64::from(self.rows.last().map_or(0, |r| r.player_provinces)),
+        );
+        out.insert(
+            "field_men_mean",
+            self.rows.iter().map(|r| f64::from(r.player_men)).sum::<f64>()
+                / self.rows.len().max(1) as f64,
         );
         out.insert(
             "victory_year",

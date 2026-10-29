@@ -400,7 +400,7 @@ fn resolve_with_acts(
         return;
     }
     // The act in progress counts while the campaign is cut short.
-    let score = i64::from(state.reign_score(data, !state.acts.finished));
+    let score = i64::from(state.reign_score(data));
     let counts = state.act_status(data).map_or((0, 0), |s| {
         (
             s.objectives.iter().filter(|o| o.met).count() as u32,

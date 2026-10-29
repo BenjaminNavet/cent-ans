@@ -125,7 +125,7 @@ fn play(data: &GameData, faction: &str, seed: u64, profile: Profile, turns: u32)
         },
         state.year,
         state.turn,
-        state.reign_score(data, true),
+        state.reign_score(data),
         reports.join(" ")
     );
     if std::env::var("REIGN_DETAIL").is_ok() {

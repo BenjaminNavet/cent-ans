@@ -140,6 +140,8 @@ pub fn faction_tech_effects(
     totals.merge(&crate::royal_acts::active_effects(state, data, faction));
     // RG13a: the councillors' tax, unrest and recruit experience.
     totals.merge(&crate::council::realm_effects(state, data, faction));
+    // R1-2: the ambitions the player's house holds for the act in progress.
+    totals.merge(&crate::acts::ambition_effects(state, data, faction));
     totals
 }
 

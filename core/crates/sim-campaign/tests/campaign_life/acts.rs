@@ -1,4 +1,5 @@
-//! ACTES (ADR 0784, 0785): the campaign arc in three acts, the reign score, the ruin of the house.
+//! ACTES (ADR 0784, refit R1): the campaign arc in three acts at fixed dates, the renown of the
+//! house, the ambitions, the reign score, the ruin of the house.
 
 use data_model::test_support::{fac, game_data};
 use data_model::GameData;
@@ -24,13 +25,35 @@ fn the_data_describe_three_consistent_acts() {
     }
     assert_eq!(rules.acts[0].start_year, 1337);
     assert_eq!(rules.acts[2].end_year, 1453);
-    for act in &rules.acts {
-        for policy in &act.policies {
-            assert!(
-                rules.categories.contains_key(&policy.category),
-                "{policy:?}"
+    // R1-2: every house has ambitions with effects in each act, their categories known.
+    for (id, faction) in &data.factions {
+        for act in &rules.acts {
+            let list = rules.ambitions(
+                id,
+                &format!("{:?}", faction.government).to_lowercase(),
+                &act.id,
             );
+            assert!(list.len() >= 2, "{id} {}", act.id);
+            for ambition in list {
+                assert!(!ambition.effects.is_empty(), "{}", ambition.id);
+                assert!(ambition
+                    .objective_categories
+                    .iter()
+                    .all(|c| rules.categories.contains_key(c)));
+                assert!(ambition
+                    .renown_sources
+                    .iter()
+                    .all(|s| rules.renown.sources.contains_key(s)));
+            }
         }
+    }
+    // Objective ids are unique from one act to the next (renown credits are keyed by id).
+    for set in rules.objective_sets.values() {
+        let mut ids: Vec<&str> = set.values().flatten().map(|o| o.id.as_str()).collect();
+        let len = ids.len();
+        ids.sort_unstable();
+        ids.dedup();
+        assert_eq!(ids.len(), len, "duplicate objective id");
     }
     // Every faction, whatever its government, has objectives in each act.
     for (id, faction) in &data.factions {
@@ -73,9 +96,9 @@ fn the_arc_starts_in_the_first_act_with_live_objectives() {
     let status = state.act_status(data).unwrap();
     assert_eq!(status.index, 0);
     assert!(status.objectives.len() >= 5);
-    // GAMEPLAY2 (ADR 0788): what the house holds at the start is an acquis to keep, not points;
-    // an idle house starts the act with nothing earned.
-    assert_eq!(status.score, 0, "{status:?}");
+    // What the house holds at the start is an acquis to keep, not renown (R1-1); an idle house
+    // starts the act with little earned.
+    assert!(status.score < 20, "{status:?}");
     let held: Vec<&str> = status
         .objectives
         .iter()
@@ -115,62 +138,179 @@ fn the_year_closes_the_acts_one_after_the_other() {
     assert_eq!(state.acts.reports[0].act_id, "act_1");
     assert_eq!(state.acts.reports[0].ended_by, "year");
     assert!(state.act_transition_pending());
-    assert!(state.acts.policy.is_none());
-    state.choose_act_policy(data, "pol_2_rigor").unwrap();
-    assert!(state.choose_act_policy(data, "pol_1_war").is_err());
+    assert!(state.acts.ambitions.is_empty());
+    state.choose_act_ambition(data, "fr2_amb_guesclin").unwrap();
+    assert!(state.choose_act_ambition(data, "fr1_amb_aides").is_err());
     state.mark_act_transition_seen();
     assert!(!state.act_transition_pending());
     state.year = 1416;
     state.end_turn_with(data, idle);
     assert_eq!(state.acts.current, 2);
-    assert_eq!(state.acts.reports[1].policy.as_deref(), Some("pol_2_rigor"));
+    assert_eq!(state.acts.reports[1].ambitions, vec!["fr2_amb_guesclin"]);
     assert!(state.outcome.is_none(), "the third act is still to play");
 }
 
+/// R1-1: an act closes with its year and only then: neither a lasting peace nor a collapse of
+/// the domain ends it (the ruin of the house stays a defeat, ADR 0784 § 8).
 #[test]
-fn a_lasting_peace_closes_the_act_early() {
-    let mut data = game_data().clone();
-    data.acts_rules.acts[0].early_end.peace_seasons = 2;
-    data.acts_rules.acts[0].early_end.min_seasons = 1;
-    let data = &data;
-    let mut state = started(data, "fac_england");
-    for faction in state.factions.values_mut() {
-        faction.at_war_with.clear();
-    }
-    for _ in 0..4 {
-        state.end_turn_with(data, idle);
-    }
-    assert_eq!(
-        state.acts.reports.first().map(|r| r.ended_by.as_str()),
-        Some("peace")
-    );
-    assert_eq!(state.acts.current, 1);
-    assert!(state.year < 1360);
-}
-
-#[test]
-fn a_collapse_closes_the_act_early() {
+fn acts_close_only_on_their_year() {
     let data = game_data();
     let mut state = started(data, "fac_france");
     let player = fac("fac_france");
-    let mut kept = 0;
     let england = fac("fac_england");
+    for faction in state.factions.values_mut() {
+        faction.at_war_with.clear();
+    }
     let provinces: Vec<_> = state.controlled_provinces(&player).cloned().collect();
-    for (id, settlement) in state.settlements.iter_mut() {
-        let _ = id;
-        if settlement.controller == player {
-            if provinces.iter().take(3).any(|p| *p == settlement.province) {
-                kept += 1;
-            } else {
-                settlement.controller = england.clone();
-            }
+    for settlement in state.settlements.values_mut() {
+        if settlement.controller == player
+            && !provinces.iter().take(3).any(|p| *p == settlement.province)
+        {
+            settlement.controller = england.clone();
         }
     }
-    assert!(kept > 0);
+    for _ in 0..12 {
+        state.end_turn_with(data, idle);
+        if state.outcome.is_some() {
+            break;
+        }
+    }
+    assert!(state.acts.reports.is_empty(), "{:?}", state.acts.reports);
+    assert_eq!(state.acts.current, 0);
+    assert!(state.year < 1361);
+    if state.outcome.is_none() {
+        state.year = 1361;
+        state.end_turn_with(data, idle);
+        assert_eq!(state.acts.reports.len(), 1);
+        assert_eq!(state.acts.reports[0].ended_by, "year");
+    }
+}
+
+/// R1-1: an objective earns its renown the season it is met, not at the close of the act.
+#[test]
+fn early_success_is_rewarded() {
+    let data = game_data();
+    let mut state = started(data, "fac_france");
+    let france = fac("fac_france");
+    let before = state.act_status(data).unwrap();
+    for settlement in state.settlements.values_mut() {
+        if matches!(settlement.province.as_str(), "prov_flandre" | "prov_artois") {
+            settlement.controller = france.clone();
+        }
+    }
     state.end_turn_with(data, idle);
-    let report = state.acts.reports.first().expect("collapse closes the act");
-    assert_eq!(report.ended_by, "collapse");
+    let after = state.act_status(data).unwrap();
+    let flanders = after
+        .objectives
+        .iter()
+        .find(|o| o.objective.id == "fr1_flanders")
+        .unwrap();
+    assert!(flanders.met && !flanders.hold, "{flanders:?}");
+    assert!(flanders.renown >= 25, "{flanders:?}");
+    assert!(after.renown >= before.renown + 25, "{after:?}");
+    assert!(after.score > before.score);
+    assert!(state.reign_score(data) > 0);
+    assert!(state.year < 1360);
+    assert!(state
+        .acts
+        .renown
+        .journal
+        .iter()
+        .any(|f| f.source == "objective_met" && f.points >= 25));
+    // Lost again, the objective gives its renown back.
+    for settlement in state.settlements.values_mut() {
+        if settlement.province.as_str() == "prov_flandre" {
+            settlement.controller = fac("fac_flanders");
+        }
+    }
+    state.end_turn_with(data, idle);
+    let lost = state.act_status(data).unwrap();
+    let flanders = lost
+        .objectives
+        .iter()
+        .find(|o| o.objective.id == "fr1_flanders")
+        .unwrap();
+    assert_eq!(flanders.renown, 0);
+}
+
+/// R1-1: an act whose every objective is already held is no free 100 (the old `base = 100`).
+#[test]
+fn nothing_to_earn_is_not_a_free_hundred() {
+    let mut data = game_data().clone();
+    let set = data
+        .acts_rules
+        .objective_sets
+        .get_mut("fac_france")
+        .unwrap()
+        .get_mut("act_1")
+        .unwrap();
+    set.retain(|o| matches!(o.id.as_str(), "fr1_dynasty" | "fr1_debt"));
+    let data = &data;
+    let mut state = started(data, "fac_france");
+    let status = state.act_status(data).unwrap();
+    assert!(status.objectives.iter().all(|o| o.hold && o.met), "{status:?}");
+    assert!(status.score < 20, "{status:?}");
+    state.year = 1361;
+    state.end_turn_with(data, idle);
+    assert!(
+        state.acts.reports[0].score < 20,
+        "{:?}",
+        state.acts.reports[0]
+    );
+}
+
+/// R1-1: the reign score keeps moving until 1453; no victory before, even with a zero threshold.
+#[test]
+fn reign_score_moves_until_1453() {
+    let mut data = game_data().clone();
+    data.acts_rules.victory_min_score = 0;
+    let data = &data;
+    let mut state = started(data, "fac_england");
+    state.year = 1416;
+    state.end_turn_with(data, idle);
+    assert_eq!(state.acts.current, 2);
+    assert!(state.outcome.is_none(), "no victory before 1453");
+    let before = state.reign_score(data);
+    for _ in 0..3 {
+        state.stats.battles_won += 2;
+        state.end_turn_with(data, idle);
+    }
     assert!(state.outcome.is_none());
+    assert!(
+        state.reign_score(data) > before,
+        "the third act still counts"
+    );
+    state.year = 1454;
+    state.end_turn_with(data, idle);
+    let outcome = state.outcome.clone().expect("the arc is over");
+    assert_eq!(outcome.kind, OutcomeKind::Victory);
+}
+
+/// R1-1: a source of renown brings at most its cap in a season.
+#[test]
+fn renown_sources_are_capped() {
+    let data = game_data();
+    let rules = &data.acts_rules.renown;
+    let cap = rules.source("battle_won").unwrap().season_cap as i32;
+    assert!(cap > 0);
+    let mut state = started(data, "fac_france");
+    state.stats.battles_won += 10;
+    state.end_turn_with(data, idle);
+    let sum = |state: &CampaignState, source: &str| -> i32 {
+        state
+            .acts
+            .renown
+            .journal
+            .iter()
+            .filter(|f| f.source == source)
+            .map(|f| f.points)
+            .sum()
+    };
+    assert_eq!(sum(&state, "battle_won"), cap);
+    let lost_cap = rules.source("battle_lost").unwrap().season_cap as i32;
+    state.stats.battles_lost += 10;
+    state.end_turn_with(data, idle);
+    assert_eq!(sum(&state, "battle_lost"), -lost_cap);
 }
 
 #[test]
@@ -201,7 +341,9 @@ fn pressures_follow_the_state_of_the_realm() {
         .pressures
         .iter()
         .any(|p| p.active && p.pressure.id == "pr1_crown"));
-    assert!(relieved.score > contested.score);
+    // R1-1: the renown of a pressure follows it season by season.
+    state.end_turn_with(data, idle);
+    assert!(!state.acts.renown.credits.contains_key("pressure:pr1_crown"));
 }
 
 #[test]
@@ -267,7 +409,7 @@ fn the_reign_score_decides_the_final_victory() {
     assert_eq!(state.acts.reports.len(), 3);
     let outcome = state.outcome.clone().expect("the arc is over");
     assert_eq!(outcome.kind, OutcomeKind::Victory);
-    assert_eq!(outcome.score, i64::from(state.reign_score(&rich, false)));
+    assert_eq!(outcome.score, i64::from(state.reign_score(&rich)));
 
     let mut hard = game_data().clone();
     hard.acts_rules.victory_min_score = 100;
@@ -283,30 +425,47 @@ fn the_state_with_its_reports_survives_a_save() {
     let mut state = started(data, "fac_burgundy");
     state.year = 1361;
     state.end_turn_with(data, idle);
-    state.choose_act_policy(data, "pol_2_regain").unwrap();
+    let first = state.act_ambitions(data)[0].id.clone();
+    state.choose_act_ambition(data, &first).unwrap();
     let loaded = CampaignState::load_json(&state.save_json()).unwrap();
     assert_eq!(loaded.acts, state.acts);
-    assert_eq!(
-        loaded.reign_score(data, true),
-        state.reign_score(data, true)
-    );
+    assert_eq!(loaded.reign_score(data), state.reign_score(data));
+    assert_eq!(loaded.house_renown(data), state.house_renown(data));
 }
 
+/// R1-2: two ambitions among four; a third replaces the oldest while the choice is open, then
+/// the choice locks. The ambitions reach the realm's effects, the player's house only.
 #[test]
-fn the_policy_weighs_one_category_more() {
+fn ambitions_are_chosen_two_by_two_and_change_the_realm() {
     let data = game_data();
     let mut state = started(data, "fac_france");
-    let base = state.act_status(data).unwrap();
-    state.choose_act_policy(data, "pol_1_line").unwrap();
-    let with_policy = state.act_status(data).unwrap();
-    let boosted = with_policy
-        .objectives
+    let player = fac("fac_france");
+    let england = fac("fac_england");
+    let ids: Vec<String> = state
+        .act_ambitions(data)
         .iter()
-        .filter(|o| o.factor_percent == 150)
-        .count();
-    assert_eq!(boosted, 1);
-    // The dynasty is secure at the start: weighing it more raises the score.
-    assert!(with_policy.score >= base.score);
+        .map(|a| a.id.clone())
+        .collect();
+    assert_eq!(ids.len(), 4);
+    assert_eq!(state.ambitions_pending(data), 2);
+    let plain = sim_campaign::research::faction_tech_effects(&state, data, &player);
+    let english = sim_campaign::research::faction_tech_effects(&state, data, &england);
+    state.choose_act_ambition(data, &ids[0]).unwrap();
+    state.choose_act_ambition(data, &ids[1]).unwrap();
+    assert_eq!(state.ambitions_pending(data), 0);
+    let with = sim_campaign::research::faction_tech_effects(&state, data, &player);
+    assert_ne!(plain, with, "an ambition changes the simulation");
+    assert_eq!(
+        english,
+        sim_campaign::research::faction_tech_effects(&state, data, &england)
+    );
+    state.choose_act_ambition(data, &ids[2]).unwrap();
+    assert_eq!(state.acts.ambitions, vec![ids[1].clone(), ids[2].clone()]);
+    assert!(state.choose_act_ambition(data, "nope").is_err());
+    for _ in 0..data.acts_rules.ambition_choice_seasons {
+        state.end_turn_with(data, idle);
+    }
+    assert!(state.choose_act_ambition(data, &ids[3]).is_err(), "locked");
 }
 
 /// A whole campaign with a passive player (the other houses play with the minimal AI) crosses

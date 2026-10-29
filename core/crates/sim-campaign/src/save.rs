@@ -15,6 +15,7 @@ pub const OLDEST_MIGRATABLE_VERSION: u32 = 9;
 pub const MIGRATIONS: &[fn(&mut serde_json::Value)] = &[
     crate::causes::migrate_v9_to_v10,
     crate::acts::migrate_v10_to_v11,
+    crate::acts::migrate_v11_to_v12,
 ];
 
 /// Applies the migration chain from `from` up to [`STATE_VERSION`].

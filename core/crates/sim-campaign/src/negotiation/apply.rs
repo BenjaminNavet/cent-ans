@@ -40,9 +40,11 @@ impl Article {
                 } else {
                     TRUCE_TURNS
                 };
+                crate::acts::note_war_ended_by_treaty(state, data, proposer, recipient);
                 state.make_peace(data, proposer, recipient, &[], 0, truce.max(1));
             }
             Article::Truce { turns } | Article::Mediation { turns } => {
+                crate::acts::note_war_ended_by_treaty(state, data, proposer, recipient);
                 state.make_peace(data, proposer, recipient, &[], 0, (*turns).max(1));
             }
             Article::Alliance => {

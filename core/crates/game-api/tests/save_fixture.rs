@@ -1,4 +1,4 @@
-//! Frozen real saves (wrapper v1 around campaign state v9, v10 and v11, England, seed 1337, 10
+//! Frozen real saves (wrapper v1 around campaign state v9 to v12, England, seed 1337, 10
 //! turns) must keep loading. Rule: every bump of `STATE_VERSION` or `SAVE_VERSION` adds a new fixture and
 //! keeps this one loading through the migration chain.
 //!
@@ -23,9 +23,9 @@ fn write_fixture() {
     }
     let dir = std::env::temp_dir().join(format!("cent-ans-fixture-{}", std::process::id()));
     let path =
-        game_api::saves::write_save(&dir, "save_v11", &state, "2026-10-22T00:00:00").unwrap();
-    std::fs::create_dir_all(fixture(11).parent().unwrap()).unwrap();
-    std::fs::copy(path, fixture(11)).unwrap();
+        game_api::saves::write_save(&dir, "save_v12", &state, "2026-10-29T00:00:00").unwrap();
+    std::fs::create_dir_all(fixture(12).parent().unwrap()).unwrap();
+    std::fs::copy(path, fixture(12)).unwrap();
     let _ = std::fs::remove_dir_all(dir);
 }
 
@@ -42,6 +42,21 @@ fn frozen_v11_save_loads_plays_a_turn_and_resaves() {
 #[test]
 fn frozen_v10_save_loads_plays_a_turn_and_resaves() {
     frozen_save_loads_plays_a_turn_and_resaves(10);
+}
+
+#[test]
+fn frozen_v12_save_loads_plays_a_turn_and_resaves() {
+    frozen_save_loads_plays_a_turn_and_resaves(12);
+}
+
+/// R1 (v11 -> v12): the renown of an older save restarts from the next season (its baseline is
+/// taken then); the policy became the first ambition.
+#[test]
+fn a_v11_save_gains_its_renown_after_one_season() {
+    let data = data_model::test_support::game_data();
+    let mut state = game_api::saves::load_save(data, &fixture(11)).expect("v11 loads");
+    state.end_turn(data);
+    assert!(state.acts.renown.baseline_taken);
 }
 
 fn frozen_save_loads_plays_a_turn_and_resaves(version: u32) {

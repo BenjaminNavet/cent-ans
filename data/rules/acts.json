@@ -1,5 +1,5 @@
 {
-  "description": "ACTES (ADR 0784, 0785) : l’arc de partie en trois actes. Chaque acte donne à la maison du joueur des objectifs (objective_sets : par faction `fac_*`, par gouvernement `gov_*`, sinon `default`) et des pressions (points de score quand la condition tient à la clôture de l’acte). Un acte se clôt avec l’année ou plus tôt (paix durable, effondrement). La victoire est le score de règne : moyenne des scores d’acte pondérée par `weight`, au moins victory_min_score. La défaite est la ruine de la maison (ruin) ou la perte de toutes les terres. ADR 0788 : un objectif déjà rempli à l’ouverture de l’acte est un acquis (hold_guard_percent) : il ne rapporte aucun point mais sa perte retranche cette part du score ; seuls les autres objectifs, comptés à partir de leur état de départ, font le score.",
+  "description": "ACTES (ADR 0784, refonte R1) : l’arc de partie en trois actes à dates fixes (1337-1360, 1360-1415, 1415-1453 : un acte ne se clôt qu’avec son année). Chaque acte donne à la maison du joueur des objectifs (objective_sets : par faction `fac_*`, par gouvernement `gov_*`, sinon `default`), des pressions et des ambitions (ambition_sets, ambitions_to_choose à choisir, effets sur la simulation). Le règne se raconte par la renommée (renown) : chaque saison, des faits (bataille, place, chevauchée, rançon, trêve imposée) et les objectifs remplis ou perdus ajoutent ou retirent de la renommée à l’acte en cours (l’objectif, à son propre acte). Le score d’un acte est sa renommée rapportée à renown_target ; le score de règne est la moyenne pondérée par weight des trois actes, et la victoire se juge en 1453 (victory_min_score). La défaite est la ruine de la maison (ruin) ou la perte de toutes les terres.",
   "acts": [
     {
       "id": "act_1",
@@ -10,39 +10,9 @@
       "weight": 25,
       "intro": "Édouard III défie Philippe VI : la querelle de la couronne de France devient une guerre. Crécy, la peste, Poitiers et le traité de Brétigny vont dire qui tient le royaume.",
       "closing": {
-        "year": "Brétigny (1360) clôt la querelle : une paix de papier, un royaume saigné.",
-        "peace": "La querelle s'apaise avant l'heure : les trêves tiennent, les armes se taisent.",
-        "collapse": "La maison s'effondre avant Brétigny : le domaine fond, les banquiers ne prêtent plus."
+        "year": "Brétigny (1360) clôt la querelle : une paix de papier, un royaume saigné."
       },
-      "early_end": {
-        "peace_seasons": 20,
-        "min_seasons": 24,
-        "collapse_domain_percent": 50,
-        "collapse_defaults": 2
-      },
-      "policies": [
-        {
-          "id": "pol_1_war",
-          "name": "Maisnie de guerre",
-          "category": "domain",
-          "factor_percent": 150,
-          "description": "Les capitaines d’abord : tenir et étendre le domaine compte une fois et demie."
-        },
-        {
-          "id": "pol_1_purse",
-          "name": "Maisnie des comptes",
-          "category": "treasury",
-          "factor_percent": 150,
-          "description": "Les clercs et les banquiers d’abord : des finances saines comptent une fois et demie."
-        },
-        {
-          "id": "pol_1_line",
-          "name": "Maisnie de la lignée",
-          "category": "dynasty",
-          "factor_percent": 150,
-          "description": "Les mariages et les héritiers d’abord : la lignée compte une fois et demie."
-        }
-      ],
+      "renown_target": 60,
       "pressures": [
         {
           "id": "pr1_crown",
@@ -99,39 +69,9 @@
       "weight": 30,
       "intro": "Charles V reprend ville à ville ce que Brétigny a cédé ; puis la folie de Charles VI, le Grand Schisme et la querelle des princes ruinent le royaume. Azincourt (1415) approche.",
       "closing": {
-        "year": "Azincourt (1415) : la chevalerie française gît dans la boue, le royaume est à genoux.",
-        "peace": "Une longue paix s'installe : le royaume respire et prépare la suite.",
-        "collapse": "Le royaume se défait : provinces perdues, banquiers en fuite, princes en rébellion."
+        "year": "Azincourt (1415) : la chevalerie française gît dans la boue, le royaume est à genoux."
       },
-      "early_end": {
-        "peace_seasons": 20,
-        "min_seasons": 32,
-        "collapse_domain_percent": 50,
-        "collapse_defaults": 2
-      },
-      "policies": [
-        {
-          "id": "pol_2_regain",
-          "name": "La reprise en main",
-          "category": "domain",
-          "factor_percent": 150,
-          "description": "Reprendre les places perdues, comme Du Guesclin : le domaine compte une fois et demie."
-        },
-        {
-          "id": "pol_2_rigor",
-          "name": "La rigueur des finances",
-          "category": "treasury",
-          "factor_percent": 150,
-          "description": "Alléger les dettes et garnir le trésor : les finances comptent une fois et demie."
-        },
-        {
-          "id": "pol_2_renown",
-          "name": "Le prestige du sage",
-          "category": "prestige",
-          "factor_percent": 150,
-          "description": "Tenir son rang et sa parole : le prestige compte une fois et demie."
-        }
-      ],
+      "renown_target": 80,
       "pressures": [
         {
           "id": "pr2_wise",
@@ -154,39 +94,9 @@
       "weight": 45,
       "intro": "Après Azincourt, le traité de Troyes livre le royaume au roi d’Angleterre ; Jeanne d’Arc, le sacre de Reims, Arras et Formigny préparent Castillon (1453). C’est l’acte qui décide du règne.",
       "closing": {
-        "year": "Castillon (1453) : la guerre de Cent Ans s'achève ; l'histoire retient ce que le règne a tenu.",
-        "peace": "La paix gagne l'acte avant Castillon : le règne s'arrête sur son bilan.",
-        "collapse": "Le sursaut échoue : la maison s'effondre avant d'avoir pu reprendre la main."
+        "year": "Castillon (1453) : la guerre de Cent Ans s'achève ; l'histoire retient ce que le règne a tenu."
       },
-      "early_end": {
-        "peace_seasons": 20,
-        "min_seasons": 40,
-        "collapse_domain_percent": 50,
-        "collapse_defaults": 2
-      },
-      "policies": [
-        {
-          "id": "pol_3_arms",
-          "name": "Le sursaut des armes",
-          "category": "domain",
-          "factor_percent": 150,
-          "description": "Tout pour la reconquête : le domaine compte une fois et demie."
-        },
-        {
-          "id": "pol_3_union",
-          "name": "L'union des princes",
-          "category": "alliance",
-          "factor_percent": 150,
-          "description": "Réconcilier les princes et les alliés : les alliances comptent une fois et demie."
-        },
-        {
-          "id": "pol_3_war_chest",
-          "name": "Le trésor de guerre",
-          "category": "treasury",
-          "factor_percent": 150,
-          "description": "La taille perpétuelle et les armées de métier : le trésor compte une fois et demie."
-        }
-      ],
+      "renown_target": 80,
       "pressures": [
         {
           "id": "pr3_reconquest",
@@ -2829,6 +2739,1258 @@
       ]
     }
   },
+  "ambitions_to_choose": 2,
+  "ambition_choice_seasons": 4,
+  "ambition_sets": {
+    "default": {
+      "act_1": [
+        {
+          "id": "pol_1_war",
+          "name": "Maisnie de guerre",
+          "description": "Les capitaines d’abord : levées moins chères (-20 %) et soldes allégées (-10 %), au prix d’un impôt moins rentré (-5 %). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -10,
+              "mode": "percent"
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken",
+            "raid_season"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "pol_1_purse",
+          "name": "Maisnie des comptes",
+          "description": "Les clercs et les banquiers d’abord : l’impôt (+10 %) et le commerce (+10 %) rentrent mieux, les levées coûtent plus (+10 %). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 10,
+              "mode": "percent"
+            },
+            {
+              "effect": "trade_income",
+              "value": 10,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_cost",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "pol_1_line",
+          "name": "Maisnie de la lignée",
+          "description": "Les mariages et les héritiers d’abord : la cour gagne en éclat (prestige) et le pays s’apaise. Lignée et prestige rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 25
+            },
+            {
+              "effect": "unrest",
+              "value": -2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "dynasty",
+            "prestige"
+          ]
+        },
+        {
+          "id": "amb_1_council",
+          "name": "Maisnie du conseil",
+          "description": "Les légistes et les ambassadeurs d’abord : le pays s’apaise (-4 de troubles), le commerce suit (+5 %). Alliances et trêves imposées rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -4
+            },
+            {
+              "effect": "trade_income",
+              "value": 5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        }
+      ],
+      "act_2": [
+        {
+          "id": "pol_2_regain",
+          "name": "La reprise en main",
+          "description": "Reprendre les places perdues, comme Du Guesclin : soldes allégées (-15 %) et marches plus rapides (+10 %). Places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "army_upkeep",
+              "value": -15,
+              "mode": "percent"
+            },
+            {
+              "effect": "movement",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "place_taken",
+            "battle_won"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "pol_2_rigor",
+          "name": "La rigueur des finances",
+          "description": "Alléger les dettes et garnir le trésor : impôt +12 %, au prix de troubles (+3). Le trésor rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 12,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 3
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "pol_2_renown",
+          "name": "Le prestige du sage",
+          "description": "Tenir son rang et sa parole : la cour gagne en éclat (prestige) et le pays s’apaise. Le prestige rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 25
+            },
+            {
+              "effect": "unrest",
+              "value": -2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        },
+        {
+          "id": "amb_2_companies",
+          "name": "Les compagnies soldées",
+          "description": "Prendre à sa solde les routiers : levées moins chères (-20 %), mais un pays qui gronde (+2). Les batailles rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "raid_season"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        }
+      ],
+      "act_3": [
+        {
+          "id": "pol_3_arms",
+          "name": "Le sursaut des armes",
+          "description": "Tout pour la reconquête : levées moins chères (-20 %) et soldes allégées (-10 %). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -10,
+              "mode": "percent"
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "pol_3_union",
+          "name": "L’union des princes",
+          "description": "Réconcilier les princes et les alliés : le pays s’apaise (-4) et le commerce suit (+5 %). Alliances et trêves imposées rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -4
+            },
+            {
+              "effect": "trade_income",
+              "value": 5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        },
+        {
+          "id": "pol_3_war_chest",
+          "name": "Le trésor de guerre",
+          "description": "La taille perpétuelle : impôt +15 %, au prix de troubles (+4). Le trésor rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "amb_3_court",
+          "name": "La cour du roi",
+          "description": "Une cour qui éblouit : prestige accru, commerce de luxe (-5 % ailleurs). Lignée et prestige rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 30
+            },
+            {
+              "effect": "trade_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        }
+      ]
+    },
+    "fac_france": {
+      "act_1": [
+        {
+          "id": "fr1_amb_arriere_ban",
+          "name": "Convoquer l’arrière-ban",
+          "description": "Le roi appelle tous les feudataires : levées moins chères (-25 %) et une place de recrutement de plus, mais le pays grogne (+2). Batailles et places prises rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            },
+            {
+              "effect": "unrest",
+              "value": 2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "fr1_amb_aides",
+          "name": "Les aides des états",
+          "description": "Les états généraux votent l’aide : impôt +12 %, au prix de troubles (+3). Le trésor et les rançons rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 12,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 3
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "fr1_amb_bonnes_villes",
+          "name": "Fortifier les bonnes villes",
+          "description": "Murs neufs et guet : les places tiennent mieux (+1 de fortification), l’impôt en souffre (-5 %). Le domaine rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "fortification_level",
+              "value": 1
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "fr1_amb_cour",
+          "name": "La cour des Valois",
+          "description": "Fêtes, joutes et ordre de l’Étoile : la cour gagne en éclat (prestige), le commerce paie le luxe (-5 %). Lignée et prestige rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 30
+            },
+            {
+              "effect": "trade_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        }
+      ],
+      "act_2": [
+        {
+          "id": "fr2_amb_guesclin",
+          "name": "La guerre de Du Guesclin",
+          "description": "Refuser la bataille, reprendre les places une à une : soldes allégées (-15 %), marches plus rapides (+10 %). Places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "army_upkeep",
+              "value": -15,
+              "mode": "percent"
+            },
+            {
+              "effect": "movement",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "fr2_amb_fouage",
+          "name": "Le fouage et la gabelle",
+          "description": "L’impôt permanent de Charles V : impôt +15 %, au prix de troubles (+4). Le trésor rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "fr2_amb_sage",
+          "name": "Le sage gouvernement",
+          "description": "Les conseillers marmousets : le pays s’apaise (-4), la cour s’honore (prestige). Le prestige rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -4
+            },
+            {
+              "effect": "prestige",
+              "value": 15
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "prestige"
+          ]
+        },
+        {
+          "id": "fr2_amb_compagnies",
+          "name": "Prendre les compagnies à solde",
+          "description": "Les routiers servent le roi : levées moins chères (-20 %), mais un pays qui gronde (+2). Les batailles rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        }
+      ],
+      "act_3": [
+        {
+          "id": "fr3_amb_ordonnance",
+          "name": "Les compagnies d’ordonnance",
+          "description": "Une armée soldée et tenue : soldes allégées (-20 %), recrues aguerries (+5), impôt un peu moins rentré (-5 %). Batailles et places prises rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "army_upkeep",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_experience",
+              "value": 5
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "fr3_amb_taille",
+          "name": "La taille perpétuelle",
+          "description": "Lever l’impôt sans les états : impôt +15 %, au prix de troubles (+4). Le trésor rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "fr3_amb_sacre",
+          "name": "Le sacre de Reims",
+          "description": "Faire sacrer le roi : la cour gagne en éclat (prestige) et le pays s’apaise (-3). Lignée et prestige rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 40
+            },
+            {
+              "effect": "unrest",
+              "value": -3
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        },
+        {
+          "id": "fr3_amb_arras",
+          "name": "Rallier la Bourgogne",
+          "description": "Préparer la paix d’Arras : le commerce reprend (+10 %), le pays s’apaise (-2). Alliances et trêves imposées rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 10,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": -2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        }
+      ]
+    },
+    "fac_england": {
+      "act_1": [
+        {
+          "id": "en1_amb_chevauchee",
+          "name": "La chevauchée",
+          "description": "Ruiner le pays du Valois : marches plus rapides (+10 %), soldes allégées par le butin (-15 %). Chevauchées et batailles rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "movement",
+              "value": 10,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -15,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "raid_season",
+            "battle_won"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "en1_amb_laines",
+          "name": "L’étape des laines",
+          "description": "Taxer la laine à Calais et Bruges : commerce +15 %, impôt -5 %. Le trésor et les rançons rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "en1_amb_archers",
+          "name": "Les archers des comtés",
+          "description": "Contrats d’indenture et arcs des comtés : levées moins chères (-20 %), mais le pays grogne (+2). Les batailles rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        },
+        {
+          "id": "en1_amb_jarretiere",
+          "name": "L’ordre de la Jarretière",
+          "description": "Une chevalerie autour du roi : la cour gagne en éclat (prestige), le commerce paie le luxe (-5 %). Prestige et lignée rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 30
+            },
+            {
+              "effect": "trade_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        }
+      ],
+      "act_2": [
+        {
+          "id": "en2_amb_gaunt",
+          "name": "La grande chevauchée",
+          "description": "Traverser le royaume de Calais à Bordeaux : marches plus rapides (+10 %), soldes allégées (-15 %). Chevauchées et batailles rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "movement",
+              "value": 10,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -15,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "raid_season",
+            "battle_won"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "en2_amb_capitation",
+          "name": "La capitation",
+          "description": "La taxe par tête : impôt +15 %, au prix de troubles (+5). Le trésor rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 5
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "en2_amb_guyenne",
+          "name": "Tenir la Guyenne",
+          "description": "Murs et garnisons en Aquitaine : les places tiennent mieux (+1 de fortification), l’impôt en souffre (-5 %). Le domaine rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "fortification_level",
+              "value": 1
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "en2_amb_cour",
+          "name": "La cour de Westminster",
+          "description": "Une cour fastueuse : la cour gagne en éclat (prestige) et le pays s’apaise (-2). Prestige et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 25
+            },
+            {
+              "effect": "unrest",
+              "value": -2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "prestige",
+            "alliance"
+          ]
+        }
+      ],
+      "act_3": [
+        {
+          "id": "en3_amb_conquete",
+          "name": "La conquête lancastrienne",
+          "description": "Prendre la Normandie place par place : levées moins chères (-20 %), recrues aguerries (+5). Batailles et places prises rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_experience",
+              "value": 5
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "en3_amb_double",
+          "name": "La double monarchie",
+          "description": "Gouverner Paris et Londres : le pays s’apaise (-4), l’impôt suit (+5 %). Prestige et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -4
+            },
+            {
+              "effect": "tax_income",
+              "value": 5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "domain"
+          ]
+        },
+        {
+          "id": "en3_amb_bedford",
+          "name": "Le gouvernement de Bedford",
+          "description": "Faire payer la Normandie : impôt +15 %, au prix de troubles (+4). Le trésor rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "en3_amb_bourgogne",
+          "name": "L’alliance bourguignonne",
+          "description": "Tenir le duc de Bourgogne : le commerce des Flandres suit (+10 %), le pays s’apaise (-2). Alliances et trêves imposées rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 10,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": -2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        }
+      ]
+    },
+    "fac_burgundy": {
+      "act_1": [
+        {
+          "id": "bu1_amb_draps",
+          "name": "Les draps de Flandre",
+          "description": "Le commerce d’abord : commerce +15 %, levées plus chères (+10 %). Le trésor rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_cost",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "bu1_amb_bascule",
+          "name": "Le jeu de bascule",
+          "description": "Ni Valois ni Plantagenêt : le pays s’apaise (-4), le commerce suit (+5 %). Alliances et trêves imposées rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -4
+            },
+            {
+              "effect": "trade_income",
+              "value": 5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        },
+        {
+          "id": "bu1_amb_chevaliers",
+          "name": "Les chevaliers du duc",
+          "description": "Lever la noblesse bourguignonne : levées moins chères (-20 %), mais le pays grogne (+2). Batailles et places prises rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "bu1_amb_cour",
+          "name": "La cour de Dijon",
+          "description": "Une cour qui rivalise avec Paris : la cour gagne en éclat (prestige), le commerce paie le luxe (-5 %). Prestige et lignée rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 30
+            },
+            {
+              "effect": "trade_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        }
+      ],
+      "act_2": [
+        {
+          "id": "bu2_amb_heritage",
+          "name": "L’héritage flamand",
+          "description": "Tenir les villes de Flandre : commerce +10 %, croissance accrue. Le domaine rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 10,
+              "mode": "percent"
+            },
+            {
+              "effect": "growth",
+              "value": 1
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "bu2_amb_aides",
+          "name": "Les aides des états",
+          "description": "Les états de Bourgogne et de Flandre votent l’aide : impôt +12 %, au prix de troubles (+3). Le trésor rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 12,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 3
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "bu2_amb_armagnacs",
+          "name": "Contre les Armagnacs",
+          "description": "La guerre des princes : levées moins chères (-20 %), soldes allégées (-10 %), impôt moins rentré (-5 %). Batailles et places prises rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -10,
+              "mode": "percent"
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "bu2_amb_conseil",
+          "name": "Le conseil du duc",
+          "description": "Les légistes de Jean sans Peur : le pays s’apaise (-3), la cour s’honore (prestige). Prestige et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -3
+            },
+            {
+              "effect": "prestige",
+              "value": 15
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "prestige",
+            "alliance"
+          ]
+        }
+      ],
+      "act_3": [
+        {
+          "id": "bu3_amb_toison",
+          "name": "La Toison d’or",
+          "description": "L’ordre le plus fastueux de la chrétienté : la cour gagne en éclat (prestige) et le pays s’apaise (-2). Prestige et lignée rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 40
+            },
+            {
+              "effect": "unrest",
+              "value": -2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        },
+        {
+          "id": "bu3_amb_arras",
+          "name": "La paix d’Arras",
+          "description": "Se réconcilier avec le Valois au meilleur prix : le pays s’apaise (-4), le commerce suit (+5 %). Alliances et trêves imposées rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -4
+            },
+            {
+              "effect": "trade_income",
+              "value": 5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        },
+        {
+          "id": "bu3_amb_pays_bas",
+          "name": "Les Pays-Bas bourguignons",
+          "description": "Unir Hollande, Brabant et Hainaut : commerce +15 %, levées plus chères (+10 %). Le domaine rapporte moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_cost",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "bu3_amb_ost",
+          "name": "L’ost de Philippe le Bon",
+          "description": "Une armée ducale tenue : levées moins chères (-20 %), soldes allégées (-10 %), impôt moins rentré (-5 %). Batailles et places prises rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -10,
+              "mode": "percent"
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        }
+      ]
+    }
+  },
+  "renown": {
+    "description": "R1-1 : sources de renommée (points par fait, plafond par saison en valeur absolue, 0 = sans plafond). Pour objective_met, objective_lost et pressure, points est un pourcentage du poids de l’objectif ou des points de la pression. La renommée des faits de l’acte en cours s’use de decay_permille_per_season pour mille par saison.",
+    "sources": {
+      "battle_won": {
+        "points": 3,
+        "season_cap": 6
+      },
+      "battle_lost": {
+        "points": -3,
+        "season_cap": 6
+      },
+      "place_taken": {
+        "points": 2,
+        "season_cap": 6
+      },
+      "place_lost": {
+        "points": -2,
+        "season_cap": 6
+      },
+      "raid_season": {
+        "points": 2,
+        "season_cap": 2
+      },
+      "ransom_received": {
+        "points": 3,
+        "season_cap": 6
+      },
+      "ransom_paid": {
+        "points": -2,
+        "season_cap": 4
+      },
+      "truce_imposed": {
+        "points": 5,
+        "season_cap": 5
+      },
+      "objective_met": {
+        "points": 100,
+        "season_cap": 0
+      },
+      "objective_lost": {
+        "points": 100,
+        "season_cap": 0
+      },
+      "pressure": {
+        "points": 100,
+        "season_cap": 0
+      }
+    },
+    "decay_permille_per_season": 5,
+    "journal_len": 48,
+    "truce_min_war_score": 25,
+    "labels": {
+      "battle_won": "bataille gagnée",
+      "battle_lost": "bataille perdue",
+      "place_taken": "place prise",
+      "place_lost": "place perdue",
+      "raid_season": "chevauchée",
+      "ransom_received": "rançon touchée",
+      "ransom_paid": "rançon payée",
+      "truce_imposed": "trêve imposée",
+      "objective_met": "objectif atteint",
+      "objective_lost": "objectif perdu",
+      "pressure": "pression"
+    }
+  },
   "grades": [
     {
       "min_score": 0,
@@ -2856,7 +4018,6 @@
       "text": "Les chroniqueurs en feront un modèle pour les siècles."
     }
   ],
-  "hold_guard_percent": 35,
   "victory_min_score": 50,
   "ruin": {
     "defaults": 3,
@@ -2878,13 +4039,11 @@
     "defeat_capital": "la capitale est perdue et le trône n'a pas d'héritier.",
     "act_label": "Acte {n} sur {total}",
     "reign_score": "Score de règne",
-    "policy_prompt": "Choisissez la politique de la maisnie pour cet acte.",
-    "policy_none": "Aucune politique choisie.",
+    "policy_prompt": "Choisissez deux ambitions de la maisnie pour cet acte (modifiables pendant la première année).",
+    "policy_none": "Aucune ambition choisie.",
     "transition_title": "Fin de l'acte {n}",
     "causes_title": "Les trois causes principales",
     "ended_by_year": "L'acte s'achève avec l'année.",
-    "ended_by_peace": "L'acte s'achève par une paix durable.",
-    "ended_by_collapse": "L'acte s'achève par l'effondrement de la maison.",
-    "hold_suffix": " — acquis à conserver"
+    "renown": "Renommée"
   }
 }
