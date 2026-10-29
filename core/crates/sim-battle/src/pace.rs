@@ -58,6 +58,15 @@ pub(crate) struct Pace {
     /// hold times of `ai.rs`) run this many times slower, so a longer approach
     /// does not make the AI leave its ground before the armies meet.
     pub(crate) ai_patience_factor: f64,
+    /// ADR combat-matchups: exponent on the armour factor of a volley (1 =
+    /// linear; above 1, plate and mail turn arrows better than the linear
+    /// rule, so heavy horse survives an approach under fire).
+    #[serde(default = "one")]
+    pub(crate) ranged_armor_exponent: f64,
+}
+
+fn one() -> f64 {
+    1.0
 }
 
 data_model::bundled_rules!(PaceRules, "rules/battle_pace.json");

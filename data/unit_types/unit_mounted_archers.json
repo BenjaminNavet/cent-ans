@@ -16,12 +16,12 @@
   "recruit_time_turns": 2,
   "stats": {
     "melee": 30,
-    "ranged": 65,
-    "range": 220,
+    "ranged": 52,
+    "range": 170,
     "armor": 20,
     "morale": 50,
     "speed": 75,
-    "ammo": 40
+    "ammo": 30
   },
   "abilities": [
     "volley",

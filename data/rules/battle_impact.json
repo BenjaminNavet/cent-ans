@@ -24,7 +24,7 @@
     "front_factor": 1.0,
     "flank_factor": 1.4,
     "rear_factor": 1.8,
-    "max_share": 0.6
+    "max_share": 0.4
   },
   "weight": {
     "foot_kg": 75.0,
@@ -37,9 +37,9 @@
   },
   "brace": {
     "still_s": 1.0,
-    "front_base": 0.15,
-    "per_rank": 0.05,
-    "max": 0.6,
+    "front_base": 0.25,
+    "per_rank": 0.08,
+    "max": 0.75,
     "cohesion_share": 0.25,
     "bonus_share": 0.5
   },
@@ -54,8 +54,8 @@
     "max_m": 6.0
   },
   "cohesion": {
-    "front": 8.0,
-    "flank_rear": 15.0
+    "front": 5.0,
+    "flank_rear": 10.0
   },
   "stopped": {
     "pikes_loss_hp_fraction": 0.08,

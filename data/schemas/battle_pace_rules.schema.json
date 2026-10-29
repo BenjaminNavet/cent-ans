@@ -28,6 +28,12 @@
           "maximum": 2,
           "description": "Facteur de létalité d'une volée (et des tirs de tour)."
         },
+        "ranged_armor_exponent": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 4,
+          "description": "Exposant du facteur d'armure d'une volée (1 = linéaire ; plus haut, mailles et plates arrêtent mieux les flèches)."
+        },
         "flank_morale_per_s": {
           "type": "number",
           "minimum": 0,

@@ -153,6 +153,7 @@ impl BattleSim {
             None => {
                 shooter.hp * accuracy * f64::from(shooter.stats.ranged) / 100.0
                     * armor_factor(self.defense_points(target))
+                        .powf(self.pace().ranged_armor_exponent)
                     * self.pace().ranged_rate
             }
         };
