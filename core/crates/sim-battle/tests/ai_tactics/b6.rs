@@ -189,11 +189,12 @@ fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "353 Some(Attacker) [42, 33, 54, 100, 100, 42, 43, 102, 88, 20]",
+            // Combat lot: the armour exponent against volleys (ADR combat) moved the figures.
+            "365 Some(Attacker) [42, 40, 56, 100, 100, 38, 42, 102, 101, 19]",
         ),
         (
             11,
-            "518 Some(Attacker) [40, 42, 77, 87, 72, 39, 52, 88, 95, 32]",
+            "498 Some(Attacker) [48, 58, 77, 88, 73, 31, 63, 91, 82, 35]",
         ),
     ];
     for (seed, digest_before) in expected {

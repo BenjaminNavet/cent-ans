@@ -3,19 +3,19 @@
   "field": {
     "melee_rate": 0.02,
     "ranged_rate": 0.3,
-    "loss_morale_factor": 50.0,
+    "loss_morale_factor": 60.0,
     "flank_morale_per_s": 1.5,
     "rear_morale_per_s": 3.0,
     "rout_morale": 20.0,
     "rally_morale": 40.0,
-    "move_speed_factor": 0.75,
+    "move_speed_factor": 0.45,
     "run_speed_factor": 1.0,
     "melee_fatigue_per_s": 0.3,
     "contagion_factor": 0.8,
-    "melee_resolve_per_s": 0.6,
+    "melee_resolve_per_s": 0.4,
     "approach_range_m": 375.0,
     "ai_patience_factor": 1.9,
-    "ranged_armor_exponent": 1.25
+    "ranged_armor_exponent": 1.15
   },
   "siege": {
     "melee_rate": 0.035,

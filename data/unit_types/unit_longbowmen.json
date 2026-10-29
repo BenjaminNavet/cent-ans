@@ -20,7 +20,7 @@
     "armor": 20,
     "morale": 55,
     "speed": 50,
-    "ammo": 36,
+    "ammo": 72,
     "reload_s": 5
   },
   "abilities": [
