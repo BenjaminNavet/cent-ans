@@ -37,6 +37,8 @@ pub struct ForestLook {
     pub frost_altitude: Vec2,
     pub bare: Vec3,
     pub bare_openwork: f32,
+    /// Autumn colour of each season class (oak, beech, conifer, hedge, gold), VIS-R7.
+    pub autumn: [Vec3; 5],
     pub open: OpenLook,
     pub groves: GroveLook,
     pub clearings: ClearingLook,
@@ -55,6 +57,9 @@ pub struct OpenLook {
     /// player's gaze), fading out over `focus_fade`.
     pub focus_keep: f32,
     pub focus_fade: f32,
+    /// 1: the gaze exemption fades with the camera distance too, so nothing of the open land is
+    /// left beyond `far_distance` when `far_share` is 0 (VIS-R7); 0: the old behaviour.
+    pub focus_cut: f32,
 }
 
 /// Groves: compact tree groups on the meadows, a few per cell.
@@ -160,10 +165,11 @@ impl Default for OpenLook {
     fn default() -> Self {
         OpenLook {
             full_distance: 60.0,
-            far_distance: 260.0,
-            far_share: 0.06,
+            far_distance: 150.0,
+            far_share: 0.0,
             focus_keep: 50.0,
             focus_fade: 40.0,
+            focus_cut: 1.0,
         }
     }
 }
@@ -177,7 +183,7 @@ impl Default for GroveLook {
             radius_px: (1.2, 2.6),
             min_crops: 0.15,
             max_per_tile: 60,
-            far_share: 0.5,
+            far_share: 0.1,
             quality_share: [0.3, 0.65, 1.0, 1.0],
         }
     }
@@ -266,12 +272,21 @@ impl OpenThinning {
                 let camera = self
                     .open
                     .camera_share(self.camera_distance, self.open.far_share);
-                let near = 1.0
+                let mut near = 1.0
                     - super::mask::smoothstep(
                         self.open.focus_keep,
                         self.open.focus_keep + self.open.focus_fade.max(1.0),
                         focus_distance,
                     );
+                if self.open.focus_cut > 0.5 {
+                    // Gaze exemption gone with the camera distance (no lone trees in the far view).
+                    near *= 1.0
+                        - super::mask::smoothstep(
+                            self.open.full_distance,
+                            self.open.far_distance.max(self.open.full_distance + 1.0),
+                            self.camera_distance,
+                        );
+                }
                 camera + (1.0 - camera) * near
             }
             Role::Grove => {
@@ -285,6 +300,18 @@ impl OpenThinning {
 
 /// Quality levels, in the order of `GroveLook::quality_share`.
 pub const LEVELS: [&str; 4] = ["low", "medium", "high", "ultra"];
+
+/// Autumn colours of the season classes (oak, beech, conifer, hedge, gold), forests russet and gold.
+pub const AUTUMN_DEFAULT: [Vec3; 5] = [
+    Vec3::new(0.21, 0.12, 0.03),
+    Vec3::new(0.30, 0.12, 0.02),
+    Vec3::new(0.20, 0.07, 0.03),
+    Vec3::new(0.17, 0.09, 0.03),
+    Vec3::new(0.34, 0.22, 0.03),
+];
+
+/// Season class names in the order of `ForestLook::autumn`.
+pub const SEASON_CLASSES: [&str; 5] = ["oak", "beech", "conifer", "hedge", "gold"];
 
 impl Default for ForestLook {
     fn default() -> Self {
@@ -312,8 +339,9 @@ impl Default for ForestLook {
             frost_strength: 0.85,
             green_share: 0.3,
             frost_altitude: Vec2::new(1.5, 4.0),
-            bare: Vec3::new(0.22, 0.18, 0.15),
+            bare: Vec3::new(0.2, 0.16, 0.16),
             bare_openwork: 0.28,
+            autumn: AUTUMN_DEFAULT,
             open: OpenLook::default(),
             groves: GroveLook::default(),
             clearings: ClearingLook::default(),
@@ -419,12 +447,19 @@ impl ForestLook {
             ),
             bare: rgb(&w["bare"], d.bare),
             bare_openwork: num(&w["bare_openwork"], d.bare_openwork),
+            autumn: std::array::from_fn(|i| {
+                rgb(
+                    &v["seasons"]["autumn"][SEASON_CLASSES[i]],
+                    AUTUMN_DEFAULT[i],
+                )
+            }),
             open: OpenLook {
                 full_distance: num(&o["full_distance"], od.full_distance),
                 far_distance: num(&o["far_distance"], od.far_distance),
                 far_share: num(&o["far_share"], od.far_share),
                 focus_keep: num(&o["focus_keep_units"], od.focus_keep),
                 focus_fade: num(&o["focus_fade_units"], od.focus_fade),
+                focus_cut: num(&o["focus_cut"], od.focus_cut),
             },
             groves: GroveLook {
                 cell_px: num(&g["cell_px"], gd.cell_px),
@@ -486,14 +521,15 @@ mod tests {
         let thin = OpenThinning::new(&ForestLook::default(), 400.0, "high");
         assert_eq!(thin.keep(Role::Forest, 500.0), 1.0);
         // Far view: hedges nearly gone, except around the focus.
-        assert!(thin.keep(Role::Open, 300.0) < 0.1);
-        assert!((thin.keep(Role::Open, 10.0) - 1.0).abs() < 1e-5);
-        // Groves stay much more than the scattered trees.
-        assert!(thin.keep(Role::Grove, 300.0) > 0.4);
+        assert!(thin.keep(Role::Open, 300.0) < 0.01);
+        // VIS-R7: beyond d 150 not a lone tree is left, not even around the focus.
+        assert_eq!(thin.keep(Role::Open, 10.0), 0.0);
+        // Groves stay a little more than the scattered trees.
+        assert!(thin.keep(Role::Grove, 300.0) > 0.05);
         // Close view: everything drawn; medium view: in between and decreasing.
         let close = OpenThinning::new(&ForestLook::default(), 40.0, "high");
         assert_eq!(close.keep(Role::Open, 300.0), 1.0);
-        let shares: Vec<f32> = [100.0, 150.0, 220.0, 300.0]
+        let shares: Vec<f32> = [70.0, 90.0, 110.0, 140.0]
             .iter()
             .map(|d| OpenThinning::new(&ForestLook::default(), *d, "high").keep(Role::Open, 300.0))
             .collect();

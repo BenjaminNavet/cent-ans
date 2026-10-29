@@ -569,6 +569,12 @@
           "maximum": 0.3,
           "description": "Luminance linéaire plancher des masses sombres (0 : carte inchangée)."
         },
+        "value_lift": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "VIS-R7 : part du relèvement de valeur appliquée (1 : ancien comportement, 0 : le plancher ne relève que la teinte)."
+        },
         "knee": {
           "type": "number",
           "minimum": 1,

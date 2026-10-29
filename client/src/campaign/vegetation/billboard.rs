@@ -44,7 +44,7 @@ const SHADER_PATH: &str = "embedded://cent_ans_client/campaign/vegetation/billbo
 
 /// Bytes of one record: x, y, z, yaw (deg), scale, 0, seed, r, g, b.
 pub const RECORD_BYTES: usize = 40;
-/// Bytes of the parameter block (`Params` of `billboard.wesl`: twenty-two `vec4`).
+/// Bytes of the parameter block (`Params` of `billboard.wesl`: twenty-seven `vec4`).
 const PARAM_BYTES: u64 = 352;
 
 /// What a batch draws (`params.frame.w`).
@@ -107,6 +107,8 @@ pub struct Params {
     pub winter: Vec4,
     /// Bare broadleaf colour, 1 when the look is set.
     pub bare: Vec4,
+    /// Autumn colour of each season class (oak, beech, conifer, hedge, gold), VIS-R7.
+    pub autumn: [Vec4; 5],
 }
 
 impl Params {
@@ -134,6 +136,7 @@ impl Params {
             frost: Vec4::new(0.75, 0.78, 0.82, 0.7),
             winter: Vec4::new(3.0, 5.0, 0.0, 0.0),
             bare: Vec4::new(0.105, 0.09, 0.082, 0.0),
+            autumn: super::look::AUTUMN_DEFAULT.map(|c| c.extend(0.0)),
         }
     }
 
@@ -166,6 +169,7 @@ impl Params {
             0.0,
         );
         self.bare = look.bare.extend(1.0);
+        self.autumn = look.autumn.map(|c| c.extend(0.0));
         self
     }
 
@@ -193,6 +197,11 @@ impl Params {
             self.frost,
             self.winter,
             self.bare,
+            self.autumn[0],
+            self.autumn[1],
+            self.autumn[2],
+            self.autumn[3],
+            self.autumn[4],
         ]
         .iter()
         .flat_map(|v| v.to_array())

@@ -44,6 +44,7 @@ struct Params {
     frost: vec4<f32>,
     winter: vec4<f32>,
     bare: vec4<f32>,
+    autumn: array<vec4<f32>, 5>, // autumn colour per season class (VIS-R7)
 }
 
 @group(2) @binding(0) var albedo_texture: texture_2d<f32>;
@@ -275,14 +276,7 @@ fn foliage_season(albedo: vec3<f32>, cls: f32, seed: f32, leaves: f32, up: f32, 
     if conifer {
         turn = 0.0;
     }
-    var target_color = vec3<f32>(0.20, 0.07, 0.03);
-    if cls < 0.5 {
-        target_color = vec3<f32>(0.19, 0.13, 0.035);
-    } else if cls < 1.5 {
-        target_color = vec3<f32>(0.30, 0.10, 0.018);
-    } else if cls > 3.5 {
-        target_color = vec3<f32>(0.34, 0.22, 0.03);
-    }
+    let target_color = params.autumn[clamp(i32(cls + 0.5), 0, 4)].rgb;
     let autumn = mix(albedo, target_color * (lum / 0.09) * mix(0.8, 1.2, leaves), turn * 0.85);
     // Winter (TS-T2): bare broadleaves grey-brown (never black dots), conifers frosted on the top
     // of the crown, more with the altitude, a share of them staying green in the lowlands.

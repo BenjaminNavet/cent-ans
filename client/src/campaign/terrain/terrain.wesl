@@ -1827,11 +1827,16 @@ fn dark_masses(cm_in: vec3<f32>, soft: vec3<f32>, q: vec2<f32>, footprint: f32) 
     }
     var cm = mix(cm_in, soft, dark * 0.6);
     let l = max(luma(cm), 1e-3);
-    let lifted = max(l, mix(floor_l, l, ground.dark.w));
+    // VIS-R7: the floor lifts the hue (chroma of the fully lifted colour) but only `value_lift` of
+    // the value, so the forest masses stay darker than the crops.
+    let full = max(l, mix(floor_l, l, ground.dark.w));
+    let c_full = cm * (full / l);
+    let lifted_l = mix(l, full, ground.macro_amp.z);
+    let toned = max(vec3<f32>(lifted_l) + (c_full - vec3<f32>(full)), vec3<f32>(0.0));
     let crowns = (vnoise(q * 0.22 + vec2<f32>(7.9)) - 0.5) * 0.9
         + (vnoise(q * 0.9) - 0.5) * 0.7 * (1.0 - smoothstep(0.4, 1.0, footprint))
         + (vnoise(q * 2.7 + vec2<f32>(3.1)) - 0.5) * 0.5 * (1.0 - smoothstep(0.15, 0.4, footprint));
-    cm = cm * mix(1.0, lifted / l * (1.0 + ground.macro_amp.w * crowns * 2.0), dark);
+    cm = mix(cm, toned * (1.0 + ground.macro_amp.w * crowns * 2.0), dark);
     return cm;
 }
 

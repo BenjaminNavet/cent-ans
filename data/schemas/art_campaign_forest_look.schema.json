@@ -213,6 +213,24 @@
         }
       }
     },
+    "seasons": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "VIS-R7 : couleur des arbres par classe de saison (chaque essence a sa classe dans tree_species).",
+      "properties": {
+        "autumn": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "oak": { "$ref": "#/$defs/rgb" },
+            "beech": { "$ref": "#/$defs/rgb" },
+            "conifer": { "$ref": "#/$defs/rgb" },
+            "hedge": { "$ref": "#/$defs/rgb" },
+            "gold": { "$ref": "#/$defs/rgb" }
+          }
+        }
+      }
+    },
     "open": {
       "type": "object",
       "additionalProperties": false,
@@ -242,6 +260,12 @@
           "type": "number",
           "minimum": 0,
           "description": "Les arbres hors forêt plus proches que cela du foyer restent tous dessinés (haies proches)."
+        },
+        "focus_cut": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "VIS-R7 : 1, l'exemption du regard s'efface aussi avec la distance caméra (plus aucun arbre isolé au-delà de far_distance si far_share = 0) ; 0, ancien comportement."
         },
         "focus_fade_units": {
           "type": "number",

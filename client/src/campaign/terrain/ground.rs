@@ -64,7 +64,7 @@ pub struct GroundParams {
     /// GA4 macro variation: noise periods (map px) and octave weights.
     pub macro_periods: Vec4,
     pub macro_weights: Vec4,
-    /// GA4 tint amplitude, luminance amplitude (0 = off); TB6 canopy relief of the dark masses.
+    /// GA4 tint amplitude, luminance amplitude (0 = off); VIS-R7 value lift of the dark masses (1 = old, 0 = hue only); TB6 canopy relief.
     pub macro_amp: Vec4,
     /// TB6 dark forest masses of the colour map: floor (linear luminance, 0 = off), knee,
     /// feather (mip levels), kept contrast.
@@ -753,6 +753,7 @@ pub fn apply_dark_masses(block: &Value, params: &mut GroundParams) {
         num("feather", 2.5),
         num("keep", 0.25),
     );
+    params.macro_amp.z = num("value_lift", 1.0);
     params.macro_amp.w = num("canopy", 0.12);
 }
 
