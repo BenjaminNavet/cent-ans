@@ -82,3 +82,4 @@ Suite : choisir les refontes prioritaires dans les audits et les lancer en lots 
 - Relancés : VIS-R1, VIS-R2, R1 renommée, ECO-R0, HIST4, IA-CAV. FPS gardé pour la fin (mesures A/B illisibles sur machine chargée : à lancer seul).
 - VIS-R2 fusionné (ADR 0797) : lavis retiré du cœur, bande au bord ; critère valeur Guyenne/Saintonge −19 % accepté (sol sombre, R1/R3) ; coût GPU à mesurer avec le lot FPS.
 - Lancés : XP-LISIBLE, BANC-1, VIS-R7 (végétation), VIS-R6a (images Z-Image des 4 maquettes, hors dépôt ~/dev/cent-ans-raw/vis-r6/, Meshy ensuite). En attente de VIS-R1 : R4 montagne, R3 sol, R5 eau (mêmes shaders).
+- ECO-R0 fusionné (diplomatie : trêve en données, truce_started, contrôle or/tribut, Auld Alliance ; sonde eco_series ; 5 métriques, bandes provisoires à recalibrer sur la passe longue). Lancé : ECO-R2a (semonce féodale).
