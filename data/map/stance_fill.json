@@ -1,5 +1,5 @@
 {
-  "description": "Lot RJ-d (ADR 0175) : lavis translucide de chaque province selon la position diplomatique de son contrôleur envers le joueur (or : nous ; vert : alliés et vassaux ; rouge : ennemis en guerre ; gris très léger : les autres). Les couleurs nous / ennemi / ami sont celles des frontières (stance_cues.json, ADR 0155) ; la province occupée garde les hachures de l’occupant (faction_borders.json), peintes par-dessus. Rendu seulement.",
+  "description": "Lot RJ-d (ADR 0175) : lavis translucide de chaque province selon la position diplomatique de son contrôleur envers le joueur (or : nous ; vert : alliés et vassaux ; rouge : ennemis en guerre ; gris très léger : les autres). Les couleurs nous / ennemi / ami sont celles des frontières (stance_cues.json, ADR 0155) ; la province occupée garde les hachures de l’occupant (faction_borders.json), peintes par-dessus. Lot VIS-R2 : en vue 3D (political, sous zoom.flat_from_distance), la position ne se lit que par la bande intérieure dégradée (band) ; l’aplat (alpha) ne revient qu’au parchemin et au-delà de flat_from_distance. Rendu seulement.",
   "colors": {
     "other": "#8a8478"
   },
@@ -9,12 +9,29 @@
     "friend": 0.26,
     "other": 0.08
   },
+  "band": {
+    "width_px": {
+      "near": 8.0,
+      "mid": 4.0,
+      "near_distance": 150.0,
+      "mid_distance": 500.0
+    },
+    "alpha": {
+      "self": 0.55,
+      "enemy": 0.5,
+      "friend": 0.45,
+      "other": 0.12
+    },
+    "falloff": 1.6
+  },
   "saturation": 0.5,
   "flat_mix": 0.0,
   "zoom": {
     "near_distance": 60.0,
     "far_distance": 260.0,
-    "near_scale": 0.35
+    "near_scale": 0.35,
+    "flat_from_distance": 900.0,
+    "flat_fade_distance": 300.0
   },
   "parchment_scale": 0.55,
   "modes": {

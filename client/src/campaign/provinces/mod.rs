@@ -16,6 +16,7 @@ pub use picker::{
     SelectedProvince, SurfaceHeight,
 };
 
+pub mod band;
 pub mod borders;
 pub mod data;
 pub mod drape;

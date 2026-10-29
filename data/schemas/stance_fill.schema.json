@@ -4,7 +4,7 @@
   "title": "Lavis par position diplomatique de la carte de campagne (RJ-d)",
   "description": "Remplissage translucide des provinces selon la position du contrôleur envers le joueur (ADR 0175). Couleurs nous / ennemi / ami reprises de stance_cues.json ; réglages d'opacité, d'atténuation de près et de parchemin. Rendu seulement.",
   "type": "object",
-  "required": ["colors", "alpha", "saturation", "zoom", "parchment_scale", "modes"],
+  "required": ["colors", "alpha", "band", "saturation", "zoom", "parchment_scale", "modes"],
   "additionalProperties": false,
   "$defs": {
     "color": { "$ref": "common.schema.json#/$defs/color_hex" },
@@ -31,16 +31,49 @@
         "other": {"type": "number", "minimum": 0, "maximum": 0.3}
       }
     },
+    "band": {
+      "type": "object",
+      "description": "VIS-R2 : bande intérieure dégradée à la couleur de position, seule lecture politique en vue 3D sous zoom.flat_from_distance. Largeur en pixels écran (interpolée de near à mid entre near_distance et mid_distance), alpha au bord par position, falloff = exposant du dégradé (1 au bord, 0 à width_px).",
+      "required": ["width_px", "alpha", "falloff"],
+      "additionalProperties": false,
+      "properties": {
+        "width_px": {
+          "type": "object",
+          "required": ["near", "mid", "near_distance", "mid_distance"],
+          "additionalProperties": false,
+          "properties": {
+            "near": {"type": "number", "minimum": 1, "maximum": 16},
+            "mid": {"type": "number", "minimum": 1, "maximum": 16},
+            "near_distance": {"type": "number", "minimum": 0},
+            "mid_distance": {"type": "number", "minimum": 0}
+          }
+        },
+        "alpha": {
+          "type": "object",
+          "required": ["self", "enemy", "friend", "other"],
+          "additionalProperties": false,
+          "properties": {
+            "self": {"type": "number", "minimum": 0, "maximum": 0.9},
+            "enemy": {"type": "number", "minimum": 0, "maximum": 0.9},
+            "friend": {"type": "number", "minimum": 0, "maximum": 0.9},
+            "other": {"type": "number", "minimum": 0, "maximum": 0.4}
+          }
+        },
+        "falloff": {"type": "number", "minimum": 0.5, "maximum": 4}
+      }
+    },
     "saturation": {"$ref": "#/$defs/unit", "description": "Part de la chromaticité de la couleur de position dans la teinte (à luminance du sol conservée)."},
     "zoom": {
       "type": "object",
       "description": "Atténuation de près (distance caméra, unités carte) : opacité × near_scale sous near_distance, pleine au-delà de far_distance.",
-      "required": ["near_distance", "far_distance", "near_scale"],
+      "required": ["near_distance", "far_distance", "near_scale", "flat_from_distance", "flat_fade_distance"],
       "additionalProperties": false,
       "properties": {
         "near_distance": {"type": "number", "minimum": 0},
         "far_distance": {"type": "number", "minimum": 0},
-        "near_scale": {"$ref": "#/$defs/unit"}
+        "near_scale": {"$ref": "#/$defs/unit"},
+        "flat_from_distance": {"type": "number", "minimum": 0, "description": "VIS-R2 : l'aplat (alpha) ne revient qu'à partir de cette distance (défaut 900) ; en dessous, bande seule."},
+        "flat_fade_distance": {"type": "number", "minimum": 1, "description": "Longueur du fondu bande vers aplat après flat_from_distance."}
       }
     },
     "flat_mix": {"$ref": "#/$defs/unit", "description": "A6-C1 : part d'aplat de couleur de position (luminance non conservée) ajoutée à la teinte, pour que le territoire se lise en vue moyenne et lointaine. 0 = teinte seule."},

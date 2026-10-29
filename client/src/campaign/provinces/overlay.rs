@@ -13,6 +13,7 @@ use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use std::collections::HashMap;
 
+use super::band::{self, BandParams};
 use super::borders::{self, BorderCounts, BorderStyle, Edge, smoothstep};
 use super::data::ProvinceMap;
 use super::drape::{BorderShape, OverlayParams, ProvinceBorderMaterial, ProvinceFillMaterial};
@@ -73,6 +74,12 @@ pub struct OverlayState {
     pub doubles: Vec<(u16, String, String)>,
     fill_image: Handle<Image>,
     hatch_image: Handle<Image>,
+    /// Stance colours of the 3D inner band (VIS-R2), painted with the fill.
+    band_image: Handle<Image>,
+    band_colors: Vec<Srgba>,
+    /// Band / flat-wash parameters (`stance_fill.json`) and the last flat-wash weight (dump).
+    pub band: BandParams,
+    pub band_flat: f32,
     fill_material: Handle<ProvinceFillMaterial>,
     fill_mesh: Handle<Mesh>,
     border_mesh: Handle<Mesh>,
@@ -178,6 +185,7 @@ fn load_province_map(
     );
     fill.sampler = ImageSampler::nearest();
     let hatch_image = images.add(fill.clone());
+    let band_image = images.add(fill.clone());
     let fill_image = images.add(fill);
     let fill_material = fill_materials.add(ProvinceFillMaterial {
         params: OverlayParams::new(config.fill_height, LIFT_PER_DISTANCE),
@@ -185,6 +193,7 @@ fn load_province_map(
         relief_floor: Handle::default(),
         fill: fill_image.clone(),
         hatch_fill: hatch_image.clone(),
+        band_fill: band_image.clone(),
     });
     let shape = BorderShape::from_tuning(&tuning.borders);
     let border_material = border_materials.add(ProvinceBorderMaterial {
@@ -256,6 +265,10 @@ fn load_province_map(
         doubles: Vec::new(),
         fill_image,
         hatch_image,
+        band_image,
+        band_colors: Vec::new(),
+        band: BandParams::from_tuning(&tuning.fill),
+        band_flat: 1.0,
         fill_material,
         fill_mesh,
         border_mesh,
@@ -511,6 +524,23 @@ fn refresh_overlays(
             }
         }
         overlay.doubles = modes::double_allegiances(&overlay.view, map.max_index());
+        let band_colors = band::province_band_colors(
+            mode.mode,
+            map.max_index(),
+            &overlay.view,
+            &tuning,
+            stance_fill,
+        );
+        if band_colors != overlay.band_colors {
+            let (fw, fh) = overlay.fill_pixels;
+            if let Some(mut image) = images.get_mut(&overlay.band_image) {
+                let mut data = image.data.take().unwrap_or_default();
+                data.resize((fw * fh * 4) as usize, 0);
+                paint_fill(&map, &band_colors, fw, fh, &mut data);
+                image.data = Some(data);
+            }
+            overlay.band_colors = band_colors;
+        }
         if colors != overlay.colors {
             let (fw, fh) = overlay.fill_pixels;
             if let Some(mut image) = images.get_mut(&overlay.fill_image) {
@@ -624,6 +654,32 @@ fn fade_with_zoom(
     let fill = distance.map_or(1.0, |d| {
         near_scale + (1.0 - near_scale) * smoothstep(near, far, d)
     });
+    // VIS-R2: stance band in 3D (political mode, stance wash on); the flat wash only from
+    // `flat_from_distance` or on the parchment. Other modes keep their plain fills.
+    let band = overlay.band;
+    let band_on = mode.mode == MapMode::Political && overlay.stance_fill;
+    let band_params = if band_on {
+        let d = distance.unwrap_or(0.0);
+        let flat = if distance.is_some() {
+            band.flat_weight(d, strategic)
+        } else {
+            1.0
+        };
+        Vec4::new(
+            band.width_px(d),
+            band.falloff,
+            flat,
+            FILL_DOWNSCALE as f32,
+        )
+    } else {
+        Vec4::ZERO
+    };
+    overlay.band_flat = if band_on { band_params.z } else { 1.0 };
+    if let Some(mut m) = fill_materials.get_mut(&overlay.fill_material)
+        && m.params.band != band_params
+    {
+        m.params.band = band_params;
+    }
     if (border - overlay.border_alpha).abs() > 1e-3 {
         overlay.border_alpha = border;
         if let Some(mut m) = border_materials.get_mut(&overlay.border_material) {

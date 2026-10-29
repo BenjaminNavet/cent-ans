@@ -17,6 +17,8 @@ struct Params {
     lift_per_distance: f32,
     pad0: f32,
     pad1: f32,
+    // Fill-only block (OverlayParams.band, VIS-R2); keeps the layout of the shared Rust struct.
+    band: vec4<f32>,
 }
 
 struct Shape {

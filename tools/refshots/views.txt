@@ -5,6 +5,8 @@
 #   battle low <distance m>           : même bataille, caméra basse sur le régiment 0
 #   siege <id de démo>                : démonstration de siège (data/ui/battle_demos.json), caméra d'ouverture
 camp_2600 campaign 1.50 49.00 2600
+camp_guyenne campaign -0.57 44.84 300
+camp_calais campaign 1.85 50.95 250
 camp_0600 campaign 1.50 49.00 600
 camp_0200 campaign 2.35 48.85 200
 camp_0060 campaign 2.35 48.85 60

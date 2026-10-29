@@ -18,3 +18,13 @@ def test_neutrals_stay_lighter_than_stances() -> None:
     assert alpha["other"] < min(alpha["self"], alpha["enemy"], alpha["friend"])
     assert tuning["zoom"]["near_distance"] < tuning["zoom"]["far_distance"]
     assert "diplomacy" not in tuning["modes"]
+
+
+def test_band_defaults_keep_the_wash_off_the_province_core() -> None:
+    """VIS-R2: 3D reads the stance by an inner band of 4-8 px; the flat wash only returns far out."""
+    tuning = _load("map/stance_fill.json")
+    band = tuning["band"]
+    assert 4 <= band["width_px"]["mid"] <= band["width_px"]["near"] <= 8
+    assert band["width_px"]["near_distance"] < band["width_px"]["mid_distance"]
+    assert band["alpha"]["other"] < min(band["alpha"]["self"], band["alpha"]["enemy"], band["alpha"]["friend"])
+    assert tuning["zoom"]["flat_from_distance"] >= tuning["zoom"]["far_distance"]

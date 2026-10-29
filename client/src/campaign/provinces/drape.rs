@@ -56,6 +56,9 @@ pub struct OverlayParams {
     pub hatch: f32,
     /// Fill only: 1 = Feudal mode, the second texture is striped over the first.
     pub feudal: f32,
+    /// Fill only (VIS-R2): `(band width px, falloff, flat-wash weight, world units per fill texel)`;
+    /// the last component is 0 outside the political mode (no band: plain wash).
+    pub band: Vec4,
 }
 
 impl OverlayParams {
@@ -66,6 +69,7 @@ impl OverlayParams {
             lift_per_distance,
             hatch: 0.0,
             feudal: 0.0,
+            band: Vec4::ZERO,
         }
     }
 
@@ -89,6 +93,9 @@ pub struct ProvinceFillMaterial {
     /// Holder colours of the Feudal mode (same layout as `fill`, transparent elsewhere).
     #[texture(5)]
     pub hatch_fill: Handle<Image>,
+    /// Stance colours of the inner band, alpha = edge opacity (VIS-R2, political mode only).
+    #[texture(6, sample_type = "float", filterable = false)]
+    pub band_fill: Handle<Image>,
 }
 
 /// Screen-space shape of the border bands (`border.wesl`, `Shape`).
