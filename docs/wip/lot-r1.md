@@ -17,6 +17,18 @@ La renommée de maison sera `CampaignState::house_renown(data)` (entier, jauge) 
 `state.acts.renown` (faits : tour, source, points, cause). Le lot TUTO peut afficher un champ `prestige` de faction
 provisoire ; à terme il sera remplacé par cette renommée (pas de doublon de règle dans `core/`).
 
-## Prochaine étape
-cargo check workspace → tests acts, timeline, ambitions → fixture v12 → sonde « après » (out/r1/run_probe.sh out/r1/after)
-→ calibrage renown_target / points → seuil victoire → ADR + INDEX.
+## Prochaine étape (PAUSE demandée par le joueur, 29/10)
+Le workspace compile sans avertissement (`cargo check --workspace --all-targets`). Aucun test lancé depuis la réécriture.
+1. Tests ciblés : `cargo test -p sim-campaign --test campaign_life acts::` (5 tests R1 + ambitions), `--lib acts::`
+   (migration v11→v12), `seed-bots --test timeline`, `seed-bots --test ambitions` (R1-2, 4 × 3 actes × 3 maisons).
+2. Fixture v12 : `CENT_ANS_WRITE_FIXTURE=1 cargo test -p game-api --test save_fixture -- write_fixture`, puis le test.
+3. Sonde « avant » : relancer `BIN=out/r1/campaign_timeline_before CENT_ANS_DATA_DIR=out/r1/data_before/data
+   tools/heavy.sh out/r1/run_probe.sh out/r1/before` (interrompue ; out/ non versionné, à recréer si perdu :
+   binaire = sonde compilée sur 95b504043, données = `git archive 95b504043 data`).
+4. Sonde « après » (`out/r1/after`), calibrage `renown_target` et points (passif ≤ 20, IA 25-45), seuil de victoire =
+   médiane IA + 15, chiffres dans l'ADR XXXX ; INDEX déjà marqué (XXXX à numéroter à la fusion).
+5. fmt, clippy, tests complets, seed bots rapides, passe longue en arrière-plan.
+
+## Client (à afficher plus tard)
+`ActView`/`TransitionView` gagnent `renown`, `house_renown`, `renown_recent` ; `ActPolicyRow` gagne
+`renown_bonus_percent` ; deux ambitions à choisir (`policy_pending` tant qu'il en manque). Noms de champs inchangés.
