@@ -356,3 +356,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0793 | [ECO : économie resserrée, attrition hors territoire, réserve de recrutement](0793-economie-attrition-reserve.md) | accepté |
 | 0794 | [Mémoire de campagne : textures de modèles BC1 en assets neufs, mesure avec relief](0794-textures-de-modeles-en-assets-neufs.md) | accepté |
 | 0795 | [MEM5 : les « 3 Go graphiques non comptés » sont le tas mimalloc](0795-mem5-tas-mimalloc-etiquete-ioaccelerator.md) | accepté |
+| 0796 | [TUTO : le champ `prestige` des factions est supprimé](0796-tuto-prestige-champ-supprime.md) | accepté |
