@@ -108,10 +108,11 @@ pub(super) fn plan_mass(
         (first, 0.0)
     };
     let t = &units[target];
-    // Not worth riding at shooters the group cannot beat.
+    // Not worth riding at shooters the group cannot beat, unless the arrows
+    // already fall on it (waiting would only bleed it).
     let own: f64 = group.iter().map(|&i| unit_power(&units[i])).sum();
     let theirs: f64 = cluster.iter().map(|&j| unit_power(&units[j])).sum();
-    if own < theirs * rules.min_power_ratio {
+    if own < theirs * rules.min_power_ratio && !hit {
         return None;
     }
     // The line forms beyond the longest reach of the cluster's shooters.
