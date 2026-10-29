@@ -22,9 +22,9 @@ if (( force == 0 )) && python3 -c "import sys;sys.exit(0 if float(sys.argv[1]) >
 	exit 3
 fi
 export CENT_ANS_MUTE=1
-status=0
+rc=0
 check() { # <kind: map|battle> <report>
-	python3 - "$conf" "$1" "$2" "$load" <<'PY' || status=1
+	python3 - "$conf" "$1" "$2" "$load" <<'PY' || rc=1
 import json, sys
 conf, kind, report, load = sys.argv[1:5]
 limits = json.load(open(conf))[kind]
@@ -62,11 +62,11 @@ sys.exit(1 if bad else 0)
 PY
 }
 if [[ $mode == map || $mode == all ]]; then
-	"$here/bench.sh" guard --bench-distance 30 --bench-pan-only --offscreen > /dev/null || status=1
+	"$here/bench.sh" guard --bench-distance 30 --bench-pan-only --offscreen > /dev/null || rc=1
 	check map "$root/out/bench/map_guard.json"
 fi
 if [[ $mode == battle || $mode == all ]]; then
-	"$here/bench.sh" guard --bench-battle --offscreen > /dev/null || status=1
+	"$here/bench.sh" guard --bench-battle --offscreen > /dev/null || rc=1
 	check battle "$root/out/bench/battle_guard.json"
 fi
-exit $status
+exit $rc
