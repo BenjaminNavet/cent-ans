@@ -385,6 +385,8 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
     let view = &mix["view"];
     let geo = &mix["geo"];
     let d = &out.clone();
+    // `CENT_ANS_PERF_OFF=parcel` restores the previous ground (A/B bench on one binary).
+    let typed = mix["landscapes"].is_object() && !crate::campaign::perf_switch::off("parcel");
     out.v0 = Vec4::new(
         f(&view["fade_start"], d.v0.x),
         f(&view["fade_end"], d.v0.y),
@@ -417,7 +419,13 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
     );
     out.v5 = Vec4::new(
         d.v5.x,
-        f(&view["lum_band"], d.v5.y),
+        // VIS-R3b: the typed forms may stray further from the colormap luminance (contrast
+        // between the cultures); `CENT_ANS_PERF_OFF=parcel` keeps the former band.
+        if typed {
+            f(&view["lum_band_typed"], f(&view["lum_band"], d.v5.y))
+        } else {
+            f(&view["lum_band"], d.v5.y)
+        },
         f(&view["hue_keep"], d.v5.z),
         d.v5.w,
     );
@@ -441,8 +449,6 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
         1.0,
     );
     // VIS-R3b: colormap share at the closest and the typed parcel forms.
-    // `CENT_ANS_PERF_OFF=parcel` restores the previous ground (A/B bench on one binary).
-    let typed = mix["landscapes"].is_object() && !crate::campaign::perf_switch::off("parcel");
     out.pc0 = Vec4::new(
         if typed {
             f(&view["colormap_near_share"], d.pc0.x)

@@ -234,6 +234,12 @@
           "minimum": 0.5,
           "maximum": 10
         },
+        "lum_band_typed": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "VIS-R3b : écart de luminance relatif maximal d'une parcelle à la carte de couleur avec le parcellaire typé (lum_band sans)."
+        },
         "colormap_near_share": {
           "type": "number",
           "minimum": 0,

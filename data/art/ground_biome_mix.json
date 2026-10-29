@@ -432,7 +432,8 @@
     "far_hedge": 0.4,
     "open_farm": 0.8,
     "cell_scale": 2.0, "sole_scale": 0.38, "sole_share": 0.4, "far_gain": 1.0, "far_start": 2.5, "far_end": 6.0, "terroir_scale": 0.45, "terroir_start": 1.0, "terroir_end": 2.2, "far_edge": 0.35, "patch_sat": 1.1,
-    "colormap_near_share": 0.12
+    "colormap_near_share": 0.12,
+    "lum_band_typed": 0.7
   },
   "landscapes": {
     "description": "VIS-R3b (ADR XXXX) : parcellaire typé. Une forme par type de paysage ; la forme d'une ligne de la table est donnée par `form` (biome ci-dessus ou paysage de data/map/agri_landscapes.json). aspect = rapport longueur/largeur des cellules [min, max] (0 : garder `strip` de la ligne) ; cell_scale multiplie `cell_m` ; warp multiplie la déformation de la grille ; brick décale les rangées (0 grille alignée, 1 décalage libre) ; len_var varie la longueur des cellules d'une rangée ; ring_* : trois soles en couronnes autour des finages (terroir R) avec seuils, centres du tirage de culture et dispersion ; hedge_px : largeur de la haie à l'écran (px) jusqu'à hedge_range (empreinte, px carte par px écran) ; furrow_* : stries sous-pixel des labours (amplitude, pas en m) ; reassign : part des parcelles dont la classe de culture est retirée selon `shares`. shares : poids par saison de wheat, green, ploughed, fallow, meadow, hay (classes 0 à 5 de season_field).",
