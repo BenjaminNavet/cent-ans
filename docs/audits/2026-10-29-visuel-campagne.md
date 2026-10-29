@@ -286,9 +286,9 @@ eau profonde < forêt < pré < labour < chaume et blé mûr < chemin et craie < 
 |---|---|---|
 | Forêt de feuillus (canopée de loin) | 0,16 0,24 0,11 | toujours plus sombre que tout champ ; résineux plus froids, 0,12 0,19 0,12 |
 | Pré, prairie de fauche | 0,36 0,50 0,22 | herbe de référence de la bible |
-| Blé d'hiver en herbe (printemps) | 0,42 0,55 0,24 | plus clair et plus jaune que le pré |
-| Labour, jachère | 0,45 0,36 0,26 | terre brune ; craie de Champagne 0,62 0,58 0,50 |
-| Chaume, blé mûr (été) | 0,70 0,60 0,36 | le clair de l'été |
+| Blé d'hiver en herbe (printemps) | 0,40 0,53 0,23 | plus jaune que le pré, un peu plus clair, mais plus sombre que le labour (VIS-R3a) |
+| Labour, jachère | 0,62 0,49 0,35 | terre brune claire, **plus claire que le pré** (révisé en VIS-R3a : l'ancienne cible 0,45 0,36 0,26 donnait un labour plus sombre que le pré, contraire à l'ordre de valeur) ; craie de Champagne 0,62 0,58 0,50 |
+| Chaume, blé mûr (été) | 0,70 0,60 0,36 | le clair de l'été ; dans la carte de couleur (saison moyenne) : blé 0,72 0,61 0,34, orge 0,66 0,60 0,36 |
 | Vigne | 0,40 0,40 0,24 en rangs | lignes de 2 tons, teinte rouille en automne |
 | Lande, garrigue, meseta | 0,55 0,47 0,30 | Castille ocre ; Écosse brun-violet 0,38 0,32 0,30 |
 | Roche (calcaire / granite) | 0,62 0,60 0,56 / 0,45 0,44 0,43 | |
@@ -297,6 +297,13 @@ eau profonde < forêt < pré < labour < chaume et blé mûr < chemin et craie < 
 | Mer, plateau à moins de 50 m | 0,12 0,28 0,30 | |
 | Mer, haut-fond et estran | 0,30 0,42 0,36 | sable et vase, sans cyan |
 | Toits | tuile 0,55 0,30 0,20 ; ardoise 0,30 0,32 0,36 ; chaume 0,60 0,50 0,30 | les villages sont les seules taches chaudes du sol |
+
+**Révision VIS-R3a (carte de couleur rebâtie).** L'ordre de valeur forêt < pré < labour < chaume est imposé par un test
+(`tools/tests/test_colormap.py::test_value_hierarchy_forest_meadow_plough_stubble`) : luminance moyenne de classe, contraste de
+culture appliqué. Pour le tenir, le labour de la bible passe de 0,45 0,36 0,26 à 0,62 0,49 0,35 (clair en vue aérienne, limon sec) et
+le blé en herbe est un peu abaissé. Les routes de la carte de couleur suivent la spec R3a (0,55 0,48 0,36), donc sous le chaume en
+valeur : à la différence de l'ordre « chemin et craie » ci-dessus, elles ne se lisent que par la teinte et le tracé ; le trait
+vectoriel du client porte la lisibilité.
 
 ### Matières, par distance caméra (u = unité carte ≈ 719 m)
 
