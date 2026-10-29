@@ -1,7 +1,7 @@
 # Lot HIST4 : historique et UX (boucle juge 2, itération 2)
 
 Source : `out/juge2/iter-02-histux.md`. Branche : worktree `agent-afbbd13049fc29b57`. ADR : `docs/decisions/XXXX-hist4-conseil-monnaies-contrastes.md`.
-PAUSE demandée par le joueur : travail arrêté, état committé.
+REPRISE faite : rebase sur main OK ; vérifications terminées (voir ci-dessous).
 
 ## Fait
 - 2 Conseil : `council::office_allows` (rôles/traits exclus, `holder_roles` aumônier=clerc, `preferred_roles`, `title_keyword` pour les
@@ -18,10 +18,7 @@ PAUSE demandée par le joueur : travail arrêté, état committé.
   Leulinghen/trêve de 28 ans, Bulle d'or (hiver 1355), codex objectifs. Apostrophes des voix : par conception (clé de cache audio).
   Étoile : correct. Sanudo/Blois : laissés (incertains).
 
-## Reste (prochaine étape)
-- Lancer : `cd core && cargo fmt --all && cargo clippy --all-targets -- -D warnings && cargo test --workspace` (clippy core OK ;
-  tests workspace non terminés : régénérations de tests de graine possibles).
-- Client : `cargo clippy --features dev --all-targets -- -D warnings && cargo test --features dev` (jamais compilé depuis les
-  changements : `fr::symbol`, hint `foreign_provinces`, `currency_title`, `StartSheet.currency_symbol`).
-- `uv run --project tools pytest` : tout passait sauf heraldry (corrigé, 5 passed) ; relancer test_schemas (next_hints corrigé).
-- Seed bots rapides ; entête « Acte 1 sur 3 » identique pour toutes les factions (non traité).
+## Vérifications finales
+- core : fmt, clippy -D warnings, test --workspace : verts. Client : clippy vert ; tests 1507 ok, 1 échec `markers::dn::real_table_and_glbs`
+  (GLB city_west absent du worktree, sans lien). pytest schémas/conseil/heraldry : 2422 ok. Seed bots rapides : 0 constat.
+- Non traité : entête « Acte 1 sur 3 » identique pour toutes les factions ; accroches de choix non calculées depuis les données.

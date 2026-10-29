@@ -560,7 +560,7 @@ fn budget_tab(pane: &mut Kids, theme: &UiTheme, assets: &AssetServer, view: &Fac
             Text::new(fr::amount(economy.treasury)),
             theme.text_font(true, false, UiType::Heading.size()),
             TextColor(fr::color_of(economy.treasury)),
-            Tooltip::new(format!("[b]Trésor[/b]\n{} ({}) en caisse ; le solde de la saison s’y ajoute en fin de tour.", fr::money_plural(), fr::symbol())),
+            Tooltip::new(&format!("[b]Trésor[/b]\n{} ({}) en caisse ; le solde de la saison s’y ajoute en fin de tour.", fr::money_plural(), fr::symbol())),
         ));
     });
     // Tax brackets.
