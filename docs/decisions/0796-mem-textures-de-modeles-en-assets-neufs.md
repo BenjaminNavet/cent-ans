@@ -37,10 +37,11 @@ GPU « non expliqués » ne sont pas dans les images : voir le point 3.
 2. **Outils de mesure** (cherry-pick du lot MEM3 resté en branche) : `CENT_ANS_MEMLOG=<s>` (journal d'empreinte, Metal
    alloué, images, maillages), `memory.metal_allocated_mib` dans le dump, `gpucensus` (images réellement présentes côté
    rendu par format et classe de taille, nombre de pipelines), `tools/bevy_bench/mem_protocol.sh`. La limite d'images en
-   vol des runs masqués (`gpu_pacing`) est **désactivée par défaut** (`CENT_ANS_GPU_LATENCY=2` pour l'essayer) : aucun
-   gain d'empreinte mesuré (5 264 Mo sans limite, 5 394 Mo avec).
+   vol des runs masqués (`gpu_pacing`, 2 par défaut, `CENT_ANS_GPU_LATENCY=0` pour la lever) est **conservée** : en
+   bataille elle ramène l'empreinte du banc de 6 540 Mo à 3 560 Mo à temps d'image égaux (le CPU prenait de l'avance
+   sur le GPU, une fenêtre réelle est cadencée par la chaîne d'échange) ; en campagne, aucune différence.
 3. **Budget** (`perf_thresholds.json`) : l'empreinte de campagne mesurée avec le jeu complet est de 5,4 Go au repos et
-   7,3 Go en fin de banc (descentes), pic RSS 4,9 Go. Seuils de **non-régression** relevés à 7 800 / 5 400 Mo ;
+   7,3 Go en fin de banc (descentes), pic RSS 4,9 Go. Seuils de **non-régression** : carte 7 800 Mo (pic RSS 5 400), bataille 4 500 Mo (3 560 mesurés, objectif 3 500), mêlée p50 17,5 ms (16,8 mesurés, objectif 16,1) ;
    l'objectif de 4 Go reste noté dans le fichier et dans `docs/performance-memoire.md` tant que le point 3 n'est pas élucidé.
    Chaque mesure doit se faire dans un worktree où `data/map/pyramid` existe.
 4. `perf_guard.sh` : `status` est une variable en lecture seule de zsh ; renommée `rc`. La garde tourne de nouveau.

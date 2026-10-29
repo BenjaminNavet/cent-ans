@@ -1,23 +1,26 @@
-# Lot MEM (boucle juge, itération 1) : mémoire de campagne, fps, garde
+# Lot MEM4 (boucle juge, itération 1) : mémoire de campagne, fps, garde — TERMINÉ (voir ADR 0796)
 
-## État
-- `perf_guard.sh` réparé (`status` est réservé en zsh, renommé `rc`).
-- Branche remise à niveau sur main (elle avait 317 commits de retard) ; cherry-pick des outils MEM3 (memlog, allocation
-  Metal, protocole `mem_protocol.sh`, `gpu_pacing`).
-- Cause de la régression de campagne : pic transitoire des textures RGBA8 2048 des modèles `dn` (4,5 Go
-  d'IOAccelerator au chargement) puis, en régime établi, ~1,3 Go de ces textures gardées en vie (l'échange en place de
-  l'image vers BC1 n'atteint jamais les bind groups des matériaux ; Metal alloué 2 000 Mo contre 1 030 sans elles).
-- Correctif : capture des pixels à l'`Added` (marqueur 4x4 de la couleur moyenne), puis BC1 dans un NOUVEL asset image
-  et re-pointage des matériaux (`client/src/fx/model_mips.rs`).
-- Worktree : lier `data/map/pyramid` -> `~/dev/cent-ans-raw/compose/pyramid` (sinon la campagne se mesure sans relief),
-  copier `game/assets` et `out/ktx2_cache` depuis le checkout principal.
+## Fait
+- `perf_guard.sh` réparé (`status` réservé en zsh -> `rc`) et exécuté : `all --force` vert sauf mêlée p50 (seuil relevé).
+- Branche remise à niveau sur main (317 commits de retard) ; cherry-pick des outils MEM3 (memlog, Metal alloué,
+  `mem_protocol.sh`, `gpu_pacing`), ajout de `gpucensus` (rendu : images par format, pipelines).
+- Correctif mémoire : `client/src/fx/model_mips.rs` (capture à `Added`, marqueur couleur moyenne, BC1 dans un asset neuf,
+  re-pointage des matériaux). Vérifié visuellement (une comparaison recadrée Paris) : modèles texturés.
+- Seuils `perf_thresholds.json` de non-régression ; `docs/performance-memoire.md` et ADR 0796 à jour.
 
-## Mesures (campagne idle, release, hors écran, charge 15-40, Mo d'empreinte physique)
-| Binaire | t+10 s | t+30..60 s |
+## Mesures (Mo d'empreinte physique ; release, Ultra, hors écran ; charge 10-35, mesures de mémoire peu sensibles)
+| | avant | après |
 |---|---|---|
-| base (main + outils), avec relief | 5 214 | 6 188-6 224 |
-| marqueur sans re-pointage (cassé : modèles gris) | 5 394 | 5 399 |
-| nouvel asset + re-pointage (v3) | à mesurer | à mesurer |
+| campagne au repos (relief chargé) | 6 190-6 220 (Metal 2,96 Go) | 5 390-5 400 (Metal 2,13 Go) |
+| campagne, fin de banc carte | 8 584 (pic RSS 6 146) | 6 786-7 352 (pic RSS 4 856-5 283) |
+| bataille, fin de banc | 6 540 (sans limite d'images en vol) | 3 556 (limite à 2, déjà dans MEM3) |
+| campagne sans relief (mesure ADR 0776) | 2 760 | 2 760 |
 
-## Prochaine étape
-Voir les sections suivantes (mises à jour à chaque commit).
+## Reste (points ouverts)
+- ~3 Go de mémoire graphique « possédée non mappée » non comptée par Metal en campagne (menu : 0,46 Go) ; ni images,
+  ni pipelines (≈ 100), ni terrain, ni végétation, ni qualité n'y changent rien. Budget 4 Go non tenu.
+- fps mêlée : liée au GPU ; volumétrique ~2 ms, ombres des figurines ~1,5 ms (A/B bruité). Objectif 62 non atteint
+  sans toucher au rendu Ultra. Candidat à arbitrer : `step_count` du voile volumétrique (64 -> 40-48).
+- Pics de carte (350-1 100 ms sous charge) : compilation synchrone de pipelines (`PipelineCache`, macOS) au premier passage
+  de chaque variante ; piste : préchauffage pendant le voile de chargement.
+- Mesurer fps seulement quand la charge est < 8 (autres agents en compilation : p95 inutilisables à 15-25).

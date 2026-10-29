@@ -101,3 +101,6 @@ Mesure : `memory.footprint_mib` (dump et rapports de banc, `proc_pid_rusage`), `
   de 350 à 1 100 ms viennent de `PipelineCache::process_pipeline_queue_system` (compilation synchrone des pipelines sous
   macOS, Bevy ne la rend pas asynchrone) au premier passage de chaque variante ; piste : préchauffer les pipelines
   pendant le voile de chargement.
+- Bataille (banc Crécy, release, masqué) : 6 540 Mo sans limite d'images en vol, 3 560 Mo avec (`gpu_pacing`, 2 par
+  défaut, mêmes temps d'image) : l'oscillation `IOAccelerator (graphics)` du point ouvert de l'ADR 0776 était le CPU
+  qui prenait de l'avance sur le GPU en fenêtre masquée, pas une fuite. Garde bataille ramenée à 4 500 Mo.
