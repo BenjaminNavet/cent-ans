@@ -118,7 +118,7 @@
     "unrest_health": "Mauvaise santé du peuple (+{value})",
     "unrest_occupation": "Occupation étrangère (+{value})",
     "unrest_foreign_religion": "Religion étrangère (+{value})",
-    "unrest_disorder": "Désordre récent : prise, pillage ou régence (+{value})",
+    "unrest_disorder": "Mécontentement récent : prise, pillage ou régence (+{value})",
     "unrest_buildings": "Effets des bâtiments (+{value})",
     "unrest_loyalty": "Noblesse peu loyale (+{value})",
     "unrest_garrison": "Garnison insuffisante (+{value})",

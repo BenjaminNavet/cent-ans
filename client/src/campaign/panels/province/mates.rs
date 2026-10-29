@@ -93,7 +93,7 @@ pub fn de(name: &str) -> String {
 /// Cartouche text (`cartouche_text`).
 pub fn cartouche(province_name: &str, count: usize) -> String {
     format!(
-        "Province {} — {count} colonie{}",
+        "Province {} — {count} localité{}",
         de(province_name),
         if count > 1 { "s" } else { "" }
     )
@@ -349,8 +349,8 @@ mod tests {
 
     #[test]
     fn possessive_forms() {
-        assert_eq!(cartouche("Paris", 3), "Province de Paris — 3 colonies");
-        assert_eq!(cartouche("Orléans", 1), "Province d'Orléans — 1 colonie");
+        assert_eq!(cartouche("Paris", 3), "Province de Paris — 3 localités");
+        assert_eq!(cartouche("Orléans", 1), "Province d'Orléans — 1 localité");
         assert_eq!(de("Le Mans"), "du Mans");
         assert_eq!(de("Les Landes"), "des Landes");
     }

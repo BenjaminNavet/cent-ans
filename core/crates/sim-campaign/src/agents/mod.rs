@@ -191,9 +191,9 @@ pub enum AgentError {
     UnknownAgent(AgentId),
     #[error("cet agent n'appartient pas à votre faction")]
     NotYourAgent,
-    #[error("colonie inconnue : {0}")]
+    #[error("localité inconnue : {0}")]
     UnknownSettlement(SettlementId),
-    #[error("cette colonie ne vous appartient pas")]
+    #[error("cette localité ne vous appartient pas")]
     NotYourSettlement,
     #[error("{0}")]
     CannotRecruit(String),
@@ -207,7 +207,7 @@ pub enum AgentError {
     AlreadyActed,
     #[error("cette action n'est pas du ressort de cet agent")]
     WrongAgent,
-    #[error("cible hors de portée : la colonie de l'agent ou une voisine")]
+    #[error("cible hors de portée : la localité de l'agent ou une voisine")]
     OutOfRange,
     #[error("{0}")]
     InvalidTarget(String),

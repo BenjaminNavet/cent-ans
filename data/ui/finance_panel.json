@@ -23,9 +23,9 @@
     "side_charges": "dépenses"
   },
   "rubrics": {
-    "receipts": { "label": "Impôts et commerce", "tip": "Impôts des colonies, commerce et seigneuriage, selon le taux d’imposition." },
+    "receipts": { "label": "Impôts et commerce", "tip": "Impôts des localités, commerce et seigneuriage, selon le taux d’imposition." },
     "armies": { "label": "Armées", "tip": "Solde et vivres des armées et des garnisons." },
-    "buildings": { "label": "Bâtiments", "tip": "Entretien des bâtiments des colonies." },
+    "buildings": { "label": "Bâtiments", "tip": "Entretien des bâtiments des localités." },
     "table": { "label": "Table", "tip": "Régimes alimentaires des provinces." },
     "administration": { "label": "Cour, administration", "tip": "Part du revenu prise par la cour, l’administration et les édits, plus une part croissante de l’épargne dormante (trésor moins dettes, au-delà d’une saison de revenu). L’argent emprunté ne compte pas dans cette épargne : emprunter ne gonfle pas cette charge." },
     "household": { "label": "Maison du roi", "tip": "Croît avec le rang du royaume et le prestige du souverain." },

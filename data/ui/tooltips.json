@@ -303,7 +303,7 @@
     },
     "hud_stance_entrenched": {
       "title": "Camp retranché",
-      "body": "Fossé et palissade : +{rule.entrenched_defense_percent} % en défense en résolution automatique, {rule.entrenched_supply_saving_percent} % de pertes de ravitaillement en moins. Exige le mouvement plein, hors des colonies."
+      "body": "Fossé et palissade : +{rule.entrenched_defense_percent} % en défense en résolution automatique, {rule.entrenched_supply_saving_percent} % de pertes de ravitaillement en moins. Exige le mouvement plein, hors des localités."
     },
     "hud_incident": {
       "title": "Incident",
@@ -529,7 +529,7 @@
       "body": "L’histoire et le savoir du temps, et les règles du jeu (onglets Histoire et Règles)."
     },
     "recruit_pool": {"title": "Réserve de recrutement"},
-    "colony_focus_open": {"title": "Ouvrir le panneau de la colonie et centrer la carte"},
+    "colony_focus_open": {"title": "Ouvrir le panneau de la localité et centrer la carte"},
     "province_possession": {"title": "Possession et occupation", "body": "La cité de la province donne son contrôle ; la possession ne change que par traité (cession). À la paix, les places occupées et non cédées reviennent à leur propriétaire.", "hint": "Codex : Conquête et possession"},
     "relief_notice_hide": {"title": "Masquer cet avis jusqu’au prochain lancement du jeu"},
     "relief_command": {"title": "À lancer à la racine du dépôt"},

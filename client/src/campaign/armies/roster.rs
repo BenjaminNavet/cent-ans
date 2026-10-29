@@ -343,7 +343,7 @@ fn agent_entries(
                     .count();
                 format!(
                     "Portée : {} à portée",
-                    fr::count(targets as i64, "colonie", None)
+                    fr::count(targets as i64, "localité", None)
                 )
             };
             AgentEntry {

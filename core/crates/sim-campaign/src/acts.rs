@@ -242,7 +242,13 @@ impl CampaignState {
                 format!("{held_now}/{count} provinces"),
             ),
             ActCondition::DomainPercent { percent } => {
-                let start = self.victory_start_provinces.max(1) as usize;
+                // The start count is recorded at the first resolution: until then (turn 0) the
+                // domain is the one held now, not 1 province (which read « 1000 % »).
+                let start = if self.victory_start_provinces == 0 {
+                    held_now.max(1)
+                } else {
+                    self.victory_start_provinces as usize
+                };
                 let share = held_now * 100 / start;
                 (
                     ratio(share, *percent as usize),

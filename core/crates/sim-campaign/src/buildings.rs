@@ -815,10 +815,10 @@ impl CampaignState {
         cost: i64,
     ) -> Option<String> {
         if !building.allowed_in(state.kind) {
-            return Some("impossible dans ce type de colonie".to_owned());
+            return Some("impossible dans ce type de localité".to_owned());
         }
         if state.owner != state.controller {
-            return Some("la colonie doit être possédée et contrôlée".to_owned());
+            return Some("la localité doit être possédée et contrôlée".to_owned());
         }
         let queued = state
             .construction
@@ -996,13 +996,13 @@ pub fn demolition_blocker(
     building: &BuildingId,
 ) -> Option<String> {
     let Some(place) = state.settlements.get(settlement) else {
-        return Some("colonie inconnue".to_owned());
+        return Some("localité inconnue".to_owned());
     };
     if !place.buildings.contains(building) {
         return Some("ce bâtiment ne se dresse pas ici".to_owned());
     }
     if place.siege.is_some() {
-        return Some("la colonie est assiégée".to_owned());
+        return Some("la localité est assiégée".to_owned());
     }
     let others: Vec<BuildingId> = place
         .buildings
@@ -1229,10 +1229,10 @@ impl CampaignState {
             reason: Some(reason.to_owned()),
         };
         let Some(state) = self.settlements.get(settlement) else {
-            return no("Colonie inconnue");
+            return no("Localité inconnue");
         };
         if state.owner != state.controller {
-            return no("Colonie occupée");
+            return no("Localité occupée");
         }
         let size = data.economy_rules.construction_queue_size.max(1) as usize;
         if state.construction.is_some() && 1 + state.build_queue.len() >= size {

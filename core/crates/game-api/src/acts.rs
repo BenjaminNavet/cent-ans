@@ -16,6 +16,8 @@ pub struct ActObjectiveRow {
     /// Weight in the act score, policy included.
     pub weight: u32,
     pub done: bool,
+    /// Already met when the act opened: to keep, earns nothing (not an accomplishment).
+    pub held: bool,
     pub percent: u32,
     pub progress: String,
 }
@@ -102,6 +104,7 @@ pub fn act_view(data: &GameData, state: &CampaignState) -> Option<ActView> {
                 .unwrap_or_else(|| o.objective.category.clone()),
             weight: o.objective.weight * o.factor_percent / 100,
             done: o.met,
+            held: o.hold,
             percent: o.percent,
             progress: o.progress.clone(),
         })

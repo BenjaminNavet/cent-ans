@@ -289,7 +289,7 @@ fn raze_costs_a_level_or_leaves_a_ruin() {
     assert!(!listed.is_empty());
     assert!(listed
         .iter()
-        .all(|o| !o.available && o.reason.as_deref() == Some("la colonie est en ruines")));
+        .all(|o| !o.available && o.reason.as_deref() == Some("la localité est en ruines")));
     let unit_type = data.unit_types.keys().next().unwrap().clone();
     let refused = state.submit_order(
         data,

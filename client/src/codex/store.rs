@@ -211,6 +211,9 @@ pub struct CodexStore {
     by_entity: BTreeMap<String, String>,
     by_decor: BTreeMap<String, String>,
     discovered: BTreeSet<String>,
+    /// Current year of the campaign (1337 outside one): entries whose era starts later and that
+    /// are not yet discovered stay hidden, so the list does not spoil the future.
+    year: i32,
     alias_index: AliasIndex,
     save_path: Option<PathBuf>,
     asset_root: Option<PathBuf>,
@@ -337,12 +340,42 @@ impl CodexStore {
             .map(String::as_str)
     }
 
+    /// Sets the campaign year (see the `year` field).
+    pub fn set_year(&mut self, year: i32) {
+        self.year = year;
+    }
+
+    /// True when the entry belongs to a future the player has not reached and not discovered.
+    fn is_future(&self, entry: &Entry) -> bool {
+        let year = self.year_or_default();
+        let starts = entry
+            .era_from
+            .split_whitespace()
+            .next()
+            .and_then(|word| word.parse::<i32>().ok());
+        starts.is_some_and(|from| from > year) && !self.discovered.contains(&entry.id)
+    }
+
+    pub fn year(&self) -> i32 {
+        self.year_or_default()
+    }
+
+    fn year_or_default(&self) -> i32 {
+        if self.year == 0 { 1337 } else { self.year }
+    }
+
+    /// Entries listed to the player (future ones hidden).
+    pub fn visible_len(&self) -> usize {
+        self.entries.values().filter(|e| !self.is_future(e)).count()
+    }
+
     /// Ids of a family (index of [`FAMILIES`], `None` = all) sorted by folded title.
     pub fn ids_in_family(&self, family: Option<usize>) -> Vec<&str> {
         let categories = family.and_then(|index| FAMILIES.get(index)).map(|f| f.1);
         let mut ids: Vec<&Entry> = self
             .entries
             .values()
+            .filter(|entry| !self.is_future(entry))
             .filter(|entry| categories.is_none_or(|list| list.contains(&entry.category.as_str())))
             .collect();
         ids.sort_by_cached_key(|entry| text::fold(&entry.title));
@@ -354,7 +387,7 @@ impl CodexStore {
         let needle = text::fold(query.trim());
         self.entries
             .values()
-            .filter(|entry| entry.matches(&needle))
+            .filter(|entry| !self.is_future(entry) && entry.matches(&needle))
             .count()
     }
 
@@ -426,6 +459,20 @@ mod tests {
 
     fn store() -> CodexStore {
         CodexStore::parse(BUNDLE.as_bytes()).unwrap()
+    }
+
+    #[test]
+    fn future_entries_stay_hidden_until_their_year_or_discovery() {
+        let bundle = r#"{"version":1,"entries":[
+          {"id":"cdx_old","title":"Crécy","category":"bataille","era":{"from":"1346","to":"1346"},"summary":"s","body":"b"},
+          {"id":"cdx_now","title":"Abbaye","category":"batiment","era":{"from":"529","to":"529"},"summary":"s","body":"b"}
+        ]}"#;
+        let mut store = CodexStore::parse(bundle.as_bytes()).unwrap();
+        store.set_year(1337);
+        assert_eq!(store.ids_in_family(None), vec!["cdx_now"]);
+        assert_eq!(store.visible_len(), 1);
+        store.set_year(1346);
+        assert_eq!(store.ids_in_family(None).len(), 2);
     }
 
     #[test]

@@ -238,7 +238,7 @@ fn open_recruit(state: &mut PanelState, sim: &Sim, place: &str, target: Option<A
         return false;
     };
     let Some(id) = game_api::recruit::settlement_or_city(game_state, place) else {
-        state.error = format!("Colonie inconnue : {place}");
+        state.error = format!("Localité inconnue : {place}");
         return false;
     };
     let id = id.as_str().to_owned();

@@ -1,13 +1,13 @@
 {
-  "description": "Mots écrits à côté des chiffres de la barre du haut de la campagne (UX, ADR 0752, 0775) : un chiffre sans mot ne se lit pas. Mots entiers sur une barre large (1500 px logiques et plus), forme abrégée en dessous (MacBook 14 pouces, 1280x800) ; l’infobulle donne toujours le mot entier et le détail.",
+  "description": "Mots écrits à côté des chiffres de la barre du haut de la campagne (UX, ADR 0752, 0775) : un chiffre sans mot ne se lit pas. Mots entiers sur une barre large (1500 px logiques et plus) ; en dessous (MacBook 14 pouces, 1280x800) les mêmes mots, jamais d’abréviation ; l’infobulle donne le détail. Un seul terme pour le mécontentement dans tout le jeu.",
   "figures": {
     "manpower": "Hommes",
     "prestige": "Prestige",
-    "unrest": "Désordre"
+    "unrest": "Mécontentement"
   },
   "short": {
-    "manpower": "Hom.",
-    "prestige": "Prest.",
-    "unrest": "Dés."
+    "manpower": "Hommes",
+    "prestige": "Prestige",
+    "unrest": "Mécontentement"
   }
 }

@@ -101,7 +101,7 @@ pub fn unrest_term(key: &str) -> &str {
         "garrison" => "Garnison",
         "occupation" => "Occupation",
         "foreign_religion" => "Religion étrangère",
-        "disorder" => "Désordre récent",
+        "disorder" => "Mécontentement récent",
         "buildings" => "Bâtiments, gouverneur, techniques",
         "loyalty" => "Loyauté de la noblesse",
         other => other,

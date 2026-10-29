@@ -185,7 +185,8 @@ fn frame_player_capital(
     let Some(state) = &sim.state else { return };
     commands.insert_resource(StartFramed);
     let placed = std::env::var(CAMERA_ENV).is_ok()
-        || paths::find_root().is_ok_and(|root| root.join(CAMERA_FILE).exists());
+        || (cfg!(feature = "dev")
+            && paths::find_root().is_ok_and(|root| root.join(CAMERA_FILE).exists()));
     if placed {
         return;
     }
@@ -233,9 +234,12 @@ fn setup_rig(mut commands: Commands) {
     rig.setup(size, size.x.max(size.y) * 0.55, &Ground::flat());
     // `open -g` (client/run_bg.sh) does not forward the environment: `out/camera.txt` carries the
     // same value for scripted runs.
-    let requested = std::env::var(CAMERA_ENV)
-        .ok()
-        .or_else(|| std::fs::read_to_string(root.join(CAMERA_FILE)).ok());
+    // Debugging aid, read in `dev` builds only (a stale file once opened a campaign on Berlin).
+    let requested = std::env::var(CAMERA_ENV).ok().or_else(|| {
+        cfg!(feature = "dev")
+            .then(|| std::fs::read_to_string(root.join(CAMERA_FILE)).ok())
+            .flatten()
+    });
     if let Some(text) = requested {
         let to_px = |lon: f64, lat: f64| meta.as_ref().ok().and_then(|m| m.lonlat_to_px(lon, lat));
         match parse_camera_env(&text, to_px) {

@@ -255,7 +255,7 @@ fn settlement_row(
     let can_build = if occupied {
         crate::CanBuild {
             ok: false,
-            reason: Some("Colonie occupée".to_owned()),
+            reason: Some("Localité occupée".to_owned()),
         }
     } else {
         state.can_build_from_options(data, id, &all_options)

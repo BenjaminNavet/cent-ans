@@ -10,7 +10,7 @@ pub const PARCHMENT_LIGHT: Color = Color::srgb(0.97, 0.93, 0.82);
 pub const PARCHMENT_DARK: Color = Color::srgb(0.80, 0.70, 0.50);
 pub const INK: Color = Color::srgb(0.22, 0.14, 0.07);
 pub const INK_SOFT: Color = Color::srgb(0.42, 0.29, 0.16);
-pub const INK_FADED: Color = Color::srgb(0.50, 0.44, 0.36);
+pub const INK_FADED: Color = Color::srgb(0.38, 0.32, 0.24);
 /// Heading ink (titles, headings).
 pub const INK_TITLE: Color = Color::srgb(0.20, 0.13, 0.07);
 pub const RUBRIC: Color = Color::srgb(0.62, 0.13, 0.08);

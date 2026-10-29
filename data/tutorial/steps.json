@@ -32,7 +32,7 @@
     },
     "move_army": {
       "title": "Donner un ordre de marche",
-      "text": "Armée choisie, la bulle dorée montre sa portée de la saison. Clic droit sur le sol : elle part aussitôt ; sur une colonie, elle y marche (siège) ; sur une armée ennemie, elle l’attaque.",
+      "text": "Armée choisie, la bulle dorée montre sa portée de la saison. Clic droit sur le sol : elle part aussitôt ; sur une localité, elle y marche (siège) ; sur une armée ennemie, elle l’attaque.",
       "objective": "Déplacer une de vos armées (clic droit sur le sol).",
       "target": "royal_army"
     },

@@ -19,7 +19,7 @@ impl CampaignState {
         };
         if !definition.allowed_in(self.settlement_kind(settlement)) {
             return Err(OrderError::BuildUnavailable(
-                "impossible dans ce type de colonie".to_owned(),
+                "impossible dans ce type de localité".to_owned(),
             ));
         }
         let option = self

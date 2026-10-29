@@ -221,7 +221,7 @@ mod tests {
     #[test]
     fn free_slot_is_quiet_last_and_counts_colonies() {
         let mut slot = alert("f", "free_slot");
-        slot.text = "32 colonie(s) sans chantier en cours".to_owned();
+        slot.text = "32 localités sans chantier : le trésor permet d’y bâtir".to_owned();
         let alerts = [slot, alert("r", "research_done"), alert("s", "siege")];
         let groups = group_alerts(&alerts);
         assert_eq!(groups.last().expect("groups").kind, "free_slot");

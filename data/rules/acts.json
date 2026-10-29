@@ -1,5 +1,5 @@
 {
-  "description": "ACTES (ADR 0784, 0785) : l'arc de partie en trois actes. Chaque acte donne à la maison du joueur des objectifs (objective_sets : par faction `fac_*`, par gouvernement `gov_*`, sinon `default`) et des pressions (points de score quand la condition tient à la clôture de l'acte). Un acte se clôt avec l'année ou plus tôt (paix durable, effondrement). La victoire est le score de règne : moyenne des scores d'acte pondérée par `weight`, au moins victory_min_score. La défaite est la ruine de la maison (ruin) ou la perte de toutes les terres. ADR 0788 : un objectif déjà rempli à l'ouverture de l'acte est un acquis (hold_guard_percent) : il ne rapporte aucun point mais sa perte retranche cette part du score ; seuls les autres objectifs, comptés à partir de leur état de départ, font le score.",
+  "description": "ACTES (ADR 0784, 0785) : l’arc de partie en trois actes. Chaque acte donne à la maison du joueur des objectifs (objective_sets : par faction `fac_*`, par gouvernement `gov_*`, sinon `default`) et des pressions (points de score quand la condition tient à la clôture de l’acte). Un acte se clôt avec l’année ou plus tôt (paix durable, effondrement). La victoire est le score de règne : moyenne des scores d’acte pondérée par `weight`, au moins victory_min_score. La défaite est la ruine de la maison (ruin) ou la perte de toutes les terres. ADR 0788 : un objectif déjà rempli à l’ouverture de l’acte est un acquis (hold_guard_percent) : il ne rapporte aucun point mais sa perte retranche cette part du score ; seuls les autres objectifs, comptés à partir de leur état de départ, font le score.",
   "acts": [
     {
       "id": "act_1",
@@ -26,28 +26,28 @@
           "name": "Maisnie de guerre",
           "category": "domain",
           "factor_percent": 150,
-          "description": "Les capitaines d'abord : tenir et étendre le domaine compte une fois et demie."
+          "description": "Les capitaines d’abord : tenir et étendre le domaine compte une fois et demie."
         },
         {
           "id": "pol_1_purse",
           "name": "Maisnie des comptes",
           "category": "treasury",
           "factor_percent": 150,
-          "description": "Les clercs et les banquiers d'abord : des finances saines comptent une fois et demie."
+          "description": "Les clercs et les banquiers d’abord : des finances saines comptent une fois et demie."
         },
         {
           "id": "pol_1_line",
           "name": "Maisnie de la lignée",
           "category": "dynasty",
           "factor_percent": 150,
-          "description": "Les mariages et les héritiers d'abord : la lignée compte une fois et demie."
+          "description": "Les mariages et les héritiers d’abord : la lignée compte une fois et demie."
         }
       ],
       "pressures": [
         {
           "id": "pr1_crown",
           "title": "La couronne contestée",
-          "text": "L'Anglais tient une province du royaume : la légitimité du roi est discutée.",
+          "text": "L’Anglais tient une province du royaume : la légitimité du roi est discutée.",
           "condition": {
             "kind": "foreign_control_at_least",
             "faction": "fac_england",
@@ -75,8 +75,8 @@
         },
         {
           "id": "pr1_claim",
-          "title": "Le défi d'Édouard",
-          "text": "La guerre pour la couronne de France est ouverte : le roi d'Angleterre tient ses droits.",
+          "title": "Le défi d’Édouard",
+          "text": "La guerre pour la couronne de France est ouverte : le roi d’Angleterre tient ses droits.",
           "condition": {
             "kind": "at_war",
             "faction": "fac_france"
@@ -152,7 +152,7 @@
       "start_year": 1415,
       "end_year": 1453,
       "weight": 45,
-      "intro": "Après Azincourt, le traité de Troyes livre le royaume au roi d'Angleterre ; Jeanne d'Arc, le sacre de Reims, Arras et Formigny préparent Castillon (1453). C'est l'acte qui décide du règne.",
+      "intro": "Après Azincourt, le traité de Troyes livre le royaume au roi d’Angleterre ; Jeanne d’Arc, le sacre de Reims, Arras et Formigny préparent Castillon (1453). C’est l’acte qui décide du règne.",
       "closing": {
         "year": "Castillon (1453) : la guerre de Cent Ans s'achève ; l'histoire retient ce que le règne a tenu.",
         "peace": "La paix gagne l'acte avant Castillon : le règne s'arrête sur son bilan.",
@@ -210,7 +210,7 @@
         {
           "id": "pr3_french_return",
           "title": "Les Français reviennent",
-          "text": "Le roi de France tient de nouveau Guyenne ou Normandie : l'Angleterre recule.",
+          "text": "Le roi de France tient de nouveau Guyenne ou Normandie : l’Angleterre recule.",
           "condition": {
             "kind": "foreign_control_at_least",
             "faction": "fac_france",
@@ -263,8 +263,8 @@
         },
         {
           "id": "gen_kingdom1g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 108 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 108 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 25,
           "condition": {
@@ -275,7 +275,7 @@
         {
           "id": "gen_kingdom1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -330,8 +330,8 @@
         },
         {
           "id": "gen_kingdom2g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 120 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 120 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 30,
           "condition": {
@@ -342,7 +342,7 @@
         {
           "id": "gen_kingdom2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -398,7 +398,7 @@
         {
           "id": "gen_kingdom3g_domain",
           "title": "Le sursaut du domaine",
-          "description": "Porter le domaine à 140 % de ce qu'il était en 1337.",
+          "description": "Porter le domaine à 140 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 35,
           "condition": {
@@ -409,7 +409,7 @@
         {
           "id": "gen_kingdom3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -466,8 +466,8 @@
         },
         {
           "id": "gen_principality1g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 108 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 108 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 25,
           "condition": {
@@ -478,7 +478,7 @@
         {
           "id": "gen_principality1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -533,8 +533,8 @@
         },
         {
           "id": "gen_principality2g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 120 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 120 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 30,
           "condition": {
@@ -545,7 +545,7 @@
         {
           "id": "gen_principality2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -601,7 +601,7 @@
         {
           "id": "gen_principality3g_domain",
           "title": "Le sursaut du domaine",
-          "description": "Porter le domaine à 140 % de ce qu'il était en 1337.",
+          "description": "Porter le domaine à 140 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 35,
           "condition": {
@@ -612,7 +612,7 @@
         {
           "id": "gen_principality3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -669,8 +669,8 @@
         },
         {
           "id": "gen_duchy1g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 108 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 108 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 25,
           "condition": {
@@ -681,7 +681,7 @@
         {
           "id": "gen_duchy1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -736,8 +736,8 @@
         },
         {
           "id": "gen_duchy2g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 120 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 120 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 30,
           "condition": {
@@ -748,7 +748,7 @@
         {
           "id": "gen_duchy2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -804,7 +804,7 @@
         {
           "id": "gen_duchy3g_domain",
           "title": "Le sursaut du domaine",
-          "description": "Porter le domaine à 140 % de ce qu'il était en 1337.",
+          "description": "Porter le domaine à 140 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 35,
           "condition": {
@@ -815,7 +815,7 @@
         {
           "id": "gen_duchy3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -872,8 +872,8 @@
         },
         {
           "id": "gen_county1g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 108 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 108 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 25,
           "condition": {
@@ -884,7 +884,7 @@
         {
           "id": "gen_county1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -939,8 +939,8 @@
         },
         {
           "id": "gen_county2g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 120 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 120 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 30,
           "condition": {
@@ -951,7 +951,7 @@
         {
           "id": "gen_county2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1007,7 +1007,7 @@
         {
           "id": "gen_county3g_domain",
           "title": "Le sursaut du domaine",
-          "description": "Porter le domaine à 140 % de ce qu'il était en 1337.",
+          "description": "Porter le domaine à 140 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 35,
           "condition": {
@@ -1018,7 +1018,7 @@
         {
           "id": "gen_county3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1075,8 +1075,8 @@
         },
         {
           "id": "gen_lordship1g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 108 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 108 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 25,
           "condition": {
@@ -1087,7 +1087,7 @@
         {
           "id": "gen_lordship1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1142,8 +1142,8 @@
         },
         {
           "id": "gen_lordship2g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 120 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 120 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 30,
           "condition": {
@@ -1154,7 +1154,7 @@
         {
           "id": "gen_lordship2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1210,7 +1210,7 @@
         {
           "id": "gen_lordship3g_domain",
           "title": "Le sursaut du domaine",
-          "description": "Porter le domaine à 140 % de ce qu'il était en 1337.",
+          "description": "Porter le domaine à 140 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 35,
           "condition": {
@@ -1221,7 +1221,7 @@
         {
           "id": "gen_lordship3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1278,8 +1278,8 @@
         },
         {
           "id": "gen_empire1g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 108 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 108 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 25,
           "condition": {
@@ -1290,7 +1290,7 @@
         {
           "id": "gen_empire1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1345,8 +1345,8 @@
         },
         {
           "id": "gen_empire2g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 120 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 120 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 30,
           "condition": {
@@ -1357,7 +1357,7 @@
         {
           "id": "gen_empire2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1413,7 +1413,7 @@
         {
           "id": "gen_empire3g_domain",
           "title": "Le sursaut du domaine",
-          "description": "Porter le domaine à 140 % de ce qu'il était en 1337.",
+          "description": "Porter le domaine à 140 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 35,
           "condition": {
@@ -1424,7 +1424,7 @@
         {
           "id": "gen_empire3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1481,8 +1481,8 @@
         },
         {
           "id": "gen_republic1g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 108 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 108 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 25,
           "condition": {
@@ -1493,7 +1493,7 @@
         {
           "id": "gen_republic1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1548,8 +1548,8 @@
         },
         {
           "id": "gen_republic2g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 120 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 120 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 30,
           "condition": {
@@ -1560,7 +1560,7 @@
         {
           "id": "gen_republic2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1616,7 +1616,7 @@
         {
           "id": "gen_republic3g_domain",
           "title": "Le sursaut du domaine",
-          "description": "Porter le domaine à 140 % de ce qu'il était en 1337.",
+          "description": "Porter le domaine à 140 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 35,
           "condition": {
@@ -1627,7 +1627,7 @@
         {
           "id": "gen_republic3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1684,8 +1684,8 @@
         },
         {
           "id": "gen_theocracy1g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 108 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 108 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 25,
           "condition": {
@@ -1696,7 +1696,7 @@
         {
           "id": "gen_theocracy1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1751,8 +1751,8 @@
         },
         {
           "id": "gen_theocracy2g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 120 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 120 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 30,
           "condition": {
@@ -1763,7 +1763,7 @@
         {
           "id": "gen_theocracy2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1819,7 +1819,7 @@
         {
           "id": "gen_theocracy3g_domain",
           "title": "Le sursaut du domaine",
-          "description": "Porter le domaine à 140 % de ce qu'il était en 1337.",
+          "description": "Porter le domaine à 140 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 35,
           "condition": {
@@ -1830,7 +1830,7 @@
         {
           "id": "gen_theocracy3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1887,8 +1887,8 @@
         },
         {
           "id": "gen_default1g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 108 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 108 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 25,
           "condition": {
@@ -1899,7 +1899,7 @@
         {
           "id": "gen_default1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -1954,8 +1954,8 @@
         },
         {
           "id": "gen_default2g_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 120 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 120 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 30,
           "condition": {
@@ -1966,7 +1966,7 @@
         {
           "id": "gen_default2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -2022,7 +2022,7 @@
         {
           "id": "gen_default3g_domain",
           "title": "Le sursaut du domaine",
-          "description": "Porter le domaine à 140 % de ce qu'il était en 1337.",
+          "description": "Porter le domaine à 140 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 35,
           "condition": {
@@ -2033,7 +2033,7 @@
         {
           "id": "gen_default3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -2080,7 +2080,7 @@
         {
           "id": "fr1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -2134,7 +2134,7 @@
         {
           "id": "fr1_flanders",
           "title": "La Flandre dans la main du roi",
-          "description": "Tenir la Flandre et l'Artois.",
+          "description": "Tenir la Flandre et l’Artois.",
           "category": "domain",
           "weight": 25,
           "condition": {
@@ -2162,7 +2162,7 @@
       "act_2": [
         {
           "id": "fr2_reconquest",
-          "title": "Chasser l'Anglais des terres perdues",
+          "title": "Chasser l’Anglais des terres perdues",
           "description": "Reprendre la Guyenne, le Ponthieu et le Poitou aux Anglais.",
           "category": "domain",
           "weight": 30,
@@ -2190,7 +2190,7 @@
         {
           "id": "fr2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -2233,7 +2233,7 @@
         {
           "id": "fr2_flanders",
           "title": "La Flandre ralliée",
-          "description": "Tenir la Flandre et l'Artois.",
+          "description": "Tenir la Flandre et l’Artois.",
           "category": "domain",
           "weight": 10,
           "condition": {
@@ -2249,7 +2249,7 @@
         {
           "id": "fr3_expel",
           "title": "Bouter les Anglais hors de France",
-          "description": "Aucune province du royaume ne doit rester aux mains de l'Angleterre.",
+          "description": "Aucune province du royaume ne doit rester aux mains de l’Angleterre.",
           "category": "domain",
           "weight": 35,
           "condition": {
@@ -2286,7 +2286,7 @@
         {
           "id": "fr3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -2356,7 +2356,7 @@
         },
         {
           "id": "en1_aquitaine",
-          "title": "L'héritage des Plantagenêts",
+          "title": "L’héritage des Plantagenêts",
           "description": "Tenir la Guyenne, le Bazadais et la Gascogne.",
           "category": "domain",
           "weight": 15,
@@ -2372,7 +2372,7 @@
         {
           "id": "en1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -2414,8 +2414,8 @@
         },
         {
           "id": "en1_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 108 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 108 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 10,
           "condition": {
@@ -2451,7 +2451,7 @@
         },
         {
           "id": "en2_aquitaine",
-          "title": "L'Aquitaine en pleine souveraineté",
+          "title": "L’Aquitaine en pleine souveraineté",
           "description": "Tenir la Guyenne, le Bazadais, la Gascogne et le Poitou.",
           "category": "domain",
           "weight": 15,
@@ -2468,7 +2468,7 @@
         {
           "id": "en2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -2499,8 +2499,8 @@
         },
         {
           "id": "en2_scotland",
-          "title": "Soumettre l'Écosse",
-          "description": "L'Écosse vassale de l'Angleterre ou disparue.",
+          "title": "Soumettre l’Écosse",
+          "description": "L’Écosse vassale de l’Angleterre ou disparue.",
           "category": "alliance",
           "weight": 15,
           "condition": {
@@ -2548,7 +2548,7 @@
         {
           "id": "en3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -2623,8 +2623,8 @@
         },
         {
           "id": "bu1_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 108 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 108 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 15,
           "condition": {
@@ -2635,7 +2635,7 @@
         {
           "id": "bu1_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -2679,7 +2679,7 @@
       "act_2": [
         {
           "id": "bu2_lowcountries",
-          "title": "Le grand-duc d'Occident",
+          "title": "Le grand-duc d’Occident",
           "description": "Tenir au moins 5 des provinces des Pays-Bas.",
           "category": "domain",
           "weight": 30,
@@ -2708,8 +2708,8 @@
         },
         {
           "id": "bu2_domain",
-          "title": "Un domaine qui s'étend",
-          "description": "Porter le domaine à 120 % de ce qu'il était en 1337.",
+          "title": "Un domaine qui s’étend",
+          "description": "Porter le domaine à 120 % de ce qu’il était en 1337.",
           "category": "domain",
           "weight": 15,
           "condition": {
@@ -2720,7 +2720,7 @@
         {
           "id": "bu2_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -2772,7 +2772,7 @@
         {
           "id": "bu3_link",
           "title": "Le lien lorrain",
-          "description": "Tenir la Bourgogne, la Lorraine et l'Île-de-France.",
+          "description": "Tenir la Bourgogne, la Lorraine et l’Île-de-France.",
           "category": "domain",
           "weight": 20,
           "condition": {
@@ -2797,7 +2797,7 @@
         {
           "id": "bu3_dynasty",
           "title": "Une lignée assurée",
-          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu'à cela.",
+          "description": "Un souverain libre, un héritier désigné, pas de régence : la couronne ne tient qu’à cela.",
           "category": "dynasty",
           "weight": 10,
           "condition": {
@@ -2848,7 +2848,7 @@
     {
       "min_score": 72,
       "title": "un règne couronné",
-      "text": "La maison sort de la guerre plus forte qu'elle n'y est entrée."
+      "text": "La maison sort de la guerre plus forte qu’elle n’y est entrée."
     },
     {
       "min_score": 88,

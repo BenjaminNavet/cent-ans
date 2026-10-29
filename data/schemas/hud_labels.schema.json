@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "hud_labels.schema.json",
   "title": "Libellés des chiffres du HUD de campagne",
-  "description": "Mot affiché devant chacun des chiffres de la barre du haut (hommes, prestige, désordre). Rendu et textes seulement.",
+  "description": "Mot affiché devant chacun des chiffres de la barre du haut (hommes, prestige, mécontentement). Rendu et textes seulement.",
   "type": "object",
   "required": ["figures", "short"],
   "additionalProperties": false,
@@ -14,9 +14,9 @@
       "required": ["manpower", "prestige", "unrest"],
       "additionalProperties": false,
       "properties": {
-        "manpower": {"type": "string", "minLength": 1, "maxLength": 8},
-        "prestige": {"type": "string", "minLength": 1, "maxLength": 8},
-        "unrest": {"type": "string", "minLength": 1, "maxLength": 8}
+        "manpower": {"type": "string", "minLength": 1, "maxLength": 20},
+        "prestige": {"type": "string", "minLength": 1, "maxLength": 20},
+        "unrest": {"type": "string", "minLength": 1, "maxLength": 20}
       }
     },
     "figures": {

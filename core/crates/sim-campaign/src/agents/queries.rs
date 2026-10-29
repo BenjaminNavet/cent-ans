@@ -137,14 +137,14 @@ impl CampaignState {
         }
         if s.siege.is_some() {
             return Err(AgentError::CannotRecruit(
-                "colonie assiégée : personne n'en sort".to_owned(),
+                "localité assiégée : personne n'en sort".to_owned(),
             ));
         }
         if !t.settlement_kinds.contains(&s.kind) {
             let needed = if t.settlement_kinds == [SettlementKind::City] {
                 "une cité"
             } else {
-                "une colonie fortifiée (pas un village)"
+                "une localité fortifiée (pas un village)"
             };
             return Err(AgentError::CannotRecruit(format!(
                 "{} se recrute dans {needed}",

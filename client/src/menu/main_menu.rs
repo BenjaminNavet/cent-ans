@@ -13,7 +13,9 @@ use bevy::ui::InteractionDisabled;
 use super::battles::{BattleScreen, OpenBattleScreen};
 use super::music_credits;
 use super::saves::{GameLoaded, OpenSaveDialog, SaveDir, SaveMode, load_into};
-use super::{MenuData, MenuOverlay, OpenSettings, menu_button, spawn_backdrop, spawn_overlay};
+use super::{
+    MenuData, MenuOverlay, OpenSettings, menu_button, spawn_backdrop_plain, spawn_overlay,
+};
 use crate::app::AppState;
 use crate::paths;
 use crate::sim::Sim;
@@ -67,7 +69,7 @@ fn spawn_menu(
             },
         ))
         .id();
-    spawn_backdrop(&mut commands, &assets, root);
+    spawn_backdrop_plain(&mut commands, &assets, root);
     let latest = game_api::saves::list_saves(&dir.0).into_iter().next();
     let column = commands
         .spawn((
@@ -125,8 +127,8 @@ fn spawn_menu(
             commands.spawn((
                 Name::new("ContinueDetail"),
                 Text::new(format!("{faction} — {}", latest.date)),
-                theme.text_font(false, true, UiType::Body.size()),
-                TextColor(Color::srgb(0.85, 0.78, 0.62)),
+                theme.text_font(false, false, UiType::Body.size()),
+                TextColor(Color::srgb(0.97, 0.93, 0.82)),
                 Node {
                     margin: UiRect {
                         left: Val::Px(25.0),

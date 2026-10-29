@@ -1,4 +1,4 @@
-//! The advisor (Jean le Bel): brief spoken interventions with a subtitle, port of
+//! The advisor (a counsellor per faction, `speakers`): brief spoken interventions with a subtitle, port of
 //! game/scripts/audio/advisor.gd.
 //!
 //! Triggers: campaign start, first battle / assault / siege / victory / defeat (said once, kept in
@@ -200,6 +200,24 @@ pub struct AdvisorState {
     /// A modal, the pause menu or the tutorial card is up: the advisor keeps quiet (the line
     /// waits in its queue) so that one narrator speaks at a time and no subtitle covers a window.
     covered: bool,
+    /// Name shown before the subtitle: the counsellor of the player's faction
+    /// (`speakers` of `data/voice/advisor.json`).
+    speaker: String,
+}
+
+/// Counsellor of `faction`: its entry of `speakers`, else the file's `default_speaker`, else
+/// the file's `name`.
+fn speaker_for(advisor: &Value, faction: &str) -> String {
+    let name_of = |entry: Option<&Value>| {
+        entry
+            .and_then(|e| e.get("name"))
+            .and_then(Value::as_str)
+            .map(String::from)
+    };
+    name_of(advisor.get("speakers").and_then(|s| s.get(faction)))
+        .or_else(|| name_of(advisor.get("default_speaker")))
+        .or_else(|| advisor.get("name").and_then(Value::as_str).map(String::from))
+        .unwrap_or_else(|| "Le conseiller".to_owned())
 }
 
 fn seen_file() -> Option<std::path::PathBuf> {
@@ -225,6 +243,7 @@ impl AdvisorState {
             seen_path,
             spoken: Vec::new(),
             covered: false,
+            speaker: speaker_for(&director.voices.advisor, ""),
         }
     }
 
@@ -309,7 +328,7 @@ fn emit(
         hold: intervention.spoken_s + 0.5,
     });
     toasts.say(
-        format!("Jean le Bel : « {} »", intervention.line.text),
+        format!("{} : « {} »", state.speaker, intervention.line.text),
         intervention.spoken_s + state.tuning.linger_s,
     );
 }
@@ -397,6 +416,7 @@ fn campaign_start(
     if !enabled(&settings) {
         return;
     }
+    state.speaker = speaker_for(&director.voices.advisor, sim.player.as_str());
     // The opening speech belongs to the first turn: a loaded game or a return from a battle
     // re-enters the campaign screen without hearing it again.
     if sim.state.as_ref().is_some_and(|state| state.turn() > 0) {

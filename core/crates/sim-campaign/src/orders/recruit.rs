@@ -322,13 +322,13 @@ impl<'a> RecruitContext<'a> {
         let province = data.provinces.get(&settlement.province)?;
         // LR-08: a razed place lies in ruins, the order is refused upfront.
         if crate::capture::is_ruined(self.state, self.settlement_id) {
-            return Some("la colonie est en ruines".to_owned());
+            return Some("la localité est en ruines".to_owned());
         }
         if &settlement.owner != self.faction || &settlement.controller != self.faction {
-            return Some("la colonie doit être possédée et contrôlée".to_owned());
+            return Some("la localité doit être possédée et contrôlée".to_owned());
         }
         if settlement.siege.is_some() {
-            return Some("la colonie est assiégée".to_owned());
+            return Some("la localité est assiégée".to_owned());
         }
         // TW2-T3 (ADR 0103): companies are hired by an army from its region's
         // reserve (`HireMercenary`), never levied in a town.

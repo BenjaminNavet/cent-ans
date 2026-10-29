@@ -86,7 +86,7 @@ fn a_besieged_settlement_blocks_the_preview() {
     });
     let preview = demolition_preview(&state, data, &place, &bld("bld_market"));
     assert!(!preview.can_demolish);
-    assert_eq!(preview.reason.as_deref(), Some("la colonie est assiégée"));
+    assert_eq!(preview.reason.as_deref(), Some("la localité est assiégée"));
 }
 
 #[test]

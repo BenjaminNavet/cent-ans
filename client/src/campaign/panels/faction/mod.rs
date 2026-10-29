@@ -584,7 +584,7 @@ fn dump_works(world: &World, panel: &FactionPanel) -> Value {
         "free_slots": overview.free_slots,
         "in_progress": overview.works_in_progress,
         "treasury": overview.treasury,
-        "colonies": overview.rows.len(),
+        "localités": overview.rows.len(),
         "visible": rows.len(),
         "only_free": ui.only_free,
         "province": ui.province,

@@ -58,7 +58,7 @@ fn check_settlements(state: &CampaignState, out: &mut Vec<Violation>) {
                 push(
                     out,
                     "settlement_refs",
-                    format!("La province {pid} liste la colonie inconnue {sid}."),
+                    format!("La province {pid} liste la localité inconnue {sid}."),
                 );
             }
         }
@@ -71,7 +71,7 @@ fn check_settlements(state: &CampaignState, out: &mut Vec<Violation>) {
                         out,
                         "settlement_single_owner",
                         format!(
-                            "La colonie {sid} déclare la province {} mais {only} la liste.",
+                            "La localité {sid} déclare la province {} mais {only} la liste.",
                             settlement.province
                         ),
                     );
@@ -80,12 +80,12 @@ fn check_settlements(state: &CampaignState, out: &mut Vec<Violation>) {
             Some(many) if many.len() > 1 => push(
                 out,
                 "settlement_single_owner",
-                format!("La colonie {sid} est listée par {} provinces.", many.len()),
+                format!("La localité {sid} est listée par {} provinces.", many.len()),
             ),
             _ => push(
                 out,
                 "settlement_single_owner",
-                format!("La colonie {sid} n'est listée par aucune province."),
+                format!("La localité {sid} n'est listée par aucune province."),
             ),
         }
         for (role, faction) in [
@@ -96,7 +96,7 @@ fn check_settlements(state: &CampaignState, out: &mut Vec<Violation>) {
                 push(
                     out,
                     "settlement_refs",
-                    format!("La colonie {sid} a pour {role} la faction inconnue {faction}."),
+                    format!("La localité {sid} a pour {role} la faction inconnue {faction}."),
                 );
             }
         }
@@ -139,7 +139,7 @@ fn check_armies(state: &CampaignState, out: &mut Vec<Violation>) {
             ArmyPosition::Settlement(sid) if !state.settlements.contains_key(sid) => push(
                 out,
                 "army_single_place",
-                format!("L'armée {aid} stationne dans la colonie inconnue {sid}."),
+                format!("L'armée {aid} stationne dans la localité inconnue {sid}."),
             ),
             ArmyPosition::Field { x, y } if !x.is_finite() || !y.is_finite() => push(
                 out,
@@ -208,7 +208,7 @@ fn check_armies(state: &CampaignState, out: &mut Vec<Violation>) {
                 out,
                 "army_refs",
                 format!(
-                    "Bataille en attente dans la colonie inconnue {}.",
+                    "Bataille en attente dans la localité inconnue {}.",
                     battle.location
                 ),
             );
@@ -286,7 +286,7 @@ fn check_factions(state: &CampaignState, data: &GameData, out: &mut Vec<Violatio
                     out,
                     "dead_faction_assets",
                     format!(
-                        "La faction disparue {fid} possède encore {armies} armée(s) et {places} colonie(s)."
+                        "La faction disparue {fid} possède encore {armies} armée(s) et {places} localité(s)."
                     ),
                 );
             }

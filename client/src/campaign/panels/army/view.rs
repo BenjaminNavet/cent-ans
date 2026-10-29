@@ -135,7 +135,7 @@ fn stance_help(key: &str) -> &'static str {
     match key {
         "normal" => "Marche et combat ; ne met pas le siège.",
         "raid" => "Chevauchée : dévaste les provinces ennemies pour le butin.",
-        "siege" => "Met le siège devant la colonie ennemie où se tient l'armée.",
+        "siege" => "Met le siège devant la localité ennemie où se tient l'armée.",
         "ambush" => "Embusquée : surgit sur une armée ennemie qui entre dans sa zone.",
         "forced_march" => "Marche forcée : plus de mouvement ce tour, troupes fatiguées.",
         "entrenched" => "Camp retranché : meilleure défense, moins de ravitaillement.",
@@ -380,7 +380,7 @@ pub fn spawn_army_panel(
                 "army:garrison",
                 "Garnison",
                 chosen > 0 && sheet.settlement.is_some(),
-                "Les régiments choisis rejoignent la garnison de la colonie.",
+                "Les régiments choisis rejoignent la garnison de la localité.",
             );
             add(
                 "army:disband",
@@ -777,7 +777,7 @@ pub fn spawn_recruit_panel(
         if !view.own {
             p.spawn(text(
                 theme,
-                "Colonie hors de votre contrôle.",
+                "Localité hors de votre contrôle.",
                 UiType::Caption,
                 style::INK_SOFT,
             ));

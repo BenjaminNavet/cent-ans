@@ -270,6 +270,7 @@ impl Plugin for CodexPlugin {
             .init_resource::<RulesBookRes>()
             .register_dump(dump_codex)
             .add_systems(Startup, load_store)
+            .add_systems(Update, sync_year)
             .add_systems(
                 Update,
                 remember_return.run_if(not(in_state(AppState::Codex))),
@@ -329,6 +330,14 @@ fn open_with_key(
         && keys.just_pressed(KeyCode::KeyK)
     {
         requests.write(OpenCodex::default());
+    }
+}
+
+/// Keeps the store's year on the campaign's (future entries stay hidden, see `CodexStore::set_year`).
+fn sync_year(sim: Res<crate::sim::Sim>, mut store: ResMut<CodexStore>) {
+    let year = sim.state.as_ref().map_or(1337, |state| state.year());
+    if store.year() != year {
+        store.set_year(year);
     }
 }
 
@@ -1071,7 +1080,11 @@ fn refresh(
     // Counter and search results.
     if let Ok(mut counter) = texts.p0().single_mut() {
         counter.0 = match view.hub {
-            Hub::History => format!("{} / {} découvertes", store.discovered_count(), store.len()),
+            Hub::History => format!(
+                "{} / {} découvertes",
+                store.discovered_count(),
+                store.visible_len()
+            ),
             Hub::Rules => format!("{} fiches de règles", book.0.len()),
         };
     }
@@ -1360,6 +1373,7 @@ fn dump_codex(world: &World) -> (String, Value) {
         "rules_category": view.rules_category,
         "query": view.query,
         "entries_total": store.len(),
+        "entries_visible": store.visible_len(),
         "entries_listed": page.listed,
         "discovered": store.discovered_count(),
         "rules_total": book.len(),

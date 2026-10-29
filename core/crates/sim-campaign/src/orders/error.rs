@@ -16,7 +16,7 @@ pub enum OrderError {
     UnknownArmy(ArmyId),
     #[error("province inconnue : {0}")]
     UnknownProvince(ProvinceId),
-    #[error("colonie inconnue : {0}")]
+    #[error("localité inconnue : {0}")]
     UnknownSettlement(SettlementId),
     #[error("type d'unité inconnu : {0}")]
     UnknownUnitType(UnitTypeId),
@@ -28,7 +28,7 @@ pub enum OrderError {
     NotYourCharacter(FactionId),
     #[error("cette province n'est pas contrôlée par la faction {0}")]
     NotYourProvince(FactionId),
-    #[error("cette colonie n'est pas contrôlée par la faction {0}")]
+    #[error("cette localité n'est pas contrôlée par la faction {0}")]
     NotYourSettlement(FactionId),
     #[error("chemin vide")]
     EmptyPath,
@@ -52,11 +52,11 @@ pub enum OrderError {
     RiverTooFar { cost: u32, left: u32 },
     #[error("l'embarquement prend toute la saison : l'armée ne doit pas avoir bougé ce tour")]
     EmbarkNeedsFullTurn,
-    #[error("l'armée doit stationner dans cette colonie")]
+    #[error("l'armée doit stationner dans cette localité")]
     NotInSettlement,
     #[error("recrutement impossible : {0}")]
     RecruitUnavailable(String),
-    #[error("file de recrutement pleine : {slots} recrutement(s) par tour dans cette colonie")]
+    #[error("file de recrutement pleine : {slots} recrutement(s) par tour dans cette localité")]
     RecruitQueueFull { slots: usize },
     #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
     InsufficientFunds { needed: i64, available: i64 },
@@ -88,19 +88,19 @@ pub enum OrderError {
     VocationRefused(String),
     #[error("construction impossible : {0}")]
     BuildUnavailable(String),
-    #[error("aucune construction en cours dans cette colonie")]
+    #[error("aucune construction en cours dans cette localité")]
     NoConstruction,
     #[error("aucune recrue à cet emplacement de la file")]
     NoQueuedRecruit,
     #[error("démolition impossible : {0}")]
     DemolitionRefused(String),
-    #[error("la colonie est assiégée")]
+    #[error("la localité est assiégée")]
     SettlementBesieged,
     #[error("posture impossible : {0}")]
     StanceRefused(String),
     #[error("interdit en marche forcée : {0}")]
     ForcedMarchForbids(&'static str),
-    #[error("garnison complète : {cap} unités au plus dans ce type de colonie")]
+    #[error("garnison complète : {cap} unités au plus dans ce type de localité")]
     GarrisonFull { cap: usize },
     /// NT5 (N6): the army would exceed `armies.json` `max_units`.
     #[error("armée complète : {cap} unités au plus par armée")]

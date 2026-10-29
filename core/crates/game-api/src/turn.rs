@@ -204,7 +204,12 @@ pub fn turn_readiness(
             "free_slot",
             Severity::Info,
             format!(
-                "{free_slots} colonie(s) sans chantier : {} livres peuvent y travailler",
+                "{free_slots} {} sans chantier : le trésor ({} livres) permet d’y bâtir",
+                if free_slots > 1 {
+                    "localités"
+                } else {
+                    "localité"
+                },
                 sim_campaign::advisor::fr_number(treasury)
             ),
         );

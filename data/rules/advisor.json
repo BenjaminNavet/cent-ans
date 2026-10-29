@@ -1,5 +1,5 @@
 {
-  "description": "GAMEPLAY2 (ADR 0789) : le conseiller parle aux moments utiles, sans bavarder. Au plus max_per_season conseils par saison, chacun avec son délai avant de se répéter (cooldown_seasons) ; le danger passe avant l'occasion, l'occasion avant le bilan de fin d'année. Les textes sont affichés par le bandeau du conseiller (alerte « advice » : première ligne = titre). La ligne de posture annonce dans la chronique le changement de doctrine d'une maison en guerre avec nous ou voisine (ADR 0782).",
+  "description": "GAMEPLAY2 (ADR 0789) : le conseiller parle aux moments utiles, sans bavarder. Au plus max_per_season conseils par saison, chacun avec son délai avant de se répéter (cooldown_seasons) ; le danger passe avant l’occasion, l’occasion avant le bilan de fin d’année. Les textes sont affichés par le bandeau du conseiller (alerte « advice » : première ligne = titre). La ligne de posture annonce dans la chronique le changement de doctrine d’une maison en guerre avec nous ou voisine (ADR 0782).",
   "max_per_season": 1,
   "quiet_seasons": 1,
   "advices": [
@@ -9,7 +9,7 @@
       "trigger": { "kind": "runway_short", "max_seasons": 3 },
       "cooldown_seasons": 3,
       "title": "Le trésor fond",
-      "text": "Messire, avec {treasury} livres et un solde de {balance} par saison, la caisse ne tiendra que {seasons} saison(s). Réduisez la solde, relevez l'impôt ou empruntez avant de manquer."
+      "text": "Messire, avec {treasury} livres et un solde de {balance} par saison, la caisse ne tiendra que {seasons} saison(s). Réduisez la solde, relevez l’impôt ou empruntez avant de manquer."
     },
     {
       "id": "build_opportunity",
@@ -17,7 +17,7 @@
       "trigger": { "kind": "idle_sites", "min_sites": 3 },
       "cooldown_seasons": 4,
       "title": "Des chantiers vous attendent",
-      "text": "Messire, {sites} colonies n'ont aucun chantier et vous avez {treasury} livres en caisse : c'est là que l'argent doit travailler (près de {province}). Bâtir rapporte plus que thésauriser."
+      "text": "Messire, {sites} colonies n’ont aucun chantier et vous avez {treasury} livres en caisse : c’est là que l’argent doit travailler (près de {province}). Bâtir rapporte plus que thésauriser."
     },
     {
       "id": "idle_hoard",
@@ -25,7 +25,7 @@
       "trigger": { "kind": "idle_hoard", "seasons": 2, "min": 3000 },
       "cooldown_seasons": 6,
       "title": "Une épargne qui dort",
-      "text": "Messire, {treasury} livres dorment dans vos coffres et la cour en prélève {levy} par saison. Bâtissez, levez des troupes ou gagnez des alliés : l'argent emprunté, lui, n'est pas taxé."
+      "text": "Messire, {treasury} livres dorment dans vos coffres et la cour en prélève {levy} par saison. Bâtissez, levez des troupes ou gagnez des alliés : l’argent emprunté, lui, n’est pas taxé."
     },
     {
       "id": "year_end_low",
@@ -33,15 +33,15 @@
       "trigger": { "kind": "act_score_low", "below": 20 },
       "cooldown_seasons": 8,
       "title": "Un règne qui attend",
-      "text": "L'année s'achève et le score de l'acte « {act} » n'est que de {score} sur 100. Rien ne s'obtient en attendant : visez « {objective} »."
+      "text": "L’année s’achève et le score de l’acte « {act} » n’est que de {score} sur 100. Rien ne s’obtient en attendant : visez « {objective} »."
     },
     {
       "id": "year_end",
       "kind": "season_end",
       "trigger": { "kind": "year_end" },
       "cooldown_seasons": 8,
-      "title": "Bilan de l'année",
-      "text": "L'année s'achève. Acte « {act} » : {score} sur 100. Objectif le plus proche : « {objective} »."
+      "title": "Bilan de l’année",
+      "text": "L’année s’achève. Acte « {act} » : {score} sur 100. Objectif le plus proche : « {objective} »."
     }
   ],
   "posture": {

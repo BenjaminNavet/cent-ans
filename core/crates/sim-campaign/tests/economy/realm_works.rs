@@ -45,7 +45,7 @@ fn overview_lists_the_colonies_with_free_slots() {
     let data = game_data();
     let state = start(data, 1_000_000);
     let works = realm_works(&state, data, &france());
-    assert!(works.rows.len() > 5, "France holds many colonies");
+    assert!(works.rows.len() > 5, "France holds many localités");
     assert_eq!(works.treasury, 1_000_000);
     assert_eq!(works.works_in_progress, 0);
     assert!(works.free_slots > 0);

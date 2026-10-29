@@ -14,7 +14,7 @@ use crate::state::CampaignState;
 const TRANSIENT_REASONS: [&str; 4] = [
     "trésor insuffisant",
     "une construction est déjà en cours",
-    "la colonie doit être possédée",
+    "la localité doit être possédée",
     SLOTS_FULL,
 ];
 

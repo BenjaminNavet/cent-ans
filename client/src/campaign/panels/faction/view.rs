@@ -50,7 +50,7 @@ const RUBRICS: [(&str, &str, &str); 13] = [
     (
         "receipts",
         "Impôts et commerce",
-        "Impôts des colonies, commerce et seigneuriage, selon le taux d’imposition.",
+        "Impôts des localités, commerce et seigneuriage, selon le taux d’imposition.",
     ),
     (
         "armies",
@@ -60,7 +60,7 @@ const RUBRICS: [(&str, &str, &str); 13] = [
     (
         "buildings",
         "Entretien des bâtiments",
-        "Entretien des bâtiments des colonies ; réduit par la dévastation.",
+        "Entretien des bâtiments des localités ; réduit par la dévastation.",
     ),
     (
         "table",
@@ -1306,7 +1306,7 @@ fn works_tab(pane: &mut Kids, theme: &UiTheme, sim: &Sim, panel: &FactionPanel) 
     .with_children(|bar| {
         bar.spawn((
             Tooltip::new(
-                "Pose le bâtiment choisi dans chaque colonie listée où il est constructible.",
+                "Pose le bâtiment choisi dans chaque localité listée où il est constructible.",
             ),
             button_small(
                 theme,
@@ -1333,7 +1333,7 @@ fn works_tab(pane: &mut Kids, theme: &UiTheme, sim: &Sim, panel: &FactionPanel) 
     }
     pane.spawn(separator(theme));
     if rows.is_empty() {
-        pane.spawn(caption(theme, "Aucune colonie ne correspond aux filtres."));
+        pane.spawn(caption(theme, "Aucune localité ne correspond aux filtres."));
     }
     for row in rows {
         let full = row.queue_full();

@@ -28,7 +28,7 @@ pub const SETTLEMENT_GROUP: &str = "provset";
 pub const TABS: [(&str, &str); 4] = [
     ("prov:tab_city", "Ville"),
     ("prov:tab_buildings", "Bâtiments"),
-    ("prov:tab_settlements", "Colonies"),
+    ("prov:tab_settlements", "Localités"),
     ("prov:tab_garrison", "Garnison"),
 ];
 
@@ -542,7 +542,7 @@ fn buildings_tab(
     snap: &Snapshot,
 ) {
     let sheet = &snap.sheet;
-    pane.spawn(caption(theme, "Colonie :"));
+    pane.spawn(caption(theme, "Localité :"));
     pane.spawn(wrap_row()).with_children(|line| {
         for place in &sheet.settlements {
             let name = format!("prov:set:{}", place.id);
@@ -673,7 +673,7 @@ fn header_plate(
         "Palier le plus haut atteint.".to_owned()
     } else {
         format!(
-            "Vers le palier {} : {} %. Bâtir et améliorer fait grandir la colonie.",
+            "Vers le palier {} : {} %. Bâtir et améliorer fait grandir la localité.",
             snap.tier + 1,
             snap.tier_progress.min(100)
         )
@@ -982,7 +982,11 @@ fn settlements_tab(
 ) {
     pane.spawn(typed(
         theme,
-        &format!("{} colonie(s)", snap.sheet.settlements.len()),
+        &format!(
+            "{} localité{}",
+            snap.sheet.settlements.len(),
+            if snap.sheet.settlements.len() > 1 { "s" } else { "" }
+        ),
         UiType::Body,
     ));
     for place in &snap.sheet.settlements {

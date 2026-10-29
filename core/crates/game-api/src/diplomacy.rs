@@ -690,7 +690,7 @@ fn clause_menu(data: &GameData, o: &TreatyOptions) -> Vec<ClauseChoice> {
         for s in side.settlements.iter().take(24) {
             push(
                 slot,
-                "Place forte ou colonie",
+                "Place forte ou localité",
                 format!("{} ({})", s.name, s.province),
                 Article::CedeSettlement {
                     giver,

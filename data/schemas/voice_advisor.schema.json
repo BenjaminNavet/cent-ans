@@ -8,6 +8,13 @@
     "version": { "type": "integer", "minimum": 1 },
     "name": { "type": "string", "minLength": 1 },
     "title": { "type": "string" },
+    "default_speaker": { "$ref": "#/$defs/speaker" },
+    "speakers": {
+      "description": "Conseiller qui parle selon la faction du joueur (sous-titre seulement ; la voix synthétique reste la même).",
+      "type": "object",
+      "propertyNames": { "pattern": "^fac_" },
+      "additionalProperties": { "$ref": "#/$defs/speaker" }
+    },
     "voice": { "type": "string", "minLength": 1 },
     "instructions": { "type": "string", "minLength": 1 },
     "alert_cooldown_turns": { "type": "integer", "minimum": 0, "description": "Tours minimum entre deux alertes du même type." },
@@ -30,6 +37,18 @@
         "if": { "properties": { "trigger": { "const": "alert" } } },
         "then": { "required": ["event"] }
       }
+    }
+  },
+  "$defs": {
+    "speaker": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "character": { "type": "string", "pattern": "^chr_" }
+      },
+      "required": ["name"],
+      "additionalProperties": false
     }
   },
   "required": ["version", "name", "voice", "instructions", "lines"],

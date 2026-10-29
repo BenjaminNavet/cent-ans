@@ -54,7 +54,7 @@ pub const SECTIONS: &[(&str, &[Line])] = &[
             ("map_toggle_units", "Mes unités (armées et agents)", "U"),
             (
                 "map_toggle_holdings",
-                "Colonies (revenus, chantiers, menaces)",
+                "Localités (revenus, chantiers, menaces)",
                 "B",
             ),
             (
@@ -81,11 +81,11 @@ pub const SECTIONS: &[(&str, &[Line])] = &[
         ],
     ),
     (
-        "Armées et colonies",
+        "Armées et localités",
         &[
             ("campaign_next_idle", "Armée inactive suivante", "Tab"),
             ("campaign_prev_idle", "Armée inactive précédente", "Maj+Tab"),
-            ("campaign_next_settlement", "Colonie suivante", "Ctrl+Tab"),
+            ("campaign_next_settlement", "Localité suivante", "Ctrl+Tab"),
             ("army_center", "Centrer sur l’armée sélectionnée", "."),
             ("army_follow", "Suivre l’armée sélectionnée", "Y"),
             ("army_split", "Séparer les régiments choisis", "X"),
@@ -161,7 +161,7 @@ pub const SECTIONS: &[(&str, &[Line])] = &[
 const MOUSE_LINES: [(&str, &str); 4] = [
     (
         "Clic gauche",
-        "Sélectionner une armée, une province ou une colonie",
+        "Sélectionner une armée, une province ou une localité",
     ),
     ("Clic droit", "Armée sélectionnée : marcher vers ce lieu"),
     ("Molette", "Zoom"),

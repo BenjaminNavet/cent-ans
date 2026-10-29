@@ -211,6 +211,7 @@ impl CampaignState {
         init_characters(&mut state, data);
         link_families(&mut state, data);
         init_rulers_and_heirs(&mut state, data);
+        init_ruler_prestige(&mut state, data);
         crate::loyalty::init_loyalty(&mut state, data);
 
         init_main_armies(&mut state, data)?;
@@ -422,6 +423,22 @@ fn init_characters(state: &mut CampaignState, data: &GameData) {
 /// with an elected head, like a realm whose dynasty died out; factions whose
 /// data names no heir get the one their succession law designates (spec M4
 /// § 1: "héritier calculable").
+/// The `prestige` of a faction file is the starting prestige of its ruler (the HUD and the
+/// prestige objectives read the ruler's; the field used to be ignored, so the game opened at 0).
+fn init_ruler_prestige(state: &mut CampaignState, data: &GameData) {
+    for (id, faction) in &data.factions {
+        let Some(prestige) = faction.prestige else {
+            continue;
+        };
+        let Some(ruler) = state.factions.get(id).and_then(|f| f.ruler.clone()) else {
+            continue;
+        };
+        if let Some(character) = state.characters.get_mut(&ruler) {
+            character.prestige = character.prestige.max(prestige as i32);
+        }
+    }
+}
+
 fn init_rulers_and_heirs(state: &mut CampaignState, data: &GameData) {
     let rulerless: Vec<FactionId> = state
         .factions

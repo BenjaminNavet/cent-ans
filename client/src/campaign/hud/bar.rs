@@ -171,7 +171,7 @@ pub fn launcher_tooltip(title: &str, key: &str, detail: &str) -> String {
     if key.is_empty() {
         format!("[b]{title}[/b]\n{detail}")
     } else {
-        format!("[b]{title}[/b] ({key})\n{detail}")
+        format!("[b]{title}[/b]\n{detail}\nRaccourci : {key}")
     }
 }
 
@@ -256,7 +256,7 @@ fn keycap(theme: &UiTheme, key: Option<String>) -> impl Bundle {
         Pickable::IGNORE,
         children![(
             Text::new(key.unwrap_or_default()),
-            theme.text_font(true, false, 10.0),
+            theme.text_font(true, false, 12.0),
             TextColor(style::INK),
             Pickable::IGNORE,
         )],
@@ -636,7 +636,7 @@ mod tests {
         assert_eq!(launcher_tooltip("Codex", "", "x"), "[b]Codex[/b]\nx");
         assert_eq!(
             launcher_tooltip("Techniques", "F4", "x"),
-            "[b]Techniques[/b] (F4)\nx"
+            "[b]Techniques[/b]\nx\nRaccourci : F4"
         );
     }
 }

@@ -111,7 +111,9 @@ pub fn objectives_view(data: &GameData, state: &CampaignState) -> ObjectivesView
                 id: o.id.clone(),
                 title: format!("{} ({})", o.title, o.category),
                 description: o.description.clone(),
-                done: o.done,
+                // « Acquis à conserver » is not an accomplishment: the panel does not tick it
+                // (« 4 réussis » at turn 0 spoiled the motivation).
+                done: o.done && !o.held,
                 progress: o.progress.clone(),
             })
             .collect(),

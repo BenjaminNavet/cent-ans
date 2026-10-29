@@ -136,11 +136,11 @@ pub fn section(
                 }
             });
         if snap.verdicts.is_empty() {
-            companion.spawn(caption(theme, "Aucune colonie à vous dans cette province."));
+            companion.spawn(caption(theme, "Aucune localité à vous dans cette province."));
         } else {
             companion.spawn(typed(
                 theme,
-                &format!("Colonie : {}", selected_name(snap)),
+                &format!("Localité : {}", selected_name(snap)),
                 UiType::Body,
             ));
             super::view::buildings_view(companion, theme, assets, labels, images, snap);

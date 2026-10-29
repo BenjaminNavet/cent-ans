@@ -421,7 +421,7 @@ pub fn vocation_button_text(view: &VocationView) -> String {
 pub fn vocation_tooltip(labels: &UiLabels, view: &VocationView) -> String {
     let mut tip = String::new();
     if view.vocation.is_empty() {
-        tip.push_str("Aucune vocation : aucun bonus ni surcoût.\nSpécialiser la colonie réduit le coût de ses bâtiments de vocation et renforce leurs effets.");
+        tip.push_str("Aucune vocation : aucun bonus ni surcoût.\nSpécialiser la localité réduit le coût de ses bâtiments de vocation et renforce leurs effets.");
     } else {
         tip.push_str(&format!(
             "[b]{}[/b] — {}\nBâtiments de la vocation : effets {}, coût {} ; autres bâtiments : coût {}.\nCohérence : {} bâtiment(s) de la vocation.",
