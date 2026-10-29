@@ -173,6 +173,22 @@
       "scale_axis": "length",
       "roughness": 0.9,
       "strip_base": false
+    },
+    "settlement_maquette": {
+      "lod_method": "voxel_bake",
+      "label": "Maquette générique de lieu (village, bourg, château, abbaye ; Meshy meshy-6 haute définition, VIS-R6b)",
+      "category": "buildings",
+      "lod_tris": [
+        30000,
+        10000,
+        3000
+      ],
+      "tex": 2048,
+      "scale_axis": "length",
+      "roughness": 0.9,
+      "strip_base": false,
+      "island_min": 0.0,
+      "lod_voxels": 320
     }
   },
   "lod0_voxel_ratio": 5,
