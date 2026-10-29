@@ -186,9 +186,9 @@ impl Default for GroveLook {
 impl Default for ClearingLook {
     fn default() -> Self {
         ClearingLook {
-            cell_px: 64.0,
-            per_cell: 0.5,
-            radius_px: (3.0, 5.5),
+            cell_px: 40.0,
+            per_cell: 0.6,
+            radius_px: (2.5, 5.5),
             min_forest: 0.9,
             wobble: 0.25,
             kinds: vec![
