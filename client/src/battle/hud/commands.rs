@@ -321,7 +321,7 @@ fn spawn_button(
     commands.spawn((
         OrderKey(order),
         Text::new(""),
-        theme.text_font(false, false, 10.0),
+        theme.text_font(false, false, crate::ui::kit::style::MIN_TEXT_PX),
         TextColor(style::INK_FADED),
         Node {
             position_type: PositionType::Absolute,

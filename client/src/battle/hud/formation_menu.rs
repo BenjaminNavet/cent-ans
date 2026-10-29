@@ -323,7 +323,7 @@ fn spawn(
     commands.spawn((
         MenuButtonLabel,
         Text::new(""),
-        theme.text_font(false, false, 10.0),
+        theme.text_font(false, false, crate::ui::kit::style::MIN_TEXT_PX),
         TextColor(INK),
         TextLayout::new(Justify::Center, LineBreak::NoWrap),
         Pickable::IGNORE,

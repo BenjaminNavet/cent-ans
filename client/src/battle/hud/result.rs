@@ -549,7 +549,8 @@ fn roster_card(
     if row.lost > 0 {
         commands.spawn((
             Text::new(format!("−{}", row.lost)),
-            ctx.theme.text_font(false, false, 12.0),
+            ctx.theme
+                .text_font(false, false, crate::ui::kit::style::MIN_TEXT_PX),
             TextColor(Color::srgb(1.0, 0.6, 0.55)),
             ChildOf(shade),
         ));

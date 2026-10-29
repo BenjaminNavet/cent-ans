@@ -256,7 +256,7 @@ fn keycap(theme: &UiTheme, key: Option<String>) -> impl Bundle {
         Pickable::IGNORE,
         children![(
             Text::new(key.unwrap_or_default()),
-            theme.text_font(true, false, 12.0),
+            theme.text_font(true, false, crate::ui::kit::style::MIN_TEXT_PX),
             TextColor(style::INK),
             Pickable::IGNORE,
         )],
@@ -286,7 +286,7 @@ pub fn launcher_badge(theme: &UiTheme, count: usize) -> impl Bundle {
         Pickable::IGNORE,
         children![(
             Text::new(count.to_string()),
-            theme.text_font(true, false, 10.0),
+            theme.text_font(true, false, crate::ui::kit::style::MIN_TEXT_PX),
             TextColor(style::PARCHMENT_LIGHT),
             Pickable::IGNORE,
         )],

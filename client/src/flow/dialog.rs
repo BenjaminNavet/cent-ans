@@ -824,7 +824,11 @@ fn side_column(
                             children![
                                 (
                                     Text::new(unit.name.clone()),
-                                    theme.text_font(false, false, 11.0),
+                                    theme.text_font(
+                                        false,
+                                        false,
+                                        crate::ui::kit::style::MIN_TEXT_PX
+                                    ),
                                     TextColor(style::INK),
                                 ),
                                 (
@@ -833,7 +837,11 @@ fn side_column(
                                     } else {
                                         format!("{}/{}", unit.soldiers, unit.max_soldiers)
                                     }),
-                                    theme.text_font(true, false, 12.0),
+                                    theme.text_font(
+                                        true,
+                                        false,
+                                        crate::ui::kit::style::MIN_TEXT_PX
+                                    ),
                                     TextColor(style::INK_SOFT),
                                 ),
                             ],

@@ -360,6 +360,7 @@ fn tooltip_driver(
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,
     theme: Res<UiTheme>,
+    settings: Option<Res<crate::settings::Settings>>,
     assets: Res<AssetServer>,
     registry: Res<TooltipRegistry>,
     mut state: ResMut<TooltipState>,
@@ -372,6 +373,7 @@ fn tooltip_driver(
     panel_entities: Query<(Entity, &TooltipPanel)>,
 ) {
     let dt = time.delta_secs();
+    let delay = settings.map_or(DELAY, |s| s.tooltip_delay.clamp(0.2, 1.5));
     let alt = keys.any_pressed([KeyCode::AltLeft, KeyCode::AltRight]);
     let cursor = logical_cursor(&window).unwrap_or(Vec2::ZERO);
     let state = &mut *state;
@@ -414,7 +416,7 @@ fn tooltip_driver(
                     _ => 0.0,
                 };
                 state.pending_host = Some((entity, elapsed));
-                if elapsed >= DELAY {
+                if elapsed >= delay {
                     state.chain.open_root(&tooltip.bbcode, cursor, alt);
                     state.source = Some(entity);
                     state.pending_host = None;
@@ -448,7 +450,7 @@ fn tooltip_driver(
                 (None, _) => None,
             };
             if let Some((_, elapsed)) = state.pending_host
-                && elapsed >= DELAY
+                && elapsed >= delay
             {
                 state.chain.clear();
             }

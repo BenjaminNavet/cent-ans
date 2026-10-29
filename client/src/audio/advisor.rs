@@ -342,10 +342,15 @@ fn emit(
 #[derive(SystemParam)]
 pub struct Subtitles<'w> {
     band: MessageWriter<'w, BandSay>,
+    settings: Option<Res<'w, Settings>>,
 }
 
 impl Subtitles<'_> {
     fn say(&mut self, text: String, seconds: f32) {
+        // Setting `access/subtitles`: the voice plays, its text is shown unless turned off.
+        if self.settings.as_deref().is_some_and(|s| !s.subtitles) {
+            return;
+        }
         self.band.write(BandSay {
             key: "advisor:voice".to_owned(),
             text,

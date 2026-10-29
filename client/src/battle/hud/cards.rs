@@ -456,7 +456,8 @@ fn spawn_card(
             ..default()
         },
         Text::new(""),
-        ctx.theme.text_font(false, false, 11.0),
+        ctx.theme
+            .text_font(false, false, crate::ui::kit::style::MIN_TEXT_PX),
         TextColor(style::PARCHMENT_LIGHT),
         Pickable::IGNORE,
         ChildOf(card),
@@ -501,7 +502,8 @@ fn spawn_card(
         commands.spawn((
             CardBadgeGlyph { id, index },
             Text::new(""),
-            ctx.theme.text_font(true, false, 10.0),
+            ctx.theme
+                .text_font(true, false, crate::ui::kit::style::MIN_TEXT_PX),
             TextColor(style::INK),
             Pickable::IGNORE,
             ChildOf(badge),

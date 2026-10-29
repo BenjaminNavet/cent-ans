@@ -279,6 +279,21 @@ pub static ROWS: &[Row] = &[
     ),
     check!(
         Interface,
+        subtitles,
+        "Sous-titres des voix",
+        "Affiche le texte des paroles du conseiller et des discours de bataille."
+    ),
+    check!(
+        Interface,
+        readable_font,
+        "Police lisible",
+        "Remplace le Garamond du texte courant par une police à lettres bien distinctes (Atkinson Hyperlegible)."
+    ),
+    choice!(Interface, tooltip_delay, "Délai des bulles d’aide",
+        "Temps de survol avant l’ouverture d’une bulle.",
+        [0.2 => "0,2 s", 0.5 => "0,5 s", 0.8 => "0,8 s", 1.1 => "1,1 s", 1.5 => "1,5 s"]),
+    check!(
+        Interface,
         high_contrast,
         "Contraste renforcé",
         "Encre plus sombre pour les textes et les bords."

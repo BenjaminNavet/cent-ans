@@ -563,7 +563,9 @@ pub fn sync_subtitles(
         (With<SpeechCry>, Without<SpeechSpeaker>, Without<SpeechLine>),
     >,
     mut band: Query<&mut Visibility, (With<SpeechBand>, Without<SpeechCry>)>,
+    settings: Option<Res<crate::settings::Settings>>,
 ) {
+    let subtitles = settings.is_none_or(|s| s.subtitles);
     let Some((who, text, is_cry)) = state.shown.clone() else {
         for root in &roots {
             commands.entity(root).despawn();
@@ -596,7 +598,9 @@ pub fn sync_subtitles(
         };
     }
     for mut visibility in &mut band {
-        *visibility = if is_cry {
+        // The spoken speech is subtitled unless the player turned subtitles off (setting
+        // `access/subtitles`); the war cry is a visual shout, not a subtitle.
+        *visibility = if is_cry || !subtitles {
             Visibility::Hidden
         } else {
             Visibility::Inherited
@@ -668,7 +672,7 @@ fn spawn_subtitles(commands: &mut Commands, theme: &UiTheme) {
     commands.spawn((
         Name::new("SpeechHint"),
         Text::new("Échap ou clic : passer"),
-        theme.text_font(false, false, 12.0),
+        theme.text_font(false, false, crate::ui::kit::style::MIN_TEXT_PX),
         TextColor(Color::srgba(0.8, 0.76, 0.66, 0.8)),
         Node {
             align_self: AlignSelf::FlexEnd,

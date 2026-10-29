@@ -335,7 +335,7 @@ pub fn spawn_row(commands: &mut Commands, parent: Entity, theme: &UiTheme, unit:
         commands.spawn((
             Name::new("AbilityLetter"),
             Text::new(""),
-            theme.text_font(true, false, 11.0),
+            theme.text_font(true, false, crate::ui::kit::style::MIN_TEXT_PX),
             TextColor(INK),
             Pickable::IGNORE,
             ChildOf(button),

@@ -65,6 +65,11 @@ pub fn gauge_color(ratio: f32) -> Color {
     }
 }
 
+/// Typographic floor (logical px at the 900 px reference): no UI text is built smaller, whatever the
+/// call site or the `text_size` setting (accessibility, audit XP-LISIBLE). Enforced by
+/// `tests/text_floor.rs`.
+pub const MIN_TEXT_PX: f32 = 13.0;
+
 /// The four type variations of the theme (base sizes at the 900 px reference height).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum UiType {

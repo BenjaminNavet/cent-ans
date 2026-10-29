@@ -292,7 +292,7 @@ pub fn spawn_seal(
             band.spawn((
                 SealLine(1),
                 Text::new(""),
-                theme.text_font(false, false, 12.0),
+                theme.text_font(false, false, crate::ui::kit::style::MIN_TEXT_PX),
                 TextColor(style::INK_SOFT),
                 Pickable::IGNORE,
             ));

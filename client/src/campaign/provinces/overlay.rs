@@ -665,12 +665,7 @@ fn fade_with_zoom(
         } else {
             1.0
         };
-        Vec4::new(
-            band.width_px(d),
-            band.falloff,
-            flat,
-            FILL_DOWNSCALE as f32,
-        )
+        Vec4::new(band.width_px(d), band.falloff, flat, FILL_DOWNSCALE as f32)
     } else {
         Vec4::ZERO
     };

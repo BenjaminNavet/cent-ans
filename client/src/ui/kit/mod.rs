@@ -63,6 +63,9 @@ const FONT_ITALIC_PATH: &str =
     "third_party/fonts/eb_garamond/EBGaramond-Italic-VariableFont_wght.ttf";
 const TITLE_FONT_PATH: &str = "third_party/fonts/im_fell_english/IMFeENrm28P.ttf";
 const TITLE_ITALIC_PATH: &str = "third_party/fonts/im_fell_english/IMFeENit28P.ttf";
+/// Readable alternative (setting `access/readable_font`): Atkinson Hyperlegible Next, OFL.
+const READABLE_FONT_PATH: &str = "third_party/fonts/atkinson/Regular.ttf";
+const READABLE_ITALIC_PATH: &str = "third_party/fonts/atkinson/Italic.ttf";
 /// Fallback faces for `₶`, `▲`, `✓`, `⚠`… (`parchment_theme.tres`: currency, symbols, symbols 2).
 const FALLBACK_FONT_PATHS: [&str; 3] = [
     "third_party/fonts/noto/NotoSerif-Currency.ttf",
@@ -174,6 +177,10 @@ pub struct UiTheme {
     /// Multiplier of every font size (setting `interface/text_size`); applies to text built
     /// after it changes (open panels keep their size until rebuilt).
     pub text_scale: f32,
+    /// Readable font on (setting `access/readable_font`): body text uses [`Self::font_readable`].
+    pub readable: bool,
+    pub font_readable: FontSource,
+    pub font_readable_italic: FontSource,
 }
 
 impl Default for UiTheme {
@@ -192,6 +199,9 @@ impl Default for UiTheme {
             icons: icons::IconLibrary::default(),
             metrics: HashMap::new(),
             text_scale: 1.0,
+            readable: false,
+            font_readable: FontSource::default(),
+            font_readable_italic: FontSource::default(),
         }
     }
 }
@@ -200,23 +210,39 @@ impl UiTheme {
     /// Body `TextFont` (Garamond, lining figures); `bold` = weight 650, else 470.
     pub fn text_font(&self, bold: bool, italic: bool, size: f32) -> TextFont {
         TextFont {
-            font: if italic {
-                self.font_italic.clone()
-            } else {
-                self.font.clone()
-            },
-            font_size: (size * self.text_scale).into(),
+            font: self.body_font(italic),
+            font_size: (size * self.text_scale).max(style::MIN_TEXT_PX).into(),
             weight: FontWeight(if bold { WEIGHT_BOLD } else { WEIGHT_BODY }),
             font_features: FontFeatures::from([FontFeatureTag::LINING_FIGURES]),
             ..default()
         }
     }
 
+    /// Font source of body text (readable alternative when the setting is on).
+    pub fn body_font(&self, italic: bool) -> FontSource {
+        match (self.readable, italic) {
+            (true, false) => self.font_readable.clone(),
+            (true, true) => self.font_readable_italic.clone(),
+            (false, false) => self.font.clone(),
+            (false, true) => self.font_italic.clone(),
+        }
+    }
+
+    /// Font source of titles (IM Fell English; large enough to stay legible, so the readable
+    /// alternative leaves it alone).
+    pub fn heading_font(&self, italic: bool) -> FontSource {
+        if italic {
+            self.font_title_italic.clone()
+        } else {
+            self.font_title.clone()
+        }
+    }
+
     /// Title `TextFont` (IM Fell English).
     pub fn title_font(&self, size: f32) -> TextFont {
         TextFont {
-            font: self.font_title.clone(),
-            font_size: (size * self.text_scale).into(),
+            font: self.heading_font(false),
+            font_size: (size * self.text_scale).max(style::MIN_TEXT_PX).into(),
             ..default()
         }
     }
@@ -365,6 +391,8 @@ fn load_resources(
     theme.font_italic = with_fallbacks(load_font(FONT_ITALIC_PATH));
     theme.font_title = with_fallbacks(load_font(TITLE_FONT_PATH));
     theme.font_title_italic = with_fallbacks(load_font(TITLE_ITALIC_PATH));
+    theme.font_readable = with_fallbacks(load_font(READABLE_FONT_PATH));
+    theme.font_readable_italic = with_fallbacks(load_font(READABLE_ITALIC_PATH));
 
     theme.icons = icons::IconLibrary::from_assets(|relative| read_asset(relative).ok());
 
@@ -441,15 +469,44 @@ pub fn parse_kit_metrics(bytes: &[u8]) -> Result<HashMap<String, SliceMetrics>, 
     Ok(result)
 }
 
-/// `interface/text_size` -> [`UiTheme::text_scale`] (clamped; no write when unchanged).
+/// `interface/text_size` and `access/readable_font` -> [`UiTheme`], applied live: text already on
+/// screen is rescaled and its font swapped (a change of the setting no longer waits for the next
+/// panel rebuild). Only fonts of the theme are touched (map labels and 3D text keep their own).
 pub(super) fn apply_text_scale(
     settings: Option<Res<crate::settings::Settings>>,
     mut theme: ResMut<UiTheme>,
+    mut texts: Query<&mut TextFont, With<Node>>,
 ) {
     let Some(settings) = settings else { return };
     let wanted = settings.text_size.clamp(0.7, 1.6);
-    if (theme.text_scale - wanted).abs() > 1e-4 {
-        theme.text_scale = wanted;
+    let readable = settings.readable_font;
+    let scale_changed = (theme.text_scale - wanted).abs() > 1e-4;
+    if !scale_changed && theme.readable == readable {
+        return;
+    }
+    let ratio = wanted / theme.text_scale.max(1e-4);
+    let fonts_before = [
+        theme.body_font(false),
+        theme.body_font(true),
+        theme.heading_font(false),
+        theme.heading_font(true),
+    ];
+    theme.text_scale = wanted;
+    theme.readable = readable;
+    let fonts_after = [
+        theme.body_font(false),
+        theme.body_font(true),
+        theme.heading_font(false),
+        theme.heading_font(true),
+    ];
+    for mut text in &mut texts {
+        let Some(slot) = fonts_before.iter().position(|font| *font == text.font) else {
+            continue;
+        };
+        text.font = fonts_after[slot].clone();
+        if scale_changed && let bevy::text::FontSize::Px(px) = text.font_size {
+            text.font_size = (px * ratio).max(style::MIN_TEXT_PX).into();
+        }
     }
 }
 

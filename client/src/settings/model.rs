@@ -51,7 +51,7 @@ pub struct Settings {
     pub fx_soft_shadows: String,
     /// `interface/ui_size`: multiplies the automatic UI scale (`UiScale`).
     pub ui_size: f32,
-    /// `interface/text_size`: multiplier of text sizes (exposed; the kit does not read it yet).
+    /// `interface/text_size`: multiplier of text sizes, applied live to the text on screen.
     pub text_size: f32,
     // ---- Audio (`audio/bus_*`, `voice/*`), linear 0..1 ----
     pub audio_master: f32,
@@ -82,6 +82,12 @@ pub struct Settings {
     pub decor_hover_delay: f32,
     /// `access/colorblind`.
     pub colorblind: bool,
+    /// `access/subtitles`: the spoken lines (advisor, battle speeches) are also shown as text.
+    pub subtitles: bool,
+    /// `interface/tooltip_delay` in seconds (0.2 to 1.5): hover time before a bubble opens.
+    pub tooltip_delay: f32,
+    /// `access/readable_font`: body text in Atkinson Hyperlegible instead of EB Garamond.
+    pub readable_font: bool,
     /// `access/reduce_motion` -> `ReduceMotion`.
     pub reduce_motion: bool,
     /// `access/high_contrast`.
@@ -168,6 +174,9 @@ impl Default for Settings {
             news_filter: "interest".into(),
             next_hint: true,
             decor_hover_delay: 1.5,
+            subtitles: true,
+            tooltip_delay: 0.5,
+            readable_font: false,
             colorblind: false,
             reduce_motion: false,
             high_contrast: false,
