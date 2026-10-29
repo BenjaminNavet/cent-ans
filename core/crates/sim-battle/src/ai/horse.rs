@@ -237,7 +237,15 @@ pub(super) fn plan_horse(
         )
     };
     let (x, z) = wing_behind_foot(view, roles, i, (x, z));
-    view.move_to(i, x, z, false, Some(facing));
+    // IA-CAV: horse that has the initiative and no foot to wait for rides to
+    // its post at the trot instead of the slow deliberate march.
+    let run = view.side == SideId::Attacker
+        && !defensive
+        && roles.line.is_empty()
+        && view
+            .nearest_enemy(i, |_| true)
+            .is_some_and(|(_, d)| d > tuning().cavalry_reach * 0.5);
+    view.move_to(i, x, z, run, Some(facing));
 }
 
 /// IA night (suite of EQ7): the attacker's horse holding its wing (or

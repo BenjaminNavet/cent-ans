@@ -237,11 +237,22 @@ fn outcome_bands() {
         "French losses too light: {:.0}",
         r.attacker_losses
     );
-    // Ten knights against ten longbows: the horse must have a chance.
+    // Ten knights against ten longbows (IA-CAV): lined up out of range, then
+    // ridden together round the flanks of the staked line, the horse wins
+    // some of the time, but at a heavy price and not always.
     let r = matchup(&[(K, 10)], &[(L, 10)], Plains, seeds);
-    assert!(r.attacker_wins <= 5, "10K vs 10L: {} wins", r.attacker_wins);
     assert!(
-        r.defender_losses > 30.0,
+        (1..=5).contains(&r.attacker_wins),
+        "10K vs 10L: {} wins",
+        r.attacker_wins
+    );
+    assert!(
+        r.attacker_losses > 150.0,
+        "knights too lightly bled: {:.0}",
+        r.attacker_losses
+    );
+    assert!(
+        r.defender_losses > 60.0,
         "archers untouched: {:.0}",
         r.defender_losses
     );

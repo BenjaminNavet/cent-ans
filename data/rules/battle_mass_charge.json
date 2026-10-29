@@ -1,7 +1,7 @@
 {
   "description": "Charge groupée de la cavalerie (lot IA-CAV). Quand un camp qui a l’initiative a des tireurs ennemis isolés à portée de chevauchée, ses escadrons ne partent plus un à un : ils s’alignent d’abord au pas hors de portée des tireurs (portée effective + stage_margin_m), puis partent ensemble au galop une fois alignés (ou dès que l’un est touché). Le groupe ne se met en place que s’il pèse au moins min_power_ratio fois les tireurs visés.",
   "reach_m": 700,
-  "stage_margin_m": 45,
+  "stage_margin_m": 20,
   "ready_m": 45,
   "stalled_s": 12,
   "min_power_ratio": 1.0,
