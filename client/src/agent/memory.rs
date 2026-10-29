@@ -126,8 +126,74 @@ pub struct MemoryProbePlugin;
 
 impl Plugin for MemoryProbePlugin {
     fn build(&self, app: &mut App) {
-        app.register_dump(dump).add_systems(Update, (relieve, memlog));
+        app.register_dump(dump)
+            .add_systems(Update, (relieve, memlog));
+        if memlog_every().is_some()
+            && let Some(render_app) = app.get_sub_app_mut(bevy::render::RenderApp)
+        {
+            render_app.add_systems(
+                bevy::render::Render,
+                gpu_census.in_set(bevy::render::RenderSystems::Cleanup),
+            );
+        }
     }
+}
+
+/// Render-world census (`CENT_ANS_MEMLOG`): what the GPU really holds, by texture format and by
+/// size class, as opposed to the main-world estimate of the dump (the `Assets<Image>` view misses
+/// the images whose asset was dropped or whose bind group keeps an old texture alive).
+fn gpu_census(
+    gpu_images: Res<bevy::render::render_asset::RenderAssets<bevy::render::texture::GpuImage>>,
+    mut next: Local<Option<std::time::Instant>>,
+) {
+    let Some(every) = memlog_every() else { return };
+    let now = std::time::Instant::now();
+    if next.is_some_and(|at| now < at) {
+        return;
+    }
+    *next = Some(now + std::time::Duration::from_secs_f32(every));
+    let mut classes: std::collections::BTreeMap<String, (usize, u64)> = Default::default();
+    let mut total = 0u64;
+    for (_, gpu) in gpu_images.iter() {
+        let descriptor = &gpu.texture_descriptor;
+        let bytes = descriptor_bytes(descriptor);
+        total += bytes;
+        let side = descriptor.size.width.max(descriptor.size.height);
+        let class = format!(
+            "{:?} {} x{}",
+            descriptor.format,
+            match side {
+                0..=16 => "<=16",
+                17..=512 => "<=512",
+                513..=1024 => "<=1024",
+                1025..=2048 => "<=2048",
+                _ => ">2048",
+            },
+            if descriptor.size.depth_or_array_layers > 1 {
+                "layers"
+            } else {
+                "1"
+            }
+        );
+        let entry = classes.entry(class).or_default();
+        entry.0 += 1;
+        entry.1 += bytes;
+    }
+    let mut rows: Vec<_> = classes.into_iter().collect();
+    rows.sort_by_key(|(_, (_, bytes))| std::cmp::Reverse(*bytes));
+    let top: Vec<String> = rows
+        .iter()
+        .take(8)
+        .map(|(class, (count, bytes))| {
+            format!("{class}: {count} / {:.0} MiB", *bytes as f64 / 1048576.0)
+        })
+        .collect();
+    info!(
+        "gpucensus images={} total={:.0} MiB | {}",
+        gpu_images.iter().count(),
+        total as f64 / 1048576.0,
+        top.join(" | ")
+    );
 }
 
 /// Resident set size of this process in MiB, read from `ps` (macOS and Linux).
@@ -187,7 +253,10 @@ pub fn report() -> Value {
 
 /// Estimated bytes of the texture once uploaded (full mip chain as declared by the descriptor).
 fn gpu_bytes(image: &Image) -> u64 {
-    let descriptor = &image.texture_descriptor;
+    descriptor_bytes(&image.texture_descriptor)
+}
+
+fn descriptor_bytes(descriptor: &bevy::render::render_resource::TextureDescriptor) -> u64 {
     let format: TextureFormat = descriptor.format;
     let (block_w, block_h) = format.block_dimensions();
     let block_bytes = u64::from(format.block_copy_size(None).unwrap_or(4));
