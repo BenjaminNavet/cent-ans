@@ -108,7 +108,10 @@ pub fn army_text(bubble: &ArmyBubble) -> String {
     let mut lines = vec![format!("[b]{title}[/b]")];
     let mut faction_line = bubble.faction_name.clone();
     if let Some(liege) = bubble.liege_name.as_deref().filter(|l| !l.is_empty()) {
-        faction_line.push_str(&format!(" (vassal {})", crate::ui::kit::fr::de_place(liege)));
+        faction_line.push_str(&format!(
+            " (vassal {})",
+            crate::ui::kit::fr::de_place(liege)
+        ));
     }
     if !general.is_empty() && !faction_line.is_empty() {
         lines.push(faction_line);

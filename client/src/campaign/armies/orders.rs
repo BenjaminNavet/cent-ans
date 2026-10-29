@@ -239,7 +239,7 @@ pub fn hover_and_input(
                 }),
         })
         .collect();
-    let under = pick_scored(&items, cursor, None).filter(|r| r.direct);
+    let under = pick_scored(&items, cursor, None);
     let id = under.as_ref().and_then(|r| ArmyId::parse(&r.id));
     if hovered.0 != id {
         hovered.0 = id.clone();
@@ -257,9 +257,8 @@ pub fn hover_and_input(
         let Some(army) = selected.0.clone() else {
             return;
         };
-        let picked = pick_scored(&items, cursor, Some(army.as_str()))
-            .filter(|r| r.direct)
-            .and_then(|r| ArmyId::parse(&r.id));
+        let picked =
+            pick_scored(&items, cursor, Some(army.as_str())).and_then(|r| ArmyId::parse(&r.id));
         // An army of a faction at peace with us: confirm the declaration of war first, then
         // attack (`army_movement_controller.ask_war`).
         if let Some(target) = picked.clone()

@@ -145,7 +145,10 @@ fn feudal_text(view: &ProvinceView, index: u16) -> String {
         return String::new();
     };
     let mut text = if cell.holder == cell.sovereign || cell.holder.is_empty() {
-        format!("royaume {}", crate::ui::kit::fr::de_place(view.name_of(&cell.sovereign)))
+        format!(
+            "royaume {}",
+            crate::ui::kit::fr::de_place(view.name_of(&cell.sovereign))
+        )
     } else {
         format!(
             "tenu par {}, sous {}",

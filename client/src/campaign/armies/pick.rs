@@ -4,7 +4,7 @@
 use bevy::prelude::*;
 
 /// Distance (pixels) under which a point near a silhouette counts as "almost".
-pub const PICK_NEAR_PX: f32 = 10.0;
+pub const PICK_NEAR_PX: f32 = 24.0;
 
 /// One pickable army on screen.
 #[derive(Debug, Clone)]
