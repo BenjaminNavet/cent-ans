@@ -25,3 +25,20 @@ Ne pas modifier main pendant que les juges tournent (run_bg.sh recompile depuis 
 
 ## État / prochaine étape
 29/10 : intégration des modifs non commitées de main (sélection des armées plus tolérante), puis itération 1.
+
+## Itération 1 — triage en cours
+- « Départ sur Berlin » (DA + histux) : cause = `out/camera.txt` oublié le 28/10 (13.405,52.52), renommé en `out/camera.txt.berlin-2810.bak`. À corriger : ce fichier ne doit agir qu'en build `dev` (le joueur lance depuis le dépôt).
+- Coupure internet pendant l'itération 1 : juges design et technique relancés par message.
+
+### Lots de l'itération 1 (lancés 29/10, worktrees)
+| Lot | Modèle | Constats | Rapports source |
+|-----|--------|----------|-----------------|
+| COMBAT | sonnet | arcs longs intouchables, cavalerie écrasante, approche de bataille 123 s | design |
+| ECO | sonnet | économie trop riche, provinces qui fondent, banqueroutes, score de règne, attrition hors territoire, bandes seed bots, invariant army_refs | design |
+| TEXTES | sonnet | camera.txt hors dev, HUD abrégé, Désordre/Mécontentement, « colonie », Codex futur, Jean le Bel, contrastes, typo, objectifs/prestige/domaine affichés, réserve de recrutement visible | histux, design |
+| SOL | sonnet (captures ≤ 5) | damier rose du sol (Angleterre), forêt saturée | art |
+| MEM | sonnet | mémoire campagne 7-12 Go, perf_guard.sh zsh, mêlée 59 fps, pics de descente | tech |
+| BATDA | sonnet | héraldique cavalerie, bannières minuscules, terrain de bataille plat/horizon, mesh sans normales | art |
+| DATA | haiku | valley_courses schéma, ids names_*, couverture des schémas, war_horn, filtre bus lointain | tech |
+Reportés à l'itération 2 : tutoriel (recrutement/siège/bataille), illustration d'Abu al-Hasan (Z-Image), Hainaut 1337, date de départ.
+ADR : les lots nomment `docs/decisions/XXXX-<lot>-titre.md`, numérotés à la fusion (dernier : 0790).
