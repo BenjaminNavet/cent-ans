@@ -258,10 +258,14 @@ pub fn treasury_tooltip(economy: &EconomyView, provinces: &[ProvinceIncome]) -> 
 /// One line on the recruitment reserve (recruitment panel header): what the realm can raise now.
 pub fn reserve_line(reserve: &RecruitReserveView) -> String {
     format!(
-        "Réserve de recrues du royaume : {} levables (plafond {}), {} sur {} · +{} à la saison prochaine",
+        "Réserve de recrues : {} sur {} · {} sur {} · +{} la saison prochaine",
         fr::count(i64::from(reserve.available), "unité", None),
         reserve.cap,
-        fr::count(i64::from(reserve.ready_settlements), "place prête", Some("places prêtes")),
+        fr::count(
+            i64::from(reserve.ready_settlements),
+            "place prête",
+            Some("places prêtes")
+        ),
         reserve.settlements,
         reserve.gain_next_season,
     )
@@ -322,8 +326,14 @@ mod tests {
         assert!(tip.contains("6 sur 9"));
         assert!(tip.contains("non la bourse"));
         let line = reserve_line(&reserve);
-        assert!(line.contains("14 unités") && line.contains("6 places prêtes sur 9"), "{line}");
-        let empty = RecruitReserveView { available: 0, ..reserve };
+        assert!(
+            line.contains("14 unités sur 32") && line.contains("6 places prêtes sur 9"),
+            "{line}"
+        );
+        let empty = RecruitReserveView {
+            available: 0,
+            ..reserve
+        };
         assert!(reserve_tooltip(&empty).contains("Aucune levée possible"));
     }
 

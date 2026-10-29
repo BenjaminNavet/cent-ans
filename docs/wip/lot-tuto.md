@@ -8,5 +8,8 @@ Branche `worktree-agent-a62be3909ca64d6f4`, base main 99d672914.
 3. Barre du haut : `bar::fit_top_bar` serre l'espacement et réduit les lanceurs sous 1500 px logiques.
 4. Prestige : champ supprimé (ADR `XXXX-tuto-prestige-champ-supprime.md`).
 
-## Prochaine étape
-Vérifier par dump à 1280x800 (`ui_kit.layout`) que la barre ne déborde plus ; tests ; commit final.
+5. Panneau de recrutement : zone `SideTall` (hauteur définie) + plafond 100 % : la grille de cartes rétrécit et défile, « Sceller la levée » reste visible à 1280x800.
+6. Étape recherche : touche lue du keymap (`{key:map_toggle_tech}`) ; la carte du guide s'écarte (racine retirée, flèche conservée) quand recrutement ou diplomatie est ouvert (`Tutorial::aside`).
+
+## Vérifications
+Dump 1280x800 : `hud.bar` width 1293, menu_right 1281, overflows false. Tests core/client verts ; seul échec : `markers::dn::tests::real_table_and_glbs` (GLB absent du worktree, sans lien). pytest 4068 verts.

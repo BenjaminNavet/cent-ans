@@ -592,7 +592,7 @@ pub fn tight_bar(width: f32) -> bool {
 
 /// Assigns `value` to a length of `node` only when it differs (no needless change detection).
 fn set_px(node: &mut Mut<Node>, pick: fn(&mut Node) -> &mut Val, value: f32) {
-    if *pick(&mut node.bypass_change_detection()) != Val::Px(value) {
+    if *pick(node.bypass_change_detection()) != Val::Px(value) {
         *pick(node) = Val::Px(value);
     }
 }
@@ -614,6 +614,7 @@ impl BarFit {
 }
 
 /// Switches the bar compact from its laid-out width, and tight below [`TIGHT_WIDTH`].
+#[allow(clippy::too_many_arguments)]
 pub(super) fn fit_top_bar(
     bar: Query<(Entity, &bevy::ui::ComputedNode), With<TopBarMark>>,
     rows: Query<(Entity, &Children), With<PanelButtons>>,
@@ -621,7 +622,10 @@ pub(super) fn fit_top_bar(
     mut compact: ResMut<BarCompact>,
     chips: Query<(Entity, &HudField)>,
     mut nodes: Query<&mut Node>,
-    menu: Query<(&Name, &bevy::ui::ComputedNode, &bevy::ui::UiGlobalTransform), With<LauncherButton>>,
+    menu: Query<
+        (&Name, &bevy::ui::ComputedNode, &bevy::ui::UiGlobalTransform),
+        With<LauncherButton>,
+    >,
     mut fit: ResMut<BarFit>,
 ) {
     let Ok((bar_entity, node)) = bar.single() else {
@@ -662,7 +666,11 @@ pub(super) fn fit_top_bar(
     };
     for (row, children) in &rows {
         if let Ok(mut row_node) = nodes.get_mut(row) {
-            let gap = if tight { TIGHT_LAUNCHER_GAP } else { LAUNCHER_GAP };
+            let gap = if tight {
+                TIGHT_LAUNCHER_GAP
+            } else {
+                LAUNCHER_GAP
+            };
             set_px(&mut row_node, |n| &mut n.column_gap, gap);
         }
         for child in children.iter().filter(|c| launchers.contains(*c)) {

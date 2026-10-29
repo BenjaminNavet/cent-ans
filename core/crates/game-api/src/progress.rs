@@ -642,10 +642,11 @@ fn troop_count(state: &CampaignState) -> u32 {
 /// A settlement the player is besieging.
 fn besieging(state: &CampaignState) -> bool {
     let player = state.player_faction();
-    state
-        .settlements
-        .values()
-        .any(|s| s.siege.as_ref().is_some_and(|siege| &siege.attacker == player))
+    state.settlements.values().any(|s| {
+        s.siege
+            .as_ref()
+            .is_some_and(|siege| &siege.attacker == player)
+    })
 }
 
 /// Snapshot taken when a step opens.

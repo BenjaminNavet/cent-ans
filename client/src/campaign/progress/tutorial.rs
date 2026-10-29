@@ -237,7 +237,8 @@ impl Tutorial {
     pub fn arrow_target(&self) -> (&str, bool) {
         let step = self.index.and_then(|i| self.steps.get(i));
         let name = step.map_or("", |s| s.target.as_str());
-        let show = (self.root.is_some() || self.aside) && self.done_timer.is_none() && !name.is_empty();
+        let show =
+            (self.root.is_some() || self.aside) && self.done_timer.is_none() && !name.is_empty();
         (name, show)
     }
 
@@ -572,8 +573,8 @@ fn rebuild(
         || settings_screen.is_some_and(|s| s.root.is_some())
         || modals.is_some_and(|m| m.is_busy());
     // Wide panels the card would cover: it steps aside (the arrow stays) until they close.
-    let aside = stack.is_some_and(|s| s.is_open("recruitment"))
-        || diplomacy.is_some_and(|d| d.open);
+    let aside =
+        stack.is_some_and(|s| s.is_open("recruitment")) || diplomacy.is_some_and(|d| d.open);
     if tutorial.aside != aside {
         tutorial.aside = aside;
     }
