@@ -60,3 +60,8 @@ En cours :
 - juges histoire/UX et technique (iter-02) ; juges DA et design arrêtés (couverts par les audits) ;
 - lots IA-CAV, FPS, TUTO (worktrees) ; MEM5 Opus (3 Go de mémoire de campagne).
 Suite : choisir les refontes prioritaires dans les audits et les lancer en lots larges.
+
+### Décisions du joueur (29/10)
+- Priorité : le visuel, surtout la carte de campagne → audit dédié `docs/audits/2026-10-29-visuel-campagne.md`.
+- R6 acceptée : recentrer sur 6-8 maisons jouables approfondies ; les autres factions restent dans le monde, pilotées par l'IA.
+- Audit campagne rendu (02292a92f) ; refonte R1 (renommée, actes à dates fixes, ambitions) lancée.
