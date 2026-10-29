@@ -3,7 +3,7 @@
 ## État : TERMINÉ (à fusionner)
 - Code : `core/crates/sim-battle/src/ai/mass.rs` (alignement hors de portée, départ ensemble, tenaille sur les
   flancs quand pieux, armées de cavalerie seule), trot vers le poste d'aile dans `ai/horse.rs`.
-- Données : `data/rules/battle_mass_charge.json` + schéma. ADR : `docs/decisions/XXXX-iacav-charge-groupee-cavalerie.md`
+- Données : `data/rules/battle_mass_charge.json` + schéma. ADR : `docs/decisions/0802-iacav-charge-groupee-cavalerie.md`
   (à numéroter à la fusion).
 - Mesures et tests : voir l'ADR. fmt, clippy `-D warnings`, `cargo test --workspace` verts ; seed bots rapide passé.
 - Fixture `auto_resolve_scenarios.json` non régénérée : l'exemple `balance_probe` cité dans son commentaire n'existe

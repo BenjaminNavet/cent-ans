@@ -1,4 +1,4 @@
-# XXXX — IA-CAV : charge groupée de la cavalerie (boucle juge 2)
+# 0802 — IA-CAV : charge groupée de la cavalerie (boucle juge 2)
 
 ## Contexte
 Mesures du lot COMBAT (ADR 0792, IA contre IA, 8 graines, `tests/combat/matchups.rs`) : 10 chevaliers contre 10 arcs
