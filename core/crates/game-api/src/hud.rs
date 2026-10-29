@@ -84,6 +84,35 @@ pub fn top_bar(data: &GameData, state: &CampaignState, faction: &FactionId) -> O
     })
 }
 
+/// ECO: the recruitment reserve of a faction (recruitment is limited by the
+/// reserves of its places, not by the purse). Shown in the top bar tooltip and
+/// the recruitment panel by the client.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+pub struct RecruitReserveView {
+    pub settlements: u32,
+    /// Units recruitable now (best-stocked type per settlement, summed).
+    pub available: u32,
+    pub cap: u32,
+    pub ready_settlements: u32,
+    pub gain_next_season: u32,
+}
+
+/// Recruitment reserve of `faction`.
+pub fn recruit_reserve(
+    data: &GameData,
+    state: &CampaignState,
+    faction: &FactionId,
+) -> RecruitReserveView {
+    let r = state.faction_recruit_reserve(data, faction);
+    RecruitReserveView {
+        settlements: r.settlements,
+        available: r.available,
+        cap: r.cap,
+        ready_settlements: r.ready_settlements,
+        gain_next_season: r.gain_next_season,
+    }
+}
+
 /// One signed row of the budget table.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct BudgetLineView {

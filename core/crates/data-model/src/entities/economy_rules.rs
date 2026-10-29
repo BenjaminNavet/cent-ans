@@ -157,6 +157,13 @@ pub struct EconomyRules {
     /// SV4: supply lost per winter season outside friendly territory.
     #[serde(default = "default_supply_loss_winter")]
     pub supply_loss_winter: u8,
+    /// ECO: share (percent) of the men of every unit lost to disease, desertion and
+    /// foraging losses each season an army spends outside friendly territory.
+    #[serde(default = "default_attrition_percent")]
+    pub attrition_percent: u32,
+    /// ECO: the same loss in winter (cold, mud, sickness).
+    #[serde(default = "default_attrition_percent_winter")]
+    pub attrition_percent_winter: u32,
     /// SV4: supply regained per season in friendly territory.
     #[serde(default = "default_supply_recovery")]
     pub supply_recovery: u8,
@@ -426,6 +433,12 @@ fn default_supply_loss() -> u8 {
 }
 fn default_supply_loss_winter() -> u8 {
     35
+}
+fn default_attrition_percent() -> u32 {
+    2
+}
+fn default_attrition_percent_winter() -> u32 {
+    5
 }
 fn default_supply_recovery() -> u8 {
     40

@@ -185,7 +185,58 @@ impl CampaignState {
     }
 }
 
+/// ECO: what the recruitment reserves of a faction allow, for the HUD.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub struct RecruitReserve {
+    /// Settlements held that have a reserve.
+    pub settlements: u32,
+    /// Sum, over the held settlements, of the units of the best-stocked type
+    /// recruitable now.
+    pub available: u32,
+    /// Sum of the reserve caps of those settlements.
+    pub cap: u32,
+    /// Settlements that have at least one whole unit recruitable now.
+    pub ready_settlements: u32,
+    /// Units gained next season, summed over the settlements (best type each).
+    pub gain_next_season: u32,
+}
+
 impl CampaignState {
+    /// ECO: the faction's recruitment reserve summary (the real bottleneck of
+    /// raising troops, rather than the purse).
+    pub fn faction_recruit_reserve(
+        &self,
+        data: &GameData,
+        faction: &data_model::FactionId,
+    ) -> RecruitReserve {
+        let mut out = RecruitReserve::default();
+        for (id, place) in &self.settlements {
+            if &place.controller != faction {
+                continue;
+            }
+            let slot_points = self.pool_slot_points(data, id);
+            let mut best = 0;
+            let mut cap = 0;
+            let mut gain = 0;
+            for unit_type in data.unit_types.keys() {
+                let view = self.recruit_pool_with(data, id, unit_type, slot_points);
+                cap = cap.max(view.cap);
+                if view.available > best {
+                    best = view.available;
+                }
+                gain = gain.max((view.milli + view.rate_milli).min(view.cap * MILLI) / MILLI);
+            }
+            out.settlements += 1;
+            out.available += best;
+            out.cap += cap;
+            out.gain_next_season += gain.saturating_sub(best);
+            if best > 0 {
+                out.ready_settlements += 1;
+            }
+        }
+        out
+    }
+
     /// Gives one unit of `unit_type` back to the reserve of `settlement` (a
     /// cancelled recruit); a full reserve leaves the map.
     pub(crate) fn restore_recruit_pool(

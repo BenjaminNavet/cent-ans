@@ -1160,6 +1160,52 @@ pub(crate) fn resolve_attrition(
         // CV3: an entrenched camp saves part of the loss.
         let loss = crate::posture::entrenched_loss(data, army, change.unsigned_abs());
         army.supply = army.supply.saturating_sub(loss);
+        // ECO: outside friendly land an army also wastes away (disease,
+        // desertion, foraging parties), more in winter, whatever its supply.
+        if !friendly {
+            let percent = if season == Season::Winter {
+                data.economy_rules.attrition_percent_winter
+            } else {
+                data.economy_rules.attrition_percent
+            };
+            let mut worn = 0;
+            for unit in &mut army.units {
+                let casualties = (unit.strength * percent).div_ceil(100).min(unit.strength);
+                unit.strength -= casualties;
+                worn += casualties;
+            }
+            army.units.retain(|u| u.strength > 0);
+            if worn > 0 {
+                let wiped = army.units.is_empty();
+                let commander = army.general.clone();
+                if wiped {
+                    if let Some(general) = commander {
+                        state.detach_general(&general);
+                    }
+                    state.armies.remove(&army_id);
+                }
+                events.push(
+                    GameEvent::new(
+                        if wiped {
+                            EventKind::ArmyDestroyed
+                        } else {
+                            EventKind::Attrition
+                        },
+                        format!(
+                            "{army_label} s'épuise en {} : {worn} hommes perdus (maladie, désertions).",
+                            data.province_name(&location)
+                        ),
+                    )
+                    .province(&location)
+                    .army(&army_id)
+                    .faction(&faction),
+                );
+                if wiped {
+                    continue;
+                }
+            }
+        }
+        let army = state.armies.get_mut(&army_id).expect("exists");
         if army.supply == 0 {
             let mut lost = 0;
             let starvation = data.economy_rules.starvation_loss_percent;

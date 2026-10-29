@@ -129,6 +129,18 @@
       "maximum": 100,
       "description": "Lot SV4 : points de ravitaillement perdus par saison d'hiver hors du territoire ami."
     },
+    "attrition_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 50,
+      "description": "Lot ECO : pourcentage des hommes de chaque unité perdus (maladie, désertion, fourrage) chaque saison passée hors du territoire ami."
+    },
+    "attrition_percent_winter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 50,
+      "description": "Lot ECO : la même perte en hiver (froid, boue, maladie)."
+    },
     "supply_recovery": {
       "type": "integer",
       "minimum": 0,
