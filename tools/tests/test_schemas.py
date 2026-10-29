@@ -230,6 +230,63 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "map_freshwater.schema.json": ("map/map_freshwater.json",),
     "agri_landscapes.schema.json": ("map/agri_landscapes.json",),
     "wetlands.schema.json": ("map/wetlands.json",),
+    # Schémas sans entrée ci-dessus (lot DATA, constat du juge technique) : validés ici.
+    "art_dn_fields.schema.json": ("art/dn_fields.json",),
+    "art_dn_ingest_classes.schema.json": ("art/dn_ingest_classes.json",),
+    "art_dn_manifest.schema.json": ("art/dn_manifest.json",),
+    "art_dn_models_hosting.schema.json": ("art/dn_models_hosting.json",),
+    "art_rock_outcrops.schema.json": ("art/rock_outcrops.yaml",),
+    "art_siege_stone.schema.json": ("art/siege_stone.json",),
+    "biomes.schema.json": ("map/biomes.yaml",),
+    "character.schema.json": ("characters/*.json",),
+    "codex.schema.json": ("codex/cdx_*.json",),
+    "codex_bundle.schema.json": ("codex_bundle.json",),
+    "colormap_style.schema.json": ("map/colormap_style.yaml",),
+    "compose_erode.schema.json": ("map/compose/erode.json",),
+    "compose_generalise.schema.json": ("map/compose/generalise.json",),
+    "compose_paint.schema.json": ("map/compose/paint/*.json",),
+    "compose_pins.schema.json": ("map/compose/pins.json",),
+    "compose_place_nudges.schema.json": ("map/compose/place_nudges.json",),
+    "compose_relief.schema.json": ("map/compose/relief.json",),
+    "compose_relief_real.schema.json": ("map/compose/relief_real.json",),
+    "compose_ridges.schema.json": ("map/compose/ridges.json",),
+    "compose_warp.schema.json": ("map/compose/warp.json",),
+    "diet.schema.json": ("diets/*.json",),
+    "edict.schema.json": ("edicts/*.json",),
+    "folk_props.schema.json": ("rules/folk_props.json",),
+    "fx_animal_motion.schema.json": ("fx/animal_motion.json",),
+    "fx_battle_impact.schema.json": ("fx/battle_impact.json",),
+    "fx_camp_horse_motion.schema.json": ("fx/camp_horse_motion.json",),
+    "fx_campaign_army_walk.schema.json": ("fx/campaign_army_walk.json",),
+    "fx_map_atmosphere.schema.json": ("fx/map_atmosphere.json",),
+    "fx_map_fire_wind.schema.json": ("fx/map_fire_wind.json",),
+    "fx_town_glow.schema.json": ("fx/town_glow.json",),
+    "ground_materials.schema.json": ("art/ground_materials.yaml",),
+    "ground_materials_pack.schema.json": ("art/ground_materials_pack.json",),
+    "map.schema.json": ("map/map.json",),
+    "map_countryside.schema.json": ("map/map_countryside.json",),
+    "map_fauna.schema.json": ("map/map_fauna.json",),
+    "materials.schema.json": ("art/materials.yaml",),
+    "names.schema.json": ("names/*.json",),
+    "relief_hosting.schema.json": ("map/relief_hosting.json",),
+    "religion.schema.json": ("religions/*.json",),
+    "resource.schema.json": ("resources/*.json",),
+    "seed_bots_bands.schema.json": ("balance/seed_bots_bands.json",),
+    "skill.schema.json": ("skills/*.json",),
+    "technology.schema.json": ("technologies/*.json",),
+    "texture_catalog.schema.json": ("art/textures/*.yaml",),
+    "trait.schema.json": ("traits/*.json",),
+    "transitions_ui.schema.json": ("ui/transitions.json",),
+    "ui_ornaments.schema.json": ("art/ui_ornaments.yaml",),
+    "unit_type.schema.json": ("unit_types/*.json",),
+    "valley_courses.schema.json": ("map/valley_courses.json",),
+    "water_materials.schema.json": ("art/water_materials.yaml",),
+}
+
+# Schémas hors table, avec la raison (tout autre schéma de data/schemas/ doit y figurer).
+EXEMPT_SCHEMAS: dict[str, str] = {
+    "common.schema.json": "définitions partagées (`$defs`), aucun document de données",
+    "battle_replay.schema.json": "échantillon écrit par sim-battle, validé par test_battle_replay_schema.py",
 }
 
 
@@ -250,3 +307,11 @@ def _cases() -> list:
 def test_data_matches_schema(schema_name: str, data_path: Path) -> None:
     """The data file validates against its schema, with sibling `$ref`s resolved."""
     assert_matches_schema(data_path, schema_name)
+
+
+def test_every_schema_is_validated_or_exempt() -> None:
+    """Chaque schéma de data/schemas/ a au moins un fichier de données dans SCHEMA_TABLE (ou une exception motivée)."""
+    schema_files = {path.name for path in (DATA / "schemas").glob("*.schema.json")}
+    uncovered = sorted(schema_files - set(SCHEMA_TABLE) - set(EXEMPT_SCHEMAS))
+    assert not uncovered, f"schémas sans validation de données : {uncovered}"
+    assert not sorted(set(SCHEMA_TABLE) - schema_files), "entrée de table sans schéma"

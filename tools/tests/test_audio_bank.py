@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
-from cent_ans_tools import audio_bank, sg2_sounds, ui_sounds
+from cent_ans_tools import audio, audio_bank, sg2_sounds, ui_sounds
 
 REPO = Path(__file__).resolve().parents[2]
 DATA = REPO / "data"
@@ -24,6 +24,8 @@ def test_every_bank_file_exists_and_is_generated() -> None:
     files += [entry["file"] for entry in bank["ambience"].values()]
     clip_names = {clip.name for clip in audio_bank.CLIPS}
     clip_names |= set(sg2_sounds.CLIP_NAMES)  # SG2: procedural siege sounds
+    # Effets d'origine (fanfare, war_horn, choir...) : joués par leur nom, fichier sfx/<nom>.
+    clip_names |= {f"sfx/{name}" for name in audio.SFX}
     # UB1: interface clips (WAV) are cut by ui_sounds from files already in the bank.
     ui_names = {f"ui/{clip.name}" for clip in ui_sounds.CLIPS}
     for name in files:

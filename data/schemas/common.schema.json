@@ -22,7 +22,7 @@
     "culture_id": { "type": "string", "pattern": "^cul_[a-z0-9_]+$" },
     "trait_id": { "type": "string", "pattern": "^trait_[a-z0-9_]+$" },
     "skill_id": { "type": "string", "pattern": "^skill_[a-z0-9_]+$" },
-    "names_id": { "type": "string", "pattern": "^names_[a-z]{2}$" },
+    "names_id": { "type": "string", "pattern": "^names_[a-z]{2,3}$" },
     "sea_zone_id": { "type": "string", "pattern": "^sea_[a-z0-9_]+$" },
     "codex_id": { "type": "string", "pattern": "^cdx_[a-z0-9_]+$" },
     "diet_id": { "type": "string", "pattern": "^diet_[a-z0-9_]+$" },

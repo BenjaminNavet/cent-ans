@@ -5,6 +5,7 @@ from functools import cache
 from pathlib import Path
 
 import pytest
+import yaml
 from PIL import Image
 
 from cent_ans_tools.codex import schema_validator
@@ -110,6 +111,8 @@ def fake_mflux(monkeypatch):
 
     monkeypatch.setattr(local_art, "_run", run)
     return commands
+
+
 @cache
 def _checked_validator(schema_name: str):
     """One validator (and metaschema check) per schema: the sibling registry is costly to build."""
@@ -119,9 +122,12 @@ def _checked_validator(schema_name: str):
 
 
 def assert_matches_schema(data_path: Path | str, schema_name: str) -> None:
-    """Asserts a JSON file (absolute, or relative to `data/`) is valid against `data/schemas/<schema_name>`."""
+    """Asserts a JSON or YAML file (absolute, or relative to `data/`) is valid against `data/schemas/<schema_name>`."""
     path = data_path if isinstance(data_path, Path) else DATA / data_path
     validator = _checked_validator(schema_name)
-    document = json.loads(path.read_text(encoding="utf-8"))
+    text = path.read_text(encoding="utf-8")
+    document = (
+        yaml.safe_load(text) if path.suffix in (".yaml", ".yml") else json.loads(text)
+    )
     errors = sorted(validator.iter_errors(document), key=lambda error: list(error.path))
     assert not errors, [f"{list(e.path)}: {e.message}" for e in errors[:5]]
