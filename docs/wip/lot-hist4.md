@@ -1,6 +1,6 @@
 # Lot HIST4 : historique et UX (boucle juge 2, itération 2)
 
-Source : `out/juge2/iter-02-histux.md`. Branche : worktree `agent-afbbd13049fc29b57`. ADR : `docs/decisions/XXXX-hist4-conseil-monnaies-contrastes.md`.
+Source : `out/juge2/iter-02-histux.md`. Branche : worktree `agent-afbbd13049fc29b57`. ADR : `docs/decisions/0798-hist4-conseil-monnaies-contrastes.md`.
 REPRISE faite : rebase sur main OK ; vérifications terminées (voir ci-dessous).
 
 ## Fait
