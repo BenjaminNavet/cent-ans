@@ -65,3 +65,4 @@ Suite : choisir les refontes prioritaires dans les audits et les lancer en lots 
 - Priorité : le visuel, surtout la carte de campagne → audit dédié `docs/audits/2026-10-29-visuel-campagne.md`.
 - R6 acceptée : recentrer sur 6-8 maisons jouables approfondies ; les autres factions restent dans le monde, pilotées par l'IA.
 - Audit campagne rendu (02292a92f) ; refonte R1 (renommée, actes à dates fixes, ambitions) lancée.
+- Audit expérience rendu (df3e688da) : C1 neuf canaux d'attention, C2 guide « boutons », C3 139 factions jouables, C4 bâtir = 130 clics ; refontes XP R1-R6, ordre R4+R1 (XP-POURQUOI, XP-AUDIENCE) puis XP-LISIBLE. À lancer après fusion de TUTO et R1 (fichiers communs) ; machine saturée (attente heavy.sh ≈ 1 h), pas plus de lots d'ici là.
