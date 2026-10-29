@@ -357,3 +357,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0794 | [Mémoire de campagne : textures de modèles BC1 en assets neufs, mesure avec relief](0794-textures-de-modeles-en-assets-neufs.md) | accepté |
 | 0795 | [MEM5 : les « 3 Go graphiques non comptés » sont le tas mimalloc](0795-mem5-tas-mimalloc-etiquete-ioaccelerator.md) | accepté |
 | 0796 | [TUTO : le champ `prestige` des factions est supprimé](0796-tuto-prestige-champ-supprime.md) | accepté |
+| 0797 | [Position diplomatique en bande intérieure en vue 3D (VIS-R2)](0797-vis-r2-position-diplomatique-en-bande.md) | accepté |
