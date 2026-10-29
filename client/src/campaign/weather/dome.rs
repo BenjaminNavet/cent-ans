@@ -297,13 +297,13 @@ pub fn dump(world: &World) -> Value {
 
 pub fn build(app: &mut App) {
     app.init_resource::<DomeState>();
-    if let Some(mut shaders) = app.world_mut().get_resource_mut::<Assets<Shader>>() {
-        if let Err(error) = shaders.insert(
+    if let Some(mut shaders) = app.world_mut().get_resource_mut::<Assets<Shader>>()
+        && let Err(error) = shaders.insert(
             DOME_SHADER.id(),
             Shader::from_wesl(include_str!("dome.wesl"), "weather/dome.wesl"),
-        ) {
-            error!("sky dome shader: {error:?}");
-        }
+        )
+    {
+        error!("sky dome shader: {error:?}");
     }
     if !app.world().contains_resource::<Assets<Mesh>>() {
         return;

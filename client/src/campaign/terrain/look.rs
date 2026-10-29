@@ -395,7 +395,8 @@ mod tests {
         .unwrap();
         let look = LookParams::from_map_json(&text);
         assert!((look.mist.z - 0.04).abs() < 1e-6, "wet_dim {}", look.mist.z);
-        assert!((look.mist.w - 0.32).abs() < 1e-6, "opacity {}", look.mist.w);
+        // VIS-R1: the painted valley mist is off, the post pass carries the single haze.
+        assert!(look.mist.w.abs() < 1e-6, "opacity {}", look.mist.w);
         assert_eq!(look.valley_a, Vec4::new(10.0, 140.0, 40.0, 220.0));
         assert!((look.valley_c.w - 0.5).abs() < 1e-6);
     }
