@@ -14,5 +14,10 @@ tant qu'on n'a pas répondu. Les flags viennent de `~/Library/Application Suppor
   personnalisée en `error!`.
 - Test `historical_launch_tests` (construit chaque bataille x 3 camps).
 
+- `run_bg.sh` : par défaut, prefs / saves / replays / settings (donc codex) dans un dossier jetable
+  (variables `CENT_ANS_*` déjà posées respectées ; `CENT_ANS_REAL_PREFS=1` pour les vrais fichiers).
+  Avant : un run agent lisait ET écrivait `~/Library/Application Support/Cent Ans/` (settings, codex, saves).
+
 ## État
-Vérifs complètes (clippy, tests, smoke) en cours.
+Clippy vert ; smoke complet 11/11 vert avec contrôle d'état ; test `historical_launch_tests` vert ;
+`cargo test --features dev` complet : voir le rapport.
