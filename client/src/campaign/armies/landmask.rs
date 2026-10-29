@@ -66,10 +66,13 @@ pub fn load_land_mask(mut commands: Commands) {
     commands.insert_resource(shared_land_mask());
 }
 
+/// Cached decoded mask: width, height and a weak handle on the bytes.
+type MaskCache = Option<(usize, usize, Weak<Vec<u8>>)>;
+
 /// `data/map/land_mask.png`, decoded once while any holder keeps it (orders, freshwater: 43 MiB
 /// each when decoded twice, MEM5). Empty mask without the file.
 pub fn shared_land_mask() -> LandMask {
-    static CACHE: Mutex<Option<(usize, usize, Weak<Vec<u8>>)>> = Mutex::new(None);
+    static CACHE: Mutex<MaskCache> = Mutex::new(None);
     let mut cache = CACHE
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner());

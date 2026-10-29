@@ -25,7 +25,7 @@ Branche `worktree-agent-a319572925dedf007`, base main 99d672914. Suite de MEM4 (
 - ADR `docs/decisions/XXXX-mem5-...` (numéroté à la fusion), `docs/performance-memoire.md` amendé.
 
 ## Prochaine étape
-- clippy/tests client, puis fusion. Seuils `perf_thresholds.json` inchangés (gain de banc dans le bruit).
+- Terminé : clippy + tests client verts (1502 + annexes). Reste la fusion (numéroter l ADR). Seuils `perf_thresholds.json` inchangés (gain de banc dans le bruit).
 
 ## Points ouverts
 - Doublons restants : rasters provinces client/cœur (82 Mo), `river_bed` x3, octets de hauteur du semis (86 Mo,
