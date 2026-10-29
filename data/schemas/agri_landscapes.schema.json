@@ -39,6 +39,10 @@
           "label": {
             "type": "string"
           },
+          "form": {
+            "enum": ["default", "openfield", "bocage", "midi", "montagne"],
+            "description": "VIS-R3b : forme de parcellaire (bloc `landscapes` de data/art/ground_biome_mix.json)."
+          },
           "cell_m": {
             "type": "number",
             "minimum": 50,

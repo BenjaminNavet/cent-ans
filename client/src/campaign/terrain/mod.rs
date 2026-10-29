@@ -21,6 +21,7 @@ pub mod colormap;
 pub mod cpu_sampler;
 pub mod decode;
 pub mod fields;
+pub mod parcel;
 pub mod ground;
 pub mod ground_cache;
 pub mod ground_detail;
@@ -732,7 +733,11 @@ fn dump_terrain(world: &World) -> (String, Value) {
                 "bg": material.ground.bg.to_array(),
                 "tiling": material.ground.tiling.to_array(),
                 "micro": material.ground.micro.to_array(),
-                "fields": {"geo": material.fields.v6.y, "patch_gain": material.fields.v0.z, "far_gain": material.fields.v2.w, "row2_cell_m": material.fields.rows_a[2].x, "row15_cell_m": material.fields.rows_a[15].x},
+                "fields": {"geo": material.fields.v6.y, "patch_gain": material.fields.v0.z, "far_gain": material.fields.v2.w, "row2_cell_m": material.fields.rows_a[2].x, "row15_cell_m": material.fields.rows_a[15].x,
+                    "colormap_near_share": material.fields.pc0.x, "typed_forms": material.fields.pc0.y,
+                    "form_of_row": (0..fields::ROWS).map(|r| material.fields.rows_b[r].z).collect::<Vec<_>>(),
+                    "aspect_by_form": material.fields.forms_a.iter().map(|a| [a.x, a.y]).collect::<Vec<_>>(),
+                    "landscape_at_focus": world.get_resource::<crate::campaign::camera::rig::CampaignRig>().zip(world.get_resource::<TerrainWorld>()).and_then(|(rig, terrain)| crate::paths::find_root().ok().map(|root| fields::landscape_at(&root, Vec2::new(rig.focus.x, rig.focus.z), Vec2::new(terrain.heights.width as f32, terrain.heights.height as f32))))},
                 "table_biome1": &material.ground.layers[1].to_array()[..],
             },
             "close_patchwork": {

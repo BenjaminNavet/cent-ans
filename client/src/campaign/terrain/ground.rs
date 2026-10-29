@@ -603,7 +603,7 @@ fn load_sheet_inner(root: &Path, res_path: &str) -> Result<Image, String> {
 }
 
 /// Decodes an 8-bit PNG into `(width, height, channels, bytes)` (grayscale 1, RGBA 4).
-fn decode_png8(path: &Path) -> Result<(usize, usize, usize, Vec<u8>), String> {
+pub(super) fn decode_png8(path: &Path) -> Result<(usize, usize, usize, Vec<u8>), String> {
     crate::agent::texture_census::timed(
         format!("terrain decode_png8 {}", path.display()),
         |r: &Result<(usize, usize, usize, Vec<u8>), String>| r.as_ref().map_or(0, |r| r.3.len()),

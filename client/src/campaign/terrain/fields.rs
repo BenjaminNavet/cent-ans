@@ -15,6 +15,8 @@ use bevy::prelude::*;
 use bevy::render::render_resource::ShaderType;
 use serde_json::Value;
 
+use super::parcel::{self, FORMS, SEASONS};
+
 /// Rows of the table: 0 unused, 1..14 biomes, 15..22 landscapes, 23 spare.
 pub const ROWS: usize = 24;
 /// Crop slots per row (`CROP_SLOTS`).
@@ -70,6 +72,20 @@ pub struct FieldParams {
     pub tex_flags: Vec4,
     /// Linear mean colour of each layer of the parcels array (`mean_linear` of the manifest).
     pub tex_means: [Vec4; TEX_LAYERS],
+    /// VIS-R3b: colormap share at the closest, 1 when the typed forms are on, 0, 0.
+    pub pc0: Vec4,
+    /// Per form (`parcel::Form`): aspect min, aspect max, warp, cell scale.
+    pub forms_a: [Vec4; FORMS],
+    /// Per form: brick, length variation, ring strength, reassign share.
+    pub forms_b: [Vec4; FORMS],
+    /// Per form: hedge width (px), hedge range (footprint), furrow amplitude, furrow pitch (m).
+    pub forms_c: [Vec4; FORMS],
+    /// Per form: ring thresholds (2), ring minimum finage, ring spread.
+    pub forms_d: [Vec4; FORMS],
+    /// Per form: ring centres (3), furrow range (footprint).
+    pub forms_e: [Vec4; FORMS],
+    /// Per (form, season), two vec4: cumulative class shares 0..3, then 4, 5, 0, 0.
+    pub shares: [Vec4; FORMS * SEASONS * 2],
 }
 
 /// Layers of the parcels array the shader tables can address.
@@ -102,6 +118,13 @@ impl Default for FieldParams {
             tex_extra: Vec4::new(-1.0, 120.0, -1.0, 120.0),
             tex_flags: Vec4::new(6.0, 5.0, 0.0, 0.0),
             tex_means: [Vec4::splat(0.18); TEX_LAYERS],
+            pc0: Vec4::new(0.45, 0.0, 0.0, 0.0),
+            forms_a: [Vec4::new(0.0, 0.0, 1.0, 1.0); FORMS],
+            forms_b: [Vec4::ZERO; FORMS],
+            forms_c: [Vec4::new(0.0, 0.0, 0.0, 4.0); FORMS],
+            forms_d: [Vec4::new(0.55, 0.2, 0.03, 0.3); FORMS],
+            forms_e: [Vec4::new(0.15, 0.45, 0.78, 0.0); FORMS],
+            shares: [Vec4::new(1.0 / 6.0, 2.0 / 6.0, 0.5, 4.0 / 6.0); FORMS * SEASONS * 2],
         }
     }
 }
@@ -177,7 +200,7 @@ fn set_row(
     out.rows_b[row] = Vec4::new(
         f(&entry["open_to_farm"], 0.0),
         f(&entry["coteau_vine"], 0.0),
-        0.0,
+        parcel::form_index(entry["form"].as_str().unwrap_or("default")) as f32,
         0.0,
     );
     let crops = entry["crops"].as_object();
@@ -224,6 +247,37 @@ fn set_row(
         f(&tint[2], 1.0),
         if ok { 1.0 } else { 0.0 },
     );
+}
+
+/// Packs the forms into the uniform tables.
+fn pack_forms(out: &mut FieldParams, forms: &[parcel::Form; FORMS]) {
+    for (i, form) in forms.iter().enumerate() {
+        out.forms_a[i] = Vec4::new(form.aspect[0], form.aspect[1], form.warp, form.cell_scale);
+        out.forms_b[i] = Vec4::new(form.brick, form.len_var, form.ring_strength, form.reassign);
+        out.forms_c[i] = Vec4::new(
+            form.hedge_px,
+            form.hedge_range,
+            form.furrow_amp,
+            form.furrow_pitch_m,
+        );
+        out.forms_d[i] = Vec4::new(
+            form.ring_thresholds[0],
+            form.ring_thresholds[1],
+            form.ring_min,
+            form.ring_spread,
+        );
+        out.forms_e[i] = Vec4::new(
+            form.ring_centers[0],
+            form.ring_centers[1],
+            form.ring_centers[2],
+            form.furrow_range,
+        );
+        for (s, cum) in form.cumulative.iter().enumerate() {
+            let at = (i * SEASONS + s) * 2;
+            out.shares[at] = Vec4::new(cum[0], cum[1], cum[2], cum[3]);
+            out.shares[at + 1] = Vec4::new(cum[4], cum[5], 0.0, 0.0);
+        }
+    }
 }
 
 /// Keys of the object under `"landscapes"` in file order (serde_json sorts keys; the mask values
@@ -386,6 +440,22 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
         f(&geo["meadow_share"], d.v8.z),
         1.0,
     );
+    // VIS-R3b: colormap share at the closest and the typed parcel forms.
+    // `CENT_ANS_PERF_OFF=parcel` restores the previous ground (A/B bench on one binary).
+    let typed = mix["landscapes"].is_object() && !crate::campaign::perf_switch::off("parcel");
+    out.pc0 = Vec4::new(
+        if typed {
+            f(&view["colormap_near_share"], d.pc0.x)
+        } else {
+            d.pc0.x
+        },
+        if typed { 1.0 } else { 0.0 },
+        0.0,
+        0.0,
+    );
+    if typed {
+        pack_forms(&mut out, &parcel::load_forms(&mix["landscapes"]));
+    }
     for (key, slot) in [
         ("vine_material", &mut out.vine),
         ("meadow_material", &mut out.meadow),
@@ -406,6 +476,45 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
             .copy_from_slice(&materials.means[..TEX_LAYERS]);
     }
     Ok(out)
+}
+
+/// Landscape and form under a map pixel, for the state dump only (reads `agri_regions.png` and
+/// the biome raster once; the GPU copies are not kept on the CPU).
+pub fn landscape_at(root: &Path, px: Vec2, map: Vec2) -> Value {
+    use std::sync::OnceLock;
+    type Raster = (usize, usize, Vec<u8>);
+    static RASTERS: OnceLock<Option<(Raster, Raster)>> = OnceLock::new();
+    let rasters = RASTERS.get_or_init(|| {
+        let dir = root.join("data/map");
+        let (aw, ah, _, agri) = super::ground::decode_png8(&dir.join("agri_regions.png")).ok()?;
+        let (bw, bh, _, biome) =
+            super::ground::decode_png8(&dir.join("biomes_blend_ab.png")).ok()?;
+        Some(((aw, ah, agri), (bw, bh, biome)))
+    });
+    let Some(((aw, ah, agri), (bw, bh, biome))) = rasters else {
+        return Value::Null;
+    };
+    let u = (px.x / map.x.max(1.0)).clamp(0.0, 0.9999);
+    let v = (px.y / map.y.max(1.0)).clamp(0.0, 0.9999);
+    let mask = agri[(v * *ah as f32) as usize * aw + (u * *aw as f32) as usize];
+    let biome_a = (biome[(v * *bh as f32) as usize * bw + (u * *bw as f32) as usize] % 16).clamp(1, 14);
+    let text = std::fs::read_to_string(root.join("data/map/agri_landscapes.json")).unwrap_or_default();
+    let order = landscape_order(&text);
+    let landscape = (mask as usize)
+        .checked_sub(8)
+        .and_then(|i| order.get(i).cloned());
+    let mix: Value = std::fs::read_to_string(root.join("data/art/ground_biome_mix.json"))
+        .ok()
+        .and_then(|s| serde_json::from_str(&s).ok())
+        .unwrap_or(Value::Null);
+    let agri_json: Value = serde_json::from_str(&text).unwrap_or(Value::Null);
+    let form = match &landscape {
+        Some(id) => agri_json["landscapes"][id.as_str()]["form"].as_str(),
+        None => mix["biomes"][biome_a.to_string()]["form"].as_str(),
+    }
+    .unwrap_or("default")
+    .to_string();
+    serde_json::json!({"mask": mask, "landscape": landscape, "biome": biome_a, "form": form})
 }
 
 #[cfg(test)]
@@ -454,5 +563,27 @@ mod tests {
             assert_eq!(p.rows_e[r].w, 1.0, "row {r} materials");
         }
         assert!(p.tex_extra.x >= 0.0 && p.tex_extra.z >= 0.0);
+    }
+
+    #[test]
+    fn typed_forms_reach_the_table() {
+        let root = crate::paths::find_root().expect("root");
+        let p = load_fields(&root).expect("fields");
+        // VIS-R3b: colormap share 0.12 at the closest, forms on.
+        assert!((p.pc0.x - 0.12).abs() < 1e-5, "{}", p.pc0.x);
+        assert_eq!(p.pc0.y, 1.0);
+        // Row 15 (openfield_north) is the openfield form (1), stretched 1:4 to 1:9.
+        assert_eq!(p.rows_b[15].z, 1.0);
+        assert!(p.forms_a[1].x >= 4.0 && p.forms_a[1].y <= 10.0);
+        // Row 16 (bocage_west) is the bocage form (2) with a hedge in pixels.
+        assert_eq!(p.rows_b[16].z, 2.0);
+        assert!(p.forms_c[2].x >= 1.0);
+        // Biome 1 (oceanic) is bocage, biome 2 (continental) openfield.
+        assert_eq!(p.rows_b[1].z, 2.0);
+        assert_eq!(p.rows_b[2].z, 1.0);
+        // Cumulative shares end at 1 for each (form, season).
+        for pair in p.shares.chunks(2) {
+            assert!((pair[1].y - 1.0).abs() < 1e-5);
+        }
     }
 }

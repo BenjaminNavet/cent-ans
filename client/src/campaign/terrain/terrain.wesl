@@ -174,6 +174,14 @@ struct FieldParams {
     // season class of the vine, of the meadow; 1 when the parcels array is bound.
     tex_flags: vec4<f32>,
     tex_means: array<vec4<f32>, 48>,
+    // VIS-R3b (parcel.rs): colormap share at the closest, typed forms on; per form tables.
+    pc0: vec4<f32>,
+    forms_a: array<vec4<f32>, 5>,
+    forms_b: array<vec4<f32>, 5>,
+    forms_c: array<vec4<f32>, 5>,
+    forms_d: array<vec4<f32>, 5>,
+    forms_e: array<vec4<f32>, 5>,
+    shares: array<vec4<f32>, 40>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(16) var<uniform> fields: FieldParams;
@@ -1269,7 +1277,10 @@ const FP_TERRACE = vec3<f32>(0.16, 0.14, 0.11);
 // Parcel colour by season. cls: 0 wheat, 1 green crop, 2 ploughed, 3 fallow, 4 meadow, 5 hay,
 // 6 vine soil; h: draw of the parcel.
 fn season_field(summer: vec3<f32>, cls: i32, h: f32) -> vec3<f32> {
-    let w = season.weights;
+    return season_field_w(summer, cls, h, season.weights);
+}
+
+fn season_field_w(summer: vec3<f32>, cls: i32, h: f32, w: vec4<f32>) -> vec3<f32> {
     let young = vec3<f32>(0.10, 0.19, 0.045);
     let plough = vec3<f32>(0.19, 0.135, 0.078);
     let wet_plough = vec3<f32>(0.135, 0.095, 0.06);
@@ -2048,6 +2059,143 @@ fn hb_voronoi(u: vec2<f32>) -> Vor {
     return Vor(id1, s1, (d2 - d1) * 0.5);
 }
 
+// --- VIS-R3b typed parcel layout (mirror and tests: parcel.rs) -----------------------------
+fn pc_hash(x: f32, y: f32) -> f32 {
+    var h = bitcast<u32>(x) ^ (bitcast<u32>(y) * 0x9E3779B1u);
+    h = (h ^ (h >> 16u)) * 0x7feb352du;
+    h = (h ^ (h >> 15u)) * 0x846ca68bu;
+    h = h ^ (h >> 16u);
+    return f32(h >> 8u) / 16777216.0;
+}
+
+// Deformed strip grid: rows of height 1, each shifted (`brick`) and cut in cells of its own
+// length (`len_var`); `strip` is the stretch already applied to u.x, so the edge distance along
+// the strip is scaled back to the units of the rows.
+fn pc_cell(u: vec2<f32>, strip: f32, brick: f32, len_var: f32) -> Vor {
+    let row = floor(u.y);
+    let off = pc_hash(row, 91.0) * brick * 7.0;
+    let mult = 1.0 / (1.0 + len_var * (pc_hash(row, 13.0) - 0.5));
+    let xs = (u.x + off) * mult;
+    let col = floor(xs);
+    let fx = xs - col;
+    let fy = u.y - row;
+    let across = min(fy, 1.0 - fy);
+    let along = min(fx, 1.0 - fx) / mult * strip;
+    return Vor(vec2<f32>(col, row), vec2<f32>((col + 0.5) / mult - off, row + 0.5), min(across, along));
+}
+
+// Crop draw of a cell pulled to the centre of the sole of its ring around the finage (r: terroir R).
+fn pc_ring_h(form: u32, r: f32, h: f32, h_dom: f32) -> f32 {
+    let b = fields.forms_b[form];
+    let d = fields.forms_d[form];
+    let e = fields.forms_e[form];
+    if (b.z <= 0.0 || r < d.z) {
+        return h;
+    }
+    var centre = e.z;
+    if (r > d.x) {
+        centre = e.x;
+    } else if (r > d.y) {
+        centre = e.y;
+    }
+    let zoned = clamp(centre + (h_dom - 0.5) * 0.2 + (h - 0.5) * d.w, 0.0, 1.0);
+    return h + (zoned - h) * b.z;
+}
+
+// Class of a parcel in a season: the crop's own, or a draw by the shares of the form.
+fn pc_class(form: u32, s: u32, base: i32, h: f32, hr: f32) -> i32 {
+    if (base > 5 || hr >= fields.forms_b[form].w) {
+        return base;
+    }
+    let a = fields.shares[(form * 4u + s) * 2u];
+    let b = fields.shares[(form * 4u + s) * 2u + 1u];
+    if (h < a.x) {
+        return 0;
+    }
+    if (h < a.y) {
+        return 1;
+    }
+    if (h < a.z) {
+        return 2;
+    }
+    if (h < a.w) {
+        return 3;
+    }
+    if (h < b.x) {
+        return 4;
+    }
+    return 5;
+}
+
+fn pc_class_summer(cls: i32) -> vec3<f32> {
+    if (cls == 0) {
+        return CROP_WHEAT;
+    } else if (cls == 1) {
+        return CROP_GREEN;
+    } else if (cls == 2) {
+        return CROP_PLOUGHED;
+    } else if (cls == 3) {
+        return CROP_FALLOW;
+    } else if (cls == 4) {
+        return MEADOW_COLOR;
+    }
+    return HAY_COLOR;
+}
+
+// Season colour of a parcel whose class is drawn by season from the shares of its form
+// (no filter: each season has its own classes, the colours are those of `season_field_w`).
+fn season_field_form(summer: vec3<f32>, cls: i32, h: f32, hq: f32, hr: f32, form: u32) -> vec3<f32> {
+    let w = season.weights;
+    if (fields.forms_b[form].w <= 0.0 || cls > 5) {
+        return season_field_w(summer, cls, h, w);
+    }
+    var acc = vec3<f32>(0.0);
+    var used = 0.0;
+    for (var s = 0u; s < 4u; s = s + 1u) {
+        let ws = w[s];
+        if (ws > 0.001) {
+            let c = pc_class(form, s, cls, hq, hr);
+            var sm = summer;
+            if (c != cls) {
+                sm = pc_class_summer(c);
+            }
+            let one = vec4<f32>(f32(s == 0u), f32(s == 1u), f32(s == 2u), f32(s == 3u));
+            acc = acc + ws * season_field_w(sm, c, h, one);
+            used = used + ws;
+        }
+    }
+    return acc / max(used, 1e-3);
+}
+
+// Parcel frame (region rotation, stretch, cell size): world position of a cell site.
+struct PcFrame {
+    rot_t: mat2x2<f32>,
+    strip: f32,
+    cell_px: f32,
+    origin: vec2<f32>,
+    rid37: vec2<f32>,
+    form: u32,
+};
+
+fn pc_site_world(site_uu: vec2<f32>, fr: PcFrame) -> vec2<f32> {
+    return fr.rot_t * (vec2<f32>((site_uu.x - fr.rid37.x) * fr.strip, site_uu.y - fr.rid37.y) * fr.cell_px) + fr.origin;
+}
+
+// Finage mask (terroir R) at a cell site, -1 for the forms without rings (no texture read).
+fn pc_ring_r(site_uu: vec2<f32>, fr: PcFrame) -> f32 {
+    if (fields.forms_b[fr.form].z <= 0.0) {
+        return -1.0;
+    }
+    return terroir_at(pc_site_world(site_uu, fr)).r;
+}
+
+fn pc_cell_of(u: vec2<f32>, form: u32, strip: f32) -> Vor {
+    if (fields.pc0.y > 0.5) {
+        return pc_cell(u, strip, fields.forms_b[form].x, fields.forms_b[form].y);
+    }
+    return hb_voronoi(u);
+}
+
 // Biome A, landscape mask value and river distance (px, signed) at a map uv.
 struct MapCell {
     biome: u32,
@@ -2084,7 +2232,7 @@ fn hb_slot(row: u32, h: f32) -> i32 {
 }
 
 // Crop of a cell: 70 % follow the dominant crop of their region; -2 meadow, -3 vine, -1 none.
-fn hb_maille(id: vec2<f32>, row: u32, h_dom: f32, vine_k: f32, meadow_k: f32) -> i32 {
+fn hb_maille(id: vec2<f32>, row: u32, h_dom: f32, vine_k: f32, meadow_k: f32, ring_r: f32, form: u32) -> i32 {
     if (fields.meadow.w > 0.5 && hb_hash(id + 23.3) < meadow_k) {
         return -2;
     }
@@ -2094,6 +2242,9 @@ fn hb_maille(id: vec2<f32>, row: u32, h_dom: f32, vine_k: f32, meadow_k: f32) ->
     var h = hb_hash(id + 27.7);
     if (hb_hash(id + 5.9) < 0.7) {
         h = clamp(h_dom + (h - 0.5) * 0.5, 0.0, 1.0);
+    }
+    if (ring_r >= 0.0) {
+        h = pc_ring_h(form, ring_r, h, h_dom);
     }
     return hb_slot(row, h);
 }
@@ -2110,9 +2261,10 @@ fn hb_maille_far(m: i32, row: u32) -> vec4<f32> {
 }
 
 // Far colour of a mesh in its season (`hb_patch_color`): luminance jitter and saturation.
-fn hb_patch_color(id: vec2<f32>, far: vec4<f32>) -> vec3<f32> {
+fn hb_patch_color(id: vec2<f32>, far: vec4<f32>, form: u32) -> vec3<f32> {
     let lumv = 1.0 + 2.0 * fields.v1.y * (hb_hash(id + 3.3) - 0.5);
-    let c = season_field(far.rgb, i32(far.a + 0.5), hb_hash(id + 61.3)) * lumv;
+    let c = season_field_form(far.rgb, i32(far.a + 0.5), hb_hash(id + 61.3), pc_hash(id.x, id.y + 211.0),
+        pc_hash(id.x + 5.0, id.y + 97.0), form) * lumv;
     return max(mix(vec3<f32>(luma(c)), c, fields.v1.w), vec3<f32>(0.0));
 }
 
@@ -2123,20 +2275,23 @@ fn hb_relative(base: vec3<f32>, c: vec3<f32>) -> vec3<f32> {
     return c * (clamp(lc, lb * (1.0 - fields.v5.y), lb * (1.0 + fields.v5.y)) / lc);
 }
 
-fn hb_far_patch(uu: vec2<f32>, footprint: f32, px_u: f32, row: u32, h_dom: f32, vine_k: f32, meadow_k: f32) -> vec3<f32> {
+fn hb_far_patch(uu: vec2<f32>, footprint: f32, px_u: f32, row: u32, h_dom: f32, vine_k: f32, meadow_k: f32,
+        fr: PcFrame) -> vec3<f32> {
     let k = smoothstep(fields.v3.w, fields.v4.x, footprint);
     var c = vec3<f32>(0.0);
     var e = 0.0;
     let sole_scale = fields.v2.y;
+    let form = fr.form;
     if (k < 0.999) {
-        let v = hb_voronoi(uu * sole_scale);
-        c = hb_patch_color(v.id, hb_maille_far(hb_maille(v.id, row, h_dom, vine_k, meadow_k), row)) * (1.0 - k);
+        let v = pc_cell_of(uu * sole_scale, form, fr.strip);
+        let ring_r = pc_ring_r(v.site / max(sole_scale, 1e-3), fr);
+        c = hb_patch_color(v.id, hb_maille_far(hb_maille(v.id, row, h_dom, vine_k, meadow_k, ring_r, form), row), form) * (1.0 - k);
         e = v.edge / max(sole_scale, 1e-3) * (1.0 - k);
     }
     if (k > 0.001) {
-        let v = hb_voronoi(uu * sole_scale * fields.v3.z + 53.0);
+        let v = pc_cell_of(uu * sole_scale * fields.v3.z + 53.0, form, fr.strip);
         let id = v.id + 0.5;
-        c = c + hb_patch_color(id, hb_maille_far(hb_maille(id, row, h_dom, vine_k, meadow_k), row)) * k;
+        c = c + hb_patch_color(id, hb_maille_far(hb_maille(id, row, h_dom, vine_k, meadow_k, -1.0, form), row), form) * k;
         e = e + v.edge / max(sole_scale * fields.v3.z, 1e-3) * k;
     }
     let line = 1.0 - smoothstep(0.0, 1.2 * px_u, e);
@@ -2201,20 +2356,30 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
     let map_px = params.map.xy;
     let cell0 = map_cell(p / map_px);
     let row0 = field_row(cell0);
-    let cell_px = max(fields.rows_a[row0].x, 50.0) * fields.v2.x / mpp;
-    let strip = clamp(fields.rows_a[row0].y, 1.0, 2.2);
+    // VIS-R3b: the form of the landscape sets the stretch, the cell size and the warp of the grid.
+    let forms_on = fields.pc0.y > 0.5;
+    let form0 = select(0u, u32(fields.rows_b[row0].z + 0.5), forms_on);
+    let fa = fields.forms_a[form0];
+    var strip = clamp(fields.rows_a[row0].y, 1.0, 2.2);
+    if (forms_on && fa.y > 0.0) {
+        strip = mix(fa.x, fa.y, hb_hash(reg.id + 13.7));
+    }
+    let cell_px = max(fields.rows_a[row0].x, 50.0) * fields.v2.x * select(1.0, fa.w, forms_on) / mpp;
+    let warp_k = select(1.0, fa.z, forms_on);
     let rot_f = hb_rot(ang_r);
     var uu = rot_f * (p - origin) / cell_px;
     uu.x = uu.x / strip;
-    uu = uu + (vec2<f32>(vnoise(uu * 0.9), vnoise(uu * 0.9 + 17.3)) - 0.5) * 0.55
-        + (vec2<f32>(vnoise(uu * 3.3 + 7.7), vnoise(uu * 3.3 + 29.1)) - 0.5) * 0.14;
-    uu = uu + gd_warp(gd, uu);  // VQ cground2: curved boundaries
+    uu = uu + ((vec2<f32>(vnoise(uu * 0.9), vnoise(uu * 0.9 + 17.3)) - 0.5) * 0.55
+        + (vec2<f32>(vnoise(uu * 3.3 + 7.7), vnoise(uu * 3.3 + 29.1)) - 0.5) * 0.14) * warp_k;
+    uu = uu + gd_warp(gd, uu) * warp_k;  // VQ cground2: curved boundaries
     uu = uu + reg.id * 37.0;
-    let parcel = hb_voronoi(uu);
+    let frame = PcFrame(transpose(rot_f), strip, cell_px, origin, reg.id * 37.0, form0);
+    let parcel = pc_cell_of(uu, form0, strip);
     let pc = transpose(rot_f) * (vec2<f32>((parcel.site.x - reg.id.x * 37.0) * strip, parcel.site.y - reg.id.y * 37.0) * cell_px) + origin;
     // The parcel is one biome / landscape: read at its centre.
     let cell_c = map_cell(pc / map_px);
     let row = field_row(cell_c);
+    let form_p = select(0u, u32(fields.rows_b[row].z + 0.5), forms_on);
     let hedge_k = fields.rows_a[row].z;
     var presence = fields.rows_a[row].w;
     var vine_k = 0.0;
@@ -2236,7 +2401,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
         far_on = false;
     }
     if (far_on) {
-        let far_col = hb_far_patch(uu, footprint, footprint / cell_px, row, h_dom, vine_k, meadow_k);
+        let far_col = hb_far_patch(uu, footprint, footprint / cell_px, row, h_dom, vine_k, meadow_k, frame);
         col = mix(col, hb_relative(col, far_col), w_far * open_w * farm_frac);
     }
     out.color = col;
@@ -2264,10 +2429,14 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
         var key = parcel.id;
         var sole = false;
         if (fields.v2.y > 0.0 && hb_hash(parcel.id + 5.1) < fields.v2.z) {
-            key = hb_voronoi(parcel.site * fields.v2.y).id;
+            key = pc_cell_of(parcel.site * fields.v2.y, form_p, strip).id;
             sole = true;
         }
-        let m = hb_maille(key, row, h_dom, vine_k, meadow_k);
+        var ring_r = -1.0;
+        if (forms_on && fields.forms_b[form_p].z > 0.0) {
+            ring_r = terroir_at(pc).r;
+        }
+        let m = hb_maille(key, row, h_dom, vine_k, meadow_k, ring_r, form_p);
         var layer = -1.0;
         var tile = 120.0;
         if (m >= 0) {
@@ -2283,7 +2452,22 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
         }
         if (m != -1) {
             let far = hb_maille_far(m, row);
-            let cls = i32(far.a + 0.5);
+            let cls_crop = i32(far.a + 0.5);
+            // Class of the parcel in the dominant season (shares of its form, parcel.rs).
+            let sw_d = season.weights;
+            var s_dom = 0u;
+            if (sw_d.y > sw_d[s_dom]) {
+                s_dom = 1u;
+            }
+            if (sw_d.z > sw_d[s_dom]) {
+                s_dom = 2u;
+            }
+            if (sw_d.w > sw_d[s_dom]) {
+                s_dom = 3u;
+            }
+            let hq = pc_hash(parcel.id.x, parcel.id.y + 211.0);
+            let hr = pc_hash(parcel.id.x + 5.0, parcel.id.y + 97.0);
+            let cls = pc_class(form_p, s_dom, cls_crop, hq, hr);
             let field_ang = ang_r + select(1.5708, 0.0, hb_hash(parcel.id + 5.3) < 0.85);
             let textured = has_tex && layer >= 0.0;
             var mean = vec3<f32>(max(luma(col), 1e-3));
@@ -2298,6 +2482,18 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
             let j1 = hb_hash(parcel.id + 3.3) - 0.5;
             let j2 = hb_hash(parcel.id + 9.1) - 0.5;
             open_col = open_col * (1.0 + 2.0 * fields.v1.y * j1) * vec3<f32>(1.0 + fields.v1.z * j2, 1.0, 1.0 - fields.v1.z * j2);
+            // VIS-R3b: anisotropic grain of the ploughland (furrows), resolved only when the
+            // pitch spans a few pixels; streaks along the strip, finer across.
+            let fc = fields.forms_c[form_p];
+            if (forms_on && fc.z > 0.0 && cls <= 3) {
+                let px_f = max(footprint * mpp, 0.01);
+                let resolved = smoothstep(1.0, 3.0, fc.w / px_f);
+                if (resolved > 0.001) {
+                    let q = (rot_f * (p - origin)) * mpp;
+                    let n = vnoise(vec2<f32>(q.x / (fc.w * 9.0), q.y / fc.w) + parcel.id * 3.7);
+                    open_col = open_col * (1.0 + fc.z * resolved * (n - 0.5) * 2.0);
+                }
+            }
             // TB1: season of the parcel; the material is of a mean season (summer gilds the wheat,
             // the other seasons take the crop's season colour and keep the grain).
             if (cls == 0) {
@@ -2305,7 +2501,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
             }
             if (sw.y < 0.999) {
                 let grain_s = clamp(luma(open_col) / max(luma(mean), 1e-3), 0.6, 1.5);
-                let season_col = season_field(far.rgb, cls, hb_hash(parcel.id + 61.3));
+                let season_col = season_field_form(far.rgb, cls_crop, hb_hash(parcel.id + 61.3), hq, hr, form_p);
                 open_col = mix(open_col, season_col * grain_s, 0.8 * (1.0 - sw.y));
             }
             // ADR 0253: from mid distance the parcel takes the colour of its crop, keeping the
@@ -2313,9 +2509,9 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
             let patch_k = fields.v0.z * smoothstep(fields.v0.w, fields.v1.x, footprint);
             if (patch_k > 0.001) {
                 let lumv = 1.0 + 2.0 * fields.v1.y * (hb_hash(parcel.id + 3.3) - 0.5);
-                var far_col = season_field(far.rgb, cls, hb_hash(parcel.id + 61.3)) * lumv;
+                var far_col = season_field_form(far.rgb, cls_crop, hb_hash(parcel.id + 61.3), hq, hr, form_p) * lumv;
                 if (sole) {
-                    far_col = hb_patch_color(key, far);
+                    far_col = hb_patch_color(key, far, form_p);
                 }
                 let grain_l = clamp(luma(open_col) / max(luma(mean), 1e-3), 0.7, 1.35);
                 open_col = mix(open_col, far_col * grain_l, patch_k);
@@ -2331,6 +2527,12 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
             if (hedge_k > 0.01) {
                 hedge = (1.0 - smoothstep(0.0, max(px_m, hedge_w), edge_m - hedge_w))
                     * clamp(2.0 * hedge_w / max(px_m, 1e-3), max(0.35, fields.v4.z), 1.0);
+            }
+            // VIS-R3b: the hedge of the bocage keeps a width of a few screen pixels.
+            if (forms_on && hedge_k > 0.01 && fc.x > 0.0) {
+                let near_k = 1.0 - smoothstep(fc.y * 0.6, fc.y, footprint);
+                let half_px = 0.5 * fc.x * near_k;
+                hedge = max(hedge, near_k * (1.0 - smoothstep(px_m * max(half_px - 0.5, 0.0), px_m * (half_px + 0.5), edge_m)));
             }
             let balk = 1.0 - smoothstep(1.5, 1.5 + px_m, edge_m);
             open_col = mix(open_col, open_col * 0.82, balk * 0.6);
@@ -2410,7 +2612,8 @@ fn regional_ground(p: vec2<f32>, footprint: f32, altitude: f32, slope_xz: vec2<f
         let ratio = clamp(luma(g.color) / max(luma(base_albedo), 1e-3), 0.55, 1.6);
         // TB1: the season shift of the land cover over the mean-season colour map.
         let tinted = base_albedo * mix(1.0, ratio, 0.55 * (1.0 - far_w)) * pow(g.season_k, vec3<f32>(SG_SEASON_STRENGTH));
-        painted = mix(g.color, tinted, mix(0.45, 1.0, far_w));
+        // VIS-R3b: the share of the colormap at the closest is data (view.colormap_near_share).
+        painted = mix(g.color, tinted, mix(fields.pc0.x, 1.0, far_w));
     }
     // Painted fields over the ground colour (after the colormap, like hb_apply).
     var dn = g.dn;

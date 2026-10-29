@@ -31,6 +31,10 @@
           "name": {
             "type": "string"
           },
+          "form": {
+            "enum": ["default", "openfield", "bocage", "midi", "montagne"],
+            "description": "VIS-R3b : forme de parcellaire du biome (bloc `landscapes`)."
+          },
           "cell_m": {
             "type": "number",
             "minimum": 50,
@@ -229,7 +233,27 @@
           "type": "number",
           "minimum": 0.5,
           "maximum": 10
+        },
+        "colormap_near_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "VIS-R3b : part de la carte de couleur dans le sol au plus près (le sol texturé fait le reste) ; 1 à distance."
         }
+      },
+      "additionalProperties": false
+    },
+    "landscapes": {
+      "type": "object",
+      "description": "VIS-R3b (ADR XXXX) : formes de parcellaire typé, une par type de paysage.",
+      "required": ["default", "openfield", "bocage", "midi", "montagne"],
+      "properties": {
+        "description": {"type": "string"},
+        "default": {"$ref": "#/$defs/form"},
+        "openfield": {"$ref": "#/$defs/form"},
+        "bocage": {"$ref": "#/$defs/form"},
+        "midi": {"$ref": "#/$defs/form"},
+        "montagne": {"$ref": "#/$defs/form"}
       },
       "additionalProperties": false
     },
@@ -248,6 +272,70 @@
       "description": "Champs d'un biome remplacés quand parcels_source vaut tx (matières régionales du paquet TX).",
       "additionalProperties": {
         "type": "object"
+      }
+    }
+  },
+  "$defs": {
+    "form": {
+      "type": "object",
+      "required": ["aspect", "cell_scale", "warp", "brick", "len_var", "ring", "hedge_px", "hedge_range", "furrow", "reassign", "shares"],
+      "additionalProperties": false,
+      "properties": {
+        "aspect": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0, "maximum": 12}},
+        "cell_scale": {"type": "number", "minimum": 0.2, "maximum": 3},
+        "warp": {"type": "number", "minimum": 0, "maximum": 3},
+        "brick": {"type": "number", "minimum": 0, "maximum": 1},
+        "len_var": {"type": "number", "minimum": 0, "maximum": 1.8},
+        "ring": {
+          "type": "object",
+          "required": ["strength", "thresholds", "min", "centers", "spread"],
+          "additionalProperties": false,
+          "properties": {
+            "strength": {"type": "number", "minimum": 0, "maximum": 1},
+            "thresholds": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+            "min": {"type": "number", "minimum": 0, "maximum": 1},
+            "centers": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+            "spread": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        },
+        "hedge_px": {"type": "number", "minimum": 0, "maximum": 4},
+        "hedge_range": {"type": "number", "minimum": 0, "maximum": 4},
+        "furrow": {
+          "type": "object",
+          "required": ["amp", "pitch_m", "range"],
+          "additionalProperties": false,
+          "properties": {
+            "amp": {"type": "number", "minimum": 0, "maximum": 0.6},
+            "pitch_m": {"type": "number", "minimum": 0.5, "maximum": 30},
+            "range": {"type": "number", "minimum": 0, "maximum": 2}
+          }
+        },
+        "reassign": {"type": "number", "minimum": 0, "maximum": 1},
+        "shares": {
+          "type": "object",
+          "required": ["spring", "summer", "autumn", "winter"],
+          "additionalProperties": false,
+          "properties": {
+            "spring": {"$ref": "#/$defs/season_shares"},
+            "summer": {"$ref": "#/$defs/season_shares"},
+            "autumn": {"$ref": "#/$defs/season_shares"},
+            "winter": {"$ref": "#/$defs/season_shares"}
+          }
+        }
+      }
+    },
+    "season_shares": {
+      "type": "object",
+      "description": "Poids relatifs (normalisés au chargement) des classes de season_field : wheat 0, green 1, ploughed 2, fallow 3, meadow 4, hay 5.",
+      "required": ["wheat", "green", "ploughed", "fallow", "meadow", "hay"],
+      "additionalProperties": false,
+      "properties": {
+        "wheat": {"type": "number", "minimum": 0},
+        "green": {"type": "number", "minimum": 0},
+        "ploughed": {"type": "number", "minimum": 0},
+        "fallow": {"type": "number", "minimum": 0},
+        "meadow": {"type": "number", "minimum": 0},
+        "hay": {"type": "number", "minimum": 0}
       }
     }
   },

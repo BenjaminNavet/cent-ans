@@ -3,6 +3,7 @@
   "biomes": {
     "1": {
       "name": "océanique",
+      "form": "bocage",
       "cell_m": 230,
       "strip": 1.3,
       "hedge": 1.0,
@@ -33,6 +34,7 @@
     },
     "2": {
       "name": "continental",
+      "form": "openfield",
       "cell_m": 300,
       "strip": 3.0,
       "hedge": 0.15,
@@ -63,6 +65,7 @@
     },
     "3": {
       "name": "méditerranéen",
+      "form": "midi",
       "cell_m": 170,
       "strip": 1.6,
       "hedge": 0.35,
@@ -141,6 +144,7 @@
     },
     "6": {
       "name": "montagnard",
+      "form": "montagne",
       "cell_m": 200,
       "strip": 1.4,
       "hedge": 0.1,
@@ -240,6 +244,7 @@
     },
     "10": {
       "name": "continental est (forêt-steppe)",
+      "form": "openfield",
       "cell_m": 480,
       "strip": 3.5,
       "hedge": 0.05,
@@ -268,6 +273,7 @@
     },
     "11": {
       "name": "Atlantique sud",
+      "form": "bocage",
       "cell_m": 170,
       "strip": 1.2,
       "hedge": 0.9,
@@ -296,6 +302,7 @@
     },
     "12": {
       "name": "plaine pannonienne-danubienne",
+      "form": "openfield",
       "cell_m": 420,
       "strip": 3.5,
       "hedge": 0.05,
@@ -349,6 +356,7 @@
     },
     "14": {
       "name": "maquis égéen",
+      "form": "midi",
       "cell_m": 150,
       "strip": 1.5,
       "hedge": 0.2,
@@ -423,7 +431,101 @@
     "patch_end": 0.08,
     "far_hedge": 0.4,
     "open_farm": 0.8,
-    "cell_scale": 2.0, "sole_scale": 0.38, "sole_share": 0.4, "far_gain": 1.0, "far_start": 2.5, "far_end": 6.0, "terroir_scale": 0.45, "terroir_start": 1.0, "terroir_end": 2.2, "far_edge": 0.35, "patch_sat": 1.1
+    "cell_scale": 2.0, "sole_scale": 0.38, "sole_share": 0.4, "far_gain": 1.0, "far_start": 2.5, "far_end": 6.0, "terroir_scale": 0.45, "terroir_start": 1.0, "terroir_end": 2.2, "far_edge": 0.35, "patch_sat": 1.1,
+    "colormap_near_share": 0.12
+  },
+  "landscapes": {
+    "description": "VIS-R3b (ADR XXXX) : parcellaire typé. Une forme par type de paysage ; la forme d'une ligne de la table est donnée par `form` (biome ci-dessus ou paysage de data/map/agri_landscapes.json). aspect = rapport longueur/largeur des cellules [min, max] (0 : garder `strip` de la ligne) ; cell_scale multiplie `cell_m` ; warp multiplie la déformation de la grille ; brick décale les rangées (0 grille alignée, 1 décalage libre) ; len_var varie la longueur des cellules d'une rangée ; ring_* : trois soles en couronnes autour des finages (terroir R) avec seuils, centres du tirage de culture et dispersion ; hedge_px : largeur de la haie à l'écran (px) jusqu'à hedge_range (empreinte, px carte par px écran) ; furrow_* : stries sous-pixel des labours (amplitude, pas en m) ; reassign : part des parcelles dont la classe de culture est retirée selon `shares`. shares : poids par saison de wheat, green, ploughed, fallow, meadow, hay (classes 0 à 5 de season_field).",
+    "default": {
+      "aspect": [0, 0],
+      "cell_scale": 1.0,
+      "warp": 1.0,
+      "brick": 0.0,
+      "len_var": 0.0,
+      "ring": {"strength": 0.0, "thresholds": [0.55, 0.2], "min": 0.03, "centers": [0.15, 0.45, 0.78], "spread": 0.3},
+      "hedge_px": 0.0,
+      "hedge_range": 0.0,
+      "furrow": {"amp": 0.0, "pitch_m": 4.0, "range": 0.0},
+      "reassign": 0.0,
+      "shares": {
+        "spring": {"wheat": 0.25, "green": 0.2, "ploughed": 0.25, "fallow": 0.1, "meadow": 0.15, "hay": 0.05},
+        "summer": {"wheat": 0.3, "green": 0.15, "ploughed": 0.1, "fallow": 0.15, "meadow": 0.2, "hay": 0.1},
+        "autumn": {"wheat": 0.15, "green": 0.1, "ploughed": 0.35, "fallow": 0.15, "meadow": 0.2, "hay": 0.05},
+        "winter": {"wheat": 0.2, "green": 0.1, "ploughed": 0.3, "fallow": 0.1, "meadow": 0.25, "hay": 0.05}
+      }
+    },
+    "openfield": {
+      "aspect": [4.0, 9.0],
+      "cell_scale": 0.55,
+      "warp": 0.45,
+      "brick": 0.0,
+      "len_var": 0.9,
+      "ring": {"strength": 0.8, "thresholds": [0.55, 0.2], "min": 0.03, "centers": [0.15, 0.45, 0.78], "spread": 0.3},
+      "hedge_px": 0.0,
+      "hedge_range": 0.0,
+      "furrow": {"amp": 0.16, "pitch_m": 4.5, "range": 0.1},
+      "reassign": 0.85,
+      "shares": {
+        "spring": {"wheat": 0.3, "green": 0.2, "ploughed": 0.28, "fallow": 0.15, "meadow": 0.04, "hay": 0.03},
+        "summer": {"wheat": 0.42, "green": 0.1, "ploughed": 0.08, "fallow": 0.28, "meadow": 0.06, "hay": 0.06},
+        "autumn": {"wheat": 0.22, "green": 0.08, "ploughed": 0.45, "fallow": 0.15, "meadow": 0.06, "hay": 0.04},
+        "winter": {"wheat": 0.3, "green": 0.1, "ploughed": 0.35, "fallow": 0.15, "meadow": 0.05, "hay": 0.05}
+      }
+    },
+    "bocage": {
+      "aspect": [1.2, 2.2],
+      "cell_scale": 0.8,
+      "warp": 1.6,
+      "brick": 1.0,
+      "len_var": 0.6,
+      "ring": {"strength": 0.0, "thresholds": [0.55, 0.2], "min": 0.03, "centers": [0.15, 0.45, 0.78], "spread": 0.3},
+      "hedge_px": 1.6,
+      "hedge_range": 0.45,
+      "furrow": {"amp": 0.0, "pitch_m": 4.0, "range": 0.0},
+      "reassign": 0.85,
+      "shares": {
+        "spring": {"wheat": 0.08, "green": 0.12, "ploughed": 0.15, "fallow": 0.05, "meadow": 0.45, "hay": 0.15},
+        "summer": {"wheat": 0.15, "green": 0.1, "ploughed": 0.05, "fallow": 0.05, "meadow": 0.4, "hay": 0.25},
+        "autumn": {"wheat": 0.05, "green": 0.08, "ploughed": 0.3, "fallow": 0.07, "meadow": 0.42, "hay": 0.08},
+        "winter": {"wheat": 0.08, "green": 0.1, "ploughed": 0.22, "fallow": 0.05, "meadow": 0.5, "hay": 0.05}
+      }
+    },
+    "midi": {
+      "aspect": [1.5, 3.0],
+      "cell_scale": 0.6,
+      "warp": 1.1,
+      "brick": 0.6,
+      "len_var": 0.7,
+      "ring": {"strength": 0.0, "thresholds": [0.55, 0.2], "min": 0.03, "centers": [0.15, 0.45, 0.78], "spread": 0.3},
+      "hedge_px": 0.0,
+      "hedge_range": 0.0,
+      "furrow": {"amp": 0.08, "pitch_m": 3.0, "range": 0.06},
+      "reassign": 0.5,
+      "shares": {
+        "spring": {"wheat": 0.2, "green": 0.2, "ploughed": 0.3, "fallow": 0.15, "meadow": 0.1, "hay": 0.05},
+        "summer": {"wheat": 0.3, "green": 0.1, "ploughed": 0.15, "fallow": 0.3, "meadow": 0.05, "hay": 0.1},
+        "autumn": {"wheat": 0.1, "green": 0.1, "ploughed": 0.4, "fallow": 0.25, "meadow": 0.1, "hay": 0.05},
+        "winter": {"wheat": 0.2, "green": 0.1, "ploughed": 0.35, "fallow": 0.2, "meadow": 0.1, "hay": 0.05}
+      }
+    },
+    "montagne": {
+      "aspect": [1.5, 3.5],
+      "cell_scale": 0.9,
+      "warp": 1.3,
+      "brick": 0.8,
+      "len_var": 0.8,
+      "ring": {"strength": 0.0, "thresholds": [0.55, 0.2], "min": 0.03, "centers": [0.15, 0.45, 0.78], "spread": 0.3},
+      "hedge_px": 0.0,
+      "hedge_range": 0.0,
+      "furrow": {"amp": 0.0, "pitch_m": 4.0, "range": 0.0},
+      "reassign": 0.8,
+      "shares": {
+        "spring": {"wheat": 0.05, "green": 0.1, "ploughed": 0.1, "fallow": 0.1, "meadow": 0.5, "hay": 0.15},
+        "summer": {"wheat": 0.1, "green": 0.1, "ploughed": 0.05, "fallow": 0.1, "meadow": 0.3, "hay": 0.35},
+        "autumn": {"wheat": 0.05, "green": 0.05, "ploughed": 0.15, "fallow": 0.15, "meadow": 0.45, "hay": 0.15},
+        "winter": {"wheat": 0.05, "green": 0.05, "ploughed": 0.15, "fallow": 0.1, "meadow": 0.55, "hay": 0.1}
+      }
+    }
   },
   "parcels_source": "tx",
   "tx_overrides": {
