@@ -104,3 +104,19 @@ Mesure : `memory.footprint_mib` (dump et rapports de banc, `proc_pid_rusage`), `
 - Bataille (banc Crécy, release, masqué) : 6 540 Mo sans limite d'images en vol, 3 560 Mo avec (`gpu_pacing`, 2 par
   défaut, mêmes temps d'image) : l'oscillation `IOAccelerator (graphics)` du point ouvert de l'ADR 0776 était le CPU
   qui prenait de l'avance sur le GPU en fenêtre masquée, pas une fuite. Garde bataille ramenée à 4 500 Mo.
+
+## Amendement MEM5 (29/10) : les « 3 Go graphiques non comptés » sont le tas mimalloc
+- **Piège de mesure n° 3** : mimalloc étiquette ses pages avec le tag VM 100 (`os_tag` par défaut) =
+  `VM_MEMORY_IOACCELERATOR`. Dans `footprint`/`vmmap` d'un binaire release (mimalloc), **`IOAccelerator` sans
+  « (graphics) » est le tas CPU**, pas le GPU. Le GPU est `Owned physical footprint (unmapped) (graphics)` (≈ Metal
+  alloué) + `IOAccelerator (graphics)`. Preuves : `--features system-alloc` (la catégorie tombe à 1 Mo) et
+  `MIMALLOC_OS_TAG=250` (le tas passe sous `App-Specific Tag 11`). `mem_protocol.sh` lance désormais avec
+  `MIMALLOC_OS_TAG=250` et affiche GPU non mappé / GPU mappé / tas.
+- Décomposition (campagne au repos, 5,8 Go) : GPU non mappé 2,7 Go (images 2,0 + maillages/cibles 0,5), tas CPU
+  2,7 Go, GPU mappé 0,17, reste 0,23.
+- Attribuer le tas : binaire `--features system-alloc`, `MallocStackLogging=lite`, puis
+  `malloc_history <pid> -allBySize` (≈ 900 Mo de texte ; filtrer les blocs ≥ 100 Ko). Plus gros postes : végétation
+  (atlas d'imposteurs en copie CPU 330, rasters du semis 590), relief E0 124, provinces client + cœur 164, polices 89,
+  copies CPU glTF 89, ECS 79.
+- Corrigé : atlas d'imposteurs GPU seul après les mips, `wetlands` en un plan, masque terre décodé une fois. Campagne au
+  repos : tas 2 712 -> 2 340-2 390 Mo, empreinte 5 680-5 840 -> 5 380-5 490 Mo. Détails : ADR MEM5.

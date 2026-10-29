@@ -63,10 +63,11 @@ sample() { # $1 run, $2 t, $3 pid, $4 vmmap-flag
 import json, sys
 d = json.loads(sys.argv[1]); c = d["categories"]
 def g(*names): return sum(c.get(n, {}).get("dirty", 0) for n in names)
-# "IOAccelerator" without "(graphics)" is the mimalloc heap (VM tag 100 = VM_MEMORY_IOACCELERATOR, MEM5).
+# mimalloc tags its pages 100 = VM_MEMORY_IOACCELERATOR by default: "IOAccelerator" without "(graphics)" is the
+# CPU heap, not the GPU (MEM5). The runs below set MIMALLOC_OS_TAG=250, shown as "App-Specific Tag 11".
 print("run %s t+%3ss footprint %7.0f MiB | GPU unmapped %6.0f mapped %5.0f | heap(mimalloc) %6.0f IOSurf %6.0f MALLOC_LARGE %6.0f SMALL %6.0f TINY %5.0f VM_ALLOC %6.0f mapped %6.0f"
   % (sys.argv[2], sys.argv[3], d["footprint_mib"], g("Owned physical footprint (unmapped) (graphics)"),
-     g("IOAccelerator (graphics)"), g("IOAccelerator"), g("IOSurface"),
+     g("IOAccelerator (graphics)"), g("IOAccelerator", "App-Specific Tag 11"), g("IOSurface"),
      g("MALLOC_LARGE", "MALLOC_LARGE (empty)"), g("MALLOC_SMALL"), g("MALLOC_TINY"),
      g("untagged (VM_ALLOCATE)"), g("mapped file")))' "$json" "$1" "$2"
 	[[ ${4:-0} == 1 ]] && { vmmap -summary "$3" > "$out/vmmap-run$1-t$2.txt" 2> /dev/null; [[ -n ${VMMAP_FULL:-} ]] && vmmap -v "$3" > "$out/vmmapv-run$1-t$2.txt" 2> /dev/null; }
@@ -77,7 +78,7 @@ for run in $(seq 1 $runs); do
 	wait_calm || exit 1
 	app=$(make_app "$out/app")
 	log=$out/run$run.log
-	envs=(--env CENT_ANS_MUTE=1 --env CENT_ANS_NO_BRIEFING=1 --env CENT_ANS_ROOT=$root --env CENT_ANS_PROFILE=release)
+	envs=(--env CENT_ANS_MUTE=1 --env CENT_ANS_NO_BRIEFING=1 --env CENT_ANS_ROOT=$root --env CENT_ANS_PROFILE=release --env MIMALLOC_OS_TAG=250)
 	for kv in ${=MEM_ENV:-}; do envs+=(--env "$kv"); done
 	case $mode in
 	idle)

@@ -70,7 +70,9 @@ pub fn load_land_mask(mut commands: Commands) {
 /// each when decoded twice, MEM5). Empty mask without the file.
 pub fn shared_land_mask() -> LandMask {
     static CACHE: Mutex<Option<(usize, usize, Weak<Vec<u8>>)>> = Mutex::new(None);
-    let mut cache = CACHE.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+    let mut cache = CACHE
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
     if let Some((width, height, weak)) = cache.as_ref()
         && let Some(bytes) = weak.upgrade()
     {

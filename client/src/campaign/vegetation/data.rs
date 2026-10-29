@@ -520,7 +520,8 @@ pub fn load(root: &Path, heights: Arc<HeightGrid>) -> Result<VegetationWorld, St
     let biomes = read_png(&map_dir.join("biomes.png")).unwrap_or_else(|_| Plane::empty());
     let land = read_png(&map_dir.join("land_mask.png")).unwrap_or_else(|_| Plane::empty());
     // The mask only reads max(R, G) (`mask.rs`): one plane instead of RGB (-86 MiB, MEM5).
-    let wet = max_rg_plane(read_png(&map_dir.join("wetlands.png")).unwrap_or_else(|_| Plane::empty()));
+    let wet =
+        max_rg_plane(read_png(&map_dir.join("wetlands.png")).unwrap_or_else(|_| Plane::empty()));
 
     // Clearings: settlements (+ crown radius, as `Vegetation.build`).
     let crown = style::crown_radius();
@@ -651,8 +652,12 @@ mod tests {
         let one = max_rg_plane(rgb.clone());
         assert_eq!((one.ch, one.data.clone()), (1, vec![200, 90]));
         for x in [0.5, 1.5] {
-            let before = rgb.texel((2.0, 1.0), x, 0.5, 0).max(rgb.texel((2.0, 1.0), x, 0.5, 1));
-            let after = one.texel((2.0, 1.0), x, 0.5, 0).max(one.texel((2.0, 1.0), x, 0.5, 1));
+            let before = rgb
+                .texel((2.0, 1.0), x, 0.5, 0)
+                .max(rgb.texel((2.0, 1.0), x, 0.5, 1));
+            let after = one
+                .texel((2.0, 1.0), x, 0.5, 0)
+                .max(one.texel((2.0, 1.0), x, 0.5, 1));
             assert_eq!(before, after);
         }
     }
