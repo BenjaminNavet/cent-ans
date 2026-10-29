@@ -105,6 +105,9 @@ class ColormapInputs:
     reservoirs: np.ndarray = field(default_factory=lambda: np.zeros((0, 2)))
     biomes: np.ndarray | None = None
     river_km: np.ndarray | None = None
+    #: VIS-R3a : regional classes (Beauce, bocage, Meseta, Landes...), ``(name, mask)`` with the
+    #: mask on the coarse biome grid (every ``biomes.weight_step``-th map pixel), 0-1.
+    regional: list[tuple[str, np.ndarray]] = field(default_factory=list)
     #: Lot CC CS (bake by tiles): first map-grid row of these arrays inside the whole map (hash
     #: noise and vectors are in whole-map coordinates), and the whole-map fields a tile cannot
     #: recompute (water components, distances, coarse biome weights); ``None``: computed here.
@@ -450,8 +453,82 @@ def _dryness(
 # ---------------------------------------------------------------------------
 
 
+#: Keys of a ``regional`` entry that say where it applies (the others are biome style).
+REGIONAL_SOURCE_KEYS = ("base", "landscape", "regions", "ellipses", "transition_km")
+
+
+def regional_spec(style: dict, name: str) -> dict:
+    """Biome style of the regional class ``name``: its ``base`` biome class, overridden by its own keys."""
+    entry = style["regional"][name]
+    base = style["biomes"]["classes"].get(entry.get("base", ""), {})
+    spec = {**base, **{k: v for k, v in entry.items() if k not in REGIONAL_SOURCE_KEYS}}
+    spec["palette"] = {**base.get("palette", {}), **entry.get("palette", {})}
+    return {"name": name, **spec}
+
+
+def regional_masks(
+    style: dict, map_dir: Path, grid: object
+) -> list[tuple[str, np.ndarray]]:
+    """Coarse 0-1 masks of the ``regional`` classes of ``style``.
+
+    A class lists the landscape of ``agri_regions.png`` it takes (``landscape``), regions of
+    ``agri_landscapes.json`` (``regions``, by id) and ellipses of its own (``ellipses``, lon / lat);
+    the edges wobble like every other area mask (:func:`landcover.area_mask`).
+    """
+    from PIL import Image
+
+    from cent_ans_tools.geo import agri_regions, landcover
+
+    section = style.get("regional")
+    if not section:
+        return []
+    step = int(style["biomes"]["weight_step"])
+    document = json.loads(
+        (map_dir / agri_regions.LANDSCAPES_FILE).read_text(encoding="utf-8")
+    )
+    by_id = {region["id"]: region for region in document["regions"]}
+    rows = agri_regions.landscape_rows(document)
+    with Image.open(map_dir / agri_regions.OUTPUT_FILE) as image:
+        landscapes = np.asarray(image.convert("L"))
+    noise = None
+    masks = []
+    for name, entry in section.items():
+        out = None
+        if "landscape" in entry:
+            fine = np.repeat(
+                np.repeat(
+                    landscapes == rows[entry["landscape"]], agri_regions.FACTOR, 0
+                ),
+                agri_regions.FACTOR,
+                1,
+            )
+            out = fine[: grid.shape[0], : grid.shape[1]].astype(np.float32)
+        areas = [by_id[i] for i in entry.get("regions", [])]
+        areas += [{"ellipse": e} for e in entry.get("ellipses", [])]
+        if areas:
+            if noise is None:
+                noise = landcover.uniform_noise(
+                    grid.shape,
+                    np.random.default_rng(agri_regions.SEED),
+                    base_cells=220,
+                    octaves=4,
+                )
+            if out is None:
+                out = np.zeros(grid.shape, dtype=np.float32)
+            for area in areas:
+                mask, window = landcover.area_mask(area, grid, noise)
+                out[window] = np.maximum(out[window], mask)
+        if out is None:
+            raise ValueError(f"regional.{name}: no landscape, region or ellipse")
+        masks.append((name, np.ascontiguousarray(out[::step, ::step])))
+    return masks
+
+
 def biome_weights(
-    biomes: np.ndarray | None, style: dict, mpp: float
+    biomes: np.ndarray | None,
+    style: dict,
+    mpp: float,
+    regional: list[tuple[str, np.ndarray]] | None = None,
 ) -> tuple[list[dict], np.ndarray | None, int]:
     """Blended biome weights on a coarse grid: ``(specs, K x h x w, step)``.
 
@@ -502,6 +579,19 @@ def biome_weights(
         layers.append(layer)
     if not layers:
         return [], None, 1
+    for name, mask in regional or []:
+        # VIS-R3a : une classe régionale prend la place des biomes là où son masque est plein.
+        edge = float(style["regional"][name].get("transition_km", 10.0))
+        share = mask.astype(np.float32)
+        if edge > 0:
+            share = ndimage.gaussian_filter(share, edge * 1000.0 / (mpp * step))
+        share = np.clip(
+            share * 1.25, 0.0, 1.0
+        )  # the blurred edge reaches 0.5 at the outline
+        if share.max() < 1e-3:
+            continue
+        layers = [layer * (1.0 - share) for layer in layers] + [share]
+        specs.append(regional_spec(style, name))
     weights = np.stack(layers)
     weights /= np.maximum(weights.sum(axis=0, keepdims=True), 1e-6)
     return specs, weights.astype(np.float32), step
@@ -756,7 +846,7 @@ def compute_fields(inputs: ColormapInputs, style: dict) -> _Fields:
     if inputs.shared is not None:
         biome = inputs.shared.biome
     else:
-        biome = biome_weights(inputs.biomes, style, mpp)
+        biome = biome_weights(inputs.biomes, style, mpp, inputs.regional)
     dry_max = _blend_scalar(biome, "dry_max", 1.0, inputs.shape, row0)
     dry = _dryness(inputs, style, moisture, dry_max if biome[1] is not None else None)
     del moisture, dry_max
@@ -1118,6 +1208,64 @@ def _paint_towns(band: _Band, discs: list, style: dict) -> None:
         patch[:] = _lerp(patch, ground, ground_a[..., None])
 
 
+def _village_discs(
+    points: np.ndarray, style: dict, factor: int, mpp: float
+) -> np.ndarray:
+    """``(x, y, core, ring)`` in texture pixels of every indexed place (``villages`` style)."""
+    spec = style.get("villages")
+    if not spec or len(points) == 0:
+        return np.zeros((0, 4))
+    texel_m = mpp / factor
+    core = max(float(spec["min_core_px"]), float(spec["core_m"]) / texel_m)
+    ring = max(core + 1.0, float(spec["ring_m"]) / texel_m)
+    xy = np.asarray(points, dtype=np.float64).reshape(-1, 2) * factor
+    discs = np.empty((len(xy), 4))
+    discs[:, :2] = xy
+    discs[:, 2] = core
+    discs[:, 3] = ring
+    return discs
+
+
+def _paint_villages(band: _Band, discs: np.ndarray, style: dict) -> None:
+    """Village kernels (VIS-R3a): a warm trodden core, gardens and orchards around it.
+
+    The ring is speckled per texel (hash of the world position): light gardens, darker orchard
+    rows for ``orchard_share`` of the texels, thinning out with the distance.
+    """
+    spec = style.get("villages")
+    if not spec or len(discs) == 0:
+        return
+    seed = int(style["seed"]) + 3000
+    palette = style["palette"]
+    garden_c = hex_color(palette["village_garden"])
+    orchard_c = hex_color(palette["orchard"])
+    core_c = hex_color(palette["village_core"])
+    rows, cols = band.out.shape[:2]
+    top = band.top
+    reach = discs[:, 3] + 1.0
+    near = (discs[:, 1] + reach >= top) & (discs[:, 1] - reach <= top + rows)
+    for x, y, core, ring in discs[near]:
+        r0 = max(0, int(np.floor(y - ring - 1.0)) - top)
+        r1 = min(rows, int(np.ceil(y + ring + 1.0)) - top + 1)
+        c0 = max(0, int(np.floor(x - ring - 1.0)))
+        c1 = min(cols, int(np.ceil(x + ring + 1.0)) + 1)
+        if r0 >= r1 or c0 >= c1:
+            continue
+        rr = np.arange(r0, r1, dtype=np.int64) + top
+        cc = np.arange(c0, c1, dtype=np.int64)
+        dist = np.hypot(cc[None, :] + 0.5 - x, rr[:, None] + 0.5 - y).astype(np.float32)
+        patch = band.out[r0:r1, c0:c1]
+        land = band.land[r0:r1, c0:c1]
+        speckle = unit(hash_u64(seed, cc[None, :], rr[:, None]))
+        orchard = speckle < spec["orchard_share"]
+        ring_color = np.where(orchard[..., None], orchard_c, garden_c)
+        fade = np.clip(1.0 - (dist - core) / max(ring - core, 1e-3), 0.0, 1.0)
+        ring_a = spec["ring_opacity"] * np.clip(ring + 0.5 - dist, 0.0, 1.0) * fade**0.5
+        patch[:] = _lerp(patch, ring_color, (ring_a * land)[..., None])
+        core_a = spec["core_opacity"] * np.clip(core + 0.5 - dist, 0.0, 1.0) * land
+        patch[:] = _lerp(patch, core_c, core_a[..., None])
+
+
 def road_texels(
     roads: list[tuple[str, np.ndarray]], factor: int
 ) -> dict[str, tuple[np.ndarray, np.ndarray]]:
@@ -1231,7 +1379,9 @@ def global_fields(inputs: ColormapInputs, style: dict) -> _Shared:
         reservoir=reservoir,
         lake_sd=_signed_distance(lake),
         settlement_km=_settlement_distance_km(inputs),
-        biome=biome_weights(inputs.biomes, style, float(inputs.meters_per_px)),
+        biome=biome_weights(
+            inputs.biomes, style, float(inputs.meters_per_px), inputs.regional
+        ),
     )
 
 
@@ -1285,6 +1435,7 @@ def bake(inputs: ColormapInputs, style: dict, band_rows: int = BAND_ROWS) -> np.
     image = np.empty((out_rows, cols * factor, 3), dtype=np.uint8)
     texels = road_texels(inputs.roads, factor)
     discs = _town_discs(inputs.towns, style, factor, mpp)
+    villages = _village_discs(inputs.settlements, style, factor, mpp)
     for top in range(0, out_rows, band_rows):
         bottom = min(out_rows, top + band_rows)
         first = max(0, top // factor - TILE_HALO_ROWS)
@@ -1312,6 +1463,7 @@ def bake(inputs: ColormapInputs, style: dict, band_rows: int = BAND_ROWS) -> np.
         near = [
             d for d in discs if d[1] + d[3] + 1 >= top and d[1] - d[3] - 1 <= bottom
         ]
+        _paint_villages(band, villages, style)
         _paint_towns(band, near, style)
         _paint_roads(band, texels, style)
         _paint_lakes(
@@ -1329,7 +1481,9 @@ def bake(inputs: ColormapInputs, style: dict, band_rows: int = BAND_ROWS) -> np.
 # ---------------------------------------------------------------------------
 
 
-def load_inputs(map_dir: Path = MAP_DIR, independent: bool = False) -> ColormapInputs:
+def load_inputs(
+    map_dir: Path = MAP_DIR, independent: bool = False, style: dict | None = None
+) -> ColormapInputs:
     """Read the rasters and vectors of ``map_dir`` (map grid of ``map.json``).
 
     ``independent`` (composed map, lot CC C4a): no roads, settlements, hamlets or town halos (they
@@ -1409,6 +1563,7 @@ def load_inputs(map_dir: Path = MAP_DIR, independent: bool = False) -> ColormapI
 
     return ColormapInputs(
         biomes=geo_biomes.read_biomes(map_dir),
+        regional=regional_masks(style or load_style(), map_dir, grid),
         river_km=river_km,
         land=land,
         splat=read("splat.png", "RGBA"),
@@ -1607,7 +1762,7 @@ def build(
     """``geo colormap``: bake, BC1 parts with mipmaps, ``map.json`` entry, preview."""
     started = time.monotonic()
     style = load_style(style_path)
-    inputs = load_inputs(map_dir, independent)
+    inputs = load_inputs(map_dir, independent, style)
     image = bake(inputs, style)
     del inputs
     baked = time.monotonic()

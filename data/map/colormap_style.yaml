@@ -11,26 +11,30 @@ scale: 2
 palette:
   sea_deep: "#1d3848"
   sea_shallow: "#2e5d66"
-  grassland: "#5f8a2e"
+  grassland: "#5c8038"
   grassland_dry: "#9c9443"
-  farmland: "#8f8a3e"
+  farmland: "#998552"
   farmland_dry: "#b59a4f"
-  forest_broadleaf: "#2c4a1c"
-  forest_conifer: "#1f3a22"
-  heath: "#6f6a3c"
+  forest_broadleaf: "#293d1c"
+  forest_conifer: "#1f301f"
+  heath: "#85744a"
   rock: "#8b8272"
   snow: "#e9edf0"
   coast_sand: "#d2bf8c"
   marsh: "#4e6334"
   ponds: "#3b5a4e"
   wet_meadow: "#4f7d34"
-  road: "#c9ad7e"
+  road: "#8c7a5c"
   lake_deep: "#24505e"
   lake_shallow: "#4f8279"
   lake_shore: "#bfae84"
   reeds: "#77843e"
-  town_ground: "#8c7558"
+  town_ground: "#9a6b4b"
   town_gardens: "#5d7c2c"
+  # VIS-R3a : noyaux villageois (jardins clairs, vergers plus sombres, cour de terre chaude).
+  village_garden: "#6f8a3a"
+  orchard: "#4f6f30"
+  village_core: "#a07a58"
   hedge: "#2f4420"
   # Garrigue / maquis (biomes méditerranéen et semi-aride, HB) : sombre et clair, en taches.
   scrub: "#6e7446"
@@ -76,8 +80,9 @@ mosaic:
   # Lot CC CS (« tapis moucheté » de près) : couleurs de cultures rapprochées de leur moyenne
   # (1 : telles quelles), assolement (une part des blocs suit la culture de la zone de `sole_km`),
   # grain de luminosité à l'intérieur des blocs (cellules de `grain_m`).
-  crop_contrast: 0.55
-  pasture_contrast: 0.6
+  # VIS-R3a : contraste relevé (0,55 -> 0,85) pour que la hiérarchie de valeur forêt < pré < labour < chaume survive.
+  crop_contrast: 0.85
+  pasture_contrast: 0.75
   sole_km: 14.0
   sole_share: 0.7
   # Mise en culture groupée (clairières, finages) : part du tirage qui suit un champ de `cluster_km`.
@@ -111,16 +116,16 @@ mosaic:
   dry_crop_tint: "#c9a654"
   dry_crop_amount: 0.35
   crops:
-    - {name: ble, color: "#caa43c", weight: 0.26}
-    - {name: orge, color: "#b9ab58", weight: 0.16}
-    - {name: seigle_avoine, color: "#a19a4a", weight: 0.1}
-    - {name: jachere, color: "#8c6b43", weight: 0.16}
-    - {name: labour, color: "#5d4331", weight: 0.14}
-    - {name: pre, color: "#5c8c30", weight: 0.18}
+    - {name: ble, color: "#b89c57", weight: 0.26}
+    - {name: orge, color: "#a89a5c", weight: 0.16}
+    - {name: seigle_avoine, color: "#998f54", weight: 0.1}
+    - {name: jachere, color: "#9a7b55", weight: 0.16}
+    - {name: labour, color: "#a38059", weight: 0.14}
+    - {name: pre, color: "#568035", weight: 0.18}
   pastures:
-    - {name: pre, color: "#5a8a2c", weight: 0.45}
-    - {name: pature, color: "#72903a", weight: 0.35}
-    - {name: pre_fauche, color: "#8a9a44", weight: 0.2}
+    - {name: pre, color: "#568035", weight: 0.45}
+    - {name: pature, color: "#668738", weight: 0.35}
+    - {name: pre_fauche, color: "#759247", weight: 0.2}
   vine:
     color: "#5b5a2c"
     # Pente minimale (m/m sur la grille de 719 m), exposition sud minimale (0-1), latitude max.
@@ -156,6 +161,17 @@ towns:
   ground_opacity: 0.75
   garden_factor: 2.4
   garden_opacity: 0.45
+
+# Noyaux villageois (VIS-R3a) : autour de chaque lieu indexé (data/map/settlements_px.json et
+# hamlets.json, ~3 900), une cour de terre chaude, puis une couronne de jardins clairs et de
+# vergers plus sombres (`orchard_share` des texels), qui s'éclaircit avec la distance.
+villages:
+  min_core_px: 0.7
+  core_m: 450.0
+  ring_m: 1500.0
+  core_opacity: 0.6
+  ring_opacity: 0.55
+  orchard_share: 0.4
 
 # Biomes (chantier HB, ADR 0143) : data/map/biomes.png (légende data/map/biomes.yaml).
 # Chaque classe surcharge une partie de la palette des terres et module la mosaïque ; les
@@ -198,9 +214,9 @@ biomes:
       openfield: 0.25
       vine: 0.3
       pastures:
-        - {name: pre, color: "#4c8a26", weight: 0.5}
-        - {name: pature, color: "#62923a", weight: 0.3}
-        - {name: pre_fauche, color: "#7a9c40", weight: 0.2}
+        - {name: pre, color: "#4a7f30", weight: 0.5}
+        - {name: pature, color: "#5b8736", weight: 0.3}
+        - {name: pre_fauche, color: "#6f9142", weight: 0.2}
     # Openfield doré / brun, forêts de feuillus.
     continental:
       palette:
@@ -213,12 +229,12 @@ biomes:
       bocage: 0.35
       openfield: 1.3
       crops:
-        - {name: ble, color: "#cfa53e", weight: 0.28}
-        - {name: orge, color: "#bda95a", weight: 0.16}
-        - {name: seigle_avoine, color: "#a89a4c", weight: 0.12}
-        - {name: jachere, color: "#8e6c44", weight: 0.16}
-        - {name: labour, color: "#5f4331", weight: 0.16}
-        - {name: pre, color: "#648c34", weight: 0.12}
+        - {name: ble, color: "#bf9f55", weight: 0.28}
+        - {name: orge, color: "#ad9d5c", weight: 0.16}
+        - {name: seigle_avoine, color: "#9d9154", weight: 0.12}
+        - {name: jachere, color: "#9f7e57", weight: 0.16}
+        - {name: labour, color: "#a98459", weight: 0.16}
+        - {name: pre, color: "#5c8038", weight: 0.12}
     # Sols ocre / rouges, oliveraies gris-vert, vigne ; garrigue et maquis bas dominants
     # hors cultures, pas de futaie dense de feuillus (chênes verts et pins d'Alep épars).
     mediterranean:
@@ -245,8 +261,8 @@ biomes:
         - {name: orge, color: "#bfa35c", weight: 0.12}
         - {name: olivier, color: "#7a8260", weight: 0.26}
         - {name: vigne, color: "#6a6634", weight: 0.08}
-        - {name: jachere, color: "#a8704a", weight: 0.14}
-        - {name: labour, color: "#8a4a32", weight: 0.14}
+        - {name: jachere, color: "#b0794d", weight: 0.14}
+        - {name: labour, color: "#b0704a", weight: 0.14}
         - {name: potager, color: "#7f8a44", weight: 0.06}
       pastures:
         - {name: pature_seche, color: "#a39a58", weight: 0.6}
@@ -293,8 +309,8 @@ biomes:
         - {name: seigle, color: "#a39a4a", weight: 0.35}
         - {name: orge, color: "#b0a456", weight: 0.25}
         - {name: avoine, color: "#9c9a50", weight: 0.15}
-        - {name: jachere, color: "#7a6440", weight: 0.15}
-        - {name: essart, color: "#4e3c2c", weight: 0.1}
+        - {name: jachere, color: "#9a7c55", weight: 0.15}
+        - {name: essart, color: "#a08058", weight: 0.1}
     # Alpages verts, forêts de sapins, roche au-dessus (base.rock_from_m).
     mountain:
       palette:
@@ -312,9 +328,9 @@ biomes:
       openfield: 0.0
       vine: 0.6
       pastures:
-        - {name: alpage, color: "#5c8e32", weight: 0.5}
-        - {name: pre_fauche, color: "#7c9a3e", weight: 0.3}
-        - {name: pature, color: "#6a8a3a", weight: 0.2}
+        - {name: alpage, color: "#4f7f30", weight: 0.5}
+        - {name: pre_fauche, color: "#6b8f40", weight: 0.3}
+        - {name: pature, color: "#5a8436", weight: 0.2}
     # Terre ocre-rose, maigres cultures, maquis clair.
     semi_arid:
       palette:
@@ -468,5 +484,112 @@ biomes:
         - {name: olivier, color: "#7a8260", weight: 0.4}
         - {name: ble, color: "#c9a24a", weight: 0.2}
         - {name: vigne, color: "#6a6634", weight: 0.15}
-        - {name: jachere, color: "#a8704a", weight: 0.15}
-        - {name: labour, color: "#8a4a32", weight: 0.1}
+        - {name: jachere, color: "#b0794d", weight: 0.15}
+        - {name: labour, color: "#b0704a", weight: 0.1}
+
+# Classes régionales (VIS-R3a) : un pays qui se lit de loin, au-dessus des biomes. Chaque classe prend la
+# place des biomes là où son masque est plein (fondu sur `transition_km`) ; `base` = classe de biome dont
+# elle hérite, le reste surcharge (mêmes clés que `biomes.classes`). Où : `landscape` (id de
+# data/map/agri_landscapes.json, masque cuit data/map/agri_regions.png), `regions` (ids des régions de
+# agri_landscapes.json) et `ellipses` (lon / lat, comme wetlands.json).
+regional:
+  # Bocage de l'ouest (Bretagne, Normandie, Maine, Gâtine, Devon, Galice...) : petits prés verts
+  # sombres bordés de haies, labours rares, vergers.
+  bocage:
+    base: oceanic
+    landscape: bocage_west
+    transition_km: 14.0
+    palette:
+      grassland: "#4b7a30"
+      grassland_dry: "#6f8c3a"
+      farmland: "#7d8a45"
+      forest_broadleaf: "#243a1a"
+    presence: 1.25
+    pasture_shift: 0.35
+    bocage: 3.0
+    openfield: 0.0
+    vine: 0.1
+    crops:
+      - {name: seigle_avoine, color: "#968c52", weight: 0.2}
+      - {name: orge, color: "#a39656", weight: 0.14}
+      - {name: jachere, color: "#977852", weight: 0.14}
+      - {name: labour, color: "#a07c57", weight: 0.16}
+      - {name: pre, color: "#4f7a30", weight: 0.36}
+    pastures:
+      - {name: pre, color: "#47792f", weight: 0.5}
+      - {name: pature, color: "#58823a", weight: 0.3}
+      - {name: pre_fauche, color: "#6b8e40", weight: 0.2}
+  # Beauce et grandes plaines à blé du Bassin parisien : openfield clair, jaune paille, craie.
+  beauce:
+    base: continental
+    regions: [beauce, plaine_de_france, brie, santerre, champagne_crayeuse]
+    transition_km: 12.0
+    palette:
+      grassland: "#6d8c3c"
+      farmland: "#ad9b5a"
+      farmland_dry: "#bba868"
+      forest_broadleaf: "#2a3f1d"
+    presence: 1.4
+    pasture_shift: -0.45
+    bocage: 0.0
+    openfield: 2.0
+    vine: 0.05
+    crops:
+      - {name: ble, color: "#c2a560", weight: 0.34}
+      - {name: orge, color: "#b4a465", weight: 0.18}
+      - {name: seigle_avoine, color: "#a39860", weight: 0.08}
+      - {name: craie, color: "#a89c84", weight: 0.1}
+      - {name: jachere, color: "#a3825b", weight: 0.14}
+      - {name: labour, color: "#ad885d", weight: 0.16}
+  # Meseta de Castille et de La Manche : ocre, chaumes pâles, peu d'arbres.
+  meseta:
+    base: semi_arid
+    transition_km: 25.0
+    ellipses:
+      - {center: [-4.3, 41.6], radii_km: [170, 70], angle_deg: 0}
+      - {center: [-3.3, 39.5], radii_km: [170, 70], angle_deg: 0}
+    palette:
+      grassland: "#a39556"
+      grassland_dry: "#b7a463"
+      farmland: "#b09a58"
+      farmland_dry: "#bba868"
+      heath: "#8c784d"
+      scrub: "#7e7348"
+      scrub_light: "#a89a68"
+      forest_broadleaf: "#4f5a38"
+      forest_conifer: "#415030"
+    forest_keep: 0.2
+    scrub: 0.5
+    presence: 0.65
+    pasture_shift: -0.3
+    crops:
+      - {name: ble, color: "#c0a45c", weight: 0.36}
+      - {name: orge, color: "#b8a468", weight: 0.2}
+      - {name: jachere, color: "#b49267", weight: 0.2}
+      - {name: labour, color: "#b88f65", weight: 0.14}
+      - {name: olivier, color: "#8a8c66", weight: 0.1}
+    pastures:
+      - {name: parcours, color: "#a89a62", weight: 0.7}
+      - {name: pre, color: "#8e8c52", weight: 0.3}
+  # Landes de Gascogne : pins maritimes sombres et lande brun-violet, presque pas de champs.
+  landes:
+    base: atlantic_south
+    transition_km: 14.0
+    ellipses:
+      - {center: [-0.95, 44.3], radii_km: [75, 85], angle_deg: 0}
+    palette:
+      grassland: "#5f6a3a"
+      grassland_dry: "#74724a"
+      farmland: "#7a7448"
+      heath: "#645a40"
+      scrub: "#5b5a3c"
+      scrub_light: "#7a7048"
+      forest_conifer: "#1c2d1d"
+    forest_keep: 1.0
+    conifer_min: 0.85
+    scrub: 0.5
+    presence: 0.15
+    pasture_shift: 0.2
+    bocage: 0.0
+    openfield: 0.0
+    vine: 0.0

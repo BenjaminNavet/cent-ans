@@ -176,6 +176,20 @@
         "garden_opacity": {"$ref": "#/$defs/share"}
       }
     },
+    "villages": {
+      "type": "object",
+      "description": "Noyaux villageois (VIS-R3a) autour de chaque lieu indexé : cour de terre, jardins clairs et vergers sombres.",
+      "required": ["min_core_px", "core_m", "ring_m", "core_opacity", "ring_opacity", "orchard_share"],
+      "additionalProperties": false,
+      "properties": {
+        "min_core_px": {"$ref": "#/$defs/positive"},
+        "core_m": {"$ref": "#/$defs/positive"},
+        "ring_m": {"$ref": "#/$defs/positive"},
+        "core_opacity": {"$ref": "#/$defs/share"},
+        "ring_opacity": {"$ref": "#/$defs/share"},
+        "orchard_share": {"$ref": "#/$defs/share"}
+      }
+    },
     "biomes": {
       "type": "object",
       "description": "Palettes et mosaïque par biome (HB, ADR 0143) ; clés = noms de data/map/biomes.yaml.",
@@ -193,6 +207,49 @@
           "type": "object",
           "propertyNames": {"enum": ["oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid", "desert", "tundra", "continental_east", "atlantic_south", "pannonian", "hemiboreal", "aegean_maquis"]},
           "additionalProperties": {"$ref": "#/$defs/biome_style"}
+        }
+      }
+    },
+    "regional": {
+      "type": "object",
+      "description": "Classes régionales (VIS-R3a) : Beauce, bocage, Meseta, Landes... Une classe hérite d'une classe de biome (`base`) et la surcharge ; elle s'applique sur un paysage de agri_landscapes.json, des régions de ce fichier et des ellipses lon / lat.",
+      "propertyNames": {"$ref": "common.schema.json#/$defs/snake_id"},
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "anyOf": [{"required": ["landscape"]}, {"required": ["regions"]}, {"required": ["ellipses"]}],
+        "properties": {
+          "base": {"enum": ["oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid", "desert", "tundra", "continental_east", "atlantic_south", "pannonian", "hemiboreal", "aegean_maquis"]},
+          "landscape": {"$ref": "common.schema.json#/$defs/snake_id"},
+          "regions": {"type": "array", "minItems": 1, "items": {"$ref": "common.schema.json#/$defs/snake_id"}},
+          "ellipses": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["center", "radii_km"],
+              "additionalProperties": false,
+              "properties": {
+                "center": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+                "radii_km": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/positive"}},
+                "angle_deg": {"type": "number"}
+              }
+            }
+          },
+          "transition_km": {"type": "number", "minimum": 0},
+            "palette": {"$ref": "#/$defs/biome_style/properties/palette"},
+            "dry_max": {"$ref": "#/$defs/biome_style/properties/dry_max"},
+            "valley_green": {"$ref": "#/$defs/biome_style/properties/valley_green"},
+            "forest_keep": {"$ref": "#/$defs/biome_style/properties/forest_keep"},
+            "conifer_min": {"$ref": "#/$defs/biome_style/properties/conifer_min"},
+            "scrub": {"$ref": "#/$defs/biome_style/properties/scrub"},
+            "presence": {"$ref": "#/$defs/biome_style/properties/presence"},
+            "pasture_shift": {"$ref": "#/$defs/biome_style/properties/pasture_shift"},
+            "bocage": {"$ref": "#/$defs/biome_style/properties/bocage"},
+            "openfield": {"$ref": "#/$defs/biome_style/properties/openfield"},
+            "vine": {"$ref": "#/$defs/biome_style/properties/vine"},
+            "crops": {"$ref": "#/$defs/biome_style/properties/crops"},
+            "pastures": {"$ref": "#/$defs/biome_style/properties/pastures"}
         }
       }
     }

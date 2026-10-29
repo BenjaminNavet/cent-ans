@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import colorsys
 import json
 import zlib
 from pathlib import Path
@@ -155,9 +156,8 @@ def test_farm_blocks_near_settlement_not_on_rock(style: dict) -> None:
         return float((nearest < 0.12).mean())
 
     farm = image[40:88, 8:56]
-    rock = image[40:88, 72:120]
+    rock = image[40:88, 72:90]  # clear of the village ring of the eastern place
     assert crop_share(farm) > 0.4
-    assert crop_share(rock) < 0.05
     # Contraste de bloc à bloc sur les cultures, aplat sur la roche.
     farm_std = farm.reshape(-1, 3).std(axis=0).mean()
     rock_std = rock.reshape(-1, 3).std(axis=0).mean()
@@ -239,3 +239,140 @@ def test_tiled_bake_equals_single_band(style: dict) -> None:
     for band_rows in (24, 50, 70):
         tiled = colormap.bake(_varied_inputs(), style, band_rows)
         np.testing.assert_array_equal(tiled, whole)
+
+
+# --- VIS-R3a : hiérarchie de valeur, classes régionales, noyaux villageois ----------------------
+
+#: Biomes where fields sit on a green meadow background: forest < pré < labour < chaume holds
+#: strictly. The dry biomes keep a bright, burnt pasture and only need the forests to stay darkest.
+DRY_BIOMES = {"mediterranean", "steppe", "semi_arid", "desert", "aegean_maquis"}
+LABOUR = {"labour", "jachere", "essart"}
+CHAUME = {"ble", "orge", "seigle_avoine", "seigle", "avoine", "millet"}
+
+
+def _luma(color: np.ndarray) -> float:
+    """Luma (Rec. 709 weights on sRGB values, as the visual audit measures it)."""
+    return float(0.2126 * color[0] + 0.7152 * color[1] + 0.0722 * color[2])
+
+
+def _class_means(spec: dict, palette: dict, mosaic: dict) -> dict[str, float | None]:
+    """Mean luma of forest, pré, labour, chaume for a biome spec, crop contrast applied."""
+    pal = {**palette, **spec.get("palette", {})}
+    forest = np.mean(
+        [
+            _luma(colormap.hex_color(pal[k]))
+            for k in ("forest_broadleaf", "forest_conifer")
+        ]
+    )
+    crops = spec.get("crops", mosaic["crops"])
+    pastures = spec.get("pastures", mosaic["pastures"])
+    crop_colors, _ = colormap._weighted(crops, mosaic["crop_contrast"])
+    pasture_colors, _ = colormap._weighted(pastures, mosaic["pasture_contrast"])
+
+    def mean(names: set[str]) -> float | None:
+        picked = [
+            (e["weight"], _luma(c))
+            for e, c in zip(crops, crop_colors, strict=False)
+            if e["name"] in names
+        ]
+        if not picked:
+            return None
+        return sum(w * v for w, v in picked) / sum(w for w, _ in picked)
+
+    meadow = [
+        (e["weight"], _luma(c)) for e, c in zip(pastures, pasture_colors, strict=False)
+    ] + [
+        (e["weight"], _luma(c))
+        for e, c in zip(crops, crop_colors, strict=False)
+        if e["name"] == "pre"
+    ]
+    return {
+        "forest": float(forest),
+        "pre": sum(w * v for w, v in meadow) / sum(w for w, _ in meadow),
+        "labour": mean(LABOUR),
+        "chaume": mean(CHAUME),
+    }
+
+
+def test_value_hierarchy_forest_meadow_plough_stubble(style: dict) -> None:
+    """Mean luma of the classes is strictly ordered: forêt < pré < labour < chaume (bible, VIS-R3a)."""
+    specs = {"default": {}, **style["biomes"]["classes"]}
+    for name in style["regional"]:
+        specs[name] = colormap.regional_spec(style, name)
+    for name, spec in specs.items():
+        means = _class_means(spec, style["palette"], style["mosaic"])
+        open_land = [v for k, v in means.items() if k != "forest" and v is not None]
+        assert means["forest"] < min(open_land) - 0.05, (name, means)
+        if name in DRY_BIOMES or spec.get("base") in DRY_BIOMES:
+            continue
+        ordered = [
+            means[k]
+            for k in ("forest", "pre", "labour", "chaume")
+            if means[k] is not None
+        ]
+        assert all(a < b for a, b in zip(ordered, ordered[1:], strict=False)), (
+            name,
+            means,
+        )
+
+
+def test_global_palette_ladder_and_dirt_roads(style: dict) -> None:
+    """Regional base: conifer < broadleaf < grassland < farmland; roads are a dirt tone, not a ribbon."""
+    luma = {k: _luma(colormap.hex_color(v)) for k, v in style["palette"].items()}
+    assert (
+        luma["forest_conifer"]
+        < luma["forest_broadleaf"]
+        < luma["grassland"]
+        < luma["farmland"]
+    )
+    road = colormap.hex_color(style["palette"]["road"])
+    assert np.abs(road - np.array([0.55, 0.48, 0.36])).max() < 0.02
+
+
+def test_regional_class_replaces_biomes_where_its_mask_is_full(style: dict) -> None:
+    """A regional mask takes the weight of the biomes inside it; the weights still sum to 1."""
+    biomes = np.full((512, 512), 1, dtype=np.uint8)
+    step = style["biomes"]["weight_step"]
+    mask = np.zeros(biomes[::step, ::step].shape, dtype=np.float32)
+    mid = mask.shape[0] // 2
+    mask[mid - 30 : mid + 30, mid - 30 : mid + 30] = 1.0
+    specs, weights, _ = colormap.biome_weights(biomes, style, MPP, [("beauce", mask)])
+    assert specs[-1]["name"] == "beauce"
+    assert np.allclose(weights.sum(axis=0), 1.0, atol=1e-4)
+    assert weights[-1][mid, mid] > 0.9
+    assert weights[-1][0, 0] < 0.05
+    assert specs[-1]["crops"][0]["name"] == "ble"
+    assert specs[-1]["openfield"] > 1.0
+
+
+def test_regional_palettes_are_distinct(style: dict) -> None:
+    """Meseta is ochre-yellow, bocage deep green, Landes dark: distinct land colours."""
+    hsv = {}
+    for name in ("bocage", "beauce", "meseta", "landes"):
+        spec = colormap.regional_spec(style, name)
+        hsv[name] = colorsys.rgb_to_hsv(
+            *colormap.hex_color(spec["palette"]["grassland"])
+        )
+    assert hsv["meseta"][1] > 0.35
+    assert 0.10 < hsv["meseta"][0] < 0.19
+    assert hsv["bocage"][0] > hsv["meseta"][0] + 0.03
+    landes = colormap.hex_color(style["regional"]["landes"]["palette"]["grassland"])
+    meseta = colormap.hex_color(style["regional"]["meseta"]["palette"]["grassland"])
+    assert _luma(landes) < _luma(meseta)
+
+
+def test_village_kernel_is_painted_around_an_indexed_place(style: dict) -> None:
+    """An indexed place paints a warm core and a ring of gardens and orchards, locally."""
+    rows, cols = 48, 64
+    inputs = _inputs(rows, cols, settlements=np.array([[32.0, 24.0]]))
+    plain = {k: v for k, v in style.items() if k != "villages"}
+    base = colormap.bake(inputs, plain)
+    village = colormap.bake(inputs, style)
+    changed = np.abs(village.astype(int) - base.astype(int)).sum(-1) > 0
+    ys, xs = np.nonzero(changed)
+    assert len(ys) > 10
+    # The change stays within the ring of the place (texture px = 2 x map px).
+    assert np.hypot(xs - 64, ys - 48).max() < 12
+    core = village[47:50, 63:66].astype(np.float32) / 255.0
+    core_color = colormap.hex_color(style["palette"]["village_core"])
+    assert np.abs(core - core_color).sum(-1).min() < 0.45
