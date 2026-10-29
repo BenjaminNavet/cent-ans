@@ -8,7 +8,7 @@
     "rgb": { "$ref": "common.schema.json#/$defs/rgb3" },
     "range": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
   },
-  "required": ["reference_season", "reference_hour", "ground", "surfaces", "sky", "season_deltas", "common_grade", "targets"],
+  "required": ["reference_season", "reference_hour", "ground", "surfaces", "sky", "season_deltas", "common_grade", "targets", "campaign"],
   "additionalProperties": false,
   "properties": {
     "description": { "type": "string" },
@@ -64,6 +64,18 @@
         }
       }
     },
+    "campaign": {
+      "type": "object",
+      "description": "VIS-R1 : cibles de la carte de campagne (albédo sRGB des matières vues du ciel, ordre de valeur testé).",
+      "required": ["materials", "value_order", "fields"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string" },
+        "materials": { "type": "object", "additionalProperties": { "$ref": "#/$defs/rgb" } },
+        "value_order": { "type": "array", "items": { "type": "string" }, "minItems": 2, "description": "Matières du plus sombre au plus clair (luminance)." },
+        "fields": { "type": "array", "items": { "type": "string" }, "description": "Cultures : toujours plus claires que la forêt de feuillus." }
+      }
+    },
     "targets": {
       "type": "object",
       "additionalProperties": false,
@@ -76,7 +88,17 @@
         },
         "dusk_ground_value_min": { "type": "number", "minimum": 0, "maximum": 1 },
         "dawn_ground_value_min": { "type": "number", "minimum": 0, "maximum": 1 },
-        "campaign_clear_ground_saturation_min": { "type": "number", "minimum": 0, "maximum": 1 }
+        "campaign_clear_ground_saturation_min": { "type": "number", "minimum": 0, "maximum": 1 },
+        "campaign_clear_ground_0060": {
+          "type": "object",
+          "required": ["hue_deg", "saturation_min", "value"],
+          "additionalProperties": false,
+          "properties": { "hue_deg": { "$ref": "#/$defs/range" }, "saturation_min": { "type": "number", "minimum": 0, "maximum": 1 }, "value": { "$ref": "#/$defs/range" } }
+        },
+        "campaign_sky_blue_margin": { "type": "number", "minimum": 0, "maximum": 1 },
+        "campaign_sun_sky_ratio_min": { "type": "number", "minimum": 1 },
+        "campaign_alps_bright_share_max": { "type": "number", "minimum": 0, "maximum": 1 },
+        "campaign_sea_land_luminance_tolerance": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     }
   }

@@ -171,3 +171,32 @@ fn weather_map_reads_the_state_date_and_seed() {
     let _ = weather_map(data, &state);
     assert_eq!(before, state.rng);
 }
+
+#[test]
+fn first_turn_of_a_new_game_is_clear_everywhere() {
+    // VIS-R1: `first_turn_clear` of the weather rules makes turn 0 dry.
+    let data = game_data();
+    assert!(data.campaign_weather.first_turn_clear);
+    for seed in [1337_u64, 7, 99] {
+        let first = compute_weather(
+            &data.campaign_weather,
+            &data.provinces,
+            seed,
+            0,
+            Season::Spring,
+        );
+        assert_eq!(first.len(), data.provinces.len());
+        assert!(first.values().all(|w| w.kind == MapWeather::Clear));
+    }
+    let second = compute_weather(
+        &data.campaign_weather,
+        &data.provinces,
+        1337,
+        1,
+        Season::Spring,
+    );
+    assert!(
+        second.values().any(|w| w.kind != MapWeather::Clear),
+        "turn 1 draws as usual"
+    );
+}

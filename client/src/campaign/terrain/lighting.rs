@@ -448,7 +448,7 @@ mod tests {
     fn real_data_gives_a_low_warm_sun_and_a_cool_sky() {
         let data = real();
         let light = target(&data, Vec4::new(0.0, 1.0, 0.0, 0.0), None);
-        assert!((light.elevation - 21.0).abs() < 1e-4);
+        assert!((light.elevation - 36.0).abs() < 1e-4);
         assert!(light.color.x > light.color.z, "warm sun");
         assert!(light.ambient.z > light.ambient.x, "cool ambient");
         assert!((light.saturation - 0.96).abs() < 1e-4);
@@ -473,6 +473,30 @@ mod tests {
         assert!(dusk.color.z < day.color.z);
         assert!(dusk.energy < day.energy);
         assert_eq!(with_dusk(&day, 0.0).elevation, day.elevation);
+    }
+
+    #[test]
+    fn sun_is_at_least_1_8_times_the_sky() {
+        // VIS-R1: sun illuminance on the ground (energy x sin elevation) against the sky
+        // ambient energy, every season, every turn of the variation.
+        let data = real();
+        let palette: Value =
+            serde_json::from_str(include_str!("../../../../data/fx/palette.json")).unwrap();
+        let ratio = palette["targets"]["campaign_sun_sky_ratio_min"].as_f64().unwrap() as f32;
+        assert!(ratio >= 1.8);
+        for (i, season) in super::super::season::SEASONS.iter().enumerate() {
+            let mut w = Vec4::ZERO;
+            w[i] = 1.0;
+            for turn in 0..200 {
+                let l = target(&data, w, Some(turn));
+                let sun = l.energy * l.elevation.to_radians().sin();
+                let sky = data.ambient_energy[i];
+                assert!(
+                    sun >= ratio * sky,
+                    "{season} turn {turn}: sun {sun:.2} < {ratio} x sky {sky:.2}"
+                );
+            }
+        }
     }
 
     #[test]

@@ -91,6 +91,72 @@ mod tests {
         (hue, if max > 0.0 { d / max } else { 0.0 }, max)
     }
 
+    fn bundled_doc() -> serde_json::Value {
+        serde_json::from_str(BUNDLED).unwrap()
+    }
+
+    fn material(doc: &serde_json::Value, key: &str) -> [f32; 3] {
+        let a = doc["campaign"]["materials"][key]
+            .as_array()
+            .unwrap_or_else(|| panic!("campaign material {key}"));
+        [0, 1, 2].map(|i| a[i].as_f64().unwrap() as f32)
+    }
+
+    fn luminance(c: [f32; 3]) -> f32 {
+        0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+    }
+
+    #[test]
+    fn campaign_palette_keeps_the_value_hierarchy() {
+        // VIS-R1 (bible c): darkest to lightest by luminance, and the broadleaf forest darker
+        // than every field.
+        let doc = bundled_doc();
+        let order: Vec<&str> = doc["campaign"]["value_order"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_str().unwrap())
+            .collect();
+        for pair in order.windows(2) {
+            let (dark, light) = (
+                luminance(material(&doc, pair[0])),
+                luminance(material(&doc, pair[1])),
+            );
+            assert!(dark < light, "{} ({dark}) must be darker than {} ({light})", pair[0], pair[1]);
+        }
+        let forest = luminance(material(&doc, "forest_broadleaf"));
+        for field in doc["campaign"]["fields"].as_array().unwrap() {
+            let name = field.as_str().unwrap();
+            assert!(forest < luminance(material(&doc, name)), "forest vs {name}");
+        }
+        // The sea is the darkest thing of the map, in its three depths.
+        let shallows = luminance(material(&doc, "sea_shallows"));
+        assert!(luminance(material(&doc, "sea_open")) < luminance(material(&doc, "sea_shelf")));
+        assert!(luminance(material(&doc, "sea_shelf")) < shallows);
+    }
+
+    #[test]
+    fn campaign_targets_and_sky_are_consistent() {
+        let doc = bundled_doc();
+        let t = &doc["targets"];
+        // Meadow of the bible sits inside the ground hue band of the clear campaign target.
+        let (hue, sat, _) = hsv(material(&doc, "meadow"));
+        let band = &t["campaign_clear_ground_0060"];
+        let lo = band["hue_deg"][0].as_f64().unwrap() as f32;
+        let hi = band["hue_deg"][1].as_f64().unwrap() as f32;
+        assert!((lo..=hi).contains(&hue), "meadow hue {hue}");
+        assert!(sat >= band["saturation_min"].as_f64().unwrap() as f32);
+        assert_eq!(
+            t["campaign_clear_ground_saturation_min"].as_f64(),
+            band["saturation_min"].as_f64()
+        );
+        // The horizon of the sky is bluer than red by at least the audit margin.
+        let horizon = doc["sky"]["horizon"].as_array().unwrap();
+        let margin = t["campaign_sky_blue_margin"].as_f64().unwrap();
+        assert!(horizon[2].as_f64().unwrap() > horizon[0].as_f64().unwrap() + margin);
+        assert!(t["campaign_sun_sky_ratio_min"].as_f64().unwrap() >= 1.8);
+    }
+
     #[test]
     fn reference_is_spring_midday_and_the_grass_is_green_not_yellow() {
         let p = Palette::load();

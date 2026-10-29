@@ -16,6 +16,7 @@ pub mod aurora;
 pub mod banner;
 pub mod clouds;
 pub mod cumulus;
+pub mod dome;
 pub mod fog;
 pub mod ground;
 pub mod model;
@@ -105,6 +106,7 @@ impl Plugin for CampaignWeatherPlugin {
         atmosphere::build(app);
         ground::build(app);
         sky::build(app);
+        dome::build(app);
         aurora::build(app);
         cumulus::build(app);
         banner::build(app);

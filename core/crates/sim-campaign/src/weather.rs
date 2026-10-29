@@ -92,6 +92,20 @@ pub fn compute_weather(
     turn: u32,
     season: Season,
 ) -> BTreeMap<ProvinceId, ProvinceWeather> {
+    if rules.first_turn_clear && turn == 0 {
+        return provinces
+            .keys()
+            .map(|id| {
+                (
+                    ProvinceId::clone(id),
+                    ProvinceWeather {
+                        kind: MapWeather::Clear,
+                        intensity: 0.0,
+                    },
+                )
+            })
+            .collect();
+    }
     let scale = rules.front_scale_deg.max(0.1);
     let jitter = rules.local_jitter.clamp(0.0, 1.0);
     let shift_x = rules.drift_deg_per_turn[0] * f64::from(turn);

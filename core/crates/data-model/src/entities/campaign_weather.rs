@@ -61,6 +61,10 @@ pub struct CampaignWeatherRules {
     /// Displacement of the weather field between two turns, in degrees
     /// (east, north): fronts come in from the Atlantic.
     pub drift_deg_per_turn: [f64; 2],
+    /// VIS-R1: the first turn of a new game (turn 0) is clear everywhere, so the player's first
+    /// sight of the map is not a rainy one. Later turns draw as usual.
+    #[serde(default)]
+    pub first_turn_clear: bool,
     pub climates: ClimateWeather,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,

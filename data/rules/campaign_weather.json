@@ -3,6 +3,7 @@
   "front_scale_deg": 3.5,
   "local_jitter": 0.22,
   "drift_deg_per_turn": [2.2, 0.35],
+  "first_turn_clear": true,
   "climates": {
     "oceanic": {
       "spring": { "clear": 45, "fog": 10, "rain": 38, "snow": 2, "storm": 5 },

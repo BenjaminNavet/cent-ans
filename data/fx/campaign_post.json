@@ -25,7 +25,7 @@
     "noise_scale": 0.012,
     "noise_drift": [0.9, 0.25],
     "noise_amount": 0.7,
-    "sea_share": 0.5,
+    "sea_share": 1.0,
     "color": [0.84, 0.86, 0.88],
     "cold_color": [0.72, 0.79, 0.9]
   },
@@ -37,9 +37,10 @@
     "clear_scale": 0.5,
     "desaturate": 0.4,
     "sky_share": 0.35,
+    "clear_max": 0.3,
     "fog_cut": 0.6,
-    "color": [0.6, 0.66, 0.74],
-    "cold_color": [0.56, 0.65, 0.79]
+    "color": [0.70, 0.77, 0.85],
+    "cold_color": [0.64, 0.73, 0.86]
   },
   "cold": {
     "winter": 0.9,

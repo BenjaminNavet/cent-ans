@@ -1,0 +1,10 @@
+{
+  "description": "VIS-R1 : ciel de la carte de campagne (client/src/campaign/weather/dome.rs). Dôme dégradé tracé derrière tout (repli retenu à la place de l'Atmosphere de Bevy 0.20, ADR vis-r1) : l'horizon prend la teinte vivante de la brume de caméra, le zénith en déduit sa teinte du rapport zénith/horizon de palette.json `sky`, ramené vers l'horizon par météo couvrante. Rendu seulement, aucune règle de jeu. `kind` : \"dome\" ou \"none\" (fond uni, pour comparer).",
+  "enabled": true,
+  "kind": "dome",
+  "gradient_exponent": 0.55,
+  "gain": 1.0,
+  "overcast_zenith_keep": 0.15,
+  "overcast_by_kind": { "clear": 0.0, "fog": 0.9, "rain": 0.75, "snow": 0.7, "storm": 0.95 },
+  "sun_glow": { "strength": 0.25, "exponent": 24.0 }
+}

@@ -518,6 +518,7 @@ pub fn dump(world: &World) -> Value {
         "sun_scatter": a.scatter,
         "weather_mist": a.mist,
         "table": table(world),
+        "sky": super::dome::dump(world),
     })
 }
 

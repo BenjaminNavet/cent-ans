@@ -20,6 +20,11 @@ pub struct CameraFeel {
     pub drag_release_inertia: f32,
     pub rotate_mouse_deg_per_px: f32,
     pub follow_release_px: f32,
+    /// VIS-R1: pitch (degrees) at the reference distance (`pitch_reference_distance`, 22).
+    pub pitch_near_deg: f32,
+    /// Pitch at `pitch_mid_distance`; linear between the two, then on to the far pitch.
+    pub pitch_mid_deg: f32,
+    pub pitch_mid_distance: f32,
 }
 
 impl Default for CameraFeel {
@@ -34,6 +39,9 @@ impl Default for CameraFeel {
             drag_release_inertia: 0.6,
             rotate_mouse_deg_per_px: 0.25,
             follow_release_px: 4.0,
+            pitch_near_deg: 20.0,
+            pitch_mid_deg: 28.0,
+            pitch_mid_distance: 150.0,
         }
     }
 }
@@ -64,6 +72,9 @@ impl CameraFeel {
         read("drag_release_inertia", &mut feel.drag_release_inertia);
         read("rotate_mouse_deg_per_px", &mut feel.rotate_mouse_deg_per_px);
         read("follow_release_px", &mut feel.follow_release_px);
+        read("pitch_near_deg", &mut feel.pitch_near_deg);
+        read("pitch_mid_deg", &mut feel.pitch_mid_deg);
+        read("pitch_mid_distance", &mut feel.pitch_mid_distance);
         feel
     }
 }
@@ -181,7 +192,7 @@ impl CampaignRig {
             min_distance: 22.0,
             max_distance: 2600.0,
             floor_distance: 0.0,
-            pitch_near_deg: 30.0,
+            pitch_near_deg: feel.pitch_near_deg,
             pitch_far_deg: 70.0,
             pitch_far_distance: 2600.0,
             pan_speed: 1.2,
@@ -342,15 +353,19 @@ impl CampaignRig {
     /// Pitch (degrees): historic curve above the reference distance, ever flatter below it.
     pub fn pitch_deg(&self) -> f32 {
         let reference = self.pitch_reference();
-        let t =
-            ((self.distance - reference) / (self.pitch_far_distance - reference)).clamp(0.0, 1.0);
-        let pitch = self.pitch_near_deg + (self.pitch_far_deg - self.pitch_near_deg) * t;
         if self.distance < reference {
             return self
                 .profile
                 .close_pitch_deg(self.distance, self.pitch_near_deg);
         }
-        pitch
+        let mid = self.feel.pitch_mid_distance.max(reference + 1.0);
+        if self.distance <= mid {
+            let t = (self.distance - reference) / (mid - reference);
+            return self.pitch_near_deg + (self.feel.pitch_mid_deg - self.pitch_near_deg) * t;
+        }
+        let far = self.pitch_far_distance.max(mid + 1.0);
+        let t = ((self.distance - mid) / (far - mid)).clamp(0.0, 1.0);
+        self.feel.pitch_mid_deg + (self.pitch_far_deg - self.feel.pitch_mid_deg) * t
     }
 
     /// One frame (`_process`), then the new pose.
@@ -613,15 +628,33 @@ mod tests {
     }
 
     #[test]
+    fn horizon_enters_the_frame_at_close_and_medium_distances() {
+        // VIS-R1: the top-of-screen ray (half the vertical field above the view axis) must pass
+        // above the horizon, so the sky shows, up to d 60.
+        let mut rig = rig();
+        let half_fov = super::super::FOV_DEG * 0.5;
+        for d in [22.0_f32, 40.0, 60.0] {
+            rig.distance = d;
+            assert!(
+                rig.pitch_deg() < half_fov - 2.0,
+                "d {d}: pitch {} leaves no sky (half fov {half_fov})",
+                rig.pitch_deg()
+            );
+        }
+    }
+
+    #[test]
     fn pitch_follows_distance_and_goes_flat_close_up() {
         let mut rig = rig();
         rig.distance = rig.pitch_reference();
-        assert!((rig.pitch_deg() - 30.0).abs() < 1e-3);
+        assert!((rig.pitch_deg() - 20.0).abs() < 1e-3);
+        rig.distance = 150.0;
+        assert!((rig.pitch_deg() - 28.0).abs() < 1e-3);
         rig.distance = 0.3;
         assert!((rig.pitch_deg() - 11.0).abs() < 1e-3);
         rig.distance = (rig.pitch_reference() + rig.pitch_far_distance) * 0.5;
         let mid = rig.pitch_deg();
-        assert!(mid > 30.0 && mid < 70.0);
+        assert!(mid > 28.0 && mid < 70.0);
     }
 
     #[test]

@@ -27,6 +27,9 @@
         "drag_release_inertia": {"$ref": "#/$defs/inertia"},
         "rotate_mouse_deg_per_px": {"description": "WH mapb2 : degrés de lacet par pixel de souris (bouton du milieu + Alt ou Maj).", "type": "number", "exclusiveMinimum": 0, "maximum": 2},
         "follow_release_px": {"description": "WH mapb2 : déplacement de souris (px) au-delà duquel un glisser manuel libère le suivi de l'armée.", "type": "number", "minimum": 0, "maximum": 100},
+        "pitch_near_deg": {"description": "VIS-R1 : inclinaison de la caméra (degrés) à la distance de référence (22 u) ; 20 pour que l'horizon et le ciel entrent dans le cadre.", "type": "number", "minimum": 5, "maximum": 45},
+        "pitch_mid_deg": {"description": "VIS-R1 : inclinaison (degrés) à pitch_mid_distance ; linéaire entre les deux, puis jusqu'à l'inclinaison lointaine (70° à 2 600 u).", "type": "number", "minimum": 5, "maximum": 60},
+        "pitch_mid_distance": {"description": "VIS-R1 : distance de caméra (u) du palier intermédiaire d'inclinaison.", "type": "number", "minimum": 23, "maximum": 1000},
         "minimap_ping_s": {"description": "WH mapb2 : durée du cercle de ping de la minicarte (s).", "type": "number", "exclusiveMinimum": 0, "maximum": 10},
         "minimap_ping_radius_px": {"description": "WH mapb2 : rayon final du ping de la minicarte (px).", "type": "number", "exclusiveMinimum": 0, "maximum": 100}
       }

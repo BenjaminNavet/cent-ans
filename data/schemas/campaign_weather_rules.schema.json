@@ -41,6 +41,7 @@
       "maxItems": 2,
       "description": "Déplacement du champ météo d'un tour à l'autre, en degrés (est, nord)."
     },
+    "first_turn_clear": { "type": "boolean", "description": "VIS-R1 : le premier tour d'une nouvelle partie (tour 0) est dégagé partout ; les suivants se tirent comme d'habitude." },
     "climates": {
       "type": "object",
       "properties": {

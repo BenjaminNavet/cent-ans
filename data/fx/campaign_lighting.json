@@ -1,12 +1,12 @@
 {
-  "description": "Lot RV-B : éclairage de jeu de la carte de campagne, lu par game/scripts/visual/campaign_lighting.gd et appliqué par CampaignAtmosphere. Le soleil de base de chaque saison reste dans fx/atmosphere.json (campaign.seasons, 18-21°, ADR 0156) ; ici : ambiance de ciel froide qui oppose versants à l’ombre (bleutés) et au soleil (dorés), exposition, variation d’un tour à l’autre entre début et fin d’après-midi (jamais de matin à l’est, qui inverserait la lecture du relief), durées d’interpolation (aucun saut), perspective aérienne selon l’inclinaison de la caméra (paires [vue basse, vue de dessus] ; légère de dessus, ADR 0142). Purement visuel.",
+  "description": "Lot RV-B : éclairage de jeu de la carte de campagne, lu par game/scripts/visual/campaign_lighting.gd et appliqué par CampaignAtmosphere. Le soleil de base de chaque saison reste dans fx/atmosphere.json (campaign.seasons, 18-21°, ADR 0156) ; ici : ambiance de ciel froide qui oppose versants à l’ombre (bleutés) et au soleil (dorés), exposition, variation d’un tour à l’autre entre début et fin d’après-midi (jamais de matin à l’est, qui inverserait la lecture du relief), durées d’interpolation (aucun saut), perspective aérienne selon l’inclinaison de la caméra (paires [vue basse, vue de dessus] ; légère de dessus, ADR 0142). Purement visuel. VIS-R1 : soleil de fin de matinée (32-36°), éclairement solaire au sol au moins 1,8 fois celui du ciel (test lighting::sun_is_at_least_1_8_times_the_sky).",
   "transition_s": {
     "season": 8.0,
     "turn": 5.0
   },
   "elevation_bounds_deg": [
-    15.0,
-    28.0
+    26.0,
+    40.0
   ],
   "turn_variation": {
     "enabled": true,
@@ -17,27 +17,27 @@
   },
   "ambient": {
     "color": [
-      0.64,
-      0.72,
+      0.75,
+      0.8,
       0.9
     ],
-    "energy": 0.56,
+    "energy": 0.4,
     "sky_contribution": 0.2,
     "seasons": {
       "autumn": {
         "color": [
-          0.6,
-          0.68,
-          0.88
+          0.74,
+          0.79,
+          0.89
         ]
       },
       "winter": {
         "color": [
-          0.62,
-          0.72,
-          0.94
+          0.74,
+          0.8,
+          0.92
         ],
-        "energy": 0.62
+        "energy": 0.44
       }
     }
   },
