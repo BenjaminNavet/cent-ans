@@ -312,6 +312,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0724 | [Textures compressées par le préprocesseur d'assets de Bevy](0724-textures-compressees-par-le-preprocesseur-d-assets.md) | acceptée |
 | 0730 | [Guyenne en trois provinces, Lothian écossais, Pays de Galles, champs de bataille historiques variés](0730-guyenne-trois-provinces-et-fidelite-1337.md) | accepté |
 | 0731 | [Révoltes graduées et armée rebelle](0731-revoltes-graduees-et-armee-rebelle.md) | accepté |
+<<<<<<< HEAD
 | 0732 | [Province du Dauphiné de Viennois, achat de 1349 et objectif français](0732-province-du-dauphine.md) | accepté |
 | 0740 | [Mise à l'échelle du monde 3D (Bevy)](0740-mise-a-l-echelle-du-monde-bevy.md) | accepté |
 | 0741 | [SMAA sur la carte de campagne au lieu du MSAA](0741-smaa-carte-au-lieu-du-msaa.md) | n/d |
@@ -351,3 +352,6 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0773 | [Mise en scène des batailles : cadrage de siège, suivi, cartes compactes, premier plan](0773-mise-en-scene-des-batailles.md) | n/d |
 | 0787 | [Sol de campagne sans patchwork](0787-sol-de-campagne-sans-patchwork.md) | accepté |
 | 0790 | [LOD1-2 refaits par voxels et texture recuite](0790-lod-par-voxels-et-texture-recuite.md) | accepté |
+=======
+| 0791 | [Sol de campagne : aspect provisoire avant le chargement du sol texturé](0791-sol-aspect-provisoire-avant-chargement.md) | accepté |
+>>>>>>> a06db89 (docs: number the SOL ADR 0791 and index it)
