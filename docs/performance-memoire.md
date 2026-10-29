@@ -85,7 +85,7 @@ Mesure : `memory.footprint_mib` (dump et rapports de banc, `proc_pid_rusage`), `
 - Feuilles de sol de campagne (JPEG 185 Mo RGBA8 décodés, transitoires) : pré-cuisson KTX2/BC7 non faite (le pipeline
   `bake-ktx2` exclut la campagne) ; mimalloc rend les tampons à l'OS, l'enjeu restant est le temps de chargement.
 
-## Amendement ADR 0796 (lot MEM4, 29/10) : mesure avec relief, textures de modèles en assets neufs
+## Amendement ADR 0794 (lot MEM4, 29/10) : mesure avec relief, textures de modèles en assets neufs
 - **Piège de mesure n° 2** : un worktree sans `data/map/pyramid` démarre une campagne sans terrain (journal : « No such
   file or directory » sur `relief_pyramid.json`). Les 2,8 Go de l'ADR 0776 étaient mesurés ainsi. Lier
   `ln -s ~/dev/cent-ans-raw/compose/pyramid data/map/pyramid` avant toute mesure.

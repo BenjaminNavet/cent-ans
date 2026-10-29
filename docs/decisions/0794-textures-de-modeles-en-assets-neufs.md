@@ -1,4 +1,4 @@
-# 0796 — Mémoire de campagne : textures de modèles BC1 dans des assets neufs, mesure avec relief
+# 0794 — Mémoire de campagne : textures de modèles BC1 dans des assets neufs, mesure avec relief
 
 Date : 2026-10-29. Statut : acceptée. Amende les ADR 0748 et 0776 (amendement du 28/10). Lot MEM4 (boucle juge 2,
 itération 1). Détails : `docs/wip/lot-mem.md`, `docs/performance-memoire.md`.

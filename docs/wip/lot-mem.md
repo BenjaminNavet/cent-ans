@@ -1,4 +1,4 @@
-# Lot MEM4 (boucle juge, itération 1) : mémoire de campagne, fps, garde — TERMINÉ (voir ADR 0796)
+# Lot MEM4 (boucle juge, itération 1) : mémoire de campagne, fps, garde — TERMINÉ (voir ADR 0794)
 
 ## Fait
 - `perf_guard.sh` réparé (`status` réservé en zsh -> `rc`) et exécuté : `all --force` vert sauf mêlée p50 (seuil relevé).
@@ -6,7 +6,7 @@
   `mem_protocol.sh`, `gpu_pacing`), ajout de `gpucensus` (rendu : images par format, pipelines).
 - Correctif mémoire : `client/src/fx/model_mips.rs` (capture à `Added`, marqueur couleur moyenne, BC1 dans un asset neuf,
   re-pointage des matériaux). Vérifié visuellement (une comparaison recadrée Paris) : modèles texturés.
-- Seuils `perf_thresholds.json` de non-régression ; `docs/performance-memoire.md` et ADR 0796 à jour.
+- Seuils `perf_thresholds.json` de non-régression ; `docs/performance-memoire.md` et ADR 0794 à jour.
 
 ## Mesures (Mo d'empreinte physique ; release, Ultra, hors écran ; charge 10-35, mesures de mémoire peu sensibles)
 | | avant | après |

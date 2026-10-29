@@ -2,7 +2,7 @@
   "_doc": "Seuils de tools/bevy_bench/perf_guard.sh (lot B5), en ms par image, fenetre masquee et muet. Mesures sur machine calme (charge < 6) ; les seuils laissent ~2x de marge sur le p50 mesure apres B5 pour ne pas declencher sur le bruit, mais attrapent le retour d'un cout de l'ordre de 28 ms (ombres d'impostors en 4 cascades a 8192, cf. docs/wip/bm-perf4.md). Les relever demande une justification dans le commit.",
   "max_load": 6,
   "memory": {
-    "_doc": "MiB (ADR 0748, amende par ADR 0776 et 0796, docs/performance-memoire.md). Seuils de NON-REGRESSION relevés par MEM4 : avec le relief (data/map/pyramid) la campagne mesure 5,4 Go au repos et 7,3 Go en fin de banc ; l'objectif de 4000 reste a atteindre (2,5 Go de memoire graphique non comptee par Metal, ADR 0796). footprint = empreinte physique en fin de banc (le budget) ; peak_rss = pic au chargement. Bataille : l'oscillation de 3,8 a 6,5 Go venait du CPU qui prend de l'avance sur le GPU en fenetre masquee ; la limite d'images en vol (gpu_pacing, 2 par defaut) la supprime : 3,56 Go mesures.",
+    "_doc": "MiB (ADR 0748, amende par ADR 0776 et 0796, docs/performance-memoire.md). Seuils de NON-REGRESSION relevés par MEM4 : avec le relief (data/map/pyramid) la campagne mesure 5,4 Go au repos et 7,3 Go en fin de banc ; l'objectif de 4000 reste a atteindre (2,5 Go de memoire graphique non comptee par Metal, ADR 0794). footprint = empreinte physique en fin de banc (le budget) ; peak_rss = pic au chargement. Bataille : l'oscillation de 3,8 a 6,5 Go venait du CPU qui prend de l'avance sur le GPU en fenetre masquee ; la limite d'images en vol (gpu_pacing, 2 par defaut) la supprime : 3,56 Go mesures.",
     "footprint": {"map": 7800, "battle": 4500},
     "peak_rss": {"map": 5400, "battle": 4000}
   },
