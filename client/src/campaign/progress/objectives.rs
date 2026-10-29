@@ -272,41 +272,35 @@ fn spawn(
                                     } else {
                                         style::INK_SOFT
                                     };
-                                    row.spawn((
-                                        Node {
-                                            align_items: AlignItems::Center,
-                                            column_gap: Val::Px(6.0),
+                                    row.spawn(Node {
+                                        align_items: AlignItems::Center,
+                                        column_gap: Val::Px(6.0),
+                                        ..default()
+                                    })
+                                    .with_children(|line| {
+                                        // Done: the ink check mark; open: an empty slot.
+                                        let mut slot = line.spawn(Node {
+                                            width: Val::Px(18.0),
+                                            height: Val::Px(18.0),
+                                            flex_shrink: 0.0,
                                             ..default()
-                                        },
-                                        children![
-                                            (
-                                                Node {
-                                                    width: Val::Px(18.0),
-                                                    height: Val::Px(18.0),
-                                                    flex_shrink: 0.0,
-                                                    ..default()
-                                                },
-                                                // Done: the ink check mark; open: an empty slot.
-                                                if objective.done {
-                                                    Some(crate::ui::kit::icons::InkGlyph {
-                                                        id: "oui",
-                                                        color: ink,
-                                                    })
-                                                } else {
-                                                    None
-                                                },
-                                            ),
-                                            (
-                                                Name::new(format!("objective:{}", objective.id)),
-                                                Text::new(format!(
-                                                    "{} — {}",
-                                                    objective.title, objective.progress
-                                                )),
-                                                theme.text_font(true, false, UiType::Body.size()),
-                                                TextColor(ink),
-                                            ),
-                                        ],
-                                    ));
+                                        });
+                                        if objective.done {
+                                            slot.insert(crate::ui::kit::icons::InkGlyph {
+                                                id: "oui",
+                                                color: ink,
+                                            });
+                                        }
+                                        line.spawn((
+                                            Name::new(format!("objective:{}", objective.id)),
+                                            Text::new(format!(
+                                                "{} — {}",
+                                                objective.title, objective.progress
+                                            )),
+                                            theme.text_font(true, false, UiType::Body.size()),
+                                            TextColor(ink),
+                                        ));
+                                    });
                                     row.spawn(caption(&theme, &objective.description));
                                 });
                             }
