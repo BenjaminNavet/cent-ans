@@ -2445,6 +2445,11 @@ fn base_ground(p: vec2<f32>, footprint: f32) -> vec3<f32> {
         let soft = textureSampleBias(colormap, colormap_sampler, cm_uv, ground.dark.z).rgb;
         if (ground.bg.x > 0.5) {
             albedo = dark_masses(albedo, soft, p, footprint);
+        } else {
+            // Regional ground still loading (worker thread, 2 to 6 s): the parcels baked in the
+            // colour map would show as blocky rose patches, so show its blurred regional tone
+            // until the textured ground is bound (lot SOL).
+            albedo = textureSampleBias(colormap, colormap_sampler, cm_uv, ground.dark.z + 2.0).rgb;
         }
     }
     return albedo;

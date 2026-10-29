@@ -290,11 +290,11 @@ impl Default for ForestLook {
     fn default() -> Self {
         ForestLook {
             value: 0.88,
-            saturation: 1.2,
-            balance: Vec3::new(0.92, 1.0, 0.8),
+            saturation: 0.85,
+            balance: Vec3::new(0.94, 0.98, 0.9),
             tree_value_spread: 0.3,
-            stand_value_spread: 0.4,
-            stand_period: 26.0,
+            stand_value_spread: 0.5,
+            stand_period: 18.0,
             height_spread: 0.3,
             height_period: 40.0,
             crown_shade: 0.35,

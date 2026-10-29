@@ -2,15 +2,15 @@
   "description": "Rendu des forêts de la carte de campagne (lot TS-T2, ADR 0710) : valeur et variété de la canopée, lisière nette, masse lointaine, givre d'hiver ; lot TS-T8 : arbres hors forêt amincis avec la distance, bosquets, clairières habitées. Lu par client/src/campaign/vegetation/look.rs.",
   "canopy": {
     "value": 0.88,
-    "saturation": 1.2,
+    "saturation": 0.85,
     "balance": [
-      0.92,
-      1.0,
-      0.8
+      0.94,
+      0.98,
+      0.9
     ],
     "tree_value_spread": 0.3,
-    "stand_value_spread": 0.4,
-    "stand_period_units": 26.0,
+    "stand_value_spread": 0.5,
+    "stand_period_units": 18.0,
     "height_spread": 0.3,
     "height_period_units": 40.0,
     "crown_shade": 0.35

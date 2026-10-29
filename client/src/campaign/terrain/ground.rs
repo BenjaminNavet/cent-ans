@@ -848,7 +848,7 @@ pub fn load_ground(root: &Path, high: bool) -> Result<GroundData, String> {
             (Some(albedo), Some(normal))
         }
         Err(message) => {
-            warn!("campaign terrain: parcels pack: {message}");
+            error!("campaign terrain: parcels pack: {message}");
             (None, None)
         }
     };
@@ -970,5 +970,63 @@ mod tests {
         assert!(data.micro_albedo.is_some());
         assert_eq!(data.splat.width(), 3540);
         assert_eq!(data.ab_dist.width(), 3540);
+    }
+
+    /// Manifests of the ground packs (base, and the local 2048 variant when present): every layer
+    /// has a distinct index, a mean colour that is not the pink of a missing texture, and the
+    /// variant agrees with the base on indices (lot SOL: pink patches on the campaign ground).
+    #[test]
+    fn ground_pack_manifests_have_no_missing_or_pink_layer() {
+        let root = root();
+        for rel in [
+            "art/tx_campaign_bg_pack.json",
+            "art/tx_campaign_parcels_pack.json",
+            "art/tx_micro_ground_pack.json",
+        ] {
+            let base = read_json(&root.join("data").join(rel)).unwrap();
+            let layers = base["layers"].as_array().expect(rel);
+            let mut seen = std::collections::HashSet::new();
+            for layer in layers {
+                let index = layer["layer"].as_u64().expect(rel);
+                assert!(seen.insert(index), "{rel}: layer {index} twice");
+                let m = layer["mean_linear"].as_array().expect(rel);
+                let (r, g, b) = (
+                    m[0].as_f64().unwrap(),
+                    m[1].as_f64().unwrap(),
+                    m[2].as_f64().unwrap(),
+                );
+                assert!(
+                    !(r > 1.3 * g && b > 1.3 * g),
+                    "{rel}: layer {} is pink ({r:.3} {g:.3} {b:.3})",
+                    layer["id"]
+                );
+            }
+            let hi_rel = rel.replace(".json", "_2048.json");
+            let Ok(hi) = read_json(&root.join("data").join(&hi_rel)) else {
+                continue; // local variant, not in the repository
+            };
+            for layer in hi["layers"].as_array().expect(&hi_rel) {
+                let found = layers.iter().find(|l| l["id"] == layer["id"]);
+                let found = found.unwrap_or_else(|| panic!("{hi_rel}: unknown id {}", layer["id"]));
+                assert_eq!(found["layer"], layer["layer"], "{hi_rel}: {}", layer["id"]);
+            }
+        }
+    }
+
+    /// The parcels pack must load with the regional ground, in both texture qualities (the
+    /// high one only when the local 2048 packs are present): without it the fields draw as flat
+    /// colour patches.
+    #[test]
+    fn parcels_pack_loads_in_both_qualities() {
+        let root = root();
+        let manifest = read_json(&root.join("data/art/tx_campaign_parcels_pack.json")).unwrap();
+        let count = manifest["layers"].as_array().unwrap().len() as u32;
+        for high in [false, true] {
+            let data = load_ground(&root, high).expect("regional ground");
+            let parcels = data.parcels_albedo.expect("parcels albedo");
+            assert_eq!(parcels.texture_descriptor.size.depth_or_array_layers, count);
+            assert!(data.parcels_normal.is_some());
+            assert_eq!(data.fields.tex_flags.z, 1.0, "parcels flag, high {high}");
+        }
     }
 }
