@@ -1,6 +1,6 @@
-# 0798 — ECO-R2a : la semonce féodale donne des soldats
+# XXXX — ECO-R2a : la semonce féodale donne des soldats
 
-Statut : accepté (boucle juge 2, lot ECO-R2a). Numéro provisoire : à renuméroter à la fusion si un autre lot a pris 0798.
+Statut : accepté (boucle juge 2, lot ECO-R2a). Numéro attribué à la fusion.
 
 ## Contexte
 

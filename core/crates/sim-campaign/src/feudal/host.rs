@@ -1,4 +1,4 @@
-//! ECO-R2a (ADR 0798): the feudal host gives soldiers.
+//! ECO-R2a (ADR XXXX): the feudal host gives soldiers.
 //!
 //! A vassal that answers its suzerain's summons no longer only declares the war: it raises a
 //! **contingent**, an army under its own flag whose seasonal upkeep is at most
