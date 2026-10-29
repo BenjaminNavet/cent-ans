@@ -82,10 +82,10 @@
     }
   },
   "clearings": {
-    "cell_px": 64.0,
-    "per_cell": 0.5,
+    "cell_px": 40.0,
+    "per_cell": 0.6,
     "radius_px": [
-      3.0,
+      2.5,
       5.5
     ],
     "min_forest": 0.9,
