@@ -21,3 +21,6 @@ tant qu'on n'a pas répondu. Les flags viennent de `~/Library/Application Suppor
 ## État
 Clippy vert ; smoke complet 11/11 vert avec contrôle d'état ; test `historical_launch_tests` vert ;
 `cargo test --features dev` complet : voir le rapport.
+
+## Prochaine étape (pause demandée)
+Restait : `cd client && cargo test --features dev` complet (interrompu). Déjà verts : clippy, smoke 11/11, test historical_launch_tests. Ensuite : rapport final.
