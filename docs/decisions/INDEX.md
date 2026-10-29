@@ -360,3 +360,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0797 | [Position diplomatique en bande intérieure en vue 3D (VIS-R2)](0797-vis-r2-position-diplomatique-en-bande.md) | accepté |
 | 0798 | [HIST4 : aptitude historique du conseil, monnaie par faction, contrastes par défaut](0798-hist4-conseil-monnaies-contrastes.md) | accepté |
 | 0799 | [Ciel, lumière et air de la carte de campagne (VIS-R1)](0799-vis-r1-ciel-et-lumiere-de-la-carte.md) | accepté |
+| 0800 | [BANC-1 : banc d'équilibre des batailles](0800-banc-1-banc-d-equilibre.md) | accepté |
