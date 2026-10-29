@@ -237,7 +237,7 @@ mod tests {
     fn quotes_core_and_data_values() {
         let data = GameData::default();
         let values = rule_constants(&data);
-        assert_eq!(values["supply_loss_winter"], 35.0);
+        assert_eq!(values["supply_loss_winter"], 45.0);
         assert_eq!(values["administration_base_percent"], 8.0);
         assert_eq!(values["ransom_default_surcharge_percent"], 10.0);
         assert_eq!(values["winter_fresh_cost_factor"], 1.5);

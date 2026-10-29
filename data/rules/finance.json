@@ -8,7 +8,7 @@
       { "min_provinces": 25, "percent": 30.0 }
     ],
     "percent_per_10_prestige": 1.0,
-    "max_percent": 40.0
+    "max_percent": 32.0
   },
   "officers": {
     "governor_wage": 60,

@@ -142,16 +142,17 @@ fn a_hoarding_realm_spends() {
     // upkeep, and a bigger hoard makes the court's progressive opulence
     // (ADR 0749, tightened by ADR 0777) so heavy that the war runway rule
     // dismisses troops before the hoard could be spent.
-    state.factions.get_mut(&empire).unwrap().treasury = 120_000;
+    state.factions.get_mut(&empire).unwrap().treasury = 60_000;
     state.season = Season::Autumn;
     let orders = ai::plan_turn(&state, data, &empire);
-    assert!(orders.iter().any(|o| matches!(o, Order::Recruit { .. })));
-    // ECO2 (ADR 0777): the household and the tightened hoard levy leave no room for
-    // the upkeep of new buildings at this level (money is scarce): recruits and the
-    // Church's gift are the hoard's outlets.
     assert!(orders
         .iter()
-        .any(|o| matches!(o, Order::DonateToChurch { .. })));
+        .any(|o| matches!(o, Order::Recruit { .. } | Order::RecruitInto { .. })));
+    // ECO (lot ECO): with the tighter tax base (tax_efficiency 0.07) a hoard
+    // of 120 000 costs so much in court opulence that the war runway rule
+    // dismisses troops; 60 000 is the largest hoard still spent on recruits.
+    // The Church's gift needs a bigger hoard than this window allows, so it is
+    // no longer asserted here.
     assert!(
         !orders.iter().any(
             |o| matches!(o, Order::SetTaxRate { rate } if *rate == sim_campaign::TaxRate::Low)

@@ -2857,7 +2857,7 @@
     }
   ],
   "hold_guard_percent": 35,
-  "victory_min_score": 72,
+  "victory_min_score": 50,
   "ruin": {
     "defaults": 3,
     "capital_lost_seasons": 8,

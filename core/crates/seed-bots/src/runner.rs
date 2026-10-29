@@ -185,7 +185,11 @@ fn play(
                         faction: &game.faction,
                     };
                     let mut rng = derived_rng(game.seed, turn, game.bot_index, BOT_SALT);
-                    bot.plan(&view, game.data, &mut rng)
+                    let mut orders = bot.plan(&view, game.data, &mut rng);
+                    if !matches!(bot.name(), "chaos" | "random-legal" | "mirror") {
+                        orders.extend(crate::candidates::austerity_orders(&view, game.data));
+                    }
+                    orders
                 }
                 Source::Log(log) => log.get(played_turns as usize).cloned().unwrap_or_default(),
             };
@@ -245,6 +249,17 @@ fn play(
         }
         if let Some(hook) = hook {
             hook(&mut state, turn);
+        }
+        if std::env::var("CENT_ANS_BOT_TRACE").is_ok_and(|b| b == game.bot_name) && turn % 5 == 0 {
+            let b = sim_campaign::economy::TurnBudget::compute(&state, game.data, &game.faction);
+            let treasury = state.factions.get(&game.faction).map_or(0, |f| f.treasury);
+            eprintln!(
+                "[trace {} seed {} t{}] prov={} treasury={} income={} army={} bld={} adm={} house={} wages={} siege={} obl={} int={} armies={}",
+                game.bot_name, game.seed, turn,
+                state.controlled_provinces(&game.faction).count(), treasury, b.income,
+                b.army_upkeep, b.building_upkeep, b.administration, b.household, b.wages, b.siege,
+                b.obligations, b.interest, state.faction_army_count(&game.faction)
+            );
         }
 
         let context = OracleContext {

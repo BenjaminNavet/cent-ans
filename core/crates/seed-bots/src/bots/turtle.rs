@@ -6,7 +6,7 @@ use sim_campaign::{Order, Stance};
 
 use super::draw_weighted;
 use crate::bot::Bot;
-use crate::candidates::{legal_candidates, Candidate, Family};
+use crate::candidates::{prudent_candidates, Candidate, Family};
 use crate::view::BotView;
 
 /// Defensive stances, recruits, fortifications; no march, no war.
@@ -19,7 +19,7 @@ impl Bot for Turtle {
     }
 
     fn plan(&mut self, view: &BotView, data: &GameData, rng: &mut CampaignRng) -> Vec<Order> {
-        let pool: Vec<Candidate> = legal_candidates(view, data)
+        let pool: Vec<Candidate> = prudent_candidates(view, data)
             .into_iter()
             .filter(|c| match &c.order {
                 Order::MoveArmy { .. } | Order::DeclareWar { .. } | Order::Assault { .. } => false,

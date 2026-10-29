@@ -8,7 +8,7 @@ use sim_campaign::Order;
 
 use super::{army_point, dist2, draw_weighted, moves_closer, nearest};
 use crate::bot::Bot;
-use crate::candidates::{legal_candidates, Candidate, Family};
+use crate::candidates::{prudent_candidates, Candidate, Family};
 use crate::view::BotView;
 
 /// Favours moves towards ports and every sea or river crossing.
@@ -102,7 +102,7 @@ impl Bot for Sailor {
             .filter(|(id, s)| &s.owner == view.faction && is_port(data, id))
             .filter_map(|(id, _)| data.settlement_point(id))
             .collect();
-        let mut pool = legal_candidates(view, data);
+        let mut pool = prudent_candidates(view, data);
         pool.extend(naval_candidates(view, data));
         let weight = |c: &Candidate| match &c.order {
             Order::Embark { .. } => 60,

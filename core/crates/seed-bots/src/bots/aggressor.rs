@@ -6,7 +6,7 @@ use sim_campaign::Order;
 
 use super::{draw_weighted, moves_closer};
 use crate::bot::Bot;
-use crate::candidates::{legal_candidates, Candidate, Family};
+use crate::candidates::{prudent_candidates, Candidate, Family};
 use crate::view::BotView;
 
 /// Favours military action and recruitment, declares war, never offers peace.
@@ -44,7 +44,7 @@ impl Bot for Aggressor {
 
     fn plan(&mut self, view: &BotView, data: &GameData, rng: &mut CampaignRng) -> Vec<Order> {
         let targets = enemy_points(view, data);
-        let pool: Vec<Candidate> = legal_candidates(view, data)
+        let pool: Vec<Candidate> = prudent_candidates(view, data)
             .into_iter()
             .filter(|c| {
                 !matches!(c.order, Order::ProposePeace { .. })

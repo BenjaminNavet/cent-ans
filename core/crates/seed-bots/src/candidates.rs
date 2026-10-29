@@ -72,6 +72,65 @@ pub fn legal_candidates(view: &BotView, data: &GameData) -> Vec<Candidate> {
     out
 }
 
+/// Orders of a reasonable ruler facing a structural deficit: high taxes, then
+/// one unit of the costliest army dismissed per season, until the books balance.
+/// Used by the bots that keep their books (not `chaos`, `random-legal`, `mirror`).
+pub fn austerity_orders(view: &BotView, data: &GameData) -> Vec<Order> {
+    let mut orders = Vec::new();
+    let Some(economy) = view.state.faction_economy(data, view.faction) else {
+        return orders;
+    };
+    let net = economy.net_income();
+    if net >= 0 || economy.treasury > -net * 4 {
+        return orders;
+    }
+    if view.state.factions.get(view.faction).map(|f| f.tax_rate) != Some(TaxRate::High) {
+        orders.push(Order::SetTaxRate {
+            rate: TaxRate::High,
+        });
+    }
+    let fighting = |id: &sim_campaign::ArmyId| {
+        view.state
+            .pending_battles
+            .iter()
+            .any(|b| &b.attacker == id || &b.defender == id)
+    };
+    let costliest = view
+        .state
+        .armies
+        .iter()
+        .filter(|(id, a)| &a.faction == view.faction && a.units.len() > 1 && !fighting(id))
+        .max_by_key(|(_, a)| a.units.len());
+    if let Some((id, army)) = costliest {
+        orders.push(Order::DisbandUnit {
+            army: Some(id.clone()),
+            settlement: None,
+            unit_index: army.units.len() - 1,
+        });
+    }
+    orders
+}
+
+/// [`legal_candidates`] for a bot that keeps its books: a reasonable player
+/// raises troops and starts works only while the purse can carry the
+/// season's charges. With a negative projected balance, the bot spends only
+/// from a purse worth more than eight seasons of the deficit (and 2 000 livres);
+/// otherwise it keeps a one-season reserve. `chaos` and `random-legal` stay
+/// naive on purpose (they test refusals).
+pub fn prudent_candidates(view: &BotView, data: &GameData) -> Vec<Candidate> {
+    let mut pool = legal_candidates(view, data);
+    let Some(economy) = view.state.faction_economy(data, view.faction) else {
+        return pool;
+    };
+    let treasury = economy.treasury;
+    let net = economy.net_income();
+    let reserve = if net < 0 { (-net) * 8 + 2000 } else { 1000 };
+    if treasury < reserve || net < 500 {
+        pool.retain(|c| !matches!(c.order, Order::Recruit { .. } | Order::Build { .. }));
+    }
+    pool
+}
+
 fn push(out: &mut Vec<Candidate>, family: Family, order: Order) {
     out.push(Candidate { order, family });
 }
