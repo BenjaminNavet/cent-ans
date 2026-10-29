@@ -1,6 +1,6 @@
 # Lot ECO (boucle juge 2, itération 1)
 
-État : terminé, en attente de fusion. ADR : `docs/decisions/XXXX-eco-economie-attrition-reserve.md` (à numéroter).
+État : terminé, en attente de fusion. ADR : `docs/decisions/0793-economie-attrition-reserve.md` (à numéroter).
 
 Fait : army_refs (purge des batailles en attente + garde fusion/garnison + test) ; économie resserrée ; attrition hors
 territoire ami ; réserve de recrutement exposée (`game_api::hud::recruit_reserve`, `RecruitReserveView`) ; bots prudents

@@ -1,4 +1,4 @@
-# XXXX — ECO : économie resserrée, attrition hors territoire, réserve de recrutement
+# 0793 — ECO : économie resserrée, attrition hors territoire, réserve de recrutement
 
 Statut : accepté (29/10/2026). Numéro à fixer à la fusion.
 
