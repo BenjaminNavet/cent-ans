@@ -10,9 +10,10 @@ Branche `worktree-agent-acc0be412a5869b78`, base main 6a601816a. Rapports : `out
 5. Conseiller par faction : `speakers` / `default_speaker` dans `data/voice/advisor.json` (France : Pierre Roger, archevêque de Rouen ; Hainaut : Jean le Bel ; sinon « Un clerc de votre conseil »). Seul le sous-titre change, la voix synthétisée reste la même.
 6. Contrastes : `INK_FADED` assombri (3,6:1 -> ~5,6:1 sur parchemin) ; sous-titre de « Continuer » plus clair et droit ; menu principal sans le cartouche « Cent Ans » cuit dans l'image (fond `menu_map_plain.jpg`).
 7. Typographie : 114 apostrophes droites converties (`tools/typo_apostrophes.py`) ; « Abu l-Hasan » partout ; bundle du codex régénéré.
-8. Domaine : `DomainPercent` n'affiche plus « 1000 % » au tour 0 (départ = domaine courant tant que non enregistré). Prestige : le champ `prestige` des fichiers factions était ignoré, il initialise maintenant le prestige du souverain (`init_ruler_prestige`). Objectifs d'acte « acquis à conserver » non cochés (`held`) donc plus de « 4 réussis » au tour 0.
+8. Domaine : `DomainPercent` n'affiche plus « 1000 % » au tour 0 (départ = domaine courant tant que non enregistré). Objectifs d'acte « acquis à conserver » non cochés (`held`) donc plus de « 4 réussis » au tour 0.
 
 ## Infirmé / reporté
+- Prestige 90 (data) contre 0 (HUD) : confirmé, le champ `prestige` des fichiers factions n'est lu nulle part. Le brancher sur le souverain (essayé) change le comportement de l'IA (test `recruits_join_a_small_army...` casse) : décision d'équilibrage, reportée.
 - `text_scale 0.9` : défaut réel 1.0 (code et settings), pas de changement.
 - Carte du choix de faction sans noms ni légende : la survol + la liste de noms existent déjà ; étiquettes sur carte reportées (fonction).
 - « Edimbourg » du fond de menu et cartouche : texte cuit dans `menu_map.jpg` (script `tools/cent_ans_tools/menu_art.py`), non régénéré.
