@@ -364,3 +364,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0801 | [XP-LISIBLE : plancher typographique, glossaire testé, signes à l’encre](0801-xp-lisible-plancher-glossaire-signes.md) | accepté |
 | 0802 | [IA-CAV : charge groupée de la cavalerie (boucle juge 2)](0802-iacav-charge-groupee-cavalerie.md) | accepté |
 | 0803 | [VIS-R6b : lieux génériques de la famille « ouest » refaits en Meshy meshy-6](0803-vis-r6-lieux-generiques-meshy.md) | accepté |
+| 0804 | [Végétation de plaine (VIS-R7)](0804-vis-r7-vegetation-de-plaine.md) | accepté |

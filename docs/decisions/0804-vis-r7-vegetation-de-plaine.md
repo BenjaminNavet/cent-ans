@@ -1,4 +1,4 @@
-# XXXX — Végétation de plaine (VIS-R7)
+# 0804 — Végétation de plaine (VIS-R7)
 
 Numéro attribué à la fusion. Amende les ADR 0161 (arbres généralisés), 0710 (« une forêt se lit comme une masse sombre ») et
 0770 ; reprend le constat G2-7 de `docs/audits/2026-10-29-visuel-campagne.md` (refonte R7).

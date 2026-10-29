@@ -1,6 +1,6 @@
 # VIS-R7 — végétation de plaine
 
-Spec : `docs/audits/2026-10-29-visuel-campagne.md` table (d) R7, constat G2-7. ADR : `docs/decisions/XXXX-vis-r7-vegetation-de-plaine.md`.
+Spec : `docs/audits/2026-10-29-visuel-campagne.md` table (d) R7, constat G2-7. ADR : `docs/decisions/0804-vis-r7-vegetation-de-plaine.md`.
 
 ## État
 Fait : arbres isolés coupés au-delà de d 150 ; bosquets 0,5 → 0,1 ; `forest_masses.value_lift` (teinte seulement) ; canopée
