@@ -8,6 +8,7 @@
 # directory, since the app starts in /.
 #        --window (opt-in)  do not pass --offscreen (default: --offscreen, muted, LSUIElement app)
 # Env: CENT_ANS_MUTE=1 by default.
+#      CENT_ANS_REAL_PREFS=1  use the real player files (default: throw-away prefs, saves, settings, codex).
 #        --visible-window   development: real window shown, rendering to the swapchain even with
 #                           --script/--shot (shot = Bevy Screenshot::primary_window); the bundle then
 #                           drops LSBackgroundOnly so the window is really composited. The window
@@ -91,6 +92,18 @@ while (( $# )); do
 done
 
 (( offscreen )) && args+=(--offscreen)
+
+# Agent runs never touch the player's files in ~/Library/Application Support/Cent Ans/ (settings,
+# codex discoveries, prefs, saves, replays): each one lives in a throw-away folder unless the
+# variable is already set. CENT_ANS_REAL_PREFS=1 opts out (a deliberate test of the real files).
+if [[ -z ${CENT_ANS_REAL_PREFS:-} ]]; then
+	sandbox=$(mktemp -d -t cent_ans_prefs)
+	trap 'rm -rf "$sandbox"' EXIT
+	export CENT_ANS_PREFS=${CENT_ANS_PREFS:-$sandbox}
+	export CENT_ANS_SAVES=${CENT_ANS_SAVES:-$sandbox/saves}
+	export CENT_ANS_REPLAYS=${CENT_ANS_REPLAYS:-$sandbox/replays}
+	export CENT_ANS_SETTINGS_PATH=${CENT_ANS_SETTINGS_PATH:-$sandbox/settings.json}
+fi
 
 # `open` does not forward the shell environment: pass every CENT_ANS_* variable explicitly.
 env_args=()
