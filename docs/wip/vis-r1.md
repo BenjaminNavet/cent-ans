@@ -5,7 +5,7 @@ PAUSE demandée par le joueur : rien n'a été compilé ni mesuré ; tout ce qui
 
 ## État : TERMINÉ (reste la fusion)
 Tout est compilé, clippy et tests verts (client 1514 tests dont shader_check, core workspace, pytest schémas).
-Repli retenu : dôme dégradé (Atmosphere exige Hdr, non mesuré). ADR : `docs/decisions/XXXX-vis-r1-ciel-et-lumiere-de-la-carte.md` (numéro à la fusion).
+Repli retenu : dôme dégradé (Atmosphere exige Hdr, non mesuré). ADR : `docs/decisions/0799-vis-r1-ciel-et-lumiere-de-la-carte.md` (numéro à la fusion).
 Mesures (clair, 1280x800, scripts scratchpad visr1/) :
 - crit.1 camp_0060 : teinte 100, sat 0,22, val 0,47 (cibles 82-106 / >=0,22 / 0,38-0,55). d 25 : sat 0,21 (limite).
 - crit.2 bande haute B-R : +0,11 à d 25 et d 60 (>= 0,08).
