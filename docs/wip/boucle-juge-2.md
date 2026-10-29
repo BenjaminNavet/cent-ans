@@ -18,6 +18,7 @@ Ne pas modifier main pendant que les juges tournent (run_bg.sh recompile depuis 
 ## Itérations
 | # | Majeurs | Corrigés | fps Ultra (carte / bataille) | Commit |
 |---|---------|----------|------------------------------|--------|
+| 1 | Berlin (fichier oublié), arcs longs, cavalerie, économie, provinces qui fondent, damier rose, forêt, mémoire 7-12 Go, mêlée 59 fps | 7 lots fusionnés (DATA, BATDA, SOL, TEXTES, COMBAT 0792, ECO 0793, MEM 0794) + illustration mérinide | mêlée 59 (inchangé), mémoire bataille 6,5 → 3,6 Go, campagne repos 6,2 → 5,4 Go | 59c0047de |
 
 ## Meshy
 | Date | Asset | Crédits | Reste |
@@ -42,3 +43,12 @@ Ne pas modifier main pendant que les juges tournent (run_bg.sh recompile depuis 
 | DATA | haiku | valley_courses schéma, ids names_*, couverture des schémas, war_horn, filtre bus lointain | tech |
 Reportés à l'itération 2 : tutoriel (recrutement/siège/bataille), illustration d'Abu al-Hasan (Z-Image), Hainaut 1337, date de départ.
 ADR : les lots nomment `docs/decisions/XXXX-<lot>-titre.md`, numérotés à la fusion (dernier : 0790).
+
+### Restes pour l'itération 2
+- IA de bataille : charge de cavalerie groupée (les chevaliers ne battent pas les arcs longs, ADR 0792), approche encore longue, fixture auto_resolve à régénérer, chevaliers contre hommes d'armes en marche (4 contre 231).
+- fps mêlée 59 < 60 : voile volumétrique `step_count` 64 → 40-48, préchauffage des pipelines pendant le voile de chargement (pics de 350-1100 ms).
+- Mémoire campagne : 3 Go non comptés par Metal (ADR 0794).
+- Prestige de faction non lu (le brancher change l'IA) ; réserve de recrutement à afficher (`game_api::hud::recruit_reserve`) ; seuil de victoire 50 à valider.
+- Tutoriel : recrutement, siège, bataille, ravitaillement.
+- Bataille : plaques de régiments ennemis en grappe sur l'horizon ; barre du haut tronquée à 1280 px.
+- « Edimbourg » cuit dans menu_map.jpg ; Hainaut 1337 ; date de départ.
