@@ -51,8 +51,58 @@ pub struct VisibilityTier {
     pub min_rank: HashMap<String, u8>,
 }
 
+/// Horizon fade of the world plates (`horizon` of `settlement_markers.json`): a plate whose
+/// anchor lies farther from the camera than `range_ratio` x the zoom distance (at least
+/// `min_range`) shrinks away over the last `fade_fraction` of that range; the strategic zoom
+/// keeps every plate. `range_ratio` 0 disables the rule.
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq)]
+pub struct HorizonRule {
+    #[serde(default)]
+    pub range_ratio: f32,
+    #[serde(default)]
+    pub min_range: f32,
+    #[serde(default = "default_horizon_fade")]
+    pub fade_fraction: f32,
+}
+
+fn default_horizon_fade() -> f32 {
+    0.3
+}
+
+impl Default for HorizonRule {
+    fn default() -> Self {
+        Self {
+            range_ratio: 0.0,
+            min_range: 0.0,
+            fade_fraction: default_horizon_fade(),
+        }
+    }
+}
+
+impl HorizonRule {
+    /// Opacity 0..1 of a plate at `anchor_distance` from the eye when the zoom (rig) distance is
+    /// `rig_distance` and the strategic tier weight is `strategic` (1 = overview, no fade).
+    pub fn opacity(&self, anchor_distance: f32, rig_distance: f32, strategic: f32) -> f32 {
+        if self.range_ratio <= 0.0 {
+            return 1.0;
+        }
+        let limit = (self.range_ratio * rig_distance).max(self.min_range);
+        let start = limit * (1.0 - self.fade_fraction.clamp(0.0, 1.0));
+        let t = if limit <= start {
+            f32::from(anchor_distance >= limit)
+        } else {
+            ((anchor_distance - start) / (limit - start)).clamp(0.0, 1.0)
+        };
+        let fade = 1.0 - t * t * (3.0 - 2.0 * t);
+        fade.max(strategic.clamp(0.0, 1.0))
+    }
+}
+
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct MarkerCatalog {
+    /// Horizon fade of the plates (absent = none).
+    #[serde(default)]
+    pub horizon: HorizonRule,
     #[serde(default)]
     pub rank_rules: Vec<RankRule>,
     #[serde(default = "one")]
@@ -414,6 +464,41 @@ mod tests {
             ]
         }))
         .unwrap()
+    }
+
+    #[test]
+    fn horizon_fades_far_plates_but_keeps_near_and_strategic_ones() {
+        let rule = HorizonRule {
+            range_ratio: 8.0,
+            min_range: 40.0,
+            fade_fraction: 0.25,
+        };
+        // Zoom distance 60: limit 480, fade from 360.
+        assert_eq!(rule.opacity(100.0, 60.0, 0.0), 1.0);
+        assert_eq!(rule.opacity(360.0, 60.0, 0.0), 1.0);
+        let mid = rule.opacity(420.0, 60.0, 0.0);
+        assert!(mid > 0.0 && mid < 1.0);
+        assert_eq!(rule.opacity(480.0, 60.0, 0.0), 0.0);
+        assert_eq!(rule.opacity(5000.0, 60.0, 0.0), 0.0);
+        // Monotonic.
+        assert!(rule.opacity(400.0, 60.0, 0.0) > rule.opacity(450.0, 60.0, 0.0));
+        // The overview keeps everything.
+        assert_eq!(rule.opacity(5000.0, 1500.0, 1.0), 1.0);
+        assert_eq!(rule.opacity(5000.0, 60.0, 1.0), 1.0);
+        // The floor protects very close views.
+        assert_eq!(rule.opacity(30.0, 1.0, 0.0), 1.0);
+        // Disabled rule.
+        assert_eq!(HorizonRule::default().opacity(1.0e6, 10.0, 0.0), 1.0);
+    }
+
+    #[test]
+    fn real_data_declares_the_horizon_rule() {
+        let Ok(root) = crate::paths::find_root() else {
+            return;
+        };
+        let text = std::fs::read_to_string(root.join("data/map/settlement_markers.json")).unwrap();
+        let catalog: MarkerCatalog = serde_json::from_str(&text).unwrap();
+        assert!(catalog.horizon.range_ratio > 0.0);
     }
 
     #[test]

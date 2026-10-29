@@ -504,7 +504,7 @@ pub fn screen_rect(
 pub fn update_plates(
     camera: Query<(&Camera, &GlobalTransform), With<Camera3d>>,
     markers: Query<(&ArmyMarker, &Transform)>,
-    mut plates: Query<(&ArmyPlate, &mut Node, &mut Visibility)>,
+    mut plates: Query<(&ArmyPlate, &mut Node, &mut Visibility, &mut UiTransform)>,
     hovered: Res<HoveredArmy>,
     selected: Res<SelectedArmy>,
     mut borders: Query<(&ArmyPlate, &mut BorderColor)>,
@@ -516,10 +516,18 @@ pub fn update_plates(
     mut stats: ResMut<PlateStats>,
     palette: Option<Res<crate::settings::palette::Palette>>,
     ui_scale: Res<UiScale>,
+    (places, zoom): (
+        Option<Res<Places>>,
+        Option<Res<crate::campaign::camera::zoom::ZoomView>>,
+    ),
 ) {
     let Some((camera, camera_transform)) = camera.iter().next() else {
         return;
     };
+    // Horizon fade (settlement_markers.json `horizon`): far plates shrink away.
+    let horizon = places.map(|p| p.catalog.horizon).unwrap_or_default();
+    let (rig_distance, strategic) = zoom.map_or((0.0, 1.0), |z| (z.distance, z.strategic));
+    let mut fades: HashMap<ArmyId, f32> = HashMap::new();
     let viewport = camera
         .logical_viewport_rect()
         .unwrap_or(Rect::new(0.0, 0.0, 1.0e5, 1.0e5));
@@ -539,7 +547,7 @@ pub fn update_plates(
     let mut anchors: HashMap<ArmyId, Rect> = HashMap::new();
     let by_id: HashMap<&ArmyId, (&ArmyMarker, &Transform)> =
         markers.iter().map(|(m, t)| (&m.id, (m, t))).collect();
-    for (plate, _, _) in &plates {
+    for (plate, _, _, _) in &plates {
         let Some(&(marker, transform)) = by_id.get(&plate.id) else {
             continue;
         };
@@ -551,6 +559,15 @@ pub fn update_plates(
             continue;
         };
         let screen = viewport_to_ui(screen, &ui_scale);
+        let opacity = if is_selected {
+            1.0
+        } else {
+            horizon.opacity(anchor_distance, rig_distance, strategic)
+        };
+        if opacity <= 0.02 {
+            continue;
+        }
+        fades.insert(plate.id.clone(), opacity);
         if !shown_area.contains(screen)
             || too_far_for_close_view(
                 camera_dist,
@@ -613,9 +630,13 @@ pub fn update_plates(
     let offsets = cache.offsets.clone();
     stats.visible = anchors.len();
     stats.displaced = offsets.values().filter(|o| **o != Vec2::ZERO).count();
-    for (plate, mut node, mut visibility) in &mut plates {
+    for (plate, mut node, mut visibility, mut ui_transform) in &mut plates {
         match anchors.get(&plate.id) {
             Some(base) => {
+                let scale = Vec2::splat(fades.get(&plate.id).copied().unwrap_or(1.0).max(0.001));
+                if ui_transform.scale != scale {
+                    ui_transform.scale = scale;
+                }
                 let offset = offsets.get(plate.id.as_str()).copied().unwrap_or_default();
                 let left = Val::Px(base.min.x + offset.x);
                 let top = Val::Px(base.min.y + offset.y);

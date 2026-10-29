@@ -23,6 +23,18 @@
       "required": ["border", "occupant_scale", "occupant_overlap"],
       "additionalProperties": false
     },
+    "horizon": {
+      "type": "object",
+      "description": "Fondu d'horizon des plaques (villes, armées) : une plaque dont l'ancre est plus loin de la caméra que range_ratio x la distance de zoom (au moins min_range) rétrécit puis disparaît sur les derniers fade_fraction de cette portée ; le dézoom stratégique garde toutes les plaques.",
+      "properties": {
+        "description": {"type": "string"},
+        "range_ratio": {"type": "number", "minimum": 0, "description": "Portée en multiples de la distance de zoom ; 0 = règle désactivée."},
+        "min_range": {"type": "number", "minimum": 0, "description": "Portée minimale (unités de carte)."},
+        "fade_fraction": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part finale de la portée où la plaque s'efface."}
+      },
+      "required": ["range_ratio", "min_range", "fade_fraction"],
+      "additionalProperties": false
+    },
     "rank_rules": {
       "type": "array",
       "description": "Règles de rang, la première qui s'applique l'emporte ; sinon `default_rank`.",

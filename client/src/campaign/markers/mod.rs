@@ -1193,13 +1193,20 @@ fn update_labels(
     pins: Res<Pins>,
     ground: GroundHeight,
     mut labels: Query<
-        (&PlaceLabel, &mut Node, &mut Visibility, &ComputedNode),
+        (
+            &PlaceLabel,
+            &mut Node,
+            &mut Visibility,
+            &ComputedNode,
+            &mut UiTransform,
+        ),
         Without<LabelShield>,
     >,
     plates: Query<(&Name, &Node, &Visibility), Without<PlaceLabel>>,
     mut stats: ResMut<MarkerStats>,
     mut name_obstacles: ResMut<crate::campaign::provinces::RegionLabelObstacles>,
     ui_scale: Res<UiScale>,
+    zoom: Option<Res<crate::campaign::camera::zoom::ZoomView>>,
 ) {
     let Some((camera, cam_t)) = camera.iter().next() else {
         return;
@@ -1236,7 +1243,9 @@ fn update_labels(
         }
     }
     let mut shown = 0;
-    for (label, node, vis, computed) in &mut entries {
+    let horizon = places.catalog.horizon;
+    let (rig_distance, strategic) = zoom.map_or((0.0, 1.0), |z| (z.distance, z.strategic));
+    for (label, node, vis, computed, ui_transform) in &mut entries {
         let p = &places.places[label.index];
         let world = placement::px_to_world(p.px, ground_y(&ground, p.px));
         let pinned = pins.indices.contains(&label.index);
@@ -1246,7 +1255,19 @@ fn update_labels(
             places.catalog.visible_until(&p.kind, p.rank)
         };
         let mut hide = true;
-        if eye.distance(world) <= limit
+        // Horizon fade: a far plate shrinks away instead of lining up under the sky.
+        let eye_distance = eye.distance(world);
+        let opacity = if pinned {
+            1.0
+        } else {
+            horizon.opacity(eye_distance, rig_distance, strategic)
+        };
+        let scale = Vec2::splat(opacity.max(0.001));
+        if ui_transform.scale != scale {
+            ui_transform.scale = scale;
+        }
+        if eye_distance <= limit
+            && opacity > 0.02
             && let Ok(screen) = camera.world_to_viewport(cam_t, world)
         {
             let screen = viewport_to_ui(screen, &ui_scale);

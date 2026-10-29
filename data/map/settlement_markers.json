@@ -183,5 +183,11 @@
     "occupant_scale": 0.62,
     "occupant_overlap": 0.45,
     "parchment_pennant_units": 1.1
+  },
+  "horizon": {
+    "description": "Lot PLAQUES-HORIZON : depuis la caméra basse (ADR 0799) les plaques de villes et d’armées lointaines s’alignaient le long de l’horizon. Une plaque dont l’ancre est plus loin de la caméra que range_ratio x la distance de zoom (au moins min_range, unités de carte) rétrécit puis disparaît sur les derniers fade_fraction de cette portée ; le dézoom stratégique (poids du palier) garde toutes les plaques. Le lieu épinglé (capitale, sélection) n’est jamais atténué.",
+    "range_ratio": 8.0,
+    "min_range": 60.0,
+    "fade_fraction": 0.3
   }
 }
