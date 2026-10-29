@@ -270,15 +270,18 @@ fn reign_score_moves_until_1453() {
     state.end_turn_with(data, idle);
     assert_eq!(state.acts.current, 2);
     assert!(state.outcome.is_none(), "no victory before 1453");
-    let before = state.reign_score(data);
-    for _ in 0..3 {
+    // A twin campaign without the battles: the same seasons, the same pressures.
+    let mut twin = state.clone();
+    for _ in 0..8 {
         state.stats.battles_won += 2;
         state.end_turn_with(data, idle);
+        twin.end_turn_with(data, idle);
     }
     assert!(state.outcome.is_none());
     assert!(
-        state.reign_score(data) > before,
-        "the third act still counts"
+        state.reign_score(data) > twin.reign_score(data),
+        "the third act still counts: {:?}",
+        state.renown_recent(12)
     );
     state.year = 1454;
     state.end_turn_with(data, idle);

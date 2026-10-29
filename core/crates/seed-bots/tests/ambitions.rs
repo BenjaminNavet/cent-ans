@@ -9,9 +9,11 @@ use std::collections::BTreeMap;
 use seed_bots::timeline::{self, ProbeConfig, Profile};
 
 const TURNS: u32 = 40;
-const FIGURES: [&str; 4] = [
+const FIGURES: [&str; 6] = [
     "treasury_end",
+    "treasury_mean",
     "prestige_end",
+    "prestige_mean",
     "field_men_mean",
     "provinces_end",
 ];

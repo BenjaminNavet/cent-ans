@@ -12,7 +12,7 @@
       "closing": {
         "year": "Brétigny (1360) clôt la querelle : une paix de papier, un royaume saigné."
       },
-      "renown_target": 60,
+      "renown_target": 80,
       "pressures": [
         {
           "id": "pr1_crown",
@@ -71,7 +71,7 @@
       "closing": {
         "year": "Azincourt (1415) : la chevalerie française gît dans la boue, le royaume est à genoux."
       },
-      "renown_target": 80,
+      "renown_target": 120,
       "pressures": [
         {
           "id": "pr2_wise",
@@ -96,7 +96,7 @@
       "closing": {
         "year": "Castillon (1453) : la guerre de Cent Ans s'achève ; l'histoire retient ce que le règne a tenu."
       },
-      "renown_target": 80,
+      "renown_target": 120,
       "pressures": [
         {
           "id": "pr3_reconquest",
@@ -3248,12 +3248,12 @@
           "effects": [
             {
               "effect": "army_upkeep",
-              "value": -20,
+              "value": -30,
               "mode": "percent"
             },
             {
               "effect": "army_experience",
-              "value": 5
+              "value": 10
             },
             {
               "effect": "tax_income",
@@ -3300,11 +3300,16 @@
           "effects": [
             {
               "effect": "prestige",
-              "value": 40
+              "value": 80
             },
             {
               "effect": "unrest",
               "value": -3
+            },
+            {
+              "effect": "tax_income",
+              "value": 8,
+              "mode": "percent"
             }
           ],
           "renown_bonus_percent": 50,
@@ -3321,7 +3326,7 @@
           "effects": [
             {
               "effect": "trade_income",
-              "value": 10,
+              "value": 25,
               "mode": "percent"
             },
             {
@@ -3777,18 +3782,17 @@
           "effects": [
             {
               "effect": "recruit_cost",
-              "value": -20,
+              "value": -30,
               "mode": "percent"
             },
             {
               "effect": "army_upkeep",
-              "value": -10,
+              "value": -25,
               "mode": "percent"
             },
             {
-              "effect": "tax_income",
-              "value": -5,
-              "mode": "percent"
+              "effect": "recruit_slots",
+              "value": 1
             }
           ],
           "renown_bonus_percent": 50,
@@ -3832,11 +3836,16 @@
           "effects": [
             {
               "effect": "prestige",
-              "value": 40
+              "value": 80
             },
             {
               "effect": "unrest",
               "value": -2
+            },
+            {
+              "effect": "trade_income",
+              "value": 10,
+              "mode": "percent"
             }
           ],
           "renown_bonus_percent": 50,
@@ -3857,7 +3866,7 @@
             },
             {
               "effect": "trade_income",
-              "value": 5,
+              "value": 25,
               "mode": "percent"
             }
           ],
@@ -3900,18 +3909,17 @@
           "effects": [
             {
               "effect": "recruit_cost",
-              "value": -20,
+              "value": -30,
               "mode": "percent"
             },
             {
               "effect": "army_upkeep",
-              "value": -10,
+              "value": -25,
               "mode": "percent"
             },
             {
-              "effect": "tax_income",
-              "value": -5,
-              "mode": "percent"
+              "effect": "recruit_slots",
+              "value": 1
             }
           ],
           "renown_bonus_percent": 50,

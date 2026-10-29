@@ -436,6 +436,11 @@ impl Timeline {
             "provinces_end",
             f64::from(self.rows.last().map_or(0, |r| r.player_provinces)),
         );
+        let mean = |value: &dyn Fn(&YearRow) -> f64| {
+            self.rows.iter().map(value).sum::<f64>() / self.rows.len().max(1) as f64
+        };
+        out.insert("treasury_mean", mean(&|r| r.player_treasury as f64));
+        out.insert("prestige_mean", mean(&|r| f64::from(r.player_prestige)));
         out.insert(
             "field_men_mean",
             self.rows.iter().map(|r| f64::from(r.player_men)).sum::<f64>()
