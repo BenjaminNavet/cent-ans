@@ -23,6 +23,7 @@ Ne pas modifier main pendant que les juges tournent (run_bg.sh recompile depuis 
 ## Meshy
 | Date | Asset | Crédits | Reste |
 |------|-------|---------|-------|
+| 29/10 | village_west, castle_west, town_west, abbey_west (meshy-6 texturé, VIS-R6) | 120 | 25 |
 
 ## État / prochaine étape
 29/10 : intégration des modifs non commitées de main (sélection des armées plus tolérante), puis itération 1.
