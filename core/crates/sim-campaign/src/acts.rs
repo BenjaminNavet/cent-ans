@@ -523,12 +523,23 @@ impl CampaignState {
 
     /// Score (0-100) of act `index`: its bilan once over, else its renown over its target.
     fn act_score(&self, rules: &ActsRules, index: usize) -> u32 {
+        self.act_score_signed(rules, index).max(0) as u32
+    }
+
+    /// Signed act score (-100 to 100): an act whose renown is negative weighs on the reign score,
+    /// so that losses keep moving it (R1-1: the reign score never freezes at an act's floor).
+    fn act_score_signed(&self, rules: &ActsRules, index: usize) -> i64 {
         let act = &rules.acts[index];
+        let target = i64::from(act.renown_target.max(1));
         if let Some(report) = self.acts.reports.iter().find(|r| r.act_id == act.id) {
-            return report.score;
+            // Reports of older saves carry no renown: their score stands.
+            return if report.renown < 0 {
+                (i64::from(report.renown) * 100 / target).max(-100)
+            } else {
+                i64::from(report.score)
+            };
         }
-        let target = i64::from(act.renown_target.max(1)) * MILLI;
-        (self.act_renown_milli(&act.id) * 100 / target).clamp(0, 100) as u32
+        (self.act_renown_milli(&act.id) * 100 / (target * MILLI)).clamp(-100, 100)
     }
 
     /// Live status of the act in progress, or of the last one once all are over.
@@ -615,19 +626,19 @@ impl CampaignState {
         (data.acts_rules.ambitions_to_choose as usize).saturating_sub(self.acts.ambitions.len())
     }
 
-    /// Reign score (0-100): the scores of the three acts weighted by their weight. It accumulates
-    /// with the renown and moves until the end of the last act (R1-1).
+    /// Reign score (0-100): the signed scores of the three acts weighted by their weight. It
+    /// accumulates with the renown and moves until the end of the last act (R1-1).
     pub fn reign_score(&self, data: &GameData) -> u32 {
         let rules = &data.acts_rules;
         if !rules.enabled() {
             return 0;
         }
-        let (mut weighted, mut total) = (0u64, 0u64);
+        let (mut weighted, mut total) = (0i64, 0i64);
         for (index, act) in rules.acts.iter().enumerate() {
-            weighted += u64::from(act.weight) * u64::from(self.act_score(rules, index));
-            total += u64::from(act.weight);
+            weighted += i64::from(act.weight) * self.act_score_signed(rules, index);
+            total += i64::from(act.weight);
         }
-        (weighted / total.max(1)).min(100) as u32
+        (weighted / total.max(1)).clamp(0, 100) as u32
     }
 
     /// R1-1: the renown of the house, every act together (the gauge the interface shows).

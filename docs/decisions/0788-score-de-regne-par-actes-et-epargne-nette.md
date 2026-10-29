@@ -1,6 +1,6 @@
 # ADR 0788 — Score de règne : des actes, pas l'attente ; épargne dormante nette des dettes
 
-Date : 2026-10-24. Statut : accepté (lot GAMEPLAY2). Amende les ADR 0784/0785 (acte, score) et 0749 (ponction du trésor dormant).
+Date : 2026-10-24. Statut : accepté (lot GAMEPLAY2) ; § 1 remplacé par l’ADR XXXX (renommée). Amende les ADR 0784/0785 (acte, score) et 0749 (ponction du trésor dormant).
 Source : juge game design it. 4 (`out/juge/iter-04-design.md`, constats C1, C2, C4).
 
 ## Contexte

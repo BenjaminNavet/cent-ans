@@ -1,6 +1,6 @@
 # 0785 — Victoire par score de règne (amende 0245)
 
-Statut : accepté (lot ACTES, 24/10/2026). Amende l'ADR 0245 (victoire féodale générique).
+Statut : remplacé par l’ADR XXXX (R1, renommée et ambitions). Était : accepté (lot ACTES, 24/10/2026). Amende l'ADR 0245 (victoire féodale générique).
 
 ## Contexte
 

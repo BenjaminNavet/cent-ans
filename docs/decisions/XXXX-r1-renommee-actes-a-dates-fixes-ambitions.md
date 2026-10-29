@@ -23,8 +23,10 @@ simulation. Le joueur n'a pas de raison de jouer chaque saison jusqu'en 1453.
    rempli**, et la rend s'il est reperdu. Un objectif déjà rempli au début de la campagne est un acquis : il ne rapporte
    rien, sa perte coûte autant (à partir de l'ouverture de son acte). Un objectif d'un acte futur rempli tôt est crédité
    tôt. Les pressions ajoutent ou retirent leurs points tant qu'elles tiennent pendant leur acte. Plus de `base = 100`.
-4. **Scores.** Score d'acte = renommée de l'acte / `renown_target` (borné 0-100) ; figé à la clôture. Score de règne =
-   moyenne pondérée des trois actes (poids de 0784), qui bouge jusqu'en 1453. La victoire n'est jugée qu'à la fin
+4. **Scores.** Score d'acte = renommée de l'acte / `renown_target` (affiché borné 0-100) ; figé à la clôture. Score de
+   règne = moyenne pondérée des trois actes (poids de 0784), avec un score d'acte **signé** (-100 à 100) : un acte dont
+   la renommée est négative pèse sur le règne, sinon le score se figerait au plancher d'un acte malheureux. Le total
+   est borné 0-100 et bouge jusqu'en 1453. La victoire n'est jugée qu'à la fin
    (1453, ou fin de campagne courte) ; aucune victoire avant.
 5. **Ambitions** (remplacent les politiques, 0785). Quatre par acte et par maison écrite (France, Angleterre, Bourgogne ;
    un jeu `default` pour les autres), deux à tenir (`ambitions_to_choose`). Une ambition a des **effets** (vocabulaire
@@ -39,7 +41,27 @@ simulation. Le joueur n'a pas de raison de jouer chaque saison jusqu'en 1453.
 
 ## Mesures (sonde `campaign_timeline`, 470 tours, graines 1-3)
 
-À compléter par les chiffres avant/après (voir `docs/wip/lot-r1.md`).
+Profil IA : France, Angleterre et Bourgogne × 3 graines (9 parties). Profil passif : France × 3. « Avant » = sonde et
+données à 95b504043 ; « après » = cette refonte (cibles 80/120/120, seuil 43).
+
+| Mesure | Avant | Après |
+|---|---|---|
+| `score_frozen_years`, IA (médiane ; max) | 63 ; 90 | 0 ; 11 |
+| Ouverture de l'acte II (IA) | 1349-1361 | 1361 (9/9) |
+| Ouverture de l'acte III (IA) | 1364-1416 | 1416 (9/9) |
+| Score de règne final, passif | 16, 16, 17 | 0, 0, 0 |
+| Score de règne final, IA (médiane ; étendue) | 15 ; 1-53 | 28 ; 3-73 |
+| Victoires IA avant 1453 | 0 | 0 |
+| Victoires IA en 1454 (au seuil) | 1/9 (seuil 50) | 3/9 (seuil 43) |
+
+- **Seuil** : médiane IA 28 + 15 = **43**.
+- **Écarts.**
+  - Le passif reste au plancher 0, si bien que `score_frozen_years` y est grand : le score ne descend pas sous 0.
+  - Une partie IA (France, graine 2) reste figée 11 ans. La maison n'a alors plus d'armée et vit en paix : rien ne se
+    passe, ce qui relève de l'IA (R5) et non de la règle.
+- **Ambitions** (test `seed-bots/tests/ambitions.rs`) : chacune des 36 ambitions écrites déplace d'au moins 10 % une
+  grandeur de la sonde sur 40 tours (trésor, prestige, effectifs, provinces). Sept ambitions trop faibles, des copies
+  des anciennes pondérations, ont été renforcées.
 
 ## Conséquences
 

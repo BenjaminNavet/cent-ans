@@ -3256,9 +3256,13 @@
               "value": 10
             },
             {
-              "effect": "tax_income",
-              "value": -5,
+              "effect": "recruit_cost",
+              "value": -25,
               "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
             }
           ],
           "renown_bonus_percent": 50,
@@ -3308,7 +3312,7 @@
             },
             {
               "effect": "tax_income",
-              "value": 8,
+              "value": 15,
               "mode": "percent"
             }
           ],
@@ -3844,7 +3848,7 @@
             },
             {
               "effect": "trade_income",
-              "value": 10,
+              "value": 25,
               "mode": "percent"
             }
           ],
@@ -4026,7 +4030,7 @@
       "text": "Les chroniqueurs en feront un modèle pour les siècles."
     }
   ],
-  "victory_min_score": 50,
+  "victory_min_score": 43,
   "ruin": {
     "defaults": 3,
     "capital_lost_seasons": 8,
