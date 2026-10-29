@@ -354,6 +354,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0791 | [Sol de campagne : aspect provisoire avant le chargement du sol texturé](0791-sol-aspect-provisoire-avant-chargement.md) | accepté |
 | 0792 | [Combat : rééquilibrage du tir (lot COMBAT, boucle juge 1)](0792-equilibrage-tir-et-choc.md) | accepté |
 | 0793 | [ECO : économie resserrée, attrition hors territoire, réserve de recrutement](0793-economie-attrition-reserve.md) | accepté |
-| 0796 | [Mémoire de campagne : textures de modèles BC1 en assets neufs, mesure avec relief](0796-mem-textures-de-modeles-en-assets-neufs.md) | accepté |
-| 0796 | [Mémoire de campagne : textures de modèles BC1 en assets neufs, mesure avec relief](0794-textures-de-modeles-en-assets-neufs.md) | accepté |
 | 0794 | [Mémoire de campagne : textures de modèles BC1 en assets neufs, mesure avec relief](0794-textures-de-modeles-en-assets-neufs.md) | accepté |
