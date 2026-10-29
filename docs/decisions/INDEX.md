@@ -356,3 +356,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0793 | [ECO : économie resserrée, attrition hors territoire, réserve de recrutement](0793-economie-attrition-reserve.md) | accepté |
 | 0796 | [Mémoire de campagne : textures de modèles BC1 en assets neufs, mesure avec relief](0796-mem-textures-de-modeles-en-assets-neufs.md) | accepté |
 | 0796 | [Mémoire de campagne : textures de modèles BC1 en assets neufs, mesure avec relief](0794-textures-de-modeles-en-assets-neufs.md) | accepté |
+| 0794 | [Mémoire de campagne : textures de modèles BC1 en assets neufs, mesure avec relief](0794-textures-de-modeles-en-assets-neufs.md) | accepté |
