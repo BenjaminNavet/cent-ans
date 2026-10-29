@@ -170,7 +170,7 @@ fn an_extraordinary_tax_pays_at_once_angers_the_provinces_and_has_a_cooldown() {
         )
         .unwrap();
     let gross = state.faction_income(data, &france);
-    assert_eq!(state.factions[&france].treasury, before + gross / 2);
+    assert_eq!(state.factions[&france].treasury, before + (gross + 1) / 2);
     assert!(finance::finance_unrest(&state, &france) > 0.0);
     assert!(
         state
@@ -193,7 +193,10 @@ fn an_extraordinary_tax_pays_at_once_angers_the_provinces_and_has_a_cooldown() {
         )
         .is_err());
     state.end_turn_with(data, idle);
-    assert_eq!(state.factions[&france].last_budget.levy_income, gross / 2);
+    assert_eq!(
+        state.factions[&france].last_budget.levy_income,
+        (gross + 1) / 2
+    );
     // The levy is in the journal of causes, with its cause.
     assert!(state
         .cause_journal()

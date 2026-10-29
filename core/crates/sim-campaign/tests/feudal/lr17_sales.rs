@@ -63,6 +63,12 @@ fn a_title_sale_takes_the_capital_and_absorbs_the_seller() {
     let mut state = start(data, "fac_england", 2);
     state.chronicle.disabled = true;
     let reval = data_model::ProvinceId::new("prov_harrien_wierland").unwrap();
+    // Lot ECO: the leaner starting treasuries no longer cover the 6 000 livres price.
+    state
+        .factions
+        .get_mut(&fac("fac_teutonic"))
+        .unwrap()
+        .treasury = 20_000;
     let teutonic = treasury(&state, "fac_teutonic");
     // A plain province transfer refuses the capital of the seller.
     apply(

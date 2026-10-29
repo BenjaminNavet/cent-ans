@@ -29,7 +29,7 @@ fn new_1337_matches_game_data() {
     assert_eq!(state.player_faction(), &fac("fac_france"));
 
     let france_state = state.faction_state(&fac("fac_france")).unwrap();
-    assert_eq!(france_state.treasury, 28_000);
+    assert_eq!(france_state.treasury, 16_000);
     assert!(france_state.at_war_with.contains(&fac("fac_england")));
     assert!(france_state.allies.contains(&fac("fac_scotland")));
     // ADR 0114: the feudal tie of Burgundy stands for an alliance.
