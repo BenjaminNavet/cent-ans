@@ -363,3 +363,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0800 | [BANC-1 : banc d'équilibre des batailles](0800-banc-1-banc-d-equilibre.md) | accepté |
 | 0801 | [XP-LISIBLE : plancher typographique, glossaire testé, signes à l’encre](0801-xp-lisible-plancher-glossaire-signes.md) | accepté |
 | 0802 | [IA-CAV : charge groupée de la cavalerie (boucle juge 2)](0802-iacav-charge-groupee-cavalerie.md) | accepté |
+| 0803 | [VIS-R6b : lieux génériques de la famille « ouest » refaits en Meshy meshy-6](0803-vis-r6-lieux-generiques-meshy.md) | accepté |

@@ -5,7 +5,7 @@
   `settlement_maquette`, 30 000 / 10 000 / 3 000 triangles, texture 2048) ; manifeste versionné, glb dans le paquet de
   release (non republié).
 - Densité village 900 → 350 ; `landmark_clearance` / `landmark_min_factor` (la grosse maquette cède) ; `tints` régionales.
-- ADR 0800. Captures dans le scratchpad de la session (3 : Wissant d 90, camp d 300, Paris d 25).
+- ADR 0803. Captures dans le scratchpad de la session (3 : Wissant d 90, camp d 300, Paris d 25).
 
 ## Reste / points ouverts
 - La plaque « Saint-Denis » chevauche encore la cathédrale à d 25 : c'est une projection d'interface, pas une collision de
