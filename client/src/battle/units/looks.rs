@@ -116,11 +116,11 @@ pub struct SoldierLook {
 impl Default for SoldierLook {
     fn default() -> Self {
         Self {
-            desaturation: 0.5,
-            value_min: 0.5,
-            value_max: 0.78,
+            desaturation: 0.3,
+            value_min: 0.68,
+            value_max: 0.95,
             plain_boost: 1.35,
-            far_glow: 0.1,
+            far_glow: 0.18,
             grain: 0.16,
             grain_fade_m: 60.0,
             variation: 0.18,

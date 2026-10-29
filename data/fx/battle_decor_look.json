@@ -60,7 +60,7 @@
     "max_trees": 90000,
     "impostor_from_m": [300.0, 400.0],
     "impostor_tile_m": 160.0,
-    "tints": [[0.26, 0.28, 0.25], [0.32, 0.34, 0.3], [0.38, 0.4, 0.34]],
+    "tints": [[0.30, 0.33, 0.26], [0.40, 0.42, 0.31], [0.50, 0.48, 0.34]],
     "thresholds": {"plains": 0.26, "heath": 0.36, "bocage": 0.16, "forest": 0.02, "hills": 0.2, "mountains": 0.18, "marsh": 0.38}
   },
   "orchard": {"step_m": 6.5, "dead_share": 0.06, "margin_m": 3.0},
