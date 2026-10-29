@@ -1,11 +1,11 @@
 {
   "_note": "Finition des soldats de bataille (VQ bsoldiers) : étoffes moins saturées, acier plus sombre, usure des boucliers, variation par soldat. Lu par client/src/battle/units/looks.rs (SoldierLook).",
   "livery": {
-    "desaturation": 0.5,
-    "value_min": 0.5,
-    "value_max": 0.78,
+    "desaturation": 0.3,
+    "value_min": 0.68,
+    "value_max": 0.95,
     "plain_boost": 1.35,
-    "far_glow": 0.1
+    "far_glow": 0.18
   },
   "fabric": {
     "grain": 0.16,
@@ -21,6 +21,11 @@
   "steel": {
     "grey_mix": 0.45,
     "darken": 0.9
+  },
+  "banner": {
+    "scale_per_m": 0.02,
+    "scale_min": 1.0,
+    "scale_max": 9.0
   },
   "battle_lod_impostor_m": 300.0
 }

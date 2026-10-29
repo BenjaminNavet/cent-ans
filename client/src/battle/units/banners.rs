@@ -38,7 +38,8 @@ const WAVE_DISTANCE: f32 = 700.0;
 
 /// Banner scale for a camera distance (`_banner_scale`).
 pub fn banner_scale(camera_distance: f32) -> f32 {
-    (camera_distance * 0.014).clamp(0.8, 9.0)
+    let look = super::looks::SoldierLook::bundled();
+    (camera_distance * look.banner_per_m).clamp(look.banner_min, look.banner_max)
 }
 
 /// Counters of the banner layer (dump section `battle_banners`).
@@ -559,9 +560,10 @@ mod tests {
 
     #[test]
     fn scale_follows_camera_distance_within_bounds() {
-        assert_eq!(banner_scale(10.0), 0.8);
-        assert!((banner_scale(100.0) - 1.4).abs() < 1e-6);
-        assert_eq!(banner_scale(5000.0), 9.0);
+        let look = super::super::looks::SoldierLook::bundled();
+        assert_eq!(banner_scale(0.0), look.banner_min);
+        assert!((banner_scale(100.0) - 100.0 * look.banner_per_m).abs() < 1e-6);
+        assert_eq!(banner_scale(50_000.0), look.banner_max);
     }
 
     #[test]

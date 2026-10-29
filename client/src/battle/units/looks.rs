@@ -107,6 +107,10 @@ pub struct SoldierLook {
     /// Share of the steel albedo pulled to a cold grey, and its darkening.
     pub steel_grey_mix: f32,
     pub steel_darken: f32,
+    /// Regiment banner scale: per metre of camera distance, and its bounds.
+    pub banner_per_m: f32,
+    pub banner_min: f32,
+    pub banner_max: f32,
 }
 
 impl Default for SoldierLook {
@@ -124,6 +128,9 @@ impl Default for SoldierLook {
             skin_calm: 0.5,
             steel_grey_mix: 0.45,
             steel_darken: 0.9,
+            banner_per_m: 0.02,
+            banner_min: 1.0,
+            banner_max: 9.0,
         }
     }
 }
@@ -153,6 +160,9 @@ impl SoldierLook {
         set(&mut look.steel_grey_mix, "steel", "grey_mix");
         set(&mut look.steel_darken, "steel", "darken");
         set(&mut look.grain_fade_m, "fabric", "grain_fade_m");
+        set(&mut look.banner_per_m, "banner", "scale_per_m");
+        set(&mut look.banner_min, "banner", "scale_min");
+        set(&mut look.banner_max, "banner", "scale_max");
         look
     }
 

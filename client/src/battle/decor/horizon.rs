@@ -730,6 +730,7 @@ fn build_skyline(relief: &RealRelief, look: &DecorLook, weather: Weather) -> (Me
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::RENDER_WORLD,
     )
+    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, vec![[0.0, 1.0, 0.0]; positions.len()])
     .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
     .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
     .with_inserted_indices(Indices::U32(indices));
@@ -755,6 +756,7 @@ fn dome_mesh(look: &DecorLook, weather: Weather, to_sun: Vec3) -> Mesh {
     let radius = look.sky.dome_radius_m;
     let (rows, columns) = (24usize, 48usize);
     let mut positions = Vec::new();
+    let mut normals = Vec::new();
     let mut colors = Vec::new();
     let mut indices = Vec::new();
     for r in 0..=rows {
@@ -764,6 +766,8 @@ fn dome_mesh(look: &DecorLook, weather: Weather, to_sun: Vec3) -> Mesh {
             let a = TAU * c as f32 / columns as f32;
             let dir = Vec3::new(e.cos() * a.sin(), e.sin(), -e.cos() * a.cos());
             positions.push((dir * radius).to_array());
+            // Unlit, but the SSAO normal prepass reads normals: inward, towards the viewer.
+            normals.push((-dir).to_array());
             colors.push(sky_vertex_colour(look, weather, dir, to_sun));
         }
     }
@@ -779,6 +783,7 @@ fn dome_mesh(look: &DecorLook, weather: Weather, to_sun: Vec3) -> Mesh {
         RenderAssetUsages::RENDER_WORLD,
     )
     .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
     .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
     .with_inserted_indices(Indices::U32(indices))
 }
