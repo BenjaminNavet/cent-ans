@@ -27,8 +27,9 @@ fn offers_of_the_eight_houses_are_proportionate_at_1337() {
         let might = house_might(&state, &state.player_faction);
         let before = probe_offers(&state, &data, false);
         let after = probe_offers(&state, &data, true);
-        let too_big =
-            |o: &sim_campaign::mission_scale::OfferProbe| f64::from(o.required_men) > f64::from(might.men) * margin;
+        let too_big = |o: &sim_campaign::mission_scale::OfferProbe| {
+            f64::from(o.required_men) > f64::from(might.men) * margin
+        };
         let disproportionate_before = before.iter().filter(|o| too_big(o)).count();
         eprintln!(
             "{house}: men {} gold {} offers {} -> {} (conquests too big before: {disproportionate_before})",
@@ -46,7 +47,8 @@ fn offers_of_the_eight_houses_are_proportionate_at_1337() {
                 might.men
             );
             assert!(
-                f64::from(offer.levy_units * offer.levy_unit_cost) <= might.gold as f64 * share + 1.0,
+                f64::from(offer.levy_units * offer.levy_unit_cost)
+                    <= might.gold as f64 * share + 1.0,
                 "{house}: levy {} unaffordable",
                 offer.template
             );

@@ -80,7 +80,8 @@ pub(crate) fn within_might(
         (MissionGoal::Control, _) => {
             men >= scale.min_men_for_conquest
                 && province.is_none_or(|p| {
-                    f64::from(target_force(state, p)) <= f64::from(men) * scale.max_target_force_ratio
+                    f64::from(target_force(state, p))
+                        <= f64::from(men) * scale.max_target_force_ratio
                 })
         }
         (MissionGoal::Count, Some(MissionCounter::BattleWon)) => men >= scale.min_men_for_battle,

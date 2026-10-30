@@ -636,14 +636,7 @@ fn offer_mission(
         .collect();
     let mut grudge_pool = grudges::candidates(state, data);
     grudge_pool.retain(|(_, m)| {
-        mission_scale::within_might(
-            state,
-            data,
-            player,
-            m.goal,
-            m.counter,
-            m.province.as_ref(),
-        )
+        mission_scale::within_might(state, data, player, m.goal, m.counter, m.province.as_ref())
     });
     let mut rng = mission_rng(state.seed, turn);
     let mut built = Vec::new();
@@ -748,7 +741,11 @@ fn build_mission(
 
 /// Faction missions go to their faction only, once, and chained ones after
 /// their predecessor succeeded.
-pub(crate) fn template_open(state: &CampaignState, player: &FactionId, template: &MissionTemplate) -> bool {
+pub(crate) fn template_open(
+    state: &CampaignState,
+    player: &FactionId,
+    template: &MissionTemplate,
+) -> bool {
     if template.faction.as_ref().is_some_and(|f| f != player) {
         return false;
     }
