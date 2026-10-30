@@ -69,6 +69,23 @@ struct SeasonParams {
     forest_floor: vec4<f32>,
     // x frequency (1 / map px), y strength, z sharpening.
     patches: vec4<f32>,
+    // VIS-R4 (`mountain`): x, y tree line (m) south / north, z, w map-height fractions of the north-south fade.
+    mt_line: vec4<f32>,
+    // x slope forest start (m), y alpine meadow thickness (m), z scree transition (m), w sunny-face shift (m).
+    mt_band: vec4<f32>,
+    // x displayed-normal y under which the forest stops, y, z full / no scree, w pattern frequency (1 / map px).
+    mt_slope: vec4<f32>,
+    // x stage-limit jitter (m), y, z altitude (m) where the snow leaves the plain grey / is white.
+    mt_edge: vec4<f32>,
+    // rgb colour, a strength.
+    mt_forest: vec4<f32>,
+    mt_alpage: vec4<f32>,
+    mt_scree: vec4<f32>,
+    // rgb alpine snow in the sun / in the shade.
+    mt_snow_sun: vec4<f32>,
+    mt_snow_shade: vec4<f32>,
+    // rgb: moorland colour of the northern alpine meadow.
+    mt_moor: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(3) var<uniform> season: SeasonParams;
@@ -384,6 +401,8 @@ struct SnowCover {
     grain: f32,
     // EAU (ADR 0750): share of forest canopy under the cover (frosted, not buried).
     frost: f32,
+    // VIS-R4: 0 plain grey snow .. 1 white alpine snow (by altitude).
+    alpine: f32,
 };
 
 // Multi-scale patch noise of the snow (x, 0..1), its fine octaves fading with the footprint, and
@@ -423,6 +442,7 @@ fn snow_cover_of(c: f32, noise: vec2<f32>, flat_y: f32) -> SnowCover {
         * smoothstep(season.snow_mask.z - 0.15, season.snow_mask.z + 0.05, flat_y);
     out.grain = noise.y;
     out.frost = 0.0;
+    out.alpine = 0.0;
     return out;
 }
 
@@ -454,22 +474,70 @@ fn season_snow(disp_y: f32, altitude: f32, xz: vec2<f32>, footprint: f32, forest
     c = c * mix(1.0, season.snow_shade.a, forest);
     var cover = snow_cover_of(c, pn, disp_y);
     cover.frost = forest;
+    cover.alpine = alpine_share(altitude);
     return cover;
 }
 
 // Snow colour: warm in the sun, cold and bluish in the shade (`lit` = n.l x sun visibility),
 // never pure white; the grain of the patches varies it slightly.
-fn snow_tint(lit: f32, grain: f32) -> vec3<f32> {
+fn snow_tint(lit: f32, grain: f32, alpine: f32) -> vec3<f32> {
     let k = smoothstep(0.05, 0.7, lit);
-    return mix(season.snow_shade.rgb, season.snow_color.rgb, k) * (0.86 + 0.24 * grain);
+    let sun_c = mix(season.snow_color.rgb, season.mt_snow_sun.rgb, alpine);
+    let shade_c = mix(season.snow_shade.rgb, season.mt_snow_shade.rgb, alpine);
+    return mix(shade_c, sun_c, k) * (0.9 + 0.16 * grain);
+}
+
+// VIS-R4 (ADR 0820): share of white alpine snow by altitude (the plain keeps its grey).
+fn alpine_share(altitude: f32) -> f32 {
+    let t = clamp((altitude - season.mt_edge.y) / max(season.mt_edge.z - season.mt_edge.y, 1.0), 0.0, 1.0);
+    return t * t * (3.0 - 2.0 * t);
 }
 
 fn snow_apply(col: vec3<f32>, cover: SnowCover, lit: f32) -> vec3<f32> {
     var out = mix(col, season.mud.rgb * (0.85 + 0.3 * cover.grain), cover.mud * 0.85);
     // EAU: under a forest the snow is a frost: greyer, bluer, and the canopy texture shows through.
     let frost_tint = vec3<f32>(0.80, 0.86, 0.95);
-    let tint = snow_tint(lit, cover.grain) * mix(vec3<f32>(1.0), frost_tint, cover.frost);
+    let tint = snow_tint(lit, cover.grain, cover.alpine) * mix(vec3<f32>(1.0), frost_tint, cover.frost);
     return mix(out, tint, cover.snow * (1.0 - 0.28 * cover.frost));
+}
+
+// VIS-R4 (ADR 0820): stages of the mountain by real altitude and exposure, ALU only. Slope forest
+// (conifers, in patches) up to the tree line, alpine meadow (moorland in the north) above it, scree
+// on the steeper ground higher up; the bare rock of the steep faces and the snow come after.
+// The tree line falls towards the north of the map and on the shaded faces.
+fn mountain_stages(col: vec3<f32>, p: vec2<f32>, disp_y: f32, altitude: f32, footprint: f32,
+        forest: f32, n_xz: vec2<f32>, land: f32) -> vec3<f32> {
+    let pattern_f = season.mt_slope.w;
+    if (pattern_f <= 0.0 || altitude < season.mt_band.x) {
+        return col;
+    }
+    let height = params.map.y;
+    let south = smoothstep(season.mt_line.z * height, season.mt_line.w * height, p.y);
+    // The horizontal normal points to where the face looks: +y (south) is the sunny face.
+    let aspect = clamp(n_xz.y * 4.0, -1.0, 1.0);
+    let large = vnoise(p * pattern_f);
+    let fine = mix(0.5, vnoise(p * pattern_f * 6.3 + vec2<f32>(7.1, 2.9)), 1.0 - smoothstep(0.3, 1.5, footprint));
+    let tree = mix(season.mt_line.y, season.mt_line.x, south) + aspect * season.mt_band.w
+        + (large - 0.5) * 2.0 * season.mt_edge.x;
+    let flat_k = disp_y;
+    let alp_w = season.mt_band.y;
+    let patches = smoothstep(0.3, 0.55, mix(large, fine, 0.45));
+    let forest_k = smoothstep(season.mt_band.x, season.mt_band.x + 250.0, altitude)
+        * (1.0 - smoothstep(tree - 300.0, tree, altitude))
+        * smoothstep(season.mt_slope.x - 0.1, season.mt_slope.x + 0.1, flat_k)
+        * patches * season.mt_forest.a * (1.0 - forest);
+    let meadow_k = smoothstep(tree - 120.0, tree + 120.0, altitude)
+        * (1.0 - smoothstep(tree + alp_w - 250.0, tree + alp_w, altitude))
+        * smoothstep(season.mt_slope.y, season.mt_slope.z, flat_k) * season.mt_alpage.a;
+    let steep_k = 1.0 - smoothstep(season.mt_slope.y, season.mt_slope.z, flat_k);
+    let scree_k = smoothstep(tree + alp_w - season.mt_band.z * 0.5, tree + alp_w + season.mt_band.z * 0.5, altitude)
+        * mix(0.55, 1.0, steep_k) * season.mt_scree.a;
+    let grain = 0.85 + 0.3 * fine;
+    let meadow_col = mix(season.mt_alpage.rgb, season.mt_moor.rgb, 1.0 - south);
+    var out = mix(col, season.mt_forest.rgb * grain, forest_k * land);
+    out = mix(out, meadow_col * (0.9 + 0.2 * fine), meadow_k * land);
+    out = mix(out, season.mt_scree.rgb * grain, scree_k * land);
+    return out;
 }
 
 // TS-T1 dark rock of the heights and of the steep displayed slopes: grey-brown, strata, lighter
@@ -683,8 +751,8 @@ fn fw_glacier_apply(col: vec3<f32>, p: vec2<f32>, hc: f32, slope: f32, footprint
     // Névé: white patches below the glacier line, cut by the noise.
     let patch_n = vnoise(p * 0.35) * 0.6 + vnoise(p * 1.3) * 0.4;
     let neve = smoothstep(g.x - 500.0, g.x + 150.0, alt) * smoothstep(0.35, 0.6, patch_n + 0.12) * flat_k;
-    let neve_col = snow_tint(lit, patch_n) * extras.glacier.neve.rgb / max(luma(extras.glacier.neve.rgb), 0.1);
-    var out = mix(col, neve_col * luma(season.snow_color.rgb), neve * 0.8 * g.w * land);
+    let neve_col = snow_tint(lit, patch_n, 1.0) * extras.glacier.neve.rgb / max(luma(extras.glacier.neve.rgb), 0.1);
+    var out = mix(col, neve_col, neve * 0.8 * g.w * land);
     // Glacier: blue-white tongue with crevasses, on gentle slopes above the line.
     let ice = smoothstep(g.x, g.y, alt) * flat_k;
     if (ice > 0.01) {
@@ -2743,6 +2811,7 @@ fn fragment(in: Varyings) -> @location(0) vec4<f32> {
         }
     }
     let land_g = smoothstep(0.0, 2.0, in.altitude);
+    albedo = mountain_stages(albedo, in.world.xz, disp_y, in.altitude, ground_footprint, forest_f, n.xz, land_g);
     albedo = rock_apply(albedo, in.world.xz, disp_y, in.altitude, ground_footprint, lit0, crest * land_g, forest_f);
     let cover = season_snow(disp_y, in.altitude, in.world.xz, ground_footprint, forest_f, n.xz);
     albedo = season_ground(albedo, cover, lit0);

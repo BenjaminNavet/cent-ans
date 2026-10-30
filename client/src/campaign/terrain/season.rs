@@ -48,6 +48,30 @@ pub struct SeasonParams {
     pub forest_floor: Vec4,
     /// x: frequency (1 / map px) of the soil patches, y: strength, z: sharpening, w: highest opacity of the cast shadows on the ground (TS-T9; 1 = no cap).
     pub patches: Vec4,
+    /// VIS-R4 (`mountain`): x, y: tree line (m) in the south / north of the map, z, w: fractions of
+    /// the map height where it goes from the north value to the south one.
+    pub mt_line: Vec4,
+    /// x: altitude (m) where the slope forest starts, y: alpine meadow thickness (m), z: scree
+    /// thickness (m), w: sunny / shaded face shift of the limits (m).
+    pub mt_band: Vec4,
+    /// x: displayed-normal `y` under which the slope forest stops, y, z: displayed-normal `y` of
+    /// full / no scree, w: patch frequency (1 / map px) of the forest and meadow patterns.
+    pub mt_slope: Vec4,
+    /// x: jitter of the stage limits (m), y: altitude (m) where the snow leaves the plain grey,
+    /// z: where it is fully white, w: unused.
+    pub mt_edge: Vec4,
+    /// rgb: slope forest colour, a: strength.
+    pub mt_forest: Vec4,
+    /// rgb: alpine meadow colour, a: strength.
+    pub mt_alpage: Vec4,
+    /// rgb: scree colour, a: strength.
+    pub mt_scree: Vec4,
+    /// rgb: sunlit alpine snow, a: unused.
+    pub mt_snow_sun: Vec4,
+    /// rgb: shaded alpine snow, a: unused.
+    pub mt_snow_shade: Vec4,
+    /// rgb: moorland colour of the alpine meadow in the north of the map, a: unused.
+    pub mt_moor: Vec4,
 }
 
 impl Default for SeasonParams {
@@ -68,6 +92,16 @@ impl Default for SeasonParams {
             rock_light: Vec4::ZERO,
             forest_floor: Vec4::new(1.0, 1.0, 1.0, 0.0),
             patches: Vec4::new(0.0, 0.0, 0.0, 1.0),
+            mt_line: Vec4::new(1.0e6, 1.0e6, 0.0, 1.0),
+            mt_band: Vec4::new(0.0, 0.0, 0.0, 0.0),
+            mt_slope: Vec4::new(0.55, 0.5, 0.85, 0.0),
+            mt_edge: Vec4::new(0.0, 1.0e6, 1.0e6, 0.0),
+            mt_forest: Vec4::ZERO,
+            mt_alpage: Vec4::ZERO,
+            mt_scree: Vec4::ZERO,
+            mt_snow_sun: Vec4::new(0.86, 0.88, 0.92, 0.0),
+            mt_snow_shade: Vec4::new(0.86, 0.88, 0.92, 0.0),
+            mt_moor: Vec4::ZERO,
         }
     }
 }
@@ -162,11 +196,61 @@ impl SeasonParams {
             num(&look["patch_sharpen"], 1.0),
             num(&look["shadow_max_opacity"], 1.0).clamp(0.0, 1.0),
         );
+        out.read_mountain(&data["mountain"]);
         let ground = &data["ground"];
         out.summer_gold = vec3_of(ground.get("summer_gold"), Vec3::ONE).extend(0.0);
         out.winter_ground = vec3_of(ground.get("winter_ground_tint"), Vec3::ONE)
             .extend(ground["winter_ground_desat"].as_f64().unwrap_or(0.0) as f32);
         out
+    }
+}
+
+impl SeasonParams {
+    /// VIS-R4: the `mountain` block (stages by altitude and exposure, alpine snow). A missing block
+    /// leaves the neutral defaults (no stage, the plain snow colour everywhere).
+    fn read_mountain(&mut self, mountain: &Value) {
+        if !mountain.is_object() {
+            return;
+        }
+        let num = |v: &Value, fallback: f32| v.as_f64().map_or(fallback, |x| x as f32);
+        let pair = |v: &Value, fallback: Vec2| match v.as_array() {
+            Some(a) if a.len() >= 2 => Vec2::new(num(&a[0], fallback.x), num(&a[1], fallback.y)),
+            _ => fallback,
+        };
+        let line = pair(&mountain["tree_line_m"], Vec2::new(1.0e6, 1.0e6));
+        let fade = pair(&mountain["tree_line_north_fade"], Vec2::new(0.0, 1.0));
+        self.mt_line = Vec4::new(line.x, line.y, fade.x, fade.y);
+        self.mt_band = Vec4::new(
+            num(&mountain["forest_from_m"], 0.0),
+            num(&mountain["alpage_width_m"], 0.0),
+            num(&mountain["scree_width_m"], 0.0),
+            num(&mountain["aspect_shift_m"], 0.0),
+        );
+        let scree = pair(&mountain["scree_normal"], Vec2::new(0.5, 0.85));
+        self.mt_slope = Vec4::new(
+            num(&mountain["forest_min_normal"], 0.55),
+            scree.x,
+            scree.y,
+            num(&mountain["pattern_frequency"], 0.0),
+        );
+        let stage = |v: &Value, current: Vec4| {
+            vec3_of(v.get("color"), current.truncate()).extend(num(&v["strength"], current.w))
+        };
+        self.mt_forest = stage(&mountain["forest"], self.mt_forest);
+        self.mt_alpage = stage(&mountain["alpage"], self.mt_alpage);
+        self.mt_scree = stage(&mountain["scree"], self.mt_scree);
+        self.mt_moor = vec3_of(mountain["alpage"].get("north_color"), self.mt_alpage.truncate())
+            .extend(0.0);
+        let snow = &mountain["snow"];
+        self.mt_edge = Vec4::new(
+            num(&mountain["edge_jitter_m"], 0.0),
+            num(&snow["alpine_from_m"], 1.0e6),
+            num(&snow["alpine_full_m"], 1.0e6),
+            0.0,
+        );
+        self.mt_snow_sun = vec3_of(snow.get("sun_color"), self.mt_snow_sun.truncate()).extend(0.0);
+        self.mt_snow_shade =
+            vec3_of(snow.get("shade_color"), self.mt_snow_shade.truncate()).extend(0.0);
     }
 }
 

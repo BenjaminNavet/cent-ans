@@ -107,6 +107,50 @@
         }
       }
     },
+    "mountain": {
+      "description": "VIS-R4 (ADR 0820) : étagement de la montagne (forêt de pente, alpage, éboulis) et neige d'altitude blanche.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tree_line_m", "tree_line_north_fade", "aspect_shift_m", "edge_jitter_m", "pattern_frequency", "forest_from_m", "alpage_width_m", "scree_width_m", "forest_min_normal", "scree_normal", "forest", "alpage", "scree", "snow"],
+      "properties": {
+        "description": {"type": "string"},
+        "tree_line_m": {"description": "Limite des arbres (m) au sud de la carte, puis au nord.", "type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0}},
+        "tree_line_north_fade": {"description": "Fractions de la hauteur de carte où la limite des arbres passe du nord au sud.", "type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+        "aspect_shift_m": {"description": "Relèvement (m) des limites sur un adret, abaissement sur un ubac.", "type": "number", "minimum": 0},
+        "edge_jitter_m": {"description": "Irrégularité (m) des limites d'étage.", "type": "number", "minimum": 0},
+        "pattern_frequency": {"description": "Fréquence (1 / px carte) des taches de forêt et d'alpage.", "type": "number", "minimum": 0},
+        "forest_from_m": {"description": "Altitude (m) où commence la forêt de pente.", "type": "number", "minimum": 0},
+        "alpage_width_m": {"description": "Épaisseur (m) de l'alpage au-dessus de la limite des arbres.", "type": "number", "minimum": 0},
+        "scree_width_m": {"description": "Épaisseur (m) de l'éboulis au-dessus de l'alpage.", "type": "number", "minimum": 0},
+        "forest_min_normal": {"description": "Composante verticale de la normale affichée sous laquelle la forêt de pente disparaît.", "type": "number", "minimum": 0, "maximum": 1},
+        "scree_normal": {"description": "Composante verticale de la normale affichée : éboulis plein (pente) / absent (replat, où le sol reste en pelouse).", "type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+        "forest": {"$ref": "#/$defs/stage"},
+        "alpage": {
+          "description": "Alpage : couleur au sud de la carte, `north_color` (lande brun-violet) au nord, force du mélange.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["color", "north_color", "strength"],
+          "properties": {
+            "color": {"$ref": "#/$defs/rgb"},
+            "north_color": {"$ref": "#/$defs/rgb"},
+            "strength": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        },
+        "scree": {"$ref": "#/$defs/stage"},
+        "snow": {
+          "description": "Neige d'altitude : blanche, la règle « jamais blanc pur » ne vaut que pour la plaine (ADR 0820).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["alpine_from_m", "alpine_full_m", "sun_color", "shade_color"],
+          "properties": {
+            "alpine_from_m": {"description": "Altitude (m) où la neige quitte le gris de plaine.", "type": "number", "minimum": 0},
+            "alpine_full_m": {"description": "Altitude (m) où la neige est pleinement blanche.", "type": "number", "minimum": 0},
+            "sun_color": {"$ref": "#/$defs/rgb"},
+            "shade_color": {"$ref": "#/$defs/rgb"}
+          }
+        }
+      }
+    },
     "ground_look": {
       "description": "TS-T1 : aspect du sol de campagne (roche des hauteurs, sol des forêts, taches de sols).",
       "type": "object",
@@ -187,6 +231,16 @@
     }
   },
   "$defs": {
+    "stage": {
+      "description": "Étage de la montagne : couleur albédo et force du mélange (0..1).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["color", "strength"],
+      "properties": {
+        "color": {"$ref": "#/$defs/rgb"},
+        "strength": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
     "rgb2": {
       "type": "array",
       "items": {

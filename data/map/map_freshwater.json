@@ -91,10 +91,10 @@
     {"id": "morecambe", "name": "Traversée des sables de Morecambe", "lonlat": [-2.85, 54.17], "width_m": 8000}
   ],
   "glacier": {
-    "line_m": 2600.0,
-    "full_m": 3100.0,
-    "max_slope": 0.62,
-    "ice_color": [0.70, 0.80, 0.88],
+    "line_m": 2450.0,
+    "full_m": 2950.0,
+    "max_slope": 0.68,
+    "ice_color": [0.74, 0.86, 0.94],
     "crevasse_color": [0.38, 0.5, 0.62]
   }
 }

@@ -148,7 +148,7 @@
       650
     ],
     "mountain_line_m": 2900,
-    "plain_share": 0.93,
+    "plain_share": 0.25,
     "region_variation": 0.18,
     "plain_color": [0.70, 0.68, 0.64],
     "shade_color": [0.55, 0.57, 0.63],
@@ -159,9 +159,31 @@
     "mud_color": [0.20, 0.13, 0.08],
     "mud_fringe": 0.1
   },
+  "mountain": {
+    "description": "VIS-R4 (ADR 0820) : étagement de la montagne par altitude réelle et exposition, neige d'altitude blanche. Altitudes en mètres, couleurs albédo sRGB (bible de palette). `tree_line_m` : limite des arbres au sud et au nord de la carte ; `tree_line_north_fade` : fractions de la hauteur de carte où elle passe du nord au sud ; `aspect_shift_m` : relèvement de toutes les limites sur un adret (abaissement sur un ubac).",
+    "tree_line_m": [2150, 650],
+    "tree_line_north_fade": [0.3, 0.62],
+    "aspect_shift_m": 220,
+    "edge_jitter_m": 180,
+    "pattern_frequency": 0.9,
+    "forest_from_m": 450,
+    "alpage_width_m": 650,
+    "scree_width_m": 500,
+    "forest_min_normal": 0.55,
+    "scree_normal": [0.5, 0.85],
+    "forest": {"color": [0.12, 0.19, 0.12], "strength": 0.75},
+    "alpage": {"color": [0.38, 0.5, 0.25], "north_color": [0.38, 0.33, 0.29], "strength": 0.7},
+    "scree": {"color": [0.5, 0.47, 0.43], "strength": 0.8},
+    "snow": {
+      "alpine_from_m": 1500,
+      "alpine_full_m": 2300,
+      "sun_color": [0.90, 0.92, 0.95],
+      "shade_color": [0.62, 0.68, 0.80]
+    }
+  },
   "ground_look": {
     "shadow_max_opacity": 0.4,
-    "rock_color": [0.11, 0.10, 0.09],
+    "rock_color": [0.42, 0.41, 0.40],
     "rock_strength": 0.75,
     "rock_normal": [0.45, 0.75],
     "rock_altitude_m": [600, 1800],
