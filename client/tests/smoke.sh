@@ -57,6 +57,7 @@ scenario_expect[campaign_audience]="audience_card=Campaign audience_rest=Campaig
 scenario_expect[codex]="codex=Codex"
 scenario_expect[faction_select]="faction_select=FactionSelect"
 scenario_expect[faction_works]="works_0=Campaign works_1=Campaign works_2=Campaign"
+scenario_expect[faction_assembly]="assembly_0=Campaign assembly_1=Campaign assembly_2=Campaign"
 scenario_expect[main_menu]="main_menu=MainMenu"
 
 # scenario -> `dump-file:section.path` pairs whose JSON value must be non-empty (XP-POURQUOI: the
@@ -64,6 +65,7 @@ scenario_expect[main_menu]="main_menu=MainMenu"
 typeset -A scenario_nonempty
 scenario_nonempty[campaign_turns]="turns_1:season_story.story.why"
 scenario_nonempty[campaign_audience]="audience_card:agenda.agenda.affairs"
+scenario_nonempty[faction_assembly]="assembly_1:assembly_panel.assemblies assembly_1:assembly_panel.forecast"
 
 # scenario -> `dump-file:section.path=N` pairs whose JSON list must hold at most N items (XP-AUDIENCE:
 # never more than three Affairs pushed at once).

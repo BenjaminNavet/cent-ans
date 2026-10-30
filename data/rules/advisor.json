@@ -12,6 +12,22 @@
       "text": "Messire, avec {treasury} livres et un solde de {balance} par saison, la caisse ne tiendra que {seasons} saison(s). Réduisez la solde, relevez l’impôt ou empruntez avant de manquer."
     },
     {
+      "id": "war_without_subsidy",
+      "kind": "danger",
+      "trigger": { "kind": "war_without_subsidy" },
+      "cooldown_seasons": 6,
+      "title": "La guerre sans subside",
+      "text": "Messire, le royaume est en guerre et aucun subside ne court. Convoquez {assembly} : les États ne consentent l’impôt que si on le leur demande, et mieux vaut le faire avant que la caisse ne soit vide."
+    },
+    {
+      "id": "promise_due",
+      "kind": "danger",
+      "trigger": { "kind": "promise_due", "within_seasons": 2 },
+      "cooldown_seasons": 2,
+      "title": "Une promesse arrive à terme",
+      "text": "Messire, vous avez promis à {assembly} : « {promise} ». L’échéance est dans {deadline} saison(s). Une promesse trahie abaisse l’humeur des États et irrite les villes."
+    },
+    {
       "id": "build_opportunity",
       "kind": "opportunity",
       "trigger": { "kind": "idle_sites", "min_sites": 3 },

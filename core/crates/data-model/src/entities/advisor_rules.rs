@@ -21,6 +21,11 @@ pub enum AdviceTrigger {
     YearEnd,
     /// The last season of the year and the act score is below `below` (an idle house).
     ActScoreLow { below: u32 },
+    /// ECO-R1d: the realm is at war, a house with assemblies has no subsidy running, no open session
+    /// and one of its assemblies can be convened (the cash will run short without consent).
+    WarWithoutSubsidy,
+    /// ECO-R1d: a promise made to an assembly falls due (a truce to sign) within `within_seasons`.
+    PromiseDue { within_seasons: u32 },
 }
 
 /// One advice of the counsellor.
@@ -35,7 +40,7 @@ pub struct Advice {
     pub cooldown_seasons: u32,
     pub title: String,
     /// Placeholders: `{sites}`, `{treasury}`, `{levy}`, `{province}`, `{seasons}`, `{act}`,
-    /// `{score}`, `{objective}`.
+    /// `{score}`, `{objective}`, `{assembly}`, `{promise}`, `{deadline}`.
     pub text: String,
 }
 

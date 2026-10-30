@@ -1,0 +1,12 @@
+{
+  "id": "cdx_parlement_angleterre",
+  "title": "Le Parlement d’Angleterre et la maltôte",
+  "category": "institution",
+  "aliases": ["Parlement d’Angleterre", "Parlement anglais", "Communes", "maltôte de la laine", "quinzième et dixième"],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Le Parlement anglais, où siègent les Lords et les Communes, vote les subsides de la couronne : quinzièmes et dixièmes sur les biens meubles, taxe sur la laine exportée, la maltôte. Au fil de la guerre, les Communes en font un contrepoids au roi.",
+  "body": "Le roi d’Angleterre n’a pas le droit de lever un impôt général sans l’accord de son Parlement. Les chevaliers des comtés et les bourgeois des villes, réunis dans les Communes, y voient le moyen de présenter leurs pétitions : on accorde l’argent si le roi répare les griefs. [[cdx_edouard_iii|Édouard III]], qui doit financer une guerre longue sur le continent, convoque le Parlement presque chaque année.\n\nLes subsides prennent deux formes principales. Les quinzièmes et dixièmes frappent les biens meubles des laïcs, un quinzième dans les campagnes et un dixième dans les villes. La taxe sur la [[cdx_laine|laine]] exportée, que ses payeurs appellent la maltôte, c’est-à-dire le « mauvais impôt », rapporte davantage encore, car la laine anglaise alimente les ateliers de [[cdx_draperie|draperie]] de Flandre. Les marchands, qui la paient, la négocient âprement : à plusieurs reprises, ils avancent l’argent au roi contre le produit de la taxe. En 1362, il est admis que la taxe sur la laine ne peut plus être fixée sans le consentement du Parlement.",
+  "gameplay": "Le Parlement est l’assemblée de la maison d’Angleterre dans le jeu : il se convoque depuis l’onglet « États » et vote un quinzième et dixième. Voir [[cdx_jeu_impot_consenti|l’impôt consenti]].",
+  "see_also": ["cdx_jeu_impot_consenti", "cdx_etats_generaux", "cdx_edouard_iii", "cdx_laine", "cdx_draperie", "cdx_jeu_impot"],
+  "sources": ["Parlement d'Angleterre", "Maltôte", "Fiscalité de l'Ancien Régime"]
+}

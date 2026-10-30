@@ -146,6 +146,38 @@ fn evaluate(
                 ]
             })
         }
+        AdviceTrigger::WarWithoutSubsidy => {
+            let rows = crate::assembly::overview(state, data, player);
+            let covered = !rows.is_empty()
+                && rows
+                    .iter()
+                    .all(|r| r.running_per_season == 0 && r.open_session.is_none());
+            let ready = rows.iter().find(|r| r.convenable.is_ok())?;
+            (covered && !ready.necessities.is_empty())
+                .then(|| vec![("assembly", ready.name.clone())])
+        }
+        AdviceTrigger::PromiseDue { within_seasons } => {
+            let rows = crate::assembly::overview(state, data, player);
+            rows.iter()
+                .flat_map(|r| r.promises.iter().map(move |p| (r, p)))
+                .filter(|(_, p)| {
+                    p.deadline >= state.turn
+                        && p.deadline <= state.turn + *within_seasons
+                        && p.deadline > 0
+                })
+                .min_by_key(|(_, p)| p.deadline)
+                .map(|(r, p)| {
+                    let name = data
+                        .assembly_rules
+                        .concession(&p.concession)
+                        .map_or_else(String::new, |c| c.name.clone());
+                    vec![
+                        ("assembly", r.name.clone()),
+                        ("promise", name),
+                        ("deadline", (p.deadline - state.turn).to_string()),
+                    ]
+                })
+        }
         AdviceTrigger::YearEnd => (state.season == Season::Winter)
             .then(|| act_values(state, data))
             .flatten(),

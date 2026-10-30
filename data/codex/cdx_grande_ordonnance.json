@@ -1,0 +1,12 @@
+{
+  "id": "cdx_grande_ordonnance",
+  "title": "La Grande Ordonnance de 1357",
+  "category": "evenement",
+  "aliases": ["ordonnance de 1357", "Grande Ordonnance de mars 1357"],
+  "era": { "from": "1357", "to": "1358" },
+  "summary": "Imposée en mars 1357 au dauphin Charles par les États de langue d’oïl, la Grande Ordonnance place les finances du royaume sous le contrôle des États, en échange d’un subside de guerre. Elle est abandonnée dès que le dauphin reprend la main.",
+  "body": "Après la capture de [[cdx_jean_ii|Jean II]] à [[cdx_poitiers|Poitiers]] en 1356, le dauphin Charles, régent, réunit les États de langue d’oïl pour obtenir de l’argent. Les États, menés par l’évêque de Laon Robert Le Coq et le prévôt des marchands [[cdx_etienne_marcel|Étienne Marcel]], posent leurs conditions : l’impôt sera levé et employé par des agents élus par eux, les États se réuniront à dates fixes sans y être convoqués, la monnaie ne sera plus manipulée, et les conseillers accusés de malversations seront chassés.\n\nCes exigences sont réunies dans l’ordonnance promulguée en mars 1357. Elle consacre le principe que l’impôt extraordinaire se négocie contre des réformes. Mais le subside voté rentre mal, les provinces se lassent, la noblesse se retire, et la radicalisation d’Étienne Marcel fait perdre au mouvement ses appuis. En 1358, le dauphin reprend le pouvoir et laisse tomber l’ordonnance.",
+  "gameplay": "La Grande Ordonnance est l’idéal des États dans le jeu : leurs concessions (élus contrôlant la maison du roi, renvoi d’un conseiller, monnaie forte) sont ce qu’ils exigent en échange d’un subside. Voir [[cdx_jeu_impot_consenti|l’impôt consenti]].",
+  "see_also": ["cdx_etats_generaux", "cdx_jeu_impot_consenti", "cdx_etienne_marcel", "cdx_poitiers", "cdx_jean_ii", "cdx_charles_v"],
+  "sources": ["États généraux (France)", "Étienne Marcel", "Grande ordonnance de 1357"]
+}

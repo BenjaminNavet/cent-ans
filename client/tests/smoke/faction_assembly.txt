@@ -1,0 +1,16 @@
+# Faction panel, « États et Parlement » tab (ECO-R1d): the Finances tab offers « Convoquer les États »
+# instead of the extraordinary taxes, the tab shows the forecast, the convocation is sent.
+state Campaign
+wait 120
+click hud:open_faction
+wait 10
+click faction:tab:finance
+wait 10
+dump out/smoke/assembly_0.json
+click faction:fin:levy_assembly
+wait 10
+dump out/smoke/assembly_1.json
+click_if faction:asm:convene:asm_etats_oil
+wait 10
+dump out/smoke/assembly_2.json
+exit
