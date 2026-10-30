@@ -32,10 +32,9 @@ choix des ambitions.
 
 ## État final
 - [x] Cœur, données, client, sonde, fumée (`campaign_attention`, `campaign_audience`), tests cœur et client verts, clippy cœur et client propres.
-- [ ] Fumée complète et seed bots rapide : voir rapport.
+- [x] Fumée complète (13 scénarios) verte ; seed bots rapide : 8 parties, 0 constat ; propriété 200 graines x 12 saisons (test `#[ignore]`) verte.
 
 ## Points ouverts
 - Conseils vocaux (`audio/advisor.rs`) et lettres scellées gardent leur canal.
 - Registre : pas de filtre par rubrique ; actions des lignes « À surveiller » minimales.
 - Critère `ui_kit.widgets.total` -20 % non atteint (-14 %).
-- Test de propriété : 3 graines x 12 saisons en test normal ; 200 graines x 12 saisons non lancé.

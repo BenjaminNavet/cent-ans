@@ -652,6 +652,37 @@ mod tests {
         }
     }
 
+    /// Spec property: never more than three Affairs, over 200 seeds x 12 seasons (a few minutes in
+    /// debug; `cargo test -p game-api agenda_budget_200 -- --ignored`).
+    #[test]
+    #[ignore = "200 seeds x 12 seasons"]
+    fn agenda_budget_200_seeds() {
+        let data = data_model::test_support::game_data();
+        let factions = ["fac_france", "fac_england", "fac_burgundy"];
+        for seed in 0..200u64 {
+            let faction = factions[(seed % 3) as usize];
+            let mut state = sim_campaign::test_support::start(data, faction, seed + 1);
+            let player = state.player_faction().clone();
+            let mut events = Vec::new();
+            for _ in 0..12 {
+                let a = agenda(data, &state, &player, &events);
+                assert!(a.affairs.len() <= data.agenda_rules.max_affairs as usize);
+                let blocking = state
+                    .decision_views(data, &player)
+                    .iter()
+                    .filter(|d| !matches!(d.presentation, data_model::EventPresentation::Map))
+                    .count();
+                if blocking > 0 {
+                    assert!(
+                        a.affairs.iter().any(|x| x.blocking),
+                        "{faction} seed {seed}"
+                    );
+                }
+                events = state.end_turn_with(data, sim_campaign::test_support::idle);
+            }
+        }
+    }
+
     #[test]
     fn a_pending_offer_is_an_affair_and_a_quiet_start_says_so() {
         let data = data_model::test_support::game_data();
