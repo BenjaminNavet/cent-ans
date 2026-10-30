@@ -2,7 +2,9 @@
 //! budget tooltip of `map_ui.gd`). Pure formatting of values computed by `game-api`.
 
 use bevy::prelude::*;
-use game_api::hud::{EconomyView, ForecastView, GaugeView, ProvinceIncome, RecruitReserveView};
+use game_api::hud::{
+    EconomyView, FigureTrend, ForecastView, GaugeView, ProvinceIncome, RecruitReserveView,
+};
 
 use crate::ui::kit::fr;
 
@@ -65,6 +67,63 @@ pub fn rubric_label(key: &str) -> &str {
         "other" => "Autres mouvements",
         other => other,
     }
+}
+
+/// XP-POURQUOI: the trend of a figure of the top bar since last season, as it opens the
+/// tooltip: the change, then the heaviest terms (three at most, `game-api` closes their sum with
+/// « Autres éléments »). Empty before the first season is resolved.
+pub fn trend_tooltip(trend: Option<&FigureTrend>, money: bool) -> String {
+    let Some((trend, delta)) = trend.and_then(|t| t.delta_since_last_season.map(|d| (t, d))) else {
+        return String::new();
+    };
+    let show = |value: i64| {
+        if money {
+            fr::signed(value)
+        } else if value == 0 {
+            "0".to_owned()
+        } else {
+            format!("{}{}", if value > 0 { "+" } else { "" }, fr::digits(value))
+        }
+    };
+    let ui = game_api::causes::ui_text;
+    let mut lines = vec![format!(
+        "[b]Depuis la saison passée :[/b] [color={}]{}[/color]",
+        hex(fr::color_of(delta)),
+        show(delta)
+    )];
+    if !trend.top_terms.is_empty() {
+        lines.push(
+            ui(if trend.terms_last_season {
+                "terms_last_season"
+            } else {
+                "terms_next_season"
+            }),
+        );
+        for term in &trend.top_terms {
+            lines.push(format!(
+                "{} : [color={}]{}[/color]",
+                term.label,
+                hex(fr::color_of(term.amount)),
+                show(term.amount)
+            ));
+        }
+    }
+    lines.join("\n") + "\n"
+}
+
+/// « ▲+1 200 » / « ▼−2 140 » after a figure: its change since last season (empty at zero or
+/// before the first season is resolved).
+pub fn past_arrow(trend: Option<&FigureTrend>) -> String {
+    match trend.and_then(|t| t.delta_since_last_season) {
+        None | Some(0) => String::new(),
+        Some(d) if d > 0 => format!(" ▲+{}", fr::digits(d)),
+        Some(d) => format!(" ▼{}{}", fr::MINUS, fr::digits(-d)),
+    }
+}
+
+/// The trend of figure `key` (`treasury`, `net_income`, `men`, `prestige`, `unrest`).
+pub fn trend_of<'a>(top: &'a game_api::TopBar, key: &str) -> Option<&'a FigureTrend> {
+    top.trends.iter().find(|t| t.figure == key)
 }
 
 /// Label of a forecast term without label of its own (`ForecastText.LABELS`).

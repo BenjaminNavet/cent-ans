@@ -41,6 +41,8 @@ impl CampaignState {
         // UI audit A3 (U3): purses before the turn, for the budget history.
         let purses = self.purses();
         let resolved_turn = self.turn;
+        // XP-POURQUOI: what the player saw, to compare with the end of the turn.
+        let baseline = crate::season_marks::Baseline::capture(self, data, &purses);
 
         // 1. The player's turn is over. His battles still pending are
         // auto-resolved first (M7).
@@ -73,6 +75,7 @@ impl CampaignState {
         crate::advisor::update(self, data, &mut events);
         self.ai_replay_finish(data);
         self.record_budget_history(&purses, resolved_turn);
+        crate::season_marks::record(self, data, baseline);
         (events, timings)
     }
 

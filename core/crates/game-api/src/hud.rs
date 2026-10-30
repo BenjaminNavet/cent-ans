@@ -43,6 +43,59 @@ pub struct TopBar {
     pub allies: Vec<String>,
     pub alive: bool,
     pub difficulty: String,
+    /// XP-POURQUOI: for each figure, its change since last season and the heaviest terms.
+    pub trends: Vec<FigureTrend>,
+}
+
+/// One term under a figure of the top bar.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct TermView {
+    pub key: String,
+    /// French label (`causes.fr.json`, or the core's own for building names).
+    pub label: String,
+    /// Signed amount in the unit of the figure.
+    pub amount: i64,
+}
+
+/// A figure of the top bar, its change since last season and what explains it (XP-POURQUOI).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct FigureTrend {
+    /// `treasury`, `net_income`, `men`, `prestige` or `unrest`.
+    pub figure: String,
+    pub current: i64,
+    /// `None` before the first turn is resolved, or for a faction that is not the player's.
+    pub delta_since_last_season: Option<i64>,
+    /// Three terms at most, heaviest first (`top_terms`, `others` closes the sum).
+    pub top_terms: Vec<TermView>,
+    /// `true`: the terms explain the change since last season and sum to it; `false`: they
+    /// are what weighs on the coming season.
+    pub terms_last_season: bool,
+}
+
+/// The trends of the top bar of `faction`.
+pub fn figure_trends(
+    data: &GameData,
+    state: &CampaignState,
+    faction: &FactionId,
+) -> Vec<FigureTrend> {
+    sim_campaign::season_marks::trends(state, data, faction)
+        .into_iter()
+        .map(|trend| FigureTrend {
+            figure: trend.figure.key().to_owned(),
+            current: trend.current,
+            delta_since_last_season: trend.delta(),
+            top_terms: trend
+                .terms
+                .iter()
+                .map(|term| TermView {
+                    key: term.key.clone(),
+                    label: crate::causes::term_label(&term.key, &term.label),
+                    amount: term.amount,
+                })
+                .collect(),
+            terms_last_season: trend.last_season,
+        })
+        .collect()
 }
 
 /// Top bar of `faction`; `None` for an unknown faction.
@@ -81,6 +134,7 @@ pub fn top_bar(data: &GameData, state: &CampaignState, faction: &FactionId) -> O
             .collect(),
         alive: summary.alive,
         difficulty: state.difficulty().key().to_owned(),
+        trends: figure_trends(data, state, faction),
     })
 }
 

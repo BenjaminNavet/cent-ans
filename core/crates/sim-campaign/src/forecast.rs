@@ -109,7 +109,8 @@ fn phase_men(
     (soldiers_of(&copy, faction) - before) as f64
 }
 
-fn prestige_contributions(
+/// Terms of the prestige change of the coming season (XP-POURQUOI reads them for the top bar).
+pub fn prestige_contributions(
     state: &CampaignState,
     data: &GameData,
     faction: &FactionId,

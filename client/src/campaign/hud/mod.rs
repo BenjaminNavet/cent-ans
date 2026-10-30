@@ -55,6 +55,7 @@ pub mod ransom;
 pub mod replay;
 pub mod report;
 pub mod seal;
+pub mod story;
 pub mod text;
 pub mod wait;
 
@@ -95,6 +96,8 @@ pub struct HudData {
     pub top_provinces: Vec<ProvinceIncome>,
     pub readiness: Option<TurnReadiness>,
     pub forecast: Option<ForecastView>,
+    /// XP-POURQUOI: the story of the season just resolved (the « Récit » panel).
+    pub story: Option<game_api::causes::SeasonStory>,
     /// Recruitment reserve of the player (ADR 0793), shown in the « Hommes » tooltip.
     pub reserve: Option<game_api::hud::RecruitReserveView>,
     pub armies: Vec<ArmyEntry>,
@@ -224,6 +227,7 @@ impl Plugin for CampaignHudPlugin {
                 integ::plugin,
                 buttons::plugin,
                 wait::plugin,
+                story::plugin,
             ))
             .add_plugins(layers::plugin)
             .add_plugins(feed::plugin)
@@ -353,6 +357,12 @@ fn refresh_data(sim: Res<Sim>, time: Res<Time>, mut hud: ResMut<HudData>) {
                 id: sheet.id,
             })
             .collect();
+        hud.story = Some(game_api::causes::season_story_with(
+            data,
+            state,
+            player,
+            hud.forecast.as_ref(),
+        ));
         hud.dirty = false;
         hud.last_refresh = now;
         hud.revision += 1;
@@ -365,6 +375,12 @@ fn refresh_data(sim: Res<Sim>, time: Res<Time>, mut hud: ResMut<HudData>) {
         hud.forecast_revision = hud.revision;
         hud.last_forecast = now;
         hud.forecasts_computed += 1;
+        hud.story = Some(game_api::causes::season_story_with(
+            data,
+            state,
+            &sim.player,
+            hud.forecast.as_ref(),
+        ));
         // The tooltips follow the forecast: make the UI sync run.
         hud.set_changed();
     }
@@ -579,15 +595,27 @@ fn update_fields(
                 ),
             ),
             HudField::Treasury => (
-                fr::amount(top.treasury),
+                format!(
+                    "{}{}",
+                    fr::amount(top.treasury),
+                    if compact.0 {
+                        String::new()
+                    } else {
+                        text::past_arrow(text::trend_of(top, "treasury"))
+                    }
+                ),
                 if top.treasury < 0 {
                     fr::LOSS_COLOR
                 } else {
                     style::INK
                 },
-                hud.economy.as_ref().map_or_else(
-                    || format!("[b]Trésor[/b]\nOr en caisse, en {}.", fr::money_plural()),
-                    |economy| text::treasury_tooltip(economy, &hud.top_provinces),
+                format!(
+                    "{}{}",
+                    text::trend_tooltip(text::trend_of(top, "treasury"), true),
+                    hud.economy.as_ref().map_or_else(
+                        || format!("[b]Trésor[/b]\nOr en caisse, en {}.", fr::money_plural()),
+                        |economy| text::treasury_tooltip(economy, &hud.top_provinces),
+                    )
                 ),
             ),
             HudField::Balance => (
@@ -597,9 +625,13 @@ fn update_fields(
                     format!("{} / saison", fr::signed(top.net_income))
                 },
                 fr::color_of(top.net_income),
-                hud.economy
-                    .as_ref()
-                    .map_or_else(|| "[b]Solde par saison[/b]\nRecettes moins dépenses attendues à la prochaine saison.".to_owned(), text::budget_tooltip),
+                format!(
+                    "{}{}",
+                    text::trend_tooltip(text::trend_of(top, "net_income"), true),
+                    hud.economy
+                        .as_ref()
+                        .map_or_else(|| "[b]Solde par saison[/b]\nRecettes moins dépenses attendues à la prochaine saison.".to_owned(), text::budget_tooltip)
+                ),
             ),
             HudField::Manpower => (
                 format!(
@@ -610,7 +642,8 @@ fn update_fields(
                 ),
                 style::INK,
                 format!(
-                    "[b]Hommes sous les armes[/b]\nTous les soldats de vos armées et garnisons.\n{reserve_tip}\n{men_tip}"
+                    "{}[b]Hommes sous les armes[/b]\nTous les soldats de vos armées et garnisons.\n{reserve_tip}\n{men_tip}",
+                    text::trend_tooltip(text::trend_of(top, "men"), false)
                 ),
             ),
             HudField::Prestige => (
@@ -621,7 +654,7 @@ fn update_fields(
                     arrow(forecast.map(|f| &f.prestige))
                 ),
                 style::INK,
-                format!("[b]Prestige[/b]\nRenommée de votre couronne : elle pèse dans la diplomatie, et déclarer la guerre sans motif en coûte.\n{prestige_tip}"),
+                format!("{}[b]Prestige[/b]\nRenommée de votre couronne : elle pèse dans la diplomatie, et déclarer la guerre sans motif en coûte.\n{prestige_tip}", text::trend_tooltip(text::trend_of(top, "prestige"), false)),
             ),
             HudField::Unrest => (
                 format!(
@@ -631,7 +664,7 @@ fn update_fields(
                     arrow(forecast.map(|f| &f.unrest))
                 ),
                 style::INK,
-                format!("[b]Mécontentement moyen[/b] des provinces (plus bas, c’est mieux)\nÀ forte valeur, les provinces se révoltent et rapportent moins.\n{unrest_tip}"),
+                format!("{}[b]Mécontentement moyen[/b] des provinces (plus bas, c’est mieux)\nÀ forte valeur, les provinces se révoltent et rapportent moins.\n{unrest_tip}", text::trend_tooltip(text::trend_of(top, "unrest"), false)),
             ),
         };
         for child in children.iter() {
@@ -1024,6 +1057,12 @@ fn dump_hud(world: &World) -> (String, Value) {
             "treasury": t.treasury, "net_income": t.net_income, "manpower": t.manpower,
             "prestige": t.prestige, "unrest": t.mean_unrest,
             "provinces": t.provinces_count, "armies": t.armies_count,
+            "trends": t.trends.iter().map(|tr| json!({
+                "figure": tr.figure, "current": tr.current,
+                "delta": tr.delta_since_last_season,
+                "terms": tr.top_terms.iter().map(|x| json!([x.label, x.amount])).collect::<Vec<_>>(),
+                "terms_last_season": tr.terms_last_season,
+            })).collect::<Vec<_>>(),
         })
     });
     (

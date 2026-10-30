@@ -18,7 +18,26 @@
     "open_causes_button": "Chroniques et causes",
     "goto_map": "Voir sur la carte",
     "why_battle_button": "Pourquoi cette bataille ?",
-    "date_line": "{season} {year}"
+    "date_line": "{season} {year}",
+    "story_title": "Le récit de la saison",
+    "story_changed": "Ce qui a changé",
+    "story_why": "Pourquoi",
+    "story_next": "Ce qui vient",
+    "story_why_none": "Rien de marquant n’explique cette saison.",
+    "story_changed_none": "Rien n’a sensiblement changé depuis la saison passée.",
+    "story_next_none": "Aucun changement notable en vue.",
+    "story_act_line": "Acte {act} : {delta} points de règne cette saison.",
+    "story_act_none": "Aucun point de règne gagné cette saison.",
+    "figure_treasury": "Trésor",
+    "figure_net_income": "Solde de la saison",
+    "figure_men": "Hommes d’armes",
+    "figure_prestige": "Prestige",
+    "figure_unrest": "Mécontentement",
+    "figure_provinces": "Provinces",
+    "figure_delta_line": "{figure} : {delta} depuis la saison passée",
+    "terms_last_season": "Causes principales depuis la saison passée :",
+    "terms_next_season": "Ce qui pèse sur la saison à venir :",
+    "terms_others": "Autres éléments"
   },
   "kinds": {
     "battle": {
@@ -67,6 +86,15 @@
     },
     "game_lost": {
       "other": "Défaite de la campagne"
+    },
+    "treasury_swing": {
+      "other": "Le trésor a beaucoup varié en une saison"
+    },
+    "unrest_swing": {
+      "other": "Le mécontentement a changé {de_lieu}"
+    },
+    "attitude_shift": {
+      "other": "{acteur} change d’attitude envers nous"
     }
   },
   "factors": {
@@ -140,7 +168,31 @@
     "score": "Score : {value}",
     "objectives_done": "Objectifs remplis : {value}",
     "provinces_held": "Provinces tenues : {value}",
-    "no_land_left": "Plus aucune terre"
+    "no_land_left": "Plus aucune terre",
+    "treasury_change": "Variation du trésor : {amount} {money}",
+    "treasury_receipts": "Recettes de la saison : {amount} {money}",
+    "treasury_armies": "Solde et entretien des armées : {amount} {money}",
+    "treasury_buildings": "Entretien des bâtiments : {amount} {money}",
+    "treasury_administration": "Cour et administration : {amount} {money}",
+    "treasury_table": "Tables et vivres : {amount} {money}",
+    "treasury_household": "Maison du roi : {amount} {money}",
+    "treasury_wages": "Gages des officiers : {amount} {money}",
+    "treasury_siege": "Coût des sièges : {amount} {money}",
+    "treasury_obligations": "Dot, tribut et saisies : {amount} {money}",
+    "treasury_interest": "Intérêts de la dette : {amount} {money}",
+    "treasury_levies": "Impôts exceptionnels levés : {amount} {money}",
+    "treasury_loans": "Emprunts et remboursements : {amount} {money}",
+    "treasury_other": "Rançons, tributs, pillages et décisions : {amount} {money}",
+    "unrest_rise": "Le mécontentement monte de {value} points",
+    "unrest_fall": "Le mécontentement baisse de {value} points",
+    "unrest_level": "Mécontentement actuel : {value} sur 100",
+    "attitude_to_hostile": "Désormais hostile envers nous (attitude {value})",
+    "attitude_to_wary": "Désormais méfiant envers nous (attitude {value})",
+    "attitude_to_neutral": "Désormais neutre envers nous (attitude {value})",
+    "attitude_to_friendly": "Désormais bienveillant envers nous (attitude {value})",
+    "attitude_to_allied": "Désormais tout acquis à notre cause (attitude {value})",
+    "attitude_warming": "Son attitude se réchauffe de {value} points",
+    "attitude_cooling": "Son attitude se refroidit de {value} points"
   },
   "reasons": {
     "ultimatum_refused": "Ultimatum refusé : la guerre suit son refus",
@@ -152,5 +204,36 @@
     "revenge": "Revanche des défaites subies contre cet adversaire",
     "revenge_at": "Revanche d’une défaite subie en {lieu}",
     "realignment": "Changement de camp : l’alliance ne sert plus ses desseins"
+  },
+  "terms": {
+    "receipts": "Impôts et commerce",
+    "armies": "Entretien des armées",
+    "buildings": "Entretien des bâtiments",
+    "table": "Table de la cour",
+    "administration": "Cour et administration",
+    "household": "Maison du roi",
+    "wages": "Gages des officiers",
+    "siege": "Coût des sièges",
+    "obligations": "Dot, tribut et saisies",
+    "interest": "Intérêts de la dette",
+    "levies": "Impôts exceptionnels",
+    "loans": "Emprunts et remboursements",
+    "other": "Rançons, pillages et décisions",
+    "others": "Autres éléments",
+    "tech": "Techniques (bilan de l’hiver)",
+    "ruler": "Souverain : traits et talents",
+    "retinue": "Compagnons du souverain",
+    "order": "Ordre de chevalerie",
+    "building": "Bâtiments (bilan de l’hiver)",
+    "tax": "Impôts trop lourds",
+    "devastation": "Terres ravagées",
+    "goods": "Biens de consommation rares",
+    "health": "Mauvaise santé du peuple",
+    "garrison": "Garnisons",
+    "occupation": "Occupation étrangère",
+    "foreign_religion": "Religion étrangère",
+    "disorder": "Mécontentement récent",
+    "loyalty": "Loyauté de la noblesse",
+    "inertia": "Mécontentement actuel qui retombe"
   }
 }

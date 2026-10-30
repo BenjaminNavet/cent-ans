@@ -144,7 +144,7 @@ impl NewsScope {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ReportMode {
     Always,
-    /// Window only for a loss, a capture or one of the player's battles; else one toast line.
+    /// XP-POURQUOI: the « Récit de la saison », a non-modal panel (ADR 0281 amended).
     #[default]
     Auto,
     Off,
@@ -164,7 +164,8 @@ impl ReportMode {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ReportPlan {
     Modal,
-    Toast(String),
+    /// The non-modal « Récit de la saison » panel (`story.rs`) says it all.
+    Story,
     Nothing,
 }
 
@@ -183,23 +184,13 @@ impl Report {
             .any(|e| e.loss || e.gain || e.battle)
     }
 
-    /// The setting decides: `always` opens the window, `off` nothing, `auto` a toast when calm.
-    pub fn plan(&self, mode: ReportMode, date_label: &str) -> ReportPlan {
+    /// The setting decides: `always` opens the window, `off` nothing, `auto` the Récit panel
+    /// (XP-POURQUOI: even a loss or a capture no longer opens a window by itself).
+    pub fn plan(&self, mode: ReportMode) -> ReportPlan {
         match mode {
             ReportMode::Always => ReportPlan::Modal,
             ReportMode::Off => ReportPlan::Nothing,
-            ReportMode::Auto if self.needs_modal() => ReportPlan::Modal,
-            ReportMode::Auto => {
-                let count = self.total();
-                ReportPlan::Toast(if count == 0 {
-                    format!("{date_label} : rien à signaler.")
-                } else {
-                    format!(
-                        "{date_label} : {count} nouvelle{} dans le journal (rien d'urgent).",
-                        fr::plural_s(count as i64)
-                    )
-                })
-            }
+            ReportMode::Auto => ReportPlan::Story,
         }
     }
 
@@ -404,17 +395,12 @@ mod tests {
         );
         assert!(loss.needs_modal());
         assert!(!foreign_battle.needs_modal(), "world battles stay quiet");
-        assert_eq!(calm.plan(ReportMode::Always, "x"), ReportPlan::Modal);
-        assert_eq!(calm.plan(ReportMode::Off, "x"), ReportPlan::Nothing);
-        assert_eq!(loss.plan(ReportMode::Auto, "x"), ReportPlan::Modal);
-        assert_eq!(
-            calm.plan(ReportMode::Auto, "Été 1337"),
-            ReportPlan::Toast("Été 1337 : rien à signaler.".to_owned())
-        );
-        assert_eq!(
-            foreign_battle.plan(ReportMode::Auto, "Été 1337"),
-            ReportPlan::Toast("Été 1337 : 1 nouvelle dans le journal (rien d'urgent).".to_owned())
-        );
+        assert_eq!(calm.plan(ReportMode::Always), ReportPlan::Modal);
+        assert_eq!(calm.plan(ReportMode::Off), ReportPlan::Nothing);
+        // The Récit panel replaces the modal and the toast of the `auto` mode.
+        assert_eq!(loss.plan(ReportMode::Auto), ReportPlan::Story);
+        assert_eq!(calm.plan(ReportMode::Auto), ReportPlan::Story);
+        assert_eq!(foreign_battle.plan(ReportMode::Auto), ReportPlan::Story);
         assert_eq!(ReportMode::from_setting("off"), ReportMode::Off);
     }
 

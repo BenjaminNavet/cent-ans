@@ -50,6 +50,15 @@ pub enum CauseKind {
     ExtraordinaryTax,
     /// The money is debased (`subject` is the minting faction).
     Debasement,
+    /// XP-POURQUOI: the treasury moved by more than the threshold over a season
+    /// (`subject` is the faction).
+    TreasurySwing,
+    /// XP-POURQUOI: the unrest of a province moved by more than the threshold (`subject` is
+    /// its lord).
+    UnrestSwing,
+    /// XP-POURQUOI: an AI faction (`actor`) moved to another tier of attitude towards the
+    /// player (`subject`).
+    AttitudeShift,
     /// The player's campaign is won.
     GameWon,
     /// The player's campaign is lost.
@@ -71,6 +80,9 @@ impl CauseKind {
             CauseKind::RoyalDefault => "royal_default",
             CauseKind::ExtraordinaryTax => "extraordinary_tax",
             CauseKind::Debasement => "debasement",
+            CauseKind::TreasurySwing => "treasury_swing",
+            CauseKind::UnrestSwing => "unrest_swing",
+            CauseKind::AttitudeShift => "attitude_shift",
             CauseKind::GameWon => "game_won",
             CauseKind::GameLost => "game_lost",
         }

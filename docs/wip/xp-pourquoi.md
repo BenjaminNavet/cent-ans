@@ -12,7 +12,9 @@ Spec : `docs/audits/2026-10-29-experience.md` § R4 et § « Lot XP-POURQUOI ».
 
 ## État
 - [x] Données + entité data-model.
-- [ ] Cœur, game-api, client, tests.
+- [x] Cœur écrit (`season_marks.rs`, `cause_builders.rs`, `causes.rs`, hooks `turn.rs`, invariant) : compilation et tests en file d'attente (`heavy.sh` saturé).
+- [x] game-api écrit (`causes::season_story*`, `hud::TopBar.trends`) ; client écrit (`story.rs`, `text.rs`, `mod.rs`, `flow.rs`, `report.rs`, `feed.rs`) : jamais compilé.
+- [ ] Prochaine étape : `cargo test` core, clippy, correctifs ; client clippy/test/smoke ; seed bots rapide ; dump `season_story` ; ADR numéroté à la fusion.
 
 ## Points ouverts
 - Termes de prestige / hommes / troubles : captures au début du tour (`season_marks`), les contributions de la prévision décrivent la saison jouée.

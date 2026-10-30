@@ -317,8 +317,8 @@ pub static ROWS: &[Row] = &[
         "Encart en haut à gauche de la carte qui propose l’action la plus utile du moment."
     ),
     choice_s!(Interface, season_report, "Rapport de saison",
-        "Si important : fenêtre seulement quand vous perdez ou prenez une place, ou qu’une bataille a eu lieu ; sinon une ligne discrète.",
-        ["always" => "Toujours", "auto" => "Si important", "off" => "Jamais"]),
+        "Récit : un petit panneau replié en un clic raconte la saison (ce qui a changé, pourquoi, ce qui vient). Toujours : une fenêtre à chaque saison.",
+        ["always" => "Toujours", "auto" => "Récit", "off" => "Jamais"]),
     choice_s!(Interface, confirm_end_turn, "Confirmer la fin du tour",
         "Si oubli : demande confirmation quand une armée n’a pas d’ordre, qu’un emplacement de construction est libre ou qu’aucune recherche n’est en cours.",
         ["off" => "Jamais", "warnings" => "Si oubli", "always" => "Toujours"]),

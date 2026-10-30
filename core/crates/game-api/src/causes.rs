@@ -34,6 +34,44 @@ struct Texts {
     kinds: BTreeMap<String, KindTexts>,
     factors: BTreeMap<String, String>,
     reasons: BTreeMap<String, String>,
+    /// Labels of the terms under the figures of the top bar.
+    #[serde(default)]
+    terms: BTreeMap<String, String>,
+}
+
+/// French label of a term under a figure of the top bar: the core's own when it has one
+/// (building names), else the text of `causes.fr.json`, else the key.
+pub fn term_label(key: &str, label: &str) -> String {
+    if !label.is_empty() {
+        return label.to_owned();
+    }
+    texts()
+        .terms
+        .get(key)
+        .cloned()
+        .unwrap_or_else(|| key.to_owned())
+}
+
+/// Minus sign of the French typography (U+2212).
+const MINUS: char = '\u{2212}';
+
+/// « +1 200 » / « −2 140 » (narrow no-break space between thousands); « 0 » for zero.
+pub fn signed_amount(value: i64) -> String {
+    let digits = sim_campaign::advisor::fr_number(value.abs());
+    match value {
+        0 => "0".to_owned(),
+        v if v > 0 => format!("+{digits}"),
+        _ => format!("{MINUS}{digits}"),
+    }
+}
+
+/// « ▲ +1 200 » / « ▼ −2 140 » / « = » (the glyphs are the ones the top bar already uses).
+pub fn arrow_amount(value: i64) -> String {
+    match value {
+        0 => "=".to_owned(),
+        v if v > 0 => format!("▲ {}", signed_amount(v)),
+        v => format!("▼ {}", signed_amount(v)),
+    }
 }
 
 fn texts() -> &'static Texts {
@@ -144,6 +182,21 @@ fn perspective(cause: &Cause, player: &data_model::FactionId) -> Perspective {
     }
 }
 
+/// The sentence of one factor: `{value}` is the raw number, `{amount}` the signed amount in
+/// French typography. A key `attitude:<label>` carries its own label.
+fn factor_text(key: &str, value: i64) -> String {
+    if let Some(label) = key.strip_prefix(sim_campaign::cause_builders::LABELLED_PREFIX) {
+        return format!("{label} ({})", signed_amount(value));
+    }
+    fill(
+        texts().factors.get(key).map_or(key, String::as_str),
+        &[
+            ("value", &value.to_string()),
+            ("amount", &signed_amount(value)),
+        ],
+    )
+}
+
 /// View of one record.
 pub fn cause_view(state: &CampaignState, data: &GameData, record: &CauseRecord) -> CauseView {
     let t = texts();
@@ -186,10 +239,7 @@ pub fn cause_view(state: &CampaignState, data: &GameData, record: &CauseRecord) 
         .iter()
         .map(|f| FactorView {
             key: f.key.clone(),
-            text: fill(
-                t.factors.get(&f.key).map_or(f.key.as_str(), String::as_str),
-                &[("value", &f.value.to_string())],
-            ),
+            text: factor_text(&f.key, f.value),
             weight: f.weight,
         })
         .collect();
@@ -279,6 +329,10 @@ fn explains(cause: &Cause, player: &data_model::FactionId, favourable: bool) -> 
         CauseKind::GameWon
         | CauseKind::GameLost
         | CauseKind::UnrestWarning
+        // XP-POURQUOI: swings explain the season's story, not the end of the campaign.
+        | CauseKind::TreasurySwing
+        | CauseKind::UnrestSwing
+        | CauseKind::AttitudeShift
         | CauseKind::ExtraordinaryTax
         | CauseKind::Debasement => false,
         CauseKind::Battle | CauseKind::PlaceTaken => {
@@ -347,6 +401,218 @@ pub fn top_causes(
         .collect()
 }
 
+/// Seasons back, from the one just resolved, that may complete the « Pourquoi » block when
+/// the last season alone explains too little.
+pub const STORY_LOOKBACK: u32 = 4;
+
+/// One line of « Ce qui a changé » or « Ce qui vient »: a figure and its change.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct StoryLine {
+    /// `treasury`, `net_income`, `men`, `prestige`, `unrest`.
+    pub figure: String,
+    pub label: String,
+    pub delta: i64,
+    /// « Trésor : ▼ −2 140 ».
+    pub text: String,
+}
+
+/// The renown the house earned in the season just resolved, with its terms (ADR 0805).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct ActDelta {
+    /// 1-based number of the act in progress.
+    pub act_number: usize,
+    /// Renown gained over the season (sum of `terms`).
+    pub renown_gained: i32,
+    /// Facts of renown, newest first, one line each (« Bataille gagnée +3 (Angleterre) »).
+    pub terms: Vec<String>,
+    /// « Acte 1 : +4 points de renom cette saison. » (empty without any fact).
+    pub text: String,
+}
+
+/// The season in three blocks (XP-POURQUOI, R4): what changed, why, what comes. API shared by
+/// the « Récit de saison » panel and the Audience (XP-AUDIENCE reads `why` for its causes).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct SeasonStory {
+    /// Turn the story is told at (the new season).
+    pub turn: u32,
+    pub date_label: String,
+    /// The figures that moved since last season, heaviest relative change first.
+    pub changed: Vec<StoryLine>,
+    /// The causes of plus fort effet, weight decreasing (`story_causes` at most).
+    pub why: Vec<CauseView>,
+    /// The forecast of the coming season.
+    pub next: Vec<StoryLine>,
+    /// Renown earned over the season just resolved.
+    pub act_delta: Option<ActDelta>,
+}
+
+fn figure_label(figure: &str) -> String {
+    ui_text(&format!("figure_{figure}"))
+}
+
+fn story_line(figure: &str, delta: i64) -> StoryLine {
+    let label = figure_label(figure);
+    StoryLine {
+        figure: figure.to_owned(),
+        text: format!("{label} : {}", arrow_amount(delta)),
+        label,
+        delta,
+    }
+}
+
+/// The records that concern the player and were noted in the last seasons, heaviest first.
+/// At most `n`, at most two of a kind while other kinds can fill the list, those of the last
+/// resolved season first and older ones (up to [`STORY_LOOKBACK`] seasons back) only to
+/// complete the list.
+pub fn season_causes(state: &CampaignState, data: &GameData, n: usize) -> Vec<CauseView> {
+    let player = state.player_faction();
+    let turn = state.turn();
+    let mut recent: Vec<&CauseRecord> = Vec::new();
+    let mut older: Vec<&CauseRecord> = Vec::new();
+    for record in state.cause_journal().records() {
+        if !record.cause.concerns(player) || record.cause.kind == CauseKind::UnrestWarning {
+            continue;
+        }
+        if record.turn >= turn {
+            recent.push(record);
+        } else if record.turn + STORY_LOOKBACK >= turn {
+            older.push(record);
+        }
+    }
+    let rank = |records: &mut Vec<&CauseRecord>| {
+        records.sort_by(|a, b| {
+            b.cause
+                .severity
+                .cmp(&a.cause.severity)
+                .then_with(|| b.id.cmp(&a.id))
+        });
+    };
+    rank(&mut recent);
+    rank(&mut older);
+    let mut per_kind: BTreeMap<&'static str, usize> = BTreeMap::new();
+    let mut chosen: Vec<&CauseRecord> = Vec::new();
+    let mut skipped: Vec<&CauseRecord> = Vec::new();
+    for record in recent.into_iter().chain(older) {
+        let count = per_kind.entry(record.cause.kind.as_str()).or_default();
+        if *count >= 2 {
+            skipped.push(record);
+        } else {
+            *count += 1;
+            chosen.push(record);
+        }
+    }
+    chosen.extend(skipped);
+    chosen.truncate(n);
+    // The last season first, then the weight (the order of `chosen` already is: stable sort).
+    chosen.sort_by(|a, b| {
+        (b.turn >= turn)
+            .cmp(&(a.turn >= turn))
+            .then_with(|| b.cause.severity.cmp(&a.cause.severity))
+            .then_with(|| b.id.cmp(&a.id))
+    });
+    chosen
+        .into_iter()
+        .map(|record| cause_view(state, data, record))
+        .collect()
+}
+
+/// The renown of the season just resolved.
+fn act_delta(data: &GameData, state: &CampaignState) -> Option<ActDelta> {
+    let number = crate::acts::act_view(data, state)?.number;
+    let last = state.turn().checked_sub(1)?;
+    let facts: Vec<&sim_campaign::acts::RenownFact> = state
+        .acts
+        .renown
+        .journal
+        .iter()
+        .rev()
+        .filter(|fact| fact.turn == last)
+        .collect();
+    let gained: i32 = facts.iter().map(|fact| fact.points).sum();
+    let text = if facts.is_empty() {
+        String::new()
+    } else {
+        fill(
+            &ui_text("story_act_line"),
+            &[
+                ("act", &number.to_string()),
+                (
+                    "delta",
+                    &signed_amount(i64::from(gained)),
+                ),
+            ],
+        )
+    };
+    Some(ActDelta {
+        act_number: number,
+        renown_gained: gained,
+        terms: facts
+            .iter()
+            .map(|fact| crate::acts::renown_line(data, fact))
+            .collect(),
+        text,
+    })
+}
+
+/// The story of the season just resolved, for `faction` (the player). Computes the forecast
+/// itself (it simulates the next turn); use [`season_story_with`] to pass a cached one.
+pub fn season_story(
+    data: &GameData,
+    state: &CampaignState,
+    faction: &data_model::FactionId,
+) -> SeasonStory {
+    let forecast = crate::hud::forecast(data, state, faction);
+    season_story_with(data, state, faction, forecast.as_ref())
+}
+
+/// [`season_story`] with the forecast the caller already has (or none: `next` is then empty).
+pub fn season_story_with(
+    data: &GameData,
+    state: &CampaignState,
+    faction: &data_model::FactionId,
+    forecast: Option<&crate::hud::ForecastView>,
+) -> SeasonStory {
+    let mut changed: Vec<StoryLine> = crate::hud::figure_trends(data, state, faction)
+        .into_iter()
+        .filter_map(|trend| {
+            trend
+                .delta_since_last_season
+                .filter(|delta| *delta != 0)
+                .map(|delta| story_line(&trend.figure, delta))
+        })
+        .collect();
+    changed.sort_by(|a, b| {
+        b.delta
+            .abs()
+            .cmp(&a.delta.abs())
+            .then_with(|| a.figure.cmp(&b.figure))
+    });
+    let mut next = Vec::new();
+    if let Some(economy) = state.faction_economy(data, faction) {
+        next.push(story_line("net_income", economy.net_income()));
+    }
+    if let Some(forecast) = forecast {
+        for (figure, gauge) in [
+            ("men", &forecast.men),
+            ("prestige", &forecast.prestige),
+            ("unrest", &forecast.unrest),
+        ] {
+            if gauge.delta != 0 {
+                next.push(story_line(figure, gauge.delta));
+            }
+        }
+    }
+    next.retain(|line| line.delta != 0);
+    SeasonStory {
+        turn: state.turn(),
+        date_label: state.date_label(),
+        changed,
+        why: season_causes(state, data, data.cause_thresholds.story_causes as usize),
+        next,
+        act_delta: act_delta(data, state),
+    }
+}
+
 /// The causes of the latest battle the player fought (`Battle` records of the newest turn
 /// that has one concerning him): the end-of-battle panel. Empty if none is recorded.
 pub fn last_battle_causes(state: &CampaignState, data: &GameData) -> Vec<CauseView> {
@@ -371,6 +637,9 @@ mod tests {
     fn every_key_resolves(cause: &Cause) {
         let t = texts();
         for factor in &cause.factors {
+            if factor.key.starts_with(build::LABELLED_PREFIX) {
+                continue;
+            }
             assert!(
                 t.factors.contains_key(&factor.key),
                 "missing factor text: {}",
@@ -626,5 +895,109 @@ mod tests {
         assert!(top[0].severity >= top[1].severity);
         assert!(top.iter().all(|v| v.kind == "battle"));
         assert!(top_causes(&state, data, true, 3).is_empty());
+    }
+
+    #[test]
+    fn swing_causes_have_a_text_for_every_key() {
+        let (a, b) = (fac("fac_england"), fac("fac_france"));
+        let province = data_model::ProvinceId::new("prov_picardie").unwrap();
+        let terms: Vec<(&str, i64)> = [
+            "receipts",
+            "armies",
+            "buildings",
+            "administration",
+            "table",
+            "household",
+            "wages",
+            "siege",
+            "obligations",
+            "interest",
+            "levies",
+            "loans",
+            "other",
+        ]
+        .iter()
+        .map(|k| (*k, -100))
+        .collect();
+        every_key_resolves(&build::treasury_swing_cause(&a, 1000, -600, &terms));
+        every_key_resolves(&build::unrest_swing_cause(
+            &a,
+            &province,
+            10.0,
+            40.0,
+            &[("tax", 9.0), ("goods", 4.0)],
+        ));
+        every_key_resolves(&build::unrest_swing_cause(&a, &province, 40.0, 10.0, &[]));
+        for tier in 0..5 {
+            let cause = build::attitude_shift_cause(
+                &a,
+                &b,
+                (-10, 30),
+                tier,
+                &[("Alliés".to_owned(), 30)],
+            );
+            every_key_resolves(&cause);
+        }
+        // Every term key of the top bar has a label.
+        for key in [
+            "receipts", "armies", "buildings", "table", "administration", "household", "wages",
+            "siege", "obligations", "interest", "levies", "loans", "other", "others", "tech",
+            "ruler", "retinue", "order", "building", "tax", "devastation", "goods", "health",
+            "garrison", "occupation", "foreign_religion", "disorder", "loyalty", "inertia",
+        ] {
+            assert_ne!(term_label(key, ""), key, "missing term label: {key}");
+        }
+    }
+
+    #[test]
+    fn signed_amounts_use_french_typography() {
+        assert_eq!(signed_amount(1200), "+1\u{202f}200");
+        assert_eq!(signed_amount(-2140), "\u{2212}2\u{202f}140");
+        assert_eq!(signed_amount(0), "0");
+        assert_eq!(arrow_amount(-5), "▼ \u{2212}5");
+        assert_eq!(arrow_amount(0), "=");
+    }
+
+    #[test]
+    fn labelled_attitude_factor_shows_its_label_and_signed_value() {
+        let cause = build::attitude_shift_cause(
+            &fac("fac_england"),
+            &fac("fac_france"),
+            (-30, 25),
+            3,
+            &[("Alliés".to_owned(), 30), ("Voisin menaçant".to_owned(), -10)],
+        );
+        let texts: Vec<String> = cause
+            .factors
+            .iter()
+            .map(|f| factor_text(&f.key, f.value))
+            .collect();
+        assert!(texts.iter().any(|t| t == "Alliés (+30)"));
+        assert!(texts.iter().any(|t| t.contains("bienveillant")));
+    }
+
+    #[test]
+    fn season_story_is_deterministic_and_never_empty_on_the_third_turn() {
+        let data = game_data();
+        let run = || {
+            let mut state = start_quiet(data, "fac_england", 1337);
+            for _ in 0..3 {
+                state.end_turn_with(data, sim_campaign::test_support::idle);
+            }
+            let player = state.player_faction().clone();
+            season_story_with(data, &state, &player, None)
+        };
+        let story = run();
+        assert_eq!(story, run());
+        assert!(story.why.len() <= data.cause_thresholds.story_causes as usize);
+        assert!(
+            !story.why.is_empty(),
+            "turn 3 of the English must already have a cause: {story:#?}"
+        );
+        assert!(story
+            .why
+            .windows(2)
+            .all(|w| (w[0].turn >= story.turn) >= (w[1].turn >= story.turn)));
+        assert!(!story.changed.is_empty());
     }
 }

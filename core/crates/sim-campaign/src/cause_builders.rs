@@ -395,6 +395,110 @@ pub fn game_end_cause(
     cause.ranked()
 }
 
+/// Prefix of the factor keys that carry their own French label (attitude reasons, whose
+/// labels the diplomacy core already writes): `attitude:<label>`.
+pub const LABELLED_PREFIX: &str = "attitude:";
+
+/// Names of the attitude tiers, lowest first (keys of the `attitude_to_*` factor texts).
+pub const ATTITUDE_TIERS: [&str; 5] = ["hostile", "wary", "neutral", "friendly", "allied"];
+
+/// XP-POURQUOI: the treasury of a faction moved over a season. `terms` are the signed livres
+/// of the budget lines (`receipts`, `armies`, `buildings`, ..., `other`); the weight of a
+/// factor is its share of the total movement, so the heaviest terms come first.
+pub fn treasury_swing_cause(
+    faction: &FactionId,
+    before: i64,
+    after: i64,
+    terms: &[(&str, i64)],
+) -> Cause {
+    let change = after - before;
+    let moved: u64 = terms
+        .iter()
+        .map(|(_, v)| v.unsigned_abs())
+        .sum::<u64>()
+        .max(1);
+    let share = (change.unsigned_abs().saturating_mul(100) / before.unsigned_abs().max(1)) as i64;
+    let severity = (20 + share / 2).clamp(20, 70) as u8;
+    let mut cause = Cause::new(CauseKind::TreasurySwing, severity)
+        .subject(faction)
+        .factor("treasury_change", change, 5);
+    for (key, amount) in terms {
+        // A term that pushes the same way as the change is a cause; one that pushes against it
+        // only softens the change and weighs a quarter.
+        let share = pct(amount.unsigned_abs(), moved);
+        let weight = if amount.signum() == change.signum() {
+            share
+        } else {
+            share / 4
+        };
+        cause = cause.factor(&format!("treasury_{key}"), *amount, weight);
+    }
+    cause.ranked()
+}
+
+/// XP-POURQUOI: the unrest of a province moved by `after - before` points. `terms` are the
+/// province's unrest terms (positive ones become factors, as for a revolt).
+pub fn unrest_swing_cause(
+    lord: &FactionId,
+    province: &ProvinceId,
+    before: f64,
+    after: f64,
+    terms: &[(&str, f64)],
+) -> Cause {
+    let delta = (after - before).round() as i64;
+    let severity = (20 + delta.abs() * 2).clamp(20, 65) as u8;
+    let direction = if delta >= 0 {
+        "unrest_rise"
+    } else {
+        "unrest_fall"
+    };
+    let mut cause = Cause::new(CauseKind::UnrestSwing, severity)
+        .subject(lord)
+        .province(province)
+        .factor(direction, delta.abs(), 5)
+        .factor("unrest_level", after.round() as i64, 4);
+    for (key, points) in terms {
+        let points = points.round() as i64;
+        if points > 0 {
+            cause = cause.factor(&format!("unrest_{key}"), points, points * 3);
+        }
+    }
+    cause.ranked()
+}
+
+/// XP-POURQUOI: the attitude of AI faction `ai` towards the player moved from `before` to
+/// `after`, into tier `tier_after`. `reasons` are the labelled terms of the attitude (the
+/// diplomacy core writes their French labels): the heaviest become factors.
+pub fn attitude_shift_cause(
+    ai: &FactionId,
+    player: &FactionId,
+    (before, after): (i32, i32),
+    tier_after: usize,
+    reasons: &[(String, i32)],
+) -> Cause {
+    let tier = ATTITUDE_TIERS[tier_after.min(ATTITUDE_TIERS.len() - 1)];
+    let delta = i64::from(after - before);
+    let severity = (20 + delta.abs() / 2).clamp(20, 60) as u8;
+    let direction = if delta >= 0 {
+        "attitude_warming"
+    } else {
+        "attitude_cooling"
+    };
+    let mut cause = Cause::new(CauseKind::AttitudeShift, severity)
+        .subject(player)
+        .actor(ai)
+        .factor(&format!("attitude_to_{tier}"), i64::from(after), 90)
+        .factor(direction, delta.abs(), 85);
+    for (label, value) in reasons {
+        cause = cause.factor(
+            &format!("{LABELLED_PREFIX}{label}"),
+            i64::from(*value),
+            i64::from(value.abs()),
+        );
+    }
+    cause.ranked()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

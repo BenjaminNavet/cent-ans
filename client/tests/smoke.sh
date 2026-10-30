@@ -55,6 +55,11 @@ scenario_expect[faction_select]="faction_select=FactionSelect"
 scenario_expect[faction_works]="works_0=Campaign works_1=Campaign works_2=Campaign"
 scenario_expect[main_menu]="main_menu=MainMenu"
 
+# scenario -> `dump-file:section.path` pairs whose JSON value must be non-empty (XP-POURQUOI: the
+# Récit of the season must already explain something on the third turn).
+typeset -A scenario_nonempty
+scenario_nonempty[campaign_turns]="turns_1:season_story.story.why"
+
 if (( $# )); then names=("$@"); else names=(${(f)"$(cd "$here/smoke" && ls *.txt | sed 's/\.txt$//')"}); fi
 
 if [[ ${SMOKE_UNIT:-0} == 1 ]]; then
@@ -103,6 +108,16 @@ for name in $names; do
 		want=${pair#*=}
 		got=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("state"))' "$dump" 2>/dev/null) || got="no dump"
 		[[ $got == $want ]] || reasons+=("${pair%%=*}.json: state $got, expected $want")
+	done
+	for pair in ${=scenario_nonempty[$name]:-}; do
+		dump="$root/out/smoke/${pair%%:*}.json"
+		path=${pair#*:}
+		python3 -c '
+import json, sys
+node = json.load(open(sys.argv[1]))
+for key in sys.argv[2].split("."):
+    node = node[key]
+sys.exit(0 if node else 1)' "$dump" "$path" 2>/dev/null || reasons+=("${pair%%:*}.json: ${path} is empty or missing")
 	done
 	if (( ${#reasons} )); then
 		echo "SMOKE FAIL $name (${elapsed}s): ${(j:, :)reasons} -> $log"

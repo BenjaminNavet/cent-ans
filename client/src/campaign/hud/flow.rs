@@ -441,7 +441,7 @@ pub fn poll_turn(
                     .as_deref()
                     .map_or("auto", |s| s.season_report.as_str()),
             );
-            let plan = rep.plan(mode, &date);
+            let plan = rep.plan(mode);
             let vignette = rep.vignette(&plates);
             flow.last_report_vignette = vignette
                 .map(|v| (v.id.clone(), v.image.clone()))
@@ -463,7 +463,7 @@ pub fn poll_turn(
             };
             flow.last_report_plan = match &plan {
                 report::ReportPlan::Modal => "modal",
-                report::ReportPlan::Toast(_) => "toast",
+                report::ReportPlan::Story => "story",
                 report::ReportPlan::Nothing => "none",
             };
             match plan {
@@ -472,10 +472,8 @@ pub fn poll_turn(
                     replay.hold_report(held);
                 }
                 report::ReportPlan::Modal => queue.request(&held.key, PRIORITY_REPORT, held.spec),
-                report::ReportPlan::Toast(line) => {
-                    toasts.write(ToastRequest::new(&line));
-                }
-                report::ReportPlan::Nothing => {}
+                // The Récit panel (`story.rs`) follows the new state by itself.
+                report::ReportPlan::Story | report::ReportPlan::Nothing => {}
             }
             if let (Some(settings), Some(dir)) = (settings.as_deref(), save_dir.as_deref()) {
                 autosave_after_turn(settings, dir, &sim, &mut flow, &mut toasts);

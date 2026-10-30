@@ -26,7 +26,7 @@ const TREASURY_LIMIT: i64 = 1_000_000_000_000;
 ///
 /// Stable keys: `settlement_single_owner`, `settlement_refs`, `army_single_place`,
 /// `army_refs`, `unit_strength`, `treasury_finite`, `dead_faction_assets`,
-/// `character_refs`, `faction_refs`, `title_refs`.
+/// `character_refs`, `faction_refs`, `title_refs`, `swing_causes_per_season`.
 pub fn check_invariants(state: &CampaignState, data: &GameData) -> Vec<Violation> {
     let mut out = Vec::new();
     check_settlements(state, &mut out);
@@ -34,7 +34,33 @@ pub fn check_invariants(state: &CampaignState, data: &GameData) -> Vec<Violation
     check_factions(state, data, &mut out);
     check_characters(state, &mut out);
     check_titles(state, data, &mut out);
+    check_swing_causes(state, data, &mut out);
     out
+}
+
+/// XP-POURQUOI: the journal holds at most `max_per_season_player` swing causes (treasury,
+/// unrest, attitude) of the player per season.
+fn check_swing_causes(state: &CampaignState, data: &GameData, out: &mut Vec<Violation>) {
+    use crate::causes::CauseKind;
+    let limit = data.cause_thresholds.max_per_season_player as usize;
+    let mut per_turn: BTreeMap<u32, usize> = BTreeMap::new();
+    for record in state.cause_journal().records() {
+        if matches!(
+            record.cause.kind,
+            CauseKind::TreasurySwing | CauseKind::UnrestSwing | CauseKind::AttitudeShift
+        ) {
+            *per_turn.entry(record.turn).or_default() += 1;
+        }
+    }
+    for (turn, count) in per_turn {
+        if count > limit {
+            push(
+                out,
+                "swing_causes_per_season",
+                format!("{count} causes de variation au tour {turn} (au plus {limit})."),
+            );
+        }
+    }
 }
 
 fn push(out: &mut Vec<Violation>, invariant: &'static str, detail: String) {

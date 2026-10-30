@@ -153,13 +153,57 @@ pub fn entry_action(province: Option<&str>, faction: Option<&str>, player: &str)
     }
 }
 
-/// `text` cut to `max_chars` characters with an ellipsis.
+/// Separators inside a written number (« 28 728 », « 1,5 »): a cut never falls across them.
+fn is_number_separator(c: char) -> bool {
+    matches!(c, ' ' | ',' | '.' | '\u{202f}' | '\u{a0}')
+}
+
+/// `end` (a cut position in `chars`) moved to the start of the number it would split, so that
+/// the line never ends in the middle of a figure (XP-POURQUOI: « 28 7… »).
+fn back_off_number(chars: &[char], end: usize) -> usize {
+    let end = end.min(chars.len());
+    if end == 0 || end >= chars.len() {
+        return end;
+    }
+    // A number continues across the cut when the character before is a digit (or a separator
+    // between digits) and the one after is a digit, or a separator followed by a digit.
+    let digit = |i: usize| chars.get(i).is_some_and(char::is_ascii_digit);
+    let continues = digit(end)
+        && (digit(end - 1)
+            || (is_number_separator(chars[end - 1]) && end >= 2 && digit(end - 2)))
+        || (end >= 1
+            && digit(end - 1)
+            && is_number_separator(chars[end])
+            && digit(end + 1));
+    if !continues {
+        return end;
+    }
+    let mut start = end;
+    while start > 0 {
+        let c = chars[start - 1];
+        let inside = c.is_ascii_digit()
+            || (is_number_separator(c) && start >= 2 && chars[start - 2].is_ascii_digit() && digit(start));
+        if !inside {
+            break;
+        }
+        start -= 1;
+    }
+    start
+}
+
+/// `text` cut to `max_chars` characters with an ellipsis (never inside a number).
 pub fn shorten(text: &str, max_chars: usize) -> String {
     let flat: String = text.split_whitespace().collect::<Vec<_>>().join(" ");
     if flat.chars().count() <= max_chars {
         return flat;
     }
-    let cut: String = flat.chars().take(max_chars.saturating_sub(1)).collect();
+    let chars: Vec<char> = flat.chars().collect();
+    let end = back_off_number(&chars, max_chars.saturating_sub(1));
+    let cut: String = chars[..end]
+        .iter()
+        .collect::<String>()
+        .trim_end_matches(['+', '-', '\u{2212}'])
+        .to_owned();
     // Cut on a word boundary (never inside a word or a parenthesis opener);
     // the full text stays in the tooltip.
     let next_is_space = flat.chars().nth(cut.chars().count()) == Some(' ');
@@ -814,5 +858,31 @@ mod tests {
             "Félonie d’Angleterre envers France…"
         );
         assert_eq!(shorten("a\n  b", 10), "a b");
+    }
+
+    #[test]
+    fn a_cut_never_falls_inside_a_number() {
+        let text = "Revenus : 28 728 livres, entretien : 3 120 livres";
+        for max in 8..text.chars().count() {
+            let cut = shorten(text, max);
+            let body = cut.trim_end_matches('…');
+            // Whatever is kept, the last figure is whole: « 28 », « 7 » alone never end a line
+            // that the text continues with digits.
+            let kept = body.chars().count();
+            let rest: Vec<char> = text.chars().skip(kept).collect();
+            let last = body.chars().last();
+            assert!(
+                !(last.is_some_and(|c| c.is_ascii_digit())
+                    && rest.first().is_some_and(|c| c.is_ascii_digit())),
+                "cut inside a number at {max}: {cut}"
+            );
+            assert!(
+                !(last.is_some_and(|c| c.is_ascii_digit())
+                    && rest.first() == Some(&' ')
+                    && rest.get(1).is_some_and(|c| c.is_ascii_digit())),
+                "cut between the groups of a number at {max}: {cut}"
+            );
+        }
+        assert_eq!(shorten("Solde : 28 728 ₶ de plus", 14), "Solde :…");
     }
 }
