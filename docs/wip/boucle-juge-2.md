@@ -157,3 +157,7 @@ Constats seed bots longs : présentés au joueur, il choisit (ne rien écrire da
 - Lancés : FUSION-A (agent de fusion Sonnet : ECO-R1c 0815, IA-PLAN-2 0816, PLAQUES-2 0819, XP-R3a 0818, CAMP-R6 0817, CAMP-R6b ;
   correctifs main snapshot faction_assembly + fmt HUD ; un check complet) ; VIS-R4 montagne étagée et neige (ADR 0820).
 - Après FUSION-A : juge visuel Opus frais, IA-PLAN-2b (0821), R2-b retenue (0822), XP-R3b (0823). Puis COHESION-1, VIS-R8. Prochain ADR libre : 0824.
+- 9 h 45 : lancés depuis fusion-a (avant son ff) : IA-PLAN-2b (0821), ECO-R2b retenue (0822), XP-R3b livres (0823 si besoin),
+  juges frais itér. 3 : visuel (Opus), technique, jeu (campagne/éco/XP) → docs/audits/2026-10-30-juge-*-iter3.md. Prochain ADR libre : 0824.
+- Plafond joueur : arrêt à 200 $ d'équivalent API pour la session (tools/session_cost.py <session-id>, journal out/session-cost.log ;
+  veille qui sonne à 190 $). 6,6 $ à 9 h 45.
