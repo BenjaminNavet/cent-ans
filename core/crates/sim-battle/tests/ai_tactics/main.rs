@@ -10,6 +10,7 @@ mod contact;
 mod ep9_decisive;
 mod ep9b_duel;
 mod eq7_cavalry;
+mod ia_plan1;
 mod rx_batsim;
 mod tw_deploy;
 mod tw_retreat;

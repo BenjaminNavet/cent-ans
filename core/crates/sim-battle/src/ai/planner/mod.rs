@@ -103,8 +103,11 @@ fn measure(view: &View) -> Metrics {
 }
 
 /// Picks (or keeps) the target of every division: the enemy regiment nearest
-/// to its able regiments, kept while it stays in `reach` metres.
+/// to any of its able regiments (the threat the division meets first), kept
+/// while it stays within `reach` metres of one of them and no other enemy is
+/// closer by more than `TARGET_HYSTERESIS`.
 fn update_targets(view: &View, divisions: &mut [Division], reach: f64) {
+    const TARGET_HYSTERESIS: f64 = 40.0;
     let id_to_ix = |id: u32| view.units.iter().position(|u| u.id == id);
     for division in divisions {
         let members: Vec<usize> = division
@@ -113,20 +116,26 @@ fn update_targets(view: &View, divisions: &mut [Division], reach: f64) {
             .filter_map(|&id| id_to_ix(id))
             .filter(|i| view.own.contains(i))
             .collect();
-        let Some((cx, cz)) = view.centroid(&members) else {
+        // Distance from the division (its nearest regiment) to an enemy.
+        let gap = |j: usize| {
+            members
+                .iter()
+                .map(|&i| dist(&view.units[i], &view.units[j]))
+                .fold(f64::INFINITY, f64::min)
+        };
+        let nearest = view
+            .able_enemies()
+            .min_by(|&a, &b| gap(a).total_cmp(&gap(b)).then(a.cmp(&b)));
+        let Some(nearest) = nearest else {
             division.target = None;
             continue;
         };
-        let dist_to_target = |j: usize| (view.units[j].x - cx).hypot(view.units[j].z - cz);
-        let kept = division
-            .target
-            .and_then(id_to_ix)
-            .filter(|&j| view.able_enemies().any(|e| e == j) && dist_to_target(j) <= reach);
-        let target = kept.or_else(|| {
-            view.able_enemies()
-                .min_by(|&a, &b| dist_to_target(a).total_cmp(&dist_to_target(b)).then(a.cmp(&b)))
+        let kept = division.target.and_then(id_to_ix).filter(|&j| {
+            view.able_enemies().any(|e| e == j)
+                && gap(j) <= reach
+                && gap(j) <= gap(nearest) + TARGET_HYSTERESIS
         });
-        division.target = target.map(|j| view.units[j].id);
+        division.target = Some(view.units[kept.unwrap_or(nearest)].id);
     }
 }
 
@@ -244,8 +253,7 @@ pub(in crate::ai) fn plan_field(view: &mut View) {
     let side_memo = &mut memo.sides[view.side.index()];
     if !side_memo.assigned {
         side_memo.assigned = true;
-        side_memo.divisions =
-            division::assign(view.units, view.side, rules.division_shares);
+        side_memo.divisions = division::assign(view.units, view.side, rules.division_shares);
     }
     let metrics = measure(view);
     let phase_ix = plan.next_phase(side_memo.phase, &metrics);
