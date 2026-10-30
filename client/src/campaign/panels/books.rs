@@ -377,6 +377,9 @@ mod tests {
         app.update();
         let messages = app.world().resource::<Messages<OpenBook>>();
         assert_eq!(messages.len(), 1);
-        assert_eq!(messages.iter_current_update_messages().next().unwrap().book, "chronicle");
+        assert_eq!(
+            messages.iter_current_update_messages().next().unwrap().book,
+            "chronicle"
+        );
     }
 }
