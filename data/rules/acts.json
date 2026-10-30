@@ -2924,7 +2924,7 @@
         {
           "id": "amb_2_companies",
           "name": "Les compagnies soldées",
-          "description": "Prendre à sa solde les routiers : levées moins chères (-20 %), mais un pays qui gronde (+2). Les batailles rapportent moitié plus de renommée.",
+          "description": "Prendre à sa solde les routiers : levées moins chères (-20 %) et une bande de plus à recruter, mais une solde plus lourde (+15 %) et un pays qui gronde (+2). Les batailles rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "recruit_cost",
@@ -3229,6 +3229,15 @@
             {
               "effect": "unrest",
               "value": 2
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            },
+            {
+              "effect": "army_upkeep",
+              "value": 15,
+              "mode": "percent"
             }
           ],
           "renown_bonus_percent": 50,
