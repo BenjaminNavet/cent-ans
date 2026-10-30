@@ -674,6 +674,7 @@ pub fn spawn_recruit_panel(
     view: &RecruitView,
     reserve: &str,
     state: &PanelState,
+    books: &crate::ui::kit::book::Books,
 ) -> Entity {
     let wrapper = commands
         .spawn((
@@ -731,6 +732,10 @@ pub fn spawn_recruit_panel(
             });
             h.spawn(close_button(theme, "rec:close"));
         });
+        // XP-R3b: the screen is the « Recrutement » tab of the Armées book.
+        if let Some(book) = books.book("armies") {
+            crate::ui::kit::book::book_bar(p, theme, book, "book:armies:recruit", &[], &[]);
+        }
         p.spawn((
             Name::new("rec:reserve"),
             Tooltip::new(

@@ -30,7 +30,7 @@
                 "key": {"type": "string", "pattern": "^[a-z_]+$"},
                 "name": {"type": "string", "minLength": 1},
                 "label": {"type": "string", "minLength": 1, "maxLength": 20},
-                "panel": {"type": "string", "enum": ["faction", "economy", "feudal", "chronicle"]},
+                "panel": {"type": "string", "enum": ["faction", "economy", "feudal", "tech", "chronicle", "roster", "recruitment", "ransom", "court", "diplomacy"]},
                 "inner": {"type": "string"},
                 "needs": {"type": "string", "enum": ["assembly_house"]}
               },

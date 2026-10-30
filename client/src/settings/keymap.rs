@@ -354,7 +354,7 @@ pub const ACTIONS: &[ActionDef] = &[
     action(
         "Fenêtres",
         "map_toggle_court",
-        "Cour et personnages",
+        "Cour (conseil, souverain, famille, ordres)",
         &["C"],
     ),
     action("Fenêtres", "map_toggle_tech", "Technologies", &["F4"]),
@@ -373,14 +373,14 @@ pub const ACTIONS: &[ActionDef] = &[
     action(
         "Fenêtres",
         "map_toggle_diplomacy",
-        "Diplomatie et religion",
+        "Diplomatie (négociation, guerre, traités)",
         &["F3"],
     ),
     action("Fenêtres", "map_toggle_objectives", "Objectifs", &["O"]),
     action(
         "Fenêtres",
         "map_toggle_units",
-        "Mes unités (armées et agents)",
+        "Armées (montre, recrutement, rançons)",
         &["U"],
     ),
     action(

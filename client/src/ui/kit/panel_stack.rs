@@ -482,6 +482,7 @@ pub fn displaces(message: &crate::campaign::panels::OpenPanel, own_id: &str) -> 
     let central = |id: &str| !(own_id == id);
     match message {
         P::CloseAll => true,
+        P::Close(panel) => own_id == panel.as_str(),
         P::Diplomacy => central("diplomacy"),
         P::Tech => central("tech"),
         P::Chronicle => central("chronicle"),

@@ -46,16 +46,13 @@ pub struct Ransoms {
 #[derive(Component)]
 struct RansomWindow;
 
-#[derive(Component)]
-struct RansomButton;
-
 pub fn plugin(app: &mut App) {
     app.init_resource::<Ransoms>()
         .register_dump(dump_ransoms)
         .add_systems(OnEnter(AppState::Campaign), reset)
         .add_systems(
             Update,
-            (refresh, handle_buttons, rebuild_window, update_button)
+            (refresh, handle_buttons, rebuild_window)
                 .chain()
                 .in_set(HudSet::Ui),
         );
@@ -76,9 +73,6 @@ fn refresh(sim: Res<Sim>, mut ransoms: ResMut<Ransoms>) {
     if ransoms.data != fresh {
         ransoms.data = fresh;
     }
-    if ransoms.data.is_empty() {
-        ransoms.open = false;
-    }
 }
 
 fn handle_buttons(
@@ -86,14 +80,25 @@ fn handle_buttons(
     mut ransoms: ResMut<Ransoms>,
     mut sim: ResMut<Sim>,
     flow: Res<TurnFlow>,
+    mut requests: MessageReader<crate::campaign::panels::OpenPanel>,
 ) {
+    // XP-R3b (ADR 0818): the window is the « Rançons » tab of the Armées book.
+    use crate::campaign::panels::OpenPanel;
+    for request in requests.read() {
+        match request {
+            OpenPanel::Hosted { panel, .. } if panel == "ransom" => {
+                ransoms.open = true;
+                ransoms.armed = None;
+            }
+            OpenPanel::Close(panel) if panel == "ransom" => ransoms.open = false,
+            other if crate::ui::kit::panel_stack::displaces(other, "ransom") => {
+                ransoms.open = false;
+            }
+            _ => {}
+        }
+    }
     for press in pressed.read() {
         let name = press.name.as_str();
-        if name == "hud:open_ransoms" {
-            ransoms.open = !ransoms.open;
-            ransoms.armed = None;
-            continue;
-        }
         let Some(rest) = name.strip_prefix("ransom:") else {
             continue;
         };
@@ -147,55 +152,13 @@ fn handle_buttons(
     }
 }
 
-fn update_button(
-    mut commands: Commands,
-    ransoms: Res<Ransoms>,
-    theme: Res<UiTheme>,
-    assets: Res<AssetServer>,
-    column: Query<Entity, With<super::PanelButtons>>,
-    button: Query<Entity, With<RansomButton>>,
-) {
-    let Ok(column) = column.single() else { return };
-    let wanted = !ransoms.data.is_empty();
-    match (button.single().ok(), wanted) {
-        (None, true) => {
-            commands
-                .spawn((
-                    super::bar::launcher_button(
-                        &theme,
-                        &assets,
-                        "hud:open_ransoms",
-                        "hud_ransom",
-                        "",
-                    ),
-                    RansomButton,
-                    ChildOf(column),
-                    Tooltip::new(&super::bar::launcher_tooltip(
-                        "Rançons",
-                        "",
-                        "Captifs, prisonniers et dettes de rançon.",
-                    )),
-                ))
-                .with_children(|button| {
-                    button.spawn(super::bar::launcher_badge(
-                        &theme,
-                        ransoms.data.ours.len()
-                            + ransoms.data.held.len()
-                            + ransoms.data.debts.len(),
-                    ));
-                });
-        }
-        (Some(entity), false) => commands.entity(entity).despawn(),
-        _ => {}
-    }
-}
-
 fn rebuild_window(
     mut commands: Commands,
     mut ransoms: ResMut<Ransoms>,
     theme: Res<UiTheme>,
     window: Query<Entity, With<RansomWindow>>,
     sim: Res<Sim>,
+    books: Res<crate::ui::kit::book::Books>,
 ) {
     let key = (
         ransoms.data.clone(),
@@ -248,6 +211,12 @@ fn rebuild_window(
                 head.spawn(heading(&theme, "Captifs et rançons"));
                 head.spawn(close_button(&theme, "ransom:close"));
             });
+            if let Some(book) = books.book("armies") {
+                crate::ui::kit::book::book_bar(win, &theme, book, "book:armies:ransoms", &[], &[]);
+            }
+            if data.is_empty() {
+                win.spawn(caption(&theme, "Aucun captif ni dette de rançon."));
+            }
             if !error.is_empty() {
                 win.spawn((
                     Text::new(error),

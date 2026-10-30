@@ -1,7 +1,7 @@
 # Faction panel, « Chantiers » tab: open, apply one building to every colony, launch the batch.
 state Campaign
 wait 120
-click hud:open_faction
+click hud:open_kingdom
 wait 10
 click faction:tab:works
 wait 10

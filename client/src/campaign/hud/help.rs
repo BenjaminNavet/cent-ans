@@ -46,11 +46,11 @@ pub const SECTIONS: &[(&str, &[Line])] = &[
     (
         "Fenêtres",
         &[
-            ("map_toggle_court", "Cour et personnages", "C"),
+            ("map_toggle_court", "Cour (conseil, souverain, famille, ordres)", "C"),
             ("map_toggle_tech", "Technologies", "F4"),
-            ("map_toggle_diplomacy", "Diplomatie et religion", "F3"),
+            ("map_toggle_diplomacy", "Diplomatie (négociation, guerre, traités)", "F3"),
             ("map_toggle_objectives", "Objectifs", "O"),
-            ("map_toggle_units", "Mes unités (armées et agents)", "U"),
+            ("map_toggle_units", "Armées (montre, recrutement, rançons)", "U"),
             (
                 "map_toggle_council",
                 "Conseil du royaume (charges et conseils)",

@@ -260,15 +260,13 @@ fn dev_open(mut done: Local<bool>, mut frames: Local<u32>, sim: Res<Sim>, mut ui
     }
 }
 
-/// J (`map_toggle_council`) toggles the council hall; C (`map_toggle_court`) toggles the ruler's
-/// character sheet (the court and its characters). Both through the message bus, so the other
-/// central panels close (`displaces`); no key while a text field has the focus.
+/// J (`map_toggle_council`) toggles the council hall through the message bus, so the other
+/// central panels close (`displaces`); no key while a text field has the focus. C (the Cour book)
+/// is read by `panels/books.rs`.
 fn shortcuts(
     keymap: Res<crate::settings::KeyMap>,
     keys: Res<ButtonInput<KeyCode>>,
     typing: Res<crate::ui::kit::text_field::TextInputFocus>,
-    sim: Res<Sim>,
-    ui: Res<CourtUi>,
     mut outgoing: MessageWriter<OpenPanel>,
 ) {
     if typing.is_active() {
@@ -276,17 +274,6 @@ fn shortcuts(
     }
     if keymap.just_pressed("map_toggle_council", &keys) {
         outgoing.write(OpenPanel::Council);
-    } else if keymap.just_pressed("map_toggle_court", &keys) {
-        if ui.screen == Screen::Sheet {
-            outgoing.write(OpenPanel::CloseAll);
-        } else if let Some(ruler) = sim
-            .state
-            .as_ref()
-            .and_then(|s| s.factions.get(&sim.player))
-            .and_then(|f| f.ruler.as_ref())
-        {
-            outgoing.write(OpenPanel::Character(ruler.to_string()));
-        }
     }
 }
 
@@ -299,6 +286,7 @@ fn open_close(
     mut requests: MessageReader<OpenPanel>,
     mut edges: ResMut<KeyEdges>,
     mut ui: ResMut<CourtUi>,
+    sim: Res<Sim>,
 ) {
     for request in requests.read() {
         match request {
@@ -309,6 +297,31 @@ fn open_close(
                 } else {
                     ui.open_council();
                 }
+            }
+            // XP-R3b (ADR 0818): a tab of the Cour book. A council tab opens the hall, a sheet
+            // tab the sheet on the character shown (else the ruler's).
+            OpenPanel::Hosted { panel, tab } if panel == "court" => {
+                if SHEET_TABS.iter().any(|(name, _)| name == tab) {
+                    ui.sheet_tab.clone_from(tab);
+                    if ui.screen != Screen::Sheet {
+                        let ruler = sim
+                            .state
+                            .as_ref()
+                            .and_then(|s| s.factions.get(&sim.player))
+                            .and_then(|f| f.ruler.as_ref())
+                            .map(ToString::to_string);
+                        match ui.character.clone().or(ruler) {
+                            Some(id) => ui.open_character(&id, false),
+                            None => ui.open_council(),
+                        }
+                    }
+                } else {
+                    if COUNCIL_TABS.iter().any(|(name, _)| name == tab) {
+                        ui.council_tab.clone_from(tab);
+                    }
+                    ui.open_council();
+                }
+                ui.dirty = true;
             }
             other if ui.screen != Screen::None && displaces(other, "court") => ui.close(),
             _ => {}

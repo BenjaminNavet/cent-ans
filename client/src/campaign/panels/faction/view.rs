@@ -239,9 +239,14 @@ pub fn rebuild(
             let selected = selected.min(tabs.len() - 1);
             // XP-R3: the player's own sheet lives in the Royaume book, whose row replaces the
             // panel's own tabs; a foreign faction's sheet keeps them.
-            match (view.is_player, books.book("kingdom")) {
+            // The « Ordres » tab belongs to the Cour book, the others to the Royaume book.
+            let active = tabs.get(selected).map_or("", |(name, _)| *name);
+            let hosting = books
+                .hosting_tab("faction", active)
+                .map(|(book, _)| book)
+                .or_else(|| books.book("kingdom"));
+            match (view.is_player, hosting) {
                 (true, Some(book)) => {
-                    let active = tabs.get(selected).map_or("", |(name, _)| *name);
                     let have: &[&str] = if view.finance.as_ref().is_some_and(|f| f.assembly_house) {
                         &["assembly_house"]
                     } else {

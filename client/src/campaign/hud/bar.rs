@@ -99,41 +99,35 @@ pub struct Launcher {
     pub action: &'static str,
 }
 
-/// The fixed launchers, in Godot's order (court, techs, codex… then diplomacy, chronicle).
-pub const LAUNCHERS: [Launcher; 7] = [
+/// The fixed launchers: the five books (XP-R3, ADR 0818) and the Codex. The book launchers match
+/// `data/ui/books.fr.json` (a test keeps them in step).
+pub const LAUNCHERS: [Launcher; 6] = [
     Launcher {
-        name: "hud:open_council",
+        name: "hud:open_court",
         icon: "hud_court",
-        title: "Conseil",
-        detail: "Charges du royaume, cour et conseils.",
-        action: "map_toggle_council",
+        title: "Cour",
+        detail: "Livre de la cour : conseil, cour, actes royaux, chevalerie, souverain et famille.",
+        action: "map_toggle_court",
     },
     Launcher {
-        name: "hud:open_tech",
-        icon: "hud_technologies",
-        title: "Techniques",
-        detail: "Arbre des techniques et recherche en cours.",
-        action: "map_toggle_tech",
+        name: "hud:open_armies",
+        icon: "recruit",
+        title: "Armées",
+        detail: "Livre des armées : montre des hommes d’armes, recrutement et rançons.",
+        action: "map_toggle_units",
     },
     Launcher {
         name: "hud:open_diplomacy",
         icon: "hud_diplomacy",
         title: "Diplomatie",
-        detail: "Relations, traités et religion.",
+        detail: "Livre de la diplomatie : négociation, guerre et traités, avec la carte des relations.",
         action: "map_toggle_diplomacy",
-    },
-    Launcher {
-        name: "hud:open_recruitment",
-        icon: "recruit",
-        title: "Recrutement",
-        detail: "Lever des troupes dans la province de l’armée choisie, sinon à la capitale.",
-        action: "map_toggle_recruitment",
     },
     Launcher {
         name: "hud:open_kingdom",
         icon: "glyph_crown",
         title: "Royaume",
-        detail: "Livre du royaume : fiche, budget, finances, chantiers, économie, commerce, monnaie et féodalité.",
+        detail: "Livre du royaume : fiche, budget, finances, chantiers, économie, commerce, monnaie, féodalité et techniques.",
         action: "map_toggle_kingdom",
     },
     Launcher {

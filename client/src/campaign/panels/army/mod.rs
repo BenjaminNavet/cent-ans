@@ -253,6 +253,23 @@ fn open_recruit(state: &mut PanelState, sim: &Sim, place: &str, target: Option<A
     true
 }
 
+/// Province the recruitment screen opens on without a place: the selected army's, else the
+/// capital (shared by the Recrutement tab and the old launcher).
+pub fn default_recruit_place(sim: &Sim, selected: Option<&ArmyId>) -> String {
+    let (Some(data), Some(state)) = (sim.data.as_ref(), sim.state.as_ref()) else {
+        return String::new();
+    };
+    selected
+        .and_then(|id| game_api::army_sheet(data, state, id)?.location_province)
+        .or_else(|| {
+            state
+                .factions
+                .get(&sim.player)
+                .map(|faction| faction.capital.as_str().to_owned())
+        })
+        .unwrap_or_default()
+}
+
 fn open_army(state: &mut PanelState, sim: &Sim, id: &ArmyId) {
     if sim.state.as_ref().is_some_and(|s| s.army(id).is_some()) && state.army.as_ref() != Some(id) {
         state.army = Some(id.clone());
@@ -330,6 +347,17 @@ fn intake(
             OpenPanel::Recruitment(place) => {
                 open_recruit(&mut state, &sim, place, None);
             }
+            // XP-R3b (ADR 0818): the « Recrutement » tab of the Armées book. It opens on the
+            // settlement already shown, else the selected army's province, else the capital.
+            OpenPanel::Hosted { panel, .. } if panel == "recruitment" => {
+                close_army(&mut state);
+                let place = state
+                    .recruit
+                    .clone()
+                    .unwrap_or_else(|| default_recruit_place(&sim, selected.0.as_ref()));
+                open_recruit(&mut state, &sim, &place, None);
+            }
+            OpenPanel::Close(panel) if panel == "recruitment" => close_recruit(&mut state),
             OpenPanel::Province(province) => {
                 close_army(&mut state);
                 let same = sim.state.as_ref().is_some_and(|s| {
@@ -715,6 +743,7 @@ fn rebuild(
     mut state: ResMut<PanelState>,
     army_roots: Query<Entity, With<ArmyPanelRoot>>,
     recruit_roots: Query<Entity, With<RecruitPanelRoot>>,
+    books: Res<crate::ui::kit::book::Books>,
 ) {
     let open = state.army.is_some() || state.recruit.is_some();
     let present = !army_roots.is_empty() || !recruit_roots.is_empty();
@@ -772,6 +801,7 @@ fn rebuild(
                     &view,
                     &reserve,
                     &state,
+                    &books,
                 );
                 let summary = &mut state.summary;
                 summary.recruit_cards = view

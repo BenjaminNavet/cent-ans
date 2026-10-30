@@ -43,6 +43,7 @@ pub fn rebuild(
     roots: Query<Entity, With<DiplomacyRoot>>,
     focus: Res<TextInputFocus>,
     fields: Query<(&Name, &TextField)>,
+    books: Res<crate::ui::kit::book::Books>,
 ) {
     if !ui.dirty {
         return;
@@ -90,7 +91,7 @@ pub fn rebuild(
             })
             .with_children(|body| {
                 faction_column(body, &theme, &assets, asset_root.as_deref(), ui);
-                detail_column(body, &theme, &assets, asset_root.as_deref(), ui);
+                detail_column(body, &theme, &assets, asset_root.as_deref(), ui, &books);
             });
         });
 }
@@ -530,6 +531,7 @@ fn detail_column(
     assets: &AssetServer,
     asset_root: Option<&std::path::Path>,
     ui: &DiplomacyUi,
+    books: &crate::ui::kit::book::Books,
 ) {
     body.spawn(Node {
         flex_grow: 1.0,
@@ -570,7 +572,22 @@ fn detail_column(
             .iter()
             .position(|(name, _)| *name == ui.tab)
             .unwrap_or(0);
-        column.spawn(tab_bar(theme, "dip_tab", &tabs, selected));
+        // XP-R3b: the three tabs are the Diplomatie book (same button names as before).
+        match books.book("diplomacy") {
+            Some(book) => {
+                crate::ui::kit::book::book_bar(
+                    column,
+                    theme,
+                    book,
+                    tabs[selected].0,
+                    &[],
+                    &[],
+                );
+            }
+            None => {
+                column.spawn(tab_bar(theme, "dip_tab", &tabs, selected));
+            }
+        }
         column.spawn(separator(theme));
         for (index, (name, _)) in tabs.iter().enumerate() {
             column

@@ -7,18 +7,214 @@
       "action": "map_toggle_kingdom",
       "launcher": "hud:open_kingdom",
       "icon": "glyph_crown",
-      "detail": "Fiche, budget, finances, chantiers, économie, commerce, monnaie et féodalité.",
+      "detail": "Fiche, budget, finances, chantiers, économie, commerce, monnaie, féodalité et techniques.",
       "tabs": [
-        { "key": "sheet", "name": "faction:tab:sheet", "label": "Fiche", "panel": "faction", "inner": "faction:tab:sheet" },
-        { "key": "budget", "name": "faction:tab:budget", "label": "Budget", "panel": "faction", "inner": "faction:tab:budget" },
-        { "key": "finance", "name": "faction:tab:finance", "label": "Finances", "panel": "faction", "inner": "faction:tab:finance" },
-        { "key": "assembly", "name": "faction:tab:assembly", "label": "États", "panel": "faction", "inner": "faction:tab:assembly", "needs": "assembly_house" },
-        { "key": "works", "name": "faction:tab:works", "label": "Chantiers", "panel": "faction", "inner": "faction:tab:works" },
-        { "key": "overview", "name": "economy:tab:overview", "label": "Économie", "panel": "economy", "inner": "overview" },
-        { "key": "trade", "name": "economy:tab:trade", "label": "Commerce", "panel": "economy", "inner": "trade" },
-        { "key": "currency", "name": "economy:tab:currency", "label": "Monnaie", "panel": "economy", "inner": "currency" },
-        { "key": "feudal", "name": "book:kingdom:feudal", "label": "Féodalité", "panel": "feudal", "inner": "" },
-        { "key": "orders", "name": "faction:tab:court", "label": "Ordres", "panel": "faction", "inner": "faction:tab:court" }
+        {
+          "key": "sheet",
+          "name": "faction:tab:sheet",
+          "label": "Fiche",
+          "panel": "faction",
+          "inner": "faction:tab:sheet"
+        },
+        {
+          "key": "budget",
+          "name": "faction:tab:budget",
+          "label": "Budget",
+          "panel": "faction",
+          "inner": "faction:tab:budget"
+        },
+        {
+          "key": "finance",
+          "name": "faction:tab:finance",
+          "label": "Finances",
+          "panel": "faction",
+          "inner": "faction:tab:finance"
+        },
+        {
+          "key": "assembly",
+          "name": "faction:tab:assembly",
+          "label": "États",
+          "panel": "faction",
+          "inner": "faction:tab:assembly",
+          "needs": "assembly_house"
+        },
+        {
+          "key": "works",
+          "name": "faction:tab:works",
+          "label": "Chantiers",
+          "panel": "faction",
+          "inner": "faction:tab:works"
+        },
+        {
+          "key": "overview",
+          "name": "economy:tab:overview",
+          "label": "Économie",
+          "panel": "economy",
+          "inner": "overview"
+        },
+        {
+          "key": "trade",
+          "name": "economy:tab:trade",
+          "label": "Commerce",
+          "panel": "economy",
+          "inner": "trade"
+        },
+        {
+          "key": "currency",
+          "name": "economy:tab:currency",
+          "label": "Monnaie",
+          "panel": "economy",
+          "inner": "currency"
+        },
+        {
+          "key": "feudal",
+          "name": "book:kingdom:feudal",
+          "label": "Féodalité",
+          "panel": "feudal",
+          "inner": ""
+        },
+        {
+          "key": "tech",
+          "name": "book:kingdom:tech",
+          "label": "Techniques",
+          "panel": "tech",
+          "inner": ""
+        }
+      ]
+    },
+    {
+      "id": "armies",
+      "title": "Armées",
+      "action": "map_toggle_units",
+      "launcher": "hud:open_armies",
+      "icon": "recruit",
+      "detail": "Montre des hommes d’armes, recrutement et rançons.",
+      "tabs": [
+        {
+          "key": "units",
+          "name": "book:armies:units",
+          "label": "Armées",
+          "panel": "roster",
+          "inner": ""
+        },
+        {
+          "key": "recruit",
+          "name": "book:armies:recruit",
+          "label": "Recrutement",
+          "panel": "recruitment",
+          "inner": ""
+        },
+        {
+          "key": "ransoms",
+          "name": "book:armies:ransoms",
+          "label": "Rançons",
+          "panel": "ransom",
+          "inner": ""
+        }
+      ]
+    },
+    {
+      "id": "court",
+      "title": "Cour",
+      "action": "map_toggle_court",
+      "launcher": "hud:open_court",
+      "icon": "hud_court",
+      "detail": "Conseil, cour, actes royaux, chevalerie, souverain et famille.",
+      "tabs": [
+        {
+          "key": "council",
+          "name": "court:tab:council",
+          "label": "Conseil",
+          "panel": "court",
+          "inner": "court:tab:council"
+        },
+        {
+          "key": "court",
+          "name": "court:tab:court",
+          "label": "Cour",
+          "panel": "court",
+          "inner": "court:tab:court"
+        },
+        {
+          "key": "acts",
+          "name": "court:tab:acts",
+          "label": "Actes royaux",
+          "panel": "court",
+          "inner": "court:tab:acts"
+        },
+        {
+          "key": "chivalry",
+          "name": "court:tab:chivalry",
+          "label": "Chevalerie",
+          "panel": "court",
+          "inner": "court:tab:chivalry"
+        },
+        {
+          "key": "sheet",
+          "name": "court:tab:sheet",
+          "label": "Fiche",
+          "panel": "court",
+          "inner": "court:tab:sheet"
+        },
+        {
+          "key": "skills",
+          "name": "court:tab:skills",
+          "label": "Compétences",
+          "panel": "court",
+          "inner": "court:tab:skills"
+        },
+        {
+          "key": "family",
+          "name": "court:tab:family",
+          "label": "Famille",
+          "panel": "court",
+          "inner": "court:tab:family"
+        },
+        {
+          "key": "decrees",
+          "name": "court:tab:orders",
+          "label": "Décrets",
+          "panel": "court",
+          "inner": "court:tab:orders"
+        },
+        {
+          "key": "orders",
+          "name": "faction:tab:court",
+          "label": "Ordres",
+          "panel": "faction",
+          "inner": "faction:tab:court"
+        }
+      ]
+    },
+    {
+      "id": "diplomacy",
+      "title": "Diplomatie",
+      "action": "map_toggle_diplomacy",
+      "launcher": "hud:open_diplomacy",
+      "icon": "hud_diplomacy",
+      "detail": "Négociation, guerre et traités ; la carte montre les relations.",
+      "tabs": [
+        {
+          "key": "negotiation",
+          "name": "dip:tab:negotiation",
+          "label": "Négociation",
+          "panel": "diplomacy",
+          "inner": "dip:tab:negotiation"
+        },
+        {
+          "key": "war",
+          "name": "dip:tab:war",
+          "label": "Guerre",
+          "panel": "diplomacy",
+          "inner": "dip:tab:war"
+        },
+        {
+          "key": "treaties",
+          "name": "dip:tab:treaties",
+          "label": "Traités",
+          "panel": "diplomacy",
+          "inner": "dip:tab:treaties"
+        }
       ]
     },
     {
@@ -29,18 +225,80 @@
       "icon": "hud_chronicle",
       "detail": "Registre, décisions, lettres, causes et journal.",
       "tabs": [
-        { "key": "registry", "name": "chronicle:tab_registry", "label": "Registre", "panel": "chronicle", "inner": "registry" },
-        { "key": "decisions", "name": "chronicle:tab_decisions", "label": "Décisions", "panel": "chronicle", "inner": "decisions" },
-        { "key": "letters", "name": "chronicle:tab_letters", "label": "Lettres", "panel": "chronicle", "inner": "letters" },
-        { "key": "causes", "name": "chronicle:tab_causes", "label": "Causes", "panel": "chronicle", "inner": "causes" },
-        { "key": "journal", "name": "chronicle:tab_journal", "label": "Journal", "panel": "chronicle", "inner": "journal" }
+        {
+          "key": "registry",
+          "name": "chronicle:tab_registry",
+          "label": "Registre",
+          "panel": "chronicle",
+          "inner": "registry"
+        },
+        {
+          "key": "decisions",
+          "name": "chronicle:tab_decisions",
+          "label": "Décisions",
+          "panel": "chronicle",
+          "inner": "decisions"
+        },
+        {
+          "key": "letters",
+          "name": "chronicle:tab_letters",
+          "label": "Lettres",
+          "panel": "chronicle",
+          "inner": "letters"
+        },
+        {
+          "key": "causes",
+          "name": "chronicle:tab_causes",
+          "label": "Causes",
+          "panel": "chronicle",
+          "inner": "causes"
+        },
+        {
+          "key": "journal",
+          "name": "chronicle:tab_journal",
+          "label": "Journal",
+          "panel": "chronicle",
+          "inner": "journal"
+        }
       ]
     }
   ],
   "aliases": [
-    { "name": "hud:open_faction", "book": "kingdom", "tab": "sheet" },
-    { "name": "hud:open_economy", "book": "kingdom", "tab": "overview" },
-    { "name": "hud:open_feudal", "book": "kingdom", "tab": "feudal" }
+    {
+      "name": "hud:open_faction",
+      "book": "kingdom",
+      "tab": "sheet"
+    },
+    {
+      "name": "hud:open_economy",
+      "book": "kingdom",
+      "tab": "overview"
+    },
+    {
+      "name": "hud:open_feudal",
+      "book": "kingdom",
+      "tab": "feudal"
+    },
+    {
+      "name": "hud:open_recruitment",
+      "book": "armies",
+      "tab": "recruit"
+    },
+    {
+      "name": "hud:open_ransoms",
+      "book": "armies",
+      "tab": "ransoms"
+    },
+    {
+      "name": "hud:open_tech",
+      "book": "kingdom",
+      "tab": "tech"
+    },
+    {
+      "name": "hud:open_council",
+      "book": "court",
+      "tab": "council"
+    }
   ],
   "registry": {
     "empty": "Rien à surveiller ce trimestre."

@@ -20,3 +20,23 @@ Spec : `docs/audits/2026-10-29-experience.md` § R3. ADR 0818.
 - XP-R3b : livres Armées (A : recrutement, Mes unités, rançons, ravitaillement) et Cour (C : personnages, Conseil, ordres de chevalerie, héritier ; retirer « Ordres » du Royaume).
 - XP-R3c : Diplomatie (D, carte diplomatique) et intendant de province + « Chantiers du royaume ».
 Pour ajouter un livre : une entrée dans `books.fr.json`, `Hosted` géré par le panneau hôte (comme `faction/mod.rs`), `book_bar` à la place de sa rangée d'onglets, un bras dans `books.rs` (`Hosted::current`, `close_message`).
+
+
+# Lot XP-R3b « Les cinq livres » (2/3) : livres Armées, Cour, Diplomatie
+
+## État : TERMINÉ côté code (cargo check + tests ciblés ; smoke et dumps laissés à la fusion)
+- 5 livres en données (`data/ui/books.fr.json`, ADR 0818 amendé) : Royaume (+ Techniques, − Ordres), Armées (montre, recrutement, rançons), Cour (conseil, cour, actes, chevalerie, fiche, compétences, famille, décrets, ordres), Diplomatie (négociation, guerre, traités), Chronique.
+- Hôtes câblés (`Hosted`/`Close`, `book_bar` à la place de leur rangée) : roster, recrutement, rançons, court, diplomatie, techniques. `OpenPanel::Close(panneau)` ajouté.
+- Lanceurs : 7 -> 6 (5 livres + Codex) ; fenêtres distinctes : 22 -> 5 livres + 2 fiches (province avec siège, armée). Touches C, U, F3 lues par `books.rs`.
+- Scripts mis à jour : `tests/smoke/{books,campaign,faction_*}.txt`, `flow/integ_script.txt`, `council/proof_script.txt`, `progress/target.rs` ; snapshot des scénarios régénéré.
+
+## À faire à la fusion (une seule fois, sur main)
+- Smoke : `books`, `campaign`, `faction_works`, `faction_assembly`, `campaign_audience`, `campaign_attention`, `campaign_turns` (tutoriel/cibles) ; dump `books` : 5 livres, `open` sur chaque étape de `books.txt`.
+- Clippy complet, tests client complets.
+
+## Points ouverts
+- Intendant de province (file de chantiers par politique) : demande une règle du cœur ; « Chantiers du royaume » existe déjà (onglet Chantiers). -> XP-R3c.
+- Plus de bouton de rançons (alias seulement) : pas de pastille d'alerte quand un captif existe ; à brancher sur l'Audience/alertes.
+- Largeurs des hôtes Armées (roster 360, recrutement 620) non unifiées avec BOOK_WIDTH.
+- Alias `hud:open_*` : à retirer au cycle suivant.
+- Ravitaillement : jamais eu de fenêtre ; reste dans la montre.

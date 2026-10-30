@@ -424,16 +424,25 @@ fn close_on_exit(mut commands: Commands, mut roster: ResMut<Roster>) {
     roster.open = false;
 }
 
+/// XP-R3b (ADR 0818): the list is the « Armées » tab of the Armées book. The book key (U,
+/// `map_toggle_units`) is read by `panels/books.rs`; here the list opens on its hosted request
+/// and gives way to every other central screen (`displaces`) and to its `Close`.
 fn open_close(
     mut roster: ResMut<Roster>,
-    keymap: Res<KeyMap>,
-    keys: Res<ButtonInput<KeyCode>>,
+    mut requests: MessageReader<crate::campaign::panels::OpenPanel>,
     mut edges: ResMut<KeyEdges>,
-    focus: Option<Res<TextInputFocus>>,
 ) {
-    if keyboard_free(focus) && keymap.just_pressed("map_toggle_units", &keys) {
-        roster.open = !roster.open;
-        roster.dirty = roster.open;
+    use crate::campaign::panels::OpenPanel;
+    for request in requests.read() {
+        match request {
+            OpenPanel::Hosted { panel, .. } if panel == "roster" => {
+                roster.open = true;
+                roster.dirty = true;
+            }
+            OpenPanel::Close(panel) if panel == "roster" => roster.open = false,
+            other if crate::ui::kit::panel_stack::displaces(other, "roster") => roster.open = false,
+            _ => {}
+        }
     }
     if roster.open && edges.escape {
         roster.open = false;
@@ -996,6 +1005,7 @@ fn rebuild(
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
     bank: Option<Res<crate::campaign::panels::court::portrait::PortraitBank>>,
+    books: Res<crate::ui::kit::book::Books>,
 ) {
     if !roster.open {
         if let Some(root) = roster.root.take() {
@@ -1073,6 +1083,16 @@ fn rebuild(
                 .with_children(|panel| {
                     panel.spawn(typed(&theme, "Montre des hommes d’armes", UiType::Title));
                     panel.spawn(close_button(&theme, "roster:close"));
+                    if let Some(book) = books.book("armies") {
+                        crate::ui::kit::book::book_bar(
+                            panel,
+                            &theme,
+                            book,
+                            "book:armies:units",
+                            &[],
+                            &[],
+                        );
+                    }
                     panel
                         .spawn(Node {
                             flex_direction: FlexDirection::Row,

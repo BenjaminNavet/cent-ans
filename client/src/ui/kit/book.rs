@@ -21,7 +21,8 @@ pub struct BookTab {
     /// Name of the tab button (agent `click`), kept from the old windows.
     pub name: String,
     pub label: String,
-    /// Hosting panel (`faction`, `economy`, `feudal`, `chronicle`).
+    /// Hosting panel (`faction`, `economy`, `feudal`, `tech`, `chronicle`, `roster`,
+    /// `recruitment`, `ransom`, `court`, `diplomacy`).
     pub panel: String,
     /// Inner tab of that panel (empty when it has none).
     pub inner: String,
@@ -146,7 +147,14 @@ impl Books {
         self.books.iter().find(|book| book.id == id)
     }
 
-    /// The book hosting `panel`, if any.
+    /// The book and tab showing `inner` of `panel` (a panel may host tabs of two books).
+    pub fn hosting_tab(&self, panel: &str, inner: &str) -> Option<(&BookDef, &BookTab)> {
+        self.books.iter().find_map(|book| {
+            book.tab_of(panel, inner).map(|tab| (book, tab))
+        })
+    }
+
+    /// The first book hosting `panel`, if any.
     pub fn hosting(&self, panel: &str) -> Option<&BookDef> {
         self.books
             .iter()
@@ -222,10 +230,11 @@ mod tests {
     }
 
     #[test]
-    fn data_parses_with_two_books() {
+    fn data_parses_with_five_books() {
         let books = books();
-        assert_eq!(books.books.len(), 2);
+        assert_eq!(books.books.len(), 5);
         assert!(books.book("kingdom").is_some_and(|b| b.tabs.len() == 10));
+        assert!(books.book("court").is_some_and(|b| b.tabs.len() == 9));
         assert!(books.book("chronicle").is_some_and(|b| b.tabs.len() == 5));
     }
 
@@ -243,7 +252,10 @@ mod tests {
         assert_eq!(names.len(), total, "duplicate tab name");
         for book in &books.books {
             for tab in &book.tabs {
-                assert_eq!(books.hosting(&tab.panel).map(|b| &b.id), Some(&book.id));
+                assert_eq!(
+                    books.hosting_tab(&tab.panel, &tab.inner).map(|(b, _)| &b.id),
+                    Some(&book.id)
+                );
             }
         }
     }

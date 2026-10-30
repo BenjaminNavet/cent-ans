@@ -2,7 +2,7 @@
 # instead of the extraordinary taxes, the tab shows the forecast, the convocation is sent.
 state Campaign
 wait 120
-click hud:open_faction
+click hud:open_kingdom
 wait 10
 click faction:tab:finance
 wait 10

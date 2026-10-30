@@ -182,6 +182,11 @@ pub(super) fn open_close(
                 panel.open = !panel.open;
                 panel.dirty = true;
             }
+            // XP-R3b: the Techniques tab of the Royaume book opens the screen (never toggles).
+            OpenPanel::Hosted { panel: target, .. } if target == "tech" => {
+                panel.open = true;
+                panel.dirty = true;
+            }
             other if displaces(other, "tech") => panel.open = false,
             _ => {}
         }
@@ -249,6 +254,7 @@ fn rebuild(
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
     icons: Res<EntityIcons>,
+    books: Res<crate::ui::kit::book::Books>,
 ) {
     if !panel.open {
         if let Some(root) = panel.root.take() {
@@ -286,6 +292,7 @@ fn rebuild(
         &faction,
         state.turn,
         &panel,
+        &books,
     );
     panel.root = Some(root);
     panel.tree = Some(tree);
@@ -301,6 +308,7 @@ fn spawn_screen(
     faction: &str,
     turn: u32,
     panel: &TechPanel,
+    books: &crate::ui::kit::book::Books,
 ) -> Entity {
     let (cards, end_line) = layout::ribbon(
         tree.research.as_ref(),
@@ -341,6 +349,17 @@ fn spawn_screen(
                         ));
                         bar.spawn(close_button(&theme, "tech:close"));
                     });
+                    // XP-R3b: the screen is a tab of the Royaume book.
+                    if let Some(book) = books.book("kingdom") {
+                        crate::ui::kit::book::book_bar(
+                            page,
+                            &theme,
+                            book,
+                            "book:kingdom:tech",
+                            &[],
+                            &[],
+                        );
+                    }
                     // Research status: current research with its gauge, or the idle line.
                     page.spawn(Node {
                         flex_direction: FlexDirection::Column,

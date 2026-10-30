@@ -3,7 +3,7 @@
 #   CENT_ANS_FEATURES=dev CENT_ANS_PROFILE=debug client/run_bg.sh --state Campaign --offscreen --script client/src/campaign/council/proof_script.txt
 state Campaign
 wait 200
-click hud:open_council
+click hud:open_court
 wait 150
 dump out/council2.json
 exit

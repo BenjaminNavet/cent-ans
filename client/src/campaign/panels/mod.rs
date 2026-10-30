@@ -40,6 +40,9 @@ pub enum OpenPanel {
         panel: String,
         tab: String,
     },
+    /// XP-R3b (ADR 0818): close the hosting panel `panel` (a book key or launcher on its open
+    /// tab). Sent by `books.rs` for the panels that have no toggle message of their own.
+    Close(String),
     CloseAll,
 }
 

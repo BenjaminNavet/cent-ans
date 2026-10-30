@@ -43,11 +43,10 @@ use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::provinces::{MapMode, MapModeState, SetMapMode};
 use crate::menu::KeyEdges;
-use crate::settings::KeyMap;
 use crate::sim::Sim;
 use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::text_field::{
-    TextFieldChanged, TextFieldSubmitted, TextInputFocus, keyboard_free,
+    TextFieldChanged, TextFieldSubmitted, TextInputFocus,
 };
 use crate::ui::kit::{ButtonPressed, TabSelected};
 
@@ -65,11 +64,7 @@ impl Plugin for PanelDiplomacyPlugin {
         .add_systems(
             Update,
             (
-                (
-                    shortcut.run_if(keyboard_free),
-                    open_close.before(crate::menu::pause::pause_escape),
-                )
-                    .chain(),
+                open_close.before(crate::menu::pause::pause_escape),
                 // After the kit's typing (which runs before `pause_escape`): the panel is
                 // rebuilt as a whole, so a character typed in the same frame must be read first.
                 (
@@ -275,34 +270,30 @@ fn close_on_exit(mut ui: ResMut<DiplomacyUi>) {
     ui.dirty = true;
 }
 
-/// Key while closed: asks for the panel through the message bus so the other central panels
-/// close (`displaces`); the `OpenPanel::Diplomacy` request in `open_close` opens this one.
-fn shortcut(
-    ui: Res<DiplomacyUi>,
-    keys: Res<ButtonInput<KeyCode>>,
-    keymap: Res<KeyMap>,
-    mut outgoing: MessageWriter<OpenPanel>,
-) {
-    if !ui.open && keymap.just_pressed("map_toggle_diplomacy", &keys) {
-        outgoing.write(OpenPanel::Diplomacy);
-    }
-}
-
-/// `OpenPanel`, F3 (testing) and Escape.
+/// `OpenPanel` and Escape.
 pub(super) fn open_close(
     mut requests: MessageReader<OpenPanel>,
-    keys: Res<ButtonInput<KeyCode>>,
-    keymap: Res<KeyMap>,
     mut edges: ResMut<KeyEdges>,
     mut ui: ResMut<DiplomacyUi>,
     typing: Res<TextInputFocus>,
 ) {
-    // Opening by key goes through [`shortcut`] (message bus); only the close is handled here.
-    let mut toggle =
-        ui.open && !typing.is_active() && keymap.just_pressed("map_toggle_diplomacy", &keys);
+    // XP-R3b: the F3 key belongs to the Diplomatie book (`panels/books.rs`).
+    let mut toggle = false;
     for request in requests.read() {
         match request {
             OpenPanel::Diplomacy => toggle = true,
+            OpenPanel::Hosted { panel, tab } if panel == "diplomacy" => {
+                if !tab.is_empty() {
+                    ui.tab.clone_from(tab);
+                }
+                if !ui.open {
+                    toggle = true;
+                } else {
+                    ui.dirty = true;
+                    ui.field = None;
+                }
+            }
+            OpenPanel::Close(panel) if panel == "diplomacy" && ui.open => toggle = true,
             other if ui.open && displaces(other, "diplomacy") => {
                 ui.open = false;
                 ui.dirty = true;

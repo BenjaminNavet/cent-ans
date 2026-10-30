@@ -10,7 +10,7 @@ battle:
 books:
   - State(Campaign)
   - Wait(200)
-  - "Click(\"hud:open_faction\")"
+  - "Click(\"hud:open_kingdom\")"
   - Wait(10)
   - "Dump(\"[repo]/client/out/smoke/books_sheet.json\")"
   - "Click(\"economy:tab:trade\")"
@@ -19,6 +19,9 @@ books:
   - "Click(\"book:kingdom:feudal\")"
   - Wait(10)
   - "Dump(\"[repo]/client/out/smoke/books_feudal.json\")"
+  - "Click(\"book:kingdom:tech\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_tech.json\")"
   - "Click(\"hud:open_chronicle\")"
   - Wait(10)
   - "Click(\"chronicle:tab_registry\")"
@@ -27,6 +30,29 @@ books:
   - "Click(\"chronicle:tab_journal\")"
   - Wait(10)
   - "Dump(\"[repo]/client/out/smoke/books_journal.json\")"
+  - "Click(\"hud:open_armies\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_armies.json\")"
+  - "Click(\"book:armies:recruit\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_recruit.json\")"
+  - "Click(\"book:armies:ransoms\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_ransoms.json\")"
+  - "Click(\"hud:open_court\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_court.json\")"
+  - "Click(\"court:tab:family\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_family.json\")"
+  - "Click(\"faction:tab:court\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_orders.json\")"
+  - "Click(\"hud:open_diplomacy\")"
+  - Wait(10)
+  - "Click(\"dip:tab:war\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_diplomacy.json\")"
   - "Key(\"Escape\")"
   - Wait(10)
   - Exit
@@ -36,15 +62,21 @@ campaign:
   - "Dump(\"[repo]/client/out/smoke/campaign.json\")"
   - "Click(\"hud:open_diplomacy\")"
   - Wait(15)
-  - "Click(\"hud:open_tech\")"
+  - "Click(\"hud:open_kingdom\")"
+  - Wait(10)
+  - "Click(\"book:kingdom:tech\")"
   - Wait(15)
   - "Click(\"hud:open_chronicle\")"
   - Wait(15)
-  - "Click(\"hud:open_feudal\")"
+  - "Click(\"hud:open_kingdom\")"
+  - Wait(10)
+  - "Click(\"book:kingdom:feudal\")"
   - Wait(15)
-  - "Click(\"hud:open_council\")"
+  - "Click(\"hud:open_court\")"
   - Wait(15)
-  - "Click(\"hud:open_faction\")"
+  - "Click(\"hud:open_kingdom\")"
+  - Wait(10)
+  - "Click(\"faction:tab:sheet\")"
   - Wait(15)
   - "Key(\"Escape\")"
   - Wait(15)
@@ -163,7 +195,7 @@ crecy:
 faction_assembly:
   - State(Campaign)
   - Wait(120)
-  - "Click(\"hud:open_faction\")"
+  - "Click(\"hud:open_kingdom\")"
   - Wait(10)
   - "Click(\"faction:tab:finance\")"
   - Wait(10)
@@ -183,7 +215,7 @@ faction_select:
 faction_works:
   - State(Campaign)
   - Wait(120)
-  - "Click(\"hud:open_faction\")"
+  - "Click(\"hud:open_kingdom\")"
   - Wait(10)
   - "Click(\"faction:tab:works\")"
   - Wait(10)

@@ -815,37 +815,11 @@ fn handle_clicks(
             "hud:faction" => {
                 panels.write(OpenPanel::Faction(sim.player.as_str().to_owned()));
             }
-            "hud:open_diplomacy" => {
-                panels.write(OpenPanel::Diplomacy);
-            }
-            "hud:open_tech" => {
-                panels.write(OpenPanel::Tech);
-            }
-            "hud:open_council" => {
-                panels.write(OpenPanel::Council);
-            }
             "hud:treasury" => {
                 panels.write(OpenPanel::Economy);
             }
             "hud:open_codex" => {
                 codex.write(crate::codex::OpenCodex::default());
-            }
-            "hud:open_recruitment" => {
-                // The recruitment screen opens on a province: the selected army's, else the capital.
-                let province = selected_army
-                    .0
-                    .as_ref()
-                    .and_then(|id| {
-                        let (data, state) = (sim.data.as_ref()?, sim.state.as_ref()?);
-                        game_api::army_sheet(data, state, id)?.location_province
-                    })
-                    .or_else(|| {
-                        let state = sim.state.as_ref()?;
-                        let faction = state.factions.get(&sim.player)?;
-                        Some(faction.capital.as_str().to_owned())
-                    })
-                    .unwrap_or_default();
-                panels.write(OpenPanel::Recruitment(province));
             }
             name => {
                 if let Some(key) = name.strip_prefix("hud:mode:")

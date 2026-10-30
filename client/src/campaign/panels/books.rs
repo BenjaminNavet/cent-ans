@@ -20,10 +20,16 @@ use bevy::prelude::*;
 use serde_json::{Value, json};
 
 use super::OpenPanel;
+use super::army;
 use super::chronicle::ChroniclePanel;
+use super::court::{CourtUi, Screen};
+use super::diplomacy::DiplomacyUi;
 use super::economy::EconomyPanel;
 use super::faction::FactionPanel;
 use super::feudal::FeudalUi;
+use super::tech::TechPanel;
+use crate::campaign::armies::roster::Roster;
+use crate::campaign::hud::ransom::Ransoms;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::hud::keys::action_down;
@@ -56,23 +62,80 @@ struct Hosted<'w> {
     economy: Res<'w, EconomyPanel>,
     feudal: Res<'w, FeudalUi>,
     chronicle: Res<'w, ChroniclePanel>,
+    tech: Res<'w, TechPanel>,
+    roster: Res<'w, Roster>,
+    recruit: Res<'w, army::PanelState>,
+    ransoms: Res<'w, Ransoms>,
+    court: Res<'w, CourtUi>,
+    diplomacy: Res<'w, DiplomacyUi>,
     sim: Res<'w, Sim>,
 }
 
 impl Hosted<'_> {
     /// `(panel, inner tab)` of the open hosting panel, if any.
     fn current(&self) -> Option<(&'static str, String)> {
-        if self.faction.open && self.faction.faction.as_deref() == Some(self.sim.player.as_str()) {
-            Some(("faction", self.faction.tab.clone()))
-        } else if self.economy.open {
-            Some(("economy", self.economy.tab.clone()))
-        } else if self.feudal.open {
-            Some(("feudal", String::new()))
-        } else if self.chronicle.open {
-            Some(("chronicle", self.chronicle.tab_key().to_owned()))
+        current_panel(
+            &Refs {
+                faction: &self.faction,
+                economy: &self.economy,
+                feudal: &self.feudal,
+                chronicle: &self.chronicle,
+                tech: &self.tech,
+                roster: &self.roster,
+                recruit: &self.recruit,
+                ransoms: &self.ransoms,
+                court: &self.court,
+                diplomacy: &self.diplomacy,
+            },
+            self.sim.player.as_str(),
+        )
+    }
+}
+
+/// Borrowed states of the hosting panels (shared by the system and the dump).
+struct Refs<'a> {
+    faction: &'a FactionPanel,
+    economy: &'a EconomyPanel,
+    feudal: &'a FeudalUi,
+    chronicle: &'a ChroniclePanel,
+    tech: &'a TechPanel,
+    roster: &'a Roster,
+    recruit: &'a army::PanelState,
+    ransoms: &'a Ransoms,
+    court: &'a CourtUi,
+    diplomacy: &'a DiplomacyUi,
+}
+
+/// The open hosting panel and its inner tab. The central screens exclude each other, so the
+/// first one found is the book on view; the docked recruitment screen comes after them.
+fn current_panel(refs: &Refs, player: &str) -> Option<(&'static str, String)> {
+    if refs.faction.open && refs.faction.faction.as_deref() == Some(player) {
+        Some(("faction", refs.faction.tab.clone()))
+    } else if refs.economy.open {
+        Some(("economy", refs.economy.tab.clone()))
+    } else if refs.feudal.open {
+        Some(("feudal", String::new()))
+    } else if refs.tech.open {
+        Some(("tech", String::new()))
+    } else if refs.chronicle.open {
+        Some(("chronicle", refs.chronicle.tab_key().to_owned()))
+    } else if refs.court.screen != Screen::None {
+        let tab = if refs.court.screen == Screen::Sheet {
+            &refs.court.sheet_tab
         } else {
-            None
-        }
+            &refs.court.council_tab
+        };
+        Some(("court", tab.clone()))
+    } else if refs.diplomacy.open {
+        Some(("diplomacy", refs.diplomacy.tab.clone()))
+    } else if refs.roster.open {
+        Some(("roster", String::new()))
+    } else if refs.ransoms.open {
+        Some(("ransom", String::new()))
+    } else if refs.recruit.recruit.is_some() {
+        Some(("recruitment", String::new()))
+    } else {
+        None
     }
 }
 
@@ -153,8 +216,7 @@ fn remember(books: Res<Books>, hosted: Hosted, mut state: ResMut<BookState>) {
     let Some((panel, inner)) = hosted.current() else {
         return;
     };
-    if let Some(book) = books.hosting(panel)
-        && let Some(tab) = book.tab_of(panel, &inner)
+    if let Some((book, tab)) = books.hosting_tab(panel, &inner)
         && state.last.get(&book.id) != Some(&tab.key)
     {
         state.last.insert(book.id.clone(), tab.key.clone());
@@ -168,7 +230,8 @@ fn close_message(panel: &str, player: &str) -> Option<OpenPanel> {
         "economy" => OpenPanel::Economy,
         "feudal" => OpenPanel::Feudal,
         "chronicle" => OpenPanel::Chronicle,
-        _ => return None,
+        // The other hosts have no toggle message of their own.
+        other => OpenPanel::Close(other.to_owned()),
     })
 }
 
@@ -237,27 +300,23 @@ fn open_book(
 fn dump_books(world: &World) -> (String, Value) {
     let books = world.resource::<Books>();
     let state = world.resource::<BookState>();
-    let faction = world.resource::<FactionPanel>();
-    let economy = world.resource::<EconomyPanel>();
-    let feudal = world.resource::<FeudalUi>();
-    let chronicle = world.resource::<ChroniclePanel>();
-    let player = world.resource::<Sim>().player.as_str().to_owned();
-    let current = if faction.open && faction.faction.as_deref() == Some(player.as_str()) {
-        Some(("faction", faction.tab.clone()))
-    } else if economy.open {
-        Some(("economy", economy.tab.clone()))
-    } else if feudal.open {
-        Some(("feudal", String::new()))
-    } else if chronicle.open {
-        Some(("chronicle", chronicle.tab_key().to_owned()))
-    } else {
-        None
+    let refs = Refs {
+        faction: world.resource::<FactionPanel>(),
+        economy: world.resource::<EconomyPanel>(),
+        feudal: world.resource::<FeudalUi>(),
+        chronicle: world.resource::<ChroniclePanel>(),
+        tech: world.resource::<TechPanel>(),
+        roster: world.resource::<Roster>(),
+        recruit: world.resource::<army::PanelState>(),
+        ransoms: world.resource::<Ransoms>(),
+        court: world.resource::<CourtUi>(),
+        diplomacy: world.resource::<DiplomacyUi>(),
     };
-    let open = current.and_then(|(panel, inner)| {
-        books.hosting(panel).and_then(|book| {
-            book.tab_of(panel, &inner)
-                .map(|tab| json!({ "book": book.id, "tab": tab.key, "panel": panel }))
-        })
+    let player = world.resource::<Sim>().player.as_str().to_owned();
+    let open = current_panel(&refs, &player).and_then(|(panel, inner)| {
+        books.hosting_tab(panel, &inner).map(
+            |(book, tab)| json!({ "book": book.id, "tab": tab.key, "panel": panel }),
+        )
     });
     let mut last: Vec<(&String, &String)> = state.last.iter().collect();
     last.sort();
@@ -268,6 +327,8 @@ fn dump_books(world: &World) -> (String, Value) {
             "last": last.iter().map(|(book, tab)| json!({ "book": book, "tab": tab })).collect::<Vec<_>>(),
             "books": books.books.iter().map(|book| json!({
                 "id": book.id,
+                "title": book.title,
+                "launcher": book.launcher,
                 "tabs": book.tabs.iter().map(|tab| tab.name.clone()).collect::<Vec<_>>(),
             })).collect::<Vec<_>>(),
         }),
@@ -346,6 +407,34 @@ mod tests {
         )
         .unwrap();
         assert_eq!(other, Ok(("faction", "faction:tab:sheet", "sheet")));
+    }
+
+    /// The launchers of the bar are the five books and the Codex, with the data's names, keys
+    /// and titles (no window of the bar escapes the books).
+    #[test]
+    fn bar_launchers_match_the_books() {
+        use crate::campaign::hud::bar::LAUNCHERS;
+        let books = Books::parse(include_str!("../../../../data/ui/books.fr.json")).unwrap();
+        assert_eq!(LAUNCHERS.len(), books.books.len() + 1);
+        for book in &books.books {
+            let launcher = LAUNCHERS
+                .iter()
+                .find(|launcher| launcher.name == book.launcher)
+                .unwrap_or_else(|| panic!("no launcher for {}", book.id));
+            assert_eq!(launcher.action, book.action, "{}", book.id);
+            assert_eq!(launcher.title, book.title, "{}", book.id);
+        }
+    }
+
+    /// Every tab of every book lands on a panel the book knows how to close.
+    #[test]
+    fn every_hosting_panel_can_be_closed() {
+        let books = Books::parse(include_str!("../../../../data/ui/books.fr.json")).unwrap();
+        for book in &books.books {
+            for tab in &book.tabs {
+                assert!(close_message(&tab.panel, "p").is_some(), "{}", tab.panel);
+            }
+        }
     }
 
     /// The book keys (R, H or F5) open the book, but not while a text field has the keyboard.

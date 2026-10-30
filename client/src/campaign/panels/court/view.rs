@@ -19,8 +19,9 @@ use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{KitWidget, ListItem, Toggled};
 use crate::ui::kit::{
     UiTheme, UiTier, UiType, button_primary, button_small, caption, fr, gauge, heading, separator,
-    style, tab_bar, tab_pane,
+    style, tab_pane,
 };
+use crate::ui::kit::book::book_bar;
 
 #[derive(Component)]
 pub struct CourtRoot;
@@ -158,6 +159,7 @@ pub fn rebuild(
     next_hint: Res<crate::campaign::hud::hint::NextHint>,
     mut ui: ResMut<CourtUi>,
     roots: Query<Entity, With<CourtRoot>>,
+    books: Res<crate::ui::kit::book::Books>,
 ) {
     if next_hint.is_changed() && ui.screen == Screen::Council {
         ui.dirty = true;
@@ -191,8 +193,8 @@ pub fn rebuild(
             theme.sliced("panel"),
         ))
         .with_children(|root| match ui.screen {
-            Screen::Sheet => sheet_screen(root, &theme, &assets, &bank, ui),
-            _ => council_screen(root, &theme, &assets, &bank, &council_room, ui),
+            Screen::Sheet => sheet_screen(root, &theme, &assets, &bank, ui, &books),
+            _ => council_screen(root, &theme, &assets, &bank, &council_room, ui, &books),
         });
 }
 
@@ -226,6 +228,7 @@ fn sheet_screen(
     assets: &AssetServer,
     bank: &PortraitBank,
     ui: &CourtUi,
+    books: &crate::ui::kit::book::Books,
 ) {
     let Some(sheet) = &ui.snapshot.sheet else {
         root.spawn(ink(theme, "Personnage inconnu.", UiType::Body, style::INK));
@@ -254,9 +257,12 @@ fn sheet_screen(
         if !ui.history.is_empty() {
             header.spawn(button_small(theme, "court:back", "Retour"));
         }
-        header.spawn(button_small(theme, "court:council", "Conseil"));
         header.spawn(close_button(theme, "court:close"));
     });
+    // XP-R3b: the council and the sheet are tabs of the Cour book.
+    if let Some(book) = books.book("court") {
+        book_bar(root, theme, book, &ui.sheet_tab, &[], &[]);
+    }
     root.spawn(separator(theme));
     root.spawn(Node {
         flex_grow: 1.0,
@@ -279,8 +285,6 @@ fn sheet_screen(
                 .iter()
                 .position(|(name, _)| *name == ui.sheet_tab)
                 .unwrap_or(0);
-            right.spawn(tab_bar(theme, "court_sheet_tab", &SHEET_TABS, selected));
-            right.spawn(separator(theme));
             for (index, (name, _)) in SHEET_TABS.iter().enumerate() {
                 let mut pane = pane(right, "court_sheet_tab", name, index == selected);
                 pane.with_children(|pane| match index {
@@ -1279,6 +1283,7 @@ fn council_screen(
     bank: &PortraitBank,
     room: &crate::campaign::council::CouncilState,
     ui: &CourtUi,
+    books: &crate::ui::kit::book::Books,
 ) {
     root.spawn(Node {
         align_items: AlignItems::Center,
@@ -1300,7 +1305,9 @@ fn council_screen(
         .iter()
         .position(|(name, _)| *name == ui.council_tab)
         .unwrap_or(0);
-    root.spawn(tab_bar(theme, "court_council_tab", &COUNCIL_TABS, selected));
+    if let Some(book) = books.book("court") {
+        book_bar(root, theme, book, &ui.council_tab, &[], &[]);
+    }
     root.spawn(separator(theme));
     root.spawn(Node {
         flex_grow: 1.0,
