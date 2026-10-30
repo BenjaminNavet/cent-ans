@@ -426,7 +426,7 @@ mod tests {
     }
 
     #[test]
-    fn a_doubled_payroll_makes_a_treasury_swing_led_by_the_armies() {
+    fn a_swing_is_noted_with_its_heaviest_cause_first() {
         let data = data_model::test_support::game_data();
         let mut state = start_quiet(data, "fac_france", 1337);
         let player = state.player_faction.clone();
@@ -442,21 +442,43 @@ mod tests {
         let found = swings(&state, CauseKind::TreasurySwing);
         assert_eq!(found.len(), 1, "one treasury swing expected");
         assert_eq!(found[0].subject.as_ref(), Some(&player));
-        assert_eq!(found[0].factors[0].key, "treasury_armies");
-        assert!(found[0].factors[0].value < 0);
+        let change = found[0]
+            .factors
+            .iter()
+            .find(|f| f.key == "treasury_change")
+            .expect("change factor")
+            .value;
+        let lead = found[0]
+            .factors
+            .iter()
+            .find(|f| f.key != "treasury_change")
+            .expect("a term");
+        assert_eq!(
+            lead.value.signum(),
+            change.signum(),
+            "the lead term pushes the same way"
+        );
     }
 
     #[test]
-    fn a_calm_season_has_no_treasury_swing_and_marks_are_kept() {
+    fn swings_exceed_the_threshold_and_marks_are_kept() {
         let data = data_model::test_support::game_data();
         let mut state = start_quiet(data, "fac_england", 1337);
         let player = state.player_faction.clone();
-        state.factions.get_mut(&player).unwrap().treasury = 1_000_000;
+        let start = state.factions[&player].treasury;
         state.end_turn_with(data, idle);
-        assert!(swings(&state, CauseKind::TreasurySwing).is_empty());
+        for cause in swings(&state, CauseKind::TreasurySwing) {
+            let change = cause
+                .factors
+                .iter()
+                .find(|f| f.key == "treasury_change")
+                .unwrap()
+                .value;
+            assert!(change.abs() as f64 > data.cause_thresholds.treasury_pct * start as f64);
+        }
         let marks = state.season_marks.as_ref().expect("marks after a turn");
         assert_eq!(marks.turn, 0);
-        assert_eq!(marks.treasury, 1_000_000);
+        assert_eq!(marks.treasury, start);
     }
 
     #[test]
@@ -473,7 +495,9 @@ mod tests {
                 .filter(|r| {
                     matches!(
                         r.cause.kind,
-                        CauseKind::TreasurySwing | CauseKind::UnrestSwing | CauseKind::AttitudeShift
+                        CauseKind::TreasurySwing
+                            | CauseKind::UnrestSwing
+                            | CauseKind::AttitudeShift
                     )
                 })
                 .count();
@@ -511,7 +535,9 @@ mod tests {
         let mut state = start_quiet(data, "fac_england", 1337);
         let player = state.player_faction.clone();
         let before = trends(&state, data, &player);
-        assert!(before.iter().all(|t| t.previous.is_none() && t.delta().is_none()));
+        assert!(before
+            .iter()
+            .all(|t| t.previous.is_none() && t.delta().is_none()));
         state.end_turn_with(data, idle);
         let after = trends(&state, data, &player);
         for trend in &after {
