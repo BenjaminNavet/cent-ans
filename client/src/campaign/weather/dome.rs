@@ -325,6 +325,7 @@ fn spawn_dome(
     state.spawned = true;
 }
 
+#[allow(clippy::too_many_arguments)]
 fn update_dome(
     look: Res<SkyLook>,
     atmosphere: Res<Atmosphere>,

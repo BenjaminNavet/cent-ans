@@ -666,6 +666,7 @@ const SOON_HEIGHT: f32 = 52.0;
 const CARDS_MIN_HEIGHT: f32 = 120.0;
 
 /// Recruitment screen, docked at the right.
+#[allow(clippy::too_many_arguments)]
 pub fn spawn_recruit_panel(
     commands: &mut Commands,
     theme: &UiTheme,

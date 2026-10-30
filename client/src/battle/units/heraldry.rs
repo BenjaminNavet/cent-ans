@@ -745,12 +745,12 @@ mod tests {
     fn field_colour_picks_the_dominant_saturated_hue() {
         let size = ARMS_SIZE as usize;
         let mut layer = vec![0u8; size * size * 4];
-        for px in layer.chunks_exact_mut(4) {
+        for px in layer.as_chunks_mut::<4>().0.iter_mut() {
             px.copy_from_slice(&[30, 50, 180, 255]);
         }
         let blue = field_colour(&layer).expect("a field");
         assert!(blue[2] > blue[0] && blue[2] > blue[1]);
-        for px in layer.chunks_exact_mut(4) {
+        for px in layer.as_chunks_mut::<4>().0.iter_mut() {
             px.copy_from_slice(&[240, 240, 235, 255]);
         }
         let white = field_colour(&layer).expect("argent");
