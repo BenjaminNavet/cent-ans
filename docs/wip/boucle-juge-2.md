@@ -126,3 +126,7 @@ Prochain ADR libre : 0814. Script de fusion : tools ou scratchpad `merge_lot.sh`
 7. 3-4 agents en parallèle au plus.
 Suivants : VIS-R4 (après R3b), COHESION-1 (après IA-PLAN-2), VIS-R8 parchemin, R2-b lettres de retenue, textes XP encore codés, lot FPS seul sur machine calme.
 Constats seed bots longs : présentés au joueur, il choisit (ne rien écrire dans seed-bots-findings.md sans lui).
+
+## Session headless 30/10 (game-project-8e)
+- ECO-R1d fusionné (619015b68, sans ADR) ; contrôle complet + smoke + pytest : out/check-r1d.
+- Lots encore actifs (session précédente) : VIS-R3b, ECO-R1c, IA-PLAN-2, FPS/MEM3 ; surveillés par out/watch_lots.sh.
