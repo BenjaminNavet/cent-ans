@@ -99,3 +99,8 @@ Suite : choisir les refontes prioritaires dans les audits et les lancer en lots 
 - 30/10 : VERT fusionné (test d'arc : saut d'années tuait Édouard III ; ambitions en2_amb_guyenne/bu3_amb_arras renforcées ; fixture régénérée, accord 80,8 % juste au seuil ; codex). XP-POURQUOI (0810 : causes de variation, Récit de saison, tendances de la barre) et RIVIERES (0811 : alpha nul du ruban élargi dans river.wesl ; Seine visible à d 600) fusionnés. Contrôle out/check-vert.
 - Lancés : ECO-R1ab (impôt consenti), XP-AUDIENCE (Audience de saison + invite d'ambitions). Restes : fleuves pâles à d 900, bande riparienne illisible ; CLI codex-bundle cherche tools/data/ depuis un worktree ; accord auto/3D à 80,8 % (marge mince).
 - 30/10 : main vert (out/check-vert). Passe longue seed bots sur main (out/seedbots-long-main-2026-10-30.md) : régression `ai_refused_orders` 430-515/partie (bande 0-40) → lot IA-REFUS lancé. Dérives d'équilibre à présenter au joueur (non inscrites dans seed-bots-findings.md) : reign_score sous [6 ; 40] pour 5 bots (échelle R1 : passif = 0, bande à recalibrer ?), army_spend_share 0,46-0,56 (au-dessus de la bande, effet voulu de la semonce/ECO ?), revoltes/prises rebelles aggressor-sailor, banqueroutes turtle/random, factions_eliminated 30 (builder). Rapport passe longue R1 : out/seedbots-long-r1-2026-10-30.md.
+
+## 30/10 matin
+- Fusionnés : ECO-R1ab (ADR 0813, ambition `fr2_amb_compagnies` réajustée, glossaire), IA-REFUS (refus IA 430-515 -> 23-38/partie, sans ADR).
+- En cours : VIS-R3b, ECO-R1c, ECO-R1d, IA-PLAN-2, récupération MEM3 + FPS mêlée (branches à rebaser, non fusionnées).
+- Ensuite : VIS-R4 après R3b ; COHESION-1 après IA-PLAN-2 ; VIS-R8.
