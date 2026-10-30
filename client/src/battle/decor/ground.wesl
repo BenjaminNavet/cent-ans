@@ -563,7 +563,7 @@ fn ground_pbr_input(in: VertexOutput, is_front: bool) -> PbrInput {
         albedo = albedo * tuft_tint * (1.0 + clump * 1.5 * tuft_k);
     }
     // Decor saturation (data/fx/battle_ground.json `look.saturation`; 1 = the layers as painted).
-    albedo = mix(vec3<f32>(bt_luma(albedo)), albedo, ground.look.x);
+    albedo = mix(vec3<f32>(bt_luma(albedo)), albedo, ground.look.x) * ground.weather.w;
     // Deep water where no splat is left.
     let water_w = 1.0 - clamp(land * 4.0, 0.0, 1.0);
     albedo = mix(albedo, ground.water.rgb, water_w);

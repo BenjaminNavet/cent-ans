@@ -20,3 +20,11 @@ Spec : `docs/audits/2026-10-30-juge-visuel-iter3.md` (### L6, défaut G2-7). Ren
 ## À faire
 - Une capture de contrôle (battle_low) + mesure HSV ; caler `look.saturation`, bande du caparaçon (hauteur d'ourlet devinée).
 - Fumée de cheminée en volume : non fait.
+
+## Mesures (5 captures consommées, build debug)
+- Sol, battle_low : avant s 0,18-0,24 / v 0,53-0,58 (audit) ; après saturation 0,86 et value 0,76 : bande de sol s ~ 0,46, v ~ 0,48 (tient s >= 0,38, v <= 0,50). Touffes visibles de 1 à 30 m.
+- Chevaliers : mesure non concluante. Les captures prises juste après une recompilation sortent corrompues (image posterisée) ; la seule saine (cavaliers à 22 m, surcots bleus de France) donne s ~ 0,22 pour le rang hors herbe, avant le renforcement du caparaçon et de la livrée (désaturation 0,1, teinte d écu relevée), non mesuré proprement.
+- Piège : relancer la capture une seconde fois sans recompiler.
+
+## Non fait
+- Fumée de cheminée en volume ; horizon à deux plans non vérifié visuellement.

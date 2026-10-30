@@ -16,7 +16,8 @@
   },
   "fine_contrast": 0.6,
   "look": {
-    "saturation": 1.12,
+    "saturation": 0.86,
+    "value": 0.76,
     "tuft_amount": 0.16,
     "tuft_size_m": 1.1,
     "tuft_fade_m": 140.0

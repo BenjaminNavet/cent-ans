@@ -198,7 +198,8 @@ pub fn plan(
                 let weight = relief_weight(field, px, pz);
                 threshold += (0.55 + (-0.9 - 0.55) * forest - threshold) * weight;
             }
-            let near_plane = cfg.plane_split_m > 0.0 && outside_by(field, px, pz) < cfg.plane_split_m;
+            let near_plane =
+                cfg.plane_split_m > 0.0 && outside_by(field, px, pz) < cfg.plane_split_m;
             if near_plane && cfg.near_plane_gaps > 0.0 {
                 let g = cfg.gap_period_m.max(10.0);
                 let clearing = (fbm(px / g - 31.7, pz / g + 9.2) - 0.45).max(0.0) * 2.0;
@@ -209,10 +210,13 @@ pub fn plan(
             if n < threshold {
                 continue;
             }
-            let plane = if near_plane { cfg.near_plane_height } else { 1.0 };
-            let height = cfg.tree_height_m
-                * plane
-                * (cfg.scale[0] + (cfg.scale[1] - cfg.scale[0]) * scale);
+            let plane = if near_plane {
+                cfg.near_plane_height
+            } else {
+                1.0
+            };
+            let height =
+                cfg.tree_height_m * plane * (cfg.scale[0] + (cfg.scale[1] - cfg.scale[0]) * scale);
             out.push(FarTree {
                 x: px,
                 y: ring_height(field, look, relief, px, pz),

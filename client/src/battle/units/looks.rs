@@ -119,14 +119,14 @@ pub struct SoldierLook {
 impl Default for SoldierLook {
     fn default() -> Self {
         Self {
-            desaturation: 0.3,
+            desaturation: 0.1,
             value_min: 0.68,
             value_max: 0.95,
             plain_boost: 1.35,
             far_glow: 0.18,
             grain: 0.16,
             grain_fade_m: 60.0,
-            variation: 0.18,
+            variation: 0.22,
             shield_wear: 0.7,
             skin_calm: 0.5,
             steel_grey_mix: 0.45,
@@ -134,7 +134,7 @@ impl Default for SoldierLook {
             banner_per_m: 0.02,
             banner_min: 1.0,
             banner_max: 9.0,
-            size_jitter_mounted: 0.0,
+            size_jitter_mounted: 0.045,
             size_jitter_foot: 0.05,
         }
     }
@@ -168,7 +168,11 @@ impl SoldierLook {
         set(&mut look.banner_per_m, "banner", "scale_per_m");
         set(&mut look.banner_min, "banner", "scale_min");
         set(&mut look.banner_max, "banner", "scale_max");
-        set(&mut look.size_jitter_mounted, "fabric", "size_jitter_mounted");
+        set(
+            &mut look.size_jitter_mounted,
+            "fabric",
+            "size_jitter_mounted",
+        );
         set(&mut look.size_jitter_foot, "fabric", "size_jitter_foot");
         look
     }

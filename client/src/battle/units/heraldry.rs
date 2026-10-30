@@ -578,7 +578,7 @@ pub fn field_colour(layer: &[u8]) -> Option<[f32; 3]> {
     if best_weight >= neutral * 0.5 {
         let mean = sum[best].map(|c| c / best_weight);
         let top = mean[0].max(mean[1]).max(mean[2]).max(0.01);
-        let lift = (0.55 / top).clamp(1.0, 1.8);
+        let lift = (0.68 / top).clamp(1.0, 2.0);
         return Some(mean.map(|c| (c * lift).min(1.0)));
     }
     Some(if white >= black {

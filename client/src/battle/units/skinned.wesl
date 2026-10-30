@@ -855,10 +855,10 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> @locatio
             // VIS-L6 caparison: horses of noble regiments wear the dye of the arms their rider wears, a trim
             // band along the hem; the horse coat shows on the neck, the legs and in front of the withers.
             if params.chest.w > 0.5 && h5 < params.livery.w {
-                let hem = 0.6 + (noise2(vec2<f32>(in.rest.z * 6.0, 3.0)) - 0.5) * 0.05;
+                let hem = 0.5 + (noise2(vec2<f32>(in.rest.z * 6.0, 3.0)) - 0.5) * 0.05;
                 let drape = smoothstep(hem, hem + 0.05, in.rest.y) * smoothstep(-0.5, -0.4, in.rest.z);
                 let band = smoothstep(0.045, 0.0, abs(in.rest.y - hem - 0.045));
-                var cap = dyed * mix(0.9, 1.1, noise2(in.rest.xz * 14.0));
+                var cap = livery * mix(0.78, 1.0, h.z) * mix(0.9, 1.1, noise2(in.rest.xz * 14.0));
                 cap = mix(cap, params.trim.rgb * 0.8, band * 0.7);
                 albedo = mix(albedo, cap, drape * 0.96);
                 roughness = mix(roughness, 0.85, drape);

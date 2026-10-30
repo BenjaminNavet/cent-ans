@@ -214,7 +214,7 @@ impl Default for GroundParams {
             micro_tile: [Vec4::splat(0.5); 4],
             relief: Vec4::new(0.0, 0.7, 0.0, 10000.0),
             relief_rect: Vec4::ZERO,
-            weather: Vec4::new(0.0, 0.0, 0.0, 0.6),
+            weather: Vec4::new(0.0, 0.0, 0.0, 1.0),
             trample_rect: Vec4::ZERO,
             far: Vec4::new(0.8, 28.0, 180.0, 45.0),
             look: Vec4::new(0.6, 0.0, 1.0, 120.0),
@@ -338,6 +338,13 @@ pub fn ground_look(data_dir: &Path) -> Vec4 {
         num("tuft_size_m", 1.0).max(0.05),
         num("tuft_fade_m", 120.0).max(1.0),
     )
+}
+
+/// Albedo multiplier of the ground (`look.value` of `data/fx/battle_ground.json`, 1 when missing).
+pub fn ground_value(data_dir: &Path) -> f32 {
+    read_json(&data_dir.join("fx/battle_ground.json"))
+        .and_then(|t| t.get("look")?.get("value")?.as_f64())
+        .map_or(1.0, |v| v as f32)
 }
 
 /// Seasonal tint of the grass relative to the summer ground, and the snow cover.
@@ -793,7 +800,12 @@ pub fn build_ground_material(
     );
     let trample_on = matches!(field.ground, Ground::Snowy | Ground::Muddy)
         || matches!(weather, Weather::Snow | Weather::Rain);
-    params.weather = Vec4::new(wetness, f32::from(u8::from(trample_on)), 1.0, 1.0);
+    params.weather = Vec4::new(
+        wetness,
+        f32::from(u8::from(trample_on)),
+        1.0,
+        ground_value(data_dir),
+    );
     params.look = ground_look(data_dir);
     let (w, d) = (field.width as f32, field.depth as f32);
     // Calm centre: the Godot rectangle (150, 60, 1050, 740) of a 1200 x 800 m field, scaled.

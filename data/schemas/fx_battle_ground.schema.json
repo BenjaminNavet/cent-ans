@@ -34,11 +34,12 @@
     },
     "look": {
       "type": "object",
-      "required": ["saturation", "tuft_amount", "tuft_size_m", "tuft_fade_m"],
+      "required": ["saturation", "value", "tuft_amount", "tuft_size_m", "tuft_fade_m"],
       "additionalProperties": false,
       "description": "VIS-L6 : matière du sol de bataille lue par le client Bevy.",
       "properties": {
         "saturation": {"type": "number", "minimum": 0.4, "maximum": 1.6, "description": "Saturation du sol (1 = couches telles que peintes ; 0,6 était le décor atténué codé en dur)."},
+        "value": {"type": "number", "minimum": 0.4, "maximum": 1.4, "description": "Multiplicateur d'albédo du sol (valeur HSV au premier plan visée ≤ 0,50)."},
         "tuft_amount": {"type": "number", "minimum": 0, "maximum": 0.6, "description": "Amplitude des touffes (clair/sombre, vert/sec)."},
         "tuft_size_m": {"type": "number", "exclusiveMinimum": 0, "maximum": 10, "description": "Taille d'une touffe en mètres."},
         "tuft_fade_m": {"type": "number", "exclusiveMinimum": 0, "maximum": 2000, "description": "Distance où les touffes disparaissent."}
