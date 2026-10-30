@@ -225,9 +225,6 @@ mod tests {
         assert_eq!(blocks.len(), 3);
         assert!(blocks.iter().all(|b| !b.lines.is_empty()));
         assert!(blocks[0].lines[0].starts_with("Trésor : ▼"));
-        assert_eq!(
-            blocks[1].lines,
-            [game_api::causes::ui_text("story_why_none")]
-        );
+        assert_eq!(blocks[1].lines, [game_api::causes::ui_text("story_why_none")]);
     }
 }

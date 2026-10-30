@@ -169,8 +169,12 @@ fn back_off_number(chars: &[char], end: usize) -> usize {
     // between digits) and the one after is a digit, or a separator followed by a digit.
     let digit = |i: usize| chars.get(i).is_some_and(char::is_ascii_digit);
     let continues = digit(end)
-        && (digit(end - 1) || (is_number_separator(chars[end - 1]) && end >= 2 && digit(end - 2)))
-        || (end >= 1 && digit(end - 1) && is_number_separator(chars[end]) && digit(end + 1));
+        && (digit(end - 1)
+            || (is_number_separator(chars[end - 1]) && end >= 2 && digit(end - 2)))
+        || (end >= 1
+            && digit(end - 1)
+            && is_number_separator(chars[end])
+            && digit(end + 1));
     if !continues {
         return end;
     }
@@ -178,10 +182,7 @@ fn back_off_number(chars: &[char], end: usize) -> usize {
     while start > 0 {
         let c = chars[start - 1];
         let inside = c.is_ascii_digit()
-            || (is_number_separator(c)
-                && start >= 2
-                && chars[start - 2].is_ascii_digit()
-                && digit(start));
+            || (is_number_separator(c) && start >= 2 && chars[start - 2].is_ascii_digit() && digit(start));
         if !inside {
             break;
         }
