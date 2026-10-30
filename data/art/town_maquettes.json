@@ -58,7 +58,7 @@
     "chimney_ratio": 0.4,
     "chimney_range": 300.0,
     "hamlet_village_ratio": 0.7,
-    "folk_scale": 675.0,
+    "folk_scale": 300.0,
     "folk_density": 1.0,
     "folk_range": 450.0,
     "folk_speed": 0.5,
