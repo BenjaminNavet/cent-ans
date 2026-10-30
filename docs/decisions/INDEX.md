@@ -374,7 +374,6 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0815 | [ECO-R1c : l'impôt consenti, IA et Angleterre](0815-eco-r1c-ia-et-angleterre.md) | accepté |
 | 0816 | [IA-PLAN-2 : plans offensifs, rôles `fix` / `wear` / `strike` / `screen`](0816-ia-plan-2-plans-offensifs.md) | n/d |
 | 0817 | [CAMP-R6 : huit maisons jouables](0817-camp-r6-maisons-jouables.md) | accepté |
-| 0820 | [VIS-R4 : montagne étagée et neige d'altitude blanche](0820-vis-r4-montagne-etagee.md) | proposé |
 | 0820 | [VIS-R4 : montagne étagée et neige d'altitude blanche](0820-vis-r4-montagne-etagee.md) | accepté |
 | 0829 | [DATA-GARDE : manifeste de schémas, chargement parallèle, textes du core](0829-data-garde-manifeste-schemas.md) | accepté |
 | 0831 | [CAMP-GEN : missions proportionnées à la puissance de la maison](0831-camp-gen-missions-proportionnees.md) | accepté |
