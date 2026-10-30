@@ -1,4 +1,4 @@
-# ADR XXXX — Budget d'attention et Audience de saison (XP-AUDIENCE, R1)
+# ADR 0812 — Budget d'attention et Audience de saison (XP-AUDIENCE, R1)
 
 Date : 2026-10-30. Statut : accepté (lot XP-AUDIENCE, boucle juge 2). Numéro à attribuer à la fusion.
 Révise l'ADR 0752 (bandeau Conseiller unique), 0775 (avis ordonnés), 0789 (conseiller de saison : devient une source), 0304 (offre de

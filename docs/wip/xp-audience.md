@@ -1,7 +1,7 @@
 # XP-AUDIENCE (R1) — budget d'attention et Audience de saison
 
 Spec : `docs/audits/2026-10-29-experience.md` § C1, R1, « Lot XP-AUDIENCE ». Base : ADR 0810 (`season_story`), 0805/R1-UI, 0789.
-ADR : `docs/decisions/XXXX-xp-audience.md` (à numéroter à la fusion).
+ADR : `docs/decisions/0812-xp-audience.md` (à numéroter à la fusion).
 
 ## Plan
 1. Données : `data/rules/agenda.json` (plafonds, tri, crises) + `data_model::AgendaRules` ; textes `data/ui/audience.fr.json` + schémas. FAIT.
