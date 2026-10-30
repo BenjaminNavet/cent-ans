@@ -1,6 +1,6 @@
 # IA-PLAN-1 — planificateur par divisions, plan « Tenir et recevoir »
 
-Spec : `docs/audits/2026-10-29-bataille.md` (d) IA-PLAN-1. ADR : `docs/decisions/XXXX-ia-plan-planificateur.md`
+Spec : `docs/audits/2026-10-29-bataille.md` (d) IA-PLAN-1. ADR : `docs/decisions/0809-ia-plan-planificateur.md`
 (numéro à la fusion). Branche : worktree-agent-a4262fad3109d43b2. Rien de poussé ni fusionné.
 
 ## État : terminé (hors fusion)

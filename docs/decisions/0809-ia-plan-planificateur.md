@@ -1,4 +1,4 @@
-# ADR XXXX — IA-PLAN-1 : planificateur d'IA de bataille par divisions
+# ADR 0809 — IA-PLAN-1 : planificateur d'IA de bataille par divisions
 
 (Numéro attribué à la fusion.)
 

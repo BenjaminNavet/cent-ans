@@ -369,3 +369,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0806 | [VIS-R5 : eau de la carte (bathymétrie réelle, rivières)](0806-vis-r5-eau.md) | accepté |
 | 0807 | [BANC-2 : auto-résolution recalibrée et datée](0807-banc-2-auto-resolution.md) | accepté |
 | 0808 | [ECO-R2a : la semonce féodale donne des soldats](0808-eco-r2a-semonce-feodale.md) | accepté |
+| 0809 | [IA-PLAN-1 : planificateur d'IA de bataille par divisions](0809-ia-plan-planificateur.md) | accepté |
