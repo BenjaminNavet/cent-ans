@@ -96,6 +96,7 @@ pub use entities::campaign_weather::{
 pub use entities::capture::{
     CaptureAiRules, CaptureRules, OccupyRules, OutcomeRules, OutcomeScores, RazeRules,
 };
+pub use entities::cause_thresholds::CauseThresholds;
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::chivalric_order::ChivalricOrder;
 pub use entities::council::{CouncilEffect, CouncilEffectKind, CouncilOfficeDef, CouncilOffices};
@@ -131,7 +132,6 @@ pub use entities::feudal_rules::{
     ArbitrationRules, ArbitrationWeights, EscalationRules, FelonyReason, FeudalRules, HostRules,
     LoyaltyWeights, ProtectionScore, StartFelony,
 };
-pub use entities::cause_thresholds::CauseThresholds;
 pub use entities::finance_rules::{
     CreditRules, DefaultRules, DowryRules, FinanceAiRules, FinanceRules, HouseholdRules,
     HouseholdTier, Lender, Levy, OfficerRules, SiegeCostRules,

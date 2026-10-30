@@ -536,10 +536,7 @@ fn act_delta(data: &GameData, state: &CampaignState) -> Option<ActDelta> {
             &ui_text("story_act_line"),
             &[
                 ("act", &number.to_string()),
-                (
-                    "delta",
-                    &signed_amount(i64::from(gained)),
-                ),
+                ("delta", &signed_amount(i64::from(gained))),
             ],
         )
     };
@@ -929,21 +926,41 @@ mod tests {
         ));
         every_key_resolves(&build::unrest_swing_cause(&a, &province, 40.0, 10.0, &[]));
         for tier in 0..5 {
-            let cause = build::attitude_shift_cause(
-                &a,
-                &b,
-                (-10, 30),
-                tier,
-                &[("Alliés".to_owned(), 30)],
-            );
+            let cause =
+                build::attitude_shift_cause(&a, &b, (-10, 30), tier, &[("Alliés".to_owned(), 30)]);
             every_key_resolves(&cause);
         }
         // Every term key of the top bar has a label.
         for key in [
-            "receipts", "armies", "buildings", "table", "administration", "household", "wages",
-            "siege", "obligations", "interest", "levies", "loans", "other", "others", "tech",
-            "ruler", "retinue", "order", "building", "tax", "devastation", "goods", "health",
-            "garrison", "occupation", "foreign_religion", "disorder", "loyalty", "inertia",
+            "receipts",
+            "armies",
+            "buildings",
+            "table",
+            "administration",
+            "household",
+            "wages",
+            "siege",
+            "obligations",
+            "interest",
+            "levies",
+            "loans",
+            "other",
+            "others",
+            "tech",
+            "ruler",
+            "retinue",
+            "order",
+            "building",
+            "tax",
+            "devastation",
+            "goods",
+            "health",
+            "garrison",
+            "occupation",
+            "foreign_religion",
+            "disorder",
+            "loyalty",
+            "inertia",
         ] {
             assert_ne!(term_label(key, ""), key, "missing term label: {key}");
         }
@@ -965,7 +982,10 @@ mod tests {
             &fac("fac_france"),
             (-30, 25),
             3,
-            &[("Alliés".to_owned(), 30), ("Voisin menaçant".to_owned(), -10)],
+            &[
+                ("Alliés".to_owned(), 30),
+                ("Voisin menaçant".to_owned(), -10),
+            ],
         );
         let texts: Vec<String> = cause
             .factors
