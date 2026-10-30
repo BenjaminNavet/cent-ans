@@ -41,7 +41,7 @@ les canaux. Le joueur apprenait à tout ignorer, y compris l'offre de mission qu
 
 ## Conséquences
 
-- Mesure (smoke `campaign_attention`, Angleterre, 10 saisons) : voir `docs/wip/xp-audience.md`.
+- Mesure (smoke `campaign_attention`, Angleterre, 10 saisons) : ouvertures d'office 61 -> 12 (33 toasts, 9 bandeaux, 9 fenêtres de décision, 10 fenêtres d'offre avant ; 11 cartes d'Audience et 1 bandeau après). Détail dans `docs/wip/xp-audience.md`.
 - Le Registre garde tout ; seule la *poussée* est limitée. Une information qui ne tient pas dans le budget reste lisible mais ne
   s'impose plus.
 - Reste : conseils vocaux (`audio/advisor.rs`) et lettres scellées gardent leur propre canal ; la table d'actions du Registre est
