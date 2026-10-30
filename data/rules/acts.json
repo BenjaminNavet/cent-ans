@@ -3951,7 +3951,7 @@
         {
           "id": "br1_amb_montfort",
           "name": "Le parti de Montfort",
-          "description": "Soutenir Jeanne de Flandre et les Montfort contre Blois, comme à Hennebont : levées moins chères (-20 %), troubles (+2). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "description": "Soutenir Jeanne de Flandre et les Montfort contre Blois, comme à Hennebont : levées moins chères (-20 %), prestige +20. Batailles, places prises et domaine rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "recruit_cost",
@@ -3959,8 +3959,8 @@
               "mode": "percent"
             },
             {
-              "effect": "unrest",
-              "value": 2
+              "effect": "prestige",
+              "value": 20
             }
           ],
           "renown_bonus_percent": 50,
@@ -3999,16 +3999,16 @@
         {
           "id": "br1_amb_sel",
           "name": "Le sel de Guérande",
-          "description": "Vendre le sel de la baie et les toiles de Bretagne : commerce +15 %, impôt -5 %. Rançons et trésor rapportent moitié plus de renommée.",
+          "description": "Vendre le sel de la baie et les toiles de Bretagne : commerce +30 %, impôt +5 %. Rançons et trésor rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "trade_income",
-              "value": 15,
+              "value": 30,
               "mode": "percent"
             },
             {
               "effect": "tax_income",
-              "value": -5,
+              "value": 5,
               "mode": "percent"
             }
           ],
@@ -4171,7 +4171,7 @@
         {
           "id": "br3_amb_richemont",
           "name": "Le connétable de Richemont",
-          "description": "Mener l’ost breton à la manière d’Arthur de Richemont : soldes allégées (-30 %), expérience des troupes (+10), levées moins chères (-25 %), une bande de plus à recruter. Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "description": "Mener l’ost breton à la manière d’Arthur de Richemont : soldes allégées (-30 %), expérience des troupes (+10), levées moins chères (-25 %), une bande de plus à recruter, prestige +25. Batailles, places prises et domaine rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "army_upkeep",
@@ -4190,6 +4190,10 @@
             {
               "effect": "recruit_slots",
               "value": 1
+            },
+            {
+              "effect": "prestige",
+              "value": 25
             }
           ],
           "renown_bonus_percent": 50,
@@ -4281,11 +4285,11 @@
         {
           "id": "na1_amb_pyrenees",
           "name": "Les cols des Pyrénées",
-          "description": "Tenir Roncevaux et les routes du pèlerinage : commerce +15 %, fortifications (+1). Places prises et domaine rapportent moitié plus de renommée.",
+          "description": "Tenir Roncevaux et les routes du pèlerinage : commerce +30 %, fortifications (+1). Places prises et domaine rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "trade_income",
-              "value": 15,
+              "value": 30,
               "mode": "percent"
             },
             {
@@ -4326,7 +4330,7 @@
         {
           "id": "na1_amb_routiers",
           "name": "Les routiers navarrais",
-          "description": "Engager les gens de pied basques et navarrais : levées moins chères (-20 %), troubles (+2). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "description": "Engager les gens de pied basques et navarrais : levées moins chères (-20 %), prestige +20. Batailles, places prises et domaine rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "recruit_cost",
@@ -4334,8 +4338,8 @@
               "mode": "percent"
             },
             {
-              "effect": "unrest",
-              "value": 2
+              "effect": "prestige",
+              "value": 20
             }
           ],
           "renown_bonus_percent": 50,
@@ -4376,16 +4380,15 @@
         {
           "id": "na2_amb_deux_couronnes",
           "name": "Le jeu entre deux couronnes",
-          "description": "Louvoyer entre Valois et Plantagenêts : troubles (-4), commerce +5 %. Trêves imposées et alliances rapportent moitié plus de renommée.",
+          "description": "Louvoyer entre Valois et Plantagenêts : troubles (-4), prestige +25. Trêves imposées et alliances rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "unrest",
               "value": -4
             },
             {
-              "effect": "trade_income",
-              "value": 5,
-              "mode": "percent"
+              "effect": "prestige",
+              "value": 25
             }
           ],
           "renown_bonus_percent": 50,
@@ -4478,16 +4481,16 @@
         {
           "id": "na3_amb_nemours",
           "name": "Le traité de Nemours",
-          "description": "Céder les terres normandes contre le duché de Nemours et la paix (1404) : commerce +25 %, troubles (-2). Trêves imposées et alliances rapportent moitié plus de renommée.",
+          "description": "Céder les terres normandes contre le duché de Nemours et la paix (1404) : commerce +40 %, prestige +15. Trêves imposées et alliances rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "trade_income",
-              "value": 25,
+              "value": 40,
               "mode": "percent"
             },
             {
-              "effect": "unrest",
-              "value": -2
+              "effect": "prestige",
+              "value": 15
             }
           ],
           "renown_bonus_percent": 50,
@@ -4605,7 +4608,7 @@
         {
           "id": "sc1_amb_bruce",
           "name": "Les barons de Bruce",
-          "description": "Rassembler les barons fidèles à David II contre Balliol : levées moins chères (-20 %), troubles (+2). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "description": "Rassembler les barons fidèles à David II contre Balliol : levées moins chères (-20 %), prestige +20. Batailles, places prises et domaine rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "recruit_cost",
@@ -4613,8 +4616,8 @@
               "mode": "percent"
             },
             {
-              "effect": "unrest",
-              "value": 2
+              "effect": "prestige",
+              "value": 20
             }
           ],
           "renown_bonus_percent": 50,
@@ -4629,16 +4632,16 @@
         {
           "id": "sc1_amb_laine",
           "name": "La laine et les peaux d’Écosse",
-          "description": "Exporter laine et peaux par Berwick et Leith : commerce +15 %, impôt -5 %. Rançons et trésor rapportent moitié plus de renommée.",
+          "description": "Exporter laine et peaux par Berwick et Leith : commerce +30 %, impôt +5 %. Rançons et trésor rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "trade_income",
-              "value": 15,
+              "value": 30,
               "mode": "percent"
             },
             {
               "effect": "tax_income",
-              "value": -5,
+              "value": 5,
               "mode": "percent"
             }
           ],
@@ -4730,15 +4733,15 @@
         {
           "id": "sc2_amb_chateaux",
           "name": "Les tours de la frontière",
-          "description": "Garder les châteaux contre les Anglais : fortifications (+1), troubles (-2). Places prises et domaine rapportent moitié plus de renommée.",
+          "description": "Garder les châteaux contre les Anglais : fortifications (+1), prestige +20. Places prises et domaine rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "fortification_level",
               "value": 1
             },
             {
-              "effect": "unrest",
-              "value": -2
+              "effect": "prestige",
+              "value": 20
             }
           ],
           "renown_bonus_percent": 50,
@@ -4904,7 +4907,7 @@
         {
           "id": "fl1_amb_milices",
           "name": "Les milices communales",
-          "description": "Lever les métiers en armes, comme à Courtrai : levées moins chères (-25 %), une bande de plus à recruter, troubles (+2). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "description": "Lever les métiers en armes, comme à Courtrai : levées moins chères (-25 %), une bande de plus à recruter, prestige +15. Batailles, places prises et domaine rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "recruit_cost",
@@ -4916,8 +4919,8 @@
               "value": 1
             },
             {
-              "effect": "unrest",
-              "value": 2
+              "effect": "prestige",
+              "value": 15
             }
           ],
           "renown_bonus_percent": 50,
@@ -5027,16 +5030,16 @@
         {
           "id": "fl2_amb_drapiers",
           "name": "Les drapiers d’Ypres et de Bruges",
-          "description": "Protéger les foires et les halles drapières : commerce +20 %, impôt -5 %. Rançons et trésor rapportent moitié plus de renommée.",
+          "description": "Protéger les foires et les halles drapières : commerce +35 %, impôt +5 %. Rançons et trésor rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "trade_income",
-              "value": 20,
+              "value": 35,
               "mode": "percent"
             },
             {
               "effect": "tax_income",
-              "value": -5,
+              "value": 5,
               "mode": "percent"
             }
           ],
@@ -5437,16 +5440,17 @@
         {
           "id": "ca3_amb_canaries",
           "name": "Les Canaries et l’Atlantique",
-          "description": "Armer les marins du golfe de Cadix : commerce +25 %, troubles (-2). Rançons et trésor rapportent moitié plus de renommée.",
+          "description": "Armer les marins du golfe de Cadix : commerce +40 %, impôt +5 %. Rançons et trésor rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "trade_income",
-              "value": 25,
+              "value": 40,
               "mode": "percent"
             },
             {
-              "effect": "unrest",
-              "value": -2
+              "effect": "tax_income",
+              "value": 5,
+              "mode": "percent"
             }
           ],
           "renown_bonus_percent": 50,
