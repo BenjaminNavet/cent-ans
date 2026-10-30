@@ -33,7 +33,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
     var col = col_in;
     let mpp = max(ground.micro.w, 1.0);
     let fade = smoothstep(fields.v0.x, fields.v0.y, footprint);
-    let w_bare = fields.v5.x * (1.0 - fade) * land;
+    var w_bare = fields.v5.x * (1.0 - fade) * land;
     var w_far = 0.0;
     if (fields.v2.y > 0.0) {
         w_far = fields.v2.w * fade * (1.0 - smoothstep(fields.v3.x, fields.v3.y, footprint)) * land;
@@ -59,6 +59,12 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
     }
     let cell_px = max(fields.rows_a[row0].x, 50.0) * fields.v2.x * select(1.0, fa.w, forms_on) / mpp;
     let warp_k = select(1.0, fa.z, forms_on);
+    // VIS-L1: a parcel narrower than a few screen pixels is not drawn one by one (the combed
+    // ground): its own colour, grain and hedges fade into the ground colour, the far patchwork
+    // (coarser levels) takes over.
+    if (forms_on && fields.pc0.w > 0.0) {
+        w_bare = w_bare * smoothstep(fields.pc0.z, fields.pc0.w, cell_px / max(footprint, 1e-6));
+    }
     let rot_f = hb_rot(ang_r);
     var uu = rot_f * (p - origin) / cell_px;
     uu.x = uu.x / strip;
@@ -95,7 +101,7 @@ fn fields_apply(p: vec2<f32>, uv: vec2<f32>, footprint_in: f32, land: f32, open_
     }
     if (far_on) {
         let far_col = hb_far_patch(uu, footprint, footprint / cell_px, row, h_dom, vine_k, meadow_k, frame);
-        col = mix(col, hb_relative(col, far_col), w_far * open_w * farm_frac);
+        col = mix(col, hb_relative(col, far_col.rgb), w_far * open_w * farm_frac * far_col.a);
     }
     out.color = col;
     if (w_bare <= 0.001) {

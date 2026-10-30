@@ -72,7 +72,8 @@ pub struct FieldParams {
     pub tex_flags: Vec4,
     /// Linear mean colour of each layer of the parcels array (`mean_linear` of the manifest).
     pub tex_means: [Vec4; TEX_LAYERS],
-    /// VIS-R3b: colormap share at the closest, 1 when the typed forms are on, 0, 0.
+    /// VIS-R3b: colormap share at the closest, 1 when the typed forms are on; VIS-L1: screen width
+    /// (px) of a strip below which it fades out (x), above which it is fully drawn (y); 0, 0 = off.
     pub pc0: Vec4,
     /// Per form (`parcel::Form`): aspect min, aspect max, warp, cell scale.
     pub forms_a: [Vec4; FORMS],
@@ -86,6 +87,10 @@ pub struct FieldParams {
     pub forms_e: [Vec4; FORMS],
     /// Per (form, season), two vec4: cumulative class shares 0..3, then 4, 5, 0, 0.
     pub shares: [Vec4; FORMS * SEASONS * 2],
+    /// VIS-L1 ground look: saturation gain, hue target (degrees), hue pull, 1 when on.
+    pub look_a: Vec4,
+    /// VIS-L1 ground look: hue range start / end (degrees), forest value, plain value.
+    pub look_b: Vec4,
 }
 
 /// Layers of the parcels array the shader tables can address.
@@ -125,6 +130,8 @@ impl Default for FieldParams {
             forms_d: [Vec4::new(0.55, 0.2, 0.03, 0.3); FORMS],
             forms_e: [Vec4::new(0.15, 0.45, 0.78, 0.0); FORMS],
             shares: [Vec4::new(1.0 / 6.0, 2.0 / 6.0, 0.5, 4.0 / 6.0); FORMS * SEASONS * 2],
+            look_a: Vec4::new(1.0, 89.0, 0.0, 0.0),
+            look_b: Vec4::new(55.0, 150.0, 1.0, 1.0),
         }
     }
 }
@@ -456,9 +463,34 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
             d.pc0.x
         },
         if typed { 1.0 } else { 0.0 },
-        0.0,
-        0.0,
+        // VIS-L1: strips narrower than this on screen fade into the coarser level (0 = off).
+        if typed {
+            view["strip_px"][0].as_f64().map_or(0.0, |x| x as f32)
+        } else {
+            0.0
+        },
+        if typed {
+            view["strip_px"][1].as_f64().map_or(0.0, |x| x as f32)
+        } else {
+            0.0
+        },
     );
+    // VIS-L1: saturation, hue and value of the ground after the painted fields (`ground_look`).
+    let look = &view["ground_look"];
+    if look["enabled"].as_bool().unwrap_or(false) && typed {
+        out.look_a = Vec4::new(
+            f(&look["saturation"], d.look_a.x),
+            f(&look["hue_target_deg"], d.look_a.y),
+            f(&look["hue_pull"], d.look_a.z),
+            1.0,
+        );
+        out.look_b = Vec4::new(
+            f(&look["hue_range_deg"][0], d.look_b.x),
+            f(&look["hue_range_deg"][1], d.look_b.y),
+            f(&look["forest_value"], d.look_b.z),
+            f(&look["plain_value"], d.look_b.w),
+        );
+    }
     if typed {
         pack_forms(&mut out, &parcel::load_forms(&mix["landscapes"]));
     }
@@ -580,6 +612,9 @@ mod tests {
         // VIS-R3b: colormap share 0.12 at the closest, forms on.
         assert!((p.pc0.x - 0.12).abs() < 1e-5, "{}", p.pc0.x);
         assert_eq!(p.pc0.y, 1.0);
+        // VIS-L1: strip fade widths and the ground look reach the table.
+        assert!(p.pc0.w > p.pc0.z && p.pc0.z > 0.0, "{}", p.pc0);
+        assert_eq!(p.look_a.w, 1.0);
         // Row 15 (openfield_north) is the openfield form (1), stretched 1:4 to 1:9.
         assert_eq!(p.rows_b[15].z, 1.0);
         assert!(p.forms_a[1].x >= 4.0 && p.forms_a[1].y <= 10.0);

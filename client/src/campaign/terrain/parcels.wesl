@@ -682,13 +682,56 @@ fn hb_relative(base: vec3<f32>, c: vec3<f32>) -> vec3<f32> {
     return c * (clamp(lc, lb * (1.0 - fields.v5.y), lb * (1.0 + fields.v5.y)) / lc);
 }
 
+// VIS-L1: the patchwork of the far parcels, drawn at the finest of three cell sizes whose strips
+// span a few screen pixels (`view.strip_px`): a strip narrower than the pixel is not point-sampled
+// any more (the "combed" ground), it hands over to the cells 1 / z and 1 / z^2 larger, and last to
+// the colour map (weight `a` of the result < 1). `view.strip_px` 0 keeps the former two-level fade
+// by footprint. Returns the colour (rgb) and the weight of the patchwork over the ground (a).
 fn hb_far_patch(uu: vec2<f32>, footprint: f32, px_u: f32, row: u32, h_dom: f32, vine_k: f32, meadow_k: f32,
-        fr: PcFrame) -> vec3<f32> {
-    let k = smoothstep(fields.v3.w, fields.v4.x, footprint);
-    var c = vec3<f32>(0.0);
-    var e = 0.0;
+        fr: PcFrame) -> vec4<f32> {
     let sole_scale = fields.v2.y;
     let form = fr.form;
+    var c = vec3<f32>(0.0);
+    var e = 0.0;
+    if (fields.pc0.w > 0.0) {
+        let lo = fields.pc0.z;
+        let hi = max(fields.pc0.w, lo + 0.01);
+        let z = clamp(fields.v3.z, 0.1, 0.9);
+        // Short side of a cell of each level, in screen pixels.
+        let w_a = 1.0 / max(px_u * sole_scale, 1e-6);
+        var rest = 1.0;
+        var res = 0.0;
+        let t_a = smoothstep(lo, hi, w_a);
+        if (t_a > 0.001) {
+            let v = pc_cell_of(uu * sole_scale, form, fr.strip);
+            let ring_r = pc_ring_r(v.site / max(sole_scale, 1e-3), fr);
+            c = hb_patch_color(v.id, hb_maille_far(hb_maille(v.id, row, h_dom, vine_k, meadow_k, ring_r, form), row), form) * t_a;
+            e = v.edge / max(sole_scale, 1e-3) * t_a;
+            res = t_a;
+            rest = 1.0 - t_a;
+        }
+        let t_b = smoothstep(lo, hi, w_a / z) * rest;
+        if (t_b > 0.001) {
+            let v = pc_cell_of(uu * sole_scale * z + 53.0, form, fr.strip);
+            let id = v.id + 0.5;
+            c = c + hb_patch_color(id, hb_maille_far(hb_maille(id, row, h_dom, vine_k, meadow_k, -1.0, form), row), form) * t_b;
+            e = e + v.edge / max(sole_scale * z, 1e-3) * t_b;
+            res = res + t_b;
+            rest = rest - t_b;
+        }
+        let t_c = smoothstep(lo, hi, w_a / (z * z)) * rest;
+        if (t_c > 0.001) {
+            let v = pc_cell_of(uu * sole_scale * z * z + 97.0, form, fr.strip);
+            let id = v.id + 0.25;
+            c = c + hb_patch_color(id, hb_maille_far(hb_maille(id, row, h_dom, vine_k, meadow_k, -1.0, form), row), form) * t_c;
+            e = e + v.edge / max(sole_scale * z * z, 1e-3) * t_c;
+            res = res + t_c;
+        }
+        let norm = 1.0 / max(res, 1e-3);
+        let line = 1.0 - smoothstep(0.0, 1.2 * px_u, e * norm);
+        return vec4<f32>(c * norm * (1.0 - fields.v4.y * line), res);
+    }
+    let k = smoothstep(fields.v3.w, fields.v4.x, footprint);
     if (k < 0.999) {
         let v = pc_cell_of(uu * sole_scale, form, fr.strip);
         let ring_r = pc_ring_r(v.site / max(sole_scale, 1e-3), fr);
@@ -702,7 +745,7 @@ fn hb_far_patch(uu: vec2<f32>, footprint: f32, px_u: f32, row: u32, h_dom: f32, 
         e = e + v.edge / max(sole_scale * fields.v3.z, 1e-3) * k;
     }
     let line = 1.0 - smoothstep(0.0, 1.2 * px_u, e);
-    return c * (1.0 - fields.v4.y * line);
+    return vec4<f32>(c * (1.0 - fields.v4.y * line), 1.0);
 }
 
 // One parcels material (`hb_sample`): layer, tile (m), rotated by `ang` around the map origin.

@@ -245,6 +245,28 @@
           "minimum": 0,
           "maximum": 1,
           "description": "VIS-R3b : part de la carte de couleur dans le sol au plus près (le sol texturé fait le reste) ; 1 à distance."
+        },
+        "strip_px": {
+          "type": "array",
+          "items": {"type": "number", "minimum": 0, "maximum": 40},
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "VIS-L1 : largeur écran (px) d'une lanière en dessous de laquelle elle se fond dans le niveau de cellules plus grossier puis dans la carte de couleur (premier), au-dessus de laquelle elle est dessinée entière (second). [0, 0] : ancien fondu par empreinte."
+        },
+        "ground_look": {
+          "type": "object",
+          "description": "VIS-L1 : saturation, teinte et valeur de la végétation du sol, appliquées à l'albédo cuit (ground_look.wesl).",
+          "required": ["enabled"],
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "saturation": {"type": "number", "minimum": 0.5, "maximum": 4, "description": "Gain de chroma des teintes de végétation."},
+            "hue_target_deg": {"type": "number", "minimum": 0, "maximum": 360, "description": "Teinte cible du pré (bible : 89)."},
+            "hue_pull": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part de l'écart de teinte corrigée."},
+            "hue_range_deg": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 360}, "minItems": 2, "maxItems": 2, "description": "Plage de teintes concernée (jaune-vert à vert-bleu)."},
+            "forest_value": {"type": "number", "minimum": 0.1, "maximum": 1.5, "description": "Facteur de valeur (linéaire) des forêts."},
+            "plain_value": {"type": "number", "minimum": 0.5, "maximum": 1.5, "description": "Facteur de valeur (linéaire) des terres ouvertes."}
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

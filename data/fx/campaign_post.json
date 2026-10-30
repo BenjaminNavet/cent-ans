@@ -35,7 +35,7 @@
     "end_ratio": 3.6,
     "strength": 0.5,
     "clear_scale": 0.5,
-    "desaturate": 0.4,
+    "desaturate": 0.15,
     "sky_share": 0.35,
     "clear_max": 0.3,
     "fog_cut": 0.6,

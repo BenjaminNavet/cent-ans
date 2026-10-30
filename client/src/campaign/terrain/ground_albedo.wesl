@@ -6,6 +6,7 @@ import bevy_pbr::render::mesh_view_types;
 import bevy_pbr::render::shadows;
 import cent_ans_client::campaign::terrain::ground_detail::gd_macro;
 import cent_ans_client::campaign::terrain::fields_paint::{fields_apply};
+import cent_ans_client::campaign::terrain::ground_look::ground_look;
 import cent_ans_client::campaign::terrain::ground_layers::{LayerAcc, canopy_field, hb_clearing_splat, sample_role, terroir_at, terroir_landuse, terroir_splat};
 import cent_ans_client::campaign::terrain::noise::{fbm, luma, vnoise};
 import cent_ans_client::campaign::terrain::parcels::{fp_parcels, fp_splat, v2b_parcels};
@@ -315,6 +316,8 @@ fn regional_ground(p: vec2<f32>, footprint: f32, altitude: f32, slope_xz: vec2<f
         nd = nd - cf.yz * 0.45 * forest_f;
         albedo = albedo * (1.0 + 0.35 * forest_f * cf.x);
     }
+    // VIS-L1: saturation, hue and value of the vegetation (data), after the canopy tone.
+    albedo = ground_look(albedo, forest_f, land, altitude);
     return RegionalOut(albedo, nd, forest_f);
 }
 

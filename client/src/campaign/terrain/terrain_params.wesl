@@ -189,7 +189,7 @@ struct FieldParams {
     // season class of the vine, of the meadow; 1 when the parcels array is bound.
     tex_flags: vec4<f32>,
     tex_means: array<vec4<f32>, 48>,
-    // VIS-R3b (parcel.rs): colormap share at the closest, typed forms on; per form tables.
+    // VIS-R3b (parcel.rs): colormap share at the closest, typed forms on; VIS-L1 strip fade widths (px, zw).
     pc0: vec4<f32>,
     forms_a: array<vec4<f32>, 5>,
     forms_b: array<vec4<f32>, 5>,
@@ -197,6 +197,10 @@ struct FieldParams {
     forms_d: array<vec4<f32>, 5>,
     forms_e: array<vec4<f32>, 5>,
     shares: array<vec4<f32>, 40>,
+    // VIS-L1 ground look: saturation gain, hue target (deg), hue pull, 1 when on.
+    look_a: vec4<f32>,
+    // VIS-L1 ground look: hue range start / end (deg), forest value, plain value.
+    look_b: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(16) var<uniform> fields: FieldParams;
