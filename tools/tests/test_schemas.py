@@ -78,6 +78,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "battle_time_of_day_rules.schema.json": ("rules/battle_time_of_day.json",),
     "battle_water_rules.schema.json": ("rules/battle_water.json",),
     "building.schema.json": ("buildings/*.json",),
+    "bathymetry.schema.json": ("map/bathymetry.json",),
     "building_models.schema.json": ("map/building_models.json",),
     "camera_feel.schema.json": ("ui/camera_feel.json",),
     "campaign_map_ui.schema.json": ("ui/campaign_map.json",),

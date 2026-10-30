@@ -327,6 +327,11 @@ reproduites telles quelles (entre guillemets).
   National Centers for Environmental Information — domaine public (données du gouvernement des
   États-Unis). Citation : *NOAA National Centers for Environmental Information. 2022: ETOPO
   2022 15 Arc-Second Global Relief Model. doi:10.25921/fd45-gt74*.
+- **Bathymétrie de la mer de campagne** (VIS-R5, `data/map/bathymetry.png`) : GEBCO 2025 Grid,
+  © GEBCO Compilation Group (2025), https://www.gebco.net — usage libre, y compris commercial, avec
+  attribution (conditions : https://www.gebco.net/data-products-gridded-bathymetry-data/gebco2025-grid).
+  Mention : « GEBCO Compilation Group (2025) GEBCO 2025 Grid ». Seul le raster réduit (1/4 de la
+  carte, produit dérivé déformé par la carte composée) est livré ; la grille d'origine reste hors dépôt.
 - **Terres, côtes, rivières, lacs** : [Natural Earth](https://www.naturalearthdata.com/)
   (10 m physical) — domaine public. « Made with Natural Earth. »
 - **Relief fin (terres de l'emprise jouable)** : Copernicus DEM GLO-90, © DLR e.V. 2010-2014 et

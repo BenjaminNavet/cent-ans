@@ -334,6 +334,24 @@
               "exclusiveMinimum": 0
             }
           }
+        },
+        "bathymetry": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "VIS-R5 : profondeur réelle (data/map/bathymetry.png, GEBCO) à la place de la distance à la côte. Absent, `enabled` faux ou raster manquant : profondeur estimée depuis la côte (ADR 0750).",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "shore_m_per_px": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Plafond de pente près du rivage : la profondeur ne dépasse pas ce nombre de mètres par pixel carte depuis la côte composée (le trait de côte reste à 0 m)."
+            },
+            "mid_depth_m": { "type": "number", "exclusiveMinimum": 0, "description": "Profondeur où la couleur atteint `mid` (plateau)." },
+            "deep_depth_m": { "type": "number", "exclusiveMinimum": 0, "description": "Profondeur où la couleur atteint `deep` (talus)." },
+            "abyss_color": { "$ref": "#/$defs/rgb", "description": "Couleur du grand fond (au-delà de `abyss_depth_m`), linéaire ; absente = `deep`." },
+            "abyss_depth_m": { "type": "number", "exclusiveMinimum": 0 },
+            "noise": { "type": "number", "minimum": 0, "maximum": 0.5, "description": "Irrégularité des fonds (bruit multiplicatif sur la profondeur de moins de 30 m)." }
+          }
         }
       }
     }

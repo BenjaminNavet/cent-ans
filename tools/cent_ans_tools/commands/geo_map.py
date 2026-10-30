@@ -346,6 +346,18 @@ def geo_splat() -> None:
     _report_landcover()
 
 
+@geo_app.command("bathymetry")
+def geo_bathymetry() -> None:
+    """Cuit bathymetry.png (GEBCO 2025 -> carte composée, L8 à 1/4) lu par le shader de mer (VIS-R5)."""
+    from cent_ans_tools.geo import bathymetry
+
+    result = bathymetry.build()
+    _print_sizes("Bathymétrie", [result.png, result.meta])
+    console.print(
+        f"Texels {result.size[0]} x {result.size[1]}, mer {result.sea_share:.1%} de la carte."
+    )
+
+
 @geo_app.command("relief-occlusion")
 def geo_relief_occlusion(
     exaggeration: float = typer.Option(

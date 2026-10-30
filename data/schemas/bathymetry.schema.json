@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/bathymetry.schema.json",
+  "title": "Bathymétrie de la carte de campagne",
+  "description": "data/map/bathymetry.json (VIS-R5) : métadonnées du raster bathymetry.png cuit par `cent-ans geo bathymetry`. Le client lit max_depth_m et le facteur ; aucune règle de jeu.",
+  "type": "object",
+  "required": ["source", "encoding", "max_depth_m", "factor", "size_px"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "source": { "type": "string" },
+    "licence": { "type": "string" },
+    "encoding": { "const": "sqrt" },
+    "max_depth_m": { "type": "number", "exclusiveMinimum": 0 },
+    "factor": { "type": "integer", "minimum": 1, "description": "Pixels de la carte par texel du raster." },
+    "size_px": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 1 },
+      "minItems": 2,
+      "maxItems": 2
+    }
+  }
+}

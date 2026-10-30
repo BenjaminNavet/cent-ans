@@ -1,0 +1,12 @@
+{
+  "description": "Bathymétrie cuite par `cent-ans geo bathymetry` (VIS-R5). Valeur L8 v = 255 * sqrt(profondeur / max_depth_m) ; un texel = `factor` pixels de la carte ; 0 sur terre.",
+  "source": "GEBCO 2025 Grid, GEBCO Compilation Group (2025), https://www.gebco.net",
+  "licence": "Usage libre, attribution obligatoire (GEBCO)",
+  "encoding": "sqrt",
+  "max_depth_m": 4000.0,
+  "factor": 4,
+  "size_px": [
+    1770,
+    1526
+  ]
+}
