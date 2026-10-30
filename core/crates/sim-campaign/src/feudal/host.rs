@@ -316,6 +316,10 @@ pub fn resolve_host_service(
             }
         }
         if home && !in_battle {
+            let general = state.armies.get(&id).and_then(|a| a.general.clone());
+            if let Some(general) = general {
+                state.detach_general(&general);
+            }
             state.armies.remove(&id);
             events.push(
                 GameEvent::new(
