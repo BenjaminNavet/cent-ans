@@ -538,19 +538,19 @@ impl GameData {
     pub fn load(root: &Path) -> Result<(GameData, Vec<Warning>), DataError> {
         let mut warnings = Vec::new();
         let mut data = GameData {
-            factions: load_entities(&root.join(folders::FACTIONS), |f: &Faction| &f.id)?,
-            provinces: load_entities(&root.join(folders::PROVINCES), |p: &Province| &p.id)?,
+            factions: BTreeMap::new(),
+            provinces: BTreeMap::new(),
             titles: BTreeMap::new(),
             feudal_rules: Default::default(),
-            unit_types: load_entities(&root.join(folders::UNIT_TYPES), |u: &UnitType| &u.id)?,
-            buildings: load_entities(&root.join(folders::BUILDINGS), |b: &Building| &b.id)?,
-            technologies: load_entities(&root.join(folders::TECHNOLOGIES), |t: &Technology| &t.id)?,
-            characters: load_entities(&root.join(folders::CHARACTERS), |c: &Character| &c.id)?,
-            resources: load_entities(&root.join(folders::RESOURCES), |r: &Resource| &r.id)?,
-            religions: load_entities(&root.join(folders::RELIGIONS), |r: &Religion| &r.id)?,
-            traits: load_entities(&root.join(folders::TRAITS), |t: &Trait| &t.id)?,
-            skills: load_entities(&root.join(folders::SKILLS), |s: &Skill| &s.id)?,
-            names: load_entities(&root.join(folders::NAMES), |n: &NameList| &n.id)?,
+            unit_types: BTreeMap::new(),
+            buildings: BTreeMap::new(),
+            technologies: BTreeMap::new(),
+            characters: BTreeMap::new(),
+            resources: BTreeMap::new(),
+            religions: BTreeMap::new(),
+            traits: BTreeMap::new(),
+            skills: BTreeMap::new(),
+            names: BTreeMap::new(),
             events: BTreeMap::new(),
             battle_orders: BTreeMap::new(),
             battle_abilities: BTreeMap::new(),
@@ -623,246 +623,295 @@ impl GameData {
             rasters: Default::default(),
             naval: Default::default(),
         };
-        load_entities_into(
-            &mut data.titles,
-            &root.join(folders::TITLES),
-            |t: &crate::entities::title::FeudalTitle| &t.id,
-        )?;
-        read_into(
-            &mut data.feudal_rules,
-            &root.join(folders::RULES).join(folders::FEUDAL_RULES),
-        )?;
-        load_entities_into(
-            &mut data.events,
-            &root.join(folders::EVENTS),
-            |e: &Event| &e.id,
-        )?;
-        load_entities_into(
-            &mut data.battle_orders,
-            &root.join(folders::BATTLE_ORDERS),
-            |o: &BattleOrder| &o.id,
-        )?;
-        load_entities_into(
-            &mut data.battle_abilities,
-            &root.join(folders::BATTLE_ABILITIES),
-            |a: &BattleAbility| &a.id,
-        )?;
-        load_entities_into(&mut data.diets, &root.join(folders::DIETS), |d: &Diet| {
-            &d.id
+        // Independent files, read on several threads (ADR 0829). Each group touches
+        // distinct `data` fields; the first error in group order is reported.
+        std::thread::scope(|scope| -> Result<(), DataError> {
+            let handles = vec![
+                scope.spawn(|| -> Result<(), DataError> {
+                    data.characters =
+                        load_entities(&root.join(folders::CHARACTERS), |c: &Character| &c.id)?;
+                    data.naval = crate::entities::naval::NavalData::load(root)?;
+                    data.unit_types =
+                        load_entities(&root.join(folders::UNIT_TYPES), |u: &UnitType| &u.id)?;
+                    data.names = load_entities(&root.join(folders::NAMES), |n: &NameList| &n.id)?;
+                    load_entities_into(
+                        &mut data.royal_acts,
+                        &root.join(folders::ROYAL_ACTS),
+                        |a: &RoyalAct| &a.id,
+                    )?;
+                    read_into(
+                        &mut data.ai_diplomacy,
+                        &root.join(folders::AI).join(folders::AI_DIPLOMACY),
+                    )?;
+                    read_into(
+                        &mut data.population_rules,
+                        &root.join(folders::RULES).join(folders::POPULATION_RULES),
+                    )?;
+                    read_into(
+                        &mut data.acts_rules,
+                        &root.join(folders::RULES).join(folders::ACTS_RULES),
+                    )?;
+                    read_some(&mut data.retinue, &root.join(folders::RETINUE))?;
+                    read_into(
+                        &mut data.replenishment_rules,
+                        &root.join(folders::RULES).join(folders::REPLENISHMENT_RULES),
+                    )?;
+                    read_into(
+                        &mut data.army_rules,
+                        &root.join(folders::RULES).join(folders::ARMY_RULES),
+                    )?;
+                    read_into(
+                        &mut data.battle_history_rules,
+                        &root
+                            .join(folders::RULES)
+                            .join(folders::BATTLE_HISTORY_RULES),
+                    )?;
+                    read_some(
+                        &mut data.free_movement,
+                        &root.join(folders::MOVEMENT).join(folders::MOVEMENT_RULES),
+                    )?;
+                    Ok(())
+                }),
+                scope.spawn(|| -> Result<(), DataError> {
+                    load_entities_into(
+                        &mut data.events,
+                        &root.join(folders::EVENTS),
+                        |e: &Event| &e.id,
+                    )?;
+                    data.buildings =
+                        load_entities(&root.join(folders::BUILDINGS), |b: &Building| &b.id)?;
+                    read_into(
+                        &mut data.feudal_rules,
+                        &root.join(folders::RULES).join(folders::FEUDAL_RULES),
+                    )?;
+                    load_entities_into(
+                        &mut data.chivalric_orders,
+                        &root.join(folders::CHIVALRIC_ORDERS),
+                        |o: &ChivalricOrder| &o.id,
+                    )?;
+                    read_some(
+                        &mut data.ai_doctrines,
+                        &root.join(folders::AI).join(folders::AI_DOCTRINES),
+                    )?;
+                    read_into(
+                        &mut data.revolt_rules,
+                        &root.join(folders::RULES).join(folders::REVOLT_RULES),
+                    )?;
+                    read_into(
+                        &mut data.advisor_rules,
+                        &root.join(folders::RULES).join(folders::ADVISOR_RULES),
+                    )?;
+                    read_some(&mut data.council, &root.join(folders::COUNCIL_OFFICES))?;
+                    read_into(
+                        &mut data.mercenary_rules,
+                        &root.join(folders::RULES).join(folders::MERCENARY_RULES),
+                    )?;
+                    read_into(
+                        &mut data.siege_engine_rules,
+                        &root.join(folders::RULES).join(folders::SIEGE_ENGINE_RULES),
+                    )?;
+                    read_into(
+                        &mut data.river_crossing_rules,
+                        &root
+                            .join(folders::RULES)
+                            .join(folders::RIVER_CROSSING_RULES),
+                    )?;
+                    data.navigable_rivers = crate::entities::river_nav::read_rivers(
+                        &root.join(folders::MOVEMENT).join(folders::NAVIGABLE_RIVERS),
+                    )?;
+                    Ok(())
+                }),
+                scope.spawn(|| -> Result<(), DataError> {
+                    load_entities_into(
+                        &mut data.titles,
+                        &root.join(folders::TITLES),
+                        |t: &crate::entities::title::FeudalTitle| &t.id,
+                    )?;
+                    data.resources =
+                        load_entities(&root.join(folders::RESOURCES), |r: &Resource| &r.id)?;
+                    load_entities_into(
+                        &mut data.battle_orders,
+                        &root.join(folders::BATTLE_ORDERS),
+                        |o: &BattleOrder| &o.id,
+                    )?;
+                    load_entities_into(
+                        &mut data.landmarks,
+                        &root.join(folders::LANDMARKS),
+                        |l: &crate::Landmark| &l.id,
+                    )?;
+                    read_into(
+                        &mut data.ai_feudal,
+                        &root.join(folders::AI).join(folders::AI_FEUDAL),
+                    )?;
+                    read_into(
+                        &mut data.finance_rules,
+                        &root.join(folders::RULES).join(folders::FINANCE_RULES),
+                    )?;
+                    read_into(
+                        &mut data.economy_rules,
+                        &root.join(folders::RULES).join(folders::ECONOMY_RULES),
+                    )?;
+                    read_some(
+                        &mut data.agent_rules,
+                        &root.join(folders::RULES).join(folders::AGENT_RULES),
+                    )?;
+                    read_some(
+                        &mut data.crusade_rules,
+                        &root.join(folders::RULES).join(folders::CRUSADE_RULES),
+                    )?;
+                    read_into(&mut data.mission_rules, &root.join(folders::MISSIONS))?;
+                    data.crossings = crate::entities::river_crossing::read_crossings(
+                        &root.join(folders::MAP).join(folders::CROSSINGS_PX),
+                    );
+                    data.passes = crate::entities::river_nav::read_passes(
+                        &root.join(folders::MAP).join(folders::CROSSINGS),
+                    );
+                    Ok(())
+                }),
+                scope.spawn(|| -> Result<(), DataError> {
+                    data.factions =
+                        load_entities(&root.join(folders::FACTIONS), |f: &Faction| &f.id)?;
+                    data.religions =
+                        load_entities(&root.join(folders::RELIGIONS), |r: &Religion| &r.id)?;
+                    load_entities_into(
+                        &mut data.battle_abilities,
+                        &root.join(folders::BATTLE_ABILITIES),
+                        |a: &BattleAbility| &a.id,
+                    )?;
+                    load_entities_into(
+                        &mut data.encounters,
+                        &root.join(folders::ENCOUNTERS),
+                        |e: &crate::Encounter| &e.id,
+                    )?;
+                    read_into(
+                        &mut data.ai_grid,
+                        &root.join(folders::AI).join(folders::AI_GRID),
+                    )?;
+                    read_into(
+                        &mut data.cause_thresholds,
+                        &root.join(folders::RULES).join(folders::CAUSE_THRESHOLDS),
+                    )?;
+                    read_into(
+                        &mut data.diplomacy_rules,
+                        &root.join(folders::RULES).join(folders::DIPLOMACY_RULES),
+                    )?;
+                    read_into(
+                        &mut data.battle_standard_rules,
+                        &root
+                            .join(folders::RULES)
+                            .join(folders::BATTLE_STANDARD_RULES),
+                    )?;
+                    read_some(
+                        &mut data.religion_rules,
+                        &root.join(folders::RULES).join(folders::RELIGION_RULES),
+                    )?;
+                    read_into(
+                        &mut data.army_tradition_rules,
+                        &root
+                            .join(folders::RULES)
+                            .join(folders::ARMY_TRADITION_RULES),
+                    )?;
+                    data.river_names = crate::entities::river_crossing::read_river_names(
+                        &root.join(folders::MAP).join(folders::RIVER_NAMES),
+                    );
+                    Ok(())
+                }),
+                scope.spawn(|| -> Result<(), DataError> {
+                    data.provinces =
+                        load_entities(&root.join(folders::PROVINCES), |p: &Province| &p.id)?;
+                    data.traits = load_entities(&root.join(folders::TRAITS), |t: &Trait| &t.id)?;
+                    load_entities_into(&mut data.diets, &root.join(folders::DIETS), |d: &Diet| {
+                        &d.id
+                    })?;
+                    read_into(
+                        &mut data.encounter_rules,
+                        &root.join(folders::RULES).join(folders::ENCOUNTER_RULES),
+                    )?;
+                    read_some(
+                        &mut data.vision_rules,
+                        &root.join(folders::RULES).join(folders::VISION_RULES),
+                    )?;
+                    read_into(
+                        &mut data.agenda_rules,
+                        &root.join(folders::RULES).join(folders::AGENDA_RULES),
+                    )?;
+                    read_into(
+                        &mut data.campaign_weather,
+                        &root
+                            .join(folders::RULES)
+                            .join(folders::CAMPAIGN_WEATHER_RULES),
+                    )?;
+                    read_into(
+                        &mut data.posture_rules,
+                        &root.join(folders::RULES).join(folders::POSTURE_RULES),
+                    )?;
+                    read_some(
+                        &mut data.starting_armies,
+                        &root.join(folders::RULES).join(folders::STARTING_ARMIES),
+                    )?;
+                    read_into(
+                        &mut data.battle_outcome_rules,
+                        &root
+                            .join(folders::RULES)
+                            .join(folders::BATTLE_OUTCOME_RULES),
+                    )?;
+                    read_some(
+                        &mut data.trade,
+                        &root.join(folders::ECONOMY).join(folders::TRADE),
+                    )?;
+                    Ok(())
+                }),
+                scope.spawn(|| -> Result<(), DataError> {
+                    data.technologies =
+                        load_entities(&root.join(folders::TECHNOLOGIES), |t: &Technology| &t.id)?;
+                    data.skills = load_entities(&root.join(folders::SKILLS), |s: &Skill| &s.id)?;
+                    load_entities_into(
+                        &mut data.edicts,
+                        &root.join(folders::EDICTS),
+                        |e: &Edict| &e.id,
+                    )?;
+                    read_some(
+                        &mut data.ai_alignment,
+                        &root.join(folders::AI).join(folders::AI_ALIGNMENT),
+                    )?;
+                    read_into(
+                        &mut data.auto_resolve,
+                        &root.join(folders::RULES).join(folders::AUTO_RESOLVE_RULES),
+                    )?;
+                    read_into(
+                        &mut data.assembly_rules,
+                        &root.join(folders::RULES).join(folders::ASSEMBLY_RULES),
+                    )?;
+                    read_into(
+                        &mut data.difficulty,
+                        &root.join(folders::RULES).join(folders::DIFFICULTY_RULES),
+                    )?;
+                    read_into(
+                        &mut data.capture_rules,
+                        &root.join(folders::RULES).join(folders::CAPTURE_RULES),
+                    )?;
+                    read_some(
+                        &mut data.starting_fit,
+                        &root.join(folders::RULES).join(folders::STARTING_FIT),
+                    )?;
+                    read_into(
+                        &mut data.map_scene_rules,
+                        &root.join(folders::RULES).join(folders::MAP_SCENE_RULES),
+                    )?;
+                    read_some(
+                        &mut data.currencies,
+                        &root.join(folders::ECONOMY).join(folders::CURRENCIES),
+                    )?;
+                    Ok(())
+                }),
+            ];
+            for handle in handles {
+                handle
+                    .join()
+                    .unwrap_or_else(|panic| std::panic::resume_unwind(panic))?;
+            }
+            Ok(())
         })?;
-        load_entities_into(
-            &mut data.edicts,
-            &root.join(folders::EDICTS),
-            |e: &Edict| &e.id,
-        )?;
-        load_entities_into(
-            &mut data.royal_acts,
-            &root.join(folders::ROYAL_ACTS),
-            |a: &RoyalAct| &a.id,
-        )?;
-        load_entities_into(
-            &mut data.chivalric_orders,
-            &root.join(folders::CHIVALRIC_ORDERS),
-            |o: &ChivalricOrder| &o.id,
-        )?;
-        load_entities_into(
-            &mut data.landmarks,
-            &root.join(folders::LANDMARKS),
-            |l: &crate::Landmark| &l.id,
-        )?;
-        load_entities_into(
-            &mut data.encounters,
-            &root.join(folders::ENCOUNTERS),
-            |e: &crate::Encounter| &e.id,
-        )?;
-        read_into(
-            &mut data.encounter_rules,
-            &root.join(folders::RULES).join(folders::ENCOUNTER_RULES),
-        )?;
-        read_some(
-            &mut data.ai_alignment,
-            &root.join(folders::AI).join(folders::AI_ALIGNMENT),
-        )?;
-        read_into(
-            &mut data.ai_diplomacy,
-            &root.join(folders::AI).join(folders::AI_DIPLOMACY),
-        )?;
-        read_some(
-            &mut data.ai_doctrines,
-            &root.join(folders::AI).join(folders::AI_DOCTRINES),
-        )?;
-        read_into(
-            &mut data.ai_feudal,
-            &root.join(folders::AI).join(folders::AI_FEUDAL),
-        )?;
-        read_into(
-            &mut data.ai_grid,
-            &root.join(folders::AI).join(folders::AI_GRID),
-        )?;
-        read_some(
-            &mut data.vision_rules,
-            &root.join(folders::RULES).join(folders::VISION_RULES),
-        )?;
-        read_into(
-            &mut data.auto_resolve,
-            &root.join(folders::RULES).join(folders::AUTO_RESOLVE_RULES),
-        )?;
-        read_into(
-            &mut data.population_rules,
-            &root.join(folders::RULES).join(folders::POPULATION_RULES),
-        )?;
-        read_into(
-            &mut data.revolt_rules,
-            &root.join(folders::RULES).join(folders::REVOLT_RULES),
-        )?;
-        read_into(
-            &mut data.finance_rules,
-            &root.join(folders::RULES).join(folders::FINANCE_RULES),
-        )?;
-        read_into(
-            &mut data.cause_thresholds,
-            &root.join(folders::RULES).join(folders::CAUSE_THRESHOLDS),
-        )?;
-        read_into(
-            &mut data.agenda_rules,
-            &root.join(folders::RULES).join(folders::AGENDA_RULES),
-        )?;
-        read_into(
-            &mut data.assembly_rules,
-            &root.join(folders::RULES).join(folders::ASSEMBLY_RULES),
-        )?;
-        read_into(
-            &mut data.acts_rules,
-            &root.join(folders::RULES).join(folders::ACTS_RULES),
-        )?;
-        read_into(
-            &mut data.advisor_rules,
-            &root.join(folders::RULES).join(folders::ADVISOR_RULES),
-        )?;
-        read_into(
-            &mut data.economy_rules,
-            &root.join(folders::RULES).join(folders::ECONOMY_RULES),
-        )?;
-        read_into(
-            &mut data.diplomacy_rules,
-            &root.join(folders::RULES).join(folders::DIPLOMACY_RULES),
-        )?;
-        read_into(
-            &mut data.campaign_weather,
-            &root
-                .join(folders::RULES)
-                .join(folders::CAMPAIGN_WEATHER_RULES),
-        )?;
-        read_into(
-            &mut data.difficulty,
-            &root.join(folders::RULES).join(folders::DIFFICULTY_RULES),
-        )?;
-        read_some(&mut data.retinue, &root.join(folders::RETINUE))?;
-        read_some(&mut data.council, &root.join(folders::COUNCIL_OFFICES))?;
-        read_some(
-            &mut data.agent_rules,
-            &root.join(folders::RULES).join(folders::AGENT_RULES),
-        )?;
-        read_into(
-            &mut data.battle_standard_rules,
-            &root
-                .join(folders::RULES)
-                .join(folders::BATTLE_STANDARD_RULES),
-        )?;
-        read_into(
-            &mut data.posture_rules,
-            &root.join(folders::RULES).join(folders::POSTURE_RULES),
-        )?;
-        read_into(
-            &mut data.capture_rules,
-            &root.join(folders::RULES).join(folders::CAPTURE_RULES),
-        )?;
-        read_into(
-            &mut data.replenishment_rules,
-            &root.join(folders::RULES).join(folders::REPLENISHMENT_RULES),
-        )?;
-        read_into(
-            &mut data.mercenary_rules,
-            &root.join(folders::RULES).join(folders::MERCENARY_RULES),
-        )?;
-        read_some(
-            &mut data.crusade_rules,
-            &root.join(folders::RULES).join(folders::CRUSADE_RULES),
-        )?;
-        read_some(
-            &mut data.religion_rules,
-            &root.join(folders::RULES).join(folders::RELIGION_RULES),
-        )?;
-        read_some(
-            &mut data.starting_armies,
-            &root.join(folders::RULES).join(folders::STARTING_ARMIES),
-        )?;
-        read_some(
-            &mut data.starting_fit,
-            &root.join(folders::RULES).join(folders::STARTING_FIT),
-        )?;
-        read_into(
-            &mut data.army_rules,
-            &root.join(folders::RULES).join(folders::ARMY_RULES),
-        )?;
-        read_into(
-            &mut data.siege_engine_rules,
-            &root.join(folders::RULES).join(folders::SIEGE_ENGINE_RULES),
-        )?;
-        read_into(&mut data.mission_rules, &root.join(folders::MISSIONS))?;
-        read_into(
-            &mut data.army_tradition_rules,
-            &root
-                .join(folders::RULES)
-                .join(folders::ARMY_TRADITION_RULES),
-        )?;
-        read_into(
-            &mut data.battle_outcome_rules,
-            &root
-                .join(folders::RULES)
-                .join(folders::BATTLE_OUTCOME_RULES),
-        )?;
-        read_into(
-            &mut data.map_scene_rules,
-            &root.join(folders::RULES).join(folders::MAP_SCENE_RULES),
-        )?;
-        read_into(
-            &mut data.battle_history_rules,
-            &root
-                .join(folders::RULES)
-                .join(folders::BATTLE_HISTORY_RULES),
-        )?;
-        read_into(
-            &mut data.river_crossing_rules,
-            &root
-                .join(folders::RULES)
-                .join(folders::RIVER_CROSSING_RULES),
-        )?;
-        data.crossings = crate::entities::river_crossing::read_crossings(
-            &root.join(folders::MAP).join(folders::CROSSINGS_PX),
-        );
-        data.river_names = crate::entities::river_crossing::read_river_names(
-            &root.join(folders::MAP).join(folders::RIVER_NAMES),
-        );
-        read_some(
-            &mut data.trade,
-            &root.join(folders::ECONOMY).join(folders::TRADE),
-        )?;
-        read_some(
-            &mut data.currencies,
-            &root.join(folders::ECONOMY).join(folders::CURRENCIES),
-        )?;
-        read_some(
-            &mut data.free_movement,
-            &root.join(folders::MOVEMENT).join(folders::MOVEMENT_RULES),
-        )?;
-        data.navigable_rivers = crate::entities::river_nav::read_rivers(
-            &root.join(folders::MOVEMENT).join(folders::NAVIGABLE_RIVERS),
-        )?;
-        data.passes = crate::entities::river_nav::read_passes(
-            &root.join(folders::MAP).join(folders::CROSSINGS),
-        );
-        data.naval = crate::entities::naval::NavalData::load(root)?;
         data.load_map(&root.join(folders::MAP), &mut warnings)?;
         data.load_settlements(root, &mut warnings)?;
         data.build_movement_graph();
