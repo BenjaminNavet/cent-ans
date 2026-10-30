@@ -1,4 +1,4 @@
-# ADR XXXX — La cause au moment de l'effet (XP-POURQUOI, R4)
+# ADR 0810 — La cause au moment de l'effet (XP-POURQUOI, R4)
 
 Date : 2026-10-30. Statut : accepté (lot XP-POURQUOI, boucle juge 2). Amende l'ADR 0281 (le rapport de saison `auto` devient le
 Récit) et l'ADR 0754 (journal des causes). Numéro à attribuer à la fusion.
