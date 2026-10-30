@@ -1,6 +1,7 @@
 # 0820 : montagne étagée et neige d'altitude blanche (VIS-R4)
 
 Statut : accepté (lot VIS-R4, boucle juge 2).
+Statut : proposé (lot VIS-R4, boucle juge 2). Numéro réservé.
 Amende 0710 et 0750 sur un point : la règle « neige jamais blanc pur » ne vaut plus pour la neige d'altitude. Elle reste pour la neige de plaine.
 
 ## Contexte

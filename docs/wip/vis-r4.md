@@ -24,3 +24,11 @@ shader_check, fmt, clippy `--features dev --all-targets -D warnings`, tests clie
 - Fond de vallée vert : la carte de couleur le fournit déjà, pas de passe dédiée (sans masque de montagne, elle recolorerait les plaines).
 - Neige hivernale de plaine non revue à l'image (seulement `plain_share`).
 - Highlands : lande brun-violet de l'alpage du nord non contrôlée à l'image.
+Spec : docs/audits/2026-10-29-visuel-campagne.md, lot R4 ; ADR 0820. Branche : worktree-agent-a47dbd6c148e66466.
+
+## État
+- Squelette : ADR 0820 + INDEX, vues `vis_r4_*` dans tools/refshots/views.txt.
+- Mesures avant : en cours (scratchpad `before/`).
+
+## Prochaine étape
+- Bloc `mountain` des données + schéma, uniformes `SeasonParams`, `mountain_stages` dans terrain.wesl.
