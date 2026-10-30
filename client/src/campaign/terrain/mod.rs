@@ -77,6 +77,18 @@ impl Plugin for CampaignTerrainPlugin {
         embedded_asset!(app, "terrain_shadow.wesl");
         // Shared relief module: `import cent_ans_client::campaign::terrain::relief::{...}`.
         bevy::shader::load_shader_library!(app, "relief.wesl");
+        // VIS-L1: the ground shader split in modules, imported by `terrain.wesl`.
+        bevy::shader::load_shader_library!(app, "terrain_params.wesl");
+        bevy::shader::load_shader_library!(app, "noise.wesl");
+        bevy::shader::load_shader_library!(app, "snow.wesl");
+        bevy::shader::load_shader_library!(app, "parchment.wesl");
+        bevy::shader::load_shader_library!(app, "water_edge.wesl");
+        bevy::shader::load_shader_library!(app, "atmosphere.wesl");
+        bevy::shader::load_shader_library!(app, "seasons.wesl");
+        bevy::shader::load_shader_library!(app, "ground_layers.wesl");
+        bevy::shader::load_shader_library!(app, "parcels.wesl");
+        bevy::shader::load_shader_library!(app, "fields_paint.wesl");
+        bevy::shader::load_shader_library!(app, "ground_albedo.wesl");
         // bevy_solari prototype on the map (docs/wip/bevy-solari-campagne-proto.md).
         #[cfg(feature = "solari")]
         solari_proxy::add_plugin(app);
