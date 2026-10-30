@@ -218,3 +218,4 @@ Reprise :
 
 - 17:09 REPRISE : 5 agents relancés (FUSION-C, CAMP-R2, BAT-R2b, M2b avec les 2 références, BATI-RÉEL en SF3D) ; garde disque et guetteur de coût relancés.
 - 17:35 BAT-R2b prêt (ac259ace8, amendement ADR 0845) : panneau Batailles, IA par échelons active par défaut, 6 tests réparés, historiques 6/6. À SURVEILLER : bornes tw_balance très relâchées (0,4→0,05 et 0,5→0,0) ; la route de relief de l IA ne tient pas compte de la fatigue en pente ; panneau jamais vu à l écran. → FUSION-D.
+- 17:42 M2b partiel (c75084478) : plaine olive-ocre et non plus citron (s 0,37), mais patchwork, canopée continue, lumière dorée et meseta non atteints. M2b entre dans FUSION-D comme base. M2c lancé (refonte du rendu vers les 2 références : forêt, parcelles et haies, soleil bas, rivières pâles, meseta), ADR 0847 réservé.
