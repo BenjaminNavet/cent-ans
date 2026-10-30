@@ -3,6 +3,7 @@
 //! view is unit-tested here by `cargo test -p game-api`.
 
 pub mod acts;
+pub mod agenda;
 pub mod army;
 pub mod causes;
 pub mod chronicle;
@@ -28,6 +29,7 @@ pub mod start_sheets;
 pub mod tech;
 pub mod turn;
 
+pub use agenda::{agenda, Affair, Agenda, AgendaAction, NewsDigest, Speaker, WatchItem};
 pub use army::{army_ids, army_sheet, ArmySheet};
 pub use chronicle::{
     chronicle_view, turn_journal, ChronicleView, JournalEntry, NewsLetter, NewsMode, TurnJournal,

@@ -2,6 +2,7 @@
 
 pub mod acts_rules;
 pub mod advisor_rules;
+pub mod agenda_rules;
 pub mod agent;
 pub mod ai_alignment;
 pub mod ai_campaign;

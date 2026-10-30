@@ -42,6 +42,8 @@ pub struct ActAmbitionRow {
     pub chosen: bool,
     /// Extra renown, in percent, from the facts and objectives the ambition names.
     pub renown_bonus_percent: u32,
+    /// XP-AUDIENCE: the choice is frozen and this ambition was not taken (the client greys it).
+    pub locked: bool,
 }
 
 /// The act in progress.
@@ -100,6 +102,9 @@ fn ambition_rows(data: &GameData, state: &CampaignState) -> Vec<ActAmbitionRow> 
             description: a.description.clone(),
             chosen: state.acts.ambitions.contains(&a.id),
             renown_bonus_percent: a.renown_bonus_percent,
+            locked: !state.acts.ambitions.contains(&a.id)
+                && state.ambitions_pending(data) == 0
+                && !state.ambition_choice_open(data),
         })
         .collect()
 }

@@ -1,0 +1,53 @@
+{
+  "description": "Textes de l'Audience de saison (XP-AUDIENCE, schéma audience_texts.schema.json). Le cœur choisit les affaires, ce fichier donne les répliques.",
+  "ui": {
+    "title": "{date} — Audience",
+    "quiet": "Sire, rien ne réclame votre attention cette saison. Le royaume attend vos ordres.",
+    "watch_heading": "À surveiller ({count})",
+    "news_heading": "Nouvelles du monde ({count})",
+    "news_none": "Aucune nouvelle notable.",
+    "news_letters": "{count} lettres pour vous",
+    "news_world": "{count} nouvelles lointaines repliées",
+    "close": "Replier",
+    "open_registry": "Registre",
+    "blocking_seal": "Une affaire vous attend : {text}",
+    "why_button": "Pourquoi ?",
+    "ambitions_locked": "Choix figé jusqu'au prochain acte."
+  },
+  "lines": {
+    "chronicle_decision": "Une décision vous attend : {title}.",
+    "mission_offer": "Sire, le conseil a des missions à vous proposer. Elles seront retirées si vous tardez.",
+    "ambition_choice": "Sire, choisissez {count} ambitions pour la maison : elles orienteront la renommée de cet acte.",
+    "siege": "Sire, {text}.",
+    "enemy_army": "Sire, {text}.",
+    "debt": "Sire, {text}.",
+    "treasury_swing": "Le trésor baisse de {amount} ₶ par saison : {terms}.",
+    "diplomacy_offer": "Sire, {text}.",
+    "chronicle_incident": "{title}",
+    "advice": "{text}",
+    "research_idle": "{text}",
+    "idle_army": "{text}",
+    "free_slot": "{text}"
+  },
+  "lines_many": {
+    "enemy_army": "Sire, {count} armées ennemies approchent de nos terres.",
+    "idle_army": "{count} armées sans ordre",
+    "chronicle_incident": "{count} incidents sur la carte"
+  },
+  "buttons": {
+    "open_chronicle": "Trancher",
+    "open_offer": "Voir les missions",
+    "open_ambitions": "Choisir",
+    "center_province": "Voir",
+    "center_army": "Voir",
+    "open_finance": "Finances",
+    "open_diplomacy": "Diplomatie",
+    "open_research": "Recherche",
+    "none": ""
+  },
+  "speakers": {
+    "chronicler_role": "Chroniqueur",
+    "chronicler_name": "Le chroniqueur",
+    "vacant_name": "Le conseil"
+  }
+}

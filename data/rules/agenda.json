@@ -1,0 +1,23 @@
+{
+  "description": "XP-AUDIENCE (R1) : budget d'attention. Au plus max_affairs Affaires poussées au joueur par saison (l'Audience), max_watch lignes « À surveiller », le reste en Nouvelles repliées. Les sources sont classées par `order` croissant ; une source `guaranteed` (décision bloquante, offre de mission) est toujours une Affaire. Une décision de chronique forte (bloquante, hors crise) par saison au plus (max_strong_decisions_per_season) : la suivante est reportée d'une saison sans expirer. `office` : charge du conseil dont le titulaire parle (vide : le chroniqueur).",
+  "max_affairs": 3,
+  "max_watch": 5,
+  "max_strong_decisions_per_season": 1,
+  "crisis_events": ["evt_black_death", "evt_peasants_revolt", "evt_revolte_fiscale", "evt_revolte_de_glyndwr"],
+  "treasury_affair_below": -1,
+  "sources": [
+    {"kind": "chronicle_decision", "rank": "affair", "order": 10, "office": "", "guaranteed": true, "action": "open_chronicle"},
+    {"kind": "mission_offer", "rank": "affair", "order": 20, "office": "chamberlain", "guaranteed": true, "action": "open_offer"},
+    {"kind": "ambition_choice", "rank": "affair", "order": 25, "office": "chamberlain", "action": "open_ambitions"},
+    {"kind": "siege", "rank": "affair", "order": 30, "office": "constable", "action": "center_province"},
+    {"kind": "enemy_army", "rank": "affair", "order": 40, "office": "constable", "grouped": true, "action": "center_army"},
+    {"kind": "debt", "rank": "affair", "order": 50, "office": "treasurer", "action": "open_finance"},
+    {"kind": "treasury_swing", "rank": "affair", "order": 60, "office": "treasurer", "action": "open_finance"},
+    {"kind": "diplomacy_offer", "rank": "affair", "order": 70, "office": "chancellor", "action": "open_diplomacy"},
+    {"kind": "chronicle_incident", "rank": "watch", "order": 10, "office": "chamberlain", "grouped": true, "action": "open_chronicle"},
+    {"kind": "advice", "rank": "watch", "order": 20, "office": "treasurer", "action": "none"},
+    {"kind": "research_idle", "rank": "watch", "order": 30, "office": "chaplain", "action": "open_research"},
+    {"kind": "idle_army", "rank": "watch", "order": 40, "office": "constable", "grouped": true, "action": "center_army"},
+    {"kind": "free_slot", "rank": "watch", "order": 50, "office": "treasurer", "action": "center_province"}
+  ]
+}

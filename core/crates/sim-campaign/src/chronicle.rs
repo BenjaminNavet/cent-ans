@@ -880,11 +880,22 @@ fn fire(
             return;
         }
     }
-    record_scene(state, event, decider.as_ref(), province.as_ref());
     let historical = event.kind != EventCategory::Random;
     let player_decides = decider
         .as_ref()
         .is_some_and(|f| f == &state.player_faction && state.faction_alive(f));
+    // XP-AUDIENCE (R1): one strong decision at a time. A second blocking, non-crisis decision
+    // waits a season (it is scheduled again, so it does not expire while it waits).
+    if player_decides && strong_decision_deferred(state, data, event) {
+        state.chronicle.scheduled.push(ScheduledEvent {
+            event: event.id.clone(),
+            turn: state.turn + 1,
+            faction: decider,
+            province,
+        });
+        return;
+    }
+    record_scene(state, event, decider.as_ref(), province.as_ref());
     if player_decides {
         let faction = decider.expect("checked");
         let id = state.chronicle.next_decision_id.max(1);
@@ -933,6 +944,31 @@ fn fire(
         }
         events.push(entry);
     }
+}
+
+/// Whether `event` opens a window for the player (blocking, not a map incident).
+fn is_strong(data: &GameData, event: &Event) -> bool {
+    event.presentation() == EventPresentation::Dialog
+        && !data.agenda_rules.is_crisis(event.id.as_str())
+}
+
+/// XP-AUDIENCE: `event` is strong and the player already holds the season's allowance of strong
+/// decisions (`agenda.json`, `max_strong_decisions_per_season`).
+fn strong_decision_deferred(state: &CampaignState, data: &GameData, event: &Event) -> bool {
+    if !is_strong(data, event) {
+        return false;
+    }
+    let open = state
+        .chronicle
+        .pending_decisions
+        .iter()
+        .filter(|d| {
+            data.events
+                .get(&d.event)
+                .is_some_and(|e| is_strong(data, e))
+        })
+        .count();
+    open >= data.agenda_rules.max_strong_decisions_per_season as usize
 }
 
 /// FK1: remembers the scene of an event carrying a `map_scene`, at its

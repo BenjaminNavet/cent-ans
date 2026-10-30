@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/agenda_rules.schema.json",
+  "title": "Budget d'attention (XP-AUDIENCE, R1)",
+  "description": "Fichier data/rules/agenda.json. Lu par sim-campaign::chronicle (une décision forte par saison), data_model::AgendaRules et game-api::agenda (tri des Affaires).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["max_affairs", "max_watch", "max_strong_decisions_per_season", "crisis_events", "sources"],
+  "properties": {
+    "description": {"type": "string"},
+    "max_affairs": {"type": "integer", "minimum": 1, "maximum": 5, "description": "Affaires poussées au joueur par saison, au plus."},
+    "max_watch": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Lignes de « À surveiller », au plus."},
+    "max_strong_decisions_per_season": {"type": "integer", "minimum": 1, "maximum": 5, "description": "Décisions de chronique bloquantes (hors crise) ouvertes par saison."},
+    "crisis_events": {"type": "array", "items": {"type": "string", "pattern": "^evt_"}, "description": "Évènements de crise : ils s'ouvrent aussitôt, sans plafond."},
+    "treasury_affair_below": {"type": "integer", "maximum": 0, "description": "Le trésorier parle quand le solde net de la saison à venir passe sous ce seuil."},
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "rank", "order"],
+        "properties": {
+          "kind": {"type": "string", "minLength": 1},
+          "rank": {"enum": ["affair", "watch", "news"]},
+          "order": {"type": "integer", "minimum": 0},
+          "office": {"type": "string", "description": "Charge du conseil dont le titulaire parle ; vide : le chroniqueur."},
+          "guaranteed": {"type": "boolean"},
+          "grouped": {"type": "boolean"},
+          "action": {"type": "string"}
+        }
+      }
+    }
+  }
+}

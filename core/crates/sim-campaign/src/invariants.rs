@@ -26,7 +26,8 @@ const TREASURY_LIMIT: i64 = 1_000_000_000_000;
 ///
 /// Stable keys: `settlement_single_owner`, `settlement_refs`, `army_single_place`,
 /// `army_refs`, `unit_strength`, `treasury_finite`, `dead_faction_assets`,
-/// `character_refs`, `faction_refs`, `title_refs`, `swing_causes_per_season`.
+/// `character_refs`, `faction_refs`, `title_refs`, `swing_causes_per_season`,
+/// `strong_decisions_open`, `mission_offer_unseen` (XP-AUDIENCE).
 pub fn check_invariants(state: &CampaignState, data: &GameData) -> Vec<Violation> {
     let mut out = Vec::new();
     check_settlements(state, &mut out);
@@ -35,6 +36,7 @@ pub fn check_invariants(state: &CampaignState, data: &GameData) -> Vec<Violation
     check_characters(state, &mut out);
     check_titles(state, data, &mut out);
     check_swing_causes(state, data, &mut out);
+    check_attention(state, data, &mut out);
     out
 }
 
@@ -60,6 +62,42 @@ fn check_swing_causes(state: &CampaignState, data: &GameData, out: &mut Vec<Viol
                 format!("{count} causes de variation au tour {turn} (au plus {limit})."),
             );
         }
+    }
+}
+
+/// XP-AUDIENCE: the Audience pushes every pending mission offer (guaranteed Affair), so an
+/// offer must live at least one season past the turn it was made; and the player never holds
+/// more strong chronicle decisions than the allowance of `agenda.json`.
+fn check_attention(state: &CampaignState, data: &GameData, out: &mut Vec<Violation>) {
+    if let Some(offer) = state.missions.offer.as_ref() {
+        if offer.expires_turn <= offer.offered_turn {
+            push(
+                out,
+                "mission_offer_unseen",
+                format!(
+                    "L'offre de mission du tour {} expire au tour {} sans avoir été une saison à l'Audience.",
+                    offer.offered_turn, offer.expires_turn
+                ),
+            );
+        }
+    }
+    let strong = state
+        .chronicle
+        .pending_decisions
+        .iter()
+        .filter_map(|d| data.events.get(&d.event))
+        .filter(|e| {
+            e.presentation() == data_model::EventPresentation::Dialog
+                && !data.agenda_rules.is_crisis(e.id.as_str())
+        })
+        .count();
+    let limit = data.agenda_rules.max_strong_decisions_per_season as usize;
+    if strong > limit {
+        push(
+            out,
+            "strong_decisions_open",
+            format!("{strong} décisions fortes ouvertes (au plus {limit})."),
+        );
     }
 }
 

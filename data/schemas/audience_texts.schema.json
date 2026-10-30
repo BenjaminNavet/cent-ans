@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/audience_texts.schema.json",
+  "title": "Textes de l'Audience de saison (XP-AUDIENCE)",
+  "description": "Fichier data/ui/audience.fr.json. Lu par game-api::agenda ; le client n'écrit aucun texte de l'Audience.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ui", "lines", "lines_many", "buttons", "speakers"],
+  "properties": {
+    "description": {"type": "string"},
+    "ui": {"type": "object", "additionalProperties": {"type": "string"}},
+    "lines": {"type": "object", "additionalProperties": {"type": "string"}, "description": "Réplique par genre de source ; jetons {text}, {title}, {count}, {amount}, {terms}."},
+    "lines_many": {"type": "object", "additionalProperties": {"type": "string"}, "description": "Réplique d'une source groupée de plusieurs éléments ({count})."},
+    "buttons": {"type": "object", "additionalProperties": {"type": "string"}, "description": "Libellé du bouton par action."},
+    "speakers": {"type": "object", "additionalProperties": {"type": "string"}, "description": "Voix sans charge au conseil (chroniqueur, conseil vacant)."}
+  }
+}
