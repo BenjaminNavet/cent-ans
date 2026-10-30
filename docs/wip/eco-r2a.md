@@ -1,6 +1,6 @@
 # ECO-R2a — semonce féodale (boucle juge 2)
 
-Spec : `docs/audits/2026-10-29-economie-politique.md` § R2-a. ADR XXXX.
+Spec : `docs/audits/2026-10-29-economie-politique.md` § R2-a. ADR 0808.
 
 ## État
 - Données : `data/rules/feudal.json` bloc `host` + schéma + `HostRules` (data-model).

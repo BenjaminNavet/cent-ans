@@ -321,7 +321,7 @@ pub enum Order {
         offer: u32,
         verdict: crate::feudal::Arbitration,
     },
-    /// ECO-R2a (ADR XXXX): the liege, at war with `enemy`, summons the host of its
+    /// ECO-R2a (ADR 0808): the liege, at war with `enemy`, summons the host of its
     /// direct vassals again (those without a contingent in the field raise one).
     SummonHost {
         enemy: FactionId,

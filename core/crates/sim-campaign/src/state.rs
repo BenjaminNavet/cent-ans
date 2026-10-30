@@ -305,7 +305,7 @@ pub struct Army {
     /// treasury (its pay is overdue); reset by a positive treasury.
     #[serde(default, skip_serializing_if = "is_zero")]
     pub unpaid_seasons: u32,
-    /// ECO-R2a (ADR XXXX): set on the contingent a vassal raised for its suzerain's host.
+    /// ECO-R2a (ADR 0808): set on the contingent a vassal raised for its suzerain's host.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub host_service: Option<crate::feudal::HostService>,
 }

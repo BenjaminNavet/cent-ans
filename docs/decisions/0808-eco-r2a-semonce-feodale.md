@@ -1,4 +1,4 @@
-# XXXX — ECO-R2a : la semonce féodale donne des soldats
+# 0808 — ECO-R2a : la semonce féodale donne des soldats
 
 Statut : accepté (boucle juge 2, lot ECO-R2a). Numéro attribué à la fusion.
 

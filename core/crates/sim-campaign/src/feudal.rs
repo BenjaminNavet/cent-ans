@@ -932,7 +932,7 @@ pub(crate) fn shirk(
 
 /// `liege` summons the host of its direct vassals against `enemy` (never
 /// its rear vassals). Whether a vassal answers is [`answers_host`]; a
-/// refusal opens a felony case (§ 4.4). ECO-R2a (ADR XXXX): a vassal that
+/// refusal opens a felony case (§ 4.4). ECO-R2a (ADR 0808): a vassal that
 /// answers also raises a contingent ([`HostService`]).
 pub fn summon_host(
     state: &mut CampaignState,

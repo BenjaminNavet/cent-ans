@@ -115,7 +115,7 @@
       "properties": {
         "max_muster_km": { "type": "number", "minimum": 0, "description": "Distance maximale (km) entre une place du vassal et la capitale de son suzerain ou une place de l'ennemi. 0 : sans limite." },
         "independent_power_ratio": { "type": "number", "minimum": 0, "description": "Puissance du vassal, en part de celle de son suzerain, à partir de laquelle il est indépendant de fait et n'est pas convoqué. 0 : sans limite." },
-        "contingent_percent_of_income": { "type": "integer", "minimum": 0, "maximum": 400, "description": "ECO-R2a (ADR XXXX) : le vassal qui répond lève un contingent dont l'entretien de saison vaut au plus cette part (en %) de sa recette de saison. 0 : la réponse ne fait que déclarer la guerre." },
+        "contingent_percent_of_income": { "type": "integer", "minimum": 0, "maximum": 400, "description": "ECO-R2a (ADR 0808) : le vassal qui répond lève un contingent dont l'entretien de saison vaut au plus cette part (en %) de sa recette de saison. 0 : la réponse ne fait que déclarer la guerre." },
         "min_units": { "type": "integer", "minimum": 0, "description": "Moins de régiments d'un contingent (si le panachage est abordable)." },
         "max_units": { "type": "integer", "minimum": 0, "description": "Plus de régiments d'un contingent." },
         "unit_mix": {

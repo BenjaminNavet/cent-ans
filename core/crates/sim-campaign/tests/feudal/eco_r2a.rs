@@ -1,4 +1,4 @@
-//! ECO-R2a (ADR 0798): the feudal host gives soldiers.
+//! ECO-R2a (ADR 0808): the feudal host gives soldiers.
 
 use data_model::{FactionId, GameData};
 use sim_campaign::feudal::{self, FelonyReason};

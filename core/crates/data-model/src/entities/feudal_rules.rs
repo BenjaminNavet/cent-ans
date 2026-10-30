@@ -100,7 +100,7 @@ pub struct HostRules {
     /// A vassal whose power reaches this share of its suzerain's is
     /// independent in fact and not summoned. `0` removes the limit.
     pub independent_power_ratio: f64,
-    /// ECO-R2a (ADR XXXX): a vassal that answers raises a contingent whose seasonal
+    /// ECO-R2a (ADR 0808): a vassal that answers raises a contingent whose seasonal
     /// upkeep is at most this share (per cent) of its own seasonal income. `0`: the
     /// answer only declares the war (pre-R2a behaviour).
     #[serde(default)]
