@@ -118,7 +118,9 @@ impl<'a> Context<'a> {
             0
         };
         let income = gross_income
-            - state.administration_upkeep_for(data, faction, gross_income)
+            // ECO-R1: the levy on an idle hoard is left out (a subsidy fills the treasury, the
+            // hoard is spent by `hoard()`, and the court's share alone is the structural cost).
+            - state.administration_share_for(data, faction, gross_income)
             - tribute
             - commitments(state, faction)
             // ECO2 (ADR 0777): household, wages, sieges, obligations, interest.

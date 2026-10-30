@@ -686,9 +686,8 @@ impl CampaignState {
         faction: &FactionId,
         income: i64,
     ) -> i64 {
+        let share = self.administration_share_for(data, faction, income);
         let rules = &data.economy_rules;
-        let provinces = self.controlled_provinces(faction).count();
-        let share = (income as f64 * rules.administration_rate(provinces)).round() as i64;
         // An idle hoard feeds court luxury, patronage and embezzlement. GAMEPLAY2 (ADR 0788):
         // only the hoard that is the house's own counts, the treasury net of the principal it
         // owes: borrowed coin is the bankers', so borrowing does not raise the court's levy.
@@ -697,6 +696,20 @@ impl CampaignState {
             .get(faction)
             .map_or(0, |f| f.treasury - f.finance.debt());
         share + rules.opulence(net_hoard, income)
+    }
+
+    /// The part of [`Self::administration_upkeep_for`] that is the court's share of the income,
+    /// without the levy on an idle hoard (ECO-R1: the AI plans on it, because a subsidy fills
+    /// the treasury and the hoard's levy is not a deficit to be cured by disbanding troops).
+    pub fn administration_share_for(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        income: i64,
+    ) -> i64 {
+        let rules = &data.economy_rules;
+        let provinces = self.controlled_provinces(faction).count();
+        (income as f64 * rules.administration_rate(provinces)).round() as i64
     }
 
     /// Full economic snapshot for the bridge (spec § 2).
