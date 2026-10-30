@@ -93,6 +93,15 @@ impl BattleOutcome {
     }
 }
 
+/// What a typed journal line announces (the text stays the player's).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BattleEventKind {
+    /// IA-PLAN-1: nobody has engaged for a good while; the battle will
+    /// probably be refused ([`crate::DecisionRules`]).
+    RefusalLikely,
+}
+
 /// One line of the battle journal.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BattleEvent {
@@ -101,4 +110,7 @@ pub struct BattleEvent {
     pub text_fr: String,
     #[serde(default)]
     pub side: Option<SideId>,
+    /// Set on the few lines that announce something typed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kind: Option<BattleEventKind>,
 }

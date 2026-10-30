@@ -66,6 +66,9 @@ pub struct DecisionRules {
     /// After a lull, the attacker keeps the field only when its share of
     /// losses is lower than the defender's by this margin.
     pub(crate) lull_loss_margin: f64,
+    /// IA-PLAN-1: the journal announces a likely refusal once nobody has
+    /// engaged for this share of the time the refusal takes.
+    pub(crate) refusal_warning_share: f64,
     pub refused_morale: RefusedMorale,
     /// TW retreat: campaign morale after an ordered general retreat.
     pub withdrawal_morale: WithdrawalMorale,

@@ -160,6 +160,7 @@ impl BattleSim {
                 .filter(|u| u.side == side && u.able() && !u.synthetic)
                 .count()
         });
+        self.warn_refusal();
         let timeout = self.elapsed >= self.deadline_s() - 1e-9;
         // T4 (ADR 0108): the market square held long enough.
         let square_held = self.square_taken();

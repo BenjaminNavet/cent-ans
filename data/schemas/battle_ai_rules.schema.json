@@ -8,6 +8,12 @@
     "description": {
       "type": "string"
     },
+    "planner": {
+      "type": "string",
+      "enum": ["legacy", "plans"],
+      "default": "legacy",
+      "description": "IA-PLAN-1: \"legacy\" = plan_field seul ; \"plans\" = planificateur par divisions (data/rules/battle_plans.json) pour les camps que ses plans couvrent."
+    },
     "cover_lateral": {
       "type": "number",
       "description": "B6: a defensive side looks for cover this far on either side of the centre of its deployment line."

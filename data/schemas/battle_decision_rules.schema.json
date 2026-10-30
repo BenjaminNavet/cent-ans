@@ -49,6 +49,12 @@
       "maximum": 1,
       "description": "Des tirs qui coûtent à l'un des camps au moins cette part de son effectif initial depuis le dernier engagement relancent le délai ; quelques flèches perdues ne suffisent pas (duel d'archers à travers une rivière)."
     },
+    "refusal_warning_share": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "IA-PLAN-1 : le journal annonce un refus probable (BattleEventKind::RefusalLikely) quand personne n'a engagé depuis cette part du délai de refus."
+    },
     "lull_loss_margin": {
       "type": "number",
       "minimum": 0,
@@ -86,6 +92,7 @@
     "approach_meters",
     "engagement_loss_share",
     "lull_loss_margin",
+    "refusal_warning_share",
     "refused_morale",
     "withdrawal_morale"
   ],

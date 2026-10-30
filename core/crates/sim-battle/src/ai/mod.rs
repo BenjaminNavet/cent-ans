@@ -112,7 +112,11 @@ pub fn plan(sim: &BattleSim, side: SideId) -> Vec<Command> {
         }
         (None, _) if plan_retreat(&mut view) => {}
         (None, _) => {
-            plan_field(&mut view);
+            if planner::covers(sim, side) {
+                planner::plan_field(&mut view);
+            } else {
+                plan_field(&mut view);
+            }
             crate::formation_ai::coordinate_flanks(sim, side, &mut view.commands);
             let formations = crate::formation_ai::plan_formations(sim, side);
             view.commands.extend(formations);
@@ -133,6 +137,7 @@ use self::horse::*;
 mod mass;
 use self::mass::*;
 mod plan_field;
+pub(crate) mod planner;
 mod retreat;
 use self::plan_field::*;
 use self::retreat::plan_retreat;

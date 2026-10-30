@@ -9,6 +9,7 @@
   "approach_window_seconds": 30,
   "engagement_loss_share": 0.01,
   "lull_loss_margin": 0.05,
+  "refusal_warning_share": 0.25,
   "refused_morale": {
     "attacker": -5,
     "defender": 2

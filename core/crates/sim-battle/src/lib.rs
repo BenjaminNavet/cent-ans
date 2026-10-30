@@ -141,7 +141,7 @@ pub use modes::{UnitMode, UnitModeRules, UnitStatus};
 pub use morale::MoraleRules;
 pub use opening::OpeningRules;
 pub use orders::{OrderUse, OrderView};
-pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};
+pub use outcome::{BattleEvent, BattleEventKind, BattleOutcome, SideResult, StandardTrophy};
 pub use preview::{PreviewError, PreviewLeg};
 pub use push::{PushRules, PushShape};
 pub use queue::{QueueRules, QueuedOrder};

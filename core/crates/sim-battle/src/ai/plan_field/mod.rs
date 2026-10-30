@@ -17,7 +17,16 @@ pub(in crate::ai) use self::orders::*;
 pub(in crate::ai) use self::reserve::*;
 
 pub(in crate::ai) fn plan_field(view: &mut View) {
-    let roles = roles(view);
+    plan_field_with(view, None);
+}
+
+/// [`plan_field`] under the orders of the division planner (IA-PLAN-1): a
+/// held posture and the reserve chosen by the plan.
+pub(in crate::ai) fn plan_field_with(view: &mut View, posture: Option<&planner::Posture>) {
+    let mut roles = roles(view);
+    if let Some(posture) = posture {
+        posture.apply_reserve(view, &mut roles);
+    }
     // A6-L13b: the patience clocks run at the pace of the battle.
     let elapsed = view.sim.elapsed() / view.sim.ai_patience_factor();
     let own_power = view.power(true);
@@ -102,6 +111,9 @@ pub(in crate::ai) fn plan_field(view: &mut View) {
         && !enemy_active
         && elapsed >= tuning().defender_sally_time;
     let defensive = match view.side {
+        // IA-PLAN-1: a held posture does not run out of patience; only the
+        // lull-breaking sally ends it.
+        SideId::Defender if posture.is_some_and(|p| p.hold) => !sallies,
         SideId::Defender => {
             (ratio < 0.85 || holds_heights || holds_river || receives)
                 && !sallies

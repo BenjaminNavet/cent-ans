@@ -28,6 +28,44 @@ impl BattleSim {
         self.duel = rules;
     }
 
+    /// The planner of this battle (IA-PLAN-1).
+    pub fn planner_mode(&self) -> crate::ai_rules::PlannerMode {
+        self.planner.unwrap_or_else(|| crate::ai::tuning().planner)
+    }
+
+    /// Chooses the planner of this battle instead of `battle_ai.json`'s
+    /// (bench, tests).
+    pub fn set_planner(&mut self, mode: crate::ai_rules::PlannerMode) {
+        self.planner = Some(mode);
+    }
+
+    pub(crate) fn planner_memo(&self) -> &std::cell::RefCell<crate::ai::planner::PlannerMemo> {
+        &self.planner_memo
+    }
+
+    /// IA-PLAN-1: writes, once, that the battle is likely to be refused
+    /// when nobody has engaged for `refusal_warning_share` of the time the
+    /// refusal takes (a field battle with the end checks on).
+    pub(super) fn warn_refusal(&mut self) {
+        if self.refusal_warned
+            || self.siege.is_some()
+            || self.clock.fought
+            || self.quiet_time()
+                < self.decision.refusal_warning_share
+                    * self.ai_patience_factor()
+                    * self.decision.refusal_seconds
+        {
+            return;
+        }
+        self.refusal_warned = true;
+        self.events.push(crate::outcome::BattleEvent {
+            time: self.elapsed,
+            text_fr: "Personne n'engage : la bataille sera sans doute refusée.".to_string(),
+            side: None,
+            kind: Some(crate::outcome::BattleEventKind::RefusalLikely),
+        });
+    }
+
     /// How the battle ended, once finished.
     pub fn end_kind(&self) -> Option<BattleEnd> {
         self.end

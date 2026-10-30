@@ -3,11 +3,25 @@
 
 use serde::{Deserialize, Serialize};
 
+/// IA-PLAN-1: the field-battle planner (`battle_ai.json` `planner`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PlannerMode {
+    /// `plan_field` alone (the historical AI).
+    #[default]
+    Legacy,
+    /// The division planner for the sides its plans cover, `plan_field` for the others.
+    Plans,
+}
+
 /// Distances (metres), delays (seconds) and thresholds of the battle AI.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BattleAiRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(crate) description: Option<String>,
+    /// IA-PLAN-1: which planner drives the field battles.
+    #[serde(default)]
+    pub planner: PlannerMode,
     /// B6: a defensive side looks for cover this far on either side of the
     /// centre of its deployment line.
     pub(crate) cover_lateral: f64,

@@ -254,7 +254,12 @@ struct Run {
     routed_defender: usize,
     destroyed_attacker: usize,
     destroyed_defender: usize,
+    /// IA-PLAN-1: when the journal announced a likely refusal.
+    refusal_likely_s: Option<f64>,
 }
+
+/// IA-PLAN-1: planner forced on every battle (`--planner legacy|plans`).
+static PLANNER: std::sync::OnceLock<sim_battle::ai_rules::PlannerMode> = std::sync::OnceLock::new();
 
 fn side_setup(name: &str, units: Vec<UnitSetup>) -> SideSetup {
     SideSetup {
@@ -490,6 +495,9 @@ impl Flank {
 
 fn run_one(data: &GameData, data_dir: &Path, line: &Line, seed: u64) -> Run {
     let mut sim = build(data, data_dir, line, seed);
+    if let Some(&mode) = PLANNER.get() {
+        sim.set_planner(mode);
+    }
     match line.mode {
         Mode::AiVsAi | Mode::Flank => {}
         Mode::PassiveAttacker | Mode::Blob => sim.set_ai(SideId::Attacker, false),
@@ -570,6 +578,11 @@ fn run_one(data: &GameData, data_dir: &Path, line: &Line, seed: u64) -> Run {
         routed_defender: count(SideId::Defender, UnitFate::Routed),
         destroyed_attacker: count(SideId::Attacker, UnitFate::Destroyed),
         destroyed_defender: count(SideId::Defender, UnitFate::Destroyed),
+        refusal_likely_s: sim
+            .events()
+            .iter()
+            .find(|e| e.kind == Some(sim_battle::BattleEventKind::RefusalLikely))
+            .map(|e| e.time),
     }
 }
 
@@ -599,6 +612,9 @@ struct Row {
     median_routed_defender: Option<f64>,
     median_destroyed_attacker: Option<f64>,
     median_destroyed_defender: Option<f64>,
+    /// IA-PLAN-1: absent from the rows where no run announced a refusal.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    median_refusal_likely_s: Option<f64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -655,6 +671,7 @@ fn row_of(line: &Line, runs: &[Run]) -> Row {
         median_routed_defender: pick(&|r| Some(r.routed_defender as f64), 1),
         median_destroyed_attacker: pick(&|r| Some(r.destroyed_attacker as f64), 1),
         median_destroyed_defender: pick(&|r| Some(r.destroyed_defender as f64), 1),
+        median_refusal_likely_s: pick(&|r| r.refusal_likely_s, 1),
     }
 }
 
@@ -696,12 +713,16 @@ fn play(data: &GameData, data_dir: &Path, lines: &[Line], threads: usize) -> Vec
 }
 
 fn summary(report: &Report) -> String {
+    let refusal = |row: &Row| {
+        row.median_refusal_likely_s
+            .map_or(String::new(), |t| format!(" | refus annonce {t:.0}s"))
+    };
     let f =
         |x: Option<f64>, scale: f64| x.map_or("   -".to_owned(), |v| format!("{:4.0}", v * scale));
     let mut out = String::new();
     for row in &report.rows {
         out += &format!(
-            "{:<34} {:<16} A {}/{} D {} nul {} | pertes A{}% D{}% | contact{}s rout1{}s ({}%) fin{}s | munit.{}% | fuite A{} D{} det. A{} D{}\n",
+            "{:<34} {:<16} A {}/{} D {} nul {} | pertes A{}% D{}% | contact{}s rout1{}s ({}%) fin{}s | munit.{}% | fuite A{} D{} det. A{} D{}{}\n",
             row.id,
             format!("{:?}", row.mode),
             row.attacker_wins,
@@ -719,6 +740,7 @@ fn summary(report: &Report) -> String {
             f(row.median_routed_defender, 1.0),
             f(row.median_destroyed_attacker, 1.0),
             f(row.median_destroyed_defender, 1.0),
+            refusal(row),
         );
     }
     out
@@ -948,6 +970,7 @@ fn main() {
     let mut args = std::env::args().skip(1);
     let (mut smoke_only, mut out, mut filter, mut matrix_path) = (false, None, None, None);
     let mut emit_fixture = false;
+    let mut seeds: Option<u64> = None;
     let mut threads = std::thread::available_parallelism()
         .map_or(2, |n| n.get())
         .min(6);
@@ -959,9 +982,21 @@ fn main() {
             "--filter" => filter = args.next(),
             "--threads" => threads = args.next().and_then(|v| v.parse().ok()).unwrap_or(threads),
             "--matrix" => matrix_path = args.next().map(PathBuf::from),
+            "--seeds" => seeds = args.next().and_then(|v| v.parse().ok()),
+            "--planner" => {
+                let mode = match args.next().as_deref() {
+                    Some("legacy") => sim_battle::ai_rules::PlannerMode::Legacy,
+                    Some("plans") => sim_battle::ai_rules::PlannerMode::Plans,
+                    _ => {
+                        eprintln!("--planner legacy|plans");
+                        std::process::exit(2);
+                    }
+                };
+                let _ = PLANNER.set(mode);
+            }
             other => {
                 eprintln!("unknown argument {other}");
-                eprintln!("usage: battle_bench [--smoke] [--filter SUBSTR] [--threads N] [--matrix FILE] [--out FILE] [--emit-auto-fixture]");
+                eprintln!("usage: battle_bench [--smoke] [--filter SUBSTR] [--threads N] [--matrix FILE] [--seeds N] [--planner legacy|plans] [--out FILE] [--emit-auto-fixture]");
                 std::process::exit(2);
             }
         }
@@ -975,6 +1010,11 @@ fn main() {
     let mut lines = lines_of(&matrix);
     if let Some(f) = &filter {
         lines.retain(|l| l.id.contains(f.as_str()));
+    }
+    if let Some(n) = seeds {
+        for l in &mut lines {
+            l.seeds = n;
+        }
     }
     if smoke_only {
         lines = smoke(lines);

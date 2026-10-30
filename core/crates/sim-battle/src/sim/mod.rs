@@ -182,6 +182,13 @@ pub struct BattleSim {
     deploying: bool,
     /// Siege pathing cache, one slot per regiment (F5a; derived data).
     path_cache: std::cell::RefCell<Vec<Option<pathing::CachedPath>>>,
+    /// IA-PLAN-1: divisions and phases of the planner (derived from the
+    /// battle, outside the replay digest).
+    planner_memo: std::cell::RefCell<crate::ai::planner::PlannerMemo>,
+    /// IA-PLAN-1: planner of this battle; `None` reads `battle_ai.json`.
+    planner: Option<crate::ai_rules::PlannerMode>,
+    /// IA-PLAN-1: the "refusal likely" line was already written.
+    refusal_warned: bool,
     /// Siege pathing: obstacle cells per side (review 2026-09-26; derived
     /// data, reset with the walls, the houses or [`BattleSim::siege_mut`]).
     obstacle_cache: std::cell::RefCell<pathing::ObstacleCache>,
@@ -647,6 +654,7 @@ impl BattleSim {
             time: self.elapsed,
             text_fr,
             side,
+            kind: None,
         });
     }
 

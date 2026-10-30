@@ -1,0 +1,32 @@
+{
+  "description": "Plans de l'IA de bataille par divisions (lot IA-PLAN-1, audit 2026-10-29 R3) : un plan est une liste de phases ; chaque phase donne un rôle à chaque division (avant-garde, bataille, arrière-garde) et se définit par des conditions d'entrée et de sortie (toutes doivent tenir ; liste vide = toujours). Lu par sim-battle (ai/planner) quand battle_ai.json « planner » vaut « plans ». Le premier plan dont « sides » contient le camp est joué ; sans plan, l'IA historique (plan_field) reste en charge.",
+  "division_shares": {
+    "vanguard": 0.34,
+    "rear": 0.26
+  },
+  "plans": [
+    {
+      "id": "hold_and_receive",
+      "name_fr": "Tenir et recevoir",
+      "sides": ["defender"],
+      "retarget_reach_m": 140.0,
+      "target_reach_m": 700.0,
+      "phases": [
+        {
+          "id": "receive",
+          "name_fr": "Recevoir l'ennemi sur le terrain choisi",
+          "roles": { "vanguard": "shoot", "battle": "hold", "rear": "reserve" },
+          "enter": [],
+          "exit": [{ "metric": "own_losses", "op": ">", "value": 0.25 }]
+        },
+        {
+          "id": "commit_reserve",
+          "name_fr": "Engager la réserve",
+          "roles": { "vanguard": "shoot", "battle": "hold", "rear": "hold" },
+          "enter": [{ "metric": "own_losses", "op": ">", "value": 0.25 }],
+          "exit": []
+        }
+      ]
+    }
+  ]
+}
