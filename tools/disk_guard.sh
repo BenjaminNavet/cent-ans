@@ -15,9 +15,9 @@ mkdir -p $MAIN/out
 
 free_gb() { df -g / | awk 'NR==2 {print $4}' }
 
-busy() {  # a cargo/rustc/clippy process runs with its cwd or args inside $1
-  pgrep -fl 'cargo|rustc|clippy-driver' 2>/dev/null | grep -qF -- "$1" && return 0
-  lsof -a -d cwd -c cargo -c rustc 2>/dev/null | grep -qF -- "$1"
+busy() {  # any process (cargo, a bench binary, a test script...) runs from or inside $1
+  ps -axo command= 2>/dev/null | grep -v disk_guard | grep -qF -- "$1" && return 0
+  lsof -a -d cwd 2>/dev/null | grep -qF -- "$1"
 }
 
 pass() {
