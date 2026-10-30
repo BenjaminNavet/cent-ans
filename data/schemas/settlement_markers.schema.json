@@ -95,6 +95,7 @@
         "interval_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 2, "description": "Période minimale entre deux recalculs."},
         "recompute_move_fraction": {"type": "number", "minimum": 0, "maximum": 1, "description": "Déplacement de la caméra (fraction de sa distance) qui déclenche un recalcul."},
         "recompute_distance_ratio": {"type": "number", "minimum": 0, "maximum": 1, "description": "Variation relative de la distance caméra qui déclenche un recalcul."},
+        "scene_height_ratio": {"type": "number", "minimum": 0, "description": "Lot PLAQUES-2 : hauteur de la silhouette 3D d'une cité-repère (× sa largeur) ; un nom plus lointain projeté dessus est masqué (0 = désactivé)."},
         "recompute_turn_degrees": {"type": "number", "minimum": 0, "maximum": 45, "description": "Rotation de la caméra (degrés) qui déclenche un recalcul."},
         "label_screen_margin": {"type": "number", "minimum": 0, "maximum": 1, "description": "Débord de l'écran (fraction) où les noms sont encore posés."},
         "pin_player_capital": {"type": "boolean"},
