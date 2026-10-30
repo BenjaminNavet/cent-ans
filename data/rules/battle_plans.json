@@ -8,22 +8,120 @@
     {
       "id": "hold_and_receive",
       "name_fr": "Tenir et recevoir",
-      "sides": ["defender"],
+      "sides": [
+        "defender"
+      ],
       "retarget_reach_m": 140.0,
       "target_reach_m": 700.0,
       "phases": [
         {
           "id": "receive",
           "name_fr": "Recevoir l'ennemi sur le terrain choisi",
-          "roles": { "vanguard": "shoot", "battle": "hold", "rear": "reserve" },
+          "roles": {
+            "vanguard": "shoot",
+            "battle": "hold",
+            "rear": "reserve"
+          },
           "enter": [],
-          "exit": [{ "metric": "own_losses", "op": ">", "value": 0.25 }]
+          "exit": [
+            {
+              "metric": "own_losses",
+              "op": ">",
+              "value": 0.25
+            }
+          ]
         },
         {
           "id": "commit_reserve",
           "name_fr": "Engager la réserve",
-          "roles": { "vanguard": "shoot", "battle": "hold", "rear": "hold" },
-          "enter": [{ "metric": "own_losses", "op": ">", "value": 0.25 }],
+          "roles": {
+            "vanguard": "shoot",
+            "battle": "hold",
+            "rear": "hold"
+          },
+          "enter": [
+            {
+              "metric": "own_losses",
+              "op": ">",
+              "value": 0.25
+            }
+          ],
+          "exit": []
+        }
+      ],
+      "target_discipline": false,
+      "legacy_reserve": true
+    },
+    {
+      "id": "fix_and_envelop",
+      "name_fr": "Fixer et déborder",
+      "sides": [
+        "attacker"
+      ],
+      "retarget_reach_m": 140.0,
+      "target_reach_m": 700.0,
+      "phases": [
+        {
+          "id": "approach",
+          "name_fr": "Approcher et s'user à distance",
+          "roles": {
+            "vanguard": "wear",
+            "battle": "wear",
+            "rear": "wear"
+          },
+          "enter": [],
+          "exit": [],
+          "exit_any": [
+            {
+              "metric": "engaged",
+              "op": ">",
+              "value": 0.05
+            },
+            {
+              "metric": "time",
+              "op": ">=",
+              "value": 150.0
+            }
+          ]
+        },
+        {
+          "id": "provoke",
+          "name_fr": "Provoquer un défenseur qui tient",
+          "roles": {
+            "vanguard": "fix",
+            "battle": "fix",
+            "rear": "fix"
+          },
+          "enter": [
+            {
+              "metric": "engaged",
+              "op": "<=",
+              "value": 0.05
+            }
+          ],
+          "exit": [
+            {
+              "metric": "engaged",
+              "op": ">",
+              "value": 0.05
+            }
+          ]
+        },
+        {
+          "id": "fix",
+          "name_fr": "Fixer le front, déborder par l'arrière-garde",
+          "roles": {
+            "vanguard": "fix",
+            "battle": "fix",
+            "rear": "strike"
+          },
+          "enter": [
+            {
+              "metric": "engaged",
+              "op": ">",
+              "value": 0.05
+            }
+          ],
           "exit": []
         }
       ]

@@ -13,6 +13,7 @@
 //! role.
 
 pub(super) mod division;
+mod offense;
 pub(super) mod plans;
 pub(super) mod roles;
 
@@ -28,12 +29,18 @@ pub(in crate::ai) struct Posture {
     pub(in crate::ai) hold: bool,
     /// Unit indices the reserve is picked from; `None`: no reserve.
     reserve_from: Option<Vec<usize>>,
+    /// The reserve stays the one `plan_field` picks (the plan's `reserve` role
+    /// then only says that a division may be kept back).
+    legacy_reserve: bool,
 }
 
 impl Posture {
     /// The reserve is the rearmost foot regiment among `reserve_from` (the
     /// historical rule of at least four line regiments applies), or none.
     pub(in crate::ai) fn apply_reserve(&self, view: &View, roles: &mut Roles) {
+        if self.legacy_reserve {
+            return;
+        }
         if let Some(r) = roles.reserve.take() {
             roles.line.push(r);
         }
@@ -99,6 +106,12 @@ fn measure(view: &View) -> Metrics {
         },
         force_ratio: view.power(true) / view.power(false).max(1.0),
         enemy_distance: contact,
+        engaged: view
+            .own
+            .iter()
+            .filter(|&&i| view.units[i].state == UnitState::Melee)
+            .count() as f64
+            / view.own.len().max(1) as f64,
     }
 }
 
@@ -273,21 +286,35 @@ pub(in crate::ai) fn plan_field(view: &mut View) {
             .filter(|&i| reserve_ids.contains(&view.units[i].id))
             .collect()
     });
+    let abl: u32 = std::env::var("ABL")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0);
     let posture = Posture {
         hold: true,
         reserve_from,
+        legacy_reserve: plan.legacy_reserve,
     };
-    plan_field_with(view, Some(&posture));
-    retarget(
-        &mut view.commands,
-        view.units,
-        &side_memo.divisions,
-        plan.retarget_reach_m,
-    );
-    debug_assert!(
-        obeys_division_targets(&view.commands, &side_memo.divisions),
-        "a division regiment targets another enemy than its division target"
-    );
+    // The attacker keeps the historical posture (patience, reserve); its plan
+    // acts through the offensive roles below.
+    plan_field_with(view, (view.side == SideId::Defender).then_some(&posture));
+    if view.side == SideId::Attacker && abl & 16 == 0 {
+        for division in &side_memo.divisions {
+            offense::apply(view, division, phase.roles.of(division.kind));
+        }
+    }
+    if plan.target_discipline {
+        retarget(
+            &mut view.commands,
+            view.units,
+            &side_memo.divisions,
+            plan.retarget_reach_m,
+        );
+        debug_assert!(
+            obeys_division_targets(&view.commands, &side_memo.divisions),
+            "a division regiment targets another enemy than its division target"
+        );
+    }
 }
 
 #[cfg(test)]

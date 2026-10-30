@@ -4,31 +4,63 @@
   "title": "Plans de l'IA de bataille",
   "description": "Fichier data/rules/battle_plans.json (lot IA-PLAN-1) : plans par divisions lus par sim-battle (ai/planner).",
   "type": "object",
-  "required": ["division_shares", "plans"],
+  "required": [
+    "division_shares",
+    "plans"
+  ],
   "additionalProperties": false,
   "properties": {
-    "description": { "type": "string" },
+    "description": {
+      "type": "string"
+    },
     "division_shares": {
       "type": "object",
-      "required": ["vanguard", "rear"],
+      "required": [
+        "vanguard",
+        "rear"
+      ],
       "additionalProperties": false,
       "description": "Parts des régiments (par profondeur au déploiement) qui forment l'avant-garde et l'arrière-garde ; le reste est la bataille.",
       "properties": {
-        "vanguard": { "type": "number", "minimum": 0, "maximum": 1 },
-        "rear": { "type": "number", "minimum": 0, "maximum": 1 }
+        "vanguard": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rear": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
       }
     },
     "plans": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/plan" }
+      "items": {
+        "$ref": "#/$defs/plan"
+      }
     }
   },
   "$defs": {
-    "role": { "enum": ["hold", "shoot", "reserve"] },
+    "role": {
+      "enum": [
+        "hold",
+        "shoot",
+        "reserve",
+        "fix",
+        "wear",
+        "strike",
+        "screen"
+      ]
+    },
     "condition": {
       "type": "object",
-      "required": ["metric", "op", "value"],
+      "required": [
+        "metric",
+        "op",
+        "value"
+      ],
       "additionalProperties": false,
       "properties": {
         "metric": {
@@ -39,46 +71,109 @@
             "enemy_shooter_share",
             "enemy_has_stakes",
             "force_ratio",
-            "enemy_distance"
+            "enemy_distance",
+            "engaged"
           ],
-          "description": "time : secondes simulées ; own_losses / enemy_losses : part des effectifs initiaux perdue ; enemy_shooter_share : part de la puissance ennemie en tireurs ; enemy_has_stakes : 1 si un régiment ennemi a planté ses pieux, sinon 0 ; force_ratio : puissance propre / ennemie ; enemy_distance : mètres jusqu'à l'ennemi le plus proche."
+          "description": "time : secondes simulées ; own_losses / enemy_losses : part des effectifs initiaux perdue ; enemy_shooter_share : part de la puissance ennemie en tireurs ; enemy_has_stakes : 1 si un régiment ennemi a planté ses pieux, sinon 0 ; force_ratio : puissance propre / ennemie ; enemy_distance : mètres jusqu'à l'ennemi le plus proche ; engaged : part des régiments propres pris en mêlée."
         },
-        "op": { "enum": [">", ">=", "<", "<="] },
-        "value": { "type": "number" }
+        "op": {
+          "enum": [
+            ">",
+            ">=",
+            "<",
+            "<="
+          ]
+        },
+        "value": {
+          "type": "number"
+        }
       }
     },
     "phase": {
       "type": "object",
-      "required": ["id", "name_fr", "roles", "enter", "exit"],
+      "required": [
+        "id",
+        "name_fr",
+        "roles",
+        "enter",
+        "exit"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "type": "string" },
-        "name_fr": { "type": "string" },
+        "id": {
+          "type": "string"
+        },
+        "name_fr": {
+          "type": "string"
+        },
         "roles": {
           "type": "object",
-          "required": ["vanguard", "battle", "rear"],
+          "required": [
+            "vanguard",
+            "battle",
+            "rear"
+          ],
           "additionalProperties": false,
           "properties": {
-            "vanguard": { "$ref": "#/$defs/role" },
-            "battle": { "$ref": "#/$defs/role" },
-            "rear": { "$ref": "#/$defs/role" }
+            "vanguard": {
+              "$ref": "#/$defs/role"
+            },
+            "battle": {
+              "$ref": "#/$defs/role"
+            },
+            "rear": {
+              "$ref": "#/$defs/role"
+            }
           }
         },
-        "enter": { "type": "array", "items": { "$ref": "#/$defs/condition" } },
-        "exit": { "type": "array", "items": { "$ref": "#/$defs/condition" } }
+        "enter": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        },
+        "exit": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        },
+        "exit_any": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/condition"
+          },
+          "description": "Sortie alternative : la phase prend aussi fin quand une seule de ces conditions tient."
+        }
       }
     },
     "plan": {
       "type": "object",
-      "required": ["id", "name_fr", "sides", "retarget_reach_m", "target_reach_m", "phases"],
+      "required": [
+        "id",
+        "name_fr",
+        "sides",
+        "retarget_reach_m",
+        "target_reach_m",
+        "phases"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "type": "string" },
-        "name_fr": { "type": "string" },
+        "id": {
+          "type": "string"
+        },
+        "name_fr": {
+          "type": "string"
+        },
         "sides": {
           "type": "array",
           "minItems": 1,
-          "items": { "enum": ["attacker", "defender"] }
+          "items": {
+            "enum": [
+              "attacker",
+              "defender"
+            ]
+          }
         },
         "retarget_reach_m": {
           "type": "number",
@@ -91,7 +186,17 @@
         "phases": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/phase" }
+          "items": {
+            "$ref": "#/$defs/phase"
+          }
+        },
+        "target_discipline": {
+          "type": "boolean",
+          "description": "Applique la discipline de cible (retarget_reach_m). Faux par défaut : elle coûtait Crécy et Poitiers au banc (IA-PLAN-2)."
+        },
+        "legacy_reserve": {
+          "type": "boolean",
+          "description": "La réserve reste celle que choisit plan_field au lieu du dernier régiment à pied de la division mise en réserve."
         }
       }
     }

@@ -29,6 +29,8 @@ pub enum Metric {
     ForceRatio,
     /// Metres from our line to the nearest able enemy.
     EnemyDistance,
+    /// Share of our regiments locked in a melee.
+    Engaged,
 }
 
 /// Comparison of a condition.
@@ -63,6 +65,7 @@ pub struct Metrics {
     pub enemy_has_stakes: f64,
     pub force_ratio: f64,
     pub enemy_distance: f64,
+    pub engaged: f64,
 }
 
 impl Metrics {
@@ -75,6 +78,7 @@ impl Metrics {
             Metric::EnemyHasStakes => self.enemy_has_stakes,
             Metric::ForceRatio => self.force_ratio,
             Metric::EnemyDistance => self.enemy_distance,
+            Metric::Engaged => self.engaged,
         }
     }
 }
@@ -105,6 +109,17 @@ pub struct Phase {
     pub roles: PhaseRoles,
     pub enter: Vec<Condition>,
     pub exit: Vec<Condition>,
+    /// Alternative exit: the phase also ends when any one of these holds.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub exit_any: Vec<Condition>,
+}
+
+impl Phase {
+    /// Does the phase end under `metrics`?
+    pub fn ends(&self, metrics: &Metrics) -> bool {
+        (!self.exit.is_empty() && all_hold(&self.exit, metrics))
+            || self.exit_any.iter().any(|c| c.holds(metrics))
+    }
 }
 
 /// A plan: who plays it and its phases.
@@ -117,6 +132,14 @@ pub struct Plan {
     /// A regiment ordered at another enemy than its division's target goes
     /// for the target when it is this close, otherwise it holds.
     pub retarget_reach_m: f64,
+    /// Apply the target discipline above (IA-PLAN-1). Off by default: it cost
+    /// Crécy and Poitiers at the bench (IA-PLAN-2).
+    #[serde(default)]
+    pub target_discipline: bool,
+    /// The reserve is the one `plan_field` picks, not the rearmost foot of the
+    /// division kept in reserve.
+    #[serde(default)]
+    pub legacy_reserve: bool,
     /// A division keeps its target while it stays this close.
     pub target_reach_m: f64,
     pub phases: Vec<Phase>,
@@ -133,7 +156,7 @@ impl Plan {
                 .unwrap_or(0),
             Some(c) => {
                 let phase = &self.phases[c];
-                if phase.exit.is_empty() || !all_hold(&phase.exit, metrics) {
+                if !phase.ends(metrics) {
                     return c;
                 }
                 (c + 1..self.phases.len())
@@ -214,6 +237,8 @@ mod tests {
             name_fr: "t".into(),
             sides: vec![SideId::Defender],
             retarget_reach_m: 100.0,
+            target_discipline: true,
+            legacy_reserve: false,
             target_reach_m: 500.0,
             phases: vec![
                 Phase {
@@ -222,6 +247,7 @@ mod tests {
                     roles: roles(Role::Reserve),
                     enter: vec![],
                     exit: vec![cond(Metric::OwnLosses, Op::Gt, 0.25)],
+                    exit_any: vec![],
                 },
                 Phase {
                     id: "b".into(),
@@ -229,6 +255,7 @@ mod tests {
                     roles: roles(Role::Hold),
                     enter: vec![cond(Metric::OwnLosses, Op::Gt, 0.25)],
                     exit: vec![],
+                    exit_any: vec![],
                 },
             ],
         }
@@ -266,7 +293,7 @@ mod tests {
     fn bundled_plans_are_consistent() {
         let rules = PlanRules::bundled();
         assert!(rules.plan_for(SideId::Defender).is_some());
-        assert!(rules.plan_for(SideId::Attacker).is_none());
+        assert!(rules.plan_for(SideId::Attacker).is_some());
         for plan in &rules.plans {
             assert!(!plan.phases.is_empty());
             assert!(plan.retarget_reach_m > 0.0 && plan.target_reach_m > 0.0);

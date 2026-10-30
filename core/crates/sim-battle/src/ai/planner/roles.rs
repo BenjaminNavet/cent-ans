@@ -1,4 +1,4 @@
-//! Roles a phase gives to a division: hold, shoot, reserve.
+//! Roles a phase gives to a division: hold, shoot, reserve (IA-PLAN-1); fix, wear, strike, screen (IA-PLAN-2).
 
 use serde::{Deserialize, Serialize};
 
@@ -14,6 +14,15 @@ pub enum Role {
     Shoot,
     /// Kept back; its foot plugs a gap in the line.
     Reserve,
+    /// Pins the enemy front: the foot attacks the division target and keeps it busy.
+    Fix,
+    /// Wears the enemy down at a distance: the legacy approach and volleys, no commitment.
+    Wear,
+    /// Falls on the flank of the enemy the fixing divisions hold (the horse by the
+    /// grouped charge of `ai/mass.rs`, the foot by a flank march).
+    Strike,
+    /// Covers the others (no order of its own; the legacy guard and counter-charges).
+    Screen,
 }
 
 /// The role of each division in a phase.
