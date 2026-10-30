@@ -342,9 +342,9 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0779 | [Histoire conditionnée et bifurcations](0779-histoire-conditionnee-et-bifurcations.md) | accepté |
 | 0782 | [Doctrines stratégiques de l'IA de campagne](0782-doctrines-strategiques-de-l-ia.md) | accepté |
 | 0783 | [Paliers de comportement de la difficulté de l'IA](0783-paliers-de-comportement-de-la-difficulte-ia.md) | accepté |
-| 0784 | [L'arc de partie en trois actes](0784-arc-de-partie-en-trois-actes.md) | accepté (fin d'acte et politiques amendées par XXXX) |
-| 0785 | [Victoire par score de règne (amende 0245)](0785-victoire-par-score-de-regne.md) | remplacé par l'ADR XXXX |
-| 0788 | [Score de règne : des actes, pas l'attente ; épargne dormante nette des dettes](0788-score-de-regne-par-actes-et-epargne-nette.md) | accepté (§ 1 remplacé par XXXX) |
+| 0784 | [L'arc de partie en trois actes](0784-arc-de-partie-en-trois-actes.md) | accepté (fin d'acte et politiques amendées par 0805) |
+| 0785 | [Victoire par score de règne (amende 0245)](0785-victoire-par-score-de-regne.md) | remplacé par l'ADR 0805 |
+| 0788 | [Score de règne : des actes, pas l'attente ; épargne dormante nette des dettes](0788-score-de-regne-par-actes-et-epargne-nette.md) | accepté (§ 1 remplacé par 0805) |
 | 0789 | [Conseiller de saison, annonce de la posture de l'IA, oracle d'équilibre des seed bots](0789-conseiller-de-saison-posture-de-l-ia-et-oracle-d-equilibre.md) | accepté |
 | 0780 | [Interface du crédit et des impôts exceptionnels](0780-interface-du-credit.md) | accepté |
 | 0772 | [Le compteur « Nuit dans » suit l'heure de départ](0772-compteur-nuit-lie-a-l-heure-de-depart.md) | n/d |
@@ -353,7 +353,7 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0790 | [LOD1-2 refaits par voxels et texture recuite](0790-lod-par-voxels-et-texture-recuite.md) | accepté |
 | 0791 | [Sol de campagne : aspect provisoire avant le chargement du sol texturé](0791-sol-aspect-provisoire-avant-chargement.md) | accepté |
 | 0792 | [Combat : rééquilibrage du tir (lot COMBAT, boucle juge 1)](0792-equilibrage-tir-et-choc.md) | accepté |
-| 0793 | [ECO : économie resserrée, attrition hors territoire, réserve de recrutement](0793-economie-attrition-reserve.md) | accepté (seuil de victoire revu par XXXX) |
+| 0793 | [ECO : économie resserrée, attrition hors territoire, réserve de recrutement](0793-economie-attrition-reserve.md) | accepté (seuil de victoire revu par 0805) |
 | 0794 | [Mémoire de campagne : textures de modèles BC1 en assets neufs, mesure avec relief](0794-textures-de-modeles-en-assets-neufs.md) | accepté |
 | 0795 | [MEM5 : les « 3 Go graphiques non comptés » sont le tas mimalloc](0795-mem5-tas-mimalloc-etiquete-ioaccelerator.md) | accepté |
 | 0796 | [TUTO : le champ `prestige` des factions est supprimé](0796-tuto-prestige-champ-supprime.md) | accepté |
@@ -365,3 +365,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0802 | [IA-CAV : charge groupée de la cavalerie (boucle juge 2)](0802-iacav-charge-groupee-cavalerie.md) | accepté |
 | 0803 | [VIS-R6b : lieux génériques de la famille « ouest » refaits en Meshy meshy-6](0803-vis-r6-lieux-generiques-meshy.md) | accepté |
 | 0804 | [Végétation de plaine (VIS-R7)](0804-vis-r7-vegetation-de-plaine.md) | accepté |
+| 0805 | [R1 : renommée accumulée, actes à dates fixes, ambitions](0805-r1-renommee-actes-a-dates-fixes-ambitions.md) | accepté |

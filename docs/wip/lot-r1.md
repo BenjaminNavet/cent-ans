@@ -4,11 +4,11 @@ Branche : `worktree-agent-adc1d3f985235a4e2` (worktree agent). Source : `docs/au
 
 ## État (30/10, après reprise et rebase sur main)
 - [x] R1-0 sonde officielle (`seed-bots/src/timeline.rs`, `examples/campaign_timeline.rs`)
-- [x] Mesures « avant » (out/r1/before, sonde + données de 95b504043) et « après » (out/r1/after3) : tableau dans l'ADR XXXX
+- [x] Mesures « avant » (out/r1/before, sonde + données de 95b504043) et « après » (out/r1/after3) : tableau dans l'ADR 0805
 - [x] R1-1 renommée, actes à dates fixes, score d'acte signé dans le règne ; tests acts:: verts
 - [x] R1-2 ambitions à effets ; test `seed-bots --test ambitions` vert (36/36 > 10 %)
 - [x] Sauvegarde v12 + migration + fixture `save_v12.json`
-- [x] ADR XXXX (mesures, seuil 43), INDEX et statuts de 0784/0785/0788/0793
+- [x] ADR 0805 (mesures, seuil 43), INDEX et statuts de 0784/0785/0788/0793
 - [x] Vérification complète : fmt, clippy, tests workspace (2 assertions `STATE_VERSION == 11` passées à 12), seed bots rapides 0 constat
 - [ ] Passe longue seed bots en arrière-plan (lancée par l'agent, constats à présenter)
 
@@ -18,7 +18,7 @@ La renommée de maison sera `CampaignState::house_renown(data)` (entier, jauge) 
 provisoire ; à terme il sera remplacé par cette renommée (pas de doublon de règle dans `core/`).
 
 ## Prochaine étape
-Lire le rapport de la passe longue (target/seed-bots/) ; numéroter l'ADR XXXX à la fusion.
+Lire le rapport de la passe longue (target/seed-bots/) ; numéroter l'ADR 0805 à la fusion.
 
 ## Client (à afficher plus tard)
 `ActView`/`TransitionView` gagnent `renown`, `house_renown`, `renown_recent` ; `ActPolicyRow` gagne

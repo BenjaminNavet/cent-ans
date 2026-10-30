@@ -1,4 +1,4 @@
-# XXXX — Ciel, lumière et air de la carte de campagne (VIS-R1)
+# 0799 — Ciel, lumière et air de la carte de campagne (VIS-R1)
 
 Date : 2026-10-29. Statut : acceptée (numéro à attribuer à la fusion). Amende les ADR 0156, 0710 et 0755 ; touche 0596 et 0124 sans les contredire.
 Lot VIS-R1 de la boucle juge 2 (audit `docs/audits/2026-10-29-visuel-campagne.md`, refonte R1). Détails : `docs/wip/vis-r1.md`.

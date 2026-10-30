@@ -1,4 +1,4 @@
-# XXXX — TUTO : le champ `prestige` des factions est supprimé
+# 0796 — TUTO : le champ `prestige` des factions est supprimé
 
 Statut : accepté (29/10/2026). Numéro à fixer à la fusion.
 

@@ -1,6 +1,6 @@
 # 0793 — ECO : économie resserrée, attrition hors territoire, réserve de recrutement
 
-Statut : accepté (29/10/2026) ; seuil de victoire revu par l’ADR XXXX (43). Numéro à fixer à la fusion.
+Statut : accepté (29/10/2026) ; seuil de victoire revu par l’ADR 0805 (43).
 
 ## Contexte
 Le juge de l'itération 1 (`out/juge2/iter-01-design.md`) et les seed bots (ADR 0348) ont relevé :

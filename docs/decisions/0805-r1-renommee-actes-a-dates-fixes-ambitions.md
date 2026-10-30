@@ -1,4 +1,4 @@
-# XXXX — R1 : renommée accumulée, actes à dates fixes, ambitions
+# 0805 — R1 : renommée accumulée, actes à dates fixes, ambitions
 
 Statut : accepté (numéro attribué à la fusion). Remplace 0785 et 0788 § 1 ; amende 0784 ; revient sur le seuil de
 victoire de 0793.

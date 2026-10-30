@@ -1,4 +1,4 @@
-# XXXX — HIST4 : aptitude historique du conseil, monnaie par faction, contrastes par défaut
+# 0798 — HIST4 : aptitude historique du conseil, monnaie par faction, contrastes par défaut
 
 Statut : accepté (29/10/2026, lot HIST4 de la boucle juge 2). Numéro à fixer à la fusion.
 

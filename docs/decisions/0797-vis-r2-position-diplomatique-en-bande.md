@@ -1,4 +1,4 @@
-# XXXX — Position diplomatique en bande intérieure en vue 3D (VIS-R2)
+# 0797 — Position diplomatique en bande intérieure en vue 3D (VIS-R2)
 
 Numéro attribué à la fusion. Amende l'ADR 0175 (lisibilité du territoire) ; reprend le constat G1-4 de
 `docs/audits/2026-10-29-visuel-campagne.md`.

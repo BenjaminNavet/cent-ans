@@ -1,4 +1,4 @@
-# XXXX — MEM5 : les « 3 Go graphiques non comptés » sont le tas mimalloc
+# 0795 — MEM5 : les « 3 Go graphiques non comptés » sont le tas mimalloc
 
 Date : 2026-10-29. Statut : acceptée. Amende l'ADR 0794 (point 3 du contexte) et `docs/performance-memoire.md`.
 Lot MEM5. Détails : `docs/wip/lot-mem5.md`.

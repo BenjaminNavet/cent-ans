@@ -1,6 +1,6 @@
 # 0784 — L'arc de partie en trois actes
 
-Statut : accepté (lot ACTES, 24/10/2026) ; amendé par l’ADR XXXX (actes à dates fixes, ambitions au lieu des politiques).
+Statut : accepté (lot ACTES, 24/10/2026) ; amendé par l’ADR 0805 (actes à dates fixes, ambitions au lieu des politiques).
 
 ## Contexte
 
