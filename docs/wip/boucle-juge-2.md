@@ -182,3 +182,4 @@ Constats seed bots longs : présentés au joueur, il choisit (ne rien écrire da
 - BUILD-DX-a prêt (f82ec0b1e, ADR 0834) : gc_targets.sh (0 Go libérable aujourd'hui, à blanc), heavy.sh FIFO testé, release-fast. Pour FUSION-C.
 - ECO-R2b fini (618dcc110, ADR 0822) : part de l'armée France 32-40 % (bande 50-70 % NON tenue, avant 26-37 %), plus grosse armée ≈ 4 k (bande 8-20 k NON tenue ; cause probable : plafond de taille d'armée, hors lot) ; pas de banqueroute France. Économie en pause : accepté tel quel, écarts consignés pour la reprise éco. Pour FUSION-C.
 - MEM6 p1 prêt (29b32015c, ADR 0786 complété) : bataille stabilisée 5 880 → 4 840 Mo (cible 4 500 non tenue), campagne au repos hors Metal 2 950 (≤ 3 000 tenu), banc carte +1 830 (critère +1 000 non tenu, caches sol/détail → phase 2), retour campagne +1,1 Go (décharge symétrique → phase 2). Pour FUSION-C.
+- 11:45 disque 12 Go → 128 Go libres : target/ supprimés des 14 worktrees de lots finis (branches gardées).
