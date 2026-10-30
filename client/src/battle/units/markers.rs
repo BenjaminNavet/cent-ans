@@ -278,6 +278,26 @@ struct Markers {
     clustered: bool,
 }
 
+/// Horizon fade of the far enemy plates (`camera_feel.json` `battle.plates_horizon`, same rule as
+/// the campaign's PLAQUES-HORIZON): an enemy regiment farther from the camera than
+/// `range_ratio` x the zoom distance (at least `min_range` m) shrinks away, so distant lines do
+/// not pile up as a cluster of plates on the horizon. `range_ratio` 0 disables it.
+#[derive(Resource, Default)]
+struct FarPlates(crate::campaign::markers::catalog::HorizonRule);
+
+fn load_far_plates() -> FarPlates {
+    let rule = crate::paths::find_root()
+        .ok()
+        .and_then(|root| {
+            std::fs::read_to_string(crate::paths::data_dir(&root).join("ui/camera_feel.json")).ok()
+        })
+        .and_then(|text| serde_json::from_str::<serde_json::Value>(&text).ok())
+        .and_then(|json| json["battle"]["plates_horizon"].as_object().cloned())
+        .and_then(|object| serde_json::from_value(serde_json::Value::Object(object)).ok())
+        .unwrap_or_default();
+    FarPlates(rule)
+}
+
 #[derive(Component)]
 struct MarkerRoot(u32);
 
@@ -287,6 +307,7 @@ impl Plugin for BattleMarkersPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<MarkerStats>()
             .init_resource::<Markers>()
+            .insert_resource(load_far_plates())
             .register_dump(dump_markers)
             .add_systems(
                 Update,
@@ -495,6 +516,7 @@ fn update_markers(
     selection: Option<Res<BattleSelection>>,
     camera_state: Option<Res<BattleCameraState>>,
     theme: Option<Res<UiTheme>>,
+    far_plates: Res<FarPlates>,
     assets: Res<AssetServer>,
     camera: Query<(&Camera, &GlobalTransform), With<BattleCamera>>,
     ui_scale: Res<bevy::ui::UiScale>,
@@ -520,6 +542,9 @@ fn update_markers(
         };
     let colors = session.colors;
     let selected: Vec<u32> = selection.map(|s| s.units.clone()).unwrap_or_default();
+    let player = session.player;
+    let eye = camera_transform.translation();
+    let mut fade: HashMap<u32, f32> = HashMap::new();
     let sim = &*session.sim_mut();
     // Entries in unit order (stable): regiments whose top is in front of the camera.
     let mut entries: Vec<Entry> = Vec::new();
@@ -537,6 +562,16 @@ fn update_markers(
         let Ok(anchor) = camera.world_to_viewport(camera_transform, top) else {
             continue;
         };
+        // Far enemy regiments fade out (selected ones and the player's own never do).
+        let opacity = if player.is_some_and(|p| p != unit.side) && !selected.contains(&unit.id) {
+            far_plates.0.opacity(eye.distance(top), distance, 0.0)
+        } else {
+            1.0
+        };
+        if opacity < 0.02 {
+            continue;
+        }
+        fade.insert(unit.id, opacity);
         // Plates are UI nodes: `Val::Px` is multiplied by `UiScale`.
         let anchor = crate::ui::kit::viewport_to_ui(anchor, &ui_scale);
         by_id.insert(unit.id, unit);
@@ -604,7 +639,7 @@ fn update_markers(
             marker_scale
         } else {
             marker_scale * COMPACT
-        };
+        } * fade.get(&entry.id).copied().unwrap_or(1.0);
         let tip_x = rect.min.x + WIDTH * plate_scale * 0.5;
         let centre = full * 0.5;
         if let Ok((mut node, mut visibility, mut transform)) = nodes.get_mut(plate.root) {

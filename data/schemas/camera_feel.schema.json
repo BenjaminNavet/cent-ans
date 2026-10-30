@@ -45,7 +45,17 @@
         "opening_ahead_m": {"description": "B3 : décalage du point visé vers l'ennemi (m) ; 0 = centre de l'armée.", "type": "number", "minimum": 0, "maximum": 200},
         "marker_shrink_start_m": {"description": "B4 : distance de caméra (m) au-delà de laquelle les icônes d'unité rapetissent.", "type": "number", "minimum": 0},
         "marker_shrink_end_m": {"description": "B4 : distance de caméra (m) où l'icône atteint son échelle minimale.", "type": "number", "minimum": 1},
-        "marker_min_scale": {"description": "B4 : échelle minimale des icônes d'unité en vue lointaine.", "type": "number", "minimum": 0.2, "maximum": 1}
+        "marker_min_scale": {"description": "B4 : échelle minimale des icônes d'unité en vue lointaine.", "type": "number", "minimum": 0.2, "maximum": 1},
+        "plates_horizon": {
+          "description": "Lot PLAQUES-2 : fondu des plaques de régiments ennemis lointains (même règle que PLAQUES-HORIZON de la campagne). Une plaque ennemie plus loin de la caméra que range_ratio x la distance de zoom (au moins min_range m) rétrécit puis disparaît sur les derniers fade_fraction de cette portée ; régiments sélectionnés et alliés exemptés. range_ratio 0 = aucun fondu.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "range_ratio": {"type": "number", "minimum": 0},
+            "min_range": {"type": "number", "minimum": 0},
+            "fade_fraction": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        }
       }
     },
     "reduce_motion": {

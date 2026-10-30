@@ -1244,6 +1244,36 @@ fn update_labels(
     }
     let mut shown = 0;
     let horizon = places.catalog.horizon;
+    // Scene occlusion (`declutter.scene_height_ratio`): a landmark city's 3D silhouette hides the
+    // name of any place farther from the eye that would be projected on it (Saint-Denis behind
+    // the Paris cathedral).
+    let height_ratio = places.catalog.declutter_f32("scene_height_ratio", 0.0);
+    let mut silhouettes: Vec<(usize, f32, Rect)> = Vec::new();
+    if height_ratio > 0.0 {
+        for (index, p) in places.places.iter().enumerate() {
+            let Some(l) = p.landmark.map(|l| &places.landmarks[l]) else {
+                continue;
+            };
+            let width = 2.0 * l.core_radius * places.maquettes.landmark_scale * l.yield_factor;
+            let base = placement::px_to_world(p.px, ground_y(&ground, p.px));
+            let top = base + Vec3::Y * width * height_ratio;
+            if let (Ok(b), Ok(t)) = (
+                camera.world_to_viewport(cam_t, base),
+                camera.world_to_viewport(cam_t, top),
+            ) {
+                let (b, t) = (viewport_to_ui(b, &ui_scale), viewport_to_ui(t, &ui_scale));
+                let half = (b.y - t.y).abs().max(8.0) * 0.5;
+                silhouettes.push((
+                    index,
+                    eye.distance(base),
+                    Rect::from_corners(
+                        Vec2::new(b.x - half, t.y.min(b.y)),
+                        Vec2::new(b.x + half, b.y.max(t.y)),
+                    ),
+                ));
+            }
+        }
+    }
     let (rig_distance, strategic) = zoom.map_or((0.0, 1.0), |z| (z.distance, z.strategic));
     for (label, node, vis, computed, ui_transform) in &mut entries {
         let p = &places.places[label.index];
@@ -1286,6 +1316,17 @@ fn update_labels(
                 rect.min + Vec2::new(0.0, size.y + 4.0),
                 rect.max + Vec2::new(0.0, size.y + 4.0),
             );
+            let hidden_behind = |r: &Rect| {
+                !pinned
+                    && silhouettes.iter().any(|(owner, dist, sil)| {
+                        *owner != label.index
+                            && *dist < eye_distance
+                            && r.min.x < sil.max.x
+                            && r.max.x > sil.min.x
+                            && r.min.y < sil.max.y
+                            && r.max.y > sil.min.y
+                    })
+            };
             let slot = if pinned {
                 // Always shown and registered so others avoid it; it dodges an army plate or an
                 // earlier pinned name by sitting just below when that is free.
@@ -1297,9 +1338,9 @@ fn update_labels(
                     grid.try_place(rect, -1, true);
                     Some(0.0)
                 }
-            } else if grid.try_place(rect, label.index as i32, false) {
+            } else if !hidden_behind(&rect) && grid.try_place(rect, label.index as i32, false) {
                 Some(0.0)
-            } else if grid.try_place(below, label.index as i32, false) {
+            } else if !hidden_behind(&below) && grid.try_place(below, label.index as i32, false) {
                 Some(size.y + 4.0)
             } else {
                 None
