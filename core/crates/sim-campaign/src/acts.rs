@@ -489,6 +489,11 @@ impl CampaignState {
         rules.ambitions(player, government_key(data, player), &rules.acts[index].id)
     }
 
+    /// R1-2: the first seasons of an act, when a third ambition may still replace the oldest.
+    pub fn ambition_choice_open(&self, data: &GameData) -> bool {
+        self.turn.saturating_sub(self.acts.act_start_turn) < data.acts_rules.ambition_choice_seasons
+    }
+
     /// R1-2: the ambitions the player's house holds now (none once the arc is over).
     pub fn chosen_ambitions<'a>(&self, data: &'a GameData) -> Vec<&'a ActAmbition> {
         if !self.acts.started || self.acts.finished {
@@ -607,9 +612,7 @@ impl CampaignState {
         }
         let wanted = rules.ambitions_to_choose.max(1) as usize;
         if self.acts.ambitions.len() >= wanted {
-            let open =
-                self.turn.saturating_sub(self.acts.act_start_turn) < rules.ambition_choice_seasons;
-            if !open {
+            if !self.ambition_choice_open(data) {
                 return Err(ActError::AmbitionsLocked);
             }
             self.acts.ambitions.remove(0);

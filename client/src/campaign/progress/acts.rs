@@ -132,6 +132,7 @@ fn spawn(commands: &mut Commands, theme: &UiTheme, view: &TransitionView) -> Ent
                         &theme,
                         &format!("{}\n{}", view.score_line, view.grade_line),
                     ));
+                    card.spawn(caption(&theme, &renown_lines(view)));
                     card.spawn(caption(&theme, &objectives));
                     if !view.pressures.is_empty() {
                         card.spawn(caption(&theme, &view.pressures.join("\n")));
@@ -155,11 +156,12 @@ fn spawn(commands: &mut Commands, theme: &UiTheme, view: &TransitionView) -> Ent
                         })
                         .with_children(|row| {
                             for ambition in &view.ambitions {
-                                let label = if ambition.chosen {
-                                    format!("> {}", ambition.name)
-                                } else {
-                                    ambition.name.clone()
-                                };
+                                let label = format!(
+                                    "{}{} (renommée +{} %)",
+                                    if ambition.chosen { "> " } else { "" },
+                                    ambition.name,
+                                    ambition.renown_bonus_percent
+                                );
                                 row.spawn(button_primary(
                                     &theme,
                                     &format!("acts:ambition:{}", ambition.id),
@@ -167,11 +169,17 @@ fn spawn(commands: &mut Commands, theme: &UiTheme, view: &TransitionView) -> Ent
                                 ));
                             }
                         });
-                        let chosen = view
+                        let held: Vec<&str> = view
                             .ambitions
                             .iter()
-                            .find(|p| p.chosen)
-                            .map_or_else(|| view.ambition_prompt.clone(), |p| p.description.clone());
+                            .filter(|a| a.chosen)
+                            .map(|a| a.description.as_str())
+                            .collect();
+                        let chosen = if held.is_empty() {
+                            view.ambition_prompt.clone()
+                        } else {
+                            format!("Ambitions tenues : {}\n{}", held.len(), held.join("\n"))
+                        };
                         card.spawn(caption(&theme, &chosen));
                     }
                     card.spawn(button_primary(&theme, "acts:continue", "Continuer"));
@@ -179,6 +187,19 @@ fn spawn(commands: &mut Commands, theme: &UiTheme, view: &TransitionView) -> Ent
             });
         })
         .id()
+}
+
+/// Renown of the house, its last three sources and the victory threshold (R1-UI).
+fn renown_lines(view: &TransitionView) -> String {
+    let mut text = format!(
+        "Renommée de la maison : {} — score de règne : {} (seuil de victoire : {})",
+        view.house_renown, view.reign_score, view.victory_min_score
+    );
+    if !view.renown_recent.is_empty() {
+        text.push_str("\nDernières sources : ");
+        text.push_str(&view.renown_recent.join(" · "));
+    }
+    text
 }
 
 fn handle_buttons(
@@ -227,9 +248,12 @@ fn dump(world: &World) -> (String, Value) {
             "view": screen.view.as_ref().map(|v| json!({
                 "title": v.title, "act_name": v.act_name, "ended_by": v.ended_by,
                 "score": v.score, "reign_score": v.reign_score,
+                "renown": v.renown, "house_renown": v.house_renown,
+                "renown_recent": v.renown_recent, "victory_min_score": v.victory_min_score,
+                "renown_lines": renown_lines(v),
                 "objectives": v.objectives, "pressures": v.pressures,
                 "causes": v.causes, "next_name": v.next_name,
-                "ambitions": v.ambitions.iter().map(|p| json!({"id": p.id, "chosen": p.chosen})).collect::<Vec<_>>(),
+                "ambitions": v.ambitions.iter().map(|p| json!({"id": p.id, "chosen": p.chosen, "renown_bonus_percent": p.renown_bonus_percent})).collect::<Vec<_>>(),
             })),
         }),
     )

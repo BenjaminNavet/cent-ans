@@ -52,7 +52,7 @@ impl ObjectivesView {
     pub fn header_line(&self) -> String {
         if let Some(act) = &self.act {
             let mut line = format!(
-                "Acte {} sur {} : {} — {} — échéance {}\nRenommée : {} (acte : {}) — score de l'acte : {} — score de règne : {}",
+                "Acte {} sur {} : {} — {} — échéance {}\nRenommée : {} (acte : {}) — score de l'acte : {} — score de règne : {} (seuil de victoire : {})",
                 act.number,
                 act.total,
                 act.name,
@@ -61,7 +61,8 @@ impl ObjectivesView {
                 act.house_renown,
                 act.renown,
                 act.score,
-                act.reign_score
+                act.reign_score,
+                act.victory_min_score
             );
             if !act.renown_recent.is_empty() {
                 line.push('\n');

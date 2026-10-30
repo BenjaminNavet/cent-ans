@@ -3,10 +3,12 @@
 //! choice between a short and a long campaign (ADR 0332, `game_api::progress::set_victory_length`).
 //!
 //! Opens on [`OpenObjectives`] (toggle) or key O; closes on Escape, `objectives:close`,
-//! `OpenPanel::CloseAll`. Widget names: `objectives:close`, `objectives:length:short|long`.
+//! `OpenPanel::CloseAll`. Widget names: `objectives:close`, `objectives:length:short|long`,
+//! `objectives:ambition:<id>` (R1-UI: take or replace an ambition of the act).
 //! Dev hook: `CENT_ANS_OPEN_OBJECTIVES=1` opens it on entering the campaign.
 
 use bevy::prelude::*;
+use game_api::acts::choose_ambition;
 use game_api::progress::{ObjectivesView, objectives_view, set_victory_length};
 use serde_json::{Value, json};
 
@@ -39,6 +41,8 @@ pub struct ObjectivesPanel {
     pub rebuilds: u32,
     /// `short` / `long` changes accepted (dump).
     pub length_changes: u32,
+    /// Ambitions taken from the panel (dump).
+    pub ambition_changes: u32,
     missions_len: usize,
 }
 
@@ -134,6 +138,13 @@ fn handle_buttons(
             && set_victory_length(state, length)
         {
             panel.length_changes += 1;
+            panel.dirty = true;
+        } else if let Some(ambition) = name.strip_prefix("ambition:")
+            && let Some(data) = sim.data.clone()
+            && let Some(state) = sim.state.as_mut()
+            && choose_ambition(&data, state, ambition)
+        {
+            panel.ambition_changes += 1;
             panel.dirty = true;
         }
     }
@@ -304,6 +315,31 @@ fn spawn(
                                     row.spawn(caption(&theme, &objective.description));
                                 });
                             }
+                            if let Some(act) = &view.act {
+                                list.spawn(separator(&theme));
+                                list.spawn(typed(&theme, "Ambitions de la maison", UiType::Heading));
+                                list.spawn(caption(&theme, &ambition_status(act)));
+                                for ambition in &act.ambitions {
+                                    list.spawn(Node {
+                                        flex_direction: FlexDirection::Column,
+                                        row_gap: Val::Px(2.0),
+                                        margin: UiRect::bottom(Val::Px(8.0)),
+                                        ..default()
+                                    })
+                                    .with_children(|row| {
+                                        row.spawn(toggle_button(
+                                            &theme,
+                                            &format!("objectives:ambition:{}", ambition.id),
+                                            &format!(
+                                                "{} (renommée +{} %)",
+                                                ambition.name, ambition.renown_bonus_percent
+                                            ),
+                                            ambition.chosen,
+                                        ));
+                                        row.spawn(caption(&theme, &ambition.description));
+                                    });
+                                }
+                            }
                             list.spawn(separator(&theme));
                             list.spawn(typed(&theme, "Missions", UiType::Heading));
                             if missions.active.is_empty() {
@@ -354,6 +390,23 @@ fn spawn(
         .id()
 }
 
+/// « Ambitions tenues : 1 sur 2 » plus what the player may still do (the choice freezes after the
+/// first seasons of the act).
+pub fn ambition_status(act: &game_api::acts::ActView) -> String {
+    let held = act.ambitions.iter().filter(|a| a.chosen).count();
+    let mut line = format!(
+        "Ambitions tenues : {held} sur {}. {}",
+        act.ambitions_to_choose, act.ambition_prompt
+    );
+    if !act.ambition_pending && !act.ambition_choice_open {
+        line = format!(
+            "Ambitions tenues : {held} sur {}. Le choix est figé jusqu'au prochain acte.",
+            act.ambitions_to_choose
+        );
+    }
+    line
+}
+
 fn dump(world: &World) -> (String, Value) {
     let panel = world.resource::<ObjectivesPanel>();
     let sim = world.resource::<Sim>();
@@ -370,6 +423,7 @@ fn dump(world: &World) -> (String, Value) {
             "built_turn": panel.built_turn,
             "rebuilds": panel.rebuilds,
             "length_changes": panel.length_changes,
+            "ambition_changes": panel.ambition_changes,
             "score_tip": world.resource::<ProgressTexts>().plain("campaign_score"),
             "view": live.as_ref().map(|v| json!({
                 "state": v.state,
@@ -380,6 +434,18 @@ fn dump(world: &World) -> (String, Value) {
                 "streak": v.streak,
                 "done": v.done_count,
                 "header": v.header_line(),
+                "act": v.act.as_ref().map(|a| json!({
+                    "number": a.number, "renown": a.renown, "house_renown": a.house_renown,
+                    "renown_recent": a.renown_recent, "score": a.score,
+                    "reign_score": a.reign_score, "victory_min_score": a.victory_min_score,
+                    "ambition_pending": a.ambition_pending,
+                    "ambition_choice_open": a.ambition_choice_open,
+                    "status": ambition_status(a),
+                    "ambitions": a.ambitions.iter().map(|r| json!({
+                        "id": r.id, "name": r.name, "chosen": r.chosen,
+                        "renown_bonus_percent": r.renown_bonus_percent,
+                    })).collect::<Vec<_>>(),
+                })),
                 "objectives": v.objectives.iter().map(|o| json!({
                     "id": o.id, "done": o.done, "progress": o.progress,
                 })).collect::<Vec<_>>(),

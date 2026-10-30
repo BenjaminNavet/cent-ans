@@ -69,6 +69,14 @@ pub struct ActView {
     pub ambitions: Vec<ActAmbitionRow>,
     /// An ambition is still to be chosen.
     pub ambition_pending: bool,
+    /// R1-UI: how many ambitions the house holds at once (two of four).
+    pub ambitions_to_choose: u32,
+    /// R1-UI: a held ambition may still be replaced (the first seasons of the act).
+    pub ambition_choice_open: bool,
+    /// R1-UI: text that asks for the ambitions (data `texts.policy_prompt`).
+    pub ambition_prompt: String,
+    /// R1-UI: reign score needed in 1453 to win (`victory_min_score`).
+    pub victory_min_score: u32,
 }
 
 fn text(data: &GameData, key: &str) -> String {
@@ -176,6 +184,10 @@ pub fn act_view(data: &GameData, state: &CampaignState) -> Option<ActView> {
             ambition_rows(data, state)
         },
         ambition_pending: state.ambitions_pending(data) > 0,
+        ambitions_to_choose: data.acts_rules.ambitions_to_choose,
+        ambition_choice_open: state.ambition_choice_open(data),
+        ambition_prompt: text(data, "policy_prompt"),
+        victory_min_score: data.acts_rules.victory_min_score,
     })
 }
 
@@ -199,6 +211,8 @@ pub struct TransitionView {
     pub score_line: String,
     pub grade_line: String,
     pub reign_score: u32,
+    /// R1-UI: reign score needed in 1453 to win.
+    pub victory_min_score: u32,
     /// R1-1: renown earned in the act that closed, and of the house.
     pub renown: i32,
     pub house_renown: i32,
@@ -298,6 +312,7 @@ pub fn transition_view(data: &GameData, state: &CampaignState) -> Option<Transit
             )
         }),
         reign_score,
+        victory_min_score: rules.victory_min_score,
         renown: report.renown,
         house_renown: state.house_renown(data),
         renown_recent: renown_recent(data, state, 3),
@@ -364,4 +379,33 @@ pub fn reign_lines(data: &GameData, state: &CampaignState) -> Vec<String> {
         }
     }
     lines
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// R1-UI: the view carries the threshold and the ambition choice; two of four can be held.
+    #[test]
+    fn ambitions_two_of_four_and_threshold() {
+        let data = data_model::test_support::game_data();
+        let mut state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
+        state.end_turn(data);
+        let view = act_view(data, &state).expect("act view");
+        assert_eq!(view.victory_min_score, data.acts_rules.victory_min_score);
+        assert_eq!(view.ambitions.len(), 4);
+        assert!(view.ambition_pending);
+        assert!(view.ambition_choice_open);
+        assert!(view.ambitions.iter().all(|a| a.renown_bonus_percent > 0));
+        let ids: Vec<String> = view.ambitions.iter().map(|a| a.id.clone()).collect();
+        assert!(choose_ambition(data, &mut state, &ids[0]));
+        assert!(choose_ambition(data, &mut state, &ids[1]));
+        let view = act_view(data, &state).unwrap();
+        assert!(!view.ambition_pending);
+        assert_eq!(view.ambitions.iter().filter(|a| a.chosen).count(), 2);
+        assert!(!choose_ambition(data, &mut state, "nope"));
+        assert!(crate::progress::objectives_view(data, &state)
+            .header_line()
+            .contains("seuil de victoire"));
+    }
 }
