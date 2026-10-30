@@ -16,3 +16,6 @@ battle_low battle low 30
 siege_paris siege siege_paris
 vis_r6_wissant campaign 1.66 50.89 90
 camp_0300 campaign 2.35 48.85 300
+vis_r3b_castile campaign -4.00 41.60 400
+vis_r3b_normandie campaign -0.40 49.00 400
+vis_r3b_loire campaign 0.70 47.40 80
