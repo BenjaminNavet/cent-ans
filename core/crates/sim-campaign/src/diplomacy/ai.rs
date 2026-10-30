@@ -277,7 +277,12 @@ pub fn plan_diplomacy(cache: &PlanCache, data: &GameData, faction: &FactionId) -
     // clearly winning, ask for the occupied provinces; when losing,
     // cede what the enemy holds rather than lose everything (F4).
     let treaties = data.ai_diplomacy.negotiation.enabled;
-    if treaties && ((turn + slot).is_multiple_of(2) || cornered(state, data, faction)) {
+    // ECO-R1c: a truce promised to the estates is sued for every season.
+    if treaties
+        && ((turn + slot).is_multiple_of(2)
+            || cornered(state, data, faction)
+            || crate::assembly::peace_promised(state, data, faction))
+    {
         orders.extend(crate::negotiation::plan_peace(cache, data, faction));
     }
 

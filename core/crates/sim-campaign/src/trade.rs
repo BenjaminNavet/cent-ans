@@ -374,6 +374,49 @@ pub fn common_routes(
         .count()
 }
 
+/// R1-c (wool custom): the share, 0 to 1, of the export of `good` that still flows. The export
+/// routes are the catalogue routes carrying `good` between a hub held by `faction` and a hub held
+/// by another faction; each weighs its `base_value` and counts for its security (0 when cut by
+/// war, embargo, siege or an enemy squadron). No export route at all gives 0; no catalogue,
+/// 1 (the data cannot say, the levy is left whole).
+pub fn export_openness(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    good: &str,
+) -> f64 {
+    let Some(catalog) = &data.trade else {
+        return 1.0;
+    };
+    let (mut total, mut open) = (0.0_f64, 0.0_f64);
+    for route in catalog
+        .routes
+        .iter()
+        .filter(|r| r.goods.iter().any(|g| g.as_str() == good))
+    {
+        let Some(view) = resolve_route(state, data, route, None) else {
+            continue;
+        };
+        let foreign = match (&view.from_faction, &view.to_faction) {
+            (Some(f), Some(t)) => (f == faction) != (t == faction),
+            _ => false,
+        };
+        if !foreign {
+            continue;
+        }
+        let weight = route.base_value as f64;
+        total += weight;
+        if !view.cut {
+            open += weight * view.security.clamp(0.0, 1.0);
+        }
+    }
+    if total <= 0.0 {
+        0.0
+    } else {
+        (open / total).clamp(0.0, 1.0)
+    }
+}
+
 /// Income `faction` collects this season from every route touching one of
 /// its hubs (query, used by [`crate::economy::FactionEconomy`] and by
 /// [`resolve_trade`]).

@@ -487,6 +487,7 @@ fn build_shares(
     faction: &FactionId,
     provinces: &[ProvinceId],
     multiple: f64,
+    form: &SubsidyForm,
 ) -> Vec<Share> {
     let tax_rate = state
         .factions
@@ -496,11 +497,12 @@ fn build_shares(
     let tech = crate::research::faction_province_tech_effects(state, data, faction);
     provinces
         .iter()
+        .filter(|p| produces_export(data, p, form))
         .map(|p| {
             let base = state.province_gross_income(data, p, faction, tax_rate, &tech);
             Share {
                 province: p.clone(),
-                amount: (base as f64 * multiple).round() as i64,
+                amount: (base as f64 * multiple * form.yield_factor).round() as i64,
                 base,
             }
         })
@@ -508,23 +510,65 @@ fn build_shares(
         .collect()
 }
 
+/// A form levied on an export (the wool custom) is paid by the provinces that produce the good.
+fn produces_export(data: &GameData, province: &ProvinceId, form: &SubsidyForm) -> bool {
+    match &form.export_good {
+        None => true,
+        Some(good) => data
+            .provinces
+            .get(province)
+            .is_some_and(|p| p.resources.iter().any(|r| r.as_str() == good)),
+    }
+}
+
+/// Share of the amount voted that still flows now: 1 for an ordinary form, the openness of the
+/// export routes for the wool custom (an embargo or a war with the buyers dries it up).
+fn flow_factor(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    form: &SubsidyForm,
+) -> f64 {
+    match &form.export_good {
+        None => 1.0,
+        Some(good) => crate::trade::export_openness(state, data, faction, good),
+    }
+}
+
 /// Livres per season of the running subsidies of `faction` from this assembly.
-fn running_amount(state: &CampaignState, assembly: &Assembly, faction: &FactionId) -> i64 {
+fn running_amount(
+    state: &CampaignState,
+    data: &GameData,
+    assembly: &Assembly,
+    faction: &FactionId,
+) -> i64 {
     runtime(state, &assembly.id).map_or(0, |r| {
         r.subsidies
             .iter()
             .filter(|s| &s.faction == faction)
-            .map(|s| paid_amount(state, faction, &s.shares))
+            .map(|s| paid_amount(state, data, faction, &s.form, &s.shares))
             .sum()
     })
 }
 
-fn paid_amount(state: &CampaignState, faction: &FactionId, shares: &[Share]) -> i64 {
-    shares
+fn paid_amount(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    form_id: &str,
+    shares: &[Share],
+) -> i64 {
+    let paid: i64 = shares
         .iter()
         .filter(|s| state.controls_province(faction, &s.province))
         .map(|s| s.amount)
-        .sum()
+        .sum();
+    match rules(data).form(form_id) {
+        Some(form) if form.export_good.is_some() => {
+            (paid as f64 * flow_factor(state, data, faction, form)).round() as i64
+        }
+        _ => paid,
+    }
 }
 
 fn mean_unrest(state: &CampaignState, provinces: &[ProvinceId]) -> f64 {
@@ -571,10 +615,13 @@ fn compute_vote(
         faction,
         &covered,
         request.ask.ordinary_multiple * multiplier,
+        request.form,
     );
     let ordinary: i64 = shares.iter().map(|s| s.base).sum();
-    let per_season: i64 = shares.iter().map(|s| s.amount).sum();
-    let running = running_amount(state, assembly, faction);
+    let per_season: i64 = (shares.iter().map(|s| s.amount).sum::<i64>() as f64
+        * flow_factor(state, data, faction, request.form))
+    .round() as i64;
+    let running = running_amount(state, data, assembly, faction);
     let running_ratio = if ordinary > 0 {
         running as f64 / ordinary as f64
     } else {
@@ -1618,7 +1665,12 @@ fn collect_subsidies(state: &mut CampaignState, data: &GameData) {
         let payments: Vec<(FactionId, i64)> = rt
             .subsidies
             .iter()
-            .map(|s| (s.faction.clone(), paid_amount(state, &s.faction, &s.shares)))
+            .map(|s| {
+                (
+                    s.faction.clone(),
+                    paid_amount(state, data, &s.faction, &s.form, &s.shares),
+                )
+            })
             .collect();
         for (faction, amount) in payments {
             if let Some(f) = state.factions.get_mut(&faction).filter(|f| f.alive) {
@@ -1674,7 +1726,7 @@ pub fn overview(state: &CampaignState, data: &GameData, faction: &FactionId) -> 
                     .into_iter()
                     .map(|f| f.id.clone())
                     .collect(),
-                running_per_season: running_amount(state, a, faction),
+                running_per_season: running_amount(state, data, a, faction),
                 open_session: rt
                     .and_then(|r| r.sessions.iter().find(|s| s.status.is_open()).cloned()),
                 promises: rt.map_or(Vec::new(), |r| {
@@ -1689,10 +1741,137 @@ pub fn overview(state: &CampaignState, data: &GameData, faction: &FactionId) -> 
         .collect()
 }
 
-// ----- AI (minimal; R1-c refines it) -------------------------------------------------------
+// ----- AI (R1-c) ---------------------------------------------------------------------------
+
+/// Does the prince keep his word? A ruler of low diplomacy (`ai_personality`) does not trouble
+/// himself with promises: only the others hold to their concessions.
+fn ai_honourable(data: &GameData, faction: &FactionId) -> bool {
+    let diplomacy = data
+        .factions
+        .get(faction)
+        .and_then(|f| f.ai_personality.as_ref())
+        .and_then(|p| p.diplomacy)
+        .unwrap_or(50);
+    f64::from(diplomacy) >= rules(data).ai.honour_min_diplomacy
+}
+
+/// Treasury of the faction and its gross income (at least 1).
+fn treasury_and_gross(cache: &PlanCache, data: &GameData, faction: &FactionId) -> (i64, i64) {
+    let treasury = cache
+        .state()
+        .factions
+        .get(faction)
+        .map_or(0, |f| f.treasury);
+    (treasury, cache.faction_income(data, faction).max(1))
+}
+
+/// May the AI weaken its money? Not while it owes strong money to an assembly, unless it is
+/// honourless or its debt is deeper than `ai.honour_debt_seasons` of income (a numbered need).
+pub fn ai_may_debase(cache: &PlanCache, data: &GameData, faction: &FactionId) -> bool {
+    let state = cache.state();
+    if state.assemblies.houses.is_empty() || !ai_honourable(data, faction) {
+        return true;
+    }
+    if !owes_kind(state, data, faction, ConcessionKind::StrongMoney) {
+        return true;
+    }
+    let (treasury, gross) = treasury_and_gross(cache, data, faction);
+    (treasury as f64) < -rules(data).ai.honour_debt_seasons * gross as f64
+}
+
+fn owes_kind(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    kind: ConcessionKind,
+) -> bool {
+    state.assemblies.houses.values().any(|r| {
+        r.promises.iter().any(|p| {
+            &p.faction == faction
+                && p.status == PromiseStatus::Active
+                && rules(data)
+                    .concession(&p.concession)
+                    .is_some_and(|c| c.kind == kind)
+        })
+    })
+}
+
+/// A truce is promised to an assembly: the diplomatic AI sues for peace every season.
+pub fn peace_promised(state: &CampaignState, data: &GameData, faction: &FactionId) -> bool {
+    !state.assemblies.houses.is_empty()
+        && owes_kind(state, data, faction, ConcessionKind::EndWar)
+        && ai_honourable(data, faction)
+}
+
+/// Can the AI keep this concession? A truce it cannot ask (it set out to conquer) and a strong
+/// money it cannot afford are not keepable.
+fn ai_can_keep(state: &CampaignState, faction: &FactionId, concession: &Concession) -> bool {
+    match concession.kind {
+        ConcessionKind::EndWar => !enemies(state, faction)
+            .iter()
+            .any(|e| is_aggressor(state, faction, e)),
+        ConcessionKind::StrongMoney => state
+            .factions
+            .get(faction)
+            .is_none_or(|f| f.treasury >= 0 || f.coinage == CoinageLevel::Strong),
+        _ => true,
+    }
+}
+
+/// Does the AI accept the terms of a proposed session? The cost fits its means, and every
+/// concession can be kept, unless the need is numbered (treasury under `ai.need_seasons` of
+/// income): then it accepts and will break what it must.
+fn ai_accepts(cache: &PlanCache, data: &GameData, faction: &FactionId, session: &Session) -> bool {
+    let rules = rules(data);
+    let concessions: Vec<&Concession> = session
+        .concessions
+        .iter()
+        .filter_map(|id| rules.concession(id))
+        .collect();
+    let cost: u32 = concessions.iter().map(|c| c.cost).sum();
+    if cost > rules.ai.accept_cost_up_to {
+        return false;
+    }
+    if !ai_honourable(data, faction) {
+        return true;
+    }
+    let state = cache.state();
+    if concessions.iter().all(|c| ai_can_keep(state, faction, c)) {
+        return true;
+    }
+    let (treasury, gross) = treasury_and_gross(cache, data, faction);
+    (treasury as f64) < rules.ai.need_seasons * gross as f64
+}
+
+/// Livres the war of `faction` is expected to lack over `ai.forecast_seasons`: the treasury and
+/// the ordinary surplus against the cost of the campaign (the upkeep of the armies and the
+/// sieges grown by `ai.war_cost_factor`), kept above `convene_below_seasons` of income. Zero in
+/// peace.
+fn war_shortfall(cache: &PlanCache, data: &GameData, faction: &FactionId) -> i64 {
+    let state = cache.state();
+    let rules = rules(data);
+    let Some(f) = state.factions.get(faction) else {
+        return 0;
+    };
+    if enemies(state, faction).is_empty() {
+        return 0;
+    }
+    let gross = cache.faction_income(data, faction).max(1);
+    let b = &f.last_budget;
+    let army = (b.army_upkeep + b.siege).max(0) as f64;
+    // The ordinary surplus: the court's share of the administration, not the levy on a hoard.
+    let structural = (b.upkeep() - b.administration - b.army_upkeep - b.siege
+        + state.administration_share_for(data, faction, gross)) as f64;
+    let surplus = b.receipts() as f64 - structural - army;
+    let horizon = rules.ai.forecast_seasons;
+    let projected =
+        f.treasury as f64 + horizon * (surplus - (rules.ai.war_cost_factor - 1.0) * army);
+    let floor = rules.ai.convene_below_seasons * gross as f64;
+    (floor - projected).max(0.0).round() as i64
+}
 
 /// The assembly orders of an AI faction: answer the terms the estates set, then convene when the
-/// treasury runs low under a war.
+/// war ahead (not only an empty treasury) calls for a subsidy, in the form the estates will vote.
 pub fn ai_assembly_orders(cache: &PlanCache, data: &GameData, faction: &FactionId) -> Vec<Order> {
     let state = cache.state();
     let rules = rules(data);
@@ -1713,15 +1892,9 @@ pub fn ai_assembly_orders(cache: &PlanCache, data: &GameData, faction: &FactionI
             .iter()
             .filter(|s| &s.faction == faction && s.status == SessionStatus::Proposed)
         {
-            let cost: u32 = session
-                .concessions
-                .iter()
-                .filter_map(|id| rules.concession(id))
-                .map(|c| c.cost)
-                .sum();
             orders.push(Order::AnswerAssembly {
                 session: session.id,
-                accept_terms: cost <= rules.ai.accept_cost_up_to,
+                accept_terms: ai_accepts(cache, data, faction, session),
             });
         }
         if rt.sessions.iter().any(|s| s.status.is_open()) {
@@ -1732,8 +1905,13 @@ pub fn ai_assembly_orders(cache: &PlanCache, data: &GameData, faction: &FactionI
         return orders;
     }
     let gross = cache.faction_income(data, faction).max(1);
-    let expected = f.treasury + (f.last_budget.receipts() - f.last_budget.upkeep()).min(0);
-    if (expected as f64) >= rules.ai.convene_below_seasons * gross as f64 {
+    let treasury = f.treasury as f64;
+    let expected = treasury + (f.last_budget.receipts() - f.last_budget.upkeep()).min(0) as f64;
+    let shortfall = war_shortfall(cache, data, faction);
+    let at_war = !enemies(state, faction).is_empty();
+    let low = expected < rules.ai.convene_below_seasons * gross as f64;
+    let campaign = at_war && treasury < rules.ai.campaign_below_seasons * gross as f64;
+    if !(low || shortfall > 0 || campaign) {
         return orders;
     }
     let Some(necessity) = available_necessities(state, data, faction)
@@ -1742,38 +1920,85 @@ pub fn ai_assembly_orders(cache: &PlanCache, data: &GameData, faction: &FactionI
     else {
         return orders;
     };
-    // The assembly in the best mood among those that can be convened now, are not already
-    // paying a subsidy, and would not refuse (the AI reads the forecast the player can read).
-    let ask = ai_ask(data, necessity);
-    let best = rules
+    // The total asked, in seasons of ordinary tax: the target, or what the war lacks.
+    let wanted = rules.ai.target_seasons.max(shortfall as f64 / gross as f64);
+    let ask = ai_ask(data, necessity, wanted);
+    // The (assembly, form) pair that yields most among those the estates would not refuse.
+    let mut best: Option<(i64, &Assembly, &SubsidyForm)> = None;
+    for assembly in rules
         .of_house(faction.as_str())
         .filter(|a| can_convene(state, data, faction, &a.id).is_ok())
-        .filter(|a| running_amount(state, a, faction) == 0)
-        .filter(|a| {
-            forecast(state, data, faction, &a.id, necessity, &ask, None, false)
-                .is_ok_and(|v| v.outcome != VoteOutcome::Refuse)
-        })
-        .max_by(|a, b| {
-            mood_of(state, a)
-                .cmp(&mood_of(state, b))
-                .then(b.id.cmp(&a.id))
-        });
-    if let Some(assembly) = best {
-        if let Some(form) = available_forms(state, data, assembly).first() {
-            orders.push(Order::ConveneAssembly {
-                assembly: assembly.id.clone(),
+    {
+        for form in available_forms(state, data, assembly) {
+            if !ai_form_allowed(state, data, faction, assembly, form, shortfall, gross) {
+                continue;
+            }
+            let Ok(vote) = forecast(
+                state,
+                data,
+                faction,
+                &assembly.id,
                 necessity,
-                ask,
-                form: Some(form.id.clone()),
-                permanent: false,
-            });
+                &ask,
+                Some(&form.id),
+                false,
+            ) else {
+                continue;
+            };
+            if vote.outcome == VoteOutcome::Refuse {
+                continue;
+            }
+            let score =
+                vote.per_season * i64::from(vote.term) + i64::from(mood_of(state, assembly));
+            if best.is_none_or(|(s, a, _)| (score, &assembly.id) > (s, &a.id)) {
+                best = Some((score, assembly, form));
+            }
         }
+    }
+    if let Some((_, assembly, form)) = best {
+        orders.push(Order::ConveneAssembly {
+            assembly: assembly.id.clone(),
+            necessity,
+            ask,
+            form: Some(form.id.clone()),
+            permanent: false,
+        });
     }
     orders
 }
 
-/// The tier the AI asks: the smallest whose total reaches the target, else the heaviest.
-fn ai_ask(data: &GameData, necessity: NecessityKind) -> String {
+/// May the AI ask this form now? Not while the same form still runs; the wool custom only while
+/// the wool still sails; the poll tax is the last resort (a large shortfall, calm provinces).
+fn ai_form_allowed(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    assembly: &Assembly,
+    form: &SubsidyForm,
+    shortfall: i64,
+    gross: i64,
+) -> bool {
+    let rules = rules(data);
+    if runtime(state, &assembly.id).is_some_and(|r| {
+        r.subsidies
+            .iter()
+            .any(|s| &s.faction == faction && s.form == form.id)
+    }) {
+        return false;
+    }
+    if form.id == "poll_tax" {
+        let covered = covered_provinces(state, data, assembly, faction);
+        return shortfall as f64 > rules.ai.poll_tax_shortfall_seasons * gross as f64
+            && mean_unrest(state, &covered) < rules.ai.poll_tax_max_unrest;
+    }
+    if let Some(good) = &form.export_good {
+        return crate::trade::export_openness(state, data, faction, good) > 0.0;
+    }
+    true
+}
+
+/// The tier the AI asks: the smallest whose total reaches `wanted` seasons, else the heaviest.
+fn ai_ask(data: &GameData, necessity: NecessityKind, wanted: f64) -> String {
     let rules = rules(data);
     let multiplier = rules.necessity(necessity).map_or(1.0, |n| n.multiplier);
     let total = |a: &AskTier| a.ordinary_multiple * f64::from(a.term_seasons) * multiplier;
@@ -1786,7 +2011,7 @@ fn ai_ask(data: &GameData, necessity: NecessityKind) -> String {
     });
     tiers
         .iter()
-        .find(|a| total(a) >= rules.ai.target_seasons)
+        .find(|a| total(a) >= wanted)
         .or(tiers.last())
         .map(|a| a.id.clone())
         .unwrap_or_default()

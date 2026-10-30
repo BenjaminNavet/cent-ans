@@ -18,6 +18,7 @@ mod dc3_province_effects;
 mod dc6b_weighted_sums;
 mod eco2_finance;
 mod eco_r1_assembly;
+mod eco_r1c_ai_england;
 mod economy_balance;
 mod eq1_balance;
 mod eq2_balance;

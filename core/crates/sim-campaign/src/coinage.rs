@@ -325,7 +325,11 @@ pub fn ai_choose_coinage(cache: &PlanCache, data: &GameData, faction: &FactionId
     } else {
         f.coinage
     };
-    if wanted == f.coinage {
+    // ECO-R1c: a prince who promised strong money to the estates does not debase it, short of a
+    // numbered need.
+    let weakens = (wanted as u8) > (f.coinage as u8)
+        && matches!(wanted, CoinageLevel::Debased | CoinageLevel::HeavilyDebased);
+    if wanted == f.coinage || (weakens && !crate::assembly::ai_may_debase(cache, data, faction)) {
         Vec::new()
     } else {
         vec![Order::SetCoinage { level: wanted }]

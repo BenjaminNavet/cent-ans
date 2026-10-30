@@ -65,6 +65,14 @@
       "description": "Premières règles de l'IA (R1-c les affine).",
       "properties": {
         "convene_below_seasons": { "type": "number", "minimum": 0, "maximum": 100 },
+        "forecast_seasons": { "type": "number", "minimum": 0, "maximum": 100, "description": "R1-c : saisons de prévision de guerre (coût de la guerre contre trésor et excédent ordinaire)." },
+        "war_cost_factor": { "type": "number", "minimum": 0, "maximum": 20, "description": "R1-c : la guerre coûte ce multiple de l'entretien actuel des armées." },
+        "campaign_below_seasons": { "type": "number", "minimum": 0, "maximum": 100, "description": "R1-c : en campagne, convoque dès que le trésor passe sous ce nombre de saisons de revenu brut." },
+        "honour_debt_seasons": { "type": "number", "minimum": 0, "maximum": 100, "description": "R1-c : l'IA n'affaiblit la monnaie malgré sa promesse que sous moins ce nombre de saisons de revenu." },
+        "honour_min_diplomacy": { "type": "number", "minimum": 0, "maximum": 100, "description": "R1-c : sous cette valeur de ai_personality.diplomacy (50 si absente), le prince ne se tient pas à ses concessions." },
+        "need_seasons": { "type": "number", "minimum": 0, "maximum": 100, "description": "R1-c : l'IA accepte une condition qu'elle ne pourra pas tenir seulement sous ce nombre de saisons de revenu." },
+        "poll_tax_shortfall_seasons": { "type": "number", "minimum": 0, "maximum": 100, "description": "R1-c : la capitation n'est demandée que si le manque dépasse ce nombre de saisons de revenu." },
+        "poll_tax_max_unrest": { "type": "number", "minimum": 0, "maximum": 100, "description": "R1-c : ... et que l'agitation moyenne des provinces couvertes reste en dessous." },
         "accept_cost_up_to": { "type": "integer", "minimum": 0, "maximum": 10000 },
         "target_seasons": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "Le plus petit palier dont le total atteint ce nombre de saisons d'impôt ordinaire est demandé (le plus lourd à défaut)." }
       },
@@ -113,7 +121,9 @@
           "rural_weight": { "type": "number", "minimum": 0, "maximum": 10 },
           "permanent_from_year": { "type": "integer", "minimum": 0, "maximum": 2000 },
           "permanent_percent": { "type": "number", "minimum": 0, "maximum": 100 },
-          "permanent_unrest": { "type": "number", "minimum": 0, "maximum": 100 }
+          "permanent_unrest": { "type": "number", "minimum": 0, "maximum": 100 },
+          "yield_factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 20, "description": "R1-c : multiplicateur du palier propre à la forme (capitation : forte recette)." },
+          "export_good": { "type": "string", "pattern": "^res_[a-z0-9_]+$", "description": "R1-c : subside sur une exportation (maltôte) : seules les provinces couvertes qui produisent ce bien paient, et le montant suit les routes de commerce de la maison qui le portent à l'étranger." }
         },
         "additionalProperties": false,
         "required": ["id", "name", "from_year", "urban_weight", "rural_weight"]

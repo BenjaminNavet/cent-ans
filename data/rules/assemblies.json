@@ -34,6 +34,14 @@
   },
   "ai": {
     "convene_below_seasons": 2.5,
+    "forecast_seasons": 4.0,
+    "war_cost_factor": 1.6,
+    "campaign_below_seasons": 6.0,
+    "honour_debt_seasons": 3.0,
+    "honour_min_diplomacy": 25.0,
+    "need_seasons": 1.0,
+    "poll_tax_shortfall_seasons": 3.0,
+    "poll_tax_max_unrest": 25.0,
     "accept_cost_up_to": 60,
     "target_seasons": 5.0
   },
@@ -54,7 +62,9 @@
     { "id": "aide", "name": "Aide", "assemblies": ["asm_etats_oil", "asm_etats_oc", "asm_etats_bretagne", "asm_membres_flandre"], "from_year": 0, "urban_weight": 1.4, "rural_weight": 0.6, "permanent_from_year": 1360, "permanent_percent": 12.0, "permanent_unrest": 1.5 },
     { "id": "gabelle", "name": "Gabelle du sel", "assemblies": ["asm_etats_oil", "asm_etats_oc"], "from_year": 1341, "urban_weight": 1.0, "rural_weight": 1.0, "permanent_from_year": 1360, "permanent_percent": 10.0, "permanent_unrest": 2.0 },
     { "id": "fouage", "name": "Fouage", "assemblies": ["asm_etats_oil", "asm_etats_oc", "asm_etats_bretagne"], "from_year": 1355, "urban_weight": 0.4, "rural_weight": 1.6, "permanent_from_year": 1363, "permanent_percent": 8.0, "permanent_unrest": 1.5 },
-    { "id": "lay_subsidy", "name": "Quinzième et dixième", "assemblies": ["asm_parliament"], "from_year": 0, "urban_weight": 1.0, "rural_weight": 1.0 }
+    { "id": "lay_subsidy", "name": "Quinzième et dixième", "assemblies": ["asm_parliament"], "from_year": 0, "urban_weight": 1.0, "rural_weight": 1.0 },
+    { "id": "wool_custom", "name": "Maltôte de la laine", "assemblies": ["asm_parliament"], "from_year": 0, "urban_weight": 0.6, "rural_weight": 1.2, "yield_factor": 3.0, "export_good": "res_wool" },
+    { "id": "poll_tax", "name": "Capitation", "assemblies": ["asm_parliament"], "from_year": 1377, "urban_weight": 1.5, "rural_weight": 3.0, "yield_factor": 2.0 }
   ],
   "concessions": [
     { "id": "con_strong_money", "name": "Monnaie forte", "text": "Ne pas affaiblir la monnaie pendant la durée du subside.", "kind": "strong_money", "cost": 30, "duration_seasons": 12 },

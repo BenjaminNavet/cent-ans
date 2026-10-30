@@ -96,6 +96,19 @@ pub struct SubsidyForm {
     /// Constant unrest of the provinces under a permanent tax (urban weight applies).
     #[serde(default)]
     pub permanent_unrest: f64,
+    /// R1-c: multiplier of the tier's multiple for this form (a poll tax yields more than a
+    /// tenth and fifteenth, at the price of a heavier burden; 1 when absent).
+    #[serde(default = "one")]
+    pub yield_factor: f64,
+    /// R1-c: the subsidy is levied on an export (the wool custom): only the covered provinces
+    /// producing this resource pay, and the amount follows the share of the trade routes of the
+    /// house that carry it to a foreign hub and are not cut by war or embargo.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub export_good: Option<String>,
+}
+
+fn one() -> f64 {
+    1.0
 }
 
 /// What a concession constrains or costs.
@@ -253,6 +266,27 @@ pub struct GrogneRules {
 pub struct AssemblyAiRules {
     /// Convene when the treasury falls under this many seasons of gross income.
     pub convene_below_seasons: f64,
+    /// R1-c, war forecast: seasons looked ahead when the cost of the war (army upkeep, grown by
+    /// `war_cost_factor`) is set against the treasury and the ordinary surplus.
+    pub forecast_seasons: f64,
+    /// R1-c: the war costs this many times the current army upkeep (levies, sieges, losses).
+    pub war_cost_factor: f64,
+    /// R1-c: a realm at war with a running campaign convenes as soon as its treasury is under this
+    /// many seasons of gross income, whatever the forecast.
+    pub campaign_below_seasons: f64,
+    /// R1-c, honour: the AI debases its money in spite of a promise of strong money only when its
+    /// treasury is below minus this many seasons of gross income.
+    pub honour_debt_seasons: f64,
+    /// R1-c, honour: a prince whose `ai_personality.diplomacy` (0-100, 50 when absent) is under
+    /// this value does not hold himself to his concessions.
+    pub honour_min_diplomacy: f64,
+    /// R1-c, honour: the AI accepts an unkeepable condition (a truce it cannot sign, a strong
+    /// money it cannot afford) only when its treasury is under this many seasons of gross income.
+    pub need_seasons: f64,
+    /// R1-c: the poll tax is asked only when the shortfall exceeds this many seasons of gross
+    /// income and the covered provinces are calm (mean unrest under `poll_tax_max_unrest`).
+    pub poll_tax_shortfall_seasons: f64,
+    pub poll_tax_max_unrest: f64,
     /// Accept terms whose total cost is at most this many points.
     pub accept_cost_up_to: u32,
     /// The smallest tier whose total (multiple x term x necessity) reaches this many seasons of
