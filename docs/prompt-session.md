@@ -11,6 +11,7 @@ Tu travailles sur Cent Ans (grande stratégie, guerre de Cent Ans ; core Rust + 
 
 ## Objectifs
 Méthode : boucle juge sans limite (jusqu'à mon arrêt ou plus rien de majeur). Chaque itération = des juges frais (visuel avec captures, technique, bataille, campagne, économie, expérience) → constats → lots de refonte → fusion → mesure. Les audits du 29/10 (docs/audits/2026-10-29-*.md) donnent le détail de chaque refonte (spec, critères, coût) : les suivre, ne pas les réécrire. État à jour : docs/wip/boucle-juge-2.md.
+Ambition : les juges font des critiques ambitieuses, pas des retouches ; les lots sont des refontes larges, qui peuvent toucher l'architecture du jeu (modules, flux de données, ADR révisés si un juge le justifie). Une itération qui ne change que des réglages est un échec de jugement.
 
 ### 1. Visuel de campagne (priorité n° 1, à challenger le plus)
 Cible : la carte doit ressembler à une photo aérienne médiévale peinte, semi-réaliste, jamais low poly ni « jeu de plateau gris ». Audit : docs/audits/2026-10-29-visuel-campagne.md (défauts G1-G3, refontes R1-R8, bible de palette).
@@ -59,8 +60,8 @@ Meshy : crédits restants (≈ 25) pour une retouche, sur décision visuelle. Z-
 1. Opus planifie, découpe, intègre. TOUS les sous-agents (implémentation, juges, fusion, recherche) sont Sonnet 5.5 en effort medium : `model: "sonnet"`, `effort: "medium"` à chaque appel Agent. Jamais Haiku. Seule exception : le juge visuel est Opus (`model: "opus"`). Les juges écrivent constats et lots proposés (spec, critères) dans docs/audits/ ; l'orchestrateur en tire les briefs d'agents.
 2. 10 agents en parallèle au plus. Sérialiser les lots qui touchent la même zone (même shader, même module de règles, mêmes registres).
 3. Réserver le numéro d'ADR au lancement du lot ; l'agent l'écrit directement (pas de XXXX, pas de renumérotation).
-4. Brief d'agent : spec courte, fichiers, tests, numéro d'ADR, « départ = main local » (`git merge-base HEAD main`, sinon `git reset --hard main`), symlinks des assets ignorés (data/map/pyramid, game/assets/models/dn). Rapport ≤ 15 lignes (résultat, branche, échecs, points ouverts) ; le détail va dans docs/wip/<lot>.md.
-5. Dans les agents : seed bots --quick seulement ; pas de passe longue, banc court. Une passe longue sur main par lot de fusions, en arrière-plan.
+4. Brief d'agent : spec courte, fichiers, tests, numéro d'ADR, « départ = main local » (`git merge-base HEAD main`, sinon `git reset --hard main`), symlinks des assets ignorés (data/map/pyramid, game/assets/models/dn). Premier pas de l'agent : `tools/warm_worktree.sh` (clone copie-sur-écriture des dépendances compilées de main, évite la compilation à froid). Rapport ≤ 15 lignes (résultat, branche, échecs, points ouverts) ; le détail va dans docs/wip/<lot>.md.
+5. Dans les agents : `cargo check` et tests ciblés du module touché ; clippy, tests complets et smoke une seule fois, à la fusion. Si la file de tools/heavy.sh dépasse 15 min d'attente, lancer moins de lots. Seed bots --quick seulement ; pas de passe longue, banc court. Une passe longue sur main par lot de fusions, en arrière-plan.
 6. Fusions par un agent de fusion Sonnet 5.5 (effort medium) tous les lots de l'itération de juge en cours (rebase sur main, conflits = union des deux côtés, ADR, ff-merge), pas par la session principale.
 7. Un seul check complet sur main par lot de fusions (tools/full_check.sh + smoke + pytest + seed quick).
 8. Lecture ciblée : grep, head, dumps d'état filtrés ; jamais de gros fichiers ni de sorties brutes. Captures : 5 par tâche (10 en travail visuel), 640 px, une seule après un groupe de corrections ; les agents mécaniques n'en prennent pas.
