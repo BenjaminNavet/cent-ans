@@ -32,7 +32,9 @@ fn ground_look(c: vec3<f32>, forest_f: f32, land: f32, altitude: f32) -> vec3<f3
     let in_range = smoothstep(lo - 12.0, lo, hue) * (1.0 - smoothstep(hi, hi + 12.0, hue)) * weight;
     // Shortest signed angle to the target hue, then a rotation of the chroma about the grey axis.
     let delta = fract((fields.look_a.y - hue) / 360.0 + 0.5) * 360.0 - 180.0;
-    let angle = radians(delta) * fields.look_a.z * in_range;
+    // Bluer-than-target hues (the mint of the bocage) are pulled harder than the yellower ones.
+    let pull = mix(fields.look_a.z, fields.look_c.x, smoothstep(0.0, max(fields.look_c.y, 1.0), -delta));
+    let angle = radians(delta) * pull * in_range;
     let axis = vec3<f32>(0.57735027);
     chroma = chroma * cos(angle) + cross(axis, chroma) * sin(angle);
     chroma = chroma * mix(1.0, fields.look_a.x, in_range);

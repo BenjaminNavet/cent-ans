@@ -1,7 +1,7 @@
 // Campaign terrain module `seasons` (VIS-L1, split of terrain.wesl): seasonal colour of the land-cover classes (fields, grass, farm, forest, vine).
 // Pure move of the code, no change of behaviour.
 
-import cent_ans_client::campaign::terrain::terrain_params::{season};
+import cent_ans_client::campaign::terrain::terrain_params::{fields, season};
 
 // Parcel colour by season. cls: 0 wheat, 1 green crop, 2 ploughed, 3 fallow, 4 meadow, 5 hay,
 // 6 vine soil; h: draw of the parcel.
@@ -11,9 +11,10 @@ fn season_field(summer: vec3<f32>, cls: i32, h: f32) -> vec3<f32> {
 
 fn season_field_w(summer: vec3<f32>, cls: i32, h: f32, w: vec4<f32>) -> vec3<f32> {
     let young = vec3<f32>(0.10, 0.19, 0.045);
-    let plough = vec3<f32>(0.19, 0.135, 0.078);
+    // VIS-L1: light ploughland and stubble (bible: labour 32 deg, v 0.62), gains from data.
+    let plough = vec3<f32>(0.19, 0.135, 0.078) * fields.look_c.z;
     let wet_plough = vec3<f32>(0.135, 0.095, 0.06);
-    let stubble = vec3<f32>(0.25, 0.20, 0.105);
+    let stubble = vec3<f32>(0.25, 0.20, 0.105) * fields.look_c.w;
     let meadow_spring = vec3<f32>(0.085, 0.19, 0.035);
     let meadow_autumn = vec3<f32>(0.11, 0.12, 0.045);
     let meadow_winter = vec3<f32>(0.075, 0.085, 0.048);

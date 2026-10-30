@@ -424,8 +424,8 @@
     "fade_end": 0.8,
     "hue_keep": 0.15,
     "lum_band": 0.15,
-    "cell_jitter": 0.07,
-    "cell_hue": 0.12,
+    "cell_jitter": 0.14,
+    "cell_hue": 0.2,
     "patch_gain": 0.5,
     "patch_start": 0.0,
     "patch_end": 0.08,
@@ -434,15 +434,19 @@
     "cell_scale": 2.0, "sole_scale": 0.38, "sole_share": 0.4, "far_gain": 1.0, "far_start": 2.5, "far_end": 6.0, "terroir_scale": 0.45, "terroir_start": 1.0, "terroir_end": 2.2, "far_edge": 0.35, "patch_sat": 1.1,
     "colormap_near_share": 0.12,
     "lum_band_typed": 0.55,
-    "strip_px": [2.0, 6.0],
+    "strip_px": [1.0, 12.0],
     "ground_look": {
       "enabled": true,
-      "saturation": 2.2,
-      "hue_target_deg": 89,
-      "hue_pull": 0.8,
+      "saturation": 1.25,
+      "hue_target_deg": 66,
+      "hue_pull": 0.35,
+      "hue_pull_cold": 0.95,
+      "hue_cold_ramp_deg": 30,
+      "plough_gain": 1.5,
+      "stubble_gain": 1.25,
       "hue_range_deg": [55, 150],
       "forest_value": 0.55,
-      "plain_value": 1.1
+      "plain_value": 0.9
     }
   },
   "landscapes": {

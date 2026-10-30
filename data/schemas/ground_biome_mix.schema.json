@@ -262,6 +262,10 @@
             "saturation": {"type": "number", "minimum": 0.5, "maximum": 4, "description": "Gain de chroma des teintes de végétation."},
             "hue_target_deg": {"type": "number", "minimum": 0, "maximum": 360, "description": "Teinte cible du pré (bible : 89)."},
             "hue_pull": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part de l'écart de teinte corrigée."},
+            "hue_pull_cold": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part de l'écart corrigée pour les teintes plus bleues que la cible (menthe du bocage)."},
+            "hue_cold_ramp_deg": {"type": "number", "minimum": 1, "maximum": 90, "description": "Écart (degrés) au bout duquel la correction froide est entière."},
+            "plough_gain": {"type": "number", "minimum": 0.5, "maximum": 3, "description": "Gain de valeur (linéaire) du labour."},
+            "stubble_gain": {"type": "number", "minimum": 0.5, "maximum": 3, "description": "Gain de valeur (linéaire) du chaume."},
             "hue_range_deg": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 360}, "minItems": 2, "maxItems": 2, "description": "Plage de teintes concernée (jaune-vert à vert-bleu)."},
             "forest_value": {"type": "number", "minimum": 0.1, "maximum": 1.5, "description": "Facteur de valeur (linéaire) des forêts."},
             "plain_value": {"type": "number", "minimum": 0.5, "maximum": 1.5, "description": "Facteur de valeur (linéaire) des terres ouvertes."}

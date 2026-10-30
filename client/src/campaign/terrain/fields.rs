@@ -91,6 +91,9 @@ pub struct FieldParams {
     pub look_a: Vec4,
     /// VIS-L1 ground look: hue range start / end (degrees), forest value, plain value.
     pub look_b: Vec4,
+    /// VIS-L1 ground look: cold hue pull (towards the target from bluer hues), its ramp (degrees),
+    /// ploughland gain, stubble gain (value of the light crop classes).
+    pub look_c: Vec4,
 }
 
 /// Layers of the parcels array the shader tables can address.
@@ -132,6 +135,7 @@ impl Default for FieldParams {
             shares: [Vec4::new(1.0 / 6.0, 2.0 / 6.0, 0.5, 4.0 / 6.0); FORMS * SEASONS * 2],
             look_a: Vec4::new(1.0, 89.0, 0.0, 0.0),
             look_b: Vec4::new(55.0, 150.0, 1.0, 1.0),
+            look_c: Vec4::new(0.0, 30.0, 1.0, 1.0),
         }
     }
 }
@@ -489,6 +493,12 @@ pub fn load_fields(root: &Path) -> Result<FieldParams, String> {
             f(&look["hue_range_deg"][1], d.look_b.y),
             f(&look["forest_value"], d.look_b.z),
             f(&look["plain_value"], d.look_b.w),
+        );
+        out.look_c = Vec4::new(
+            f(&look["hue_pull_cold"], d.look_c.x),
+            f(&look["hue_cold_ramp_deg"], d.look_c.y),
+            f(&look["plough_gain"], d.look_c.z),
+            f(&look["stubble_gain"], d.look_c.w),
         );
     }
     if typed {

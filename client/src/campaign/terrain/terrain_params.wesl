@@ -201,6 +201,8 @@ struct FieldParams {
     look_a: vec4<f32>,
     // VIS-L1 ground look: hue range start / end (deg), forest value, plain value.
     look_b: vec4<f32>,
+    // VIS-L1 ground look: cold hue pull, its ramp (deg), ploughland gain, stubble gain.
+    look_c: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(16) var<uniform> fields: FieldParams;
