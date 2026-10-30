@@ -80,6 +80,7 @@ pub struct CampaignAdjust {
     pub aerial_a: Vec4,
     /// rgb haze colour (linear), w share on the sky.
     pub aerial_color: Vec4,
+    /// L3: rgb far haze colour (linear), w haze curve exponent. Near colour is `aerial_color`.
     pub aerial_cold: Vec4,
     /// x, y altitude (m) ramp of the cold, z its share.
     pub cold_alt: Vec4,
@@ -498,6 +499,7 @@ fn sync_atmosphere(
     look: Res<PostLook>,
     view: Option<Res<crate::campaign::weather::WeatherView>>,
     atmosphere: Option<Res<crate::campaign::weather::atmosphere::Atmosphere>>,
+    sky: Option<Res<crate::campaign::weather::dome::SkyLook>>,
     rig: Option<Res<crate::campaign::camera::rig::CampaignRig>>,
     zoom: Option<Res<crate::campaign::camera::zoom::ZoomView>>,
     relief: Option<Res<super::relief_state::ReliefState>>,
@@ -543,13 +545,21 @@ fn sync_atmosphere(
     *drift += Vec2::from(m.noise_drift) * time.delta_secs();
     let follow = m.follow_focus * focus_alt;
     let a = &look.aerial;
-    let aerial_strength = if look.enabled && a.enabled {
-        let fog = fog.clamp(0.0, 1.0);
-        let raw = a.strength * (a.clear_scale + ((1.0 - a.fog_cut) - a.clear_scale) * fog);
-        raw.min(a.clear_max + (1.0 - a.clear_max) * fog)
-    } else {
-        0.0
-    };
+    // L3 one air: the camera depth-fog curve (begin, end, curve, density, from the weather
+    // atmosphere) is applied here for land and sea alike, from the depth buffer; the camera
+    // `DistanceFog` is switched off (alpha 0) so nothing veils twice.
+    let depth_fog = atmosphere
+        .as_ref()
+        .and_then(|a| a.fog.as_ref())
+        .map(|f| f.depth);
+    let aerial_on = look.enabled && a.enabled && depth_fog.is_some();
+    let air = depth_fog.unwrap_or(crate::campaign::weather::atmosphere::DepthFog {
+        begin: 0.0,
+        end: 1.0,
+        density: 0.0,
+        curve: 1.0,
+    });
+    let aerial_strength = if aerial_on { air.density } else { 0.0 };
     let g = &look.grade;
     let grade_on = look.enabled && g.enabled;
     let master_grade = if grade_on { 1.0 - strategic } else { 0.0 };
@@ -581,14 +591,18 @@ fn sync_atmosphere(
     let mist_c = Vec4::new(drift.x, drift.y, m.sea_share, 1.0 / vscale);
     let mist_color = linear(m.color).extend(coldness);
     let mist_cold = linear(m.cold_color).extend(0.0);
-    let aerial_a = Vec4::new(
-        a.begin_ratio * distance,
-        a.end_ratio * distance,
-        aerial_strength,
-        a.desaturate,
-    );
-    let aerial_color = linear(a.color).extend(a.sky_share);
-    let aerial_cold = linear(a.cold_color).extend(0.0);
+    let aerial_a = Vec4::new(air.begin, air.end, aerial_strength, a.desaturate);
+    let (near_haze, far_haze) = match (atmosphere.as_ref(), sky.as_ref()) {
+        (Some(at), Some(sk)) => {
+            let fog_color = Vec3::from_array(at.color);
+            let far = sk.haze_color(fog_color, Vec3::from_array(at.sky));
+            (fog_color, far)
+        }
+        _ => (a.color, a.color),
+    };
+    let chill = coldness * 0.5;
+    let aerial_color = linear(near_haze.lerp(a.cold_color, chill)).extend(a.sky_share);
+    let aerial_cold = linear(far_haze.lerp(a.cold_color, chill)).extend(air.curve);
     let c = &look.cold;
     let mist_d = Vec4::new(
         m.hollow_m[0],

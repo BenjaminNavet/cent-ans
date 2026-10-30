@@ -52,6 +52,51 @@ pub struct SkyLook {
     pub sun_glow: [f32; 2],
     /// Multiplier on the final sky colour (calibrates the sky against the tonemapped ground).
     pub gain: f32,
+    /// L3: share of the sky tint of the aerial perspective in the horizon colour (and in the
+    /// far haze of the post pass): the one veil colour of land, sea and sky.
+    pub haze_sky_share: f32,
+    /// L3: elevation share over which the horizon colour turns to the saturated sky blue.
+    pub band_saturation: f32,
+    pub clouds: CloudLook,
+}
+
+/// Campaign sky clouds (L3): a procedural layer on the dome, seen from the strategic camera
+/// above the horizon. Same family as the battle clouds (soft banks, lit side, flat base).
+#[derive(Debug, Clone, Copy)]
+pub struct CloudLook {
+    pub enabled: bool,
+    /// Sky coverage in clear weather (0..1), and the extra share added by the overcast.
+    pub cover: f32,
+    pub overcast_cover: f32,
+    /// Edge softness of the banks.
+    pub soft: f32,
+    /// Bank frequency on the projected plane.
+    pub scale: f32,
+    /// Elevation (0..1 of the quarter circle) over which the clouds fade in from the horizon.
+    pub horizon_fade: f32,
+    /// Drift speed (plane units per second), x and z.
+    pub drift: [f32; 2],
+    /// Lit / shaded colour (sRGB) and the opacity ceiling.
+    pub lit: Vec3,
+    pub shade: Vec3,
+    pub opacity: f32,
+}
+
+impl Default for CloudLook {
+    fn default() -> Self {
+        CloudLook {
+            enabled: true,
+            cover: 0.42,
+            overcast_cover: 0.55,
+            soft: 0.22,
+            scale: 2.4,
+            horizon_fade: 0.12,
+            drift: [0.004, 0.0012],
+            lit: Vec3::new(0.97, 0.96, 0.93),
+            shade: Vec3::new(0.62, 0.68, 0.78),
+            opacity: 0.92,
+        }
+    }
 }
 
 impl Default for SkyLook {
@@ -66,6 +111,9 @@ impl Default for SkyLook {
             overcast: [0.0, 0.9, 0.75, 0.7, 0.95],
             sun_glow: [0.25, 24.0],
             gain: 1.0,
+            haze_sky_share: 0.6,
+            band_saturation: 0.18,
+            clouds: CloudLook::default(),
         }
     }
 }
@@ -82,6 +130,12 @@ fn vec3_of(value: &Value, fallback: Vec3) -> Vec3 {
 }
 
 impl SkyLook {
+    /// Colour (sRGB) of the one haze: the live fog colour pulled towards the sky tint of the
+    /// aerial perspective. Land, sea (post pass) and the dome horizon all use it.
+    pub fn haze_color(&self, fog_color: Vec3, sky_tint: Vec3) -> Vec3 {
+        fog_color.lerp(sky_tint, self.haze_sky_share)
+    }
+
     pub fn from_json(sky: &Value, palette: &Value) -> SkyLook {
         let d = SkyLook::default();
         let num = |v: &Value, fb: f32| v.as_f64().map_or(fb, |x| x as f32);
@@ -102,6 +156,27 @@ impl SkyLook {
                 num(&sky["sun_glow"]["exponent"], d.sun_glow[1]),
             ],
             gain: num(&sky["gain"], d.gain),
+            haze_sky_share: num(&sky["haze_sky_share"], d.haze_sky_share).clamp(0.0, 1.0),
+            band_saturation: num(&sky["band_saturation"], d.band_saturation).clamp(0.0, 1.0),
+            clouds: {
+                let c = &sky["clouds"];
+                let k = d.clouds;
+                CloudLook {
+                    enabled: c["enabled"].as_bool().unwrap_or(k.enabled),
+                    cover: num(&c["cover"], k.cover).clamp(0.0, 1.0),
+                    overcast_cover: num(&c["overcast_cover"], k.overcast_cover).clamp(0.0, 1.0),
+                    soft: num(&c["soft"], k.soft).clamp(0.01, 1.0),
+                    scale: num(&c["scale"], k.scale).max(0.1),
+                    horizon_fade: num(&c["horizon_fade"], k.horizon_fade).clamp(0.0, 1.0),
+                    drift: [
+                        num(&c["drift"][0], k.drift[0]),
+                        num(&c["drift"][1], k.drift[1]),
+                    ],
+                    lit: vec3_of(&c["lit"], k.lit),
+                    shade: vec3_of(&c["shade"], k.shade),
+                    opacity: num(&c["opacity"], k.opacity).clamp(0.0, 1.0),
+                }
+            },
         }
     }
 
@@ -153,6 +228,14 @@ pub struct DomeParams {
     pub sun: Vec4,
     /// Linear sun colour (rgb), glow exponent (a).
     pub sun_color: Vec4,
+    /// Clouds: x cover, y softness, z scale, w horizon fade (0 cover = off).
+    pub cloud_a: Vec4,
+    /// Clouds: xy drift offset (plane units), z opacity, w band saturation.
+    pub cloud_b: Vec4,
+    /// Clouds: linear lit colour (rgb).
+    pub cloud_lit: Vec4,
+    /// Clouds: linear shaded colour (rgb).
+    pub cloud_shade: Vec4,
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
@@ -246,6 +329,7 @@ fn update_dome(
     look: Res<SkyLook>,
     atmosphere: Res<Atmosphere>,
     view: Res<WeatherView>,
+    time: Res<Time<Real>>,
     light: Option<Res<CampaignLight>>,
     domes: Query<&MeshMaterial3d<DomeMaterial>, With<SkyDome>>,
     mut materials: ResMut<Assets<DomeMaterial>>,
@@ -255,13 +339,18 @@ fn update_dome(
     let Some(mut material) = materials.get_mut(&handle.0) else {
         return;
     };
-    let horizon = Vec3::from_array(atmosphere.color);
+    let horizon = look.haze_color(
+        Vec3::from_array(atmosphere.color),
+        Vec3::from_array(atmosphere.sky),
+    );
     let overcast = look.overcast_of(view.focus_entry.kind, view.focus_entry.intensity);
     let zenith = look.zenith_for(horizon, overcast);
     let (sun_dir, sun_color) = match light {
         Some(l) => (toward_sun(l.elevation, l.azimuth), l.color),
         None => (Vec3::Y, Vec3::ONE),
     };
+    let c = look.clouds;
+    let seconds = time.elapsed_secs();
     let glow = look.sun_glow[0] * (1.0 - overcast);
     let mut h = srgb_to_linear_vec(horizon);
     h.w = look.exponent;
@@ -272,6 +361,24 @@ fn update_dome(
         zenith: z,
         sun: sun_dir.extend(glow),
         sun_color: sun_color.extend(look.sun_glow[1]),
+        cloud_a: Vec4::new(
+            if c.enabled {
+                (c.cover + c.overcast_cover * overcast).clamp(0.0, 1.0)
+            } else {
+                0.0
+            },
+            c.soft,
+            c.scale,
+            c.horizon_fade,
+        ),
+        cloud_b: Vec4::new(
+            c.drift[0] * seconds,
+            c.drift[1] * seconds,
+            c.opacity,
+            look.band_saturation,
+        ),
+        cloud_lit: srgb_to_linear_vec(c.lit),
+        cloud_shade: srgb_to_linear_vec(c.shade.lerp(horizon * 0.8, overcast * 0.6)),
     };
     state.overcast = overcast;
     state.horizon = horizon.to_array();

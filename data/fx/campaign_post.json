@@ -37,6 +37,8 @@
     "clear_scale": 0.5,
     "desaturate": 0.15,
     "sky_share": 0.35,
+    "desaturate": 0.4,
+    "sky_share": 0.0,
     "clear_max": 0.3,
     "fog_cut": 0.6,
     "color": [0.70, 0.77, 0.85],

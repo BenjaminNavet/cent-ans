@@ -4,33 +4,151 @@
   "title": "Ciel de la carte de campagne (lot VIS-R1)",
   "description": "Fichier data/fx/campaign_sky.json : dôme dégradé de la carte (client/src/campaign/weather/dome.rs). Les couleurs viennent de palette.json `sky` et de la brume vivante ; ici seulement la forme du dégradé, la part de ciel couvert par météo et l'éclat du soleil. Aucune règle de jeu.",
   "type": "object",
-  "required": ["enabled", "kind"],
+  "required": [
+    "enabled",
+    "kind"
+  ],
   "additionalProperties": false,
-  "$defs": { "unit": { "type": "number", "minimum": 0, "maximum": 1 } },
+  "$defs": {
+    "unit": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  },
   "properties": {
-    "description": { "type": "string" },
-    "enabled": { "type": "boolean" },
-    "kind": { "enum": ["dome", "none"], "description": "dome = dégradé tracé derrière tout ; none = fond uni (comparaison)." },
-    "gradient_exponent": { "type": "number", "minimum": 0.05, "maximum": 4, "description": "Plus grand, plus la bande d'horizon colle à l'horizon." },
-    "gain": { "type": "number", "minimum": 0.2, "maximum": 3, "description": "Multiplicateur du ciel avant le tonemap, pour l'accorder au sol." },
-    "overcast_zenith_keep": { "$ref": "#/$defs/unit", "description": "Part de la teinte du zénith gardée sous couverture pleine." },
+    "description": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "kind": {
+      "enum": [
+        "dome",
+        "none"
+      ],
+      "description": "dome = dégradé tracé derrière tout ; none = fond uni (comparaison)."
+    },
+    "gradient_exponent": {
+      "type": "number",
+      "minimum": 0.05,
+      "maximum": 4,
+      "description": "Plus grand, plus la bande d'horizon colle à l'horizon."
+    },
+    "gain": {
+      "type": "number",
+      "minimum": 0.2,
+      "maximum": 3,
+      "description": "Multiplicateur du ciel avant le tonemap, pour l'accorder au sol."
+    },
+    "overcast_zenith_keep": {
+      "$ref": "#/$defs/unit",
+      "description": "Part de la teinte du zénith gardée sous couverture pleine."
+    },
     "overcast_by_kind": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "clear": { "$ref": "#/$defs/unit" },
-        "fog": { "$ref": "#/$defs/unit" },
-        "rain": { "$ref": "#/$defs/unit" },
-        "snow": { "$ref": "#/$defs/unit" },
-        "storm": { "$ref": "#/$defs/unit" }
+        "clear": {
+          "$ref": "#/$defs/unit"
+        },
+        "fog": {
+          "$ref": "#/$defs/unit"
+        },
+        "rain": {
+          "$ref": "#/$defs/unit"
+        },
+        "snow": {
+          "$ref": "#/$defs/unit"
+        },
+        "storm": {
+          "$ref": "#/$defs/unit"
+        }
       }
     },
     "sun_glow": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "strength": { "type": "number", "minimum": 0, "maximum": 2 },
-        "exponent": { "type": "number", "minimum": 1, "maximum": 512 }
+        "strength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "exponent": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 512
+        }
+      }
+    },
+    "haze_sky_share": {
+      "$ref": "#/$defs/unit",
+      "description": "L3 : part du bleu de ciel de la perspective aérienne dans la couleur de l'unique brume (sol, mer, horizon du dôme)."
+    },
+    "band_saturation": {
+      "$ref": "#/$defs/unit",
+      "description": "L3 : hauteur (part du quart de cercle) sur laquelle le bleu de ciel revient au-dessus de la ligne d'horizon."
+    },
+    "clouds": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "L3 : nuages procéduraux sur le dôme.",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "cover": {
+          "$ref": "#/$defs/unit"
+        },
+        "overcast_cover": {
+          "$ref": "#/$defs/unit"
+        },
+        "soft": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 1
+        },
+        "scale": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 20
+        },
+        "horizon_fade": {
+          "$ref": "#/$defs/unit"
+        },
+        "drift": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "lit": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "shade": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "opacity": {
+          "$ref": "#/$defs/unit"
+        }
       }
     }
   }

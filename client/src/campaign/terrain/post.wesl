@@ -30,11 +30,11 @@ struct CampaignAdjust {
     mist_color: vec4<f32>,
     // rgb: cold mist colour (linear), w: unused.
     mist_cold: vec4<f32>,
-    // Aerial perspective: x begin, y end (world distance), z strength, w desaturation.
+    // One air: x begin, y end (world distance), z density, w desaturation.
     aerial_a: vec4<f32>,
     // rgb: haze colour (linear), w: share applied to the sky.
     aerial_color: vec4<f32>,
-    // rgb: cold haze colour (linear), w: unused.
+    // rgb: far haze colour (linear), w: haze curve exponent.
     aerial_cold: vec4<f32>,
     // x, y: altitude (m) ramp of the cold, z: its share, w: unused.
     cold_alt: vec4<f32>,
@@ -163,11 +163,13 @@ fn atmosphere(c: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
         let colour = mix(adjust.mist_color.rgb, adjust.mist_cold.rgb, cold_here);
         out = mix(out, colour, mist);
     }
-    // Aerial perspective: the far land loses its colour, then dissolves into the cold haze.
+    // One air (L3): the camera depth-fog curve for land and sea alike. The haze goes from the
+    // near fog colour to the sky-tinted far colour, the same as the dome horizon.
     if (adjust.aerial_a.z > 0.0) {
-        let a = smoothstep(adjust.aerial_a.x, adjust.aerial_a.y, dist) * adjust.aerial_a.z * master;
+        let u = smoothstep(adjust.aerial_a.x, adjust.aerial_a.y, dist);
+        let a = pow(u, adjust.aerial_cold.w) * adjust.aerial_a.z * master;
         out = mix(out, vec3<f32>(luma(out)), a * adjust.aerial_a.w);
-        let haze = mix(adjust.aerial_color.rgb, adjust.aerial_cold.rgb, cold_here);
+        let haze = mix(adjust.aerial_color.rgb, adjust.aerial_cold.rgb, u);
         out = mix(out, haze, a);
     }
     return out;

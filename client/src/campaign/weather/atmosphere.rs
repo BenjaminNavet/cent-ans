@@ -429,7 +429,8 @@ fn update_atmosphere(
             state.color[0],
             state.color[1],
             state.color[2],
-            depth.density,
+            // L3: the depth haze is applied once by the campaign post pass (land and sea).
+            0.0,
         ),
         directional_light_color: Color::linear_rgba(
             sun_color.x * scatter,
