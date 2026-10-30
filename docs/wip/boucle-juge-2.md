@@ -136,3 +136,10 @@ Constats seed bots longs : présentés au joueur, il choisit (ne rien écrire da
 - Check en cours au moment de l'arrêt : out/check-refus/status (+ passe longue seed bots, rapport dans core/target/seed-bots/ le plus récent).
 - Branches d'agents (les agents de la session précédente peuvent finir seuls ; fini = plus « locked ») : VIS-R3b a771f004f6088afb4, ECO-R1c aa5182d13ee2ab5e2, IA-PLAN-2 a81b1ae605a828a40, MEM3 a0377ad7d1eea36f9 + FPS mêlée a7fa6dbbe9cdf1f9d (rebasées par un agent de récupération, à vérifier puis fusionner).
 - Objectifs détaillés et règles : docs/prompt-session.md.
+
+## Session 30/10 matin (7 h) — vague 3
+- Agents de la session précédente morts (verrous périmés levés). Worktrees MEM3/FPS gardés pour une fenêtre machine calme (lot seul).
+- Lancés (Sonnet, effort medium) : VIS-R3b fin (agent-a771f004f6088afb4, ADR 0814), ECO-R1c fin (agent-aa5182d13ee2ab5e2, 0815),
+  IA-PLAN-2 (agent-a81b1ae605a828a40, 0816), CAMP-R6 8 maisons jouables (0817), XP-R3a livres Royaume + Chronique (0818),
+  PLAQUES-2 Saint-Denis + plaques de bataille lointaines (0819 si besoin). Prochain ADR libre : 0820.
+- Ensuite : agent de fusion, check complet, juge visuel Opus frais, puis VIS-R4 (après R3b), COHESION-1 (après IA-PLAN-2), VIS-R8, R2-b.
