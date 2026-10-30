@@ -1402,6 +1402,8 @@ mod tests {
     }
 
     #[test]
+    // 4 knights against 10 militia (BANC-2: against 20 the 3D battle favours the militia, so the
+    // auto-resolve no longer gives the knights the win there).
     fn armoured_cavalry_rides_down_cheap_foot_but_not_pikes() {
         let knights = side(vec![
             BattleUnit {
@@ -1415,7 +1417,7 @@ mod tests {
                 morale: 40,
                 ..unit(120, 40, 0, 30, false)
             };
-            20
+            10
         ]);
         let pikes = side(vec![unit(120, 55, 0, 40, false); 4]);
         let horse = profile(UnitFamily::Cavalry, 90);

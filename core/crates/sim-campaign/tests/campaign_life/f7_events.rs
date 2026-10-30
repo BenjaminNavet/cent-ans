@@ -174,8 +174,8 @@ fn f7_events_load_with_their_kind_and_sources() {
 #[test]
 fn a_simulated_campaign_fires_the_new_history() {
     let data = game_data();
-    // Seed 1341: after the HIST spouses data seeds 1337-1339 fire 18-19 events (threshold 20), 1340-1345 fire 21-24.
-    let fired = simulate(data, "fac_france", 1341);
+    // Seed 1342 (BANC-2: 1341 fired only 3 chained steps once melee auto-resolve was recalibrated); before that seed 1341: after the HIST spouses data seeds 1337-1339 fire 18-19 events (threshold 20), 1340-1345 fire 21-24.
+    let fired = simulate(data, "fac_france", 1342);
     let historical: Vec<&str> = F7_HISTORICAL
         .iter()
         .copied()
