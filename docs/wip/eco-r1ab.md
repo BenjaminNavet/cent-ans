@@ -45,6 +45,9 @@ Avant (première version, IA qui licenciait) : part de l'armée 3-6 % ; le corre
   l'IA licencie). `economy.json` est inchangé.
 - Armées plus grosses : `men_under_arms` de la France IA atteint 5 000-13 000 en fin de siècle (graines 2 et 3), à surveiller par R2.
 - Les boutons d'impôt de la fenêtre Finances restent affichés pour une maison à assemblée et sont refusés (R1-d).
+- Passe longue des seed bots (fin de lot) : l'IA du jeu (mirror) ne dérive que sur `ai_refused_orders` (593 pour une bande à 400, tous les bots
+  dérivent dans le même sens, 1 ordre refusé sur 512 touche une assemblée) et `men_under_arms_peak` (4 890, bande relevée à 9 000) ;
+  les autres dérives (révoltes, provinces tenues, banqueroutes des bots naïfs) concernent des bots qui ne convoquent aucune assemblée.
 - Bandes des seed bots : `army_spend_share` [0,04 ; 0,45] (rapide) / [0,04 ; 0,7] (longue), `extraordinary_income_share` [0 ; 0,65].
 
 ## Reste (suites)
