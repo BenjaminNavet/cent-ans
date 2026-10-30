@@ -227,8 +227,8 @@ impl Plugin for CampaignHudPlugin {
                 integ::plugin,
                 buttons::plugin,
                 wait::plugin,
-                story::plugin,
             ))
+            .add_plugins(story::plugin)
             .add_plugins(layers::plugin)
             .add_plugins(feed::plugin)
             .register_dump(dump_hud)

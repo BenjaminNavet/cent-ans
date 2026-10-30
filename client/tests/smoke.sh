@@ -111,13 +111,13 @@ for name in $names; do
 	done
 	for pair in ${=scenario_nonempty[$name]:-}; do
 		dump="$root/out/smoke/${pair%%:*}.json"
-		path=${pair#*:}
+		jpath=${pair#*:}
 		python3 -c '
 import json, sys
 node = json.load(open(sys.argv[1]))
 for key in sys.argv[2].split("."):
     node = node[key]
-sys.exit(0 if node else 1)' "$dump" "$path" 2>/dev/null || reasons+=("${pair%%:*}.json: ${path} is empty or missing")
+sys.exit(0 if node else 1)' "$dump" "$jpath" 2>/dev/null || reasons+=("${pair%%:*}.json: ${jpath} is empty or missing")
 	done
 	if (( ${#reasons} )); then
 		echo "SMOKE FAIL $name (${elapsed}s): ${(j:, :)reasons} -> $log"

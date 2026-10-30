@@ -93,6 +93,7 @@ pub fn plugin(app: &mut App) {
         );
 }
 
+#[allow(clippy::too_many_arguments)]
 fn rebuild_panel(
     mut commands: Commands,
     hud: Res<HudData>,
