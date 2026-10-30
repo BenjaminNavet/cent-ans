@@ -27,9 +27,9 @@
       "canopy": "broadleaf_canopy",
       "rock": "granite_rock",
       "tint": [
-        1.0,
+        1.03,
         1.02,
-        0.95
+        0.93
       ]
     },
     "2": {
@@ -58,9 +58,9 @@
       "canopy": "broadleaf_canopy",
       "rock": "limestone_rock",
       "tint": [
-        1.02,
+        1.05,
         1.0,
-        0.92
+        0.88
       ]
     },
     "3": {
@@ -86,9 +86,9 @@
       "canopy": "med_pine_open",
       "rock": "limestone_rock",
       "tint": [
-        1.06,
-        1.02,
-        0.9
+        1.12,
+        1.0,
+        0.82
       ]
     },
     "4": {
@@ -188,9 +188,9 @@
       "canopy": "med_pine_open",
       "rock": "limestone_rock",
       "tint": [
-        1.04,
+        1.14,
         0.98,
-        0.86
+        0.78
       ]
     },
     "8": {
@@ -295,9 +295,9 @@
       "canopy": "med_pine_open",
       "rock": "granite_rock",
       "tint": [
-        1.0,
+        1.03,
         1.02,
-        0.93
+        0.91
       ]
     },
     "12": {
@@ -451,7 +451,7 @@
       "shares": {
         "spring": {"wheat": 0.25, "green": 0.2, "ploughed": 0.25, "fallow": 0.1, "meadow": 0.15, "hay": 0.05},
         "summer": {"wheat": 0.3, "green": 0.15, "ploughed": 0.1, "fallow": 0.15, "meadow": 0.2, "hay": 0.1},
-        "autumn": {"wheat": 0.15, "green": 0.1, "ploughed": 0.35, "fallow": 0.15, "meadow": 0.2, "hay": 0.05},
+        "autumn": {"wheat": 0.15, "green": 0.24, "ploughed": 0.3, "fallow": 0.1, "meadow": 0.16, "hay": 0.05},
         "winter": {"wheat": 0.2, "green": 0.1, "ploughed": 0.3, "fallow": 0.1, "meadow": 0.25, "hay": 0.05}
       }
     },
@@ -469,7 +469,7 @@
       "shares": {
         "spring": {"wheat": 0.3, "green": 0.2, "ploughed": 0.28, "fallow": 0.15, "meadow": 0.04, "hay": 0.03},
         "summer": {"wheat": 0.42, "green": 0.1, "ploughed": 0.08, "fallow": 0.28, "meadow": 0.06, "hay": 0.06},
-        "autumn": {"wheat": 0.32, "green": 0.1, "ploughed": 0.28, "fallow": 0.12, "meadow": 0.12, "hay": 0.06},
+        "autumn": {"wheat": 0.24, "green": 0.26, "ploughed": 0.24, "fallow": 0.1, "meadow": 0.12, "hay": 0.06},
         "winter": {"wheat": 0.3, "green": 0.1, "ploughed": 0.25, "fallow": 0.15, "meadow": 0.15, "hay": 0.05}
       }
     },
@@ -505,7 +505,7 @@
       "shares": {
         "spring": {"wheat": 0.2, "green": 0.2, "ploughed": 0.3, "fallow": 0.15, "meadow": 0.1, "hay": 0.05},
         "summer": {"wheat": 0.3, "green": 0.1, "ploughed": 0.15, "fallow": 0.3, "meadow": 0.05, "hay": 0.1},
-        "autumn": {"wheat": 0.1, "green": 0.1, "ploughed": 0.4, "fallow": 0.25, "meadow": 0.1, "hay": 0.05},
+        "autumn": {"wheat": 0.1, "green": 0.2, "ploughed": 0.35, "fallow": 0.2, "meadow": 0.1, "hay": 0.05},
         "winter": {"wheat": 0.2, "green": 0.1, "ploughed": 0.35, "fallow": 0.2, "meadow": 0.1, "hay": 0.05}
       }
     },

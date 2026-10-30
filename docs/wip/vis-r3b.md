@@ -24,3 +24,8 @@ Spec : docs/audits/2026-10-29-visuel-campagne.md, lot R3b. Worktree, non fusionn
 - fmt, clippy client `--features dev -D warnings` : propres. Tests client : 1535 + autres verts ; seul échec `snapshots::smoke_scenarios_parse_to_stable_command_lists`, hérité de main (scénario `faction_assembly` d'ECO-R1 absent du snapshot), hors zone, non touché. pytest schémas/sol : 2950 verts.
 
 TERMINÉ (avec écarts de mesure critères 3 et 4, voir ci-dessus).
+
+## Passe de réglage critères 3 et 4 (10-30, données seulement)
+- Modifié : `data/art/ground_biome_mix.json` : teintes de biome (continental 1,05/1,0/0,88 ; méditerranéen 1,12/1,0/0,82 ; semi-aride 1,14/0,98/0,78 ; océanique et Atlantique sud un peu plus jaunes) ; parts d'automne de `default`, `openfield`, `midi` avec `green` relevé (0,24 / 0,26 / 0,20).
+- Mesure (3 captures, masque « forêt » = pixels de valeur < 0,36 exclus, recadrage central hors HUD) : Castille 93 deg (avant 94), Normandie 114 deg (115), Loire automne V 0,37 (0,37), toujours aucun vert de pré distinct (teintes de centres 26-39 deg). Effet nul : ces vues sont dominées par des couches que les teintes de biome et les parts de culture ne pilotent pas (carte de couleur lointaine, `hue_keep` / `colormap_near_share`, canopée, blé en herbe de printemps), le masque de valeur n'isole pas vraiment la forêt (pas de masque de classe disponible sans dump par pixel).
+- Conclusion : critères 3 et 4 NON atteints par les seules données de ce lot ; pistes : relever `view.hue_keep` / baisser `colormap_near_share`, ou ajouter une région « meseta » à `agri_regions` (re-cuisson du PNG), ou un dump de classe de sol par pixel pour mesurer sans forêt. Tests terrain 98 verts, pytest schémas 2950 verts.
