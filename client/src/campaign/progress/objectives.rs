@@ -327,7 +327,7 @@ fn spawn(
                                         ..default()
                                     })
                                     .with_children(|row| {
-                                        row.spawn(toggle_button(
+                                        let mut toggle = row.spawn(toggle_button(
                                             &theme,
                                             &format!("objectives:ambition:{}", ambition.id),
                                             &format!(
@@ -336,7 +336,18 @@ fn spawn(
                                             ),
                                             ambition.chosen,
                                         ));
-                                        row.spawn(caption(&theme, &ambition.description));
+                                        // XP-AUDIENCE: once the choice is frozen, the ambitions
+                                        // not taken are greyed and cannot be clicked.
+                                        if ambition.locked {
+                                            toggle.insert(bevy::ui::InteractionDisabled);
+                                        }
+                                        let mut description =
+                                            row.spawn(caption(&theme, &ambition.description));
+                                        if ambition.locked {
+                                            description.insert(TextColor(
+                                                crate::ui::kit::style::INK_FADED,
+                                            ));
+                                        }
                                     });
                                 }
                             }
@@ -442,7 +453,7 @@ fn dump(world: &World) -> (String, Value) {
                     "ambition_choice_open": a.ambition_choice_open,
                     "status": ambition_status(a),
                     "ambitions": a.ambitions.iter().map(|r| json!({
-                        "id": r.id, "name": r.name, "chosen": r.chosen,
+                        "id": r.id, "name": r.name, "chosen": r.chosen, "locked": r.locked,
                         "renown_bonus_percent": r.renown_bonus_percent,
                     })).collect::<Vec<_>>(),
                 })),

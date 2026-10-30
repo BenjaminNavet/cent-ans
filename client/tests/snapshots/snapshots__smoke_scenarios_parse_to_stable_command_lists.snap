@@ -29,6 +29,65 @@ campaign:
   - Wait(60)
   - "Dump(\"[repo]/client/out/smoke/campaign_panels.json\")"
   - Exit
+campaign_attention:
+  - State(Campaign)
+  - Wait(120)
+  - "Dump(\"[repo]/client/out/smoke/attention_0.json\")"
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Dump(\"[repo]/client/out/smoke/attention_6.json\")"
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Dump(\"[repo]/client/out/smoke/attention_12.json\")"
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Dump(\"[repo]/client/out/smoke/attention_10.json\")"
+  - Exit
+campaign_audience:
+  - State(Campaign)
+  - Wait(120)
+  - "Key(\"Enter\")"
+  - Wait(100)
+  - "Key(\"Enter\")"
+  - Wait(200)
+  - "Dump(\"[repo]/client/out/smoke/audience_card.json\")"
+  - Wait(2400)
+  - "Dump(\"[repo]/client/out/smoke/audience_rest.json\")"
+  - Exit
 campaign_battle:
   - State(Campaign)
   - Wait(200)
