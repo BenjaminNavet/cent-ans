@@ -11,10 +11,10 @@ Spec : `docs/audits/2026-10-29-experience.md` § R4 et § « Lot XP-POURQUOI ».
 5. Tests, fumée, seed bots (invariant `max_per_season_player`), ADR, `docs/architecture.md`.
 
 ## État
-- [x] Données + entité data-model.
-- [x] Cœur écrit (`season_marks.rs`, `cause_builders.rs`, `causes.rs`, hooks `turn.rs`, invariant) : compilation et tests en file d'attente (`heavy.sh` saturé).
-- [x] game-api écrit (`causes::season_story*`, `hud::TopBar.trends`) ; client écrit (`story.rs`, `text.rs`, `mod.rs`, `flow.rs`, `report.rs`, `feed.rs`) : jamais compilé.
-- [ ] Prochaine étape : `cargo test` core, clippy, correctifs ; client clippy/test/smoke ; seed bots rapide ; dump `season_story` ; ADR numéroté à la fusion.
+- [x] Données, cœur, game-api, client, textes : écrits, clippy cœur et client propres, tests du lot verts.
+- [x] Smoke `campaign_turns` vert (dump `season_story.story.why` non vide au tour 6 ; au tour 3 : 3 causes de variation du trésor).
+- [ ] Seed bots rapide (lancé), ADR à numéroter à la fusion.
+- Échecs existants hors lot : `campaign_life::acts::reign_score_moves_until_1453` (échoue aussi sans `season_marks::record`), `seed-bots ambitions` (`en2_amb_guyenne`), client `markers::dn::real_table_and_glbs` (GLB `city_west` absent).
 
 ## Points ouverts
 - Termes de prestige / hommes / troubles : captures au début du tour (`season_marks`), les contributions de la prévision décrivent la saison jouée.

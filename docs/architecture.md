@@ -54,6 +54,7 @@ héraldique, audio, budget cloud ; `launch.sh` (lanceur, ADR 0117/0362), `compar
 2. Quand deux armées ennemies se rencontrent : soit auto-résolution par phases dans `sim-campaign` (ADR 0013), soit bataille jouée. Pour la bataille jouée, `sim-campaign` construit un `BattleSetup` (armées, bonus de technologie…) que le client place dans `PendingBattle` avant de passer à l'état `Battle` ; `sim-battle` simule en temps réel avec pause.
 3. Le `BattleOutcome` revient à `sim-campaign` (pertes, captifs, moral, prise de colonie) ; la campagne reprend. Les sièges suivent le même chemin avec murs, machines et assaut produits par le cœur.
 4. Le rendu (figurines, relief, végétation, effets) n'écrit jamais dans l'état de jeu.
+5. Les causes (ADR 0748, XP-POURQUOI) : à chaque fin de tour `sim-campaign::season_marks` compare l'état au début du tour (trésor, troubles d'une province, attitude des IA) et verse les variations notables dans le journal des causes (`causes.rs`, seuils dans `data/rules/cause_thresholds.json`) ; `game-api::causes::season_story` en tire le Récit de la saison (changé / pourquoi / à venir) et `TopBar.trends` l'écart et les trois termes de chaque chiffre. Le client ne fait que les afficher.
 
 ## Où trouver quoi
 
