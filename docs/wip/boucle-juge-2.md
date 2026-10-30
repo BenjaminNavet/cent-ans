@@ -215,3 +215,5 @@ Reprise :
 - BATI-RÉEL (agent-a3e7ecbf368524a30) : les 44 images sont faites ; TRELLIS a produit farm_2 et abbey_1 à abbey_3 ; chaîne coupée. Quota TRELLIS HF épuisé (≈ 22 h) ; farm_1 et la suite restent à faire (repli SF3D).
 - Prêts pour FUSION-D : FORECAST-ASYNC, CAMP-S, M5a, VIS-L4 + L4b, VIS-L5.
 - Relancer tools/disk_guard.sh et le guetteur de coût.
+
+- 17:09 REPRISE : 5 agents relancés (FUSION-C, CAMP-R2, BAT-R2b, M2b avec les 2 références, BATI-RÉEL en SF3D) ; garde disque et guetteur de coût relancés.
