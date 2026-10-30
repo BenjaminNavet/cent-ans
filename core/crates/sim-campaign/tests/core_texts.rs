@@ -12,9 +12,13 @@ fn collect_keys(dir: &Path, keys: &mut BTreeSet<String>) {
             collect_keys(&path, keys);
         } else if path.extension().is_some_and(|ext| ext == "rs") {
             let text = fs::read_to_string(&path).expect("source readable");
-            for piece in text.split("core_text(\"").skip(1) {
-                if let Some(end) = piece.find('"') {
-                    keys.insert(piece[..end].to_owned());
+            // rustfmt may break the call after the parenthesis.
+            for piece in text.split("core_text(").skip(1) {
+                let Some(quoted) = piece.trim_start().strip_prefix('"') else {
+                    continue;
+                };
+                if let Some(end) = quoted.find('"') {
+                    keys.insert(quoted[..end].to_owned());
                 }
             }
         }
