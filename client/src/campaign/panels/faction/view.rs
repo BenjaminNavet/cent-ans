@@ -166,6 +166,8 @@ pub fn rebuild(
     roots: Query<Entity, With<FactionRoot>>,
     texts: Res<super::finance::FinanceTexts>,
     finance_ui: Res<super::finance::FinanceUi>,
+    asm_texts: Res<super::assembly::AssemblyTexts>,
+    asm_ui: Res<super::assembly::AssemblyUi>,
     keymap: Option<Res<crate::settings::KeyMap>>,
     settings: Option<Res<crate::settings::Settings>>,
 ) {
@@ -224,6 +226,9 @@ pub fn rebuild(
                 tabs.push((TABS[3], "Cour"));
                 tabs.push((TABS[4], "Chantiers"));
                 tabs.push((TABS[5], texts.s("tab")));
+                if view.finance.as_ref().is_some_and(|f| f.assembly_house) {
+                    tabs.push((TABS[6], asm_texts.s("tab")));
+                }
             }
             let selected = selected.min(tabs.len() - 1);
             root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));
@@ -306,10 +311,36 @@ pub fn rebuild(
                                     state.turn,
                                     state.year,
                                     &shortcut_label,
+                                    &asm_texts,
                                 );
                             }
                         });
                 });
+                if view.finance.as_ref().is_some_and(|f| f.assembly_house) {
+                    root.spawn(tab_pane_fit(
+                        TAB_GROUP,
+                        TABS[6],
+                        selected == 6,
+                        TAB_HEIGHT,
+                        MIN_TAB_HEIGHT,
+                    ))
+                    .with_children(|pane| {
+                        pane.spawn(scroll_list_fill(&theme, "faction:scroll:assembly"))
+                            .with_children(|list| {
+                                if let (Some(data), Some(state)) = (&sim.data, &sim.state) {
+                                    super::assembly::assembly_tab(
+                                        list,
+                                        &theme,
+                                        &asm_texts,
+                                        &asm_ui,
+                                        data,
+                                        state,
+                                        &sim.player,
+                                    );
+                                }
+                            });
+                    });
+                }
             }
         });
 }

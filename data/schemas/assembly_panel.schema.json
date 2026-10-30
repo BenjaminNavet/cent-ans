@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "assembly_panel.schema.json",
+  "title": "Textes de l’onglet États et Parlement (ECO-R1d, ADR 0813)",
+  "description": "Textes français de l’onglet « États et Parlement » du panneau de faction et du remplacement des impôts extraordinaires de l’onglet Finances. Aucune règle de jeu : les chiffres viennent du core.",
+  "type": "object",
+  "required": ["tab", "title", "intro", "none", "pick", "mood", "scope", "necessity", "ask", "form", "forecast", "convene", "session", "promises", "finance", "advisor"],
+  "properties": {
+    "description": {"type": "string"},
+    "tab": {"type": "string", "minLength": 1, "maxLength": 20},
+    "title": {"type": "string", "minLength": 1},
+    "intro": {"type": "string", "minLength": 1},
+    "none": {"type": "string", "minLength": 1},
+    "pick": {"$ref": "#/$defs/texts"},
+    "mood": {
+      "type": "object",
+      "required": ["label", "value", "tip", "bands"],
+      "properties": {
+        "bands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["max", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "max": {"type": "integer", "minimum": 0, "maximum": 100},
+              "label": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      },
+      "additionalProperties": {"type": ["string", "array"]}
+    },
+    "scope": {"$ref": "#/$defs/texts"},
+    "necessity": {"$ref": "#/$defs/texts"},
+    "ask": {"$ref": "#/$defs/texts"},
+    "form": {"$ref": "#/$defs/texts"},
+    "forecast": {
+      "type": "object",
+      "required": ["title", "outcome", "accord", "amount", "terms_title", "parts_title", "parts"],
+      "properties": {
+        "outcome": {
+          "type": "object",
+          "required": ["grant", "conditions", "refuse"],
+          "additionalProperties": false,
+          "properties": {
+            "grant": {"type": "string", "minLength": 1},
+            "conditions": {"type": "string", "minLength": 1},
+            "refuse": {"type": "string", "minLength": 1}
+          }
+        },
+        "parts": {
+          "type": "object",
+          "required": ["assembly_mood", "assembly_prestige", "assembly_necessity", "assembly_ask", "assembly_subsidies", "assembly_unrest", "assembly_broken", "assembly_permanent"],
+          "additionalProperties": {"type": "string", "minLength": 1}
+        }
+      },
+      "additionalProperties": {"type": ["string", "object"]}
+    },
+    "convene": {"$ref": "#/$defs/texts"},
+    "session": {"$ref": "#/$defs/texts"},
+    "promises": {"$ref": "#/$defs/texts"},
+    "finance": {"$ref": "#/$defs/texts"},
+    "advisor": {"$ref": "#/$defs/texts"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "texts": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "string", "minLength": 1}}
+  }
+}

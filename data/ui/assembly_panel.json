@@ -1,0 +1,111 @@
+{
+  "description": "ECO-R1d (ADR 0813) — textes de l’onglet « États et Parlement » du panneau de faction et du remplacement des impôts extraordinaires de l’onglet Finances. Les {accolades} sont remplies par le client avec les chiffres du core ; aucune règle de jeu ici, seulement des textes, des bandes d’humeur pour l’affichage et les libellés des parts de l’accord.",
+  "tab": "États",
+  "title": "États et Parlement",
+  "intro": "Dans ce royaume, l’impôt extraordinaire est consenti : vous ne le levez plus d’un ordre, vous convoquez une assemblée. Elle répond à la saison suivante par un accord, un accord sous conditions ou un refus.",
+  "none": "Votre maison ne réunit aucune assemblée.",
+  "pick": {
+    "title": "Assemblée",
+    "tip": "Les provinces que vous tenez et que cette assemblée représente paieraient le subside."
+  },
+  "mood": {
+    "label": "Humeur",
+    "value": "{label} ({mood} sur 100)",
+    "tip": "La confiance de l’assemblée en la couronne. Elle baisse après un refus ou une promesse trahie, remonte avec le temps et avec les promesses tenues.",
+    "bands": [
+      { "max": 30, "label": "Hostile" },
+      { "max": 50, "label": "Réservée" },
+      { "max": 70, "label": "Bienveillante" },
+      { "max": 100, "label": "Confiante" }
+    ]
+  },
+  "scope": {
+    "provinces": "{count} provinces représentées",
+    "orders": "Ordres réunis : {orders}",
+    "running": "Subside perçu : {amount} par saison",
+    "running_none": "Aucun subside perçu."
+  },
+  "necessity": {
+    "title": "Nécessité invoquée",
+    "tip": "Les États n’accordent un subside que pour une raison qu’ils jugent valable. Plus elle est grave, plus ils sont enclins à payer.",
+    "none": "Aucune nécessité ne justifie une convocation : il faut une guerre, une invasion du royaume, une rançon à payer ou une croisade."
+  },
+  "ask": {
+    "title": "Montant demandé",
+    "tip": "Un montant plus lourd rapporte plus et se perçoit plus longtemps, mais l’assemblée l’accorde plus difficilement.",
+    "label": "{name} ({term} saisons)"
+  },
+  "form": {
+    "title": "Forme du subside",
+    "tip": "L’impôt que l’assemblée vote. Chaque forme pèse autrement sur les villes et sur les campagnes.",
+    "permanent": "Demander qu’il devienne permanent",
+    "permanent_on": "Impôt permanent demandé",
+    "permanent_tip": "Les États rendraient cet impôt ordinaire, perçu chaque saison sans nouveau vote, au prix d’un mécontentement constant. Ils y consentent plus difficilement.",
+    "permanent_unavailable": "Cette forme ne peut pas encore être rendue permanente, ou elle l’est déjà."
+  },
+  "forecast": {
+    "title": "Prévision",
+    "tip": "Ce que les États répondraient aujourd’hui à cette demande. Le calcul est celui du vote : rien n’est tiré au hasard.",
+    "outcome": {
+      "grant": "Accord : les États accorderaient le subside sans condition.",
+      "conditions": "Accord sous conditions : les États exigeraient des concessions.",
+      "refuse": "Refus : les États refuseraient et leur humeur baisserait."
+    },
+    "accord": "Accord prévu : {accord} points (accord à partir de {grant}, conditions à partir de {conditional})",
+    "amount": "Subside : {amount} par saison pendant {term} saisons",
+    "no_amount": "Aucun subside à percevoir : vous ne tenez pas assez de provinces représentées.",
+    "terms_title": "Concessions exigées",
+    "term": "{name} : {text}",
+    "term_tip": "Valeur de la concession : {cost} points d’accord.",
+    "parts_title": "D’où vient l’accord",
+    "part": "{label} : {points} points",
+    "parts": {
+      "assembly_mood": "Humeur de l’assemblée",
+      "assembly_prestige": "Légitimité du souverain",
+      "assembly_necessity": "Nécessité invoquée",
+      "assembly_ask": "Montant demandé",
+      "assembly_subsidies": "Subsides déjà perçus",
+      "assembly_unrest": "Mécontentement des provinces",
+      "assembly_broken": "Promesses trahies dont l’assemblée se souvient",
+      "assembly_permanent": "Impôt rendu permanent"
+    },
+    "error": "Demande impossible : {reason}"
+  },
+  "convene": {
+    "button": "Convoquer {name}",
+    "tip": "Les États se réuniront et répondront à la saison prochaine. Un refus coûte de l’humeur à l’assemblée.",
+    "blocked": "Convocation impossible : {reason}",
+    "done": "{name} sont convoqués : ils répondront à la saison prochaine.",
+    "refused": "Refusé : {reason}"
+  },
+  "session": {
+    "title": "Session ouverte",
+    "pending": "{name} sont réunis pour « {necessity} » ({ask}, {form}) depuis {season}. Ils répondront à la saison prochaine.",
+    "proposed": "Les États accordent {amount} par saison pendant {term} saisons, à condition que vous acceptiez leurs demandes (accord : {accord} points).",
+    "answer_by": "Vous pouvez répondre jusqu’à la fin de {season}, sinon la session tombe.",
+    "terms_title": "Concessions exigées en échange",
+    "accept": "Accepter les conditions",
+    "accept_tip": "Le subside est accordé et vous promettez chaque concession. Une promesse tenue relève l’humeur de l’assemblée, une promesse trahie l’abaisse et irrite les villes.",
+    "decline": "Refuser les conditions",
+    "decline_tip": "Pas de subside, et l’assemblée en garde rancune.",
+    "accepted": "Conditions acceptées : le subside sera perçu chaque saison.",
+    "declined": "Conditions refusées : aucun subside."
+  },
+  "promises": {
+    "title": "Promesses en cours",
+    "none": "Vous n’avez aucune promesse en cours devant les États.",
+    "line": "{name} : promesse tenue jusqu’à {until}",
+    "deadline": "{name} : à tenir avant {deadline}, promesse valable jusqu’à {until}",
+    "tip": "{text} Une promesse trahie abaisse l’humeur de l’assemblée et irrite les villes."
+  },
+  "finance": {
+    "title": "Impôts extraordinaires",
+    "intro": "Les impôts extraordinaires de ce royaume sont consentis par les États : on ne les lève plus d’un ordre.",
+    "button": "Convoquer les États",
+    "tip": "Ouvre l’onglet « États et Parlement » : nécessité, montant, prévision de la réponse, convocation."
+  },
+  "advisor": {
+    "title": "États et Parlement",
+    "action": "Voir les États"
+  }
+}

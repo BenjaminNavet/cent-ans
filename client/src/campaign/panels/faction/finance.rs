@@ -326,6 +326,11 @@ fn handle_buttons(
         if !panel.open {
             continue;
         }
+        if name == "levy_assembly" {
+            panel.tab = super::assembly::TAB.to_owned();
+            panel.dirty = true;
+            continue;
+        }
         if let Some(id) = name.strip_prefix("lender:") {
             ui.lender = Some(id.to_owned());
             panel.dirty = true;
@@ -1069,6 +1074,23 @@ fn levies_section(
     }
 }
 
+/// A house with assemblies does not levy extraordinary taxes (`FinanceError::AssemblyRequired`):
+/// the buttons are replaced by « Convoquer les États », which opens the assembly tab.
+fn assembly_notice(pane: &mut Kids, theme: &UiTheme, texts: &super::assembly::AssemblyTexts) {
+    pane.spawn(heading(theme, texts.s("finance.title")));
+    pane.spawn(wrapped(caption(theme, texts.s("finance.intro"))));
+    pane.spawn(button_row()).with_children(|row| {
+        row.spawn((
+            button_primary(
+                theme,
+                "faction:fin:levy_assembly",
+                texts.s("finance.button"),
+            ),
+            Tooltip::new(texts.s("finance.tip")),
+        ));
+    });
+}
+
 fn history_section(
     pane: &mut Kids,
     theme: &UiTheme,
@@ -1156,6 +1178,7 @@ pub(super) fn finance_tab(
     turn: u32,
     year: i32,
     shortcut_label: &str,
+    asm_texts: &super::assembly::AssemblyTexts,
 ) {
     let economy = &view.economy;
     pane.spawn(heading(theme, texts.s("title")));
@@ -1243,7 +1266,11 @@ pub(super) fn finance_tab(
     pane.spawn(separator(theme));
     repay_section(pane, theme, texts, ui, finance, economy.treasury);
     pane.spawn(separator(theme));
-    levies_section(pane, theme, texts, finance, data, year);
+    if finance.assembly_house {
+        assembly_notice(pane, theme, asm_texts);
+    } else {
+        levies_section(pane, theme, texts, finance, data, year);
+    }
     pane.spawn(separator(theme));
     history_section(pane, theme, texts, view);
 }

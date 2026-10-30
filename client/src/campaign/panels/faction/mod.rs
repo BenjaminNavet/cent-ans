@@ -32,6 +32,7 @@
 //!
 //! Not ported: the ransoms window and the routes overlay of the map.
 
+pub(crate) mod assembly;
 pub(crate) mod chart;
 pub(crate) mod finance;
 pub(crate) mod sections;
@@ -61,20 +62,21 @@ use crate::ui::kit::{ButtonPressed, TabSelected, ToggleChanged};
 /// Id of the panel in the panel stack.
 pub const PANEL_ID: &str = "faction";
 const TAB_GROUP: &str = "faction_tab";
-const TABS: [&str; 6] = [
+const TABS: [&str; 7] = [
     "faction:tab:sheet",
     "faction:tab:budget",
     "faction:tab:trade",
     "faction:tab:court",
     "faction:tab:works",
     finance::TAB,
+    assembly::TAB,
 ];
 
 pub struct PanelFactionPlugin;
 
 impl Plugin for PanelFactionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(finance::FinancePlugin)
+        app.add_plugins((finance::FinancePlugin, assembly::AssemblyPlugin))
             .init_resource::<FactionPanel>()
             .register_dump(dump_faction)
             .add_systems(
