@@ -47,12 +47,20 @@
         },
         "variation": {
           "type": "number"
+        },
+        "size_jitter_mounted": {
+          "type": "number"
+        },
+        "size_jitter_foot": {
+          "type": "number"
         }
       },
       "required": [
         "grain",
         "grain_fade_m",
-        "variation"
+        "variation",
+        "size_jitter_mounted",
+        "size_jitter_foot"
       ],
       "additionalProperties": false
     },

@@ -6,6 +6,7 @@ entry must match at least one file, every schema must be used.
 """
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -21,13 +22,27 @@ EXEMPT_SCHEMAS: dict[str, str] = {
 }
 
 
+def _ignored_by_git() -> set[Path]:
+    """Generated data files that git ignores (e.g. `data/map/real/map.json`)."""
+    listing = subprocess.run(
+        ["git", "ls-files", "--others", "--ignored", "--exclude-standard", "--", "."],
+        cwd=DATA,
+        capture_output=True,
+        text=True,
+        check=False,
+    ).stdout
+    return {Path(line) for line in listing.splitlines()}
+
+
 def _data_files() -> list[Path]:
-    """Every JSON/YAML data file, except the schemas themselves."""
+    """Every tracked JSON/YAML data file, except the schemas themselves."""
     schema_dir = DATA / "schemas"
+    ignored = _ignored_by_git()
     return sorted(
         path
         for path in DATA.rglob("*")
         if path.is_file()
+        and path.relative_to(DATA) not in ignored
         and path.suffix in DATA_SUFFIXES
         and schema_dir not in path.parents
     )
