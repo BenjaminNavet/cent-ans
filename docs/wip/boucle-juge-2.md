@@ -130,3 +130,9 @@ Constats seed bots longs : présentés au joueur, il choisit (ne rien écrire da
 ## Session headless 30/10 (game-project-8e)
 - ECO-R1d fusionné (619015b68, sans ADR) ; contrôle complet + smoke + pytest : out/check-r1d.
 - Lots encore actifs (session précédente) : VIS-R3b, ECO-R1c, IA-PLAN-2, FPS/MEM3 ; surveillés par out/watch_lots.sh.
+
+## Reprise (30/10, session headless arrêtée)
+- main = 5fdd09a1a, propre. ECO-R1d fusionné (worktree agent-af539704f9ee95346 à supprimer, fusionné).
+- Check en cours au moment de l'arrêt : out/check-refus/status (+ passe longue seed bots, rapport dans core/target/seed-bots/ le plus récent).
+- Branches d'agents (les agents de la session précédente peuvent finir seuls ; fini = plus « locked ») : VIS-R3b a771f004f6088afb4, ECO-R1c aa5182d13ee2ab5e2, IA-PLAN-2 a81b1ae605a828a40, MEM3 a0377ad7d1eea36f9 + FPS mêlée a7fa6dbbe9cdf1f9d (rebasées par un agent de récupération, à vérifier puis fusionner).
+- Objectifs détaillés et règles : docs/prompt-session.md.
