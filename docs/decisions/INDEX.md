@@ -367,3 +367,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0804 | [Végétation de plaine (VIS-R7)](0804-vis-r7-vegetation-de-plaine.md) | accepté |
 | 0805 | [R1 : renommée accumulée, actes à dates fixes, ambitions](0805-r1-renommee-actes-a-dates-fixes-ambitions.md) | accepté |
 | 0806 | [VIS-R5 : eau de la carte (bathymétrie réelle, rivières)](0806-vis-r5-eau.md) | accepté |
+| 0807 | [BANC-2 : auto-résolution recalibrée et datée](0807-banc-2-auto-resolution.md) | accepté |

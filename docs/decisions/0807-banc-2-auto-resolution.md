@@ -1,4 +1,4 @@
-# ADR 0805 — BANC-2 : auto-résolution recalibrée et datée
+# ADR 0807 — BANC-2 : auto-résolution recalibrée et datée
 
 ## Contexte
 
