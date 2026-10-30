@@ -641,6 +641,17 @@ impl<'a> GridPlanner<'a> {
         if army.is_at(target) {
             return Vec::new();
         }
+        // IA-REFUS: an army that already walked this season has only part of
+        // the allowance left; a leg past it would answer `NoMovementLeft`.
+        let full = self.state.army_grid_allowance(self.data, army);
+        if army.movement_left == 0 {
+            return Vec::new();
+        }
+        let cap = if army.movement_left < full {
+            (u64::from(cap) * u64::from(army.movement_left) / u64::from(full.max(1))) as u32
+        } else {
+            cap
+        };
         let Some(path) = path_to(table, target) else {
             return Vec::new();
         };
@@ -654,6 +665,10 @@ impl<'a> GridPlanner<'a> {
             if is_sea_crossing(self.data, &previous, &node) {
                 if orders.is_empty() {
                     orders.push(if army.is_at(&previous) {
+                        // `Embark` costs the whole turn: only from a full one.
+                        if army.movement_left < full {
+                            break;
+                        }
                         Order::Embark {
                             army: army_id.clone(),
                             to_port: node,
@@ -664,7 +679,7 @@ impl<'a> GridPlanner<'a> {
                 }
                 break;
             }
-            let beyond = table.get(&node).is_none_or(|r| r.cost > cap);
+            let beyond = table.get(&node).is_none_or(|r| r.cost >= cap);
             orders.push(Order::move_to(army_id.clone(), node.clone()));
             if beyond || orders.len() >= self.rules.max_legs_per_turn {
                 break;

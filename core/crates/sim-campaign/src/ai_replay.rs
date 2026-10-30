@@ -511,6 +511,16 @@ fn notability(
     near.then_some(AiMoveNotability::NearPlayer)
 }
 
+/// `Order -> Error` key of the refusal histogram (variant names only).
+fn refusal_kind(order_name: &str, error: &crate::OrderError) -> String {
+    let error = format!("{error:?}");
+    let variant = error
+        .split(|c: char| !c.is_alphanumeric() && c != '_')
+        .next()
+        .unwrap_or_default();
+    format!("{order_name} -> {variant}")
+}
+
 #[cfg(test)]
 mod key_enum_tests {
     use super::*;
@@ -520,14 +530,4 @@ mod key_enum_tests {
     fn keys_match_serde_names() {
         assert_keys_match_serde::<AiMoveKind>();
     }
-}
-
-/// `Order -> Error` key of the refusal histogram (variant names only).
-fn refusal_kind(order_name: &str, error: &crate::OrderError) -> String {
-    let error = format!("{error:?}");
-    let variant = error
-        .split(|c: char| !c.is_alphanumeric() && c != '_')
-        .next()
-        .unwrap_or_default();
-    format!("{order_name} -> {variant}")
 }

@@ -585,7 +585,40 @@ fn plan_turn_in(
     ));
     military_orders::plan_siege_orders(&ctx, &mut orders);
     army::plan_armies(&ctx, &mut orders);
+    drop_orders_on_emptied_armies(state, &mut orders);
     orders
+}
+
+/// IA-REFUS: an army whose every unit is dismissed this turn is gone before
+/// the orders planned after the dismissal (a general, a tradition, a merge)
+/// reach it: the core would refuse them (`UnknownArmy`), so they are dropped.
+fn drop_orders_on_emptied_armies(state: &CampaignState, orders: &mut Vec<Order>) {
+    let mut dismissed: BTreeMap<&ArmyId, usize> = BTreeMap::new();
+    for order in orders.iter() {
+        if let Order::DisbandUnit {
+            army: Some(army), ..
+        } = order
+        {
+            *dismissed.entry(army).or_insert(0) += 1;
+        }
+    }
+    let emptied: BTreeSet<ArmyId> = dismissed
+        .into_iter()
+        .filter(|(army, n)| state.armies.get(*army).is_some_and(|a| *n >= a.units.len()))
+        .map(|(army, _)| army.clone())
+        .collect();
+    if emptied.is_empty() {
+        return;
+    }
+    orders.retain(|order| match order {
+        Order::AssignGeneral { army, .. } | Order::ChooseArmyTradition { army, .. } => {
+            !emptied.contains(army)
+        }
+        Order::MergeArmies { source, target } => {
+            !emptied.contains(source) && !emptied.contains(target)
+        }
+        _ => true,
+    });
 }
 
 /// TW2-T3: livres this turn's recruitments and constructions will spend

@@ -211,6 +211,10 @@ impl<'c, 'a, 'o> Fleet<'c, 'a, 'o> {
             let Some(location) = state.armies[id].settlement().cloned() else {
                 continue;
             };
+            // A feudal contingent keeps its own banner (`HostContingent`).
+            if state.armies[id].host_service.is_some() {
+                continue;
+            }
             let size = state.armies[id].units.len();
             let targets = by_location.entry(location).or_default();
             match targets.iter_mut().find(|(_, units)| *units + size <= cap) {
