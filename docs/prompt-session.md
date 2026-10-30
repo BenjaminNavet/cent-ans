@@ -66,7 +66,7 @@ Meshy : crédits restants (≈ 25) pour une retouche, sur décision visuelle. Z-
 8. Lecture ciblée : grep, head, dumps d'état filtrés ; jamais de gros fichiers ni de sorties brutes. Captures : 5 par tâche (10 en travail visuel), 640 px, une seule après un groupe de corrections ; les agents mécaniques n'en prennent pas.
 9. Ne jamais finir un tour « en attente » : attendre agents et checks par Monitor ou boucle until en arrière-plan, puis enchaîner.
 10. Mettre à jour la note wip du chantier à chaque lot de fusions ; la session suivante reprend depuis elle. Une session par vague, /clear entre deux chantiers.
-11. Sessions parallèles : pour un chantier indépendant (ou pour passer la main quand le contexte devient lourd), lance une nouvelle session headless plutôt que de grossir la tienne : `nohup claude -p --dangerously-skip-permissions --output-format stream-json --verbose "<prompt : chantier, note wip à lire, règles de ce fichier>" > out/sessions/<chantier>-<date>.jsonl 2>&1 &`. Une seule session fusionne dans main à la fois (verrou `mkdir out/merge.lock`) ; chaque session a sa note docs/wip/<chantier>.md ; consigne PID et journal dans la note de la boucle.
+
 ```
 
 Avant de lancer : désactiver dans `/mcp` les serveurs inutiles au projet (rea, Chrome, Gmail, Calendar, Drive, Hugging Face) ; dans `/config`, modèle de sous-agent par défaut = Sonnet (claude-sonnet-5-5).
