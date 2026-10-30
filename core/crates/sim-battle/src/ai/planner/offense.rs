@@ -30,8 +30,22 @@ pub(super) fn apply(view: &mut View, division: &Division, role: Role) {
         .filter_map(|&id| view.units.iter().position(|u| u.id == id))
         .filter(|i| view.own.contains(i))
         .collect();
+    // A regiment the legacy placement already sends at an enemy keeps that
+    // order: the roles only move those that would wait or hold the line.
+    let ordered: Vec<u32> = view
+        .commands
+        .iter()
+        .filter_map(|c| match c {
+            Command::Attack { units, .. } => Some(units.clone()),
+            _ => None,
+        })
+        .flatten()
+        .collect();
     for i in members {
         let unit = &view.units[i];
+        if role == Role::Fix && (ordered.contains(&unit.id) || unit.target.is_some()) {
+            continue;
+        }
         if !view.free(i)
             || unit.is_general
             || is_horse(unit)
