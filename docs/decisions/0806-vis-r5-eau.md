@@ -1,4 +1,4 @@
-# XXXX — VIS-R5 : eau de la carte (bathymétrie réelle, rivières)
+# 0806 — VIS-R5 : eau de la carte (bathymétrie réelle, rivières)
 
 Statut : accepté (lot VIS-R5, 30/10/2026). Numéro à fixer à la fusion.
 

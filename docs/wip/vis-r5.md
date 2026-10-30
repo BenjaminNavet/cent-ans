@@ -1,6 +1,6 @@
 # VIS-R5 — Eau : bathymétrie et rivières de carte
 
-Spec : `docs/audits/2026-10-29-visuel-campagne.md` (tableau d, ligne R5 ; G2-2, G2-8 ; bible c). ADR : `docs/decisions/XXXX-vis-r5-eau.md`.
+Spec : `docs/audits/2026-10-29-visuel-campagne.md` (tableau d, ligne R5 ; G2-2, G2-8 ; bible c). ADR : `docs/decisions/0806-vis-r5-eau.md`.
 Branche : worktree agent-a6e0f261dba299bab (partie de main 8323c8cdc). Ne pas pousser ni fusionner.
 
 ## État : FAIT (à vérifier au merge)
