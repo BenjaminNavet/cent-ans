@@ -161,3 +161,9 @@ Constats seed bots longs : présentés au joueur, il choisit (ne rien écrire da
   juges frais itér. 3 : visuel (Opus), technique, jeu (campagne/éco/XP) → docs/audits/2026-10-30-juge-*-iter3.md. Prochain ADR libre : 0824.
 - Plafond joueur : arrêt à 200 $ d'équivalent API pour la session (tools/session_cost.py <session-id>, journal out/session-cost.log ;
   veille qui sonne à 190 $). 6,6 $ à 9 h 45.
+- 10 h 50 : FUSION-A fusionnée (737f049e9 ; 6 lots, ADR 0815-0818 ; check vert sauf `real_table_and_glbs` : glb ignoré absent du worktree, revérifié sur main dans out/check-main-postA ; passe longue seed bots sur main lancée au même endroit).
+- Juges itér. 3 rendus : technique (docs/audits/2026-10-30-juge-technique-iter3.md, lots L-A..L-F), visuel (…-juge-visuel-iter3.md, 4,5/10, lots L1-L6).
+- VIS-R4 fini (branche worktree-agent-a47dbd6c148e66466, ADR 0820), en attente de la fusion d'itération.
+- Lancés : VIS-L2 habitat (0824), VIS-L6 bataille (0825), VIS-L1 sol-photo (0826, part de la branche VIS-R4). Prochain ADR libre : 0827.
+- Règles changées par le joueur : sondes seulement à la fusion (tools/checks_for_diff.sh), fusion de toute l'itération sauf lot en retard. 27,9 $ à 10 h 45.
+- À lancer ensuite : L-A compteurs de perf, L-C prévision asynchrone ; L4 eau après L1 ; L3/L5 après les plaques ; lots du juge de jeu.
