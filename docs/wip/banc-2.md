@@ -25,3 +25,9 @@ contre 8 hommes d'armes. Plateau stable (0,55/0,22 et 0,6/0,25 donnent le même 
 Désaccords restants (5) : 10 chevaliers contre 10 arcs (3D 6/11, pile ou face), FR/EN collines (6/11), symétrique 7 (6/11),
 Crécy colline (3D 8/11 pour l'attaquant français, contraire à l'histoire : à juger côté 3D, pas côté auto).
 Seuil du test abaissé de 95 % à 80 % (cible de l'audit).
+
+## Etat final
+FAIT. fmt, clippy workspace, tests workspace verts ; seed bots rapide : 0 constat.
+Deux tests adaptés à la nouvelle mêlée : `battle_auto::armoured_cavalry_rides_down_cheap_foot_but_not_pikes` (4 chevaliers
+contre 10 milices au lieu de 20, la 3D donne 2/11 aux chevaliers contre 20) et `f7_events` (graine 1341 -> 1342 : 3 étapes
+chaînées au lieu de 4, simulation chaotique).
