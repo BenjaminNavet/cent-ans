@@ -8,7 +8,7 @@
   "short_name": "Dulkadir",
   "adjective": "de Dulkadir",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_karaca_bey",
   "capital": "prov_elbistan",
   "capital_city": "Elbistan (Albistan)",

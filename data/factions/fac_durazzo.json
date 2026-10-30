@@ -8,7 +8,7 @@
   "short_name": "Durazzo",
   "adjective": "albanais angevin",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_charles_de_durazzo",
   "capital": "prov_durazzo",
   "capital_city": "Durazzo",

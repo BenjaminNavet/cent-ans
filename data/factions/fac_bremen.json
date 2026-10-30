@@ -8,7 +8,7 @@
   "short_name": "Brême",
   "adjective": "brêmois",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_burchard_grelle",
   "capital": "prov_lower_saxony",
   "capital_city": "Brême",

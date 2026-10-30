@@ -8,7 +8,7 @@
   "short_name": "Armagnac",
   "adjective": "armagnacais",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_jean_i_d_armagnac",
   "capital": "prov_armagnac",
   "capital_city": "Lectoure",

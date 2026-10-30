@@ -8,7 +8,7 @@
   "short_name": "Hongrie",
   "adjective": "hongrois",
   "government": "kingdom",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_charles_i_robert_de_hongrie",
   "heir": "chr_louis_ier_de_hongrie",
   "capital": "prov_hungary_central",

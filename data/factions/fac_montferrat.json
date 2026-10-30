@@ -8,7 +8,7 @@
   "short_name": "Montferrat",
   "adjective": "montferratais",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "capital": "prov_montferrat",
   "capital_city": "Casal",
   "religion": "rel_catholic",

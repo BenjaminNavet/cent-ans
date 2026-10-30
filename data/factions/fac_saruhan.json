@@ -8,7 +8,7 @@
   "short_name": "Saruhan",
   "adjective": "de Saruhan",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_saruhan_bey",
   "capital": "prov_manisa",
   "capital_city": "Manisa (Magnésie du Sipyle)",

@@ -8,7 +8,7 @@
   "short_name": "Raguse",
   "adjective": "raguséen",
   "government": "republic",
-  "playable": true,
+  "playable": false,
   "capital": "prov_ragusa",
   "capital_city": "Raguse",
   "religion": "rel_catholic",

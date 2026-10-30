@@ -8,7 +8,7 @@
   "short_name": "Hama",
   "adjective": "de Hama",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_al_afdal_muhammad",
   "capital": "prov_hama",
   "capital_city": "Hama (Hamat)",

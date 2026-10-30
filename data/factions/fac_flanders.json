@@ -8,7 +8,7 @@
   "short_name": "Flandre",
   "adjective": "flamand",
   "government": "county",
-  "playable": false,
+  "playable": true,
   "ruler": "chr_louis_de_nevers",
   "heir": "chr_louis_de_male",
   "capital": "prov_flandre",

@@ -8,7 +8,7 @@
   "short_name": "Berg",
   "adjective": "bergeois",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_adolf_vii_von_berg",
   "capital": "prov_berg",
   "capital_city": "Düsseldorf",

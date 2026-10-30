@@ -8,7 +8,7 @@
   "short_name": "Arborée",
   "adjective": "arboréen",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_pietro_iii_d_arborea",
   "capital": "prov_arborea",
   "capital_city": "Oristano",

@@ -8,7 +8,7 @@
   "short_name": "Urbin",
   "adjective": "urbinate",
   "government": "lordship",
-  "playable": true,
+  "playable": false,
   "capital": "prov_urbino",
   "capital_city": "Urbin",
   "religion": "rel_catholic",

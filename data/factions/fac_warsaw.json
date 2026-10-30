@@ -8,7 +8,7 @@
   "short_name": "Varsovie",
   "adjective": "varsovien",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_trojden_i_de_mazovie",
   "capital": "prov_warsaw",
   "capital_city": "Varsovie",

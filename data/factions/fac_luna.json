@@ -8,7 +8,7 @@
   "short_name": "Luna",
   "adjective": "lunois",
   "government": "lordship",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_lope_de_luna",
   "capital": "prov_luna",
   "capital_city": "Luna",

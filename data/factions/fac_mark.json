@@ -8,7 +8,7 @@
   "short_name": "Marck",
   "adjective": "marckois",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_adolf_ii_von_der_mark",
   "capital": "prov_westphalia",
   "capital_city": "Hamm",

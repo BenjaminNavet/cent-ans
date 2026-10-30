@@ -8,7 +8,7 @@
   "short_name": "Épire",
   "adjective": "épirote",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_nikephoros_ii_orsini",
   "capital": "prov_epirus",
   "capital_city": "Arta",

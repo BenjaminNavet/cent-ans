@@ -8,7 +8,7 @@
   "short_name": "Trébizonde",
   "adjective": "trapézontin",
   "government": "empire",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_basile_trebizonde",
   "capital": "prov_trebizond",
   "capital_city": "Trébizonde",

@@ -8,7 +8,7 @@
   "short_name": "Ordre Teutonique",
   "adjective": "teutonique",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_dietrich_von_altenburg",
   "capital": "prov_pomesania",
   "capital_city": "Marienbourg",

@@ -8,7 +8,7 @@
   "short_name": "Chypre",
   "adjective": "chypriote",
   "government": "kingdom",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_hugues_iv_de_chypre",
   "heir": "chr_pierre_i_de_chypre",
   "capital": "prov_cyprus",

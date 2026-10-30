@@ -8,7 +8,7 @@
   "short_name": "Legnica",
   "adjective": "de Legnica",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_boleslas_iii_de_legnica",
   "capital": "prov_legnica",
   "capital_city": "Legnica",

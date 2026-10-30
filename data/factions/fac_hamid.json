@@ -8,7 +8,7 @@
   "short_name": "Hamid",
   "adjective": "de Hamid",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_hizir_hamid",
   "capital": "prov_hamid",
   "capital_city": "Eğirdir",

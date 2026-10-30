@@ -8,7 +8,7 @@
   "short_name": "Juliers",
   "adjective": "julichois",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_wilhelm_v_von_julich",
   "capital": "prov_julich",
   "capital_city": "Jülich",

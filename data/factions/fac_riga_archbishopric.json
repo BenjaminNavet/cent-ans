@@ -8,7 +8,7 @@
   "short_name": "Riga (archevêché)",
   "adjective": "rigois",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_friedrich_von_pernstein",
   "capital": "prov_riga_archbishopric",
   "capital_city": "Kokenhusen",

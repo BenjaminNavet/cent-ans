@@ -8,7 +8,7 @@
   "short_name": "Menteşe",
   "adjective": "de Menteşe",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_orhan_mentese",
   "capital": "prov_mentese",
   "capital_city": "Milas (Mylasa)",

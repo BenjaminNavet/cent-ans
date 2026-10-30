@@ -8,7 +8,7 @@
   "short_name": "Ordre Livonien",
   "adjective": "livonien",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_eberhard_von_monheim",
   "capital": "prov_livonia",
   "capital_city": "Wenden",

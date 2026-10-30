@@ -8,7 +8,7 @@
   "short_name": "Écosse",
   "adjective": "écossais",
   "government": "kingdom",
-  "playable": false,
+  "playable": true,
   "ruler": "chr_david_ii",
   "heir": "chr_robert_stewart",
   "capital": "prov_lothian",

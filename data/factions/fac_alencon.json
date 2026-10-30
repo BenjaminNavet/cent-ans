@@ -8,7 +8,7 @@
   "short_name": "Alençon",
   "adjective": "alençonnais",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_charles_d_alencon",
   "capital": "prov_alencon",
   "capital_city": "Alençon",

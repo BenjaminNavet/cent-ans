@@ -8,7 +8,7 @@
   "short_name": "Karasi",
   "adjective": "karasi",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "capital": "prov_karasi",
   "capital_city": "Balıkesir",
   "religion": "rel_islam",

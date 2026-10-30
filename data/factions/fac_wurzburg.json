@@ -8,7 +8,7 @@
   "short_name": "Wurtzbourg",
   "adjective": "wurtzbourgeois",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_otto_von_wolfskeel",
   "capital": "prov_franconia",
   "capital_city": "Wurtzbourg",

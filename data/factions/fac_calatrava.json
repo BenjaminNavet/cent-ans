@@ -8,7 +8,7 @@
   "short_name": "Calatrava",
   "adjective": "calatravan",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "capital": "prov_calatrava",
   "capital_city": "Ciudad Real",
   "religion": "rel_catholic",

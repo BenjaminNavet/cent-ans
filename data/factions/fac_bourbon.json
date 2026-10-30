@@ -8,7 +8,7 @@
   "short_name": "Bourbon",
   "adjective": "bourbonnais",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_louis_i_de_bourbon",
   "heir": "chr_pierre_i_de_bourbon",
   "capital": "prov_bourbonnais",

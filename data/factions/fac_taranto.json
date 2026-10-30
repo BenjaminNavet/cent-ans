@@ -8,7 +8,7 @@
   "short_name": "Tarente",
   "adjective": "tarentin",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "capital": "prov_taranto",
   "capital_city": "Tarente",
   "religion": "rel_catholic",

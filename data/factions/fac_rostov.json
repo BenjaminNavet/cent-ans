@@ -8,7 +8,7 @@
   "short_name": "Rostov",
   "adjective": "rostovien",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "capital": "prov_rostov",
   "capital_city": "Rostov",
   "religion": "rel_orthodox",

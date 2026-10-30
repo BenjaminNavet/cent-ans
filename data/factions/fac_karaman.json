@@ -8,7 +8,7 @@
   "short_name": "Karaman",
   "adjective": "de Karaman",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_halil_karaman",
   "capital": "prov_karaman",
   "capital_city": "Larende (Karaman)",

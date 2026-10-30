@@ -8,7 +8,7 @@
   "short_name": "Mamelouks",
   "adjective": "mamelouk",
   "government": "kingdom",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_al_nasir_muhammad",
   "heir": "chr_anuk",
   "capital": "prov_cairo",

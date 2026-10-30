@@ -8,7 +8,7 @@
   "short_name": "Slesvig",
   "adjective": "slesvigois",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_valdemar_v_de_slesvig",
   "capital": "prov_schleswig",
   "capital_city": "Slesvig",

@@ -8,7 +8,7 @@
   "short_name": "Opole",
   "adjective": "d'Opole",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_boleslas_ii_d_opole",
   "capital": "prov_upper_silesia",
   "capital_city": "Opole",

@@ -8,7 +8,7 @@
   "short_name": "Castille",
   "adjective": "castillan",
   "government": "kingdom",
-  "playable": false,
+  "playable": true,
   "ruler": "chr_alfonso_xi",
   "capital": "prov_toledo",
   "capital_city": "Tolède",

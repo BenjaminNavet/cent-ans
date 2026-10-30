@@ -8,7 +8,7 @@
   "short_name": "Haute-Oka",
   "adjective": "de la Haute-Oka",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "capital": "prov_kozelsk",
   "capital_city": "Kozelsk",
   "religion": "rel_orthodox",

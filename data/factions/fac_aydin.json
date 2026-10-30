@@ -8,7 +8,7 @@
   "short_name": "Aydın",
   "adjective": "d'Aydın",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_umur_bey",
   "capital": "prov_izmir",
   "capital_city": "Smyrne (İzmir)",

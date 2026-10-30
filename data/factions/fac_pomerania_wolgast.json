@@ -8,7 +8,7 @@
   "short_name": "Poméranie-Wolgast",
   "adjective": "poméranien de Wolgast",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_bogislaw_v_de_pomeranie",
   "heir": "chr_barnim_iv_de_pomeranie",
   "capital": "prov_pomerania_wolgast",

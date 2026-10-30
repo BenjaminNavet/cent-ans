@@ -7,7 +7,7 @@
   "short_name": "Lancastre",
   "adjective": "lancastrien",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_henry_iii_de_lancastre",
   "heir": "chr_henry_of_grosmont",
   "capital": "prov_lancaster",

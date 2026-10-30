@@ -8,7 +8,7 @@
   "short_name": "Majorque",
   "adjective": "majorquin",
   "government": "kingdom",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_jacques_iii_de_majorque",
   "capital": "prov_mallorca",
   "capital_city": "Palma",

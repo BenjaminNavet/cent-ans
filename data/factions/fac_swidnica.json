@@ -8,7 +8,7 @@
   "short_name": "Świdnica",
   "adjective": "de Świdnica",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_bolko_ii_de_swidnica",
   "capital": "prov_swidnica",
   "capital_city": "Świdnica",

@@ -8,7 +8,7 @@
   "short_name": "Eretna",
   "adjective": "d'Eretna",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_eretna",
   "capital": "prov_sivas",
   "capital_city": "Sivas (Sébaste)",

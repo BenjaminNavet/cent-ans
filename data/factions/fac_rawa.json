@@ -8,7 +8,7 @@
   "short_name": "Rawa",
   "adjective": "rawois",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_siemowit_ii_de_rawa",
   "capital": "prov_rawa",
   "capital_city": "Rawa Mazowiecka",

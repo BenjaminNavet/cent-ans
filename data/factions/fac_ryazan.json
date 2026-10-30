@@ -8,7 +8,7 @@
   "short_name": "Riazan",
   "adjective": "riazanais",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_ivan_korotopol",
   "capital": "prov_ryazan",
   "capital_city": "Pereslavl-Riazanski",

@@ -8,7 +8,7 @@
   "short_name": "Pallars",
   "adjective": "pallarais",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_arnau_roger_ii_de_pallars",
   "capital": "prov_pallars",
   "capital_city": "Sort",

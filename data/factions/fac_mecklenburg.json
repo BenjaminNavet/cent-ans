@@ -8,7 +8,7 @@
   "short_name": "Mecklembourg",
   "adjective": "mecklembourgeois",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_albert_ii_de_mecklembourg",
   "capital": "prov_mecklenburg",
   "capital_city": "Wismar",

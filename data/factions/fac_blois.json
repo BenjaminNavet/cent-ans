@@ -8,7 +8,7 @@
   "short_name": "Blois",
   "adjective": "blésois",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_guy_i_de_chatillon",
   "heir": "chr_charles_de_blois",
   "capital": "prov_blois",

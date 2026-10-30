@@ -8,7 +8,7 @@
   "short_name": "Penthièvre",
   "adjective": "penthiévrin",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_jeanne_de_penthievre",
   "capital": "prov_penthievre",
   "capital_city": "Lamballe",

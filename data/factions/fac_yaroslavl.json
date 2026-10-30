@@ -8,7 +8,7 @@
   "short_name": "Iaroslavl",
   "adjective": "iaroslavien",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_vassili_davidovitch",
   "capital": "prov_yaroslavl",
   "capital_city": "Iaroslavl",

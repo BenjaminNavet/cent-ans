@@ -8,7 +8,7 @@
   "short_name": "Płock",
   "adjective": "płockois",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_boleslas_iii_de_plock",
   "capital": "prov_plock",
   "capital_city": "Płock",

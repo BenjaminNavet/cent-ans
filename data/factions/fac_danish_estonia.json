@@ -8,7 +8,7 @@
   "short_name": "Estonie danoise",
   "adjective": "estonien danois",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "capital": "prov_harrien_wierland",
   "capital_city": "Reval",
   "religion": "rel_catholic",

@@ -8,7 +8,7 @@
   "short_name": "Navarre",
   "adjective": "navarrais",
   "government": "kingdom",
-  "playable": false,
+  "playable": true,
   "ruler": "chr_jeanne_ii_de_navarre",
   "capital": "prov_navarra",
   "capital_city": "Pampelune",

@@ -8,7 +8,7 @@
   "short_name": "Pskov",
   "adjective": "pskovien",
   "government": "republic",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_alexandre_mikhailovitch",
   "capital": "prov_pskov",
   "capital_city": "Pskov",

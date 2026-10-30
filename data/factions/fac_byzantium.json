@@ -8,7 +8,7 @@
   "short_name": "Byzance",
   "adjective": "byzantin",
   "government": "empire",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_andronikos_iii",
   "heir": "chr_ioannes_v",
   "capital": "prov_constantinople",

@@ -8,7 +8,7 @@
   "short_name": "Briansk",
   "adjective": "brianskien",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_gleb_sviatoslavitch",
   "capital": "prov_briansk",
   "capital_city": "Briansk",

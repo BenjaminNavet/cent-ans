@@ -8,7 +8,7 @@
   "short_name": "Lituanie",
   "adjective": "lituanien",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_gediminas",
   "heir": "chr_jaunutis",
   "capital": "prov_vilnius",

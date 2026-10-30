@@ -8,7 +8,7 @@
   "short_name": "Smolensk",
   "adjective": "smolenskien",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_ivan_alexandrovitch",
   "capital": "prov_smolensk",
   "capital_city": "Smolensk",

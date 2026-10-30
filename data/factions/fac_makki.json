@@ -8,7 +8,7 @@
   "short_name": "Gabès",
   "adjective": "gabésien",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "capital": "prov_gabes",
   "capital_city": "Gabès",
   "religion": "rel_islam",

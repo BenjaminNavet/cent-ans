@@ -7,7 +7,7 @@
   "short_name": "Kildare",
   "adjective": "kildarien",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_maurice_fitzgerald_iv_de_kildare",
   "capital": "prov_kildare",
   "capital_city": "Kildare",

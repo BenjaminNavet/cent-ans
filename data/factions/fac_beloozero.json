@@ -8,7 +8,7 @@
   "short_name": "Beloozero",
   "adjective": "beloozerien",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "capital": "prov_beloozero",
   "capital_city": "Beloozero",
   "religion": "rel_orthodox",

@@ -8,7 +8,7 @@
   "short_name": "Sicile",
   "adjective": "sicilien",
   "government": "kingdom",
-  "playable": true,
+  "playable": false,
   "capital": "prov_sicilia",
   "capital_city": "Palerme",
   "religion": "rel_catholic",

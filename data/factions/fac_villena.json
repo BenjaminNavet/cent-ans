@@ -8,7 +8,7 @@
   "short_name": "Villena",
   "adjective": "villenois",
   "government": "lordship",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_juan_manuel_de_villena",
   "capital": "prov_villena",
   "capital_city": "Villena",

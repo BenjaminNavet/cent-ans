@@ -8,7 +8,7 @@
   "short_name": "Croisés",
   "adjective": "croisé",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_pierre_de_la_palud",
   "capital": "prov_cyprus",
   "capital_city": "Limassol",

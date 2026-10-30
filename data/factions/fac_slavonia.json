@@ -8,7 +8,7 @@
   "short_name": "Slavonie",
   "adjective": "slavon",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_mikcs_ban",
   "capital": "prov_slavonia_west",
   "capital_city": "Zagreb",

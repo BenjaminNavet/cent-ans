@@ -8,7 +8,7 @@
   "short_name": "Cologne",
   "adjective": "colonais",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_walram_de_juliers",
   "capital": "prov_cologne",
   "capital_city": "Cologne",

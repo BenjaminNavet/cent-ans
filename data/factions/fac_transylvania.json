@@ -8,7 +8,7 @@
   "short_name": "Transylvanie",
   "adjective": "transylvain",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_thomas_szecsenyi",
   "capital": "prov_transylvania",
   "capital_city": "Alba Iulia",

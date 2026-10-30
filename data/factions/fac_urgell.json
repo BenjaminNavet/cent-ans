@@ -8,7 +8,7 @@
   "short_name": "Urgell",
   "adjective": "urgellais",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_jaume_i_durgell",
   "capital": "prov_urgell",
   "capital_city": "Balaguer",

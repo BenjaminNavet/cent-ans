@@ -8,7 +8,7 @@
   "short_name": "Trèves",
   "adjective": "trévire",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_baudouin_de_luxembourg",
   "capital": "prov_trier",
   "capital_city": "Trèves",

@@ -8,7 +8,7 @@
   "short_name": "Kiev",
   "adjective": "kiévien",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_fiodor_de_kiev",
   "capital": "prov_kyiv",
   "capital_city": "Kiev",

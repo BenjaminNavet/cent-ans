@@ -8,7 +8,7 @@
   "short_name": "Bade",
   "adjective": "badois",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_rodolphe_iv_de_bade",
   "capital": "prov_baden",
   "capital_city": "Baden-Baden",

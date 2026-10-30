@@ -8,7 +8,7 @@
   "short_name": "Wurtemberg",
   "adjective": "wurtembergeois",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_ulrich_iv_de_wurtemberg",
   "capital": "prov_wurttemberg",
   "capital_city": "Stuttgart",

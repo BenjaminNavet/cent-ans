@@ -8,7 +8,7 @@
   "short_name": "Utrecht",
   "adjective": "utrechtois",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_jean_iii_de_diest",
   "capital": "prov_utrecht",
   "capital_city": "Utrecht",

@@ -8,7 +8,7 @@
   "short_name": "Clèves",
   "adjective": "clévois",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_dietrich_ix_von_kleve",
   "capital": "prov_cleve",
   "capital_city": "Clèves",

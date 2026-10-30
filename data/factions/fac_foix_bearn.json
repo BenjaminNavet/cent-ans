@@ -8,7 +8,7 @@
   "short_name": "Foix-Béarn",
   "adjective": "béarnais",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_gaston_ii_de_foix_bearn",
   "heir": "chr_gaston_iii_de_foix_bearn",
   "capital": "prov_bearn",

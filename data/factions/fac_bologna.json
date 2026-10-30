@@ -8,7 +8,7 @@
   "short_name": "Bologne",
   "adjective": "bolonais",
   "government": "republic",
-  "playable": true,
+  "playable": false,
   "capital": "prov_bologna",
   "capital_city": "Bologne",
   "religion": "rel_catholic",

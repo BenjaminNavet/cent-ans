@@ -8,7 +8,7 @@
   "short_name": "Ösel-Wiek",
   "adjective": "oeselien",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_jakob_ii_d_osel_wiek",
   "capital": "prov_osel_wiek",
   "capital_city": "Hapsal",

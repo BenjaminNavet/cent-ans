@@ -8,7 +8,7 @@
   "short_name": "Saluces",
   "adjective": "saluçois",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "capital": "prov_saluzzo",
   "capital_city": "Saluces",
   "religion": "rel_catholic",

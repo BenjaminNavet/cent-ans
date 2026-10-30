@@ -8,7 +8,7 @@
   "short_name": "Tyrol",
   "adjective": "tyrolien",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_marguerite_de_tyrol",
   "capital": "prov_tirol",
   "capital_city": "Innsbruck",

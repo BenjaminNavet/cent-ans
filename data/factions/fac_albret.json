@@ -8,7 +8,7 @@
   "short_name": "Albret",
   "adjective": "albretais",
   "government": "lordship",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_bernard_ezi_d_albret",
   "capital": "prov_albret",
   "capital_city": "Nérac",

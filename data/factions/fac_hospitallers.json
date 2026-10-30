@@ -8,7 +8,7 @@
   "short_name": "Hospitaliers",
   "adjective": "hospitalier",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_helion_de_villeneuve",
   "capital": "prov_rhodes",
   "capital_city": "Rhodes",

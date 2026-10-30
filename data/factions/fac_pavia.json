@@ -8,7 +8,7 @@
   "short_name": "Pavie",
   "adjective": "pavesan",
   "government": "republic",
-  "playable": true,
+  "playable": false,
   "capital": "prov_pavia",
   "capital_city": "Pavie",
   "religion": "rel_catholic",

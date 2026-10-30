@@ -8,7 +8,7 @@
   "short_name": "Théodoro",
   "adjective": "théodorite",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "capital": "prov_theodoro",
   "capital_city": "Mangoup",
   "religion": "rel_orthodox",

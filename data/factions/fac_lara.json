@@ -8,7 +8,7 @@
   "short_name": "Lara",
   "adjective": "lariste",
   "government": "lordship",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_juan_nunez_iii_de_lara",
   "capital": "prov_lara",
   "capital_city": "Lara de los Infantes",

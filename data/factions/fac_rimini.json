@@ -8,7 +8,7 @@
   "short_name": "Rimini",
   "adjective": "riminois",
   "government": "lordship",
-  "playable": true,
+  "playable": false,
   "capital": "prov_rimini",
   "capital_city": "Rimini",
   "religion": "rel_catholic",

@@ -8,7 +8,7 @@
   "short_name": "Novgorod",
   "adjective": "novgorodien",
   "government": "republic",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_fiodor_danilovitch",
   "capital": "prov_novgorod",
   "capital_city": "Novgorod",

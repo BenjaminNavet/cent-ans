@@ -8,7 +8,7 @@
   "short_name": "Vidin",
   "adjective": "de Vidin",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_belaur",
   "capital": "prov_vidin",
   "capital_city": "Vidin",

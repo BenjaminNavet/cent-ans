@@ -8,7 +8,7 @@
   "short_name": "Moscou",
   "adjective": "moscovite",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_ivan_kalita",
   "heir": "chr_simeon_ivanovitch",
   "capital": "prov_moscow",

@@ -8,7 +8,7 @@
   "short_name": "Palatinat",
   "adjective": "palatin",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_rudolf_ii_du_palatinat",
   "capital": "prov_palatinate",
   "capital_city": "Heidelberg",

@@ -8,7 +8,7 @@
   "short_name": "Riga",
   "adjective": "rigois de la ville",
   "government": "republic",
-  "playable": true,
+  "playable": false,
   "capital": "prov_riga",
   "capital_city": "Riga",
   "religion": "rel_catholic",

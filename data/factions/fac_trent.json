@@ -8,7 +8,7 @@
   "short_name": "Trente",
   "adjective": "trentin",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_nicolas_de_brno",
   "capital": "prov_trent",
   "capital_city": "Trente",

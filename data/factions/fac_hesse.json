@@ -8,7 +8,7 @@
   "short_name": "Hesse",
   "adjective": "hessois",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_heinrich_ii_de_hesse",
   "capital": "prov_hesse",
   "capital_city": "Cassel",

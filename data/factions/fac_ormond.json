@@ -7,7 +7,7 @@
   "short_name": "Ormond",
   "adjective": "ormondien",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_james_butler_i_d_ormond",
   "heir": "chr_james_butler_ii_d_ormond",
   "capital": "prov_ormond",

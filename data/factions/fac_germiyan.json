@@ -8,7 +8,7 @@
   "short_name": "Germiyan",
   "adjective": "de Germiyan",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_yakub_i",
   "capital": "prov_kutahya",
   "capital_city": "Kütahya (Cotyaeum)",

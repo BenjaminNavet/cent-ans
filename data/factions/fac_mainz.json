@@ -8,7 +8,7 @@
   "short_name": "Mayence",
   "adjective": "mayençais",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_heinrich_iii_von_virneburg",
   "capital": "prov_mainz",
   "capital_city": "Mayence",

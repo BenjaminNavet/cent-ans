@@ -8,7 +8,7 @@
   "short_name": "Sienne",
   "adjective": "siennois",
   "government": "republic",
-  "playable": true,
+  "playable": false,
   "capital": "prov_siena",
   "capital_city": "Sienne",
   "religion": "rel_catholic",

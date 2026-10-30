@@ -8,7 +8,7 @@
   "short_name": "Głogów",
   "adjective": "de Głogów",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_henri_iv_de_zagan",
   "capital": "prov_glogow",
   "capital_city": "Głogów",

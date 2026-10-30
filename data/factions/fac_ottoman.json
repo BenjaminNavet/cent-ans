@@ -8,7 +8,7 @@
   "short_name": "Ottomans",
   "adjective": "ottoman",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_orhan",
   "heir": "chr_suleyman_pasha",
   "capital": "prov_bursa",

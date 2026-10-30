@@ -8,7 +8,7 @@
   "short_name": "Lorraine",
   "adjective": "lorrain",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_raoul_de_lorraine",
   "capital": "prov_lorraine",
   "capital_city": "Nancy",

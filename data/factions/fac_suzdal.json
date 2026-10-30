@@ -8,7 +8,7 @@
   "short_name": "Souzdal",
   "adjective": "souzdalien",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_konstantin_vassilievitch",
   "capital": "prov_suzdal",
   "capital_city": "Souzdal",

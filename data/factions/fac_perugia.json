@@ -8,7 +8,7 @@
   "short_name": "Pérouse",
   "adjective": "pérugin",
   "government": "republic",
-  "playable": true,
+  "playable": false,
   "capital": "prov_perugia",
   "capital_city": "Pérouse",
   "religion": "rel_catholic",

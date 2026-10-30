@@ -8,7 +8,7 @@
   "short_name": "Archipel",
   "adjective": "archipélagique",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_nicolo_i_sanudo",
   "capital": "prov_archipelago",
   "capital_city": "Naxos (Chora)",

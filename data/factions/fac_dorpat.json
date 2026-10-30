@@ -8,7 +8,7 @@
   "short_name": "Dorpat",
   "adjective": "dorpatois",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_engelbert_von_dolen",
   "capital": "prov_dorpat",
   "capital_city": "Dorpat",

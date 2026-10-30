@@ -8,7 +8,7 @@
   "short_name": "Poméranie-Stettin",
   "adjective": "poméranien de Stettin",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_otto_i_de_pomeranie",
   "heir": "chr_barnim_iii_de_pomeranie",
   "capital": "prov_pomerania_stettin",

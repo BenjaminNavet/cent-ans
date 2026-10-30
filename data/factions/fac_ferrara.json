@@ -8,7 +8,7 @@
   "short_name": "Ferrare",
   "adjective": "ferrarais",
   "government": "lordship",
-  "playable": true,
+  "playable": false,
   "capital": "prov_ferrara",
   "capital_city": "Ferrare",
   "religion": "rel_catholic",

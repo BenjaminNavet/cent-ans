@@ -8,7 +8,7 @@
   "short_name": "Courlande (évêché)",
   "adjective": "courlandais épiscopal",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_johann_ii_de_courlande",
   "capital": "prov_pilten",
   "capital_city": "Pilten",

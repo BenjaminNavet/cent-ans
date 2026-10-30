@@ -8,7 +8,7 @@
   "short_name": "Liège",
   "adjective": "liégeois",
   "government": "theocracy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_adolphe_de_la_marck",
   "capital": "prov_liege",
   "capital_city": "Liège",

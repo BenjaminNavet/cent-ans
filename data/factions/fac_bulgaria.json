@@ -8,7 +8,7 @@
   "short_name": "Bulgarie",
   "adjective": "bulgare",
   "government": "empire",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_ivan_alexander",
   "heir": "chr_mihail_asen_iv",
   "capital": "prov_tarnovo",

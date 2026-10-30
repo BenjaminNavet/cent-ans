@@ -7,7 +7,7 @@
   "short_name": "Thomond",
   "adjective": "thomondien",
   "government": "kingdom",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_muirchertach_o_brien",
   "capital": "prov_thomond",
   "capital_city": "Ennis",

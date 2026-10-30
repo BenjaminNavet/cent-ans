@@ -8,7 +8,7 @@
   "short_name": "Brandebourg",
   "adjective": "brandebourgeois",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_louis_v_de_baviere",
   "capital": "prov_brandenburg",
   "capital_city": "Berlin",

@@ -8,7 +8,7 @@
   "short_name": "Bretagne",
   "adjective": "breton",
   "government": "duchy",
-  "playable": false,
+  "playable": true,
   "ruler": "chr_jean_iii_de_bretagne",
   "heir": "chr_jeanne_de_penthievre",
   "capital": "prov_bretagne",

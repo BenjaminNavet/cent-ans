@@ -8,7 +8,7 @@
   "short_name": "Teke",
   "adjective": "de Teke",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "capital": "prov_teke",
   "capital_city": "Antalya (Attaleia)",
   "religion": "rel_islam",

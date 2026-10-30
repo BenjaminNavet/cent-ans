@@ -8,7 +8,7 @@
   "short_name": "Barqa",
   "adjective": "cyrénaïque",
   "government": "lordship",
-  "playable": true,
+  "playable": false,
   "capital": "prov_barqa",
   "capital_city": "Barqa (Al-Marj)",
   "religion": "rel_islam",

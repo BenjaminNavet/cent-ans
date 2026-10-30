@@ -8,7 +8,7 @@
   "short_name": "Holstein-Kiel",
   "adjective": "holsteinois de Kiel",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_johan_iii_de_holstein_kiel",
   "capital": "prov_sjaelland",
   "capital_city": "Roskilde",

@@ -8,7 +8,7 @@
   "short_name": "Tripoli",
   "adjective": "tripolitain",
   "government": "lordship",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_muhammad_ibn_thabit",
   "capital": "prov_tripolitania",
   "capital_city": "Tripoli",

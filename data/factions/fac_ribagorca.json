@@ -8,7 +8,7 @@
   "short_name": "Ribagorce",
   "adjective": "ribagorçan",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_infant_pere_de_ribagorca",
   "capital": "prov_ribagorca",
   "capital_city": "Benabarre",

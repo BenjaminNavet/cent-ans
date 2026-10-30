@@ -8,7 +8,7 @@
   "short_name": "Pise",
   "adjective": "pisan",
   "government": "republic",
-  "playable": true,
+  "playable": false,
   "capital": "prov_pisa",
   "capital_city": "Pise",
   "religion": "rel_catholic",

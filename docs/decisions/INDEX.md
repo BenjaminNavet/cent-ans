@@ -374,3 +374,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0815 | [ECO-R1c : l'impôt consenti, IA et Angleterre](0815-eco-r1c-ia-et-angleterre.md) | accepté |
 | 0816 | [IA-PLAN-2 : plans offensifs (fix, wear, strike, screen)](0816-ia-plan-2-plans-offensifs.md) | accepté |
 | 0818 | [Les cinq livres : cadre « livre à onglets » (XP-R3)](0818-xp-r3-cinq-livres.md) | accepté |
+| 0817 | [CAMP-R6 : huit maisons jouables](0817-camp-r6-maisons-jouables.md) | accepté |

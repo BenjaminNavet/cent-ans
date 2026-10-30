@@ -8,7 +8,7 @@
   "short_name": "Tver",
   "adjective": "tverois",
   "government": "principality",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_konstantin_mikhailovitch",
   "capital": "prov_tver",
   "capital_city": "Tver",

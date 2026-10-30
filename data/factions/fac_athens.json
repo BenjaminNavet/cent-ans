@@ -8,7 +8,7 @@
   "short_name": "Athènes",
   "adjective": "athénien",
   "government": "duchy",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_guillaume_ii_d_athenes",
   "capital": "prov_attica",
   "capital_city": "Athènes",

@@ -8,7 +8,7 @@
   "short_name": "Mantoue",
   "adjective": "mantouan",
   "government": "lordship",
-  "playable": true,
+  "playable": false,
   "capital": "prov_mantova",
   "capital_city": "Mantoue",
   "religion": "rel_catholic",

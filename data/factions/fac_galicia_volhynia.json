@@ -8,7 +8,7 @@
   "short_name": "Galicie-Volhynie",
   "adjective": "galicien",
   "government": "kingdom",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_boleslas_iouri_ii",
   "capital": "prov_lviv",
   "capital_city": "Léopol",

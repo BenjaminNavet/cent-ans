@@ -8,7 +8,7 @@
   "short_name": "Nuremberg",
   "adjective": "nurembergeois",
   "government": "county",
-  "playable": true,
+  "playable": false,
   "ruler": "chr_jean_ii_de_hohenzollern",
   "capital": "prov_nuremberg",
   "capital_city": "Nuremberg",
