@@ -383,6 +383,9 @@ impl MetricsTracker {
         for sample in state.ai_refused_order_samples() {
             eprintln!("ai refused order: {sample}");
         }
+        for (kind, n) in state.ai_refusal_kinds() {
+            eprintln!("ai refusal kind: {n:5} {kind}");
+        }
         GameMetrics {
             revolts: self.revolts,
             bankruptcies: self.bankruptcies,

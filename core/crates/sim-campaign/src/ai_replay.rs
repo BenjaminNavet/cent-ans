@@ -138,6 +138,8 @@ pub struct AiRefusals {
     /// Treaty proposals the other side declined: a normal outcome, kept apart.
     pub declined: u32,
     pub samples: Vec<String>,
+    /// Refusals by `Order variant -> error variant`.
+    pub by_kind: std::collections::BTreeMap<String, u32>,
 }
 
 impl PartialEq for AiRefusals {
@@ -226,6 +228,11 @@ impl CampaignState {
     /// B1: a refused order is no longer dropped silently, it is counted
     /// ([`CampaignState::ai_refused_orders`]) and its first occurrences kept.
     pub(crate) fn apply_ai_order(&mut self, data: &GameData, faction: &FactionId, order: Order) {
+        let order_name = format!("{order:?}")
+            .split(|c: char| !c.is_alphanumeric() && c != '_')
+            .next()
+            .unwrap_or_default()
+            .to_string();
         let label =
             (self.ai_refusals.samples.len() < AI_REFUSAL_SAMPLES).then(|| format!("{order:?}"));
         if let Err(error) = self.apply_ai_order_inner(data, faction, order) {
@@ -237,6 +244,11 @@ impl CampaignState {
                 return;
             }
             self.ai_refusals.count += 1;
+            *self
+                .ai_refusals
+                .by_kind
+                .entry(refusal_kind(&order_name, &error))
+                .or_insert(0) += 1;
             if let Some(label) = label {
                 self.ai_refusals.samples.push(format!(
                     "turn {} {faction}: {label} -> {error:?}",
@@ -255,6 +267,11 @@ impl CampaignState {
     /// Treaty proposals of the AI the other side declined (not an error).
     pub fn ai_declined_proposals(&self) -> u32 {
         self.ai_refusals.declined
+    }
+
+    /// Refusals grouped by `Order -> error` kind (diagnostics).
+    pub fn ai_refusal_kinds(&self) -> &std::collections::BTreeMap<String, u32> {
+        &self.ai_refusals.by_kind
     }
 
     /// The first refused AI orders (at most [`AI_REFUSAL_SAMPLES`]), as text.
@@ -503,4 +520,14 @@ mod key_enum_tests {
     fn keys_match_serde_names() {
         assert_keys_match_serde::<AiMoveKind>();
     }
+}
+
+/// `Order -> Error` key of the refusal histogram (variant names only).
+fn refusal_kind(order_name: &str, error: &crate::OrderError) -> String {
+    let error = format!("{error:?}");
+    let variant = error
+        .split(|c: char| !c.is_alphanumeric() && c != '_')
+        .next()
+        .unwrap_or_default();
+    format!("{order_name} -> {variant}")
 }
