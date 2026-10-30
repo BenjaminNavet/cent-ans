@@ -733,6 +733,7 @@ pub fn can_convene(
 }
 
 /// Validates the request (everything but the delay between convocations).
+#[allow(clippy::too_many_arguments)]
 fn prepare<'a>(
     state: &CampaignState,
     data: &'a GameData,
@@ -1589,9 +1590,10 @@ fn promise_verdict(state: &CampaignState, data: &GameData, promise: &Promise) ->
     let turn = state.turn;
     match concession.map(|c| c.kind) {
         Some(ConcessionKind::EndWar) => {
-            let at_war = state.factions.get(&promise.faction).map_or(false, |f| {
-                promise.wars.iter().any(|w| f.at_war_with.contains(w))
-            });
+            let at_war = state
+                .factions
+                .get(&promise.faction)
+                .is_some_and(|f| promise.wars.iter().any(|w| f.at_war_with.contains(w)));
             if !at_war {
                 Some(true)
             } else if turn >= promise.deadline {
@@ -1619,7 +1621,7 @@ fn collect_subsidies(state: &mut CampaignState, data: &GameData) {
             .map(|s| (s.faction.clone(), paid_amount(state, &s.faction, &s.shares)))
             .collect();
         for (faction, amount) in payments {
-            if let Some(f) = state.factions.get_mut(&faction) {
+            if let Some(f) = state.factions.get_mut(&faction).filter(|f| f.alive) {
                 f.treasury += amount;
                 f.finance.ledger.levied += amount;
             }
@@ -1740,10 +1742,17 @@ pub fn ai_assembly_orders(cache: &PlanCache, data: &GameData, faction: &FactionI
     else {
         return orders;
     };
-    // The assembly in the best mood among those that can be convened now.
+    // The assembly in the best mood among those that can be convened now, are not already
+    // paying a subsidy, and would not refuse (the AI reads the forecast the player can read).
+    let ask = ai_ask(data, necessity);
     let best = rules
         .of_house(faction.as_str())
         .filter(|a| can_convene(state, data, faction, &a.id).is_ok())
+        .filter(|a| running_amount(state, a, faction) == 0)
+        .filter(|a| {
+            forecast(state, data, faction, &a.id, necessity, &ask, None, false)
+                .is_ok_and(|v| v.outcome != VoteOutcome::Refuse)
+        })
         .max_by(|a, b| {
             mood_of(state, a)
                 .cmp(&mood_of(state, b))
@@ -1754,7 +1763,7 @@ pub fn ai_assembly_orders(cache: &PlanCache, data: &GameData, faction: &FactionI
             orders.push(Order::ConveneAssembly {
                 assembly: assembly.id.clone(),
                 necessity,
-                ask: ai_ask(data, necessity),
+                ask,
                 form: Some(form.id.clone()),
                 permanent: false,
             });

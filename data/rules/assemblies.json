@@ -33,9 +33,9 @@
     "broken_promise_unrest_turns": 8
   },
   "ai": {
-    "convene_below_seasons": 3.0,
+    "convene_below_seasons": 2.5,
     "accept_cost_up_to": 60,
-    "target_seasons": 6.0
+    "target_seasons": 5.0
   },
   "necessities": [
     { "id": "defensive_war", "name": "Guerre défensive", "multiplier": 1.0, "accord_bonus": 20.0 },
