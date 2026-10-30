@@ -658,9 +658,7 @@ fn drop_moves_without_movement(state: &CampaignState, orders: &mut Vec<Order>) {
     let mut touched: BTreeSet<ArmyId> = BTreeSet::new();
     orders.retain(|order| match order {
         Order::AssignGeneral { army, .. }
-        | Order::RecruitInto { army, .. }
         | Order::HireMercenary { army, .. }
-        | Order::SetStance { army, .. }
         | Order::DisbandUnit {
             army: Some(army), ..
         } => {
@@ -712,7 +710,6 @@ fn drop_orders_on_emptied_armies(state: &CampaignState, orders: &mut Vec<Order>)
     orders.retain(|order| match order {
         Order::AssignGeneral { army, .. }
         | Order::ChooseArmyTradition { army, .. }
-        | Order::HireMercenary { army, .. }
         | Order::RecruitInto { army, .. } => !emptied.contains(army),
         Order::MergeArmies { source, target } => {
             !emptied.contains(source) && !emptied.contains(target)
