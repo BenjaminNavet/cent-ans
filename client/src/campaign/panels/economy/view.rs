@@ -129,7 +129,7 @@ pub fn rebuild(
             match books.book("kingdom") {
                 Some(book) => {
                     let active = names.get(selected).map_or("", String::as_str);
-                    root.spawn(book_bar(&theme, book, active, &[], &[]));
+                    book_bar(root, &theme, book, active, &[], &[]);
                 }
                 None => {
                     root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));

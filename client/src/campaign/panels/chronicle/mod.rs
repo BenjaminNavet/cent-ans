@@ -625,7 +625,8 @@ fn spawn_screen(
                         let active = book
                             .tab_of("chronicle", panel.tab.name())
                             .map_or("", |tab| tab.name.as_str());
-                        page.spawn(book_bar(
+                        book_bar(
+                            page,
                             &theme,
                             book,
                             active,
@@ -635,7 +636,7 @@ fn spawn_screen(
                                 ("chronicle:tab_letters", letters),
                                 ("chronicle:tab_causes", causes_label),
                             ],
-                        ));
+                        );
                     }
                     page.spawn(separator(&theme));
                     match panel.tab {

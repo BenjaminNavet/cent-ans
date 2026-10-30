@@ -69,7 +69,7 @@ pub fn rebuild(
         .with_children(|root| {
             header(root, &theme, ui);
             if let Some(book) = books.book("kingdom") {
-                root.spawn(book_bar(&theme, book, "book:kingdom:feudal", &[], &[]));
+                book_bar(root, &theme, book, "book:kingdom:feudal", &[], &[]);
             }
             root.spawn(separator(&theme));
             root.spawn((

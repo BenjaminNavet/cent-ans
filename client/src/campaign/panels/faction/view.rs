@@ -203,13 +203,11 @@ pub fn rebuild(
             UiTier::Panel.index(),
             Node {
                 position_type: PositionType::Absolute,
-                width: Val::Px(
-                    if panel.view.as_ref().is_some_and(|view| view.is_player) {
-                        BOOK_WIDTH
-                    } else {
-                        PANEL_WIDTH
-                    },
-                ),
+                width: Val::Px(if panel.view.as_ref().is_some_and(|view| view.is_player) {
+                    BOOK_WIDTH
+                } else {
+                    PANEL_WIDTH
+                }),
                 padding: theme.inner_padding("panel", 8.0),
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(6.0),
@@ -244,13 +242,12 @@ pub fn rebuild(
             match (view.is_player, books.book("kingdom")) {
                 (true, Some(book)) => {
                     let active = tabs.get(selected).map_or("", |(name, _)| *name);
-                    let have: &[&str] = if view.finance.as_ref().is_some_and(|f| f.assembly_house)
-                    {
+                    let have: &[&str] = if view.finance.as_ref().is_some_and(|f| f.assembly_house) {
                         &["assembly_house"]
                     } else {
                         &[]
                     };
-                    root.spawn(book_bar(&theme, book, active, have, &[]));
+                    book_bar(root, &theme, book, active, have, &[]);
                 }
                 _ => {
                     root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));

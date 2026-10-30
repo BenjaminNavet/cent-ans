@@ -102,10 +102,7 @@ impl Books {
                                 label: text(tab, "label"),
                                 panel: text(tab, "panel"),
                                 inner: text(tab, "inner"),
-                                needs: tab
-                                    .get("needs")
-                                    .and_then(Value::as_str)
-                                    .map(str::to_owned),
+                                needs: tab.get("needs").and_then(Value::as_str).map(str::to_owned),
                             })
                             .collect()
                     })
@@ -185,12 +182,13 @@ impl Books {
 /// condition is not in `have` are left out; `relabel` replaces the label of a tab by name (a
 /// count, say). The row wraps when it is wider than the page.
 pub fn book_bar(
+    parent: &mut ChildSpawnerCommands,
     theme: &UiTheme,
     book: &BookDef,
     active: &str,
     have: &[&str],
     relabel: &[(&str, String)],
-) -> impl Bundle {
+) {
     let shown: Vec<&BookTab> = book
         .tabs
         .iter()
@@ -207,7 +205,12 @@ pub fn book_bar(
         })
         .collect();
     let selected = shown.iter().position(|tab| tab.name == active).unwrap_or(0);
-    widgets::tab_bar_wrapped(theme, &format!("book:{}", book.id), &pairs, selected)
+    parent.spawn(widgets::tab_bar_wrapped(
+        theme,
+        &format!("book:{}", book.id),
+        &pairs,
+        selected,
+    ));
 }
 
 #[cfg(test)]
@@ -258,7 +261,10 @@ mod tests {
             assert_eq!((book.id.as_str(), tab.key.as_str()), ("kingdom", key));
         }
         let (book, tab) = books.resolve_name("economy:tab:trade").unwrap();
-        assert_eq!((book.id.as_str(), tab.panel.as_str()), ("kingdom", "economy"));
+        assert_eq!(
+            (book.id.as_str(), tab.panel.as_str()),
+            ("kingdom", "economy")
+        );
         assert!(books.resolve_name("nothing").is_none());
     }
 

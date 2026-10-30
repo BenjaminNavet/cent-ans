@@ -414,62 +414,62 @@ pub fn registry_body(
     lists: bool,
     width: f32,
 ) {
-        if agenda.affairs.is_empty() {
-            card.spawn((
-                caption(theme, &agenda.quiet),
-                Node {
-                    width: Val::Px(width - 16.0),
-                    ..default()
-                },
-            ));
-        }
-        for affair in &agenda.affairs {
-            spawn_affair(card, theme, assets, bank, sim, affair);
-        }
-        if lists {
-            card.spawn((
-                Text::new(agenda.watch_heading.clone()),
-                theme.text_font(true, false, UiType::Body.size()),
-                TextColor(style::INK_TITLE),
-            ));
-            for item in &agenda.watch {
-                card.spawn(Node {
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::SpaceBetween,
-                    align_items: AlignItems::Center,
-                    column_gap: Val::Px(6.0),
-                    ..default()
-                })
-                .with_children(|row| {
-                    row.spawn((
-                        caption(theme, &item.text),
-                        Node {
-                            width: Val::Px(width - 110.0),
-                            ..default()
-                        },
+    if agenda.affairs.is_empty() {
+        card.spawn((
+            caption(theme, &agenda.quiet),
+            Node {
+                width: Val::Px(width - 16.0),
+                ..default()
+            },
+        ));
+    }
+    for affair in &agenda.affairs {
+        spawn_affair(card, theme, assets, bank, sim, affair);
+    }
+    if lists {
+        card.spawn((
+            Text::new(agenda.watch_heading.clone()),
+            theme.text_font(true, false, UiType::Body.size()),
+            TextColor(style::INK_TITLE),
+        ));
+        for item in &agenda.watch {
+            card.spawn(Node {
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::SpaceBetween,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(6.0),
+                ..default()
+            })
+            .with_children(|row| {
+                row.spawn((
+                    caption(theme, &item.text),
+                    Node {
+                        width: Val::Px(width - 110.0),
+                        ..default()
+                    },
+                ));
+                if !item.action.label.is_empty() && item.action.kind != "none" {
+                    row.spawn(button_small(
+                        theme,
+                        &format!("{ACT}{}", item.id),
+                        &item.action.label,
                     ));
-                    if !item.action.label.is_empty() && item.action.kind != "none" {
-                        row.spawn(button_small(
-                            theme,
-                            &format!("{ACT}{}", item.id),
-                            &item.action.label,
-                        ));
-                    }
-                });
-            }
-            card.spawn((
-                Text::new(agenda.news_heading.clone()),
-                theme.text_font(true, false, UiType::Body.size()),
-                TextColor(style::INK_TITLE),
-            ));
-            card.spawn((
-                caption(theme, &agenda.news_summary),
-                Node {
-                    width: Val::Px(width - 16.0),
-                    ..default()
-                },
-            ));
+                }
+            });
         }
+        card.spawn((
+            Text::new(agenda.news_heading.clone()),
+            theme.text_font(true, false, UiType::Body.size()),
+            TextColor(style::INK_TITLE),
+        ));
+        card.spawn((
+            caption(theme, &agenda.news_summary),
+            Node {
+                width: Val::Px(width - 16.0),
+                ..default()
+            },
+        ));
+    }
 }
 
 fn spawn_affair(
