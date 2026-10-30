@@ -380,3 +380,5 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0831 | [CAMP-GEN : missions proportionnées à la puissance de la maison](0831-camp-gen-missions-proportionnees.md) | accepté |
 | 0818 | [Les cinq livres : cadre « livre à onglets » (XP-R3)](0818-xp-r3-cinq-livres.md) | accepté |
 | 0830 | [XP-SOBRE : un rappel appris ne se répète plus](0830-xp-sobre-rappels-appris.md) | accepté |
+| 0814 | [VIS-R3b : parcellaire typé du sol de campagne](0814-vis-r3b-parcellaire-type.md) | accepté |
+| 0824 | [VIS-L2 : habitat à l'échelle](0824-vis-l2-habitat-a-l-echelle.md) | en cours |
