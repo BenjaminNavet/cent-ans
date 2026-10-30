@@ -9,6 +9,7 @@ pub mod bench_battle;
 #[cfg(feature = "dev")]
 pub mod bevy_tools;
 pub mod cli;
+pub mod counters;
 pub mod devtools;
 pub mod dump;
 pub mod gpu_pacing;
@@ -136,6 +137,9 @@ impl Plugin for AgentPlugin {
             app.add_plugins(gpu_pacing::GpuPacingPlugin);
         }
         app.add_plugins(texture_census::TextureCensusPlugin);
+        app.add_plugins(counters::WorkCountersPlugin {
+            diagnostics: cli.bench.is_some() || std::env::var_os("CENT_ANS_COUNTERS").is_some(),
+        });
         bench::add(app, cli);
         // With `dev`, BrpExtrasPlugin (devtools) installs the same transport with a chosen port.
         #[cfg(all(feature = "remote", not(feature = "dev")))]

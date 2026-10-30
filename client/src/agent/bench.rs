@@ -22,6 +22,7 @@ use bevy::window::{PresentMode, PrimaryWindow};
 use serde_json::{Value, json};
 
 use super::cli::{BenchConfig, Cli};
+use super::counters::{WorkRecorder, with_work};
 use crate::app::AppState;
 use crate::campaign::camera::CameraSet;
 use crate::campaign::camera::rig::{CampaignRig, Ground};
@@ -207,6 +208,7 @@ fn bench_step(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     meshes: Query<&ViewVisibility, With<Mesh3d>>,
     all: Query<Entity>,
+    mut work: Option<ResMut<WorkRecorder>>,
     mut exit: MessageWriter<AppExit>,
 ) {
     run.frames += 1;
@@ -235,6 +237,10 @@ fn bench_step(
 
     // Measured frame: every frame after the warm-up.
     let measuring = !matches!(run.phase, Phase::WaitCampaign | Phase::Warmup | Phase::Done);
+    // The work counters (draws, pipelines, CPU) are sampled per frame in `Last`, per named phase.
+    if let Some(work) = work.as_mut() {
+        work.phase = measuring.then_some(if run.phase == Phase::Pan { "pan" } else { "descent" });
+    }
     if measuring && dt > 0.0 {
         if frame_ms > PROFILE_SPIKE_MS {
             run.spikes.push((super::profile::now_ms(), frame_ms));
@@ -302,7 +308,7 @@ fn bench_step(
                 run.pan =
                     (!run.frame_ms.is_empty()).then(|| Stats::of(&run.frame_ms, &run.visible));
                 if run.config.pan_only {
-                    finish(&mut run, &mut exit);
+                    finish(&mut run, work.as_deref(), &mut exit);
                 } else {
                     run.phase = Phase::Descent(0, 0);
                     run.phase_time = 0.0;
@@ -335,7 +341,7 @@ fn bench_step(
                         place(&mut rig, DESCENT_SITES[site + 1], DESCENT_FAR);
                         rig.snap(&ground);
                     } else {
-                        finish(&mut run, &mut exit);
+                        finish(&mut run, work.as_deref(), &mut exit);
                     }
                 } else {
                     run.phase = Phase::Descent(site, next_leg);
@@ -375,7 +381,7 @@ pub(super) fn write_report(
     exit.write(AppExit::Success);
 }
 
-fn finish(run: &mut BenchRun, exit: &mut MessageWriter<AppExit>) {
+fn finish(run: &mut BenchRun, work: Option<&WorkRecorder>, exit: &mut MessageWriter<AppExit>) {
     run.phase = Phase::Done;
     let descent = (!run.descent.is_empty()).then(|| Stats::of(&run.descent, &run.descent_visible));
     let report = json!({
@@ -386,8 +392,8 @@ fn finish(run: &mut BenchRun, exit: &mut MessageWriter<AppExit>) {
         "pan_seconds": run.config.seconds,
         "startup_total_ms": (run.startup_ms * 10.0).round() / 10.0,
         "entities_max": run.entities_max,
-        "pan": run.pan.as_ref().map(Stats::json),
-        "descent": descent.as_ref().map(Stats::json),
+        "pan": run.pan.as_ref().map(|stats| with_work(stats.json(), work, "pan")),
+        "descent": descent.as_ref().map(|stats| with_work(stats.json(), work, "descent")),
         "systems": super::profile::report(&run.spikes),
         "note": "frame_ms = real time between frames, vsync off; visible_meshes replaces draw calls",
     });

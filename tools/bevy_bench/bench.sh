@@ -35,7 +35,8 @@ mkdir -p "$root/out/bench"
 rm -f "$out"
 export CENT_ANS_PROFILE=release CENT_ANS_MUTE=1 CENT_ANS_NO_BRIEFING=1
 # BENCH_FEATURES=profile adds the per-system timings ("systems" section) to the report.
-if [[ -n "${BENCH_FEATURES:-}" ]]; then export CENT_ANS_FEATURES=$BENCH_FEATURES; else unset CENT_ANS_FEATURES; fi
+# `perf-counters` (always on, ADR 0827) adds the draw-call counters to the `work` object of each phase.
+if [[ -n "${BENCH_FEATURES:-}" ]]; then export CENT_ANS_FEATURES="perf-counters,$BENCH_FEATURES"; else export CENT_ANS_FEATURES=perf-counters; fi
 cd "$root"
 if [[ $mode == battle ]]; then
 	# Crécy through the menus, no deployment phase; --bench-battle takes over once the battle runs.

@@ -1,68 +1,33 @@
 #!/bin/zsh
-# Automatic performance guard of the Bevy client (lot B5). Muted and hidden window ONLY
-# (bench.sh -> client/run_bg.sh, CENT_ANS_MUTE=1, --offscreen): never steals the focus.
+# Automatic performance guard of the Bevy client (lot B5, rewritten by PERF-COMPTEURS, ADR 0827).
+# Muted and hidden window ONLY (bench.sh -> client/run_bg.sh, CENT_ANS_MUTE=1, --offscreen): never
+# steals the focus.
 #
-# Usage: tools/bevy_bench/perf_guard.sh [map|battle|all] [--force]
-# Runs the existing bench (tools/bevy_bench/bench.sh, see README.md) and compares its percentiles with
-# the thresholds of tools/bevy_bench/perf_thresholds.json (documented there). Exit code 0 = within
-# thresholds, 1 = threshold exceeded or bench failed, 3 = skipped because the machine is loaded
-# (1-minute load average > max_load, default 6; --force measures anyway).
-# Map: panorama d=30 (pan only). Battle: Crecy, calm + melee.
+# Usage: tools/bevy_bench/perf_guard.sh [map|battle|all]
+# Runs the bench (tools/bevy_bench/bench.sh, build with the cargo feature `perf-counters`) and checks the
+# WORK counters of each phase against tools/bevy_bench/perf_thresholds.json (v2): draw calls,
+# triangles, pipelines created, CPU ms of the process and of the main thread (all in the `work`
+# object of the report), plus the memory of the end of the bench. Frame times are printed for
+# information, never compared: they depend on how busy the machine is, the counters do not, so
+# there is no load check and no skip (exit codes: 0 ok, 1 threshold exceeded / bench failed /
+# counter missing, 2 usage).
+# Map: panorama d=30 (pan) and the three descents. Battle: Crecy, calm + melee.
+# Recalibrate with perf_calibrate.py after 3 runs (see README.md).
 set -u
 here=${0:A:h}
 root=${here:h:h}
 mode=${1:-map}
-[[ $mode == map || $mode == battle || $mode == all ]] || { echo "usage: perf_guard.sh [map|battle|all] [--force]" >&2; exit 2; }
-force=0; [[ ${2:-} == --force ]] && force=1
+[[ $mode == map || $mode == battle || $mode == all ]] || { echo "usage: perf_guard.sh [map|battle|all]" >&2; exit 2; }
 conf="$here/perf_thresholds.json"
-max_load=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['max_load'])" "$conf")
-load=$(uptime | sed -E 's/.*load averages?: *([0-9]+[.,]?[0-9]*).*/\1/' | tr ',' '.')
-if (( force == 0 )) && python3 -c "import sys;sys.exit(0 if float(sys.argv[1]) > float(sys.argv[2]) else 1)" "$load" "$max_load"; then
-	echo "perf_guard SKIPPED: load average $load > $max_load (use --force to measure anyway)"
-	exit 3
-fi
 export CENT_ANS_MUTE=1
+# Counters do not depend on the load: no wait for a quiet machine (bench.sh -> calm.sh).
+export CALM_SKIP=1
 rc=0
 check() { # <kind: map|battle> <report>
-	python3 - "$conf" "$1" "$2" "$load" <<'PY' || rc=1
-import json, sys
-conf, kind, report, load = sys.argv[1:5]
-limits = json.load(open(conf))[kind]
-rep = json.load(open(report))
-bad = 0
-for phase, stats in limits.items():
-    if phase.startswith("_"):
-        continue
-    got = rep.get(phase)
-    if not got:
-        print(f"FAIL {kind}.{phase}: phase absent from the report")
-        bad += 1
-        continue
-    for stat, limit in stats.items():
-        value = got["frame_ms_" + stat]
-        ok = value <= limit
-        bad += not ok
-        print(f"{'ok  ' if ok else 'FAIL'} {kind}.{phase}.{stat} = {value:.2f} ms (max {limit}) [load {load}]")
-# Memory budget (ADR 0748, amended by ADR 0776): physical footprint at the end of the bench
-# (`memory.footprint_mib`, what the budget counts) and peak RSS (`memory.peak_rss_mib`, loading peak).
-memory_conf = json.load(open(conf)).get("memory", {})
-for metric, key in (("footprint", "footprint_mib"), ("peak_rss", "peak_rss_mib")):
-    mem_limit = memory_conf.get(metric, {}).get(kind)
-    if mem_limit is None:
-        continue
-    value = rep.get("memory", {}).get(key)
-    if value is None or value < 0:
-        print(f"FAIL {kind}.{metric}: absent from the report")
-        bad += 1
-    else:
-        ok = value <= mem_limit
-        bad += not ok
-        print(f"{'ok  ' if ok else 'FAIL'} {kind}.{metric} = {value:.0f} MiB (max {mem_limit}) [load {load}]")
-sys.exit(1 if bad else 0)
-PY
+	python3 "$here/perf_check.py" "$conf" "$1" "$2" || rc=1
 }
 if [[ $mode == map || $mode == all ]]; then
-	"$here/bench.sh" guard --bench-distance 30 --bench-pan-only --offscreen > /dev/null || rc=1
+	"$here/bench.sh" guard --bench-distance 30 --offscreen > /dev/null || rc=1
 	check map "$root/out/bench/map_guard.json"
 fi
 if [[ $mode == battle || $mode == all ]]; then

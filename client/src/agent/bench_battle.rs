@@ -23,6 +23,7 @@ use sim_battle::UnitState;
 
 use super::bench::{Stats, write_report};
 use super::cli::BenchConfig;
+use super::counters::{WorkRecorder, with_work};
 use crate::app::AppState;
 use crate::battle::scene::BattleSession;
 use crate::battle::scene::camera::{BattleCameraState, control_camera};
@@ -119,6 +120,7 @@ fn battle_bench_step(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     meshes: Query<&ViewVisibility, With<Mesh3d>>,
     all: Query<Entity>,
+    mut work: Option<ResMut<WorkRecorder>>,
     mut exit: MessageWriter<AppExit>,
 ) {
     run.frames += 1;
@@ -136,6 +138,9 @@ fn battle_bench_step(
     };
 
     let measuring = matches!(run.phase, Phase::Calm | Phase::Melee);
+    if let Some(work) = work.as_mut() {
+        work.phase = measuring.then_some(if run.phase == Phase::Calm { "calm" } else { "melee" });
+    }
     if measuring && dt > 0.0 {
         if frame_ms > PROFILE_SPIKE_MS {
             run.spikes.push((super::profile::now_ms(), frame_ms));
@@ -228,7 +233,7 @@ fn battle_bench_step(
             }
             run.regiments = session.snapshot.regiments;
             if run.phase_time >= run.config.melee_seconds {
-                finish(&mut run, &mut exit);
+                finish(&mut run, work.as_deref(), &mut exit);
             }
         }
         Phase::Done => {}
@@ -249,7 +254,7 @@ fn hold_opening(run: &BattleBench, camera: &mut BattleCameraState) {
     }
 }
 
-fn finish(run: &mut BattleBench, exit: &mut MessageWriter<AppExit>) {
+fn finish(run: &mut BattleBench, work: Option<&WorkRecorder>, exit: &mut MessageWriter<AppExit>) {
     run.phase = Phase::Done;
     let calm = (!run.calm.is_empty()).then(|| Stats::of(&run.calm, &run.calm_visible));
     let melee = (!run.melee_ms.is_empty()).then(|| Stats::of(&run.melee_ms, &run.melee_visible));
@@ -264,8 +269,8 @@ fn finish(run: &mut BattleBench, exit: &mut MessageWriter<AppExit>) {
         "sim_seconds_at_contact": (run.sim_seconds_at_contact * 10.0).round() / 10.0,
         "regiments_at_end": run.regiments,
         "entities_max": run.entities_max,
-        "calm": calm.as_ref().map(Stats::json),
-        "melee": melee.as_ref().map(Stats::json),
+        "calm": calm.as_ref().map(|stats| with_work(stats.json(), work, "calm")),
+        "melee": melee.as_ref().map(|stats| with_work(stats.json(), work, "melee")),
         "systems": super::profile::report(&run.spikes),
         "note": "frame_ms = real time between frames, vsync off; calm = opening camera, melee = fixed oblique camera on the first contact",
     });

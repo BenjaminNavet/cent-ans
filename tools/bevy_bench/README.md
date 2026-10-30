@@ -13,8 +13,8 @@ d = 30 pendant 20 s, puis trois descentes (Rouen, Grande Chartreuse, Paris : 150
 `visible_meshes_*`) ; code de sortie 1 si panique, `AGENT_FATAL`, rapport absent ou délai dépassé.
 
 Écarts avec Godot : pas de phase « zoom » séparée, pas de statistiques du quadtree de relief ;
-Bevy n'expose pas le nombre d'appels de dessin, `visible_meshes` (entités `Mesh3d` visibles,
-échantillon toutes les 10 images, lots instanciés comptés une fois) le remplace.
+`visible_meshes` (entités `Mesh3d` visibles, échantillon toutes les 10 images) reste, les appels de dessin
+sont dans `work` (voir plus bas).
 Comparaison : chiffres Godot dans `docs/wip/fl-fluidite-carte.md`, `docs/wip/rx/perf.md`.
 
 ## Chronométrage par système (feature `profile`)
@@ -47,14 +47,40 @@ La caméra est réécrite à chaque image avant le contrôleur : le parcours ne 
 (aussi `contact`, `sim_seconds_at_contact`, `regiments_at_end`, `entities_max`, `systems`).
 Porte ADR 0404 : lire `melee.frame_ms_p95` ≤ 25 ms.
 
-## Garde de performance (lot B5)
+## Compteurs de travail et garde de performance (ADR 0827)
 
-    tools/bevy_bench/perf_guard.sh [map|battle|all] [--force]
+Le banc mesure le TRAVAIL par image, pas seulement le temps : un temps d'image dépend de la charge
+de la machine (20-40 en permanence ici), un compteur non. Chaque phase du rapport (`pan`, `descent`
+pour la carte ; `calm`, `melee` pour la bataille) porte un objet `work` :
 
-Lance `bench.sh` (muet, `--offscreen`, aucun focus) et compare les percentiles aux seuils de
-`perf_thresholds.json` (carte : panoramique d=30 p50/p95 ; bataille : Crécy calme/mêlée, mêlée p95 <= 25 ms,
-ADR 0404). Code 0 = ok, 1 = seuil dépassé ou banc en échec, 3 = sautée car charge > `max_load` (6) ;
-`--force` mesure quand même. Les seuils ne valent que sur machine calme.
+| Champ | Sens |
+|---|---|
+| `draw_calls_p50/p95/max`, `triangles_p50`, `instances_p50` | appels de dessin soumis par image (tous les `TrackedRenderPass`, instanciés compris) ; triangles et instances des appels directs |
+| `pipelines_created`, `pipelines_total` | pipelines ajoutés au `PipelineCache` pendant la phase ; total en fin de phase |
+| `render_passes_p50`, `pass_cpu_ms` | passes de rendu par image et CPU moyen des plus coûteuses (`RenderDiagnosticsPlugin`, temps CPU seulement sous Metal) |
+| `process_cpu_ms_*` | CPU de tous les fils du processus par image (`getrusage`) |
+| `main_thread_cpu_ms_*` | CPU du fil principal par image (`CLOCK_THREAD_CPUTIME_ID`) |
+
+Le bloc `memory` du rapport donne `footprint_mib`, `peak_rss_mib`, `metal_allocated_mib`, `heap_commit_mib`
+(tas mimalloc) et `footprint_non_heap_mib`. Le dump d'état a la section `work` (240 dernières images ;
+`CENT_ANS_COUNTERS=1` ajoute les passes) et `memory`. Avec `BENCH_FEATURES=profile`, chaque système
+du rapport a aussi `cpu_total_ms` / `cpu_mean_ms` (CPU du fil, indépendant de la charge).
+
+Les appels de dessin viennent de la feature cargo `perf-counters` (`bench.sh` la met toujours) :
+`bevy_render/detailed_trace` fait émettre un événement `trace!` par appel, compté par une couche `tracing`
+(`client/src/agent/counters.rs`) qui refuse tous les autres sites d'appel du module. Un build sans la
+feature donne `draw_calls_*: null` et le garde échoue. Le comptage coûte un peu de CPU côté rendu : toutes
+les valeurs de référence sont prises avec lui, les temps d'image d'un build sans lui sont un peu meilleurs.
+
+    tools/bevy_bench/perf_guard.sh [map|battle|all]
+
+Lance `bench.sh` (muet, `--offscreen`, aucun focus) et compare les compteurs de `perf_thresholds.json` (v2).
+Code 0 = ok, 1 = seuil dépassé, compteur absent ou banc en échec. Plus de `max_load` ni de saut : les
+compteurs tiennent sous charge (`CALM_SKIP=1` est posé par le garde). Les temps d'image sont affichés,
+jamais comparés. `tools/full_check.sh` le lance (`PERF_GUARD=0` pour l'omettre).
+Recalibrer après une fusion qui change le travail voulu : 3 exécutions, puis
+`perf_calibrate.py tools/bevy_bench/perf_thresholds.json map out/bench/map_a.json out/bench/map_b.json out/bench/map_c.json`
+(pire des trois + 5 % sur les comptes, + 15 % sur le CPU ; médiane dans `reference`).
 Réglage : `map_shadow_splits` (cascades du soleil de campagne) par préréglage dans `data/fx/render_quality.json` ;
 `CENT_ANS_MAP_CASCADES=n` force le nombre pour un A/B (`ab.sh map <étiquette> "CENT_ANS_MAP_CASCADES=4" ""`).
 Dans un worktree, lier les données ignorées (`data/map/pyramid`, `game/assets/models/dn`,

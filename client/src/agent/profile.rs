@@ -13,16 +13,37 @@ use serde_json::Value;
 
 /// `LogPlugin` to register in `DefaultPlugins`: with feature `profile`, it carries the timing layer.
 pub fn log_plugin() -> LogPlugin {
-    #[cfg(feature = "profile")]
+    #[allow(unused_mut)]
+    let mut plugin = LogPlugin::default();
+    #[cfg(any(feature = "profile", feature = "perf-counters"))]
     {
-        LogPlugin {
-            custom_layer: imp::layer,
-            ..Default::default()
-        }
+        plugin.custom_layer = layers;
     }
-    #[cfg(not(feature = "profile"))]
+    // Draw events are enabled at TRACE for that one module and kept out of the log output.
+    #[cfg(feature = "perf-counters")]
     {
-        LogPlugin::default()
+        plugin.filter = format!("{},{}=trace", plugin.filter, super::counters::draw_layer::TARGET);
+        plugin.fmt_layer = super::counters::draw_layer::fmt_layer;
+    }
+    plugin
+}
+
+/// The optional layers: per-system timings (`profile`) and draw counters (`perf-counters`).
+#[cfg(any(feature = "profile", feature = "perf-counters"))]
+fn layers(app: &mut bevy::prelude::App) -> Option<bevy::log::BoxedLayer> {
+    #[allow(unused_mut)]
+    let mut all: Vec<bevy::log::BoxedLayer> = Vec::new();
+    #[cfg(feature = "profile")]
+    all.extend(imp::layer(app));
+    #[cfg(feature = "perf-counters")]
+    all.push(Box::new(super::counters::draw_layer::DrawCounter));
+    let _ = app;
+    // One layer: no wrapper (a `Vec` unions the callsite interests, which would defeat the
+    // `Interest::never` of the draw counter).
+    if all.len() == 1 {
+        all.pop()
+    } else {
+        Some(Box::new(all))
     }
 }
 
@@ -89,6 +110,8 @@ mod imp {
     struct Agg {
         count: u64,
         total: f64,
+        /// CPU time of the thread inside the span (load independent, unlike `total`).
+        cpu: f64,
         max: f64,
     }
 
@@ -112,6 +135,7 @@ mod imp {
     struct SpanInfo {
         label: String,
         entered: Option<Instant>,
+        entered_cpu: f64,
     }
 
     #[derive(Default)]
@@ -148,6 +172,7 @@ mod imp {
                 span.extensions_mut().insert(SpanInfo {
                     label,
                     entered: None,
+                    entered_cpu: 0.0,
                 });
             }
         }
@@ -157,6 +182,7 @@ mod imp {
                 && let Some(info) = span.extensions_mut().get_mut::<SpanInfo>()
             {
                 info.entered = Some(Instant::now());
+                info.entered_cpu = super::super::counters::thread_cpu_ms();
             }
         }
 
@@ -170,11 +196,13 @@ mod imp {
                 return;
             };
             let ms = entered.elapsed().as_secs_f64() * 1000.0;
+            let cpu = (super::super::counters::thread_cpu_ms() - info.entered_cpu).max(0.0);
             let end = now_ms();
             if let Ok(mut store) = store().lock() {
                 let agg = store.by_name.entry(info.label.clone()).or_default();
                 agg.count += 1;
                 agg.total += ms;
+                agg.cpu += cpu;
                 agg.max = agg.max.max(ms);
                 if ms >= LONG_SPAN_MS && store.long.len() < LONG_SPAN_CAP {
                     store.long.push((end, ms, info.label.clone()));
@@ -203,7 +231,8 @@ mod imp {
             .take(30)
             .map(|(name, a)| {
                 json!({"span": name, "count": a.count, "total_ms": r(a.total),
-                "mean_ms": r(a.total / a.count.max(1) as f64), "max_ms": r(a.max)})
+                "mean_ms": r(a.total / a.count.max(1) as f64), "max_ms": r(a.max),
+                "cpu_total_ms": r(a.cpu), "cpu_mean_ms": r(a.cpu / a.count.max(1) as f64)})
             })
             .collect();
         rows.sort_by(|a, b| b.1.max.total_cmp(&a.1.max));
