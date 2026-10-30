@@ -78,6 +78,9 @@ pub struct FinanceView {
     pub obligations: Vec<ObligationView>,
     /// Unrest points the extraordinary taxes and the default add to each province now.
     pub grievance_unrest: f64,
+    /// The house has assemblies (ECO-R1): extraordinary revenue is consented there and the
+    /// `levies` are refused (`FinanceError::AssemblyRequired`).
+    pub assembly_house: bool,
 }
 
 /// Finances of `faction`; `None` for an unknown faction.
@@ -162,6 +165,7 @@ pub fn finance_view(
             })
             .collect(),
         grievance_unrest: finance::finance_unrest(state, faction),
+        assembly_house: sim_campaign::assembly::has_assembly(data, faction),
     })
 }
 

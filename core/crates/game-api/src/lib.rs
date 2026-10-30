@@ -5,6 +5,7 @@
 pub mod acts;
 pub mod agenda;
 pub mod army;
+pub mod assembly;
 pub mod causes;
 pub mod chronicle;
 pub mod common;
