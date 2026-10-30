@@ -315,13 +315,9 @@ pub fn duties(data: &GameData, state: &CampaignState, faction: &FactionId) -> Du
             .collect(),
         homage_candidates: faction_refs(data, &feudal::homage_candidates(state, data, faction)),
         host_enemy: host_enemy(state, data, faction).map(|e| faction_ref(data, &e)),
-        host_wait: state
-            .feudal
-            .host_summoned
-            .get(faction)
-            .map_or(0, |last| {
-                (last + data.feudal_rules.host.resummon_delay_seasons).saturating_sub(state.turn)
-            }),
+        host_wait: state.feudal.host_summoned.get(faction).map_or(0, |last| {
+            (last + data.feudal_rules.host.resummon_delay_seasons).saturating_sub(state.turn)
+        }),
     }
 }
 
@@ -342,8 +338,8 @@ fn host_enemy(state: &CampaignState, data: &GameData, faction: &FactionId) -> Op
 
 /// ECO-R2a: the player summons the host of its direct vassals against its first foe at war.
 pub fn summon_host(data: &GameData, state: &mut CampaignState) -> OrderResult {
-    let order = host_enemy(state, data, state.player_faction())
-        .map(|enemy| Order::SummonHost { enemy });
+    let order =
+        host_enemy(state, data, state.player_faction()).map(|enemy| Order::SummonHost { enemy });
     send(data, state, order)
 }
 

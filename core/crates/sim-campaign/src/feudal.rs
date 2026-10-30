@@ -18,8 +18,8 @@ use crate::negotiation::{Article, Treaty};
 use crate::state::CampaignState;
 
 mod acts;
-mod host;
 mod felony;
+mod host;
 mod inherit;
 mod objectives;
 mod policy;
@@ -959,7 +959,6 @@ pub fn order_summon_host(
 
 pub use host::HostService;
 pub use host::{contingent_units, resolve_host_service};
-
 
 /// Can `vassal` be summoned to the host of `liege` against `enemy` (ADR 0114, `feudal_rules.host`)? Not when it is independent in fact (its
 /// power reaches `independent_power_ratio` of its suzerain's), nor when none

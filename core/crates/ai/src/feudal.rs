@@ -341,10 +341,7 @@ pub fn plan_summon_host(cache: &PlanCache, data: &GameData, faction: &FactionId)
     let me = state.factions.get(faction)?;
     let without_contingent = |vassal: &FactionId| {
         !state.armies.values().any(|a| {
-            &a.faction == vassal
-                && a.host_service
-                    .as_ref()
-                    .is_some_and(|s| &s.liege == faction)
+            &a.faction == vassal && a.host_service.as_ref().is_some_and(|s| &s.liege == faction)
         })
     };
     me.at_war_with

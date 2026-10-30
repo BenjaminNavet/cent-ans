@@ -79,9 +79,10 @@ pub fn contingent_units(state: &CampaignState, data: &GameData, vassal: &Faction
 
 /// Does `vassal` already have a contingent in the field for `liege`?
 fn has_contingent(state: &CampaignState, vassal: &FactionId, liege: &FactionId) -> bool {
-    state.armies.values().any(|a| {
-        &a.faction == vassal && a.host_service.as_ref().is_some_and(|s| &s.liege == liege)
-    })
+    state
+        .armies
+        .values()
+        .any(|a| &a.faction == vassal && a.host_service.as_ref().is_some_and(|s| &s.liege == liege))
 }
 
 /// Where the contingent musters: the vassal's capital city, else any place it holds.

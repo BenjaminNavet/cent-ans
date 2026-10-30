@@ -274,7 +274,10 @@ impl MetricsTracker {
             .values()
             .filter(|army| {
                 &army.faction == house
-                    || army.host_service.as_ref().is_some_and(|s| &s.liege == house)
+                    || army
+                        .host_service
+                        .as_ref()
+                        .is_some_and(|s| &s.liege == house)
             })
             .map(|army| army.total_strength())
             .sum();

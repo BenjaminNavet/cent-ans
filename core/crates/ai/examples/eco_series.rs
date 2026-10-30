@@ -164,7 +164,9 @@ fn run_seed(data: &GameData, seed: u64, options: &Options, out: &mut impl FnMut(
             let host_men: u64 = state
                 .armies
                 .values()
-                .filter(|a| a.faction != id && a.host_service.as_ref().is_some_and(|s| s.liege == id))
+                .filter(|a| {
+                    a.faction != id && a.host_service.as_ref().is_some_and(|s| s.liege == id)
+                })
                 .map(|a| u64::from(a.total_strength()))
                 .sum();
             let own_men: u64 = state
