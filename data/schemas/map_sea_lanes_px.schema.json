@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map_sea_lanes_px.schema.json",
+  "title": "Sea lanes in map pixels",
+  "description": "Fichiers : map/sea_lanes_px.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "lanes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "length_km": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "from",
+          "id",
+          "length_km",
+          "points",
+          "to"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "description",
+    "lanes"
+  ],
+  "additionalProperties": false
+}

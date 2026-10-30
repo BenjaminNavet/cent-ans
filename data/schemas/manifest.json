@@ -1,0 +1,1330 @@
+{
+ "description": "Explicit data file glob -> JSON schema table (paths relative to data/, schemas relative to data/schemas/). Checked by tools/tests/test_schemas.py: every JSON/YAML file of data/ must match an entry or an exception, and validate. ADR 0829.",
+ "entries": [
+  {
+   "glob": "rules/acts.json",
+   "schema": "acts_rules.schema.json"
+  },
+  {
+   "glob": "rules/advisor.json",
+   "schema": "advisor_rules.schema.json"
+  },
+  {
+   "glob": "rules/agenda.json",
+   "schema": "agenda_rules.schema.json"
+  },
+  {
+   "glob": "rules/agents.json",
+   "schema": "agent_rules.schema.json"
+  },
+  {
+   "glob": "map/agri_landscapes.json",
+   "schema": "agri_landscapes.schema.json"
+  },
+  {
+   "glob": "ai/alignment.json",
+   "schema": "ai_alignment.schema.json"
+  },
+  {
+   "glob": "ai/campaign.json",
+   "schema": "ai_campaign.schema.json"
+  },
+  {
+   "glob": "ai/diplomacy.json",
+   "schema": "ai_diplomacy.schema.json"
+  },
+  {
+   "glob": "ai/doctrines.json",
+   "schema": "ai_doctrine.schema.json"
+  },
+  {
+   "glob": "ai/feudal.json",
+   "schema": "ai_feudal.schema.json"
+  },
+  {
+   "glob": "ai/grid.json",
+   "schema": "ai_grid.schema.json"
+  },
+  {
+   "glob": "ai/strategic_doctrines.json",
+   "schema": "ai_strategic_doctrine.schema.json"
+  },
+  {
+   "glob": "ui/ai_turn_replay.json",
+   "schema": "ai_turn_replay.schema.json"
+  },
+  {
+   "glob": "rules/armies.json",
+   "schema": "army_rules.schema.json"
+  },
+  {
+   "glob": "rules/army_traditions.json",
+   "schema": "army_traditions_rules.schema.json"
+  },
+  {
+   "glob": "art/battle_grass.json",
+   "schema": "art_battle_grass.schema.json"
+  },
+  {
+   "glob": "art/battle_tree_leaves.json",
+   "schema": "art_battle_tree_leaves.schema.json"
+  },
+  {
+   "glob": "art/building_materials.json",
+   "schema": "art_building_materials.schema.json"
+  },
+  {
+   "glob": "art/building_regions.json",
+   "schema": "art_building_regions.schema.json"
+  },
+  {
+   "glob": "art/campaign_forest_look.json",
+   "schema": "art_campaign_forest_look.schema.json"
+  },
+  {
+   "glob": "art/council_catalog.json",
+   "schema": "art_council_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_campaign_models.json",
+   "schema": "art_dn_campaign_models.schema.json"
+  },
+  {
+   "glob": "art/dn_cards_manifest.json",
+   "schema": "art_dn_cards_manifest.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_architecture.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_battle.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_battle_extra.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_campaign.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_economy.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_fields.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_illus.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_map_extra.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_mobile.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_nature.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_nature_extra.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_yaya.json",
+   "schema": "art_dn_catalog.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_nature_cards.json",
+   "schema": "art_dn_catalog_nature_cards.schema.json"
+  },
+  {
+   "glob": "art/dn_catalog_ui.json",
+   "schema": "art_dn_catalog_ui.schema.json"
+  },
+  {
+   "glob": "art/dn_fields.json",
+   "schema": "art_dn_fields.schema.json"
+  },
+  {
+   "glob": "art/dn_illus_generation.json",
+   "schema": "art_dn_illus_generation.schema.json"
+  },
+  {
+   "glob": "art/dn_ingest_classes.json",
+   "schema": "art_dn_ingest_classes.schema.json"
+  },
+  {
+   "glob": "art/dn_manifest.json",
+   "schema": "art_dn_manifest.schema.json"
+  },
+  {
+   "glob": "art/dn_models_hosting.json",
+   "schema": "art_dn_models_hosting.schema.json"
+  },
+  {
+   "glob": "art/dn_water_models.json",
+   "schema": "art_dn_water_models.schema.json"
+  },
+  {
+   "glob": "art/event_scenes.json",
+   "schema": "art_event_scenes.schema.json"
+  },
+  {
+   "glob": "art/forest_stands.json",
+   "schema": "art_forest_stands.schema.json"
+  },
+  {
+   "glob": "art/ga3_decor.json",
+   "schema": "art_ga3_decor.schema.json"
+  },
+  {
+   "glob": "art/rock_outcrops.yaml",
+   "schema": "art_rock_outcrops.schema.json"
+  },
+  {
+   "glob": "art/settlement_tiers.json",
+   "schema": "art_settlement_tiers.schema.json"
+  },
+  {
+   "glob": "art/siege_stone.json",
+   "schema": "art_siege_stone.schema.json"
+  },
+  {
+   "glob": "art/style/anchor.yaml",
+   "schema": "art_style_anchor.schema.json"
+  },
+  {
+   "glob": "art/tree_model_gains.json",
+   "schema": "art_tree_model_gains.schema.json"
+  },
+  {
+   "glob": "art/tree_species.json",
+   "schema": "art_tree_species.schema.json"
+  },
+  {
+   "glob": "art/tree_species.yaml",
+   "schema": "art_tree_species.schema.json"
+  },
+  {
+   "glob": "art/tx_*_pack.json",
+   "schema": "art_tx_pack.schema.json"
+  },
+  {
+   "glob": "rules/assemblies.json",
+   "schema": "assemblies.schema.json"
+  },
+  {
+   "glob": "ui/assembly_panel.json",
+   "schema": "assembly_panel.schema.json"
+  },
+  {
+   "glob": "ui/audience.fr.json",
+   "schema": "audience_texts.schema.json"
+  },
+  {
+   "glob": "audio/credits.json",
+   "schema": "audio_credits.schema.json"
+  },
+  {
+   "glob": "rules/auto_resolve.json",
+   "schema": "auto_resolve_rules.schema.json"
+  },
+  {
+   "glob": "map/bathymetry.json",
+   "schema": "bathymetry.schema.json"
+  },
+  {
+   "glob": "battle_abilities/*.json",
+   "schema": "battle_ability.schema.json"
+  },
+  {
+   "glob": "rules/battle_ai.json",
+   "schema": "battle_ai_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_alerts.json",
+   "schema": "battle_alerts_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_bench.json",
+   "schema": "battle_bench.schema.json"
+  },
+  {
+   "glob": "rules/battle_crest_defence.json",
+   "schema": "battle_crest_defence_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_crest.json",
+   "schema": "battle_crest_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_decision.json",
+   "schema": "battle_decision_rules.schema.json"
+  },
+  {
+   "glob": "battle_maps/decor_plan_example.json",
+   "schema": "battle_decor_plan.schema.json"
+  },
+  {
+   "glob": "rules/battle_decor.json",
+   "schema": "battle_decor_rules.schema.json"
+  },
+  {
+   "glob": "ui/battle_demos.json",
+   "schema": "battle_demos.schema.json"
+  },
+  {
+   "glob": "rules/battle_duel.json",
+   "schema": "battle_duel_rules.schema.json"
+  },
+  {
+   "glob": "fx/battle_finish.json",
+   "schema": "battle_finish.schema.json"
+  },
+  {
+   "glob": "fx/battle_gore.json",
+   "schema": "battle_gore.schema.json"
+  },
+  {
+   "glob": "rules/battle_history.json",
+   "schema": "battle_history_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_horse_wait.json",
+   "schema": "battle_horse_wait_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_hover.json",
+   "schema": "battle_hover_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_impact.json",
+   "schema": "battle_impact_rules.schema.json"
+  },
+  {
+   "glob": "audio/battle_layers.json",
+   "schema": "battle_layers.schema.json"
+  },
+  {
+   "glob": "battle_maps/auray.json",
+   "schema": "battle_map.schema.json"
+  },
+  {
+   "glob": "battle_maps/azincourt.json",
+   "schema": "battle_map.schema.json"
+  },
+  {
+   "glob": "battle_maps/castillon.json",
+   "schema": "battle_map.schema.json"
+  },
+  {
+   "glob": "battle_maps/crecy.json",
+   "schema": "battle_map.schema.json"
+  },
+  {
+   "glob": "battle_maps/formigny.json",
+   "schema": "battle_map.schema.json"
+  },
+  {
+   "glob": "battle_maps/poitiers.json",
+   "schema": "battle_map.schema.json"
+  },
+  {
+   "glob": "rules/battle_mass_charge.json",
+   "schema": "battle_mass_charge_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_morale.json",
+   "schema": "battle_morale_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_movement.json",
+   "schema": "battle_movement_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_opening.json",
+   "schema": "battle_opening_rules.schema.json"
+  },
+  {
+   "glob": "battle_orders/*.json",
+   "schema": "battle_order.schema.json"
+  },
+  {
+   "glob": "rules/battle_outcome.json",
+   "schema": "battle_outcome_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_pace.json",
+   "schema": "battle_pace_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_plans.json",
+   "schema": "battle_plans.schema.json"
+  },
+  {
+   "glob": "tutorial/battle_prologue.json",
+   "schema": "battle_prologue.schema.json"
+  },
+  {
+   "glob": "rules/battle_push.json",
+   "schema": "battle_push_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_queue.json",
+   "schema": "battle_queue_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_relief.json",
+   "schema": "battle_relief_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_replay.json",
+   "schema": "battle_replay_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_rout.json",
+   "schema": "battle_rout_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_scale.json",
+   "schema": "battle_scale_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_site.json",
+   "schema": "battle_site_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_spear_wall.json",
+   "schema": "battle_spear_wall_rules.schema.json"
+  },
+  {
+   "glob": "speeches/battle_speeches.json",
+   "schema": "battle_speeches.schema.json"
+  },
+  {
+   "glob": "rules/battle_standards.json",
+   "schema": "battle_standard_rules.schema.json"
+  },
+  {
+   "glob": "fx/battle_standards.json",
+   "schema": "battle_standards_fx.schema.json"
+  },
+  {
+   "glob": "rules/battle_terrain.json",
+   "schema": "battle_terrain_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_time_of_day.json",
+   "schema": "battle_time_of_day_rules.schema.json"
+  },
+  {
+   "glob": "rules/battle_water.json",
+   "schema": "battle_water_rules.schema.json"
+  },
+  {
+   "glob": "map/biomes.yaml",
+   "schema": "biomes.schema.json"
+  },
+  {
+   "glob": "buildings/*.json",
+   "schema": "building.schema.json"
+  },
+  {
+   "glob": "map/building_models.json",
+   "schema": "building_models.schema.json"
+  },
+  {
+   "glob": "ui/camera_feel.json",
+   "schema": "camera_feel.schema.json"
+  },
+  {
+   "glob": "ui/campaign_map.json",
+   "schema": "campaign_map_ui.schema.json"
+  },
+  {
+   "glob": "ui/campaign_seasons.json",
+   "schema": "campaign_seasons_ui.schema.json"
+  },
+  {
+   "glob": "rules/campaign_weather.json",
+   "schema": "campaign_weather_rules.schema.json"
+  },
+  {
+   "glob": "rules/captains.json",
+   "schema": "captains_rules.schema.json"
+  },
+  {
+   "glob": "rules/capture.json",
+   "schema": "capture_rules.schema.json"
+  },
+  {
+   "glob": "rules/cause_thresholds.json",
+   "schema": "cause_thresholds.schema.json"
+  },
+  {
+   "glob": "ui/causes.fr.json",
+   "schema": "causes.schema.json"
+  },
+  {
+   "glob": "characters/*.json",
+   "schema": "character.schema.json"
+  },
+  {
+   "glob": "chivalric_orders/*.json",
+   "schema": "chivalric_order.schema.json"
+  },
+  {
+   "glob": "map/coast_types.json",
+   "schema": "coast_types.schema.json"
+  },
+  {
+   "glob": "codex/cdx_*.json",
+   "schema": "codex.schema.json"
+  },
+  {
+   "glob": "codex_bundle.json",
+   "schema": "codex_bundle.schema.json"
+  },
+  {
+   "glob": "map/colormap_style.yaml",
+   "schema": "colormap_style.schema.json"
+  },
+  {
+   "glob": "map/compose/erode.json",
+   "schema": "compose_erode.schema.json"
+  },
+  {
+   "glob": "map/compose/generalise.json",
+   "schema": "compose_generalise.schema.json"
+  },
+  {
+   "glob": "map/compose/id_map*.json",
+   "schema": "compose_id_map.schema.json"
+  },
+  {
+   "glob": "map/compose/paint/*.json",
+   "schema": "compose_paint.schema.json"
+  },
+  {
+   "glob": "map/compose/pins.json",
+   "schema": "compose_pins.schema.json"
+  },
+  {
+   "glob": "map/compose/place_nudges.json",
+   "schema": "compose_place_nudges.schema.json"
+  },
+  {
+   "glob": "map/compose/relief.json",
+   "schema": "compose_relief.schema.json"
+  },
+  {
+   "glob": "map/compose/relief_real.json",
+   "schema": "compose_relief_real.schema.json"
+  },
+  {
+   "glob": "map/compose/ridges.json",
+   "schema": "compose_ridges.schema.json"
+  },
+  {
+   "glob": "map/compose/selection*.json",
+   "schema": "compose_selection.schema.json"
+  },
+  {
+   "glob": "map/compose/warp.json",
+   "schema": "compose_warp.schema.json"
+  },
+  {
+   "glob": "council/offices.json",
+   "schema": "council_offices.schema.json"
+  },
+  {
+   "glob": "map/crossings.json",
+   "schema": "crossings.schema.json"
+  },
+  {
+   "glob": "rules/crusade.json",
+   "schema": "crusade_rules.schema.json"
+  },
+  {
+   "glob": "economy/currencies.json",
+   "schema": "currencies.schema.json"
+  },
+  {
+   "glob": "rules/custom_battle.json",
+   "schema": "custom_battle_rules.schema.json"
+  },
+  {
+   "glob": "map/detail_zones.json",
+   "schema": "detail_zones.schema.json"
+  },
+  {
+   "glob": "diets/*.json",
+   "schema": "diet.schema.json"
+  },
+  {
+   "glob": "rules/difficulty.json",
+   "schema": "difficulty_rules.schema.json"
+  },
+  {
+   "glob": "rules/diplomacy.json",
+   "schema": "diplomacy_rules.schema.json"
+  },
+  {
+   "glob": "rules/dynasty.json",
+   "schema": "dynasty_rules.schema.json"
+  },
+  {
+   "glob": "rules/economy.json",
+   "schema": "economy_rules.schema.json"
+  },
+  {
+   "glob": "edicts/*.json",
+   "schema": "edict.schema.json"
+  },
+  {
+   "glob": "encounters/*.json",
+   "schema": "encounter.schema.json"
+  },
+  {
+   "glob": "rules/encounters.json",
+   "schema": "encounter_rules.schema.json"
+  },
+  {
+   "glob": "ui/encyclopedia.json",
+   "schema": "encyclopedia.schema.json"
+  },
+  {
+   "glob": "ui/entity_icons.json",
+   "schema": "entity_icons.schema.json"
+  },
+  {
+   "glob": "events/*.json",
+   "schema": "event.schema.json"
+  },
+  {
+   "glob": "ui/event_feed.json",
+   "schema": "event_feed.schema.json"
+  },
+  {
+   "glob": "factions/*.json",
+   "schema": "faction.schema.json"
+  },
+  {
+   "glob": "map/faction_borders.json",
+   "schema": "faction_borders.schema.json"
+  },
+  {
+   "glob": "rules/feudal.json",
+   "schema": "feudal_rules.schema.json"
+  },
+  {
+   "glob": "ui/finance_panel.json",
+   "schema": "finance_panel.schema.json"
+  },
+  {
+   "glob": "rules/finance.json",
+   "schema": "finance_rules.schema.json"
+  },
+  {
+   "glob": "map/fine_anchors.json",
+   "schema": "fine_anchors.schema.json"
+  },
+  {
+   "glob": "rules/folk_props.json",
+   "schema": "folk_props.schema.json"
+  },
+  {
+   "glob": "rules/folk_scene_layouts.json",
+   "schema": "folk_scene_layouts.schema.json"
+  },
+  {
+   "glob": "map/forced_sea_edges.json",
+   "schema": "forced_sea_edges.schema.json"
+  },
+  {
+   "glob": "map/forest_cover.json",
+   "schema": "forest_cover.schema.json"
+  },
+  {
+   "glob": "rules/formation_width.json",
+   "schema": "formation_width_rules.schema.json"
+  },
+  {
+   "glob": "map/former_settlements.json",
+   "schema": "former_settlements.schema.json"
+  },
+  {
+   "glob": "ui/front_end.json",
+   "schema": "front_end.schema.json"
+  },
+  {
+   "glob": "fx/animal_motion.json",
+   "schema": "fx_animal_motion.schema.json"
+  },
+  {
+   "glob": "fx/animal_motion_measured.json",
+   "schema": "fx_animal_motion_measured.schema.json"
+  },
+  {
+   "glob": "fx/atmosphere.json",
+   "schema": "fx_atmosphere.schema.json"
+  },
+  {
+   "glob": "fx/battle_animation.json",
+   "schema": "fx_battle_animation.schema.json"
+  },
+  {
+   "glob": "fx/battle_crowd.json",
+   "schema": "fx_battle_crowd.schema.json"
+  },
+  {
+   "glob": "fx/battle_decals.json",
+   "schema": "fx_battle_decals.schema.json"
+  },
+  {
+   "glob": "fx/battle_decor_look.json",
+   "schema": "fx_battle_decor_look.schema.json"
+  },
+  {
+   "glob": "fx/battle_ground.json",
+   "schema": "fx_battle_ground.schema.json"
+  },
+  {
+   "glob": "fx/battle_ground_layers.json",
+   "schema": "fx_battle_ground_layers.schema.json"
+  },
+  {
+   "glob": "fx/battle_impact.json",
+   "schema": "fx_battle_impact.schema.json"
+  },
+  {
+   "glob": "fx/battle_lighting.json",
+   "schema": "fx_battle_lighting.schema.json"
+  },
+  {
+   "glob": "fx/battle_province_biomes.json",
+   "schema": "fx_battle_province_biomes.schema.json"
+  },
+  {
+   "glob": "fx/battle_soldier_look.json",
+   "schema": "fx_battle_soldier_look.schema.json"
+  },
+  {
+   "glob": "fx/battle_staging.json",
+   "schema": "fx_battle_staging.schema.json"
+  },
+  {
+   "glob": "fx/battle_weather_fx.json",
+   "schema": "fx_battle_weather_fx.schema.json"
+  },
+  {
+   "glob": "fx/camp_horse_motion.json",
+   "schema": "fx_camp_horse_motion.schema.json"
+  },
+  {
+   "glob": "fx/campaign_army_walk.json",
+   "schema": "fx_campaign_army_walk.schema.json"
+  },
+  {
+   "glob": "fx/campaign_lighting.json",
+   "schema": "fx_campaign_lighting.schema.json"
+  },
+  {
+   "glob": "fx/campaign_post.json",
+   "schema": "fx_campaign_post.schema.json"
+  },
+  {
+   "glob": "fx/campaign_relief_shade.json",
+   "schema": "fx_campaign_relief_shade.schema.json"
+  },
+  {
+   "glob": "fx/campaign_sky.json",
+   "schema": "fx_campaign_sky.schema.json"
+  },
+  {
+   "glob": "fx/campaign_terrain_textures.json",
+   "schema": "fx_campaign_terrain_textures.schema.json"
+  },
+  {
+   "glob": "fx/fa3_anim_sources.json",
+   "schema": "fx_fa3_anim_sources.schema.json"
+  },
+  {
+   "glob": "fx/fire_flipbooks.json",
+   "schema": "fx_fire_flipbooks.schema.json"
+  },
+  {
+   "glob": "fx/horizon.json",
+   "schema": "fx_horizon.schema.json"
+  },
+  {
+   "glob": "fx/map_atmosphere.json",
+   "schema": "fx_map_atmosphere.schema.json"
+  },
+  {
+   "glob": "fx/map_fire_wind.json",
+   "schema": "fx_map_fire_wind.schema.json"
+  },
+  {
+   "glob": "fx/palette.json",
+   "schema": "fx_palette.schema.json"
+  },
+  {
+   "glob": "fx/sea_life.json",
+   "schema": "fx_sea_life.schema.json"
+  },
+  {
+   "glob": "fx/siege_fire.json",
+   "schema": "fx_siege_fire.schema.json"
+  },
+  {
+   "glob": "fx/solari.json",
+   "schema": "fx_solari.schema.json"
+  },
+  {
+   "glob": "fx/solari_campaign.json",
+   "schema": "fx_solari_campaign.schema.json"
+  },
+  {
+   "glob": "fx/town_glow.json",
+   "schema": "fx_town_glow.schema.json"
+  },
+  {
+   "glob": "fx/trebuchet_swing_curve.json",
+   "schema": "fx_trebuchet_swing_curve.schema.json"
+  },
+  {
+   "glob": "fx/understory.json",
+   "schema": "fx_understory.schema.json"
+  },
+  {
+   "glob": "fx/water_detail.json",
+   "schema": "fx_water_detail.schema.json"
+  },
+  {
+   "glob": "art/ground_biome_mix.json",
+   "schema": "ground_biome_mix.schema.json"
+  },
+  {
+   "glob": "fx/ground_detail.json",
+   "schema": "ground_detail.schema.json"
+  },
+  {
+   "glob": "art/ground_materials.yaml",
+   "schema": "ground_materials.schema.json"
+  },
+  {
+   "glob": "art/ground_materials_pack.json",
+   "schema": "ground_materials_pack.schema.json"
+  },
+  {
+   "glob": "rules/group_formations.json",
+   "schema": "group_formations.schema.json"
+  },
+  {
+   "glob": "heraldry/charges/charges.json",
+   "schema": "heraldry_charges.schema.json"
+  },
+  {
+   "glob": "heraldry/houses.json",
+   "schema": "heraldry_houses.schema.json"
+  },
+  {
+   "glob": "map/historical_forests.json",
+   "schema": "historical_forests.schema.json"
+  },
+  {
+   "glob": "map/historical_hydro_notes.json",
+   "schema": "historical_hydro_notes.schema.json"
+  },
+  {
+   "glob": "map/historical_lakes.json",
+   "schema": "historical_lakes.schema.json"
+  },
+  {
+   "glob": "ui/hud_labels.json",
+   "schema": "hud_labels.schema.json"
+  },
+  {
+   "glob": "ui/icons_ink.json",
+   "schema": "icons_ink.schema.json"
+  },
+  {
+   "glob": "ui/illustrations.json",
+   "schema": "illustrations.schema.json"
+  },
+  {
+   "glob": "ui/journal_genres.json",
+   "schema": "journal_genres.schema.json"
+  },
+  {
+   "glob": "map/lakes.json",
+   "schema": "lakes.schema.json"
+  },
+  {
+   "glob": "landmarks/*.json",
+   "schema": "landmark.schema.json"
+  },
+  {
+   "glob": "landmarks_v2/*.json",
+   "schema": "landmark_v2.schema.json"
+  },
+  {
+   "glob": "rules/loyalty.json",
+   "schema": "loyalty_rules.schema.json"
+  },
+  {
+   "glob": "map/map.json",
+   "schema": "map.schema.json"
+  },
+  {
+   "glob": "map/biome_parents.json",
+   "schema": "map_biome_parents.schema.json"
+  },
+  {
+   "glob": "map/map_birds.json",
+   "schema": "map_birds.schema.json"
+  },
+  {
+   "glob": "map/map_countryside.json",
+   "schema": "map_countryside.schema.json"
+  },
+  {
+   "glob": "map/crossings_px.json",
+   "schema": "map_crossings_px.schema.json"
+  },
+  {
+   "glob": "map/map_fauna.json",
+   "schema": "map_fauna.schema.json"
+  },
+  {
+   "glob": "map/map_freshwater.json",
+   "schema": "map_freshwater.schema.json"
+  },
+  {
+   "glob": "map/freshwater_px.json",
+   "schema": "map_freshwater_px.schema.json"
+  },
+  {
+   "glob": "map/hamlets.json",
+   "schema": "map_hamlets.schema.json"
+  },
+  {
+   "glob": "map/landcover_params.json",
+   "schema": "map_landcover_params.schema.json"
+  },
+  {
+   "glob": "map/map_landmarks_extra.json",
+   "schema": "map_landmarks_extra.schema.json"
+  },
+  {
+   "glob": "ui/map_legend.json",
+   "schema": "map_legend.schema.json"
+  },
+  {
+   "glob": "map/parchment_ornaments.json",
+   "schema": "map_parchment_ornaments.schema.json"
+  },
+  {
+   "glob": "map/compose/province_splits.json",
+   "schema": "map_province_splits.schema.json"
+  },
+  {
+   "glob": "map/rivers_render.json",
+   "schema": "map_rivers_render.schema.json"
+  },
+  {
+   "glob": "rules/map_scenes.json",
+   "schema": "map_scenes_rules.schema.json"
+  },
+  {
+   "glob": "map/sea_lanes_px.json",
+   "schema": "map_sea_lanes_px.schema.json"
+  },
+  {
+   "glob": "map/settlement_edge_paths.json",
+   "schema": "map_settlement_edge_paths.schema.json"
+  },
+  {
+   "glob": "map/settlement_graph.json",
+   "schema": "map_settlement_graph.schema.json"
+  },
+  {
+   "glob": "map/settlements_px.json",
+   "schema": "map_settlements_px.schema.json"
+  },
+  {
+   "glob": "map/wetland_sites_px.json",
+   "schema": "map_wetland_sites_px.schema.json"
+  },
+  {
+   "glob": "art/materials.yaml",
+   "schema": "materials.schema.json"
+  },
+  {
+   "glob": "rules/mercenaries.json",
+   "schema": "mercenary_rules.schema.json"
+  },
+  {
+   "glob": "rules/missile_arc.json",
+   "schema": "missile_arc_rules.schema.json"
+  },
+  {
+   "glob": "rules/missile_morale.json",
+   "schema": "missile_morale_rules.schema.json"
+  },
+  {
+   "glob": "missions.json",
+   "schema": "missions.schema.json"
+  },
+  {
+   "glob": "map/modern_reservoirs.json",
+   "schema": "modern_reservoirs.schema.json"
+  },
+  {
+   "glob": "movement/rules.json",
+   "schema": "movement_rules.schema.json"
+  },
+  {
+   "glob": "audio/music.json",
+   "schema": "music.schema.json"
+  },
+  {
+   "glob": "names/*.json",
+   "schema": "names.schema.json"
+  },
+  {
+   "glob": "naval/fleets.json",
+   "schema": "naval_fleets.schema.json"
+  },
+  {
+   "glob": "naval/rules.json",
+   "schema": "naval_rules.schema.json"
+  },
+  {
+   "glob": "naval/ship_names.json",
+   "schema": "naval_ship_names.schema.json"
+  },
+  {
+   "glob": "movement/rivers.json",
+   "schema": "navigable_rivers.schema.json"
+  },
+  {
+   "glob": "ui/next_hints.json",
+   "schema": "next_hints.schema.json"
+  },
+  {
+   "glob": "rules/population.json",
+   "schema": "population_rules.schema.json"
+  },
+  {
+   "glob": "portraits/archetypes.json",
+   "schema": "portrait_archetypes.schema.json"
+  },
+  {
+   "glob": "fx/postfx.json",
+   "schema": "postfx.schema.json"
+  },
+  {
+   "glob": "rules/postures.json",
+   "schema": "posture_rules.schema.json"
+  },
+  {
+   "glob": "provinces/*.json",
+   "schema": "province.schema.json"
+  },
+  {
+   "glob": "map/relief_hosting.json",
+   "schema": "relief_hosting.schema.json"
+  },
+  {
+   "glob": "map/relief_pyramid.json",
+   "schema": "relief_pyramid.schema.json"
+  },
+  {
+   "glob": "religions/*.json",
+   "schema": "religion.schema.json"
+  },
+  {
+   "glob": "rules/religion.json",
+   "schema": "religion_rules.schema.json"
+  },
+  {
+   "glob": "fx/render_quality.json",
+   "schema": "render_quality.schema.json"
+  },
+  {
+   "glob": "rules/replenishment.json",
+   "schema": "replenishment_rules.schema.json"
+  },
+  {
+   "glob": "resources/*.json",
+   "schema": "resource.schema.json"
+  },
+  {
+   "glob": "retinue.json",
+   "schema": "retinue.schema.json"
+  },
+  {
+   "glob": "rules/revolt.json",
+   "schema": "revolt_rules.schema.json"
+  },
+  {
+   "glob": "rules/river_crossings.json",
+   "schema": "river_crossings_rules.schema.json"
+  },
+  {
+   "glob": "map/river_display.json",
+   "schema": "river_display.schema.json"
+  },
+  {
+   "glob": "map/river_names.json",
+   "schema": "river_names.schema.json"
+  },
+  {
+   "glob": "map/river_styles.json",
+   "schema": "river_styles.schema.json"
+  },
+  {
+   "glob": "map/river_widths.json",
+   "schema": "river_widths.schema.json"
+  },
+  {
+   "glob": "map/rivers_fine.json",
+   "schema": "rivers_fine.schema.json"
+  },
+  {
+   "glob": "royal_acts/*.json",
+   "schema": "royal_act.schema.json"
+  },
+  {
+   "glob": "map/sea_basins.json",
+   "schema": "sea_basins.schema.json"
+  },
+  {
+   "glob": "naval/sea_lanes.json",
+   "schema": "sea_lanes.schema.json"
+  },
+  {
+   "glob": "balance/seed_bots_bands.json",
+   "schema": "seed_bots_bands.schema.json"
+  },
+  {
+   "glob": "balance/seed_bots_bands_quick.json",
+   "schema": "seed_bots_bands.schema.json"
+  },
+  {
+   "glob": "settlements/prov_*.json",
+   "schema": "settlement.schema.json"
+  },
+  {
+   "glob": "map/settlement_cap_rules.json",
+   "schema": "settlement_cap_rules.schema.json"
+  },
+  {
+   "glob": "map/settlement_markers.json",
+   "schema": "settlement_markers.schema.json"
+  },
+  {
+   "glob": "settlements/rules.json",
+   "schema": "settlement_rules.schema.json"
+  },
+  {
+   "glob": "ui/settlement_tiers.json",
+   "schema": "settlement_tiers_ui.schema.json"
+  },
+  {
+   "glob": "naval/ships/*.json",
+   "schema": "ship_class.schema.json"
+  },
+  {
+   "glob": "rules/siege_capture.json",
+   "schema": "siege_capture_rules.schema.json"
+  },
+  {
+   "glob": "rules/siege_engines.json",
+   "schema": "siege_engine_rules.schema.json"
+  },
+  {
+   "glob": "fx/siege_engines.json",
+   "schema": "siege_engines.schema.json"
+  },
+  {
+   "glob": "rules/siege_fire.json",
+   "schema": "siege_fire_rules.schema.json"
+  },
+  {
+   "glob": "fx/siege_fx.json",
+   "schema": "siege_fx.schema.json"
+  },
+  {
+   "glob": "rules/siege_town.json",
+   "schema": "siege_town_rules.schema.json"
+  },
+  {
+   "glob": "rules/siege_works.json",
+   "schema": "siege_works_rules.schema.json"
+  },
+  {
+   "glob": "skills/*.json",
+   "schema": "skill.schema.json"
+  },
+  {
+   "glob": "audio/sound_bank.json",
+   "schema": "sound_bank.schema.json"
+  },
+  {
+   "glob": "map/stance_cues.json",
+   "schema": "stance_cues.schema.json"
+  },
+  {
+   "glob": "map/stance_fill.json",
+   "schema": "stance_fill.schema.json"
+  },
+  {
+   "glob": "rules/starting_armies.json",
+   "schema": "starting_armies.schema.json"
+  },
+  {
+   "glob": "rules/starting_fit.json",
+   "schema": "starting_fit.schema.json"
+  },
+  {
+   "glob": "technologies/*.json",
+   "schema": "technology.schema.json"
+  },
+  {
+   "glob": "art/textures/*.yaml",
+   "schema": "texture_catalog.schema.json"
+  },
+  {
+   "glob": "titles/*.json",
+   "schema": "title.schema.json"
+  },
+  {
+   "glob": "ui/tooltip_style.json",
+   "schema": "tooltip_style.schema.json"
+  },
+  {
+   "glob": "ui/tooltips.json",
+   "schema": "tooltips.schema.json"
+  },
+  {
+   "glob": "rules/town_footprint.json",
+   "schema": "town_footprint_rules.schema.json"
+  },
+  {
+   "glob": "art/town_look.json",
+   "schema": "town_look.schema.json"
+  },
+  {
+   "glob": "art/town_maquettes.json",
+   "schema": "town_maquettes.schema.json"
+  },
+  {
+   "glob": "map/towns_1340.json",
+   "schema": "towns_1340.schema.json"
+  },
+  {
+   "glob": "economy/trade.json",
+   "schema": "trade.schema.json"
+  },
+  {
+   "glob": "traits/*.json",
+   "schema": "trait.schema.json"
+  },
+  {
+   "glob": "rules/trait_triggers.json",
+   "schema": "trait_triggers.schema.json"
+  },
+  {
+   "glob": "ui/transitions.json",
+   "schema": "transitions_ui.schema.json"
+  },
+  {
+   "glob": "tutorial/steps.json",
+   "schema": "tutorial_steps.schema.json"
+  },
+  {
+   "glob": "ui/books.fr.json",
+   "schema": "ui_books.schema.json"
+  },
+  {
+   "glob": "ui/fa_ui_assets.json",
+   "schema": "ui_fa_assets.schema.json"
+  },
+  {
+   "glob": "ui/glossary.json",
+   "schema": "ui_glossary.schema.json"
+  },
+  {
+   "glob": "art/ui_ornaments.yaml",
+   "schema": "ui_ornaments.schema.json"
+  },
+  {
+   "glob": "rules/unit_formations.json",
+   "schema": "unit_formations_rules.schema.json"
+  },
+  {
+   "glob": "fx/unit_looks.json",
+   "schema": "unit_looks.schema.json"
+  },
+  {
+   "glob": "rules/unit_modes.json",
+   "schema": "unit_modes_rules.schema.json"
+  },
+  {
+   "glob": "ui/unit_ranks.json",
+   "schema": "unit_ranks_ui.schema.json"
+  },
+  {
+   "glob": "unit_types/*.json",
+   "schema": "unit_type.schema.json"
+  },
+  {
+   "glob": "map/valley_courses.json",
+   "schema": "valley_courses.schema.json"
+  },
+  {
+   "glob": "rules/vision.json",
+   "schema": "vision_rules.schema.json"
+  },
+  {
+   "glob": "settlements/vocations.json",
+   "schema": "vocations.schema.json"
+  },
+  {
+   "glob": "voice/advisor.json",
+   "schema": "voice_advisor.schema.json"
+  },
+  {
+   "glob": "voice/barks.json",
+   "schema": "voice_barks.schema.json"
+  },
+  {
+   "glob": "voice/speech_voices.json",
+   "schema": "voice_speech.schema.json"
+  },
+  {
+   "glob": "ui/war_scars.json",
+   "schema": "war_scars_ui.schema.json"
+  },
+  {
+   "glob": "art/water_materials.yaml",
+   "schema": "water_materials.schema.json"
+  },
+  {
+   "glob": "map/wetlands.json",
+   "schema": "wetlands.schema.json"
+  }
+ ],
+ "exceptions": []
+}

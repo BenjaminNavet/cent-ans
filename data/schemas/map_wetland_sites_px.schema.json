@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map_wetland_sites_px.schema.json",
+  "title": "Wetland sites",
+  "description": "Fichiers : map/wetland_sites_px.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "sites": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "px": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "radius_px": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "kind",
+          "px",
+          "radius_px"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "description",
+    "sites"
+  ],
+  "additionalProperties": false
+}

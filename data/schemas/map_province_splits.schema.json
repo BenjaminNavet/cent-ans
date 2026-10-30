@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map_province_splits.schema.json",
+  "title": "Province splits",
+  "description": "Fichiers : map/compose/province_splits.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "splits": {
+      "type": "object",
+      "properties": {
+        "prov_guyenne": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "seed_lonlat": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number"
+                }
+              },
+              "weight": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "seed_lonlat",
+              "weight"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "prov_guyenne"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "description",
+    "splits"
+  ],
+  "additionalProperties": false
+}

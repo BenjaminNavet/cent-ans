@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_dn_catalog.schema.json",
+  "title": "DN generation catalog (array of asset requests)",
+  "description": "Fichiers : art/dn_catalog_architecture.json, art/dn_catalog_battle.json, art/dn_catalog_battle_extra.json, art/dn_catalog_campaign.json, art/dn_catalog_economy.json, art/dn_catalog_fields.json, art/dn_catalog_illus.json, art/dn_catalog_map_extra.json, art/dn_catalog_mobile.json, art/dn_catalog_nature.json, art/dn_catalog_nature_extra.json, art/dn_catalog_yaya.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "kind": {
+        "type": "string"
+      },
+      "prompt": {
+        "type": "string"
+      },
+      "seeds": {
+        "type": "integer"
+      },
+      "backend3d": {
+        "type": "string"
+      },
+      "ingest": {
+        "type": "object",
+        "properties": {
+          "yaw_fix": {
+            "type": "integer"
+          },
+          "target_width_m": {
+            "type": "number"
+          },
+          "class": {
+            "type": "string"
+          },
+          "target_height_m": {
+            "type": "number"
+          },
+          "target_length_m": {
+            "type": "integer"
+          },
+          "out": {
+            "type": "string"
+          },
+          "size": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "integer"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "target": {
+        "type": "string"
+      },
+      "region": {
+        "type": "string"
+      },
+      "mounted": {
+        "type": "boolean"
+      },
+      "style_suffix": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "backend3d",
+      "id",
+      "ingest",
+      "kind",
+      "prompt",
+      "seeds",
+      "target"
+    ],
+    "additionalProperties": false
+  }
+}

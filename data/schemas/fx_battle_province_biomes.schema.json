@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_battle_province_biomes.schema.json",
+  "title": "Battle biome per province",
+  "description": "Fichiers : fx/battle_province_biomes.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "provinces": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer"
+      }
+    }
+  },
+  "required": [
+    "provinces"
+  ],
+  "additionalProperties": false
+}

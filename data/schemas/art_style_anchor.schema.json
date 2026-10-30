@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_style_anchor.schema.json",
+  "title": "NB style anchor record",
+  "description": "Fichiers : art/style/anchor.yaml. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "file": {
+      "type": "string"
+    },
+    "chosen": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "image_config": {
+      "type": "object",
+      "properties": {
+        "aspect_ratio": {
+          "type": "string"
+        },
+        "image_size": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "aspect_ratio",
+        "image_size"
+      ],
+      "additionalProperties": false
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "resized_to": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "integer"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prompt_file": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "chosen",
+    "file",
+    "image_config",
+    "model",
+    "prompt_file",
+    "resized_to",
+    "seed",
+    "sources"
+  ],
+  "additionalProperties": false
+}

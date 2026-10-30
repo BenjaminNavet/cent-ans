@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_council_catalog.schema.json",
+  "title": "Council figure catalog",
+  "description": "Fichiers : art/council_catalog.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "figure_style": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "class": {
+            "type": "string"
+          },
+          "scale": {
+            "type": "object",
+            "properties": {
+              "height_m": {
+                "type": "number"
+              },
+              "length_m": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object",
+            "properties": {
+              "image_model": {
+                "type": "string"
+              },
+              "image_seed_chosen": {
+                "type": "integer"
+              },
+              "image_seeds_tried": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "model_3d": {
+                "type": "string"
+              },
+              "ingest_yaw": {
+                "type": "integer"
+              },
+              "triangles_lod0": {
+                "type": "integer"
+              },
+              "glb": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "glb",
+              "image_model",
+              "image_seed_chosen",
+              "image_seeds_tried",
+              "ingest_yaw",
+              "model_3d",
+              "triangles_lod0"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "class",
+          "id",
+          "kind",
+          "prompt",
+          "result",
+          "scale"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "figure_style",
+    "items",
+    "notes"
+  ],
+  "additionalProperties": false
+}

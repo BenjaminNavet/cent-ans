@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_dn_cards_manifest.schema.json",
+  "title": "DN cards manifest (per-card file, seed, scores)",
+  "description": "Fichiers : art/dn_cards_manifest.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string"
+      },
+      "seed": {
+        "type": "integer"
+      },
+      "scores": {
+        "type": "object",
+        "properties": {
+          "s_mean": {
+            "type": "number"
+          },
+          "s_p95": {
+            "type": "number"
+          },
+          "v_mean": {
+            "type": "number"
+          },
+          "livery_px": {
+            "type": "integer"
+          },
+          "score": {
+            "type": "number"
+          },
+          "touches_border": {
+            "type": "boolean"
+          },
+          "centring": {
+            "type": "number"
+          },
+          "fill": {
+            "type": "number"
+          },
+          "solidity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "centring",
+          "fill",
+          "livery_px",
+          "s_mean",
+          "s_p95",
+          "score",
+          "solidity",
+          "touches_border",
+          "v_mean"
+        ],
+        "additionalProperties": false
+      },
+      "charter": {
+        "type": "string"
+      },
+      "aspect": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "aspect",
+      "charter",
+      "file",
+      "scores",
+      "seed"
+    ],
+    "additionalProperties": false
+  }
+}

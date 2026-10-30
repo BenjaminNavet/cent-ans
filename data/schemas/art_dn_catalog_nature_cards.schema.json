@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_dn_catalog_nature_cards.schema.json",
+  "title": "DN nature cards catalog",
+  "description": "Fichiers : art/dn_catalog_nature_cards.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "biomes": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "biomes",
+          "id",
+          "kind",
+          "prompt"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "cards",
+    "description"
+  ],
+  "additionalProperties": false
+}

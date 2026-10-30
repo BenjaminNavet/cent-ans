@@ -1,0 +1,364 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_animal_motion_measured.schema.json",
+  "title": "Measured animal motion",
+  "description": "Fichiers : fx/animal_motion_measured.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "assumptions": {
+      "type": "object",
+      "properties": {
+        "cattle_withers_m": {
+          "type": "number"
+        },
+        "horse_withers_m": {
+          "type": "number"
+        },
+        "wagon_px_per_m": {
+          "type": "integer"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cattle_withers_m",
+        "horse_withers_m",
+        "note",
+        "wagon_px_per_m"
+      ],
+      "additionalProperties": false
+    },
+    "clips": {
+      "type": "object",
+      "properties": {
+        "cow_walk": {
+          "type": "object",
+          "properties": {
+            "video": {
+              "type": "string"
+            },
+            "start_s": {
+              "type": "number"
+            },
+            "end_s": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "end_s",
+            "start_s",
+            "video"
+          ],
+          "additionalProperties": false
+        },
+        "cow_speed": {
+          "type": "object",
+          "properties": {
+            "video": {
+              "type": "string"
+            },
+            "start_s": {
+              "type": "number"
+            },
+            "end_s": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "end_s",
+            "start_s",
+            "video"
+          ],
+          "additionalProperties": false
+        },
+        "cow_period_a": {
+          "type": "object",
+          "properties": {
+            "video": {
+              "type": "string"
+            },
+            "start_s": {
+              "type": "number"
+            },
+            "end_s": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "end_s",
+            "start_s",
+            "video"
+          ],
+          "additionalProperties": false
+        },
+        "cow_period_b": {
+          "type": "object",
+          "properties": {
+            "video": {
+              "type": "string"
+            },
+            "start_s": {
+              "type": "number"
+            },
+            "end_s": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "end_s",
+            "start_s",
+            "video"
+          ],
+          "additionalProperties": false
+        },
+        "cow_graze": {
+          "type": "object",
+          "properties": {
+            "video": {
+              "type": "string"
+            },
+            "start_s": {
+              "type": "number"
+            },
+            "end_s": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "end_s",
+            "start_s",
+            "video"
+          ],
+          "additionalProperties": false
+        },
+        "sheep_graze": {
+          "type": "object",
+          "properties": {
+            "video": {
+              "type": "string"
+            },
+            "start_s": {
+              "type": "number"
+            },
+            "end_s": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "end_s",
+            "start_s",
+            "video"
+          ],
+          "additionalProperties": false
+        },
+        "wagon_box": {
+          "type": "object",
+          "properties": {
+            "video": {
+              "type": "string"
+            },
+            "start_s": {
+              "type": "number"
+            },
+            "end_s": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "end_s",
+            "start_s",
+            "video"
+          ],
+          "additionalProperties": false
+        },
+        "wagon_speed": {
+          "type": "object",
+          "properties": {
+            "video": {
+              "type": "string"
+            },
+            "start_s": {
+              "type": "number"
+            },
+            "end_s": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "end_s",
+            "start_s",
+            "video"
+          ],
+          "additionalProperties": false
+        },
+        "wagon_horses": {
+          "type": "object",
+          "properties": {
+            "video": {
+              "type": "string"
+            },
+            "start_s": {
+              "type": "number"
+            },
+            "end_s": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "end_s",
+            "start_s",
+            "video"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "cow_graze",
+        "cow_period_a",
+        "cow_period_b",
+        "cow_speed",
+        "cow_walk",
+        "sheep_graze",
+        "wagon_box",
+        "wagon_horses",
+        "wagon_speed"
+      ],
+      "additionalProperties": false
+    },
+    "cattle": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "array",
+          "number",
+          "string"
+        ]
+      }
+    },
+    "sheep": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "graze_head_below_horizontal_deg": {
+          "type": "number"
+        },
+        "graze_delta_rad": {
+          "type": "number"
+        },
+        "head_down_share": {
+          "type": "number"
+        },
+        "bite_peaks_hz": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "bite_amp_rad": {
+          "type": "number"
+        },
+        "step_peaks_hz": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "required": [
+        "bite_amp_rad",
+        "bite_peaks_hz",
+        "graze_delta_rad",
+        "graze_head_below_horizontal_deg",
+        "head_down_share",
+        "source",
+        "step_peaks_hz"
+      ],
+      "additionalProperties": false
+    },
+    "wagon": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "speed_m_per_s": {
+          "type": "number"
+        },
+        "box_rms_m": {
+          "type": "number"
+        },
+        "jolt_lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hz": {
+                "type": "number"
+              },
+              "spatial_period_m": {
+                "type": "number"
+              },
+              "amp_m": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "amp_m",
+              "hz",
+              "spatial_period_m"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "roll_half_rad": {
+          "type": "number"
+        },
+        "roll_hz": {
+          "type": "number"
+        },
+        "horse_half_cycle_s": {
+          "type": "number"
+        },
+        "horse_stride_period_s": {
+          "type": "number"
+        },
+        "horse_stride_m": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "box_rms_m",
+        "horse_half_cycle_s",
+        "horse_stride_m",
+        "horse_stride_period_s",
+        "jolt_lines",
+        "roll_half_rad",
+        "roll_hz",
+        "source",
+        "speed_m_per_s"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "assumptions",
+    "cattle",
+    "clips",
+    "sheep",
+    "wagon"
+  ],
+  "additionalProperties": false
+}

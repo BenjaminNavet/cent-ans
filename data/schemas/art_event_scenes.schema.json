@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_event_scenes.schema.json",
+  "title": "Event id to scene illustration",
+  "description": "Fichiers : art/event_scenes.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "additionalProperties": {
+    "type": "string"
+  }
+}

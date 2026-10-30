@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map_rivers_render.schema.json",
+  "title": "Rivers render",
+  "description": "Fichiers : map/rivers_render.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "bed_scale": {
+      "type": "number"
+    },
+    "bank_px": {
+      "type": "number"
+    },
+    "custom_zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "px": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "radius_px": {
+            "type": "number"
+          },
+          "boundary_bridges": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "boundary_bridges",
+          "id",
+          "name",
+          "px",
+          "radius_px"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rivers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "importance": {
+            "type": "integer"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "widths": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "importance",
+          "name",
+          "points",
+          "widths"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "bank_px",
+    "bed_scale",
+    "custom_zones",
+    "description",
+    "rivers"
+  ],
+  "additionalProperties": false
+}

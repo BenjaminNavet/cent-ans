@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_dn_illus_generation.schema.json",
+  "title": "DN illustration generation log",
+  "description": "Fichiers : art/dn_illus_generation.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "assets": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "full_prompt": {
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "integer"
+            }
+          },
+          "image": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ts": {
+                  "type": "string"
+                },
+                "seed": {
+                  "type": "integer"
+                },
+                "endpoint": {
+                  "type": "string"
+                },
+                "file": {
+                  "type": "string"
+                },
+                "arguments": {
+                  "type": "object",
+                  "properties": {
+                    "image_size": {
+                      "type": "object",
+                      "properties": {
+                        "width": {
+                          "type": "integer"
+                        },
+                        "height": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "height",
+                        "width"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "seed": {
+                      "type": "integer"
+                    },
+                    "enable_prompt_expansion": {
+                      "type": "boolean"
+                    },
+                    "output_format": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "enable_prompt_expansion",
+                    "image_size",
+                    "output_format",
+                    "seed"
+                  ],
+                  "additionalProperties": false
+                },
+                "usd": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "arguments",
+                "endpoint",
+                "file",
+                "seed",
+                "ts",
+                "usd"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "full_prompt",
+          "id",
+          "image",
+          "seed",
+          "size"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "assets",
+    "description"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map_landcover_params.schema.json",
+  "title": "Landcover parameters",
+  "description": "Fichiers : map/landcover_params.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "cleared_scale": {
+      "type": "number"
+    },
+    "forest_share": {
+      "type": "number"
+    },
+    "plain_open": {
+      "type": "number"
+    },
+    "noise_mix": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "number"
+      }
+    },
+    "grass_to_heath": {
+      "type": "object",
+      "properties": {
+        "mediterranean": {
+          "type": "number"
+        },
+        "semi_arid": {
+          "type": "number"
+        },
+        "steppe": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "mediterranean",
+        "semi_arid",
+        "steppe"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "cleared_scale",
+    "description",
+    "forest_share",
+    "grass_to_heath",
+    "noise_mix",
+    "plain_open"
+  ],
+  "additionalProperties": false
+}

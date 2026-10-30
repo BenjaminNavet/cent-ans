@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_tx_pack.schema.json",
+  "title": "Texture pack atlas manifest",
+  "description": "Fichiers : art/tx_*_pack.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "layer_size": {
+      "type": "integer"
+    },
+    "normal_size": {
+      "type": "integer"
+    },
+    "grid": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "integer"
+      }
+    },
+    "albedo": {
+      "type": "string"
+    },
+    "normal": {
+      "type": "string"
+    },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "layer": {
+            "type": "integer"
+          },
+          "role": {
+            "type": "string"
+          },
+          "biomes": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "species": {
+            "type": "string"
+          },
+          "tile_m": {
+            "type": "number"
+          },
+          "mean_linear": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "number"
+            }
+          },
+          "regions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "aspect": {
+            "type": "number"
+          },
+          "slope": {
+            "type": "number"
+          },
+          "flat": {
+            "type": "boolean"
+          },
+          "albedo": {
+            "type": "string"
+          },
+          "normal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "biomes",
+          "id",
+          "role",
+          "tile_m"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "biomes": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "tile_m": {
+            "type": "number"
+          },
+          "aspect": {
+            "type": "number"
+          },
+          "luma": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "aspect",
+          "biomes",
+          "file",
+          "id",
+          "luma",
+          "role",
+          "tile_m"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "layer_size"
+  ],
+  "additionalProperties": false
+}

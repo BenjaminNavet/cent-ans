@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_tree_model_gains.schema.json",
+  "title": "Tree model gains",
+  "description": "Fichiers : art/tree_model_gains.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "model_chroma": {
+      "type": "number"
+    },
+    "impostor_gain": {
+      "type": "number"
+    },
+    "impostor_gain_note": {
+      "type": "string"
+    },
+    "model_chroma_note": {
+      "type": "string"
+    },
+    "faithful": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "faithful_note": {
+      "type": "string"
+    },
+    "gains": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "required": [
+    "description",
+    "faithful",
+    "faithful_note",
+    "gains",
+    "impostor_gain",
+    "impostor_gain_note",
+    "model_chroma",
+    "model_chroma_note"
+  ],
+  "additionalProperties": false
+}

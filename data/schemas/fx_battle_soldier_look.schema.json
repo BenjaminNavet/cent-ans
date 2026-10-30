@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_battle_soldier_look.schema.json",
+  "title": "Battle soldier look",
+  "description": "Fichiers : fx/battle_soldier_look.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "_note": {
+      "type": "string"
+    },
+    "livery": {
+      "type": "object",
+      "properties": {
+        "desaturation": {
+          "type": "number"
+        },
+        "value_min": {
+          "type": "number"
+        },
+        "value_max": {
+          "type": "number"
+        },
+        "plain_boost": {
+          "type": "number"
+        },
+        "far_glow": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "desaturation",
+        "far_glow",
+        "plain_boost",
+        "value_max",
+        "value_min"
+      ],
+      "additionalProperties": false
+    },
+    "fabric": {
+      "type": "object",
+      "properties": {
+        "grain": {
+          "type": "number"
+        },
+        "grain_fade_m": {
+          "type": "number"
+        },
+        "variation": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "grain",
+        "grain_fade_m",
+        "variation"
+      ],
+      "additionalProperties": false
+    },
+    "shield": {
+      "type": "object",
+      "properties": {
+        "wear": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "wear"
+      ],
+      "additionalProperties": false
+    },
+    "skin": {
+      "type": "object",
+      "properties": {
+        "calm": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "calm"
+      ],
+      "additionalProperties": false
+    },
+    "steel": {
+      "type": "object",
+      "properties": {
+        "grey_mix": {
+          "type": "number"
+        },
+        "darken": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "darken",
+        "grey_mix"
+      ],
+      "additionalProperties": false
+    },
+    "banner": {
+      "type": "object",
+      "properties": {
+        "scale_per_m": {
+          "type": "number"
+        },
+        "scale_min": {
+          "type": "number"
+        },
+        "scale_max": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "scale_max",
+        "scale_min",
+        "scale_per_m"
+      ],
+      "additionalProperties": false
+    },
+    "battle_lod_impostor_m": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "_note",
+    "banner",
+    "battle_lod_impostor_m",
+    "fabric",
+    "livery",
+    "shield",
+    "skin",
+    "steel"
+  ],
+  "additionalProperties": false
+}

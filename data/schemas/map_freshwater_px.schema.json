@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map_freshwater_px.schema.json",
+  "title": "Freshwater features in map pixels",
+  "description": "Fichiers : map/freshwater_px.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "wetlands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "density": {
+            "type": "number"
+          },
+          "lagoon": {
+            "type": "boolean"
+          },
+          "center": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "radii_px": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "angle_deg": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "angle_deg",
+          "center",
+          "density",
+          "id",
+          "kind",
+          "lagoon",
+          "radii_px"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "salt_pans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tint": {
+            "type": "string"
+          },
+          "center": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "radii_px": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "angle_deg": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "angle_deg",
+          "center",
+          "id",
+          "name",
+          "radii_px",
+          "tint"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "waterfalls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "height_m": {
+            "type": "integer"
+          },
+          "px": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "height_m",
+          "id",
+          "name",
+          "px"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fords": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "width_m": {
+            "type": "integer"
+          },
+          "px": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "px",
+          "width_m"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "torrents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "river": {
+            "type": "string"
+          },
+          "slope": {
+            "type": "number"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "altitude_m": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "altitude_m",
+          "points",
+          "river",
+          "slope"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "description",
+    "fords",
+    "salt_pans",
+    "torrents",
+    "waterfalls",
+    "wetlands"
+  ],
+  "additionalProperties": false
+}

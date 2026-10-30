@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map_settlements_px.schema.json",
+  "title": "Settlement positions in map pixels",
+  "description": "Fichiers : map/settlements_px.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "additionalProperties": {
+    "type": "array",
+    "minItems": 2,
+    "maxItems": 2,
+    "items": {
+      "type": "number"
+    }
+  }
+}

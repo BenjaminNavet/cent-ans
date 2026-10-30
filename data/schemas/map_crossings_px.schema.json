@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map_crossings_px.schema.json",
+  "title": "Crossings in map pixels",
+  "description": "Fichiers : map/crossings_px.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "crossings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "structure": {
+            "type": "string"
+          },
+          "river": {
+            "type": "string"
+          },
+          "px": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "dir": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "width": {
+            "type": "number"
+          },
+          "snapped": {
+            "type": "boolean"
+          },
+          "in_custom_zone": {
+            "type": "boolean"
+          },
+          "axis": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "road_type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dir",
+          "id",
+          "in_custom_zone",
+          "name",
+          "px",
+          "river",
+          "snapped",
+          "structure",
+          "type",
+          "width"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "crossings",
+    "description"
+  ],
+  "additionalProperties": false
+}

@@ -1,335 +1,93 @@
-"""Every data file is valid against its JSON schema (one table, one parametrised test)."""
+"""Every data file is valid against its JSON schema, through the explicit manifest.
 
+`data/schemas/manifest.json` maps data globs to schemas (ADR 0829). Three guards:
+every JSON/YAML file of `data/` must match an entry or a justified exception, every
+entry must match at least one file, every schema must be used.
+"""
+
+import json
 from pathlib import Path
 
 import pytest
 from conftest import DATA, assert_matches_schema
 
-# schema (in data/schemas/) -> data files or globs (relative to data/) that must match it.
-SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
-    "captains_rules.schema.json": ("rules/captains.json",),
-    "loyalty_rules.schema.json": ("rules/loyalty.json",),
-    "trait_triggers.schema.json": ("rules/trait_triggers.json",),
-    "ui_glossary.schema.json": ("ui/glossary.json",),
-    "royal_act.schema.json": ("royal_acts/*.json",),
-    "agent_rules.schema.json": ("rules/agents.json",),
-    "ai_alignment.schema.json": ("ai/alignment.json",),
-    "ai_campaign.schema.json": ("ai/campaign.json",),
-    "ai_diplomacy.schema.json": ("ai/diplomacy.json",),
-    "ai_doctrine.schema.json": ("ai/doctrines.json",),
-    "ai_feudal.schema.json": ("ai/feudal.json",),
-    "ai_grid.schema.json": ("ai/grid.json",),
-    "ai_strategic_doctrine.schema.json": ("ai/strategic_doctrines.json",),
-    "ai_turn_replay.schema.json": ("ui/ai_turn_replay.json",),
-    "army_rules.schema.json": ("rules/armies.json",),
-    "army_traditions_rules.schema.json": ("rules/army_traditions.json",),
-    "art_battle_grass.schema.json": ("art/battle_grass.json",),
-    "art_battle_tree_leaves.schema.json": ("art/battle_tree_leaves.json",),
-    "art_building_materials.schema.json": ("art/building_materials.json",),
-    "art_building_regions.schema.json": ("art/building_regions.json",),
-    "art_ga3_decor.schema.json": ("art/ga3_decor.json",),
-    "art_tree_species.schema.json": ("art/tree_species.json",),
-    "art_forest_stands.schema.json": ("art/forest_stands.json",),
-    "art_campaign_forest_look.schema.json": ("art/campaign_forest_look.json",),
-    "auto_resolve_rules.schema.json": ("rules/auto_resolve.json",),
-    "battle_bench.schema.json": ("rules/battle_bench.json",),
-    "battle_ability.schema.json": ("battle_abilities/*.json",),
-    "battle_ai_rules.schema.json": ("rules/battle_ai.json",),
-    "battle_alerts_rules.schema.json": ("rules/battle_alerts.json",),
-    "battle_crest_defence_rules.schema.json": ("rules/battle_crest_defence.json",),
-    "battle_crest_rules.schema.json": ("rules/battle_crest.json",),
-    "battle_decision_rules.schema.json": ("rules/battle_decision.json",),
-    "battle_decor_plan.schema.json": ("battle_maps/decor_plan_example.json",),
-    "battle_decor_rules.schema.json": ("rules/battle_decor.json",),
-    "battle_demos.schema.json": ("ui/battle_demos.json",),
-    "battle_duel_rules.schema.json": ("rules/battle_duel.json",),
-    "battle_finish.schema.json": ("fx/battle_finish.json",),
-    "battle_gore.schema.json": ("fx/battle_gore.json",),
-    "battle_history_rules.schema.json": ("rules/battle_history.json",),
-    "battle_horse_wait_rules.schema.json": ("rules/battle_horse_wait.json",),
-    "battle_mass_charge_rules.schema.json": ("rules/battle_mass_charge.json",),
-    "battle_hover_rules.schema.json": ("rules/battle_hover.json",),
-    "battle_layers.schema.json": ("audio/battle_layers.json",),
-    "battle_map.schema.json": (
-        "battle_maps/azincourt.json",
-        "battle_maps/crecy.json",
-        "battle_maps/poitiers.json",
-    ),
-    "battle_morale_rules.schema.json": ("rules/battle_morale.json",),
-    "battle_opening_rules.schema.json": ("rules/battle_opening.json",),
-    "battle_order.schema.json": ("battle_orders/*.json",),
-    "battle_outcome_rules.schema.json": ("rules/battle_outcome.json",),
-    "battle_pace_rules.schema.json": ("rules/battle_pace.json",),
-    "battle_movement_rules.schema.json": ("rules/battle_movement.json",),
-    "battle_plans.schema.json": ("rules/battle_plans.json",),
-    "battle_prologue.schema.json":("tutorial/battle_prologue.json",),
-    "battle_push_rules.schema.json": ("rules/battle_push.json",),
-    "battle_queue_rules.schema.json": ("rules/battle_queue.json",),
-    "battle_relief_rules.schema.json": ("rules/battle_relief.json",),
-    "battle_replay_rules.schema.json": ("rules/battle_replay.json",),
-    "battle_rout_rules.schema.json": ("rules/battle_rout.json",),
-    "battle_site_rules.schema.json": ("rules/battle_site.json",),
-    "battle_scale_rules.schema.json": ("rules/battle_scale.json",),
-    "battle_impact_rules.schema.json": ("rules/battle_impact.json",),
-    "battle_spear_wall_rules.schema.json": ("rules/battle_spear_wall.json",),
-    "battle_speeches.schema.json": ("speeches/battle_speeches.json",),
-    "battle_standard_rules.schema.json": ("rules/battle_standards.json",),
-    "battle_standards_fx.schema.json": ("fx/battle_standards.json",),
-    "battle_terrain_rules.schema.json": ("rules/battle_terrain.json",),
-    "battle_time_of_day_rules.schema.json": ("rules/battle_time_of_day.json",),
-    "battle_water_rules.schema.json": ("rules/battle_water.json",),
-    "building.schema.json": ("buildings/*.json",),
-    "bathymetry.schema.json": ("map/bathymetry.json",),
-    "building_models.schema.json": ("map/building_models.json",),
-    "camera_feel.schema.json": ("ui/camera_feel.json",),
-    "campaign_map_ui.schema.json": ("ui/campaign_map.json",),
-    "campaign_seasons_ui.schema.json": ("ui/campaign_seasons.json",),
-    "campaign_weather_rules.schema.json": ("rules/campaign_weather.json",),
-    "capture_rules.schema.json": ("rules/capture.json",),
-    "chivalric_order.schema.json": ("chivalric_orders/*.json",),
-    "coast_types.schema.json": ("map/coast_types.json",),
-    "crossings.schema.json": ("map/crossings.json",),
-    "crusade_rules.schema.json": ("rules/crusade.json",),
-    "custom_battle_rules.schema.json": ("rules/custom_battle.json",),
-    "detail_zones.schema.json": ("map/detail_zones.json",),
-    "difficulty_rules.schema.json": ("rules/difficulty.json",),
-    "diplomacy_rules.schema.json": ("rules/diplomacy.json",),
-    "dynasty_rules.schema.json": ("rules/dynasty.json",),
-    "economy_rules.schema.json": ("rules/economy.json",),
-    "encounter.schema.json": ("encounters/*.json",),
-    "encounter_rules.schema.json": ("rules/encounters.json",),
-    "encyclopedia.schema.json": ("ui/encyclopedia.json",),
-    "entity_icons.schema.json": ("ui/entity_icons.json",),
-    "event.schema.json": ("events/*.json",),
-    "faction.schema.json": ("factions/*.json",),
-    "faction_borders.schema.json": ("map/faction_borders.json",),
-    "feudal_rules.schema.json": ("rules/feudal.json",),
-    "fine_anchors.schema.json": ("map/fine_anchors.json",),
-    "forced_sea_edges.schema.json": ("map/forced_sea_edges.json",),
-    "forest_cover.schema.json": ("map/forest_cover.json",),
-    "formation_width_rules.schema.json": ("rules/formation_width.json",),
-    "front_end.schema.json": ("ui/front_end.json",),
-    "fx_atmosphere.schema.json": ("fx/atmosphere.json",),
-    "fx_campaign_post.schema.json": ("fx/campaign_post.json",),
-    "fx_campaign_sky.schema.json": ("fx/campaign_sky.json",),
-    "fx_palette.schema.json": ("fx/palette.json",),
-    "fx_battle_decor_look.schema.json": ("fx/battle_decor_look.json",),
-    "fx_battle_lighting.schema.json": ("fx/battle_lighting.json",),
-    "fx_battle_weather_fx.schema.json": ("fx/battle_weather_fx.json",),
-    "fx_trebuchet_swing_curve.schema.json": ("fx/trebuchet_swing_curve.json",),
-    "fx_battle_animation.schema.json": ("fx/battle_animation.json",),
-    "fx_battle_ground.schema.json": ("fx/battle_ground.json",),
-    "fx_battle_ground_layers.schema.json": ("fx/battle_ground_layers.json",),
-    "fx_battle_staging.schema.json": ("fx/battle_staging.json",),
-    "fx_campaign_lighting.schema.json": ("fx/campaign_lighting.json",),
-    "fx_campaign_terrain_textures.schema.json": ("fx/campaign_terrain_textures.json",),
-    "fx_fa3_anim_sources.schema.json": ("fx/fa3_anim_sources.json",),
-    "fx_fire_flipbooks.schema.json": ("fx/fire_flipbooks.json",),
-    "fx_horizon.schema.json": ("fx/horizon.json",),
-    "fx_siege_fire.schema.json": ("fx/siege_fire.json",),
-    "fx_sea_life.schema.json": ("fx/sea_life.json",),
-    "fx_water_detail.schema.json": ("fx/water_detail.json",),
-    "ground_biome_mix.schema.json": ("art/ground_biome_mix.json",),
-    "group_formations.schema.json": ("rules/group_formations.json",),
-    "heraldry_charges.schema.json": ("heraldry/charges/charges.json",),
-    "heraldry_houses.schema.json": ("heraldry/houses.json",),
-    "historical_forests.schema.json": ("map/historical_forests.json",),
-    "historical_hydro_notes.schema.json": ("map/historical_hydro_notes.json",),
-    "historical_lakes.schema.json": ("map/historical_lakes.json",),
-    "icons_ink.schema.json": ("ui/icons_ink.json",),
-    "illustrations.schema.json": ("ui/illustrations.json",),
-    "lakes.schema.json": ("map/lakes.json",),
-    "landmark.schema.json": ("landmarks/*.json",),
-    "landmark_v2.schema.json": ("landmarks_v2/*.json",),
-    "map_birds.schema.json": ("map/map_birds.json",),
-    "map_landmarks_extra.schema.json": ("map/map_landmarks_extra.json",),
-    "map_legend.schema.json": ("ui/map_legend.json",),
-    "journal_genres.schema.json": ("ui/journal_genres.json",),
-    "causes.schema.json": ("ui/causes.fr.json",),
-    "event_feed.schema.json": ("ui/event_feed.json",),
-    "map_parchment_ornaments.schema.json": ("map/parchment_ornaments.json",),
-    "folk_scene_layouts.schema.json": ("rules/folk_scene_layouts.json",),
-    "map_scenes_rules.schema.json": ("rules/map_scenes.json",),
-    "mercenary_rules.schema.json": ("rules/mercenaries.json",),
-    "missile_arc_rules.schema.json": ("rules/missile_arc.json",),
-    "missile_morale_rules.schema.json": ("rules/missile_morale.json",),
-    "missions.schema.json": ("missions.json",),
-    "modern_reservoirs.schema.json": ("map/modern_reservoirs.json",),
-    "movement_rules.schema.json": ("movement/rules.json",),
-    "navigable_rivers.schema.json": ("movement/rivers.json",),
-    "music.schema.json": ("audio/music.json",),
-    "audio_credits.schema.json": ("audio/credits.json",),
-    "naval_fleets.schema.json": ("naval/fleets.json",),
-    "naval_rules.schema.json": ("naval/rules.json",),
-    "naval_ship_names.schema.json": ("naval/ship_names.json",),
-    "next_hints.schema.json": ("ui/next_hints.json",),
-    "hud_labels.schema.json": ("ui/hud_labels.json",),
-    "finance_panel.schema.json": ("ui/finance_panel.json",),
-    "assembly_panel.schema.json": ("ui/assembly_panel.json",),
-    "ui_books.schema.json": ("ui/books.fr.json",),
-    "unit_ranks_ui.schema.json": ("ui/unit_ranks.json",),
-    "population_rules.schema.json": ("rules/population.json",),
-    "revolt_rules.schema.json": ("rules/revolt.json",),
-    "acts_rules.schema.json": ("rules/acts.json",),
-    "advisor_rules.schema.json": ("rules/advisor.json",),
-    "finance_rules.schema.json": ("rules/finance.json",),
-    "cause_thresholds.schema.json": ("rules/cause_thresholds.json",),
-    "agenda_rules.schema.json": ("rules/agenda.json",),
-    "audience_texts.schema.json": ("ui/audience.fr.json",),
-    "assemblies.schema.json": ("rules/assemblies.json",),
-    "portrait_archetypes.schema.json": ("portraits/archetypes.json",),
-    "posture_rules.schema.json": ("rules/postures.json",),
-    "province.schema.json": ("provinces/*.json",),
-    "relief_pyramid.schema.json": ("map/relief_pyramid.json",),
-    "render_quality.schema.json": ("fx/render_quality.json",),
-    "postfx.schema.json": ("fx/postfx.json",),
-    "ground_detail.schema.json": ("fx/ground_detail.json",),
-    "fx_understory.schema.json": ("fx/understory.json",),
-    "religion_rules.schema.json": ("rules/religion.json",),
-    "replenishment_rules.schema.json": ("rules/replenishment.json",),
-    "council_offices.schema.json": ("council/offices.json",),
-    "retinue.schema.json": ("retinue.json",),
-    "river_crossings_rules.schema.json": ("rules/river_crossings.json",),
-    "river_display.schema.json": ("map/river_display.json",),
-    "river_names.schema.json": ("map/river_names.json",),
-    "river_styles.schema.json": ("map/river_styles.json",),
-    "river_widths.schema.json": ("map/river_widths.json",),
-    "rivers_fine.schema.json": ("map/rivers_fine.json",),
-    "sea_basins.schema.json": ("map/sea_basins.json",),
-    "sea_lanes.schema.json": ("naval/sea_lanes.json",),
-    "settlement.schema.json": ("settlements/prov_*.json",),
-    "settlement_cap_rules.schema.json": ("map/settlement_cap_rules.json",),
-    "compose_selection.schema.json": ("map/compose/selection*.json",),
-    "compose_id_map.schema.json": ("map/compose/id_map*.json",),
-    "former_settlements.schema.json": ("map/former_settlements.json",),
-    "settlement_markers.schema.json": ("map/settlement_markers.json",),
-    "settlement_rules.schema.json": ("settlements/rules.json",),
-    "vocations.schema.json": ("settlements/vocations.json",),
-    "ship_class.schema.json": ("naval/ships/*.json",),
-    "siege_capture_rules.schema.json": ("rules/siege_capture.json",),
-    "siege_engine_rules.schema.json": ("rules/siege_engines.json",),
-    "siege_engines.schema.json": ("fx/siege_engines.json",),
-    "siege_fire_rules.schema.json": ("rules/siege_fire.json",),
-    "siege_fx.schema.json": ("fx/siege_fx.json",),
-    "siege_town_rules.schema.json": ("rules/siege_town.json",),
-    "siege_works_rules.schema.json": ("rules/siege_works.json",),
-    "sound_bank.schema.json": ("audio/sound_bank.json",),
-    "stance_cues.schema.json": ("map/stance_cues.json",),
-    "stance_fill.schema.json": ("map/stance_fill.json",),
-    "starting_armies.schema.json": ("rules/starting_armies.json",),
-    "starting_fit.schema.json": ("rules/starting_fit.json",),
-    "title.schema.json": ("titles/*.json",),
-    "tooltip_style.schema.json": ("ui/tooltip_style.json",),
-    "tooltips.schema.json": ("ui/tooltips.json",),
-    "town_footprint_rules.schema.json": ("rules/town_footprint.json",),
-    "art_dn_campaign_models.schema.json": ("art/dn_campaign_models.json",),
-    "art_dn_water_models.schema.json": ("art/dn_water_models.json",),
-    "town_look.schema.json": ("art/town_look.json",),
-    "town_maquettes.schema.json": ("art/town_maquettes.json",),
-    "towns_1340.schema.json": ("map/towns_1340.json",),
-    "trade.schema.json": ("economy/trade.json",),
-    "currencies.schema.json": ("economy/currencies.json",),
-    "ui_fa_assets.schema.json": ("ui/fa_ui_assets.json",),
-    "tutorial_steps.schema.json": ("tutorial/steps.json",),
-    "unit_formations_rules.schema.json": ("rules/unit_formations.json",),
-    "unit_looks.schema.json": ("fx/unit_looks.json",),
-    "unit_modes_rules.schema.json": ("rules/unit_modes.json",),
-    "vision_rules.schema.json": ("rules/vision.json",),
-    "settlement_tiers_ui.schema.json": ("ui/settlement_tiers.json",),
-    "voice_advisor.schema.json": ("voice/advisor.json",),
-    "voice_barks.schema.json": ("voice/barks.json",),
-    "voice_speech.schema.json": ("voice/speech_voices.json",),
-    "war_scars_ui.schema.json": ("ui/war_scars.json",),
-    "map_freshwater.schema.json": ("map/map_freshwater.json",),
-    "agri_landscapes.schema.json": ("map/agri_landscapes.json",),
-    "wetlands.schema.json": ("map/wetlands.json",),
-    # Schémas sans entrée ci-dessus (lot DATA, constat du juge technique) : validés ici.
-    "art_dn_fields.schema.json": ("art/dn_fields.json",),
-    "art_dn_ingest_classes.schema.json": ("art/dn_ingest_classes.json",),
-    "art_dn_manifest.schema.json": ("art/dn_manifest.json",),
-    "art_dn_models_hosting.schema.json": ("art/dn_models_hosting.json",),
-    "art_rock_outcrops.schema.json": ("art/rock_outcrops.yaml",),
-    "art_siege_stone.schema.json": ("art/siege_stone.json",),
-    "biomes.schema.json": ("map/biomes.yaml",),
-    "character.schema.json": ("characters/*.json",),
-    "codex.schema.json": ("codex/cdx_*.json",),
-    "codex_bundle.schema.json": ("codex_bundle.json",),
-    "colormap_style.schema.json": ("map/colormap_style.yaml",),
-    "compose_erode.schema.json": ("map/compose/erode.json",),
-    "compose_generalise.schema.json": ("map/compose/generalise.json",),
-    "compose_paint.schema.json": ("map/compose/paint/*.json",),
-    "compose_pins.schema.json": ("map/compose/pins.json",),
-    "compose_place_nudges.schema.json": ("map/compose/place_nudges.json",),
-    "compose_relief.schema.json": ("map/compose/relief.json",),
-    "compose_relief_real.schema.json": ("map/compose/relief_real.json",),
-    "compose_ridges.schema.json": ("map/compose/ridges.json",),
-    "compose_warp.schema.json": ("map/compose/warp.json",),
-    "diet.schema.json": ("diets/*.json",),
-    "edict.schema.json": ("edicts/*.json",),
-    "folk_props.schema.json": ("rules/folk_props.json",),
-    "fx_animal_motion.schema.json": ("fx/animal_motion.json",),
-    "fx_battle_impact.schema.json": ("fx/battle_impact.json",),
-    "fx_camp_horse_motion.schema.json": ("fx/camp_horse_motion.json",),
-    "fx_campaign_army_walk.schema.json": ("fx/campaign_army_walk.json",),
-    "fx_map_atmosphere.schema.json": ("fx/map_atmosphere.json",),
-    "fx_map_fire_wind.schema.json": ("fx/map_fire_wind.json",),
-    "fx_town_glow.schema.json": ("fx/town_glow.json",),
-    "ground_materials.schema.json": ("art/ground_materials.yaml",),
-    "ground_materials_pack.schema.json": ("art/ground_materials_pack.json",),
-    "map.schema.json": ("map/map.json",),
-    "map_countryside.schema.json": ("map/map_countryside.json",),
-    "map_fauna.schema.json": ("map/map_fauna.json",),
-    "materials.schema.json": ("art/materials.yaml",),
-    "names.schema.json": ("names/*.json",),
-    "relief_hosting.schema.json": ("map/relief_hosting.json",),
-    "religion.schema.json": ("religions/*.json",),
-    "resource.schema.json": ("resources/*.json",),
-    "seed_bots_bands.schema.json": ("balance/seed_bots_bands.json",),
-    "skill.schema.json": ("skills/*.json",),
-    "technology.schema.json": ("technologies/*.json",),
-    "texture_catalog.schema.json": ("art/textures/*.yaml",),
-    "trait.schema.json": ("traits/*.json",),
-    "transitions_ui.schema.json": ("ui/transitions.json",),
-    "fx_battle_crowd.schema.json": ("fx/battle_crowd.json",),
-    "fx_battle_decals.schema.json": ("fx/battle_decals.json",),
-    "fx_campaign_relief_shade.schema.json": ("fx/campaign_relief_shade.json",),
-    "fx_solari.schema.json": ("fx/solari.json",),
-    "fx_solari_campaign.schema.json": ("fx/solari_campaign.json",),
-    "ui_ornaments.schema.json": ("art/ui_ornaments.yaml",),
-    "unit_type.schema.json": ("unit_types/*.json",),
-    "valley_courses.schema.json": ("map/valley_courses.json",),
-    "water_materials.schema.json": ("art/water_materials.yaml",),
-}
+MANIFEST = json.loads((DATA / "schemas" / "manifest.json").read_text(encoding="utf-8"))
+DATA_SUFFIXES = {".json", ".yaml", ".yml"}
 
-# Schémas hors table, avec la raison (tout autre schéma de data/schemas/ doit y figurer).
+# Schémas sans données propres (modules partagés de $ref), avec la raison.
 EXEMPT_SCHEMAS: dict[str, str] = {
     "common.schema.json": "définitions partagées (`$defs`), aucun document de données",
     "battle_replay.schema.json": "échantillon écrit par sim-battle, validé par test_battle_replay_schema.py",
 }
 
 
+def _data_files() -> list[Path]:
+    """Every JSON/YAML data file, except the schemas themselves."""
+    schema_dir = DATA / "schemas"
+    return sorted(
+        path
+        for path in DATA.rglob("*")
+        if path.is_file()
+        and path.suffix in DATA_SUFFIXES
+        and schema_dir not in path.parents
+    )
+
+
+def _relative(path: Path) -> str:
+    return path.relative_to(DATA).as_posix()
+
+
 def _cases() -> list:
     cases = []
-    for schema_name, patterns in SCHEMA_TABLE.items():
-        for pattern in patterns:
-            paths = sorted(DATA.glob(pattern))
-            assert paths, f"{pattern}: no data file"
-            cases.extend(
-                pytest.param(schema_name, path, id=path.relative_to(DATA).as_posix())
-                for path in paths
-            )
+    for entry in MANIFEST["entries"]:
+        paths = sorted(DATA.glob(entry["glob"]))
+        cases.extend(
+            pytest.param(entry["schema"], path, id=_relative(path)) for path in paths
+        )
     return cases
 
 
 @pytest.mark.parametrize(("schema_name", "data_path"), _cases())
 def test_data_matches_schema(schema_name: str, data_path: Path) -> None:
-    """The data file validates against its schema, with sibling `$ref`s resolved."""
     assert_matches_schema(data_path, schema_name)
 
 
+def test_every_data_file_has_a_schema_or_an_exception() -> None:
+    covered = {
+        _relative(path)
+        for entry in MANIFEST["entries"]
+        for path in DATA.glob(entry["glob"])
+    }
+    excepted = {
+        _relative(path)
+        for exception in MANIFEST["exceptions"]
+        for path in DATA.glob(exception["glob"])
+    }
+    unmatched = [
+        _relative(path)
+        for path in _data_files()
+        if _relative(path) not in covered | excepted
+    ]
+    assert not unmatched, f"{len(unmatched)} fichiers sans schéma : {unmatched[:20]}"
+
+
+def test_every_manifest_entry_matches_a_file() -> None:
+    dead = [
+        entry["glob"]
+        for entry in [*MANIFEST["entries"], *MANIFEST["exceptions"]]
+        if not list(DATA.glob(entry["glob"]))
+    ]
+    assert not dead, f"entrées du manifeste sans fichier : {dead}"
+
+
+def test_exceptions_are_justified() -> None:
+    bare = [e["glob"] for e in MANIFEST["exceptions"] if len(e.get("reason", "")) < 20]
+    assert not bare, f"exceptions sans raison : {bare}"
+
+
 def test_every_schema_is_validated_or_exempt() -> None:
-    """Chaque schéma de data/schemas/ a au moins un fichier de données dans SCHEMA_TABLE (ou une exception motivée)."""
     schema_files = {path.name for path in (DATA / "schemas").glob("*.schema.json")}
-    uncovered = sorted(schema_files - set(SCHEMA_TABLE) - set(EXEMPT_SCHEMAS))
+    used = {entry["schema"] for entry in MANIFEST["entries"]}
+    uncovered = sorted(schema_files - used - set(EXEMPT_SCHEMAS))
     assert not uncovered, f"schémas sans validation de données : {uncovered}"
-    assert not sorted(set(SCHEMA_TABLE) - schema_files), "entrée de table sans schéma"
+    assert not sorted(used - schema_files), "entrée du manifeste sans schéma"

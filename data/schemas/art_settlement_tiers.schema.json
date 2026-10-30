@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_settlement_tiers.schema.json",
+  "title": "Settlement tier art",
+  "description": "Fichiers : art/settlement_tiers.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "style": {
+      "type": "string"
+    },
+    "kinds": {
+      "type": "object",
+      "properties": {
+        "village": {
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string"
+            },
+            "tiers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "subject",
+            "tiers"
+          ],
+          "additionalProperties": false
+        },
+        "town": {
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string"
+            },
+            "tiers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "subject",
+            "tiers"
+          ],
+          "additionalProperties": false
+        },
+        "city": {
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string"
+            },
+            "tiers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "subject",
+            "tiers"
+          ],
+          "additionalProperties": false
+        },
+        "castle": {
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string"
+            },
+            "tiers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "subject",
+            "tiers"
+          ],
+          "additionalProperties": false
+        },
+        "abbey": {
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string"
+            },
+            "tiers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "subject",
+            "tiers"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "abbey",
+        "castle",
+        "city",
+        "town",
+        "village"
+      ],
+      "additionalProperties": false
+    },
+    "buildings": {
+      "type": "object",
+      "properties": {
+        "bld_bailiwick": {
+          "type": "string"
+        },
+        "bld_banal_oven": {
+          "type": "string"
+        },
+        "bld_corn_hall": {
+          "type": "string"
+        },
+        "bld_manor_chapel": {
+          "type": "string"
+        },
+        "bld_provostry": {
+          "type": "string"
+        },
+        "bld_tithe_barn": {
+          "type": "string"
+        },
+        "bld_toll_post": {
+          "type": "string"
+        },
+        "bld_town_hall": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "bld_bailiwick",
+        "bld_banal_oven",
+        "bld_corn_hall",
+        "bld_manor_chapel",
+        "bld_provostry",
+        "bld_tithe_barn",
+        "bld_toll_post",
+        "bld_town_hall"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "buildings",
+    "description",
+    "kinds",
+    "style"
+  ],
+  "additionalProperties": false
+}

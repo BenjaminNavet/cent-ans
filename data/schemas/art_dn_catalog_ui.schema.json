@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/art_dn_catalog_ui.schema.json",
+  "title": "DN UI catalog (commands with asset ids)",
+  "description": "Fichiers : art/dn_catalog_ui.json. Schéma initial dérivé des données existantes (ADR 0829) : types, clés requises et clés inconnues refusées ; à resserrer (bornes, énumérations) quand le champ est touché.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "cmd": {
+        "type": "string"
+      },
+      "ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "note": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "cmd",
+      "ids",
+      "note"
+    ],
+    "additionalProperties": false
+  }
+}
