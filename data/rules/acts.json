@@ -3945,6 +3945,1519 @@
           ]
         }
       ]
+    },
+    "fac_brittany": {
+      "act_1": [
+        {
+          "id": "br1_amb_montfort",
+          "name": "Le parti de Montfort",
+          "description": "Soutenir Jeanne de Flandre et les Montfort contre Blois, comme à Hennebont : levées moins chères (-20 %), troubles (+2). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "br1_amb_penthievre",
+          "name": "Le parti de Penthièvre",
+          "description": "S’appuyer sur Charles de Blois et la couronne de France : soldes allégées (-15 %), prestige +20. Trêves imposées, prestige et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "army_upkeep",
+              "value": -15,
+              "mode": "percent"
+            },
+            {
+              "effect": "prestige",
+              "value": 20
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "prestige",
+            "alliance"
+          ]
+        },
+        {
+          "id": "br1_amb_sel",
+          "name": "Le sel de Guérande",
+          "description": "Vendre le sel de la baie et les toiles de Bretagne : commerce +15 %, impôt -5 %. Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "br1_amb_marches",
+          "name": "Les marches de Bretagne",
+          "description": "Garnir les places de la frontière d’Anjou et de Normandie : fortifications (+1), impôt -5 %. Places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "fortification_level",
+              "value": 1
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        }
+      ],
+      "act_2": [
+        {
+          "id": "br2_amb_guerande",
+          "name": "Le traité de Guérande",
+          "description": "Faire reconnaître le duc Jean IV après la bataille d’Auray (1364-1365) : troubles (-4), prestige +20. Trêves imposées, prestige et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -4
+            },
+            {
+              "effect": "prestige",
+              "value": 20
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "prestige",
+            "alliance"
+          ]
+        },
+        {
+          "id": "br2_amb_independance",
+          "name": "L’indépendance ducale",
+          "description": "Lever le fouage ducal sans l’aveu du roi : impôt +15 %, troubles (+4). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "br2_amb_clisson",
+          "name": "Les compagnies de Clisson",
+          "description": "Armer les capitaines bretons autour d’Olivier de Clisson : levées moins chères (-25 %), soldes allégées (-15 %), une bande de plus à recruter. Batailles et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -15,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "br2_amb_ports",
+          "name": "Nantes et Saint-Malo",
+          "description": "Armer les ports du duché : commerce +20 %, levées plus chères (+10 %). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 20,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_cost",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        }
+      ],
+      "act_3": [
+        {
+          "id": "br3_amb_neutralite",
+          "name": "La neutralité de Jean V",
+          "description": "Rester entre la France et l’Angleterre : troubles (-5), commerce +30 %. Trêves imposées et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -5
+            },
+            {
+              "effect": "trade_income",
+              "value": 30,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        },
+        {
+          "id": "br3_amb_richemont",
+          "name": "Le connétable de Richemont",
+          "description": "Mener l’ost breton à la manière d’Arthur de Richemont : soldes allégées (-30 %), expérience des troupes (+10), levées moins chères (-25 %), une bande de plus à recruter. Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "army_upkeep",
+              "value": -30,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_experience",
+              "value": 10
+            },
+            {
+              "effect": "recruit_cost",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "br3_amb_cour",
+          "name": "La cour de Nantes",
+          "description": "Tenir son rang de duc : prestige +60, troubles (-3), impôt +10 %. Prestige et lignée rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 60
+            },
+            {
+              "effect": "unrest",
+              "value": -3
+            },
+            {
+              "effect": "tax_income",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        },
+        {
+          "id": "br3_amb_toiles",
+          "name": "Les toiles de Bretagne",
+          "description": "Exporter toiles et sel vers l’Angleterre et les Pays-Bas : commerce +25 %, impôt +5 %. Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 25,
+              "mode": "percent"
+            },
+            {
+              "effect": "tax_income",
+              "value": 5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        }
+      ]
+    },
+    "fac_navarre": {
+      "act_1": [
+        {
+          "id": "na1_amb_evreux",
+          "name": "Les terres d’Évreux",
+          "description": "Tirer parti des domaines normands de la maison d’Évreux : impôt +12 %, troubles (+3). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 12,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 3
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "na1_amb_pyrenees",
+          "name": "Les cols des Pyrénées",
+          "description": "Tenir Roncevaux et les routes du pèlerinage : commerce +15 %, fortifications (+1). Places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "fortification_level",
+              "value": 1
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "na1_amb_couronne",
+          "name": "Les droits à la couronne",
+          "description": "Rappeler les droits de Jeanne II et de son fils sur le trône de France : prestige +30, commerce -5 %. Prestige et lignée rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 30
+            },
+            {
+              "effect": "trade_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        },
+        {
+          "id": "na1_amb_routiers",
+          "name": "Les routiers navarrais",
+          "description": "Engager les gens de pied basques et navarrais : levées moins chères (-20 %), troubles (+2). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        }
+      ],
+      "act_2": [
+        {
+          "id": "na2_amb_normandie",
+          "name": "La guerre de Normandie",
+          "description": "Défendre Évreux et le Cotentin contre le Dauphin, comme Charles le Mauvais : marches plus rapides (+10 %), soldes allégées (-15 %). Places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "movement",
+              "value": 10,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -15,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "na2_amb_deux_couronnes",
+          "name": "Le jeu entre deux couronnes",
+          "description": "Louvoyer entre Valois et Plantagenêts : troubles (-4), commerce +5 %. Trêves imposées et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -4
+            },
+            {
+              "effect": "trade_income",
+              "value": 5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        },
+        {
+          "id": "na2_amb_captal",
+          "name": "Le captal de Buch",
+          "description": "Prendre à solde les capitaines gascons, comme à Cocherel (1364) : levées moins chères (-30 %), soldes allégées (-25 %), une bande de plus à recruter. Batailles et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -30,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "na2_amb_tresor",
+          "name": "Le trésor de Pampelune",
+          "description": "Presser les Cortes de Navarre : impôt +15 %, troubles (+4). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        }
+      ],
+      "act_3": [
+        {
+          "id": "na3_amb_noble",
+          "name": "Charles le Noble",
+          "description": "Embellir la cour de Pampelune et d’Olite : prestige +50, troubles (-3), impôt +10 %. Prestige et lignée rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 50
+            },
+            {
+              "effect": "unrest",
+              "value": -3
+            },
+            {
+              "effect": "tax_income",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        },
+        {
+          "id": "na3_amb_nemours",
+          "name": "Le traité de Nemours",
+          "description": "Céder les terres normandes contre le duché de Nemours et la paix (1404) : commerce +25 %, troubles (-2). Trêves imposées et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 25,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": -2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        },
+        {
+          "id": "na3_amb_aragon",
+          "name": "L’union aragonaise",
+          "description": "Lever les hommes d’armes avec Jean d’Aragon, époux de la reine Blanche : levées moins chères (-25 %), soldes allégées (-20 %), une bande de plus à recruter. Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "na3_amb_cortes",
+          "name": "Les Cortes de Navarre",
+          "description": "Faire voter de nouvelles aides : impôt +15 %, troubles (+4). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        }
+      ]
+    },
+    "fac_scotland": {
+      "act_1": [
+        {
+          "id": "sc1_amb_auld",
+          "name": "L’Auld Alliance",
+          "description": "Renouveler l’alliance avec la France de Philippe VI : prestige +25, troubles (-2). Trêves imposées, prestige et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 25
+            },
+            {
+              "effect": "unrest",
+              "value": -2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "prestige",
+            "alliance"
+          ]
+        },
+        {
+          "id": "sc1_amb_frontiere",
+          "name": "Les raids sur la frontière",
+          "description": "Ravager le Northumberland, de Neville’s Cross aux marches : marches plus rapides (+10 %), soldes allégées (-15 %). Chevauchées, batailles et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "movement",
+              "value": 10,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -15,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "raid_season",
+            "battle_won"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "sc1_amb_bruce",
+          "name": "Les barons de Bruce",
+          "description": "Rassembler les barons fidèles à David II contre Balliol : levées moins chères (-20 %), troubles (+2). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "sc1_amb_laine",
+          "name": "La laine et les peaux d’Écosse",
+          "description": "Exporter laine et peaux par Berwick et Leith : commerce +15 %, impôt -5 %. Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        }
+      ],
+      "act_2": [
+        {
+          "id": "sc2_amb_rancon",
+          "name": "La rançon de David II",
+          "description": "Lever les marcs promis à l’Angleterre pour la libération du roi (1357) : impôt +15 %, troubles (+4). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "sc2_amb_stewart",
+          "name": "L’avènement des Stewart",
+          "description": "Affermir la dynastie de Robert II : prestige +20, troubles (-3). Trêves imposées, prestige et lignée rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 20
+            },
+            {
+              "effect": "unrest",
+              "value": -3
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        },
+        {
+          "id": "sc2_amb_douglas",
+          "name": "Les marches de Douglas",
+          "description": "Armer les seigneurs de la frontière, comme à Otterburn (1388) : levées moins chères (-30 %), soldes allégées (-25 %), une bande de plus à recruter. Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -30,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "sc2_amb_chateaux",
+          "name": "Les tours de la frontière",
+          "description": "Garder les châteaux contre les Anglais : fortifications (+1), troubles (-2). Places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "fortification_level",
+              "value": 1
+            },
+            {
+              "effect": "unrest",
+              "value": -2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        }
+      ],
+      "act_3": [
+        {
+          "id": "sc3_amb_france",
+          "name": "Les Écossais de France",
+          "description": "Envoyer des hommes d’armes servir le dauphin, de Baugé à Verneuil : levées moins chères (-25 %), soldes allégées (-20 %), une bande de plus à recruter. Batailles, domaine et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won"
+          ],
+          "objective_categories": [
+            "domain",
+            "alliance"
+          ]
+        },
+        {
+          "id": "sc3_amb_jacques",
+          "name": "Jacques Ier et la loi",
+          "description": "Rétablir l’ordre et les finances après la captivité du roi : impôt +12 %, troubles (-3). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 12,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": -3
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "sc3_amb_alliance",
+          "name": "Le renouvellement de l’alliance",
+          "description": "Marier la fille de Jacques Ier au dauphin de France : prestige +40, commerce +15 %. Trêves imposées, prestige et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 40
+            },
+            {
+              "effect": "trade_income",
+              "value": 15,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "prestige",
+            "alliance"
+          ]
+        },
+        {
+          "id": "sc3_amb_ports",
+          "name": "Leith et Dundee",
+          "description": "Ouvrir les ports au commerce de la Baltique et de Flandre : commerce +25 %, troubles (-2). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 25,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": -2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        }
+      ]
+    },
+    "fac_flanders": {
+      "act_1": [
+        {
+          "id": "fl1_amb_laine",
+          "name": "La laine anglaise",
+          "description": "Importer la laine d’Angleterre pour les métiers de Gand et d’Ypres, malgré l’embargo : commerce +20 %, levées plus chères (+10 %). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 20,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_cost",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "fl1_amb_artevelde",
+          "name": "Jacques van Artevelde",
+          "description": "Garder la neutralité des Trois Villes entre Édouard III et Philippe VI : troubles (-4), commerce +5 %. Trêves imposées et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -4
+            },
+            {
+              "effect": "trade_income",
+              "value": 5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        },
+        {
+          "id": "fl1_amb_milices",
+          "name": "Les milices communales",
+          "description": "Lever les métiers en armes, comme à Courtrai : levées moins chères (-25 %), une bande de plus à recruter, troubles (+2). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            },
+            {
+              "effect": "unrest",
+              "value": 2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "fl1_amb_nevers",
+          "name": "La cour de Louis de Nevers",
+          "description": "Soutenir le comte, fidèle au roi de France : prestige +30, commerce -5 %. Prestige et lignée rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 30
+            },
+            {
+              "effect": "trade_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        }
+      ],
+      "act_2": [
+        {
+          "id": "fl2_amb_male",
+          "name": "Louis de Male",
+          "description": "Taxer les bonnes villes pour tenir la cour comtale : impôt +15 %, troubles (+4). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "fl2_amb_chaperons",
+          "name": "Les Chaperons blancs de Gand",
+          "description": "Armer les métiers révoltés autour de Philippe van Artevelde : levées moins chères (-25 %), soldes allégées (-15 %). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -15,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "fl2_amb_marguerite",
+          "name": "Le mariage de Marguerite de Male",
+          "description": "Unir l’héritière à Philippe le Hardi (1369) : prestige +25, troubles (-3). Trêves imposées, prestige et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 25
+            },
+            {
+              "effect": "unrest",
+              "value": -3
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "prestige",
+            "alliance"
+          ]
+        },
+        {
+          "id": "fl2_amb_drapiers",
+          "name": "Les drapiers d’Ypres et de Bruges",
+          "description": "Protéger les foires et les halles drapières : commerce +20 %, impôt -5 %. Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 20,
+              "mode": "percent"
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        }
+      ],
+      "act_3": [
+        {
+          "id": "fl3_amb_toison",
+          "name": "Sous la Toison d’or",
+          "description": "Briller dans l’orbite de la maison de Bourgogne : prestige +50, troubles (-3), commerce +15 %. Prestige et lignée rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 50
+            },
+            {
+              "effect": "unrest",
+              "value": -3
+            },
+            {
+              "effect": "trade_income",
+              "value": 15,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        },
+        {
+          "id": "fl3_amb_arras",
+          "name": "La paix d’Arras et le commerce",
+          "description": "Rouvrir les routes de la laine et du drap après 1435 : troubles (-5), commerce +35 %. Trêves imposées et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "unrest",
+              "value": -5
+            },
+            {
+              "effect": "trade_income",
+              "value": 35,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        },
+        {
+          "id": "fl3_amb_milices",
+          "name": "Les milices de Gand et de Bruges",
+          "description": "Fournir l’ost du duc : levées moins chères (-25 %), soldes allégées (-20 %), une bande de plus à recruter. Batailles et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "fl3_amb_foires",
+          "name": "Les foires de Bruges",
+          "description": "Taxer le grand marché de l’Europe du Nord : commerce +20 %, impôt +8 %. Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 20,
+              "mode": "percent"
+            },
+            {
+              "effect": "tax_income",
+              "value": 8,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        }
+      ]
+    },
+    "fac_castile": {
+      "act_1": [
+        {
+          "id": "ca1_amb_salado",
+          "name": "Le Salado et Algésiras",
+          "description": "Poursuivre la reconquête avec Alphonse XI : levées moins chères (-20 %), soldes allégées (-10 %). Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "ca1_amb_mesta",
+          "name": "La Mesta et la laine",
+          "description": "Exporter la laine des troupeaux transhumants : commerce +15 %, impôt -5 %. Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "tax_income",
+              "value": -5,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "ca1_amb_cortes",
+          "name": "Les Cortes d’Alcalá",
+          "description": "Obtenir l’alcabala des Cortes : impôt +12 %, troubles (+3). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 12,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 3
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "ca1_amb_detroit",
+          "name": "Les galères du détroit",
+          "description": "Tenir la mer entre Séville et Cadix : commerce +10 %, marches plus rapides (+10 %). Chevauchées, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 10,
+              "mode": "percent"
+            },
+            {
+              "effect": "movement",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "raid_season",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        }
+      ],
+      "act_2": [
+        {
+          "id": "ca2_amb_trastamare",
+          "name": "Henri de Trastamare",
+          "description": "Soutenir le bâtard contre Pierre Ier dans la guerre civile (1366-1369) : levées moins chères (-25 %), soldes allégées (-15 %), une bande de plus à recruter. Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -15,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "ca2_amb_justice",
+          "name": "La justice de Pierre le Cruel",
+          "description": "Frapper les nobles et lever l’impôt : impôt +15 %, troubles (+4). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "ca2_amb_charles_v",
+          "name": "L’alliance de Charles V",
+          "description": "S’unir à la France contre l’Angleterre : commerce +15 %, troubles (-4). Trêves imposées et alliances rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": -4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "truce_imposed"
+          ],
+          "objective_categories": [
+            "alliance"
+          ]
+        },
+        {
+          "id": "ca2_amb_flotte",
+          "name": "La flotte de La Rochelle",
+          "description": "Reprendre la mer contre les Anglais (1372) : soldes allégées (-15 %), marches plus rapides (+10 %). Chevauchées, batailles et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "army_upkeep",
+              "value": -15,
+              "mode": "percent"
+            },
+            {
+              "effect": "movement",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "raid_season",
+            "battle_won"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        }
+      ],
+      "act_3": [
+        {
+          "id": "ca3_amb_luna",
+          "name": "Álvaro de Luna",
+          "description": "Gouverner par le favori de Jean II : impôt +15 %, troubles (+4). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "tax_income",
+              "value": 15,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": 4
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        },
+        {
+          "id": "ca3_amb_grenade",
+          "name": "La frontière de Grenade",
+          "description": "Tenir les capitaines de l’Andalousie contre l’émirat : levées moins chères (-25 %), soldes allégées (-20 %), une bande de plus à recruter. Batailles, places prises et domaine rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "recruit_cost",
+              "value": -25,
+              "mode": "percent"
+            },
+            {
+              "effect": "army_upkeep",
+              "value": -20,
+              "mode": "percent"
+            },
+            {
+              "effect": "recruit_slots",
+              "value": 1
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "battle_won",
+            "place_taken"
+          ],
+          "objective_categories": [
+            "domain"
+          ]
+        },
+        {
+          "id": "ca3_amb_cour",
+          "name": "La cour de Jean II",
+          "description": "Briller par les lettres et les armes : prestige +60, troubles (-3), impôt +10 %. Prestige et lignée rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "prestige",
+              "value": 60
+            },
+            {
+              "effect": "unrest",
+              "value": -3
+            },
+            {
+              "effect": "tax_income",
+              "value": 10,
+              "mode": "percent"
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [],
+          "objective_categories": [
+            "prestige",
+            "dynasty"
+          ]
+        },
+        {
+          "id": "ca3_amb_canaries",
+          "name": "Les Canaries et l’Atlantique",
+          "description": "Armer les marins du golfe de Cadix : commerce +25 %, troubles (-2). Rançons et trésor rapportent moitié plus de renommée.",
+          "effects": [
+            {
+              "effect": "trade_income",
+              "value": 25,
+              "mode": "percent"
+            },
+            {
+              "effect": "unrest",
+              "value": -2
+            }
+          ],
+          "renown_bonus_percent": 50,
+          "renown_sources": [
+            "ransom_received"
+          ],
+          "objective_categories": [
+            "treasury"
+          ]
+        }
+      ]
     }
   },
   "renown": {

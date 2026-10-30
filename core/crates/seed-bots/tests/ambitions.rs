@@ -1,5 +1,5 @@
 //! R1-2 acceptance: every ambition of a written house changes the campaign. For each ambition
-//! of France, England and Burgundy, 40 turns from the opening of its act (the strategic AI at
+//! of the eight written houses, 40 turns from the opening of its act (the strategic AI at
 //! the player's seat, the minimal AI elsewhere) move at least one probe figure by more than 10 %
 //! against the same campaign without any ambition. Renown is left out: it is what an ambition
 //! earns, not what it changes.
@@ -9,6 +9,16 @@ use std::collections::BTreeMap;
 use seed_bots::timeline::{self, ProbeConfig, Profile};
 
 const TURNS: u32 = 40;
+const HOUSES: [&str; 8] = [
+    "fac_france",
+    "fac_england",
+    "fac_burgundy",
+    "fac_brittany",
+    "fac_navarre",
+    "fac_scotland",
+    "fac_flanders",
+    "fac_castile",
+];
 const FIGURES: [&str; 6] = [
     "treasury_end",
     "treasury_mean",
@@ -43,7 +53,7 @@ fn every_ambition_changes_the_campaign() {
     let rules = &data.acts_rules;
     let starts = [None, Some(1361), Some(1416)];
     let mut runs: Vec<(String, String, ProbeConfig)> = Vec::new();
-    for house in ["fac_france", "fac_england", "fac_burgundy"] {
+    for house in HOUSES {
         let key = house.to_owned();
         for (index, act) in rules.acts.iter().enumerate() {
             let set = rules.ambition_sets.get(&key).and_then(|s| s.get(&act.id));

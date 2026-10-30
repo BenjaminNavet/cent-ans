@@ -376,7 +376,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^(pol|amb|fr[0-9]_amb|en[0-9]_amb|bu[0-9]_amb)_[a-z0-9_]+$"
+          "pattern": "^(pol|amb|fr[0-9]_amb|en[0-9]_amb|bu[0-9]_amb|br[0-9]_amb|na[0-9]_amb|sc[0-9]_amb|fl[0-9]_amb|ca[0-9]_amb)_[a-z0-9_]+$"
         },
         "name": {
           "type": "string"
