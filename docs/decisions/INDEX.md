@@ -373,3 +373,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0810 | [La cause au moment de l'effet (XP-POURQUOI, R4)](0810-xp-pourquoi-causes.md) | accepté |
 | 0811 | [Rivières lisibles à toute distance (lot RIVIERES)](0811-rivieres-lisibles.md) | accepté |
 | 0812 | [Budget d'attention et Audience de saison (XP-AUDIENCE, R1)](0812-xp-audience.md) | accepté |
+| 0813 | [ECO-R1 : l'impôt consenti (assemblées, subsides, concessions)](0813-eco-r1-impot-consenti.md) | accepté |

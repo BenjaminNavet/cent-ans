@@ -1,4 +1,4 @@
-# XXXX — ECO-R1 : l'impôt consenti (assemblées, subsides, concessions)
+# 0813 — ECO-R1 : l'impôt consenti (assemblées, subsides, concessions)
 
 Statut : accepté (30/10/2026, lot ECO-R1ab de la boucle juge 2). Numéro à fixer à la fusion.
 

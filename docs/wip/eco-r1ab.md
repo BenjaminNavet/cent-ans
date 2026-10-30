@@ -1,7 +1,7 @@
 # ECO-R1ab — « L'impôt consenti » (boucle juge 2)
 
 Spec : `docs/audits/2026-10-29-economie-politique.md` § 6 R1 et § 8 (R1-a, R1-b). R1-c (IA, Angleterre, maltôte) et R1-d
-(interface) viennent après : l'API publique de `sim-campaign::assembly` est prévue pour eux. ADR : `docs/decisions/XXXX-eco-r1-impot-consenti.md`
+(interface) viennent après : l'API publique de `sim-campaign::assembly` est prévue pour eux. ADR : `docs/decisions/0813-eco-r1-impot-consenti.md`
 (à numéroter à la fusion).
 
 ## État : terminé (R1-a, R1-b), prêt à fusionner
