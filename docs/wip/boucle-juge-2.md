@@ -143,3 +143,11 @@ Constats seed bots longs : présentés au joueur, il choisit (ne rien écrire da
   IA-PLAN-2 (agent-a81b1ae605a828a40, 0816), CAMP-R6 8 maisons jouables (0817), XP-R3a livres Royaume + Chronique (0818),
   PLAQUES-2 Saint-Denis + plaques de bataille lointaines (0819 si besoin). Prochain ADR libre : 0820.
 - Ensuite : agent de fusion, check complet, juge visuel Opus frais, puis VIS-R4 (après R3b), COHESION-1 (après IA-PLAN-2), VIS-R8, R2-b.
+
+## ARRÊT demandé par le joueur (30/10)
+- Tout arrêté. main = 60e6d7c82 : VIS-R3b fusionné (ADR 0814 ; critères teinte 3/4 non atteints, à juger). Check complet sur main NON lancé.
+- Prêts, non fusionnés : CAMP-R6 (agent-a65d62579f5332956, 0817), IA-PLAN-2 (agent-a81b1ae605a828a40, 0816, défaut legacy),
+  PLAQUES-2 (agent-a3bc6a6b1ae8c9817 ; fmt HUD non commité dans le worktree), XP-R3a (agent-a956e1bb95065cfe9, 0818),
+  CAMP-R6b (agent-a3ef7512eced87a7a), ECO-R1c (agent-aa5182d13ee2ab5e2, 0815 ; armée IA 27-37 %, sous la bande).
+- À corriger sur main : snapshot faction_assembly (test client), fmt HUD (audience, feed, story, text).
+- Suivants : IA-PLAN-2b (patience du défenseur, Castillon), R2-b retenue, XP-R3b, VIS-R4, juge visuel Opus. Prochain ADR libre : 0820.
