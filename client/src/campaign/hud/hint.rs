@@ -241,9 +241,9 @@ pub fn plugin(app: &mut App) {
         .register_dump(dump_hint)
         .add_systems(
             Update,
-            (refresh, publish, handle_buttons)
-                .chain()
-                .in_set(HudSet::Ui),
+            // XP-AUDIENCE: the card is absorbed by the Audience; the hint is still computed (dump,
+            // tests) but no longer sent to the advisor band (`publish` stays unscheduled).
+            (refresh, handle_buttons).chain().in_set(HudSet::Ui),
         );
 }
 
@@ -338,6 +338,7 @@ fn band_key(id: &str) -> String {
 
 /// Sends the current hint to the single advisor band (ADR 0752) and withdraws the one that is
 /// gone. A hint is a standing message: after the reading time it folds into the band's chip.
+#[allow(dead_code)]
 fn publish(
     mut hint: ResMut<NextHint>,
     mut says: MessageWriter<BandSay>,

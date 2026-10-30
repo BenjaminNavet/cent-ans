@@ -37,6 +37,11 @@ fn texts() -> &'static Texts {
     TEXTS.get_or_init(|| serde_json::from_str(TEXTS_JSON).expect("data/ui/audience.fr.json parses"))
 }
 
+/// A UI label of `audience.fr.json` (`ui` block); the key itself when missing.
+pub fn ui_text(key: &str) -> String {
+    ui(key)
+}
+
 fn ui(key: &str) -> String {
     texts()
         .ui
@@ -73,6 +78,8 @@ pub struct AgendaAction {
     pub label: String,
     /// Province or army id for `center_*`.
     pub target: Option<String>,
+    /// `province`, `army` or empty.
+    pub target_kind: String,
 }
 
 /// One matter pushed at the player.
@@ -248,19 +255,24 @@ fn speaker(data: &GameData, state: &CampaignState, faction: &FactionId, office: 
 }
 
 fn action(source: &AgendaSource, item: &Candidate) -> AgendaAction {
-    let target = match source.action.as_str() {
-        "center_province" => item.province.clone(),
-        "center_army" => item.army.clone().or_else(|| item.province.clone()),
-        _ => None,
+    let (target, target_kind) = match source.action.as_str() {
+        "center_province" => (item.province.clone(), "province"),
+        "center_army" => match (&item.army, &item.province) {
+            (Some(army), _) => (Some(army.clone()), "army"),
+            (None, Some(province)) => (Some(province.clone()), "province"),
+            _ => (None, ""),
+        },
+        _ => (None, ""),
     };
     let kind = match (source.action.as_str(), &target) {
-        ("center_army", None) | ("center_province", None) => "none",
+        ("center_army" | "center_province", None) => "none",
         (other, _) => other,
     };
     AgendaAction {
         kind: kind.to_owned(),
         label: texts().buttons.get(kind).cloned().unwrap_or_default(),
         target,
+        target_kind: target_kind.to_owned(),
     }
 }
 
@@ -599,6 +611,44 @@ mod tests {
                 }
                 events = state.end_turn_with(data, sim_campaign::test_support::idle);
             }
+        }
+    }
+
+    /// XP-AUDIENCE: the choice of the ambitions is an Affair from the first season, gone once
+    /// two are held; once the choice freezes, the others are locked (greyed by the client).
+    #[test]
+    fn ambitions_are_an_affair_until_chosen_then_locked() {
+        let data = data_model::test_support::game_data();
+        let mut state = sim_campaign::test_support::start_quiet(data, "fac_france", 1337);
+        state.end_turn(data);
+        let player = state.player_faction().clone();
+        let a = agenda(data, &state, &player, &[]);
+        let ambition = a
+            .affairs
+            .iter()
+            .find(|x| x.kind == "ambition_choice")
+            .expect("ambition affair at turn 1");
+        assert_eq!(ambition.action.kind, "open_ambitions");
+        assert!(ambition
+            .text
+            .contains(&data.acts_rules.ambitions_to_choose.to_string()));
+        let view = crate::acts::act_view(data, &state).unwrap();
+        assert!(
+            view.ambitions.iter().all(|x| !x.locked),
+            "open choice: nothing locked"
+        );
+        let ids: Vec<String> = view.ambitions.iter().map(|x| x.id.clone()).collect();
+        assert!(crate::acts::choose_ambition(data, &mut state, &ids[0]));
+        assert!(crate::acts::choose_ambition(data, &mut state, &ids[1]));
+        let a = agenda(data, &state, &player, &[]);
+        assert!(a.affairs.iter().all(|x| x.kind != "ambition_choice"));
+        // Freeze the choice: the seasons allowed for replacing an ambition are over.
+        for _ in 0..=data.acts_rules.ambition_choice_seasons {
+            state.end_turn_with(data, sim_campaign::test_support::idle);
+        }
+        let view = crate::acts::act_view(data, &state).unwrap();
+        if !view.ambition_choice_open && !view.ambitions.is_empty() {
+            assert!(view.ambitions.iter().all(|x| x.locked == !x.chosen));
         }
     }
 

@@ -27,12 +27,14 @@ use crate::campaign::provinces::{MapMode, RegionLabelObstacles, SetMapMode};
 use crate::sim::Sim;
 use crate::ui::kit::layout;
 use crate::ui::kit::modal::ModalQueue;
-use crate::ui::kit::style::{self, UiTier, UiType};
+use crate::ui::kit::style::{self, UiTier};
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::button_small;
 use crate::ui::kit::{ButtonPressed, UiTheme, fr};
 use bevy::ui::{ComputedNode, UiGlobalTransform};
 
+pub mod attention;
+pub mod audience;
 pub mod bar;
 pub mod briefing;
 pub mod buttons;
@@ -229,6 +231,8 @@ impl Plugin for CampaignHudPlugin {
                 wait::plugin,
             ))
             .add_plugins(story::plugin)
+            .add_plugins(attention::plugin)
+            .add_plugins(audience::plugin)
             .add_plugins(layers::plugin)
             .add_plugins(feed::plugin)
             .register_dump(dump_hud)
@@ -692,61 +696,52 @@ fn update_fields(
     }
 }
 
-/// Short kinds shown at most (the rest is summed on a last « +n » line, Godot's fan has room
-/// for about as many).
-const MAX_ALERT_PILLS: usize = 6;
-
+/// XP-AUDIENCE: the bell is a counter. One pill (« Registre », affairs plus watched items) opens
+/// the Registre of the Audience; the alerts themselves are ranked by `game_api::agenda`.
 fn rebuild_alerts(
     mut commands: Commands,
-    hud: Res<HudData>,
+    audience: Res<audience::Audience>,
     theme: Res<UiTheme>,
     assets: Res<AssetServer>,
     list: Query<Entity, With<AlertList>>,
-    mut built: Local<u64>,
+    mut built: Local<Option<(usize, bool)>>,
 ) {
-    if *built == hud.revision {
-        return;
-    }
-    let (Some(readiness), Ok(list)) = (&hud.readiness, list.single()) else {
+    let Ok(list) = list.single() else {
         return;
     };
-    *built = hud.revision;
+    let count = audience.count();
+    let danger = audience
+        .agenda
+        .as_ref()
+        .is_some_and(|a| a.affairs.iter().any(|x| x.blocking));
+    if *built == Some((count, danger)) {
+        return;
+    }
+    *built = Some((count, danger));
     commands.entity(list).despawn_children();
-    let groups = cluster::group_alerts(&readiness.alerts);
-    let hidden: usize = groups
-        .iter()
-        .skip(MAX_ALERT_PILLS)
-        .map(|g| g.alerts.len())
-        .sum();
+    if count == 0 {
+        return;
+    }
+    let label = game_api::agenda::ui_text("open_registry");
     commands.entity(list).with_children(|column| {
-        if hidden > 0 {
-            column.spawn((
-                Text::new(format!("+ {} autres avis", hidden)),
-                theme.text_font(false, true, UiType::Caption.size()),
-                TextColor(style::PARCHMENT_LIGHT),
-                TextShadow::default(),
-            ));
-        }
-        // The most urgent pill sits right above the seal: the column lists them bottom-up.
-        for group in groups.iter().take(MAX_ALERT_PILLS).rev() {
-            column.spawn((
-                seal::alert_pill(
-                    &theme,
-                    &assets,
-                    &format!("hud:alert:{}", group.kind),
-                    &group.kind,
-                    cluster::short_label(&group.kind),
-                    group.display_count(),
-                    seal::AlertPill {
-                        danger: group.danger(),
-                        quiet: group.quiet(),
-                    },
-                ),
-                HudWidget,
-                AlertTarget(group.clone()),
-                Tooltip::new(&group.tooltip()),
-            ));
-        }
+        column.spawn((
+            seal::alert_pill(
+                &theme,
+                &assets,
+                audience::REGISTRY_TOGGLE,
+                "other",
+                &label,
+                count,
+                seal::AlertPill {
+                    danger,
+                    quiet: false,
+                },
+            ),
+            HudWidget,
+            Tooltip::new(&audience.agenda.as_ref().map_or_else(String::new, |a| {
+                format!("{}\n{}", a.watch_heading, a.news_heading)
+            })),
+        ));
     });
 }
 

@@ -8,7 +8,6 @@ use bevy::prelude::*;
 use data_model::GameData;
 use sim_campaign::{AiMoveRecord, CampaignState, GameEvent};
 
-use super::decision::OpenDecision;
 use super::replay::{self, AiReplay, HeldReport};
 use super::report;
 use super::{HudData, HudSet};
@@ -396,7 +395,6 @@ pub fn poll_turn(
     mut sim: ResMut<Sim>,
     mut queue: ResMut<ModalQueue>,
     mut advanced: MessageWriter<TurnAdvanced>,
-    mut decisions: MessageWriter<OpenDecision>,
     mut toasts: MessageWriter<ToastRequest>,
     mut data_view: ResMut<HudData>,
     mut replay: ResMut<AiReplay>,
@@ -481,7 +479,7 @@ pub fn poll_turn(
             flow.last_events = events.clone();
             data_view.force_refresh();
             advanced.write(TurnAdvanced { turn, events });
-            decisions.write(OpenDecision::FirstBlocking);
+            // XP-AUDIENCE: the decision no longer opens by itself; the Audience carries it.
         }
     }
 }

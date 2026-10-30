@@ -1295,3 +1295,49 @@ impl CampaignState {
         Some(id)
     }
 }
+
+#[cfg(test)]
+mod attention_tests {
+    use super::*;
+    use crate::test_support::start_quiet;
+
+    /// XP-AUDIENCE: two strong decisions in the same turn; the second waits a season (it is
+    /// scheduled again, so it does not expire while it waits).
+    #[test]
+    fn a_second_strong_decision_is_deferred_a_season() {
+        let data = data_model::test_support::game_data();
+        let mut state = start_quiet(data, "fac_france", 1337);
+        let player = state.player_faction.clone();
+        let strong: Vec<&Event> = data
+            .events
+            .values()
+            .filter(|e| is_strong(data, e) && !e.options.is_empty())
+            .take(2)
+            .collect();
+        assert_eq!(strong.len(), 2, "two dialog events in the data");
+        let mut events = Vec::new();
+        for event in &strong {
+            fire(
+                &mut state,
+                data,
+                event,
+                Some(player.clone()),
+                None,
+                &mut events,
+            );
+        }
+        assert_eq!(state.chronicle.pending_decisions.len(), 1);
+        assert_eq!(state.chronicle.scheduled.len(), 1);
+        assert_eq!(state.chronicle.scheduled[0].turn, state.turn + 1);
+        assert_eq!(state.chronicle.scheduled[0].event, strong[1].id);
+        // A crisis is never deferred.
+        let crisis = data
+            .events
+            .values()
+            .find(|e| data.agenda_rules.is_crisis(e.id.as_str()) && !e.options.is_empty());
+        if let Some(crisis) = crisis {
+            fire(&mut state, data, crisis, Some(player), None, &mut events);
+            assert_eq!(state.chronicle.pending_decisions.len(), 2);
+        }
+    }
+}

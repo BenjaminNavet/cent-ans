@@ -40,6 +40,7 @@ trap 'rm -rf "$prefs"' EXIT
 typeset -A scenario_env scenario_args
 scenario_env[campaign_battle]="CENT_ANS_STAGE_BATTLE=1 CENT_ANS_FLOW_SIM_TO_END=1 CENT_ANS_LOADING_SECONDS=0"
 scenario_args[campaign_turns]="--faction fac_england"
+scenario_args[campaign_attention]="--faction fac_england"
 scenario_args[campaign_descent]="--bench-map --bench-descent-only"
 
 # scenario -> `dump-file=State` pairs: the final state each dump must report (AppState name).
@@ -50,6 +51,7 @@ scenario_expect[siege]="siege=Battle"
 scenario_expect[campaign]="campaign=Campaign campaign_panels=Campaign"
 scenario_expect[campaign_battle]="campaign_battle_after=Campaign campaign_battle_turn=Campaign"
 scenario_expect[campaign_turns]="turns_0=Campaign turns_1=Campaign"
+scenario_expect[campaign_attention]="attention_0=Campaign attention_10=Campaign"
 scenario_expect[codex]="codex=Codex"
 scenario_expect[faction_select]="faction_select=FactionSelect"
 scenario_expect[faction_works]="works_0=Campaign works_1=Campaign works_2=Campaign"

@@ -2,9 +2,10 @@
 //!
 //! - Tracker: always visible under the minimap, collapsible, one line per active mission with its
 //!   bar and « n saisons » (red when the deadline is near); a click leads to the target province.
-//! - Offer (ADR 0304): when the council offers missions, a window lists the candidates; choosing
+//! - Offer (ADR 0304): when the council offers missions, the Audience carries it (XP-AUDIENCE);
+//!   its button asks for the window that lists the candidates ([`OpenMissionOffer`]); choosing
 //!   one or refusing is the core's `Order::ChooseMission`.
-//! - Notices of the last turn (offered, accomplished, failed) come out as toasts.
+//! - Notices of the last turn (offered, accomplished, failed) are counted, no longer toasts.
 //!
 //! Everything is read from `CampaignState::missions` / `mission_offer` / `mission_notices`.
 
@@ -53,6 +54,11 @@ pub fn is_due(mission: &MissionView) -> bool {
     mission.turns_left <= DUE_TURNS
 }
 
+/// XP-AUDIENCE: the Audience (or the tracker) asks for the offer window; it no longer opens by
+/// itself.
+#[derive(Message, Debug, Clone, Copy)]
+pub struct OpenMissionOffer;
+
 #[derive(Resource, Default)]
 pub struct Missions {
     pub active: Vec<MissionView>,
@@ -60,6 +66,8 @@ pub struct Missions {
     pub collapsed: bool,
     /// The offer window was put aside (« Plus tard »).
     pub offer_dismissed: bool,
+    /// The player asked to see the offer this season (XP-AUDIENCE).
+    pub offer_requested: bool,
     pub notices_shown: u32,
     pub chosen: u32,
     offer_turn: u32,
@@ -76,6 +84,7 @@ struct MissionTarget(Option<String>);
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<Missions>()
+        .add_message::<OpenMissionOffer>()
         .register_dump(dump_missions)
         .add_systems(
             Update,
@@ -104,6 +113,7 @@ fn refresh(sim: Res<Sim>, mut missions: ResMut<Missions>) {
     if offer_turn != missions.offer_turn {
         missions.offer_turn = offer_turn;
         missions.offer_dismissed = false;
+        missions.offer_requested = false;
     }
     if missions.active != active {
         missions.active = active;
@@ -113,11 +123,11 @@ fn refresh(sim: Res<Sim>, mut missions: ResMut<Missions>) {
     }
 }
 
-/// Toasts of the notices left by the turn that just ended.
+/// Notices of the last turn (offered, accomplished, failed): counted, not shown as toasts. The
+/// Audience carries the offer, the journal carries the results (XP-AUDIENCE).
 fn notices(
     mut advanced: MessageReader<TurnAdvanced>,
     sim: Res<Sim>,
-    mut toasts: MessageWriter<ToastRequest>,
     mut missions: ResMut<Missions>,
 ) {
     if advanced.read().next().is_none() {
@@ -127,10 +137,7 @@ fn notices(
     let Some(state) = sim.state.as_ref() else {
         return;
     };
-    for notice in state.mission_notices() {
-        toasts.write(ToastRequest::new(&notice.text));
-        missions.notices_shown += 1;
-    }
+    missions.notices_shown += state.mission_notices().len() as u32;
 }
 
 fn rebuild_tracker(
@@ -221,7 +228,6 @@ fn rebuild_offer(
     modals: Res<crate::ui::kit::modal::ModalQueue>,
     stack: Option<Res<crate::ui::kit::panel_stack::PanelStack>>,
     mut local: Local<Option<(Option<MissionOfferView>, bool)>>,
-    mut toasts: MessageWriter<ToastRequest>,
 ) {
     // The offer waits for the modal in progress (season report, decision) and for a central
     // window (diplomacy, chronicle): one notice at a time (ADR 0775). The advisor and the
@@ -229,7 +235,10 @@ fn rebuild_offer(
     let screen_taken = modals.is_busy() || stack.is_some_and(|s| s.has_central_open());
     let want = (
         missions.offer.clone(),
-        missions.offer_dismissed || missions.offer.is_none() || screen_taken,
+        missions.offer_dismissed
+            || !missions.offer_requested
+            || missions.offer.is_none()
+            || screen_taken,
     );
     let existing = window.single().ok();
     if existing.is_some() && local.as_ref() == Some(&want) {
@@ -240,12 +249,6 @@ fn rebuild_offer(
     }
     if let Some(entity) = existing {
         commands.entity(entity).despawn();
-    }
-    // The pill of a deferred offer: a toast says it waits for the screen (ADR 0775).
-    if want.0.is_some() && screen_taken && !missions.offer_dismissed {
-        toasts.write(ToastRequest::new(
-            "Le conseil a des missions à proposer : elles s’ouvriront dès que l’écran sera libre.",
-        ));
     }
     *local = Some(want.clone());
     let (Some(offer), false) = (want.0, want.1) else {
@@ -319,6 +322,7 @@ fn rebuild_offer(
 #[allow(clippy::too_many_arguments)]
 fn handle_buttons(
     mut pressed: MessageReader<ButtonPressed>,
+    mut requests: MessageReader<OpenMissionOffer>,
     targets: Query<&MissionTarget>,
     mut missions: ResMut<Missions>,
     mut sim: ResMut<Sim>,
@@ -327,6 +331,10 @@ fn handle_buttons(
     mut toasts: MessageWriter<ToastRequest>,
     flow: Res<super::TurnFlow>,
 ) {
+    if requests.read().count() > 0 {
+        missions.offer_requested = true;
+        missions.offer_dismissed = false;
+    }
     for press in pressed.read() {
         let name = press.name.as_str();
         if name == "hud:missions_toggle" {
@@ -382,6 +390,7 @@ fn dump_missions(world: &World) -> (String, Value) {
             "offer_candidates": missions.offer.as_ref().map(|o| o.candidates.len()),
             "collapsed": missions.collapsed,
             "offer_dismissed": missions.offer_dismissed,
+            "offer_requested": missions.offer_requested,
             "notices_shown": missions.notices_shown,
             "chosen": missions.chosen,
         }),
