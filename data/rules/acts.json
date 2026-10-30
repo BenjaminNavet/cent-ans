@@ -3497,7 +3497,7 @@
         {
           "id": "en2_amb_guyenne",
           "name": "Tenir la Guyenne",
-          "description": "Murs et garnisons en Aquitaine : les places tiennent mieux (+1 de fortification), l’impôt en souffre (-5 %). Le domaine rapporte moitié plus de renommée.",
+          "description": "Murs et garnisons en Aquitaine : les places tiennent mieux (+1 de fortification), l’impôt en souffre (-8 %). Le domaine rapporte moitié plus de renommée.",
           "effects": [
             {
               "effect": "fortification_level",
@@ -3505,7 +3505,7 @@
             },
             {
               "effect": "tax_income",
-              "value": -5,
+              "value": -8,
               "mode": "percent"
             }
           ],
@@ -3862,15 +3862,15 @@
         {
           "id": "bu3_amb_arras",
           "name": "La paix d’Arras",
-          "description": "Se réconcilier avec le Valois au meilleur prix : le pays s’apaise (-4), le commerce suit (+5 %). Alliances et trêves imposées rapportent moitié plus de renommée.",
+          "description": "Se réconcilier avec le Valois au meilleur prix : le pays s’apaise (-6), le commerce suit (+40 %). Alliances et trêves imposées rapportent moitié plus de renommée.",
           "effects": [
             {
               "effect": "unrest",
-              "value": -4
+              "value": -6
             },
             {
               "effect": "trade_income",
-              "value": 25,
+              "value": 40,
               "mode": "percent"
             }
           ],
