@@ -7,6 +7,29 @@ battle:
   - Wait(600)
   - "Dump(\"[repo]/client/out/smoke/battle.json\")"
   - Exit
+books:
+  - State(Campaign)
+  - Wait(200)
+  - "Click(\"hud:open_faction\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_sheet.json\")"
+  - "Click(\"economy:tab:trade\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_trade.json\")"
+  - "Click(\"book:kingdom:feudal\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_feudal.json\")"
+  - "Click(\"hud:open_chronicle\")"
+  - Wait(10)
+  - "Click(\"chronicle:tab_registry\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_registry.json\")"
+  - "Click(\"chronicle:tab_journal\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/books_journal.json\")"
+  - "Key(\"Escape\")"
+  - Wait(10)
+  - Exit
 campaign:
   - State(Campaign)
   - Wait(300)
@@ -136,6 +159,21 @@ crecy:
   - "Click(\"Battle_crecy_defender\")"
   - Wait(600)
   - "Dump(\"[repo]/client/out/smoke/crecy.json\")"
+  - Exit
+faction_assembly:
+  - State(Campaign)
+  - Wait(120)
+  - "Click(\"hud:open_faction\")"
+  - Wait(10)
+  - "Click(\"faction:tab:finance\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/assembly_0.json\")"
+  - "Click(\"faction:fin:levy_assembly\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/assembly_1.json\")"
+  - "ClickIf(\"faction:asm:convene:asm_etats_oil\")"
+  - Wait(10)
+  - "Dump(\"[repo]/client/out/smoke/assembly_2.json\")"
   - Exit
 faction_select:
   - State(FactionSelect)

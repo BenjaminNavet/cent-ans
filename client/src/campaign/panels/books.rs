@@ -347,4 +347,36 @@ mod tests {
         .unwrap();
         assert_eq!(other, Ok(("faction", "faction:tab:sheet", "sheet")));
     }
+
+    /// The book keys (R, H or F5) open the book, but not while a text field has the keyboard.
+    #[test]
+    fn key_is_ignored_while_typing() {
+        let mut app = App::new();
+        app.insert_resource(Books::load())
+            .insert_resource(KeyMap::defaults())
+            .init_resource::<ButtonInput<KeyCode>>()
+            .init_resource::<TextInputFocus>()
+            .add_message::<OpenBook>()
+            .add_systems(Update, keys);
+        let field = app.world_mut().spawn_empty().id();
+        app.world_mut().resource_mut::<TextInputFocus>().0 = Some(field);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F5);
+        app.update();
+        assert_eq!(app.world().resource::<Messages<OpenBook>>().len(), 0);
+        // Focus dropped and the key released then pressed again: the chronicle book opens.
+        app.world_mut().resource_mut::<TextInputFocus>().0 = None;
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .release(KeyCode::F5);
+        app.update();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F5);
+        app.update();
+        let messages = app.world().resource::<Messages<OpenBook>>();
+        assert_eq!(messages.len(), 1);
+        assert_eq!(messages.iter_current_update_messages().next().unwrap().book, "chronicle");
+    }
 }

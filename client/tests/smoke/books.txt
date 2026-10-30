@@ -1,0 +1,24 @@
+# XP-R3 (ADR 0818): the Royaume and Chronique books. Old launchers (hud:open_faction) still open
+# their tab; a tab of another panel switches the panel; the key action opens the remembered tab.
+state Campaign
+wait 200
+click hud:open_faction
+wait 10
+dump out/smoke/books_sheet.json
+click economy:tab:trade
+wait 10
+dump out/smoke/books_trade.json
+click book:kingdom:feudal
+wait 10
+dump out/smoke/books_feudal.json
+click hud:open_chronicle
+wait 10
+click chronicle:tab_registry
+wait 10
+dump out/smoke/books_registry.json
+click chronicle:tab_journal
+wait 10
+dump out/smoke/books_journal.json
+key Escape
+wait 10
+exit

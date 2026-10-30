@@ -1042,7 +1042,7 @@ mod tests {
         );
         assert_eq!(
             rebind(&mut bindings, "map_pan_up", 1, Chord::key(KeyCode::KeyH)),
-            Some("army_garrison")
+            Some("map_toggle_chronicle")
         );
         let map = KeyMap::from_bindings(&bindings);
         assert_eq!(map.label("battle_halt", "qwerty"), "F");
