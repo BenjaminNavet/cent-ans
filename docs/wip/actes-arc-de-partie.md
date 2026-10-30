@@ -7,7 +7,7 @@ Branche : worktree-agent-a295039522a70fda4.
   `victory::resolve_with_acts` (victoire = score de règne), `STATE_VERSION` 11, fixture `save_v11.json`.
 - Données : `data/rules/acts.json` (généré par un script jetable), `data/schemas/acts_rules.schema.json`.
 - game-api : `acts.rs` (vue de l'acte, transition, choix de politique), `progress.rs` (objectifs de l'acte, fin de partie).
-- Client : `client/src/campaign/progress/acts.rs` (écran de transition, boutons `acts:policy:<id>`, `acts:continue`,
+- Client : `client/src/campaign/progress/acts.rs` (écran de transition, boutons `acts:ambition:<id>`, `acts:continue`,
   hook `CENT_ANS_FORCE_ACT=1`, dump `progress_acts`). Aucune capture prise.
 - Tests : `tests/campaign_life/acts.rs` (dont partie complète 1337-1454 : France passive -> Ended, score 66, actes 65/46/82).
 

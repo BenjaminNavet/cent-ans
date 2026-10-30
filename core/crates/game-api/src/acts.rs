@@ -1,6 +1,6 @@
 //! The arc in three acts (ADR 0784, refit R1): the act in progress, the renown of the house, the
 //! transition screen with the bilan of the act that has just closed, and the ambitions of the
-//! household (the `policies` rows keep their name for the client). Pure views over
+//! household (formerly "policies", renamed in R1-UI). Pure views over
 //! `sim_campaign::acts`; the texts come from `data/rules/acts.json`.
 
 use data_model::GameData;
@@ -14,7 +14,7 @@ pub struct ActObjectiveRow {
     pub title: String,
     pub description: String,
     pub category: String,
-    /// Weight in the act score, policy included.
+    /// Weight in the act score, ambition included.
     pub weight: u32,
     pub done: bool,
     /// Already met when the act opened: to keep, earns nothing (not an accomplishment).
@@ -35,7 +35,7 @@ pub struct ActPressureRow {
 
 /// An ambition the player may choose (R1-2; the row keeps its old name for the client).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct ActPolicyRow {
+pub struct ActAmbitionRow {
     pub id: String,
     pub name: String,
     pub description: String,
@@ -66,9 +66,9 @@ pub struct ActView {
     pub renown_recent: Vec<String>,
     pub objectives: Vec<ActObjectiveRow>,
     pub pressures: Vec<ActPressureRow>,
-    pub policies: Vec<ActPolicyRow>,
+    pub ambitions: Vec<ActAmbitionRow>,
     /// An ambition is still to be chosen.
-    pub policy_pending: bool,
+    pub ambition_pending: bool,
 }
 
 fn text(data: &GameData, key: &str) -> String {
@@ -82,11 +82,11 @@ fn fill(template: &str, pairs: &[(&str, &str)]) -> String {
 }
 
 /// The ambitions of the act in progress, the held ones marked.
-fn policy_rows(data: &GameData, state: &CampaignState) -> Vec<ActPolicyRow> {
+fn ambition_rows(data: &GameData, state: &CampaignState) -> Vec<ActAmbitionRow> {
     state
         .act_ambitions(data)
         .iter()
-        .map(|a| ActPolicyRow {
+        .map(|a| ActAmbitionRow {
             id: a.id.clone(),
             name: a.name.clone(),
             description: a.description.clone(),
@@ -170,19 +170,19 @@ pub fn act_view(data: &GameData, state: &CampaignState) -> Option<ActView> {
         renown_recent: renown_recent(data, state, 3),
         objectives,
         pressures,
-        policies: if state.acts.finished {
+        ambitions: if state.acts.finished {
             Vec::new()
         } else {
-            policy_rows(data, state)
+            ambition_rows(data, state)
         },
-        policy_pending: state.ambitions_pending(data) > 0,
+        ambition_pending: state.ambitions_pending(data) > 0,
     })
 }
 
 /// Takes an ambition for the act in progress (R1-2: two among four; beyond, it replaces the
 /// oldest while the choice is open); `false` for an unknown ambition, no act, or a closed choice.
-pub fn choose_policy(data: &GameData, state: &mut CampaignState, policy: &str) -> bool {
-    state.choose_act_ambition(data, policy).is_ok()
+pub fn choose_ambition(data: &GameData, state: &mut CampaignState, ambition: &str) -> bool {
+    state.choose_act_ambition(data, ambition).is_ok()
 }
 
 /// The transition screen: the bilan of the act that has just closed, and the act that begins.
@@ -215,8 +215,8 @@ pub struct TransitionView {
     pub next_name: Option<String>,
     pub next_subtitle: String,
     pub next_intro: String,
-    pub policy_prompt: String,
-    pub policies: Vec<ActPolicyRow>,
+    pub ambition_prompt: String,
+    pub ambitions: Vec<ActAmbitionRow>,
 }
 
 /// The transition screen if the player has not seen the last one yet.
@@ -312,13 +312,13 @@ pub fn transition_view(data: &GameData, state: &CampaignState) -> Option<Transit
         next_name: next.map(|a| a.name.clone()),
         next_subtitle: next.map_or_else(String::new, |a| a.subtitle.clone()),
         next_intro: next.map_or_else(String::new, |a| a.intro.clone()),
-        policy_prompt: if next.is_some() {
+        ambition_prompt: if next.is_some() {
             text(data, "policy_prompt")
         } else {
             String::new()
         },
-        policies: if next.is_some() {
-            policy_rows(data, state)
+        ambitions: if next.is_some() {
+            ambition_rows(data, state)
         } else {
             Vec::new()
         },

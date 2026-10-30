@@ -1,14 +1,14 @@
 //! Act transition screen (ADR 0784): when an act closes, a vellum card gives the bilan of the act
 //! (score, objectives, pressures, the three main causes of the journal), announces the next act
-//! and lets the player choose the policy of the household. All figures and texts come from
+//! and lets the player choose the ambition of the household. All figures and texts come from
 //! `game_api::acts` (data `rules/acts.json`).
 //!
-//! Widget names: `acts:policy:<id>` (choose a policy), `acts:continue`. Dev hook:
+//! Widget names: `acts:ambition:<id>` (choose a ambition), `acts:continue`. Dev hook:
 //! `CENT_ANS_FORCE_ACT=1` jumps the calendar past the first act after the first frame. Dump
 //! section: `progress_acts`.
 
 use bevy::prelude::*;
-use game_api::acts::{TransitionView, choose_policy, mark_transition_seen, transition_view};
+use game_api::acts::{TransitionView, choose_ambition, mark_transition_seen, transition_view};
 use serde_json::{Value, json};
 
 use crate::agent::dump::DumpAppExt;
@@ -146,7 +146,7 @@ fn spawn(commands: &mut Commands, theme: &UiTheme, view: &TransitionView) -> Ent
                             &format!("{next} — {}\n{}", view.next_subtitle, view.next_intro),
                             UiType::Body,
                         ));
-                        card.spawn(caption(&theme, &view.policy_prompt));
+                        card.spawn(caption(&theme, &view.ambition_prompt));
                         card.spawn(Node {
                             column_gap: Val::Px(12.0),
                             justify_content: JustifyContent::Center,
@@ -154,24 +154,24 @@ fn spawn(commands: &mut Commands, theme: &UiTheme, view: &TransitionView) -> Ent
                             ..default()
                         })
                         .with_children(|row| {
-                            for policy in &view.policies {
-                                let label = if policy.chosen {
-                                    format!("> {}", policy.name)
+                            for ambition in &view.ambitions {
+                                let label = if ambition.chosen {
+                                    format!("> {}", ambition.name)
                                 } else {
-                                    policy.name.clone()
+                                    ambition.name.clone()
                                 };
                                 row.spawn(button_primary(
                                     &theme,
-                                    &format!("acts:policy:{}", policy.id),
+                                    &format!("acts:ambition:{}", ambition.id),
                                     &label,
                                 ));
                             }
                         });
                         let chosen = view
-                            .policies
+                            .ambitions
                             .iter()
                             .find(|p| p.chosen)
-                            .map_or_else(|| view.policy_prompt.clone(), |p| p.description.clone());
+                            .map_or_else(|| view.ambition_prompt.clone(), |p| p.description.clone());
                         card.spawn(caption(&theme, &chosen));
                     }
                     card.spawn(button_primary(&theme, "acts:continue", "Continuer"));
@@ -190,14 +190,14 @@ fn handle_buttons(
 ) {
     for press in pressed.read() {
         let name = press.name.as_str();
-        if let Some(policy) = name.strip_prefix("acts:policy:") {
+        if let Some(ambition) = name.strip_prefix("acts:ambition:") {
             let Some(data) = sim.data.clone() else {
                 continue;
             };
             let Some(state) = sim.state.as_mut() else {
                 continue;
             };
-            if choose_policy(&data, state, policy) {
+            if choose_ambition(&data, state, ambition) {
                 if let Some(root) = screen.root.take() {
                     commands.entity(root).despawn();
                 }
@@ -229,7 +229,7 @@ fn dump(world: &World) -> (String, Value) {
                 "score": v.score, "reign_score": v.reign_score,
                 "objectives": v.objectives, "pressures": v.pressures,
                 "causes": v.causes, "next_name": v.next_name,
-                "policies": v.policies.iter().map(|p| json!({"id": p.id, "chosen": p.chosen})).collect::<Vec<_>>(),
+                "ambitions": v.ambitions.iter().map(|p| json!({"id": p.id, "chosen": p.chosen})).collect::<Vec<_>>(),
             })),
         }),
     )
