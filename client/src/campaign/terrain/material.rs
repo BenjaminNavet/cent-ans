@@ -290,9 +290,10 @@ mod tests {
     /// material may own 4 at most (a 17th binding crashed the campaign at first render).
     #[test]
     fn terrain_shader_owns_few_samplers() {
-        let source = include_str!("terrain.wesl");
+        // The bindings live in `terrain_params.wesl` since the split of terrain.wesl (VIS-L1).
+        let source = include_str!("terrain_params.wesl");
         let declared = source.matches(": sampler;").count();
-        assert!(declared <= 4, "{declared} samplers in terrain.wesl");
+        assert!(declared <= 4, "{declared} samplers in terrain_params.wesl");
         let bound = include_str!("material.rs")
             .lines()
             .filter(|l| l.trim_start().starts_with("#[sampler("))
