@@ -203,3 +203,14 @@ Constats seed bots longs : présentés au joueur, il choisit (ne rien écrire da
 - M2 fait (7d674ca5c, contient M1, ADR 0843) : Sentinel-2 L2A (AWS Open Data, licence ouverte, ~3 Go, 2 472 scènes), carte de couleur recuite, forêts sombres à lisière nette ; chroma perdue trouvée (plancher d'ombre gris dans terrain.wesl) → pré s 0,22 → 0,51. Jugement orchestrateur sur les aperçus : forêts réussies, mais plaine vert pomme uniforme (« gazon »), parcellaire disparu. Lancé M2b (base M2 + M3) : saturation 0,30-0,42, damier de cultures et jachères ocre, vues Castille/Highlands. Pour FUSION-D : M2b remplace M1, M2, M3.
 
 - 15:40 Joueur : image de référence de carte de campagne (~/dev/cent-ans-raw/refs/campagne-cible-joueur.png) = cible visuelle. Canopée olive dense continue, clairières olive grisé peu saturées, voile doré, brume d horizon. Transmise à M2b ; servira de base au prochain juge visuel. FUSION-C : relance du garde de perf (tué, code 143), puis smoke et bench. Coût 202 $.
+
+## PAUSE 30/10 15:45 (demandée par le joueur, reprise dans quelques heures)
+Coût 205 $ / 300 $. Tous les agents et toutes les boucles de fond sont arrêtés. Verrou de fusion libéré.
+Reprise :
+- FUSION-C (worktree fusion-c, d1abe288f, 1 fichier modifié) : contrôles verts sauf le garde de perf (tué, code 143), à relancer. Relancer aussi le test f7 seul, puis smoke, battle_bench --smoke et le ff-merge.
+- CAMP-R2 (agent-aca56a08ae241545a, e921291db, propre) : manquent clippy et les tests.
+- BAT-R2b (agent-ad1b97fe8e5c9b8a2, d60e1eee3, 4 fichiers modifiés) : clippy propre ; manquent les tests client et le smoke.
+- M2b (agent-af438da53ac776d29, 4a9485dc3, 3 fichiers modifiés) : en cours de recalage sur la référence du joueur (~/dev/cent-ans-raw/refs/campagne-cible-joueur.png) ; build et vues à refaire.
+- BATI-RÉEL : chaîne de génération coupée. Quota TRELLIS HF épuisé (≈ 22 h) ; farm_1 et la suite restent à faire (repli SF3D).
+- Prêts pour FUSION-D : FORECAST-ASYNC, CAMP-S, M5a, VIS-L4 + L4b, VIS-L5.
+- Relancer tools/disk_guard.sh et le guetteur de coût.
