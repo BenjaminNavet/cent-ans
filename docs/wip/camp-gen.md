@@ -14,3 +14,7 @@ Spec : `docs/audits/2026-10-30-juge-jeu-iter3.md` (M1, M2, M5, « Lot E »).
 
 ## Points ouverts
 - Affaires « Armée ennemie près de X (200 hommes) » : dans `agenda.rs` (lot XP-SOBRE), non touché.
+
+## Fait
+- ADR 0831 + INDEX ; tests 8 maisons verts (offres proportionnées, armée >= 100 sur 4 saisons sans ordre).
+- Leviers de départ non ajoutés : l armée de départ tient déjà ; la disparition Navarre vient du pilote judge_play, à sonder à la fusion.

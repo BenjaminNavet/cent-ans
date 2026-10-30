@@ -378,3 +378,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0820 | [VIS-R4 : montagne étagée et neige d'altitude blanche](0820-vis-r4-montagne-etagee.md) | proposé |
 | 0820 | [VIS-R4 : montagne étagée et neige d'altitude blanche](0820-vis-r4-montagne-etagee.md) | accepté |
 | 0829 | [DATA-GARDE : manifeste de schémas, chargement parallèle, textes du core](0829-data-garde-manifeste-schemas.md) | accepté |
+| 0831 | [CAMP-GEN : missions proportionnées à la puissance de la maison](0831-camp-gen-missions-proportionnees.md) | accepté |
