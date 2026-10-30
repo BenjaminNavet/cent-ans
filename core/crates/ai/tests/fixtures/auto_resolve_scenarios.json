@@ -1,6 +1,6 @@
 {
   "comment": "Scénarios de calibration de l'auto-résolution (ADR 0013, BANC-2). reference_3d : résultats de la bataille 3D (sim-battle, IA contre IA), générés par `tools/heavy.sh cargo run --release -p sim-battle --example battle_bench -- --emit-auto-fixture`. data_hash : empreinte de data/unit_types/*.json et data/rules/battle_*.json ; le test auto_resolve_calibration échoue si elle est périmée (relancer la commande).",
-  "data_hash": "609727e3924027eb",
+  "data_hash": "f295ed26ddd83c41",
   "scenarios": [
     {
       "attacker": [

@@ -286,10 +286,6 @@ pub(in crate::ai) fn plan_field(view: &mut View) {
             .filter(|&i| reserve_ids.contains(&view.units[i].id))
             .collect()
     });
-    let abl: u32 = std::env::var("ABL")
-        .ok()
-        .and_then(|v| v.parse().ok())
-        .unwrap_or(0);
     let posture = Posture {
         hold: true,
         reserve_from,
@@ -298,7 +294,7 @@ pub(in crate::ai) fn plan_field(view: &mut View) {
     // The attacker keeps the historical posture (patience, reserve); its plan
     // acts through the offensive roles below.
     plan_field_with(view, (view.side == SideId::Defender).then_some(&posture));
-    if view.side == SideId::Attacker && abl & 16 == 0 {
+    if view.side == SideId::Attacker {
         for division in &side_memo.divisions {
             offense::apply(view, division, phase.roles.of(division.kind));
         }

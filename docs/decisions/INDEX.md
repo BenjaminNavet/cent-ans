@@ -376,3 +376,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0813 | [ECO-R1 : l'impôt consenti (assemblées, subsides, concessions)](0813-eco-r1-impot-consenti.md) | accepté |
 | 0814 | [VIS-R3b : parcellaire typé du sol de campagne](0814-vis-r3b-parcellaire-type.md) | accepté |
 | 0815 | [ECO-R1c : l'impôt consenti, IA et Angleterre](0815-eco-r1c-ia-et-angleterre.md) | accepté |
+| 0816 | [IA-PLAN-2 : plans offensifs (fix, wear, strike, screen)](0816-ia-plan-2-plans-offensifs.md) | accepté |

@@ -1,13 +1,12 @@
-# IA-PLAN-2 — plans offensifs (échelons, fixer-déborder, provoquer)
+# IA-PLAN-2 — plans offensifs (échelons, fixer-déborder, provoquer) — TERMINÉ (défaut inchangé)
 
-Spec : `docs/audits/2026-10-29-bataille.md` § IA-PLAN-2. Base : IA-PLAN-1 (`docs/wip/ia-plan-1.md`, ADR 0809).
-Branche : worktree-agent-a81b1ae605a828a40 (reset sur main 80af89beb). Rien de poussé.
+ADR : `docs/decisions/0816-ia-plan-2-plans-offensifs.md`. Branche : worktree-agent-a81b1ae605a828a40.
 
 ## État
-- [ ] Banc de référence legacy/plans (20 graines).
-- [ ] Diagnostic Crécy (14 -> 9) / Castillon (2 -> 0) sous `plans`.
-- [ ] Plans offensifs (rôles fix/wear/strike/screen, données + schéma).
-- [ ] Défaut `planner: plans` seulement si le critère est atteint.
+- [x] Banc de référence legacy/plans (8 et 20 graines).
+- [x] Diagnostic : la posture tenue du défenseur déplace l'équilibre ; le plan offensif est neutre.
+- [x] Plans offensifs en données (rôles fix/wear/strike/screen, schéma).
+- [ ] Bascule du défaut : NON (critère non atteint : symétrique 40-60 %, Castillon).
 
-## Prochaine étape
-Mesurer le banc de référence.
+## Suite possible
+Rééquilibrer la patience du défenseur tenu ; réglage de Castillon (le défenseur y perd déjà en `legacy`).
