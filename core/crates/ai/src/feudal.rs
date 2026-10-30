@@ -378,8 +378,12 @@ pub fn plan_commise(cache: &PlanCache, data: &GameData, faction: &FactionId) -> 
     }
     let factor = 1.0 + f64::from(aggression(data, faction) - 50) / 50.0 * w.aggression_shift;
     let needed = w.min_power_ratio / factor.max(0.1);
+    // IA-REFUS: a case outlives the bond; forfeiture needs a title still held
+    // of us (`NotVassal` otherwise).
+    let vassals = sim_campaign::feudal::direct_vassals(state, data, faction);
     cases
         .into_iter()
+        .filter(|v| vassals.contains(*v))
         .filter(|v| {
             let other_wars = wars(state, faction) - usize::from(state.is_at_war(faction, v));
             other_wars <= w.max_wars

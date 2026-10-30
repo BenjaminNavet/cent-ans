@@ -686,6 +686,21 @@ impl<'a> GridPlanner<'a> {
             }
             previous = node;
         }
+        // IA-REFUS: the first leg must be walkable on the grid as the core
+        // sees it (zones of control, hostile places): else `NoPath`.
+        if let Some(Order::MoveArmy {
+            target: sim_campaign::MoveOrderTarget::Place(sim_campaign::Place::Settlement(first)),
+            ..
+        }) = orders.first()
+        {
+            let reachable = self
+                .data
+                .settlement_point(first)
+                .is_none_or(|point| self.state.find_path(self.data, army_id, point).is_some());
+            if !reachable {
+                return Vec::new();
+            }
+        }
         orders
     }
 }

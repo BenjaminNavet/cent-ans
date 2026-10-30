@@ -496,7 +496,10 @@ fn state_plans(
 /// The orders of the state-only planners, in the order they are issued; the
 /// gifts among them leave the treasury the economy then plans with.
 fn state_orders(ctx: &mut Context, plans: StatePlans) -> Vec<Order> {
-    let mut orders = plans.diplomacy;
+    // IA-REFUS: the agents were planned on the state as it stands; a peace or
+    // a war declared first would turn their action (incite, parley) illegal.
+    let mut orders = plans.agents;
+    orders.extend(plans.diplomacy);
     if let Some(order) = plans.money_fief {
         ctx.treasury -= gift_amount(&order);
         orders.push(order);
@@ -529,7 +532,6 @@ fn state_orders(ctx: &mut Context, plans: StatePlans) -> Vec<Order> {
     }));
     orders.extend(plans.ransoms);
     orders.extend(plans.chivalry);
-    orders.extend(plans.agents);
     orders
 }
 
@@ -586,7 +588,104 @@ fn plan_turn_in(
     military_orders::plan_siege_orders(&ctx, &mut orders);
     army::plan_armies(&ctx, &mut orders);
     drop_orders_on_emptied_armies(state, &mut orders);
+    drop_moves_without_movement(state, &mut orders);
+    drop_unaffordable_orders(state, data, faction, &mut orders);
     orders
+}
+
+/// IA-REFUS: the planner pieces each count the treasury on their own; walks
+/// the whole plan with a running balance and drops the recruitments and
+/// constructions the core would refuse for lack of funds (`InsufficientFunds`,
+/// `BuildUnavailable`). Orders raising money (borrowing, levies) are ignored:
+/// the balance is a prudent floor.
+fn drop_unaffordable_orders(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    orders: &mut Vec<Order>,
+) {
+    let Some(mut balance) = state.factions.get(faction).map(|f| f.treasury) else {
+        return;
+    };
+    let place_id = |place: &sim_campaign::Place| match place {
+        sim_campaign::Place::Settlement(id) => Some(id.clone()),
+        _ => None,
+    };
+    orders.retain(|order| {
+        let cost = match order {
+            Order::Recruit {
+                settlement,
+                unit_type,
+            }
+            | Order::RecruitInto {
+                settlement,
+                unit_type,
+                ..
+            } => data.unit_types.get(unit_type).map(|unit| {
+                let priced = place_id(settlement)
+                    .map_or(0, |id| state.recruit_cost(data, faction, &id, unit));
+                i64::from(priced.max(unit.cost.money))
+            }),
+            Order::RoyalAct { act } => data.royal_acts.get(act).map(|a| a.cost_livres),
+            Order::Build { building, .. } => data
+                .buildings
+                .get(building)
+                .map(|b| i64::from(b.cost.money)),
+            _ => None,
+        };
+        match cost {
+            Some(cost) if cost > balance => false,
+            Some(cost) => {
+                balance -= cost;
+                true
+            }
+            None => true,
+        }
+    });
+}
+
+/// IA-REFUS: walks through the plan tracking the movement each army has left
+/// (a merge hands the target the lower of the two, an attack or an embarkation
+/// spends the turn) and drops the marches ordered after it ran out: the core
+/// answers them `NoMovementLeft`.
+fn drop_moves_without_movement(state: &CampaignState, orders: &mut Vec<Order>) {
+    let mut left: BTreeMap<ArmyId, u32> = BTreeMap::new();
+    let initial = |left: &mut BTreeMap<ArmyId, u32>, id: &ArmyId| -> u32 {
+        *left
+            .entry(id.clone())
+            .or_insert_with(|| state.armies.get(id).map_or(1, |a| a.movement_left))
+    };
+    let mut touched: BTreeSet<ArmyId> = BTreeSet::new();
+    orders.retain(|order| match order {
+        Order::AssignGeneral { army, .. }
+        | Order::RecruitInto { army, .. }
+        | Order::HireMercenary { army, .. }
+        | Order::SetStance { army, .. }
+        | Order::DisbandUnit {
+            army: Some(army), ..
+        } => {
+            touched.insert(army.clone());
+            true
+        }
+        Order::Embark { army, .. } if touched.contains(army) => false,
+        Order::MergeArmies { source, target } => {
+            touched.insert(source.clone());
+            touched.insert(target.clone());
+            let source_left = initial(&mut left, source);
+            let target_left = initial(&mut left, target);
+            left.insert(target.clone(), target_left.min(source_left));
+            true
+        }
+        Order::Attack { army, .. } | Order::Embark { army, .. } => {
+            let keep = initial(&mut left, army) > 0;
+            if keep {
+                left.insert(army.clone(), 0);
+            }
+            keep
+        }
+        Order::MoveArmy { army, .. } => initial(&mut left, army) > 0,
+        _ => true,
+    });
 }
 
 /// IA-REFUS: an army whose every unit is dismissed this turn is gone before
@@ -611,9 +710,10 @@ fn drop_orders_on_emptied_armies(state: &CampaignState, orders: &mut Vec<Order>)
         return;
     }
     orders.retain(|order| match order {
-        Order::AssignGeneral { army, .. } | Order::ChooseArmyTradition { army, .. } => {
-            !emptied.contains(army)
-        }
+        Order::AssignGeneral { army, .. }
+        | Order::ChooseArmyTradition { army, .. }
+        | Order::HireMercenary { army, .. }
+        | Order::RecruitInto { army, .. } => !emptied.contains(army),
         Order::MergeArmies { source, target } => {
             !emptied.contains(source) && !emptied.contains(target)
         }

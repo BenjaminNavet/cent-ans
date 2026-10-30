@@ -125,7 +125,10 @@ pub struct AiMoveRecord {
 }
 
 /// How many refused AI orders are kept as text samples.
-pub const AI_REFUSAL_SAMPLES: usize = 16;
+pub const AI_REFUSAL_SAMPLES: usize = 120;
+
+/// How many samples are kept for each `Order -> error` kind.
+const AI_REFUSAL_SAMPLES_PER_KIND: u32 = 2;
 
 /// Counter of the AI orders the core refused (B1), never saved.
 ///
@@ -233,8 +236,7 @@ impl CampaignState {
             .next()
             .unwrap_or_default()
             .to_string();
-        let label =
-            (self.ai_refusals.samples.len() < AI_REFUSAL_SAMPLES).then(|| format!("{order:?}"));
+        let kept = (self.ai_refusals.samples.len() < AI_REFUSAL_SAMPLES).then(|| order.clone());
         if let Err(error) = self.apply_ai_order_inner(data, faction, order) {
             if matches!(
                 error,
@@ -244,14 +246,15 @@ impl CampaignState {
                 return;
             }
             self.ai_refusals.count += 1;
-            *self
+            let seen = self
                 .ai_refusals
                 .by_kind
                 .entry(refusal_kind(&order_name, &error))
-                .or_insert(0) += 1;
-            if let Some(label) = label {
+                .or_insert(0);
+            *seen += 1;
+            if let (Some(order), true) = (kept, *seen <= AI_REFUSAL_SAMPLES_PER_KIND) {
                 self.ai_refusals.samples.push(format!(
-                    "turn {} {faction}: {label} -> {error:?}",
+                    "turn {} {faction}: {order:?} -> {error:?}",
                     self.turn
                 ));
             }
