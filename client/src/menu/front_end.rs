@@ -158,7 +158,7 @@ mod tests {
     fn real_file_parses() {
         let root = paths::find_root().expect("repo root");
         let front = FrontEnd::load(&paths::data_dir(&root), &paths::asset_root(&root)).unwrap();
-        assert!(front.factions.len() > 100);
+        assert_eq!(front.factions.len(), 8); // CAMP-R6, ADR 0817
         assert!(front.recommended().contains(&"fac_england".to_owned()));
         assert_eq!(front.difficulty_labels.len(), 4);
         assert!(front.start_date_label().starts_with("Printemps 1337"));
