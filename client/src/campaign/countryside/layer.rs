@@ -157,7 +157,11 @@ pub fn prop_frame(cfg: &super::config::Config, prop: usize, real_units: f32, d: 
             .clamp(1.0, p.max_mult * cfg.maquette_size * cfg.maquette_range);
         (m, m.powf(r.spread_exponent))
     };
-    let range = if p.stretched || p.max_real_mult.is_some() { 1.0 } else { cfg.maquette_range };
+    let range = if p.stretched || p.max_real_mult.is_some() {
+        1.0
+    } else {
+        cfg.maquette_range
+    };
     let fade = 1.0 - smoothstep(p.fade_from * range, p.max_distance * range, d);
     PropFrame {
         mult,

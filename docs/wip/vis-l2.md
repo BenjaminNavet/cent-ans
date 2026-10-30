@@ -2,18 +2,14 @@
 
 Spec : docs/audits/2026-10-30-juge-visuel-iter3.md, G1-2 et lot L2.
 
-## État
-- Squelette : note + ADR réservé.
-
-## Plan
-1. Données : bloc `habitat` de `data/map/map_countryside.json` (+ schéma) : plafond d'échelle (× réel), portée max des
-   habitations. Props marquées `"habitat": true`.
-2. `countryside/{config,layer}.rs` : `prop_frame` applique le plafond et la portée des habitations ; fin du grossissement
-   « taille écran » pour les fermes.
-3. `towns/shapes.rs` supprimé : plus de bloc maison ni d'arbres de jardin bâtis par le code (kit glb partout, arbres de
-   la végétation en place). Test d'inventaire (grep).
-4. Noyau de hameau : décalque au sol + au plus une maquette existante.
-5. Figures et chariots plafonnés relativement aux maquettes de ville.
+## État (30/10)
+Fait et testé (cargo check + tests `campaign::` verts, pytest schéma vert) :
+- `max_real_mult` (10 props d'habitation, 3 × réel, portée 70-120) ; `hamlet_core` (décalque drapé, 4 palettes) ;
+  `hameau_jardins`/`hamlet_garden` supprimés ; `towns/shapes.rs` supprimé (maisons en kit glb à tout LOD, plus d'arbres
+  de jardin bâtis) ; test d'inventaire ; `folk_scale` 675 → 300.
+Non fait : maquette `village_west` sur le noyau, décalques Z-Image, mesure visuelle (captures), mesure de visibilité des
+villes `city` (Bordeaux, Caen), Paris vs voisins.
 
 ## Prochaine étape
-Étape 1.
+À la fusion : une capture camp_0200 / camp_calais / camp_guyenne (tools/compare_views.sh) pour juger le décalque (alpha,
+rayon 220 m, palette) ; vérifier le coût d'entités des villes en kit à tout LOD ; fmt/clippy complets.

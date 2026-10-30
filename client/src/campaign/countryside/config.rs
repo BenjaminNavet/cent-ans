@@ -391,7 +391,10 @@ pub fn parse(doc: &Value, data_dir: &Path, projection: &MapProjection) -> Config
                     .get("fixed_size")
                     .and_then(Value::as_bool)
                     .unwrap_or(false),
-                max_real_mult: p.get("max_real_mult").and_then(Value::as_f64).map(|v| v as f32),
+                max_real_mult: p
+                    .get("max_real_mult")
+                    .and_then(Value::as_f64)
+                    .map(|v| v as f32),
                 max_instances: num(p, "max_instances", render.max_instances_per_prop as f32)
                     as usize,
                 albedo_gain: num(p, "albedo_gain", 1.0),
@@ -480,7 +483,14 @@ mod tests {
         let doc: Value = serde_json::from_str(&text).unwrap();
         let projection = MapProjection::load(&root.join("data/map")).unwrap();
         let cfg = parse(&doc, &root.join("data"), &projection);
-        assert_eq!(cfg.props.len(), 50);
+        assert_eq!(cfg.props.len(), 49);
+        assert!(!cfg.hamlet_core.palettes.is_empty() && cfg.hamlet_core.radius_m > 0.0);
+        assert!(
+            cfg.props
+                .iter()
+                .filter(|p| p.id.starts_with("farm_") || p.id == "house_brick")
+                .all(|p| p.max_real_mult.is_some_and(|m| m <= 3.0))
+        );
         assert!(cfg.rules.len() >= 25, "{} rules", cfg.rules.len());
         assert!(
             cfg.rules

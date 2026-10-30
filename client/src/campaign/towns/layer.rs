@@ -98,8 +98,6 @@ pub(super) struct TownMeshes {
     planks: Handle<BuildingAtlasMaterial>,
     street: Handle<StandardMaterial>,
     ground: Handle<StandardMaterial>,
-    /// White, double sided: monument meshes carry their colours in the vertices.
-    vertex: Handle<StandardMaterial>,
     /// Kit atlas with box UVs: monument meshes carry their atlas layer in the vertex alpha.
     monument: Handle<BuildingAtlasMaterial>,
 }
@@ -349,7 +347,6 @@ fn init_towns(
         monument: atlas_mat(None, Vec3::ONE),
         street: mat(look.street, 1.0),
         ground: mat(look.ground, 1.0),
-        vertex: mat([1.0, 1.0, 1.0], 0.92),
     };
     let landmarks = LandmarkLibrary::load(&data_dir);
     let landmark_px = landmark::landmark_anchors(&landmarks, &data_dir);
@@ -1053,7 +1050,7 @@ fn spawn_building(
         .world
         .kit
         .pick_styled(kind, front, depth, rng, sp.style.as_ref())
-            .cloned()
+        .cloned()
     {
         let scale = sp.world.kit.fit_scale(&entry.name, front, depth);
         sp.kit_piece(&entry.name, local, yaw, scale, half, 0.0);

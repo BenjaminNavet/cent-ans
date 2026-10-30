@@ -238,15 +238,6 @@ pub(super) fn stream_landmarks(
         style_of_town(sim, world, id),
     );
     state.scenes = scenes;
-    let trees = spawn_trees(
-        commands,
-        meshes,
-        shared,
-        root,
-        &lp.plan,
-        lod == Lod::Detail,
-        &y_of,
-    );
     state.towns_spawned += 1;
     state.spawn_ms_max = state
         .spawn_ms_max
@@ -262,7 +253,6 @@ pub(super) fn stream_landmarks(
             counts,
             anchor,
             landmark: Some(LmShown { plan: lp, walls }),
-            trees,
         },
     );
 }
@@ -362,14 +352,13 @@ fn spawn_landmark(
     anchor: Vec2,
     seed: u32,
     lp: &LandmarkPlan,
-    lod: Lod,
+    _lod: Lod,
     weight: f32,
     y_of: &dyn Fn(Vec2) -> f32,
     style: Option<RegionStyle>,
 ) -> (Entity, [Handle<Mesh>; 2], Vec<Handle<Mesh>>, Counts) {
     let scale = 1.0 / world.db.meters_per_unit;
     let look = &world.look;
-    let detail = lod == Lod::Detail;
     let plan = &lp.plan;
     let root = commands
         .spawn((
@@ -435,7 +424,6 @@ fn spawn_landmark(
         sp.fixed = bridge.map(|b| (b.pos, h.base - b.water));
         spawn_building(
             &mut sp,
-            detail,
             HOUSE_KINDS[h.kind],
             h.pos,
             h.yaw,

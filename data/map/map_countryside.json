@@ -346,17 +346,19 @@
     "farm_baltic": {
       "model": "buildings/farm_baltic_longhouse",
       "max_mult": 60,
+      "max_real_mult": 3.0,
       "size_scale": 1.0,
-      "fade_from": 45,
-      "max_distance": 80,
+      "fade_from": 70,
+      "max_distance": 120,
       "max_instances": 300
     },
     "farm_log_cabin": {
       "model": "buildings/farm_polish_log_cabin",
       "max_mult": 60,
+      "max_real_mult": 3.0,
       "size_scale": 1.0,
-      "fade_from": 45,
-      "max_distance": 80,
+      "fade_from": 70,
+      "max_distance": 120,
       "max_instances": 300
     },
     "hedge_bank": {
