@@ -58,5 +58,5 @@ def test_special_starts_are_presented() -> None:
     front_end = _load("ui/front_end.json")
     presented = {faction["id"] for faction in front_end["factions"]}
     special = front_end.get("special_starts", {}).get("factions", [])
-    assert "fac_crusaders" in special
+    # CAMP-R6 (ADR 0817): the challenges tab is empty while no singular faction is playable.
     assert set(special) <= presented
