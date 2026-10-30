@@ -544,7 +544,11 @@ fn build_sea(
     out.sea_life = life.is_some();
     // RC5 / TX: coastal `sea`, open `ocean` and per-basin generated surfaces.
     // VIS-R5: baked GEBCO depth. Without the raster the sea keeps the coast-distance estimate.
-    let bathymetry = if params.bathy_a.x > 0.5 { bathymetry } else { None };
+    let bathymetry = if params.bathy_a.x > 0.5 {
+        bathymetry
+    } else {
+        None
+    };
     match bathymetry {
         Some((image, max_depth_m)) => {
             params.bathy_a.y = max_depth_m;

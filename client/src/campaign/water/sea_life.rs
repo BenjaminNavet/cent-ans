@@ -148,7 +148,11 @@ impl SeaLife {
             let abyss = array(
                 eau,
                 &["bathymetry", "abyss_color"],
-                [params.deep_color.x, params.deep_color.y, params.deep_color.z],
+                [
+                    params.deep_color.x,
+                    params.deep_color.y,
+                    params.deep_color.z,
+                ],
             );
             params.abyss_color = Vec4::new(abyss[0], abyss[1], abyss[2], 1.0);
         }
@@ -255,7 +259,9 @@ mod tests {
         assert_eq!(params.life_a.x, 1.0);
         assert!((params.life_a.y - 1.45).abs() < 1e-5, "brightness");
         assert!((params.life_a.z - 0.4).abs() < 1e-5, "saturation max");
-        assert!((params.shallows_a.w - 60.0).abs() < 1e-5);
+        assert!((params.shallows_a.w - 10.0).abs() < 1e-5, "shoals depth");
+        assert_eq!(params.bathy_a.x, 1.0, "bathymetry wanted");
+        assert!(params.bathy_b.x < params.bathy_b.y && params.bathy_b.y < params.bathy_b.z);
         assert!((params.crest_b.x - 40.0).abs() < 1e-5 && (params.crest_b.y - 140.0).abs() < 1e-5);
         assert!((params.tide_a.x - 150.0).abs() < 1e-5);
     }
