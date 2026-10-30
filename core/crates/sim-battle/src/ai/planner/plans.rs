@@ -246,8 +246,9 @@ mod tests {
         assert_eq!(plan.next_phase(Some(0), &calm), 0);
         assert_eq!(plan.next_phase(Some(0), &bled), 1);
         assert_eq!(plan.next_phase(Some(1), &calm), 1);
-        // Starting late (losses already high) enters the matching phase.
-        assert_eq!(plan.next_phase(None, &bled), 1);
+        // The first phase whose entry holds starts the plan; its exit then
+        // moves on at the next decision.
+        assert_eq!(plan.next_phase(None, &bled), 0);
     }
 
     #[test]
