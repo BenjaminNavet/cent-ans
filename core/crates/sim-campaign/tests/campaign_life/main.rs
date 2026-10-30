@@ -12,6 +12,7 @@ mod hist_spouses;
 mod m10_events;
 mod m10_victory;
 mod m4;
+mod missions_scaled;
 mod nt3_missions;
 mod rg13a_council;
 mod tw_m2a;

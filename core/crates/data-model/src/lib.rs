@@ -150,7 +150,7 @@ pub use entities::map_scenes::{MapSceneRules, DEFAULT_SCENE_TURNS};
 pub use entities::mercenaries::{MercenaryAi, MercenaryArrears, MercenaryBand, MercenaryRules};
 pub use entities::missions::{
     GrudgeAgeTier, GrudgeKindRules, GrudgeRules, MissionCounter, MissionGoal, MissionReward,
-    MissionRules, MissionTarget, MissionTemplate,
+    MissionRules, MissionScale, MissionTarget, MissionTemplate,
 };
 pub use entities::movement::{EmbarkCost, FreeMovementRules, MassifImpassable, TerrainCosts};
 pub use entities::names::NameList;

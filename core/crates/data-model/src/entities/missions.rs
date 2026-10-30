@@ -26,6 +26,8 @@ pub struct MissionRules {
     #[serde(default = "default_offer_expiry")]
     pub offer_expiry_turns: u32,
     pub templates: Vec<MissionTemplate>,
+    /// Proportion of the offers to the house's real might (ADR 0831).
+    pub scale: MissionScale,
     /// Dated grudges (ADR 0720).
     pub grudge: GrudgeRules,
 }
@@ -147,6 +149,23 @@ fn default_offer_expiry() -> u32 {
 
 fn one() -> u32 {
     1
+}
+
+/// Proportion rules of the mission generator (ADR 0831): an offer must be
+/// within what the house can do with its men, its purse and its slots.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MissionScale {
+    /// A conquest (`control`) is offered only while the target's force
+    /// (garrisons and armies sheltered in it) is at most this many times the
+    /// men the house has under arms.
+    pub max_target_force_ratio: f64,
+    /// Men under arms below which no conquest is offered at all.
+    pub min_men_for_conquest: u32,
+    /// Men under arms below which a battle (`battle_won`) is not asked for.
+    pub min_men_for_battle: u32,
+    /// Share of the treasury a levy mission may ask to spend on its units.
+    pub levy_treasury_share: f64,
 }
 
 /// Dated grudges (ADR 0720): missions anchored in an affront suffered.

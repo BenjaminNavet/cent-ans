@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::events::{EventKind, GameEvent};
 use crate::grudges::{self, Grudge};
+use crate::mission_scale;
 use crate::rng::CampaignRng;
 use crate::state::{CampaignState, Season, Unit};
 
@@ -188,10 +189,12 @@ pub struct MissionOfferView {
 
 /// Where a mission points to, before its texts are filled in.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-struct Target {
-    province: Option<ProvinceId>,
+pub(crate) struct Target {
+    pub(crate) province: Option<ProvinceId>,
     settlement: Option<SettlementId>,
     building: Option<BuildingId>,
+    /// Number asked for when the house's might lowers the template's.
+    pub(crate) count: Option<u32>,
     /// `{cible}`.
     target_name: String,
     /// `{lieu}`.
@@ -632,6 +635,16 @@ fn offer_mission(
         .filter(|(_, c)| !c.is_empty())
         .collect();
     let mut grudge_pool = grudges::candidates(state, data);
+    grudge_pool.retain(|(_, m)| {
+        mission_scale::within_might(
+            state,
+            data,
+            player,
+            m.goal,
+            m.counter,
+            m.province.as_ref(),
+        )
+    });
     let mut rng = mission_rng(state.seed, turn);
     let mut built = Vec::new();
     while built.len() < rules.offer_candidates.max(1) as usize
@@ -701,7 +714,7 @@ fn build_mission(
     let count = if template.goal == MissionGoal::Hold {
         template.duration
     } else {
-        template.count.max(1)
+        target.count.unwrap_or(template.count).max(1)
     };
     let fill = |text: &str| {
         text.replace("{cible}", &target.target_name)
@@ -735,7 +748,7 @@ fn build_mission(
 
 /// Faction missions go to their faction only, once, and chained ones after
 /// their predecessor succeeded.
-fn template_open(state: &CampaignState, player: &FactionId, template: &MissionTemplate) -> bool {
+pub(crate) fn template_open(state: &CampaignState, player: &FactionId, template: &MissionTemplate) -> bool {
     if template.faction.as_ref().is_some_and(|f| f != player) {
         return false;
     }
@@ -756,8 +769,55 @@ fn mission_rng(seed: u64, turn: u32) -> CampaignRng {
     )
 }
 
-/// Plausible targets of `template` for `player` (empty: not offered).
+/// Plausible targets of `template` for `player` (empty: not offered), within
+/// the house's might (ADR 0831).
 fn candidates(
+    state: &CampaignState,
+    data: &GameData,
+    player: &FactionId,
+    template: &MissionTemplate,
+) -> Vec<Target> {
+    candidates_with(state, data, player, template, true)
+}
+
+/// [`candidates`], with or without the proportion rules.
+pub(crate) fn candidates_with(
+    state: &CampaignState,
+    data: &GameData,
+    player: &FactionId,
+    template: &MissionTemplate,
+    scaled: bool,
+) -> Vec<Target> {
+    let mut targets = unscaled_candidates(state, data, player, template);
+    if !scaled {
+        return targets;
+    }
+    targets.retain(|t| {
+        mission_scale::within_might(
+            state,
+            data,
+            player,
+            template.goal,
+            template.counter,
+            t.province.as_ref(),
+        )
+    });
+    if template.counter == Some(MissionCounter::UnitsRecruited) {
+        targets = match mission_scale::affordable_levy(state, data, player, template.count) {
+            Some(count) => targets
+                .into_iter()
+                .map(|t| Target {
+                    count: Some(count),
+                    ..t
+                })
+                .collect(),
+            None => Vec::new(),
+        };
+    }
+    targets
+}
+
+fn unscaled_candidates(
     state: &CampaignState,
     data: &GameData,
     player: &FactionId,
@@ -849,6 +909,7 @@ fn candidates(
                             province: Some((*p).clone()),
                             settlement: Some(city.clone()),
                             building: Some(option.building.clone()),
+                            count: None,
                         });
                     }
                 }

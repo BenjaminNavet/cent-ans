@@ -6,6 +6,12 @@
   "failure_prestige": -2,
   "offer_candidates": 3,
   "offer_expiry_turns": 2,
+  "scale": {
+    "max_target_force_ratio": 1.5,
+    "min_men_for_conquest": 150,
+    "min_men_for_battle": 100,
+    "levy_treasury_share": 0.8
+  },
   "templates": [
     {
       "id": "take_neighbour",

@@ -50,6 +50,18 @@
         "$ref": "#/$defs/template"
       }
     },
+    "scale": {
+      "type": "object",
+      "description": "ADR 0831 : proportion des offres à la puissance réelle de la maison.",
+      "properties": {
+        "max_target_force_ratio": {"type": "number", "minimum": 0.1, "maximum": 10, "description": "Force de la cible (garnisons et armées abritées) au plus ce multiple des hommes sous les armes, pour une conquête."},
+        "min_men_for_conquest": {"type": "integer", "minimum": 0, "description": "Hommes sous les armes en deçà desquels aucune conquête n'est offerte."},
+        "min_men_for_battle": {"type": "integer", "minimum": 0, "description": "Hommes sous les armes en deçà desquels on ne demande pas de bataille."},
+        "levy_treasury_share": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part du trésor qu'une mission de levée peut demander de dépenser."}
+      },
+      "required": ["max_target_force_ratio", "min_men_for_conquest", "min_men_for_battle", "levy_treasury_share"],
+      "additionalProperties": false
+    },
     "grudge": {
       "type": "object",
       "description": "Rancunes datées (lot M1, ADR 0720) : missions ancrées dans un affront subi ; récompense multipliée par l'ancienneté (en tours = saisons). {cible} = lieu, {auteur} = faction fautive.",
@@ -286,7 +298,8 @@
     "first_turn",
     "offer_cooldown_turns",
     "failure_prestige",
-    "templates"
+    "templates",
+    "scale"
   ],
   "additionalProperties": false,
   "$defs": {
