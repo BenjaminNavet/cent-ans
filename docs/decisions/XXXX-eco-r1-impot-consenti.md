@@ -55,6 +55,10 @@ l'argent n'était jamais une décision politique.
     La part de l'armée dans les dépenses dépend de ce que l'IA fait de l'argent (réserve de recrutement, ADR 0102,
     ponction d'épargne qui mange l'excédent) : elle relève de R1-c et de R2.
 
+12. **Planification de l'IA** (`ai/src/campaign.rs`) : le revenu net que l'IA planifie ne compte plus la ponction d'épargne
+    (`CampaignState::administration_share_for`, seule la part de cour). Sans cela, un subside qui remplit le trésor faisait voir
+    à l'IA un déficit, et elle licenciait ses troupes (3 unités en moyenne au lieu de 10 pour la France IA).
+
 ## Conséquences
 - L'interface Finances (ADR 0780) montre toujours les boutons de l'ancien impôt : refusés pour une maison à assemblée
   jusqu'à R1-d (onglet « États et Parlement »).
