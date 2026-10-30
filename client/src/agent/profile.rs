@@ -22,7 +22,11 @@ pub fn log_plugin() -> LogPlugin {
     // Draw events are enabled at TRACE for that one module and kept out of the log output.
     #[cfg(feature = "perf-counters")]
     {
-        plugin.filter = format!("{},{}=trace", plugin.filter, super::counters::draw_layer::TARGET);
+        plugin.filter = format!(
+            "{},{}=trace",
+            plugin.filter,
+            super::counters::draw_layer::TARGET
+        );
         plugin.fmt_layer = super::counters::draw_layer::fmt_layer;
     }
     plugin

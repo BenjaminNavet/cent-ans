@@ -239,7 +239,11 @@ fn bench_step(
     let measuring = !matches!(run.phase, Phase::WaitCampaign | Phase::Warmup | Phase::Done);
     // The work counters (draws, pipelines, CPU) are sampled per frame in `Last`, per named phase.
     if let Some(work) = work.as_mut() {
-        work.phase = measuring.then_some(if run.phase == Phase::Pan { "pan" } else { "descent" });
+        work.phase = measuring.then_some(if run.phase == Phase::Pan {
+            "pan"
+        } else {
+            "descent"
+        });
     }
     if measuring && dt > 0.0 {
         if frame_ms > PROFILE_SPIKE_MS {

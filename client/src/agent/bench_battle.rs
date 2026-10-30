@@ -139,7 +139,11 @@ fn battle_bench_step(
 
     let measuring = matches!(run.phase, Phase::Calm | Phase::Melee);
     if let Some(work) = work.as_mut() {
-        work.phase = measuring.then_some(if run.phase == Phase::Calm { "calm" } else { "melee" });
+        work.phase = measuring.then_some(if run.phase == Phase::Calm {
+            "calm"
+        } else {
+            "melee"
+        });
     }
     if measuring && dt > 0.0 {
         if frame_ms > PROFILE_SPIKE_MS {

@@ -1,7 +1,110 @@
 {
   "version": 2,
   "_doc": "Seuils de tools/bevy_bench/perf_guard.sh v2 (PERF-COMPTEURS, ADR 0827) : des COMPTEURS DE TRAVAIL par phase (appels de dessin, triangles, pipelines crees, CPU-ms du processus et du fil principal), pas des temps d'image : ils ne dependent pas de la charge de la machine, donc plus de max_load ni de saut. Ecrits par perf_calibrate.py a partir de 3 mesures (pire des 3 + marge : comptes +5 %, CPU +15 %). Les relever demande une justification dans le commit.",
-  "counters": {},
-  "memory": {},
-  "reference": {}
+  "counters": {
+    "map": {
+      "pan": {
+        "draw_calls_p50": 452.55,
+        "draw_calls_p95": 479.85,
+        "triangles_p50": 1793106.0,
+        "instances_p50": 538065.15,
+        "render_passes_p50": 12.6,
+        "main_thread_cpu_ms_p50": 2.75,
+        "pipelines_created": 15.65
+      },
+      "descent": {
+        "draw_calls_p50": 448.35,
+        "draw_calls_p95": 501.9,
+        "triangles_p50": 1820787.15,
+        "instances_p50": 619145.1,
+        "render_passes_p50": 13.65,
+        "main_thread_cpu_ms_p50": 2.89,
+        "pipelines_created": 3.05
+      }
+    },
+    "battle": {
+      "calm": {
+        "draw_calls_p50": 309.75,
+        "draw_calls_p95": 309.75,
+        "triangles_p50": 592736.55,
+        "instances_p50": 11007.15,
+        "render_passes_p50": 22.05,
+        "main_thread_cpu_ms_p50": 2.09,
+        "pipelines_created": 2.0
+      },
+      "melee": {
+        "draw_calls_p50": 466.2,
+        "draw_calls_p95": 469.35,
+        "triangles_p50": 6750276.75,
+        "instances_p50": 37080.75,
+        "render_passes_p50": 22.05,
+        "main_thread_cpu_ms_p50": 2.38,
+        "pipelines_created": 8.3
+      }
+    }
+  },
+  "memory": {
+    "footprint": {
+      "map": 7391,
+      "battle": 3699
+    },
+    "peak_rss": {
+      "map": 5461,
+      "battle": 3055
+    }
+  },
+  "reference": {
+    "map": {
+      "pan": {
+        "draw_calls_p50": 430.0,
+        "draw_calls_p95": 454.0,
+        "triangles_p50": 1693051.5,
+        "instances_p50": 511813.5,
+        "render_passes_p50": 12.0,
+        "main_thread_cpu_ms_p50": 2.0899999141693115,
+        "pipelines_created": 11.5,
+        "process_cpu_ms_p50": 34.51500129699707
+      },
+      "descent": {
+        "draw_calls_p50": 423.0,
+        "draw_calls_p95": 476.0,
+        "triangles_p50": 1681868.9375,
+        "instances_p50": 576134.0,
+        "render_passes_p50": 13.0,
+        "main_thread_cpu_ms_p50": 2.1649999618530273,
+        "pipelines_created": 1.0,
+        "process_cpu_ms_p50": 34.55999946594238
+      },
+      "memory": {
+        "footprint_mib": 6941.770603179932,
+        "peak_rss_mib": 5016.0234375
+      }
+    },
+    "battle": {
+      "calm": {
+        "draw_calls_p50": 294.5,
+        "draw_calls_p95": 294.5,
+        "triangles_p50": 564493.0,
+        "instances_p50": 10478.5,
+        "render_passes_p50": 21.0,
+        "main_thread_cpu_ms_p50": 1.6299999952316284,
+        "pipelines_created": 0.0,
+        "process_cpu_ms_p50": 28.109999656677246
+      },
+      "melee": {
+        "draw_calls_p50": 441.5,
+        "draw_calls_p95": 444.5,
+        "triangles_p50": 6341168.0,
+        "instances_p50": 35270.5,
+        "render_passes_p50": 21.0,
+        "main_thread_cpu_ms_p50": 1.875,
+        "pipelines_created": 6.0,
+        "process_cpu_ms_p50": 33.77000045776367
+      },
+      "memory": {
+        "footprint_mib": 3494.409637451172,
+        "peak_rss_mib": 2819.0
+      }
+    }
+  }
 }

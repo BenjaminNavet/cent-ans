@@ -134,7 +134,10 @@ pub mod draw_layer {
             if metadata.target() != TARGET {
                 return Interest::always();
             }
-            if metadata.line().is_some_and(|line| DRAW_LINES.contains(&line)) {
+            if metadata
+                .line()
+                .is_some_and(|line| DRAW_LINES.contains(&line))
+            {
                 Interest::always()
             } else {
                 Interest::never()
@@ -235,10 +238,20 @@ pub fn heap_commit_mib() -> Option<(f64, f64)> {
                 page_faults: *mut usize,
             );
         }
-        let (mut a, mut b, mut c, mut d, mut e, mut commit, mut peak, mut g) = (0usize, 0, 0, 0, 0, 0, 0, 0);
+        let (mut a, mut b, mut c, mut d, mut e, mut commit, mut peak, mut g) =
+            (0usize, 0, 0, 0, 0, 0, 0, 0);
         // SAFETY: documented mimalloc call; every pointer is a valid local `usize`.
         unsafe {
-            mi_process_info(&mut a, &mut b, &mut c, &mut d, &mut e, &mut commit, &mut peak, &mut g);
+            mi_process_info(
+                &mut a,
+                &mut b,
+                &mut c,
+                &mut d,
+                &mut e,
+                &mut commit,
+                &mut peak,
+                &mut g,
+            );
         }
         let mib = |bytes: usize| bytes as f64 / (1024.0 * 1024.0);
         Some((mib(commit), mib(peak)))
@@ -350,10 +363,26 @@ pub fn with_work(mut stats: Value, recorder: Option<&WorkRecorder>, phase: &str)
 }
 
 /// Main world, last system of the frame.
-fn sample_frame(mut recorder: ResMut<WorkRecorder>, diagnostics: Option<Res<DiagnosticsStore>>) {
-    let recorder = &mut *recorder;
-    let process_ms = process_cpu_ms();
+/// Exclusive on purpose: an exclusive system runs on the thread that drives the schedule (the main
+/// thread), so the thread CPU clock read here is always the same thread's (a plain system may run on
+/// any task-pool thread, whose clocks are unrelated).
+fn sample_frame(world: &mut World) {
     let thread_ms = thread_cpu_ms();
+    world.resource_scope(|world, mut recorder: Mut<WorkRecorder>| {
+        record_frame(
+            &mut recorder,
+            world.get_resource::<DiagnosticsStore>(),
+            thread_ms,
+        );
+    });
+}
+
+fn record_frame(
+    recorder: &mut WorkRecorder,
+    diagnostics: Option<&DiagnosticsStore>,
+    thread_ms: f64,
+) {
+    let process_ms = process_cpu_ms();
     let process_delta = (process_ms - recorder.last_process_ms) as f32;
     let thread_delta = (thread_ms - recorder.last_thread_ms) as f32;
     let first = recorder.last_process_ms == 0.0;

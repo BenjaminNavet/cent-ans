@@ -58,8 +58,8 @@ pour la carte ; `calm`, `melee` pour la bataille) porte un objet `work` :
 | `draw_calls_p50/p95/max`, `triangles_p50`, `instances_p50` | appels de dessin soumis par image (tous les `TrackedRenderPass`, instanciés compris) ; triangles et instances des appels directs |
 | `pipelines_created`, `pipelines_total` | pipelines ajoutés au `PipelineCache` pendant la phase ; total en fin de phase |
 | `render_passes_p50`, `pass_cpu_ms` | passes de rendu par image et CPU moyen des plus coûteuses (`RenderDiagnosticsPlugin`, temps CPU seulement sous Metal) |
-| `process_cpu_ms_*` | CPU de tous les fils du processus par image (`getrusage`) |
-| `main_thread_cpu_ms_*` | CPU du fil principal par image (`CLOCK_THREAD_CPUTIME_ID`) |
+| `process_cpu_ms_*` | CPU de tous les fils du processus par image (`getrusage`). INDICATIF : les fils de travail tournent à vide plus longtemps quand la machine est saturée (+30 % mesuré), jamais un seuil |
+| `main_thread_cpu_ms_*` | CPU du fil principal par image (`CLOCK_THREAD_CPUTIME_ID`, système exclusif donc toujours le même fil) : stable à ±10 % entre charge 5 et 40, c'est le seuil CPU |
 
 Le bloc `memory` du rapport donne `footprint_mib`, `peak_rss_mib`, `metal_allocated_mib`, `heap_commit_mib`
 (tas mimalloc) et `footprint_non_heap_mib`. Le dump d'état a la section `work` (240 dernières images ;
@@ -80,7 +80,7 @@ compteurs tiennent sous charge (`CALM_SKIP=1` est posé par le garde). Les temps
 jamais comparés. `tools/full_check.sh` le lance (`PERF_GUARD=0` pour l'omettre).
 Recalibrer après une fusion qui change le travail voulu : 3 exécutions, puis
 `perf_calibrate.py tools/bevy_bench/perf_thresholds.json map out/bench/map_a.json out/bench/map_b.json out/bench/map_c.json`
-(pire des trois + 5 % sur les comptes, + 15 % sur le CPU ; médiane dans `reference`).
+(pire des trois + 5 % sur les comptes, + 20 % sur le CPU du fil principal ; médiane dans `reference`).
 Réglage : `map_shadow_splits` (cascades du soleil de campagne) par préréglage dans `data/fx/render_quality.json` ;
 `CENT_ANS_MAP_CASCADES=n` force le nombre pour un A/B (`ab.sh map <étiquette> "CENT_ANS_MAP_CASCADES=4" ""`).
 Dans un worktree, lier les données ignorées (`data/map/pyramid`, `game/assets/models/dn`,

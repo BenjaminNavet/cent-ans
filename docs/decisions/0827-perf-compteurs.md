@@ -22,12 +22,15 @@ Metal n'a ni requêtes d'horodatage ni statistiques de pipeline : le banc ne pou
      événements `draw*` de `bevy_render =0.20.0` sont une constante datée (un changement de version les relit ; un
      décalage donne `null` et le garde échoue) ;
    - pipelines créés et total (`PipelineCache`, échantillonné chaque image dans le monde de rendu) ;
-   - CPU en ms par image : processus entier (`getrusage`) et fil principal (`CLOCK_THREAD_CPUTIME_ID`) ; avec la feature
-     `profile`, CPU du fil par système (`cpu_*_ms`). Un fil qui attend une machine chargée ne consomme pas de CPU ;
+   - CPU en ms par image : fil principal (`CLOCK_THREAD_CPUTIME_ID`, lu dans un système exclusif pour que ce soit toujours le
+     même fil) et processus entier (`getrusage`) ; avec la feature `profile`, CPU du fil par système (`cpu_*_ms`). Un fil qui
+     attend une machine chargée ne consomme pas de CPU. MESURE : le CPU du processus monte de ~30 % quand la machine est
+     saturée (les fils de travail tournent à vide plus longtemps) : indicatif, jamais un seuil ; le CPU du fil principal reste
+     à ±10 % et sert de seuil ;
    - passes : `RenderDiagnosticsPlugin` (temps CPU par passe sous Metal), seulement en banc ou avec `CENT_ANS_COUNTERS=1` ;
    - mémoire dans le même rapport : empreinte, pic RSS, allocation Metal, tas mimalloc (courant, pic), empreinte hors tas.
 2. **`perf_thresholds.json` v2** : seuils en compteurs et en CPU-ms par phase, écrits par `perf_calibrate.py` depuis
-   3 mesures (pire des 3, + 5 % sur les comptes, + 15 % sur le CPU), valeurs de `reference` (médianes) conservées ;
+   3+ mesures (pire des runs, + 5 % sur les comptes, + 20 % sur le CPU du fil principal), valeurs de `reference` (médianes) conservées ;
    seuils mémoire = mesure + 5 %. Plus de `max_load`.
 3. **`perf_guard.sh` ne saute plus** (`CALM_SKIP=1`) ; les temps d'image sont affichés, jamais comparés. Il est lancé par
    `tools/full_check.sh`.

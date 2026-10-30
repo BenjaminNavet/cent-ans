@@ -250,7 +250,20 @@ pub fn footprint_mib() -> f64 {
 
 /// `memory` block of the bench reports (checked by `tools/bevy_bench/perf_guard.sh`).
 pub fn report() -> Value {
-    json!({"rss_mib": rss_mib(), "peak_rss_mib": peak_rss_mib(), "footprint_mib": footprint_mib()})
+    let footprint = footprint_mib();
+    let heap = super::counters::heap_commit_mib();
+    json!({
+        "rss_mib": rss_mib(),
+        "peak_rss_mib": peak_rss_mib(),
+        "footprint_mib": footprint,
+        // MEM5 items in the same report (ADR 0827): Metal device allocation (textures, buffers,
+        // heaps), allocator heap (mimalloc commit, now and peak) and what the footprint holds
+        // beyond the heap (mapped files, GPU-shared pages, code).
+        "metal_allocated_mib": metal_allocated_mib(),
+        "heap_commit_mib": heap.map(|(now, _)| now),
+        "heap_peak_commit_mib": heap.map(|(_, peak)| peak),
+        "footprint_non_heap_mib": heap.filter(|_| footprint >= 0.0).map(|(now, _)| footprint - now),
+    })
 }
 
 /// Estimated bytes of the texture once uploaded (full mip chain as declared by the descriptor).
@@ -340,6 +353,8 @@ fn dump(world: &World) -> (String, Value) {
             "peak_rss_mib": peak_rss_mib(),
             "footprint_mib": footprint_mib(),
             "metal_allocated_mib": metal_allocated_mib(),
+            "heap_commit_mib": super::counters::heap_commit_mib().map(|(now, _)| now),
+            "heap_peak_commit_mib": super::counters::heap_commit_mib().map(|(_, peak)| peak),
             "images": {
                 "count": rows.len(),
                 "gpu_estimate_mib": mib(gpu_images),

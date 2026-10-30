@@ -7,7 +7,7 @@ Lot MEM (ADR 0748). Mesures sur Apple M4 Pro, build release, préréglage Ultra,
 - `--dump-state f.json` : section `memory` = `rss_mib`, `peak_rss_mib`, images (nombre, taille GPU estimée, copies CPU
   conservées, 10 plus grosses côté GPU et côté CPU, avec dimensions / format / mips / `RenderAssetUsages`), maillages
   (copies CPU encore présentes).
-- Rapports des bancs (`bench.sh`, `perf_guard.sh`) : bloc `memory.{rss_mib,peak_rss_mib}` (`getrusage`).
+- Rapports des bancs (`bench.sh`, `perf_guard.sh`) : bloc `memory` (empreinte, RSS, pic, Metal, tas mimalloc, hors tas), et par phase l'objet `work` (ADR 0827, `tools/bevy_bench/README.md`).
 - Hors client : `vmmap -summary <pid>` et `footprint <pid>`. **Le RSS (`ps`) sous-estime et fluctue sur macOS** : le
   compresseur mémoire déplace des pages en « swapped » (RSS divisé par deux sans que l'empreinte physique baisse). La
   mesure fiable est `footprint` (empreinte physique, GPU unifié inclus).
@@ -41,9 +41,19 @@ stabilisés varient de ±500 Mo d'une exécution à l'autre.
    « empty » du tas.
 8-10. Décor de bataille (`castle_wall`, flipbooks) chargé dès la campagne ; tas des simulations ; cibles d'ombre.
 
-## Budget (garde dans `tools/bevy_bench/perf_guard.sh`)
-Pic de RSS : **campagne 3 500 Mo, bataille 3 000 Mo** (`perf_thresholds.json`, clé `memory`). Le garde échoue au-delà et
-n'est valable que sur machine calme (même règle que les temps d'image).
+## Budget (garde dans `tools/bevy_bench/perf_guard.sh`, amendé par ADR 0827)
+Le garde n'est plus « machine calme » : il compare des compteurs de travail (appels de dessin, pipelines, CPU-ms) et la
+mémoire de fin de banc à `perf_thresholds.json` v2, sans saut sous charge. Seuils mémoire = mesure de la fusion PERF-COMPTEURS
++ 5 % (30/10/2026, 3 passes, bench complet carte d = 30 avec descentes et bataille de Crécy) :
+
+| | empreinte (`footprint_mib`) | pic RSS | tas mimalloc | Metal | hors tas |
+|---|---|---|---|---|---|
+| Campagne, fin de banc | 6 942 Mo (seuil 7 391) | 5 016 Mo (seuil 5 461) | 4 467 Mo | 2 405 Mo | 2 492 Mo |
+| Bataille (Crécy), fin de banc | 3 494 Mo (seuil 3 699) | 2 819 Mo (seuil 3 055) | 2 093 Mo | 1 739 Mo | 1 360 Mo |
+
+Ces seuils sont des seuils de NON-RÉGRESSION, pas la cible : la cible de 3 Go hors Metal de la campagne reste à atteindre
+(lot MEM6, qui se mesure maintenant avec ces champs). Le rapport de banc donne `memory.{footprint_mib, peak_rss_mib,
+metal_allocated_mib, heap_commit_mib, heap_peak_commit_mib, footprint_non_heap_mib}` ; le dump d'état la section `memory`.
 
 ## Essais écartés
 - `malloc_zone_pressure_relief` en tâche de fond : RSS divisé par 2 mais empreinte physique inchangée (pages
