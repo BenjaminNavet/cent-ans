@@ -523,7 +523,9 @@ fn currency_heading() -> String {
         "Livre tournois".to_owned()
     } else {
         let mut chars = currency.singular.chars();
-        chars.next().map_or_else(String::new, |c| c.to_uppercase().chain(chars).collect())
+        chars
+            .next()
+            .map_or_else(String::new, |c| c.to_uppercase().chain(chars).collect())
     };
     format!("{name} ({})", currency.symbol)
 }

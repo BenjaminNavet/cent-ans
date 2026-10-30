@@ -38,7 +38,10 @@ impl Sim {
     /// currency read by `ui::kit::fr` and by the core's texts (lot HIST4). The value is the
     /// common unit of account, only the name changes.
     pub fn sync_currency(&self) {
-        let currency = self.data.as_ref().map(|data| data.currency_of(&self.player));
+        let currency = self
+            .data
+            .as_ref()
+            .map(|data| data.currency_of(&self.player));
         data_model::currency::set_display(currency);
     }
 

@@ -243,7 +243,11 @@ pub fn cards(
     let mut loot = Vec::new();
     let total = aftermath.map_or(0, |a| a.ransom_total);
     loot.push(if total > 0 {
-        format!("{} {} de rançons à percevoir.", fr::digits(total), fr::symbol())
+        format!(
+            "{} {} de rançons à percevoir.",
+            fr::digits(total),
+            fr::symbol()
+        )
     } else {
         "Aucun butin : pas de rançon à percevoir.".to_owned()
     });
