@@ -8,3 +8,5 @@ grandeur de la sonde de plus de 10 % sur 40 tours (effets renforcés en prestige
 Écart : Flandre acte III non sondable (une province, rayée par le saut d'horloge de la sonde à 1416), exclue du test.
 Pas de codex d'ambitions dans le modèle (rien à ajouter).
 Reste : fmt, clippy, tests core, seed bots --quick, pytest schémas.
+
+TERMINÉ : fmt, clippy, tests core, seed bots --quick, pytest schémas passés.
