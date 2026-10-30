@@ -56,12 +56,12 @@ Meshy : crédits restants (≈ 25) pour une retouche, sur décision visuelle. Z-
 - Constats de la passe longue seed bots : présentés au joueur, rien dans seed-bots-findings.md sans lui.
 
 ## Économie de jetons (obligatoire)
-1. Opus planifie, découpe, intègre. TOUS les sous-agents (implémentation, juges, fusion, recherche) sont Sonnet 5.5 en effort medium : `model: "sonnet"`, `effort: "medium"` à chaque appel Agent. Jamais Haiku, jamais Opus en sous-agent.
-2. 3-4 agents en parallèle au plus. Sérialiser les lots qui touchent la même zone (même shader, même module de règles, mêmes registres).
+1. Opus planifie, découpe, intègre. TOUS les sous-agents (implémentation, juges, fusion, recherche) sont Sonnet 5.5 en effort medium : `model: "sonnet"`, `effort: "medium"` à chaque appel Agent. Jamais Haiku. Seule exception : le juge visuel est Opus (`model: "opus"`). Les juges écrivent constats et lots proposés (spec, critères) dans docs/audits/ ; l'orchestrateur en tire les briefs d'agents.
+2. 10 agents en parallèle au plus. Sérialiser les lots qui touchent la même zone (même shader, même module de règles, mêmes registres).
 3. Réserver le numéro d'ADR au lancement du lot ; l'agent l'écrit directement (pas de XXXX, pas de renumérotation).
 4. Brief d'agent : spec courte, fichiers, tests, numéro d'ADR, « départ = main local » (`git merge-base HEAD main`, sinon `git reset --hard main`), symlinks des assets ignorés (data/map/pyramid, game/assets/models/dn). Rapport ≤ 15 lignes (résultat, branche, échecs, points ouverts) ; le détail va dans docs/wip/<lot>.md.
 5. Dans les agents : seed bots --quick seulement ; pas de passe longue, banc court. Une passe longue sur main par lot de fusions, en arrière-plan.
-6. Fusions par un agent de fusion Sonnet 5.5 (effort medium) par lot de 2-4 branches (rebase sur main, conflits = union des deux côtés, ADR, ff-merge), pas par la session principale.
+6. Fusions par un agent de fusion Sonnet 5.5 (effort medium) tous les lots de l'itération de juge en cours (rebase sur main, conflits = union des deux côtés, ADR, ff-merge), pas par la session principale.
 7. Un seul check complet sur main par lot de fusions (tools/full_check.sh + smoke + pytest + seed quick).
 8. Lecture ciblée : grep, head, dumps d'état filtrés ; jamais de gros fichiers ni de sorties brutes. Captures : 5 par tâche (10 en travail visuel), 640 px, une seule après un groupe de corrections ; les agents mécaniques n'en prennent pas.
 9. Ne jamais finir un tour « en attente » : attendre agents et checks par Monitor ou boucle until en arrière-plan, puis enchaîner.
