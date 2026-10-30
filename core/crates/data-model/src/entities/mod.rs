@@ -35,6 +35,7 @@ pub mod encounter;
 pub mod event;
 pub mod faction;
 pub mod feudal_rules;
+pub mod cause_thresholds;
 pub mod finance_rules;
 pub mod landmark;
 pub mod loyalty;

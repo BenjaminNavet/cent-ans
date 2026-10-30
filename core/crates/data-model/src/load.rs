@@ -107,6 +107,8 @@ pub mod folders {
     pub const REVOLT_RULES: &str = "revolt.json";
     /// Royal finances (ADR 0777), inside `rules/`; optional.
     pub const FINANCE_RULES: &str = "finance.json";
+    /// Thresholds of the swing causes (XP-POURQUOI), inside `rules/`; optional.
+    pub const CAUSE_THRESHOLDS: &str = "cause_thresholds.json";
     /// The campaign arc in acts (ADR 0784), inside `rules/`; optional.
     pub const ACTS_RULES: &str = "acts.json";
     /// The counsellor's season advice (ADR 0789), inside `rules/`; optional.
@@ -378,6 +380,8 @@ pub struct GameData {
     pub revolt_rules: crate::entities::revolt_rules::RevoltRules,
     /// `data/rules/finance.json` (ADR 0777).
     pub finance_rules: crate::entities::finance_rules::FinanceRules,
+    /// `data/rules/cause_thresholds.json` (XP-POURQUOI, R4).
+    pub cause_thresholds: crate::entities::cause_thresholds::CauseThresholds,
     /// `data/rules/acts.json` (ADR 0784).
     pub acts_rules: crate::entities::acts_rules::ActsRules,
     /// `data/rules/advisor.json` (ADR 0789).
@@ -567,6 +571,7 @@ impl GameData {
             population_rules: Default::default(),
             revolt_rules: Default::default(),
             finance_rules: Default::default(),
+            cause_thresholds: Default::default(),
             acts_rules: Default::default(),
             advisor_rules: Default::default(),
             economy_rules: Default::default(),
@@ -703,6 +708,10 @@ impl GameData {
         read_into(
             &mut data.finance_rules,
             &root.join(folders::RULES).join(folders::FINANCE_RULES),
+        )?;
+        read_into(
+            &mut data.cause_thresholds,
+            &root.join(folders::RULES).join(folders::CAUSE_THRESHOLDS),
         )?;
         read_into(
             &mut data.acts_rules,

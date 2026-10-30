@@ -171,6 +171,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "acts_rules.schema.json": ("rules/acts.json",),
     "advisor_rules.schema.json": ("rules/advisor.json",),
     "finance_rules.schema.json": ("rules/finance.json",),
+    "cause_thresholds.schema.json": ("rules/cause_thresholds.json",),
     "portrait_archetypes.schema.json": ("portraits/archetypes.json",),
     "posture_rules.schema.json": ("rules/postures.json",),
     "province.schema.json": ("provinces/*.json",),

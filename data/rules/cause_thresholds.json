@@ -1,0 +1,10 @@
+{
+  "description": "XP-POURQUOI (R4) : seuils du bruit des causes. Une variation du trésor de plus de treasury_pct (et d'au moins treasury_min livres), des troubles d'une province de plus de unrest_points, ou le passage d'une IA à un autre palier d'attitude envers le joueur devient une cause du journal. Au plus max_per_season_player causes de variation par saison pour le joueur (les plus lourdes d'abord).",
+  "treasury_pct": 0.10,
+  "treasury_min": 300,
+  "unrest_points": 10,
+  "attitude_bands": [-50, -20, 20, 50],
+  "max_per_season_player": 6,
+  "story_causes": 3,
+  "top_terms": 3
+}

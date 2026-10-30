@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/cause_thresholds.schema.json",
+  "title": "Seuils des causes de variation (XP-POURQUOI, R4)",
+  "description": "Fichier data/rules/cause_thresholds.json. Lu par sim-campaign::season_marks (CauseThresholds) et game-api::causes::season_story.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["treasury_pct", "treasury_min", "unrest_points", "attitude_bands", "max_per_season_player", "story_causes", "top_terms"],
+  "properties": {
+    "description": {"type": "string"},
+    "treasury_pct": {"type": "number", "exclusiveMinimum": 0, "maximum": 5, "description": "Part du trésor d'avant la saison au-delà de laquelle une variation est une cause (0,10 = 10 %)."},
+    "treasury_min": {"type": "integer", "minimum": 0, "description": "Variation absolue minimale en livres (évite le bruit d'un trésor presque vide)."},
+    "unrest_points": {"type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "Variation des troubles d'une province (points, 0-100) qui en fait une cause."},
+    "attitude_bands": {"type": "array", "minItems": 1, "maxItems": 8, "items": {"type": "integer", "minimum": -100, "maximum": 100}, "description": "Bornes croissantes des paliers d'attitude d'une IA envers le joueur ; n bornes donnent n+1 paliers."},
+    "max_per_season_player": {"type": "integer", "minimum": 1, "maximum": 50, "description": "Causes de variation du joueur au plus par saison."},
+    "story_causes": {"type": "integer", "minimum": 1, "maximum": 10, "description": "Causes du bloc « Pourquoi » du Récit."},
+    "top_terms": {"type": "integer", "minimum": 1, "maximum": 6, "description": "Termes au plus sous un chiffre de la barre du haut."}
+  }
+}
