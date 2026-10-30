@@ -81,7 +81,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     // Painted horizon: the one haze colour only on the horizon line; just above it the sky blue
     // comes back (a thin pale line, not a milk band).
     let pull = smoothstep(0.0, max(params.cloud_b.w, 0.01), elevation);
-    var col = mix(params.zenith.rgb, params.horizon.rgb, k * mix(1.0, 0.45, pull));
+    var col = mix(params.zenith.rgb, params.horizon.rgb, k * mix(1.0, 0.15, pull));
     let facing = max(dot(dir, normalize(params.sun.xyz)), 0.0);
     col = col + params.sun_color.rgb * params.sun.w * pow(facing, params.sun_color.a) * (1.0 - elevation * 0.5);
     // Clouds: banks on a plane above the camera, flattened by perspective towards the horizon.
