@@ -45,7 +45,15 @@ l'argent n'était jamais une décision politique.
 9. **IA minimale** (`assembly::ai_assembly_orders`, branchée dans `ai/src/campaign.rs`) : répond aux conditions selon un
    plafond de coût, convoque quand le trésor prévisible passe sous N saisons de revenu et qu'une nécessité existe.
    R1-c (maltôte, honneur, prévision) l'affinera.
-10. **Équilibre** : l'ordinaire est resserré dans `economy.json` (mesures dans `docs/wip/eco-r1ab.md`).
+10. **Légitimité plafonnée** : la renommée du souverain (ADR 0805) n'a pas de borne (plusieurs centaines de points
+    dans la sonde) ; sa part dans l'accord est plafonnée (`vote.prestige_max_points`), sinon les États ne refusent jamais.
+11. **Équilibre** : `economy.json` n'est **pas** modifié. Un essai à `tax_efficiency` 0,056 (−20 %, l'ordinaire « ≈ −30 % » de
+    l'audit) met la France de départ en austérité (l'IA licencie, hausse la taxe : deux tests d'`ai` tombent) : l'ordinaire
+    de la France n'est déjà pas excédentaire. L'IA ne convoque que si le trésor prévisible est sous N saisons de revenu,
+    qu'aucun subside ne court dans l'assemblée, qu'une nécessité existe et que la prévision du vote n'est pas un refus ;
+    elle demande le plus petit palier dont le total atteint `ai.target_seasons`. Mesures dans `docs/wip/eco-r1ab.md`.
+    La part de l'armée dans les dépenses dépend de ce que l'IA fait de l'argent (réserve de recrutement, ADR 0102,
+    ponction d'épargne qui mange l'excédent) : elle relève de R1-c et de R2.
 
 ## Conséquences
 - L'interface Finances (ADR 0780) montre toujours les boutons de l'ancien impôt : refusés pour une maison à assemblée
