@@ -109,9 +109,9 @@ def dn_ingest_command(
 def codex_bundle_command() -> None:
     """Régénère data/codex_bundle.json (lu par le jeu) depuis data/codex/cdx_*.json."""
     from cent_ans_tools import codex
+    from cent_ans_tools.paths import DATA_DIR
 
-    data_dir = Path(__file__).resolve().parents[2] / "data"
-    target = codex.write_bundle(data_dir)
+    target = codex.write_bundle(DATA_DIR)
     console.print(f"Bundle du codex écrit : {target}")
 
 
