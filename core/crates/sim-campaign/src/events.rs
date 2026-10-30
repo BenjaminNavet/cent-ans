@@ -90,6 +90,8 @@ pub enum EventKind {
     /// B4 (ADR 0731): graded revolts. A warning (rising tension, `loss`) or
     /// the news of an uprising put down (not `loss`).
     Unrest,
+    /// ECO-R1: an assembly is convened, votes a subsidy, or a promise to it is kept or broken.
+    Assembly,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

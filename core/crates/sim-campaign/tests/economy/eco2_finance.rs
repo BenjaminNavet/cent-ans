@@ -157,7 +157,11 @@ fn repaying_pays_the_dearest_loan_first() {
 
 #[test]
 fn an_extraordinary_tax_pays_at_once_angers_the_provinces_and_has_a_cooldown() {
-    let data = game_data();
+    // ECO-R1: the old levy is the way of the houses without assembly (here: France with the
+    // assemblies taken out of the data).
+    let mut data = game_data().clone();
+    data.assembly_rules = Default::default();
+    let data = &data;
     let mut state = start_quiet(data, "fac_france", 5);
     let france = fac("fac_france");
     let before = state.factions[&france].treasury;

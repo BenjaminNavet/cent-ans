@@ -1130,6 +1130,12 @@ pub struct CampaignState {
     /// ADR 0784: the campaign arc in three acts (bookkeeping of the player's house).
     #[serde(default)]
     pub acts: crate::acts::ActsState,
+    /// ECO-R1: the assemblies that consent to the extraordinary tax (moods, sessions, promises).
+    #[serde(
+        default,
+        skip_serializing_if = "crate::assembly::AssemblyStates::is_default"
+    )]
+    pub assemblies: crate::assembly::AssemblyStates,
     /// ADR 0789: the counsellor's notes of the season and the postures last announced.
     #[serde(default)]
     pub advisor: crate::advisor::AdvisorState,
@@ -1245,6 +1251,7 @@ impl CampaignState {
             chronicle: crate::chronicle::ChronicleState::default(),
             causes: crate::causes::CauseJournal::default(),
             acts: crate::acts::ActsState::default(),
+            assemblies: crate::assembly::AssemblyStates::default(),
             advisor: crate::advisor::AdvisorState::default(),
             season_marks: None,
             outcome: None,

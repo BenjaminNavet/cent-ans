@@ -148,6 +148,8 @@ pub enum OrderError {
     #[error(transparent)]
     Finance(#[from] crate::finance::FinanceError),
     #[error(transparent)]
+    Assembly(#[from] crate::assembly::AssemblyError),
+    #[error(transparent)]
     Ransom(#[from] crate::ransom::RansomError),
     #[error(transparent)]
     Chivalry(#[from] crate::chivalry::ChivalryError),

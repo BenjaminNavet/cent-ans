@@ -334,6 +334,7 @@ fn explains(cause: &Cause, player: &data_model::FactionId, favourable: bool) -> 
         | CauseKind::UnrestSwing
         | CauseKind::AttitudeShift
         | CauseKind::ExtraordinaryTax
+        | CauseKind::SubsidyGranted
         | CauseKind::Debasement => false,
         CauseKind::Battle | CauseKind::PlaceTaken => {
             if favourable {
@@ -348,6 +349,8 @@ fn explains(cause: &Cause, player: &data_model::FactionId, favourable: bool) -> 
             !favourable && cause.subject.as_ref() == Some(player)
         }
         CauseKind::Bankruptcy
+        | CauseKind::AssemblyRefused
+        | CauseKind::PromiseBroken
         | CauseKind::RoyalDefault
         | CauseKind::Revolt
         | CauseKind::Succession => !favourable && cause.subject.as_ref() == Some(player),

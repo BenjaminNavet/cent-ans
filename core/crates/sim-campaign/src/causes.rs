@@ -59,6 +59,12 @@ pub enum CauseKind {
     /// XP-POURQUOI: an AI faction (`actor`) moved to another tier of attitude towards the
     /// player (`subject`).
     AttitudeShift,
+    /// An assembly refuses the subsidy (`subject` is the asking faction, ECO-R1).
+    AssemblyRefused,
+    /// A promise to an assembly is broken (`subject` is the faction that promised).
+    PromiseBroken,
+    /// An assembly votes a subsidy (`subject` is the faction that obtains it).
+    SubsidyGranted,
     /// The player's campaign is won.
     GameWon,
     /// The player's campaign is lost.
@@ -83,6 +89,9 @@ impl CauseKind {
             CauseKind::TreasurySwing => "treasury_swing",
             CauseKind::UnrestSwing => "unrest_swing",
             CauseKind::AttitudeShift => "attitude_shift",
+            CauseKind::AssemblyRefused => "assembly_refused",
+            CauseKind::PromiseBroken => "promise_broken",
+            CauseKind::SubsidyGranted => "subsidy_granted",
             CauseKind::GameWon => "game_won",
             CauseKind::GameLost => "game_lost",
         }

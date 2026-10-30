@@ -649,3 +649,68 @@ mod tests {
         assert!(keys(&cause).contains(&"ruler_age"));
     }
 }
+
+// ----- ECO-R1: assemblies ------------------------------------------------------------------
+
+/// What the cause of a subsidy voted by an assembly is built from.
+pub struct SubsidyFacts<'a> {
+    pub faction: &'a FactionId,
+    pub per_season: i64,
+    pub term: i64,
+    pub accord: i64,
+    pub concessions: i64,
+}
+
+/// Cause of a granted subsidy: what is collected, for how long, the terms conceded.
+pub fn subsidy_granted_cause(f: &SubsidyFacts<'_>) -> Cause {
+    let mut cause = Cause::new(CauseKind::SubsidyGranted, 30)
+        .subject(f.faction)
+        .factor("subsidy_per_season", f.per_season, 50)
+        .factor("subsidy_term", f.term, 30)
+        .factor("assembly_accord", f.accord, 20);
+    if f.concessions > 0 {
+        cause = cause.factor("subsidy_concessions", f.concessions, 60);
+    }
+    cause.ranked()
+}
+
+/// What the cause of a refused subsidy is built from.
+pub struct RefusalFacts<'a> {
+    pub faction: &'a FactionId,
+    pub accord: i64,
+    pub threshold: i64,
+    /// The parts of the agreement (keys of the texts), signed points.
+    pub parts: Vec<(&'static str, i64)>,
+}
+
+/// Cause of a refusal: the agreement against the threshold, then every part that pulled it down.
+pub fn assembly_refused_cause(f: &RefusalFacts<'_>) -> Cause {
+    let mut cause = Cause::new(CauseKind::AssemblyRefused, 55)
+        .subject(f.faction)
+        .factor("assembly_accord", f.accord, 20)
+        .factor("assembly_threshold", f.threshold, 15);
+    for (key, points) in &f.parts {
+        if *points < 0 {
+            cause = cause.factor(key, *points, -points * 3);
+        }
+    }
+    cause.ranked()
+}
+
+/// What the cause of a broken promise is built from.
+pub struct PromiseFacts<'a> {
+    pub faction: &'a FactionId,
+    pub mood_before: i64,
+    pub mood_loss: i64,
+    pub unrest: i64,
+}
+
+/// Cause of a broken promise: the trust lost and the unrest in the towns.
+pub fn promise_broken_cause(f: &PromiseFacts<'_>) -> Cause {
+    Cause::new(CauseKind::PromiseBroken, 60)
+        .subject(f.faction)
+        .factor("mood_lost", f.mood_loss, 80)
+        .factor("assembly_mood", f.mood_before, 20)
+        .factor("unrest_broken", f.unrest, f.unrest * 8)
+        .ranked()
+}

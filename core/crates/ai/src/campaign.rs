@@ -438,6 +438,13 @@ fn state_plans(
                                     faction,
                                     sim_campaign::finance::ai_finance_orders(cache, data, faction),
                                 );
+                                orders.extend(crate::strategy::filter_finance_orders(
+                                    state,
+                                    faction,
+                                    sim_campaign::assembly::ai_assembly_orders(
+                                        cache, data, faction,
+                                    ),
+                                ));
                                 orders.extend(sim_campaign::coinage::ai_choose_coinage(
                                     cache, data, faction,
                                 ));

@@ -156,6 +156,7 @@ pub fn set_coinage(
     if f.coinage_changed_year == Some(year) {
         return Err(CoinageError::AlreadyChangedThisYear(year));
     }
+    let previous = f.coinage;
     let f = state.factions.get_mut(faction).expect("checked above");
     f.coinage = level;
     f.coinage_changed_year = Some(year);
@@ -188,6 +189,8 @@ pub fn set_coinage(
         ));
     }
     state.pending_events.push(event);
+    // ECO-R1: debasing breaks a promise of strong money made to an assembly.
+    crate::assembly::on_coinage_set(state, data, faction, previous, level);
     Ok(())
 }
 

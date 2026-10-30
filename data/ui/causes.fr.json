@@ -95,6 +95,18 @@
     },
     "attitude_shift": {
       "other": "{acteur} change d’attitude envers nous"
+    },
+    "assembly_refused": {
+      "loss": "Les États refusent le subside demandé",
+      "other": "Une assemblée refuse le subside"
+    },
+    "promise_broken": {
+      "loss": "Promesse faite aux États trahie",
+      "other": "Une promesse faite à une assemblée est trahie"
+    },
+    "subsidy_granted": {
+      "gain": "Les États accordent un subside",
+      "other": "Une assemblée accorde un subside"
     }
   },
   "factors": {
@@ -192,7 +204,22 @@
     "attitude_to_friendly": "Désormais bienveillant envers nous (attitude {value})",
     "attitude_to_allied": "Désormais tout acquis à notre cause (attitude {value})",
     "attitude_warming": "Son attitude se réchauffe de {value} points",
-    "attitude_cooling": "Son attitude se refroidit de {value} points"
+    "attitude_cooling": "Son attitude se refroidit de {value} points",
+    "subsidy_per_season": "Subside de {value} {money} par saison",
+    "subsidy_term": "Perçu pendant {value} saisons",
+    "subsidy_concessions": "{value} concession(s) accordée(s) en échange",
+    "assembly_accord": "Accord des États : {value} points",
+    "assembly_threshold": "Seuil pour obtenir un accord : {value} points",
+    "assembly_mood": "Humeur des États : {value} sur 100",
+    "assembly_prestige": "Légitimité du souverain : {value} points",
+    "assembly_necessity": "Nécessité invoquée : {value} points",
+    "assembly_ask": "Montant demandé : {value} points",
+    "assembly_subsidies": "Subsides déjà perçus : {value} points",
+    "assembly_unrest": "Agitation des provinces : {value} points",
+    "assembly_broken": "Promesses trahies dont les États se souviennent : {value} points",
+    "assembly_permanent": "Impôt rendu permanent : {value} points",
+    "mood_lost": "Confiance des États perdue : {value} points",
+    "unrest_broken": "Les villes grondent : {value} points d'agitation"
   },
   "reasons": {
     "ultimatum_refused": "Ultimatum refusé : la guerre suit son refus",

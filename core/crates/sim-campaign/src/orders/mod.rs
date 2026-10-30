@@ -460,6 +460,32 @@ impl CampaignState {
                 crate::finance::levy(self, data, faction, &levy)?;
                 Ok(())
             }
+            Order::ConveneAssembly {
+                assembly,
+                necessity,
+                ask,
+                form,
+                permanent,
+            } => {
+                crate::assembly::convene(
+                    self,
+                    data,
+                    faction,
+                    &assembly,
+                    necessity,
+                    &ask,
+                    form.as_deref(),
+                    permanent,
+                )?;
+                Ok(())
+            }
+            Order::AnswerAssembly {
+                session,
+                accept_terms,
+            } => {
+                crate::assembly::answer(self, data, faction, session, accept_terms)?;
+                Ok(())
+            }
             Order::SetCoinage { level } => {
                 crate::coinage::set_coinage(self, data, faction, level)?;
                 Ok(())

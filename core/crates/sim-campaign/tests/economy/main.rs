@@ -17,6 +17,7 @@ mod co_c_tier;
 mod dc3_province_effects;
 mod dc6b_weighted_sums;
 mod eco2_finance;
+mod eco_r1_assembly;
 mod economy_balance;
 mod eq1_balance;
 mod eq2_balance;

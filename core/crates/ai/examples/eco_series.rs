@@ -131,6 +131,7 @@ fn run_seed(data: &GameData, seed: u64, options: &Options, out: &mut impl FnMut(
                         | EventKind::Death
                         | EventKind::Edict
                         | EventKind::RoyalAct
+                        | EventKind::Assembly
                         | EventKind::Diplomacy
                 )
             {
@@ -191,12 +192,50 @@ fn run_seed(data: &GameData, seed: u64, options: &Options, out: &mut impl FnMut(
                 "prestige": f.ruler.as_ref().and_then(|r| state.characters.get(r)).map(|c| c.prestige),
                 "regency": f.regency, "ransom_debts": f.ransom_debts.len(),
                 "deficit_seasons": f.deficit_seasons,
+                "asm": assembly_summary(&state, data, &id),
             }));
         }
         let line = json!({"seed": seed, "turn": state.turn, "year": state.year, "kinds": kinds, "fac": fac, "notable": notable,
             "outcome": state.outcome.as_ref().map(|o| format!("{:?}", o.kind))});
         out(line.to_string());
     }
+}
+
+/// ECO-R1: the assemblies of a house (sessions convened, granted, refused, heavy terms, moods).
+fn assembly_summary(state: &CampaignState, data: &GameData, id: &FactionId) -> serde_json::Value {
+    let (mut convened, mut granted, mut refused, mut heavy, mut running) =
+        (0u32, 0u32, 0u32, 0u32, 0i64);
+    let mut moods = serde_json::Map::new();
+    for assembly in data
+        .assembly_rules
+        .assemblies
+        .iter()
+        .filter(|a| a.house == id.as_str())
+    {
+        if let Some(rt) = state.assemblies.houses.get(&assembly.id) {
+            convened += rt.convened;
+            granted += rt.granted;
+            refused += rt.refused;
+            heavy += rt
+                .sessions
+                .iter()
+                .filter(|s| s.concessions.len() >= 2)
+                .count() as u32;
+            running += rt
+                .subsidies
+                .iter()
+                .map(|s| s.shares.iter().map(|x| x.amount).sum::<i64>())
+                .sum::<i64>();
+            moods.insert(assembly.id.clone(), json!(rt.mood));
+        }
+    }
+    let permanent = state
+        .assemblies
+        .permanent
+        .get(id)
+        .cloned()
+        .unwrap_or_default();
+    json!({"convened": convened, "granted": granted, "refused": refused, "heavy": heavy, "running": running, "mood": moods, "permanent": permanent})
 }
 
 fn main() {

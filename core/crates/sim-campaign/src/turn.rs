@@ -142,6 +142,8 @@ impl CampaignState {
         // default, and a change becomes active once its delay has elapsed.
         edicts::resolve_requirements(self, data, events);
 
+        // ECO-R1: the estates vote and the subsidies are collected, ahead of the budget.
+        crate::assembly::resolve_assemblies(self, data, events);
         // 6-8. Economy, attrition, recovery.
         economy::resolve_economy(self, data, events);
         // ECO2: obligations, rating, royal default.

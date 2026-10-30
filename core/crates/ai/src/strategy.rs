@@ -148,7 +148,9 @@ pub fn filter_finance_orders(
         .into_iter()
         .filter(|order| match order {
             Order::Borrow { .. } => broke || finance.borrow_percent >= 50,
-            Order::LevyExtraordinary { .. } => broke || finance.levy_percent >= 50,
+            Order::LevyExtraordinary { .. } | Order::ConveneAssembly { .. } => {
+                broke || finance.levy_percent >= 50
+            }
             _ => true,
         })
         .collect()

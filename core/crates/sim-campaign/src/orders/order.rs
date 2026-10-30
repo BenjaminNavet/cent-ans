@@ -425,6 +425,23 @@ pub enum Order {
     LevyExtraordinary {
         levy: String,
     },
+    /// ECO-R1: summons the assembly `assembly` for the necessity, at the tier of demand `ask`
+    /// (and the form of subsidy `form`, the first available by default); `permanent` asks the
+    /// estates to make the form an ordinary tax. The estates answer the next season.
+    ConveneAssembly {
+        assembly: String,
+        necessity: data_model::NecessityKind,
+        ask: String,
+        #[serde(default)]
+        form: Option<String>,
+        #[serde(default)]
+        permanent: bool,
+    },
+    /// ECO-R1: accepts or declines the terms the estates set to a subsidy.
+    AnswerAssembly {
+        session: u32,
+        accept_terms: bool,
+    },
     /// H5: strikes the faction's money at `level`; one change per year.
     SetCoinage {
         level: crate::coinage::CoinageLevel,

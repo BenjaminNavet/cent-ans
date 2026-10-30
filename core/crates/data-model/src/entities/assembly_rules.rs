@@ -299,7 +299,8 @@ impl AssemblyRules {
     }
 
     /// Assemblies the house `faction` convenes.
-    pub fn of_house<'a>(&'a self, faction: &'a str) -> impl Iterator<Item = &'a Assembly> + 'a {
+    pub fn of_house<'a>(&'a self, faction: &str) -> impl Iterator<Item = &'a Assembly> + 'a {
+        let faction = faction.to_owned();
         self.assemblies.iter().filter(move |a| a.house == faction)
     }
 }

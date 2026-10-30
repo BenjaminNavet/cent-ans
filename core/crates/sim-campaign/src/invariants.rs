@@ -27,7 +27,7 @@ const TREASURY_LIMIT: i64 = 1_000_000_000_000;
 /// Stable keys: `settlement_single_owner`, `settlement_refs`, `army_single_place`,
 /// `army_refs`, `unit_strength`, `treasury_finite`, `dead_faction_assets`,
 /// `character_refs`, `faction_refs`, `title_refs`, `swing_causes_per_season`,
-/// `strong_decisions_open`, `mission_offer_unseen` (XP-AUDIENCE).
+/// `strong_decisions_open`, `mission_offer_unseen` (XP-AUDIENCE), `assembly_refs`.
 pub fn check_invariants(state: &CampaignState, data: &GameData) -> Vec<Violation> {
     let mut out = Vec::new();
     check_settlements(state, &mut out);
@@ -37,7 +37,62 @@ pub fn check_invariants(state: &CampaignState, data: &GameData) -> Vec<Violation
     check_titles(state, data, &mut out);
     check_swing_causes(state, data, &mut out);
     check_attention(state, data, &mut out);
+    check_assemblies(state, data, &mut out);
     out
+}
+
+/// ECO-R1: assemblies, forms and factions are known, moods stay in range, one session at a time.
+fn check_assemblies(state: &CampaignState, data: &GameData, out: &mut Vec<Violation>) {
+    let rules = &data.assembly_rules;
+    for (id, rt) in &state.assemblies.houses {
+        let Some(assembly) = rules.assembly(id) else {
+            push(out, "assembly_refs", format!("Assemblée inconnue : {id}."));
+            continue;
+        };
+        if rt.mood < 0 || rt.mood > rules.mood.max {
+            push(
+                out,
+                "assembly_refs",
+                format!("Humeur hors bornes pour {id} : {}.", rt.mood),
+            );
+        }
+        if rt.sessions.iter().filter(|s| s.status.is_open()).count() > 1 {
+            push(
+                out,
+                "assembly_refs",
+                format!("Plusieurs sessions ouvertes pour {id}."),
+            );
+        }
+        let known = |f: &data_model::FactionId| state.factions.contains_key(f);
+        for s in &rt.subsidies {
+            if rules.form(&s.form).is_none() || !known(&s.faction) {
+                push(
+                    out,
+                    "assembly_refs",
+                    format!("Subside invalide pour {id} : {} / {}.", s.form, s.faction),
+                );
+            }
+        }
+        for p in &rt.promises {
+            if rules.concession(&p.concession).is_none() || !known(&p.faction) {
+                push(
+                    out,
+                    "assembly_refs",
+                    format!("Promesse invalide pour {id} : {}.", p.concession),
+                );
+            }
+        }
+        let _ = assembly;
+    }
+    for (faction, forms) in &state.assemblies.permanent {
+        if !state.factions.contains_key(faction) || forms.iter().any(|f| rules.form(f).is_none()) {
+            push(
+                out,
+                "assembly_refs",
+                format!("Impôt permanent invalide pour {faction}."),
+            );
+        }
+    }
 }
 
 /// XP-POURQUOI: the journal holds at most `max_per_season_player` swing causes (treasury,

@@ -608,9 +608,11 @@ impl CampaignState {
         let net = (gross as f64 * self.embargo_income_factor(faction)).round() as i64;
         // LR-04: the lord's demesne, wherever his seat is held.
         let domain = self.faction_domain_income(data, faction);
+        // ECO-R1: the forms of subsidy the estates made permanent are ordinary taxes.
+        let permanent = crate::assembly::permanent_income(self, data, faction, net);
         // DF1: difficulty (AI or player income).
         crate::difficulty::scale_i64(
-            net + domain,
+            net + domain + permanent,
             self.difficulty_income_percent(data, faction),
         )
             // JR1: the alms of the crusade (0 for every other faction).

@@ -53,6 +53,7 @@ pub mod advisor;
 pub mod agents;
 pub mod ai_minimal;
 pub mod ai_replay;
+pub mod assembly;
 pub mod battle_auto;
 pub mod battle_forecast;
 pub mod battle_history;

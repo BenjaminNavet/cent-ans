@@ -39,6 +39,8 @@ pub enum ObligationKind {
     Seizure,
     /// Tribute or subsidy owed to another faction.
     Tribute,
+    /// ECO-R1: ordinary tax given up to an assembly (a remission).
+    Remission,
 }
 
 impl ObligationKind {
@@ -47,6 +49,7 @@ impl ObligationKind {
             ObligationKind::Dowry => "dowry",
             ObligationKind::Seizure => "seizure",
             ObligationKind::Tribute => "tribute",
+            ObligationKind::Remission => "remission",
         }
     }
 }
@@ -166,6 +169,8 @@ pub enum FinanceError {
     LevyTooEarly(String),
     #[error("une couronne sans province ne peut pas lever d'impôt")]
     NoProvince,
+    #[error("l'impôt exceptionnel est consenti : convoquez les États ou le Parlement")]
+    AssemblyRequired,
 }
 
 fn rules(data: &GameData) -> &FinanceRules {
@@ -178,8 +183,19 @@ fn capped(amount: f64, percent_cap: f64, gross: i64) -> i64 {
     amount.min(ceiling).round().max(0.0) as i64
 }
 
-/// Percent of the gross tax income the household costs (rank and prestige).
+/// Percent of the gross tax income the household costs, once the elected officers promised to
+/// an assembly (ECO-R1) have capped it.
 pub fn household_percent(state: &CampaignState, data: &GameData, faction: &FactionId) -> f64 {
+    let percent = household_percent_uncapped(state, data, faction);
+    crate::assembly::household_cap(state, data, faction).map_or(percent, |cap| percent.min(cap))
+}
+
+/// [`household_percent`] before any cap (rank and prestige).
+pub fn household_percent_uncapped(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> f64 {
     let rules = &rules(data).household;
     let provinces = state.controlled_provinces(faction).count() as u32;
     let rank = rules
@@ -464,6 +480,9 @@ pub fn levy(
     faction: &FactionId,
     levy_id: &str,
 ) -> Result<i64, FinanceError> {
+    if crate::assembly::has_assembly(data, faction) {
+        return Err(FinanceError::AssemblyRequired);
+    }
     let rules = rules(data);
     let levy = rules
         .levy(levy_id)
@@ -722,8 +741,11 @@ pub fn ai_finance_orders(cache: &PlanCache, data: &GameData, faction: &FactionId
     if expected >= need_below {
         return Vec::new();
     }
-    // A calm realm raises a tax first.
-    if state.mean_unrest(faction) < ai.levy_max_unrest {
+    // A calm realm raises a tax first (a house with an assembly convenes it instead,
+    // `assembly::ai_assembly_orders`).
+    if !crate::assembly::has_assembly(data, faction)
+        && state.mean_unrest(faction) < ai.levy_max_unrest
+    {
         let best = levy_status(state, data, faction)
             .into_iter()
             .filter(|(_, ready)| *ready == 0)
