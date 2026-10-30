@@ -130,27 +130,27 @@ pub struct RansomDebt {
 /// Why a ransom order was refused.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum RansomError {
-    #[error("ce personnage n'est pas captif")]
+    #[error("{}", data_model::texts::core_text("ransom.not_captive", &[]))]
     NotCaptive,
-    #[error("ce captif n'appartient pas à votre faction")]
+    #[error("{}", data_model::texts::core_text("ransom.not_your_captive", &[]))]
     NotYourCaptive,
-    #[error("personne ne détient ce captif contre rançon")]
+    #[error("{}", data_model::texts::core_text("ransom.no_captor", &[]))]
     NoCaptor,
-    #[error("ce captif n'est pas détenu par votre faction")]
+    #[error("{}", data_model::texts::core_text("ransom.not_your_prisoner", &[]))]
     NotYourPrisoner,
-    #[error("son geôlier refuse toute rançon")]
+    #[error("{}", data_model::texts::core_text("ransom.held", &[]))]
     Held,
-    #[error("son geôlier exige une province, pas de l'argent : {0}")]
+    #[error("{}", data_model::texts::core_text("ransom.province_demanded", &[("0", &.0)]))]
     ProvinceDemanded(String),
-    #[error("nombre d'échéances invalide (1 à {MAX_INSTALLMENTS})")]
+    #[error("{}", data_model::texts::core_text("ransom.bad_installments", &[("MAX_INSTALLMENTS", &MAX_INSTALLMENTS)]))]
     BadInstallments,
-    #[error("trésor insuffisant : {needed} {money} nécessaires, {available} disponibles", money = data_model::currency::MONEY)]
+    #[error("{}", data_model::texts::core_text("ransom.insufficient_funds", &[("needed", &.needed), ("money", &data_model::currency::MONEY), ("available", &.available)]))]
     InsufficientFunds { needed: i64, available: i64 },
-    #[error("province impossible : {0}")]
+    #[error("{}", data_model::texts::core_text("ransom.bad_province", &[("0", &.0)]))]
     BadProvince(String),
-    #[error("sa famille refuse : {offered} {money} demandés, sa rançon est de {fair} {money}", money = data_model::currency::MONEY)]
+    #[error("{}", data_model::texts::core_text("ransom.ransom_too_high", &[("offered", &.offered), ("money", &data_model::currency::MONEY), ("fair", &.fair)]))]
     RansomTooHigh { offered: i64, fair: i64 },
-    #[error("sa faction ne peut payer : {needed} {money} demandées, {available} dans son trésor", money = data_model::currency::MONEY)]
+    #[error("{}", data_model::texts::core_text("ransom.payer_cannot_pay", &[("needed", &.needed), ("money", &data_model::currency::MONEY), ("available", &.available)]))]
     PayerCannotPay { needed: i64, available: i64 },
 }
 
@@ -268,9 +268,9 @@ pub fn pay_ransom(
             cede_province(state, faction, &captor, &province);
             let province_name = data.province_name(&province);
             crate::chronicle::release_character(state, data, character, 0, &mut Vec::new());
-            let text = format!(
-                "{name} est libéré contre la cession de la province {}.",
-                crate::events::de(&province_name)
+            let text = data_model::texts::core_text(
+                "ransom.est_libere_contre_la",
+                &[("name", &name), ("p1", &crate::events::de(&province_name))],
             );
             push_news(state, faction, &captor, text);
             Ok(())
@@ -304,11 +304,22 @@ pub fn pay_ransom(
                         next_due_turn: turn + crate::state::TURNS_PER_YEAR,
                         missed: 0,
                     });
-                format!(
-                    "{name} est libéré : rançon de {total} {MONEY} en {installments} échéances annuelles de {first} {MONEY}."
+                data_model::texts::core_text(
+                    "ransom.est_libere_rancon_de",
+                    &[
+                        ("name", &name),
+                        ("total", &total),
+                        ("MONEY", &MONEY),
+                        ("installments", &installments),
+                        ("first", &first),
+                        ("MONEY_5", &MONEY),
+                    ],
                 )
             } else {
-                format!("{name} est libéré contre une rançon de {total} {MONEY}.")
+                data_model::texts::core_text(
+                    "ransom.est_libere_contre_une",
+                    &[("name", &name), ("total", &total), ("MONEY", &MONEY)],
+                )
             };
             push_news(state, faction, &captor, text);
             Ok(())
@@ -334,8 +345,9 @@ fn check_ceded_province(
     province: &ProvinceId,
 ) -> Result<(), RansomError> {
     if !state.provinces.contains_key(province) {
-        return Err(RansomError::BadProvince(format!(
-            "province inconnue : {province}"
+        return Err(RansomError::BadProvince(data_model::texts::core_text(
+            "ransom.province_inconnue",
+            &[("province", &province)],
         )));
     }
     if !state.holds_province(payer, province) {
@@ -421,15 +433,24 @@ pub fn set_ransom_terms(
     }
     let name = state.character_name(data, character);
     let text = match &terms {
-        RansomTerms::Money => format!(
-            "{name} peut être racheté pour {} {MONEY}.",
-            ransom_amount(state, data, character)
+        RansomTerms::Money => data_model::texts::core_text(
+            "ransom.peut_etre_rachete_pour",
+            &[
+                ("name", &name),
+                ("p1", &ransom_amount(state, data, character)),
+                ("MONEY", &MONEY),
+            ],
         ),
-        RansomTerms::Province { province } => format!(
-            "Pour libérer {name}, son geôlier exige la province {}.",
-            crate::events::de(&data.province_name(province))
+        RansomTerms::Province { province } => data_model::texts::core_text(
+            "ransom.pour_liberer_son_geolier",
+            &[
+                ("name", &name),
+                ("p1", &crate::events::de(&data.province_name(province))),
+            ],
         ),
-        RansomTerms::Hold => format!("{name} restera captif : son geôlier refuse toute rançon."),
+        RansomTerms::Hold => {
+            data_model::texts::core_text("ransom.restera_captif_son_geolier", &[("name", &name)])
+        }
         RansomTerms::Parole => unreachable!("handled above"),
     };
     state
@@ -488,10 +509,12 @@ pub fn release_on_parole(
         "Captif libéré sur parole",
         20,
     );
-    let text = format!(
-        "{} est libéré sur parole par {}.",
-        state.character_name(data, character),
-        data.faction_label(faction)
+    let text = data_model::texts::core_text(
+        "ransom.est_libere_sur_parole",
+        &[
+            ("p0", &state.character_name(data, character)),
+            ("p1", &data.faction_label(faction)),
+        ],
     );
     push_news(state, &owner, faction, text);
     Ok(())
@@ -533,9 +556,13 @@ pub fn release_for_ransom(
             r.prestige += RELEASE_RANSOM_PRESTIGE;
         }
     }
-    let text = format!(
-        "{} est libéré contre une rançon de {offered} {MONEY}.",
-        state.character_name(data, character)
+    let text = data_model::texts::core_text(
+        "ransom.est_libere_contre_une_9",
+        &[
+            ("p0", &state.character_name(data, character)),
+            ("offered", &offered),
+            ("MONEY", &MONEY),
+        ],
     );
     push_news(state, &owner, faction, text);
     Ok(())
@@ -711,14 +738,20 @@ pub fn execute_captive(
     state.pending_events.push(
         GameEvent::new(
             EventKind::Ransom,
-            format!("{name} est exécuté sur l'ordre de {executioner} : la rançon est perdue, la terreur s'étend."),
+            data_model::texts::core_text(
+                "ransom.est_execute_sur_l",
+                &[("name", &name), ("executioner", &executioner)],
+            ),
         )
         .faction(faction),
     );
     state.pending_events.push(
         GameEvent::new(
             EventKind::Ransom,
-            format!("{name} a été exécuté par {executioner} : sa faction réclame vengeance."),
+            data_model::texts::core_text(
+                "ransom.a_ete_execute_par",
+                &[("name", &name), ("executioner", &executioner)],
+            ),
         )
         .faction(&victim_faction),
     );
@@ -804,13 +837,19 @@ pub(crate) fn resolve_ransoms(
                 }
                 debt.remaining -= due;
                 let text = if debt.remaining > 0 {
-                    format!(
-                        "Échéance de la rançon de {name} versée : {due} {MONEY} (reste {}).",
-                        debt.remaining
+                    data_model::texts::core_text(
+                        "ransom.echeance_de_la_rancon",
+                        &[
+                            ("name", &name),
+                            ("due", &due),
+                            ("MONEY", &MONEY),
+                            ("p3", &debt.remaining),
+                        ],
                     )
                 } else {
-                    format!(
-                        "Dernière échéance de la rançon de {name} versée : la dette est soldée."
+                    data_model::texts::core_text(
+                        "ransom.derniere_echeance_de_la",
+                        &[("name", &name)],
                     )
                 };
                 events.push(GameEvent::new(EventKind::Ransom, text).faction(id));
@@ -826,9 +865,9 @@ pub(crate) fn resolve_ransoms(
                 events.push(
                     GameEvent::new(
                         EventKind::Ransom,
-                        format!(
-                            "Échéance de la rançon de {name} impayée : la dette monte à {} {MONEY}, le prestige du souverain en souffre.",
-                            debt.remaining
+                        data_model::texts::core_text(
+                            "ransom.echeance_de_la_rancon_14",
+                            &[("name", &name), ("p1", &debt.remaining), ("MONEY", &MONEY)],
                         ),
                     )
                     .faction(id),

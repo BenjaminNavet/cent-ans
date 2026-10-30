@@ -326,3 +326,15 @@ fn cover_map_reads_the_rasters() {
     assert!(map.forest.iter().any(|v| *v > 200), "no forest cell");
     assert!(map.wetland.iter().any(|v| *v > 100), "no wetland cell");
 }
+
+/// Measures `GameData::load` (wall time, three runs): `cargo test --release -p data-model
+/// --test real_data load_timing -- --ignored --nocapture`. Only reported, not asserted (ADR 0829).
+#[test]
+#[ignore = "timing probe, run on demand"]
+fn load_timing() {
+    for run in 0..3 {
+        let start = std::time::Instant::now();
+        let (_data, _warnings) = GameData::load(&data_root()).expect("data/ must load");
+        println!("load_ms run {run}: {}", start.elapsed().as_millis());
+    }
+}

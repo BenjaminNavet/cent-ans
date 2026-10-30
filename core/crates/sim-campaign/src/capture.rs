@@ -123,13 +123,13 @@ pub struct Banditry {
 /// Why a `choose_capture_outcome` order was refused.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum CaptureError {
-    #[error("aucune place prise n'attend ce choix : {0}")]
+    #[error("{}", data_model::texts::core_text("capture.unknown_decision", &[("0", &.0)]))]
     UnknownDecision(u32),
-    #[error("la place n'est plus entre vos mains")]
+    #[error("{}", data_model::texts::core_text("capture.place_lost", &[]))]
     PlaceLost,
-    #[error("impossible de raser cette place : {0}")]
+    #[error("{}", data_model::texts::core_text("capture.raze_forbidden", &[("0", &.0)]))]
     RazeForbidden(String),
-    #[error("impossible de céder cette place : {0}")]
+    #[error("{}", data_model::texts::core_text("capture.cession_forbidden", &[("0", &.0)]))]
     CessionForbidden(String),
 }
 
@@ -405,24 +405,39 @@ pub fn preview(
 pub fn describe(data: &GameData, effects: &CaptureEffects, previous: &FactionId) -> String {
     let mut lines = Vec::new();
     if effects.gold != 0 {
-        lines.push(format!("Trésor {}", signed_livres(effects.gold)));
+        lines.push(data_model::texts::core_text(
+            "capture.tresor",
+            &[("p0", &signed_livres(effects.gold))],
+        ));
     }
     if effects.unrest > 0 {
-        lines.push(format!("Mécontentement +{}", effects.unrest));
+        lines.push(data_model::texts::core_text(
+            "capture.mecontentement",
+            &[("p0", &effects.unrest)],
+        ));
     }
     if effects.population_percent != 0 {
-        lines.push(format!(
-            "Population {} % (≈ {} âmes)",
-            effects.population_percent, effects.population_lost
+        lines.push(data_model::texts::core_text(
+            "capture.population_ames",
+            &[
+                ("p0", &effects.population_percent),
+                ("p1", &effects.population_lost),
+            ],
         ));
     }
     if effects.devastation > 0 {
-        lines.push(format!("Dévastation +{}", effects.devastation));
+        lines.push(data_model::texts::core_text(
+            "capture.devastation",
+            &[("p0", &effects.devastation)],
+        ));
     }
     if effects.banditry_devastation > 0 {
-        lines.push(format!(
-            "dont banditisme +{} pendant {} saisons",
-            effects.banditry_devastation, effects.banditry_turns
+        lines.push(data_model::texts::core_text(
+            "capture.dont_banditisme_pendant_saisons",
+            &[
+                ("p0", &effects.banditry_devastation),
+                ("p1", &effects.banditry_turns),
+            ],
         ));
     }
     if !effects.buildings_lost.is_empty() {
@@ -431,47 +446,63 @@ pub fn describe(data: &GameData, effects: &CaptureEffects, previous: &FactionId)
             .iter()
             .map(|b| data.building_name(b))
             .collect();
-        lines.push(format!("Bâtiments détruits : {}", names.join(", ")));
+        lines.push(data_model::texts::core_text(
+            "capture.batiments_detruits",
+            &[("p0", &names.join(", "))],
+        ));
     }
     if effects.becomes_ruin {
-        lines.push(format!(
-            "La place devient une ruine ({} saisons sans recrutement ni chantier)",
-            effects.ruin_turns
+        lines.push(data_model::texts::core_text(
+            "capture.la_place_devient_une",
+            &[("p0", &effects.ruin_turns)],
         ));
     } else if effects.fortification_loss > 0 {
-        lines.push(format!(
-            "Fortification −{} niveau{}",
-            effects.fortification_loss,
-            if effects.fortification_loss > 1 {
-                "x"
-            } else {
-                ""
-            }
+        lines.push(data_model::texts::core_text(
+            "capture.fortification_niveau",
+            &[
+                ("p0", &effects.fortification_loss),
+                (
+                    "p1",
+                    &if effects.fortification_loss > 1 {
+                        "x"
+                    } else {
+                        ""
+                    },
+                ),
+            ],
         ));
     }
     if effects.unit_experience > 0 {
-        lines.push(format!(
-            "Expérience des troupes +{}",
-            effects.unit_experience
+        lines.push(data_model::texts::core_text(
+            "capture.experience_des_troupes",
+            &[("p0", &effects.unit_experience)],
         ));
     }
     if effects.ruler_piety != 0 {
-        lines.push(format!("Piété du souverain {:+}", effects.ruler_piety));
+        lines.push(data_model::texts::core_text(
+            "capture.piete_du_souverain",
+            &[("p0", &format!("{:+}", effects.ruler_piety))],
+        ));
     }
     if effects.papal_favor != 0 {
-        lines.push(format!("Faveur pontificale {:+}", effects.papal_favor));
+        lines.push(data_model::texts::core_text(
+            "capture.faveur_pontificale",
+            &[("p0", &format!("{:+}", effects.papal_favor))],
+        ));
     }
     if effects.victim_opinion != 0 {
-        lines.push(format!(
-            "Attitude de {} {:+}",
-            data.faction_name(previous),
-            effects.victim_opinion
+        lines.push(data_model::texts::core_text(
+            "capture.attitude_de",
+            &[
+                ("p0", &data.faction_name(previous)),
+                ("p1", &format!("{:+}", effects.victim_opinion)),
+            ],
         ));
     }
     if effects.others_opinion != 0 {
-        lines.push(format!(
-            "Attitude des autres royaumes {:+}",
-            effects.others_opinion
+        lines.push(data_model::texts::core_text(
+            "capture.attitude_des_autres_royaumes",
+            &[("p0", &format!("{:+}", effects.others_opinion))],
         ));
     }
     lines.join("\n")
@@ -788,9 +819,13 @@ pub(crate) fn apply_outcome(
     let place_name = data.settlement_name(settlement);
     let turns = outcome_rules(&data.capture_rules, outcome).map_or(0, |r| r.opinion_turns);
     let reason = match outcome {
-        CaptureOutcome::Ransom => format!("A rançonné {place_name}"),
-        CaptureOutcome::Sack => format!("A pillé {place_name}"),
-        _ => format!("A rasé {place_name}"),
+        CaptureOutcome::Ransom => {
+            data_model::texts::core_text("capture.a_ranconne", &[("place_name", &place_name)])
+        }
+        CaptureOutcome::Sack => {
+            data_model::texts::core_text("capture.a_pille", &[("place_name", &place_name)])
+        }
+        _ => data_model::texts::core_text("capture.a_rase", &[("place_name", &place_name)]),
     };
     let rebels = FactionId::new(REBELS_FACTION).ok();
     if effects.victim_opinion != 0
@@ -820,18 +855,33 @@ pub(crate) fn apply_outcome(
         place_name.clone()
     };
     let text = match outcome {
-        CaptureOutcome::Ransom => format!(
-            "{who} met {place_label} à rançon : {} {MONEY} d'appatis.",
-            effects.gold
+        CaptureOutcome::Ransom => data_model::texts::core_text(
+            "capture.met_a_rancon_d",
+            &[
+                ("who", &who),
+                ("place_label", &place_label),
+                ("p2", &effects.gold),
+                ("MONEY", &MONEY),
+            ],
         ),
-        CaptureOutcome::Sack => format!(
-            "{who} livre {place_label} au pillage : {} {MONEY} de butin, {} âmes perdues.",
-            effects.gold, effects.population_lost
+        CaptureOutcome::Sack => data_model::texts::core_text(
+            "capture.livre_au_pillage_de",
+            &[
+                ("who", &who),
+                ("place_label", &place_label),
+                ("p2", &effects.gold),
+                ("MONEY", &MONEY),
+                ("p4", &effects.population_lost),
+            ],
         ),
-        _ if effects.becomes_ruin => {
-            format!("{who} rase et brûle {place_label} : il n'en reste qu'une ruine.")
-        }
-        _ => format!("{who} rase les défenses de {place_label} et y met le feu."),
+        _ if effects.becomes_ruin => data_model::texts::core_text(
+            "capture.rase_et_brule_il",
+            &[("who", &who), ("place_label", &place_label)],
+        ),
+        _ => data_model::texts::core_text(
+            "capture.rase_les_defenses_de",
+            &[("who", &who), ("place_label", &place_label)],
+        ),
     };
     events.push(
         GameEvent::new(EventKind::ProvinceCaptured, text)
@@ -879,12 +929,12 @@ fn apply_cession(
         CaptureOutcome::Gift => (
             rules.gift.recipient_opinion,
             rules.gift.opinion_turns,
-            format!("A remis {place_name}"),
+            data_model::texts::core_text("capture.a_remis", &[("place_name", &place_name)]),
         ),
         _ => (
             rules.liberate.former_holder_opinion,
             rules.liberate.opinion_turns,
-            format!("A libéré {place_name}"),
+            data_model::texts::core_text("capture.a_libere", &[("place_name", &place_name)]),
         ),
     };
     if opinion != 0 {
@@ -898,7 +948,10 @@ fn apply_cession(
         place_name.clone()
     };
     let text = if outcome == CaptureOutcome::Gift {
-        format!("{who} remet {place_label} à {to}, en don féodal.")
+        data_model::texts::core_text(
+            "capture.remet_a_en_don",
+            &[("who", &who), ("place_label", &place_label), ("to", &to)],
+        )
     } else {
         let allies: Vec<FactionId> = state
             .factions
@@ -916,7 +969,10 @@ fn apply_cession(
         }
         state.change_ruler_prestige(captor, rules.liberate.prestige);
         crate::grudges::forget_settlement(state, settlement);
-        format!("{who} libère {place_label} et la rend à {to}.")
+        data_model::texts::core_text(
+            "capture.libere_et_la_rend",
+            &[("who", &who), ("place_label", &place_label), ("to", &to)],
+        )
     };
     events.push(
         GameEvent::new(EventKind::ProvinceCaptured, text)
@@ -958,12 +1014,8 @@ impl CampaignState {
                             CaptureOutcome::Gift | CaptureOutcome::Liberate => cession,
                             _ => None,
                         };
-                        let recipient = default_recipient(
-                            self,
-                            &pending.settlement,
-                            &pending.faction,
-                            outcome,
-                        );
+                        let recipient =
+                            default_recipient(self, &pending.settlement, &pending.faction, outcome);
                         let recipients = if outcome == CaptureOutcome::Gift {
                             gift_recipients(self, &pending.settlement, &pending.faction)
                         } else {
@@ -972,19 +1024,32 @@ impl CampaignState {
                         let mut effects_text = describe(data, &effects, &pending.previous);
                         if let (Some(to), true) = (&recipient, reason.is_none()) {
                             let line = if outcome == CaptureOutcome::Gift {
-                                format!("Remise à {} (troubles annulés)", data.faction_name(to))
+                                data_model::texts::core_text(
+                                    "capture.remise_a_troubles_annules",
+                                    &[("p0", &data.faction_name(to))],
+                                )
                             } else {
-                                format!(
-                                    "Rendue à {} (troubles annulés, rancune oubliée, prestige {:+})",
-                                    data.faction_name(to),
-                                    effects.prestige
+                                data_model::texts::core_text(
+                                    "capture.rendue_a_troubles_annules",
+                                    &[
+                                        ("p0", &data.faction_name(to)),
+                                        ("p1", &format!("{:+}", effects.prestige)),
+                                    ],
                                 )
                             };
-                            effects_text = format!("{line}\nAttitude de {} {:+}", data.faction_name(to), effects.recipient_opinion);
+                            effects_text = data_model::texts::core_text(
+                                "capture.nattitude_de",
+                                &[
+                                    ("line", &line),
+                                    ("p1", &data.faction_name(to)),
+                                    ("p2", &format!("{:+}", effects.recipient_opinion)),
+                                ],
+                            );
                         }
                         if outcome == CaptureOutcome::Occupy {
-                            effects_text = format!(
-                                "La place change de mains, sans plus.\n{effects_text} (déjà compté)"
+                            effects_text = data_model::texts::core_text(
+                                "capture.la_place_change_de",
+                                &[("effects_text", &effects_text)],
                             );
                         }
                         CaptureOptionView {
@@ -1011,13 +1076,18 @@ impl CampaignState {
                 Some(CaptureDecisionView {
                     id: pending.id,
                     settlement: pending.settlement.clone(),
-                    title: format!("{settlement_name} est prise"),
-                    text: format!(
-                        "La place de {settlement_name} ({province_name}) est tombée ; ses \
-                         défenseurs, qui tenaient pour {previous_name}, attendent votre bon \
-                         plaisir. Vos capitaines demandent quel sort lui réserver : l'occuper \
-                         telle quelle, en tirer rançon, la livrer au pillage, la raser, la remettre à un allié ou la libérer. \
-                         Sans ordre avant la fin de la saison, on l'occupera.\n\n{reminder}"
+                    title: data_model::texts::core_text(
+                        "capture.est_prise",
+                        &[("settlement_name", &settlement_name)],
+                    ),
+                    text: data_model::texts::core_text(
+                        "capture.la_place_de_est",
+                        &[
+                            ("settlement_name", &settlement_name),
+                            ("province_name", &province_name),
+                            ("previous_name", &previous_name),
+                            ("reminder", &reminder),
+                        ],
                     ),
                     settlement_name,
                     province: place.province.clone(),
@@ -1134,17 +1204,19 @@ pub fn debug_capture(
 /// the taker owns it (a place recovered).
 pub fn occupation_reminder(is_city: bool, province_name: &str, owner_name: Option<&str>) -> String {
     let control = if is_city {
-        format!("C'est la cité de {province_name} : vous en prenez le contrôle. ")
+        data_model::texts::core_text(
+            "capture.c_est_la_cite",
+            &[("province_name", &province_name)],
+        )
     } else {
         String::new()
     };
     let Some(owner_name) = owner_name else {
-        return format!("{control}La place est à vous de droit : vous la recouvrez.");
+        return data_model::texts::core_text("capture.la_place_est_a", &[("control", &control)]);
     };
-    format!(
-        "{control}Occuper n'est pas posséder : la place reste de droit à {owner_name} ; \
-         elle ne devient vôtre que par cession dans un traité, et vous la rendrez à la paix \
-         si elle n'est pas cédée."
+    data_model::texts::core_text(
+        "capture.occuper_n_est_pas",
+        &[("control", &control), ("owner_name", &owner_name)],
     )
 }
 

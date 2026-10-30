@@ -46,21 +46,31 @@ fn check_assemblies(state: &CampaignState, data: &GameData, out: &mut Vec<Violat
     let rules = &data.assembly_rules;
     for (id, rt) in &state.assemblies.houses {
         let Some(assembly) = rules.assembly(id) else {
-            push(out, "assembly_refs", format!("Assemblée inconnue : {id}."));
+            push(
+                out,
+                "assembly_refs",
+                data_model::texts::core_text("invariant.assemblee_inconnue", &[("id", &id)]),
+            );
             continue;
         };
         if rt.mood < 0 || rt.mood > rules.mood.max {
             push(
                 out,
                 "assembly_refs",
-                format!("Humeur hors bornes pour {id} : {}.", rt.mood),
+                data_model::texts::core_text(
+                    "invariant.humeur_hors_bornes_pour",
+                    &[("id", &id), ("p1", &rt.mood)],
+                ),
             );
         }
         if rt.sessions.iter().filter(|s| s.status.is_open()).count() > 1 {
             push(
                 out,
                 "assembly_refs",
-                format!("Plusieurs sessions ouvertes pour {id}."),
+                data_model::texts::core_text(
+                    "invariant.plusieurs_sessions_ouvertes_pour",
+                    &[("id", &id)],
+                ),
             );
         }
         let known = |f: &data_model::FactionId| state.factions.contains_key(f);
@@ -69,7 +79,10 @@ fn check_assemblies(state: &CampaignState, data: &GameData, out: &mut Vec<Violat
                 push(
                     out,
                     "assembly_refs",
-                    format!("Subside invalide pour {id} : {} / {}.", s.form, s.faction),
+                    data_model::texts::core_text(
+                        "invariant.subside_invalide_pour",
+                        &[("id", &id), ("p1", &s.form), ("p2", &s.faction)],
+                    ),
                 );
             }
         }
@@ -78,7 +91,10 @@ fn check_assemblies(state: &CampaignState, data: &GameData, out: &mut Vec<Violat
                 push(
                     out,
                     "assembly_refs",
-                    format!("Promesse invalide pour {id} : {}.", p.concession),
+                    data_model::texts::core_text(
+                        "invariant.promesse_invalide_pour",
+                        &[("id", &id), ("p1", &p.concession)],
+                    ),
                 );
             }
         }
@@ -89,7 +105,10 @@ fn check_assemblies(state: &CampaignState, data: &GameData, out: &mut Vec<Violat
             push(
                 out,
                 "assembly_refs",
-                format!("Impôt permanent invalide pour {faction}."),
+                data_model::texts::core_text(
+                    "invariant.impot_permanent_invalide_pour",
+                    &[("faction", &faction)],
+                ),
             );
         }
     }
@@ -114,7 +133,10 @@ fn check_swing_causes(state: &CampaignState, data: &GameData, out: &mut Vec<Viol
             push(
                 out,
                 "swing_causes_per_season",
-                format!("{count} causes de variation au tour {turn} (au plus {limit})."),
+                data_model::texts::core_text(
+                    "invariant.causes_de_variation_au",
+                    &[("count", &count), ("turn", &turn), ("limit", &limit)],
+                ),
             );
         }
     }
@@ -129,9 +151,9 @@ fn check_attention(state: &CampaignState, data: &GameData, out: &mut Vec<Violati
             push(
                 out,
                 "mission_offer_unseen",
-                format!(
-                    "L'offre de mission du tour {} expire au tour {} sans avoir été une saison à l'Audience.",
-                    offer.offered_turn, offer.expires_turn
+                data_model::texts::core_text(
+                    "invariant.l_offre_de_mission",
+                    &[("p0", &offer.offered_turn), ("p1", &offer.expires_turn)],
                 ),
             );
         }
@@ -151,7 +173,10 @@ fn check_attention(state: &CampaignState, data: &GameData, out: &mut Vec<Violati
         push(
             out,
             "strong_decisions_open",
-            format!("{strong} décisions fortes ouvertes (au plus {limit})."),
+            data_model::texts::core_text(
+                "invariant.decisions_fortes_ouvertes_au",
+                &[("strong", &strong), ("limit", &limit)],
+            ),
         );
     }
 }
@@ -169,7 +194,10 @@ fn check_settlements(state: &CampaignState, out: &mut Vec<Violation>) {
             push(
                 out,
                 "settlement_refs",
-                format!("La province {pid} ne liste pas sa ville {}.", province.city),
+                data_model::texts::core_text(
+                    "invariant.la_province_ne_liste",
+                    &[("pid", &pid), ("p1", &province.city)],
+                ),
             );
         }
         for sid in &province.settlements {
@@ -178,7 +206,10 @@ fn check_settlements(state: &CampaignState, out: &mut Vec<Violation>) {
                 push(
                     out,
                     "settlement_refs",
-                    format!("La province {pid} liste la localité inconnue {sid}."),
+                    data_model::texts::core_text(
+                        "invariant.la_province_liste_la",
+                        &[("pid", &pid), ("sid", &sid)],
+                    ),
                 );
             }
         }
@@ -190,9 +221,9 @@ fn check_settlements(state: &CampaignState, out: &mut Vec<Violation>) {
                     push(
                         out,
                         "settlement_single_owner",
-                        format!(
-                            "La localité {sid} déclare la province {} mais {only} la liste.",
-                            settlement.province
+                        data_model::texts::core_text(
+                            "invariant.la_localite_declare_la",
+                            &[("sid", &sid), ("p1", &settlement.province), ("only", &only)],
                         ),
                     );
                 }
@@ -200,12 +231,15 @@ fn check_settlements(state: &CampaignState, out: &mut Vec<Violation>) {
             Some(many) if many.len() > 1 => push(
                 out,
                 "settlement_single_owner",
-                format!("La localité {sid} est listée par {} provinces.", many.len()),
+                data_model::texts::core_text(
+                    "invariant.la_localite_est_listee",
+                    &[("sid", &sid), ("p1", &many.len())],
+                ),
             ),
             _ => push(
                 out,
                 "settlement_single_owner",
-                format!("La localité {sid} n'est listée par aucune province."),
+                data_model::texts::core_text("invariant.la_localite_n_est", &[("sid", &sid)]),
             ),
         }
         for (role, faction) in [
@@ -216,7 +250,10 @@ fn check_settlements(state: &CampaignState, out: &mut Vec<Violation>) {
                 push(
                     out,
                     "settlement_refs",
-                    format!("La localité {sid} a pour {role} la faction inconnue {faction}."),
+                    data_model::texts::core_text(
+                        "invariant.la_localite_a_pour",
+                        &[("sid", &sid), ("role", &role), ("faction", &faction)],
+                    ),
                 );
             }
         }
@@ -228,11 +265,18 @@ fn check_settlements(state: &CampaignState, out: &mut Vec<Violation>) {
             push(
                 out,
                 "settlement_refs",
-                format!("Siège de {sid} par la faction inconnue {}.", siege.attacker),
+                data_model::texts::core_text(
+                    "invariant.siege_de_par_la",
+                    &[("sid", &sid), ("p1", &siege.attacker)],
+                ),
             );
         }
         for unit in &settlement.garrison {
-            check_unit(out, &format!("garnison de {sid}"), unit);
+            check_unit(
+                out,
+                &data_model::texts::core_text("invariant.garnison_de", &[("sid", &sid)]),
+                unit,
+            );
         }
     }
 }
@@ -242,9 +286,14 @@ fn check_unit(out: &mut Vec<Violation>, place: &str, unit: &Unit) {
         push(
             out,
             "unit_strength",
-            format!(
-                "Unité {} ({place}) : effectif {} supérieur au maximum {}.",
-                unit.unit_type, unit.strength, unit.max_strength
+            data_model::texts::core_text(
+                "invariant.unite_effectif_superieur_au",
+                &[
+                    ("p0", &unit.unit_type),
+                    ("place", &place),
+                    ("p2", &unit.strength),
+                    ("p3", &unit.max_strength),
+                ],
             ),
         );
     }
@@ -259,12 +308,18 @@ fn check_armies(state: &CampaignState, out: &mut Vec<Violation>) {
             ArmyPosition::Settlement(sid) if !state.settlements.contains_key(sid) => push(
                 out,
                 "army_single_place",
-                format!("L'armée {aid} stationne dans la localité inconnue {sid}."),
+                data_model::texts::core_text(
+                    "invariant.l_armee_stationne_dans",
+                    &[("aid", &aid), ("sid", &sid)],
+                ),
             ),
             ArmyPosition::Field { x, y } if !x.is_finite() || !y.is_finite() => push(
                 out,
                 "army_single_place",
-                format!("L'armée {aid} a une position de campagne non finie ({x}, {y})."),
+                data_model::texts::core_text(
+                    "invariant.l_armee_a_une",
+                    &[("aid", &aid), ("x", &x), ("y", &y)],
+                ),
             ),
             _ => {}
         }
@@ -272,9 +327,9 @@ fn check_armies(state: &CampaignState, out: &mut Vec<Violation>) {
             push(
                 out,
                 "army_refs",
-                format!(
-                    "L'armée {aid} appartient à la faction inconnue {}.",
-                    army.faction
+                data_model::texts::core_text(
+                    "invariant.l_armee_appartient_a",
+                    &[("aid", &aid), ("p1", &army.faction)],
                 ),
             );
         }
@@ -284,21 +339,32 @@ fn check_armies(state: &CampaignState, out: &mut Vec<Violation>) {
                 None => push(
                     out,
                     "army_refs",
-                    format!("L'armée {aid} a pour général le personnage inconnu {general}."),
+                    data_model::texts::core_text(
+                        "invariant.l_armee_a_pour",
+                        &[("aid", &aid), ("general", &general)],
+                    ),
                 ),
                 Some(c) if c.army.as_ref() != Some(aid) => push(
                     out,
                     "army_refs",
-                    format!(
-                        "Le général {general} de l'armée {aid} pointe vers {:?}.",
-                        c.army
+                    data_model::texts::core_text(
+                        "invariant.le_general_de_l",
+                        &[
+                            ("general", &general),
+                            ("aid", &aid),
+                            ("p2", &format!("{:?}", c.army)),
+                        ],
                     ),
                 ),
                 _ => {}
             }
         }
         for unit in &army.units {
-            check_unit(out, &format!("armée {aid}"), unit);
+            check_unit(
+                out,
+                &data_model::texts::core_text("invariant.armee", &[("aid", &aid)]),
+                unit,
+            );
         }
     }
     for (general, armies) in generals {
@@ -306,9 +372,9 @@ fn check_armies(state: &CampaignState, out: &mut Vec<Violation>) {
             push(
                 out,
                 "army_single_place",
-                format!(
-                    "Le général {general} commande {} armées à la fois.",
-                    armies.len()
+                data_model::texts::core_text(
+                    "invariant.le_general_commande_armees",
+                    &[("general", &general), ("p1", &armies.len())],
                 ),
             );
         }
@@ -319,7 +385,10 @@ fn check_armies(state: &CampaignState, out: &mut Vec<Violation>) {
                 push(
                     out,
                     "army_refs",
-                    format!("Bataille en attente avec l'armée inconnue {aid}."),
+                    data_model::texts::core_text(
+                        "invariant.bataille_en_attente_avec",
+                        &[("aid", &aid)],
+                    ),
                 );
             }
         }
@@ -327,9 +396,9 @@ fn check_armies(state: &CampaignState, out: &mut Vec<Violation>) {
             push(
                 out,
                 "army_refs",
-                format!(
-                    "Bataille en attente dans la localité inconnue {}.",
-                    battle.location
+                data_model::texts::core_text(
+                    "invariant.bataille_en_attente_dans",
+                    &[("p0", &battle.location)],
                 ),
             );
         }
@@ -343,7 +412,10 @@ fn check_factions(state: &CampaignState, data: &GameData, out: &mut Vec<Violatio
             push(
                 out,
                 "treasury_finite",
-                format!("Le trésor de {fid} est démesuré : {}.", faction.treasury),
+                data_model::texts::core_text(
+                    "invariant.le_tresor_de_est",
+                    &[("fid", &fid), ("p1", &faction.treasury)],
+                ),
             );
         }
         // ECO2 (ADR 0777): loans are positive, owed to a known banker.
@@ -352,9 +424,14 @@ fn check_factions(state: &CampaignState, data: &GameData, out: &mut Vec<Violatio
                 push(
                     out,
                     "finance_loans",
-                    format!(
-                        "{fid} doit {} {MONEY} à « {} » : prêt invalide.",
-                        loan.principal, loan.lender
+                    data_model::texts::core_text(
+                        "invariant.doit_a_pret_invalide",
+                        &[
+                            ("fid", &fid),
+                            ("p1", &loan.principal),
+                            ("MONEY", &MONEY),
+                            ("p3", &loan.lender),
+                        ],
                     ),
                 );
             }
@@ -363,16 +440,16 @@ fn check_factions(state: &CampaignState, data: &GameData, out: &mut Vec<Violatio
             push(
                 out,
                 "finance_loans",
-                format!("La cote de crédit de {fid} dépasse 100."),
+                data_model::texts::core_text("invariant.la_cote_de_credit", &[("fid", &fid)]),
             );
         }
         if !data.provinces.contains_key(&faction.capital) {
             push(
                 out,
                 "faction_refs",
-                format!(
-                    "La capitale {} de {fid} est inconnue des données.",
-                    faction.capital
+                data_model::texts::core_text(
+                    "invariant.la_capitale_de_est",
+                    &[("p0", &faction.capital), ("fid", &fid)],
                 ),
             );
         }
@@ -381,7 +458,10 @@ fn check_factions(state: &CampaignState, data: &GameData, out: &mut Vec<Violatio
                 push(
                     out,
                     "faction_refs",
-                    format!("Le {role} de {fid} est le personnage inconnu {id}."),
+                    data_model::texts::core_text(
+                        "invariant.le_de_est_le",
+                        &[("role", &role), ("fid", &fid), ("id", &id)],
+                    ),
                 );
             }
         }
@@ -390,7 +470,10 @@ fn check_factions(state: &CampaignState, data: &GameData, out: &mut Vec<Violatio
                 push(
                     out,
                     "faction_refs",
-                    format!("{fid} est liée à la faction inconnue {other}."),
+                    data_model::texts::core_text(
+                        "invariant.est_liee_a_la",
+                        &[("fid", &fid), ("other", &other)],
+                    ),
                 );
             }
         }
@@ -405,8 +488,9 @@ fn check_factions(state: &CampaignState, data: &GameData, out: &mut Vec<Violatio
                 push(
                     out,
                     "dead_faction_assets",
-                    format!(
-                        "La faction disparue {fid} possède encore {armies} armée(s) et {places} localité(s)."
+                    data_model::texts::core_text(
+                        "invariant.la_faction_disparue_possede",
+                        &[("fid", &fid), ("armies", &armies), ("places", &places)],
                     ),
                 );
             }
@@ -420,9 +504,9 @@ fn check_characters(state: &CampaignState, out: &mut Vec<Violation>) {
             push(
                 out,
                 "character_refs",
-                format!(
-                    "Le personnage {cid} sert la faction inconnue {}.",
-                    c.faction
+                data_model::texts::core_text(
+                    "invariant.le_personnage_sert_la",
+                    &[("cid", &cid), ("p1", &c.faction)],
                 ),
             );
         }
@@ -434,7 +518,10 @@ fn check_characters(state: &CampaignState, out: &mut Vec<Violation>) {
             push(
                 out,
                 "character_refs",
-                format!("Le personnage {cid} se trouve dans la province inconnue {loc}."),
+                data_model::texts::core_text(
+                    "invariant.le_personnage_se_trouve",
+                    &[("cid", &cid), ("loc", &loc)],
+                ),
             );
         }
         if let Some(aid) = c
@@ -445,7 +532,10 @@ fn check_characters(state: &CampaignState, out: &mut Vec<Violation>) {
             push(
                 out,
                 "character_refs",
-                format!("Le personnage {cid} est rattaché à l'armée inconnue {aid}."),
+                data_model::texts::core_text(
+                    "invariant.le_personnage_est_rattache",
+                    &[("cid", &cid), ("aid", &aid)],
+                ),
             );
         }
         for (role, id) in [
@@ -457,7 +547,10 @@ fn check_characters(state: &CampaignState, out: &mut Vec<Violation>) {
                 push(
                     out,
                     "character_refs",
-                    format!("Le {role} de {cid} est le personnage inconnu {id}."),
+                    data_model::texts::core_text(
+                        "invariant.le_de_est_le_38",
+                        &[("role", &role), ("cid", &cid), ("id", &id)],
+                    ),
                 );
             }
         }
@@ -466,7 +559,10 @@ fn check_characters(state: &CampaignState, out: &mut Vec<Violation>) {
                 push(
                     out,
                     "character_refs",
-                    format!("L'enfant {child} de {cid} est inconnu."),
+                    data_model::texts::core_text(
+                        "invariant.l_enfant_de_est",
+                        &[("child", &child), ("cid", &cid)],
+                    ),
                 );
             }
         }
@@ -478,9 +574,9 @@ fn check_characters(state: &CampaignState, out: &mut Vec<Violation>) {
             push(
                 out,
                 "character_refs",
-                format!(
-                    "Le voyage de {cid} mène à la province inconnue {}.",
-                    journey.to
+                data_model::texts::core_text(
+                    "invariant.le_voyage_de_mene",
+                    &[("cid", &cid), ("p1", &journey.to)],
                 ),
             );
         }
@@ -494,14 +590,17 @@ fn check_titles(state: &CampaignState, data: &GameData, out: &mut Vec<Violation>
             push(
                 out,
                 "title_refs",
-                format!("Le titre {title} est détenu mais absent des données."),
+                data_model::texts::core_text("invariant.le_titre_est_detenu", &[("title", &title)]),
             );
         }
         if !state.factions.contains_key(holder) {
             push(
                 out,
                 "title_refs",
-                format!("Le titre {title} est détenu par la faction inconnue {holder}."),
+                data_model::texts::core_text(
+                    "invariant.le_titre_est_detenu_42",
+                    &[("title", &title), ("holder", &holder)],
+                ),
             );
         }
     }

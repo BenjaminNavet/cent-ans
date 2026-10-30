@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/core_messages.schema.json",
+  "title": "Phrases françaises du cœur de simulation",
+  "description": "Fichier data/ui/core_messages.fr.json (ADR 0829). Clé `espace.nom` vers un gabarit français ; les paramètres s'écrivent {nom} et sont fournis par le code (data_model::texts::core_text). Lu par sim-campaign (refus d'ordres, rançons, captures, invariants).",
+  "type": "object",
+  "required": ["description", "messages"],
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string" },
+    "messages": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z]+\\.[a-z0-9_]+$" },
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    }
+  }
+}

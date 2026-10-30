@@ -542,6 +542,10 @@
    "schema": "compose_warp.schema.json"
   },
   {
+   "glob": "ui/core_messages.fr.json",
+   "schema": "core_messages.schema.json"
+  },
+  {
    "glob": "council/offices.json",
    "schema": "council_offices.schema.json"
   },

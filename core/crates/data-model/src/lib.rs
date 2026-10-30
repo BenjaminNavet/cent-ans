@@ -30,6 +30,7 @@ pub mod settlement_grid;
 pub mod settlement_load;
 #[cfg(feature = "test-support")]
 pub mod test_support;
+pub mod texts;
 pub mod title_check;
 pub mod trade_paths;
 pub mod util;

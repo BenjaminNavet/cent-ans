@@ -12,104 +12,104 @@ use crate::state::ArmyId;
 pub enum OrderError {
     #[error("{0}")]
     MissionChoice(#[from] crate::missions::MissionChoiceError),
-    #[error("armée inconnue : {0}")]
+    #[error("{}", data_model::texts::core_text("order.unknown_army", &[("0", &.0)]))]
     UnknownArmy(ArmyId),
-    #[error("province inconnue : {0}")]
+    #[error("{}", data_model::texts::core_text("order.unknown_province", &[("0", &.0)]))]
     UnknownProvince(ProvinceId),
-    #[error("localité inconnue : {0}")]
+    #[error("{}", data_model::texts::core_text("order.unknown_settlement", &[("0", &.0)]))]
     UnknownSettlement(SettlementId),
-    #[error("type d'unité inconnu : {0}")]
+    #[error("{}", data_model::texts::core_text("order.unknown_unit_type", &[("0", &.0)]))]
     UnknownUnitType(UnitTypeId),
-    #[error("personnage inconnu : {0}")]
+    #[error("{}", data_model::texts::core_text("order.unknown_character", &[("0", &.0)]))]
     UnknownCharacter(CharacterId),
-    #[error("cette armée n'appartient pas à la faction {0}")]
+    #[error("{}", data_model::texts::core_text("order.not_your_army", &[("0", &.0)]))]
     NotYourArmy(FactionId),
-    #[error("ce personnage n'appartient pas à la faction {0}")]
+    #[error("{}", data_model::texts::core_text("order.not_your_character", &[("0", &.0)]))]
     NotYourCharacter(FactionId),
-    #[error("cette province n'est pas contrôlée par la faction {0}")]
+    #[error("{}", data_model::texts::core_text("order.not_your_province", &[("0", &.0)]))]
     NotYourProvince(FactionId),
-    #[error("cette localité n'est pas contrôlée par la faction {0}")]
+    #[error("{}", data_model::texts::core_text("order.not_your_settlement", &[("0", &.0)]))]
     NotYourSettlement(FactionId),
-    #[error("chemin vide")]
+    #[error("{}", data_model::texts::core_text("order.empty_path", &[]))]
     EmptyPath,
-    #[error("chemin invalide : {from} et {to} ne sont pas reliées (route ou mer entre ports)")]
+    #[error("{}", data_model::texts::core_text("order.not_adjacent", &[("from", &.from), ("to", &.to)]))]
     NotAdjacent { from: String, to: String },
-    #[error("destination inaccessible")]
+    #[error("{}", data_model::texts::core_text("order.no_path", &[]))]
     NoPath,
-    #[error("cette armée n'a plus de points de mouvement ce tour")]
+    #[error("{}", data_model::texts::core_text("order.no_movement_left", &[]))]
     NoMovementLeft,
-    #[error("l'armée ciblée est hors de portée ce tour")]
+    #[error("{}", data_model::texts::core_text("order.out_of_range", &[]))]
     OutOfRange,
-    #[error("ces deux factions ne sont pas en guerre")]
+    #[error("{}", data_model::texts::core_text("order.not_at_war", &[]))]
     NotAtWar,
-    #[error("l'armée doit stationner dans un port pour embarquer")]
+    #[error("{}", data_model::texts::core_text("order.not_in_port", &[]))]
     NotInPort,
-    #[error("aucune route maritime de {from} à {to} en une saison")]
+    #[error("{}", data_model::texts::core_text("order.no_sea_route", &[("from", &.from), ("to", &.to)]))]
     NoSeaRoute { from: String, to: String },
-    #[error("aucun trajet fluvial de {from} à {to}")]
+    #[error("{}", data_model::texts::core_text("order.no_river_route", &[("from", &.from), ("to", &.to)]))]
     NoRiverRoute { from: String, to: String },
-    #[error("trajet fluvial trop long pour ce tour : {cost} points nécessaires, {left} restants")]
+    #[error("{}", data_model::texts::core_text("order.river_too_far", &[("cost", &.cost), ("left", &.left)]))]
     RiverTooFar { cost: u32, left: u32 },
-    #[error("l'embarquement prend toute la saison : l'armée ne doit pas avoir bougé ce tour")]
+    #[error("{}", data_model::texts::core_text("order.embark_needs_full_turn", &[]))]
     EmbarkNeedsFullTurn,
-    #[error("l'armée doit stationner dans cette localité")]
+    #[error("{}", data_model::texts::core_text("order.not_in_settlement", &[]))]
     NotInSettlement,
-    #[error("recrutement impossible : {0}")]
+    #[error("{}", data_model::texts::core_text("order.recruit_unavailable", &[("0", &.0)]))]
     RecruitUnavailable(String),
-    #[error("file de recrutement pleine : {slots} recrutement(s) par tour dans cette localité")]
+    #[error("{}", data_model::texts::core_text("order.recruit_queue_full", &[("slots", &.slots)]))]
     RecruitQueueFull { slots: usize },
-    #[error("trésor insuffisant : {needed} {money} nécessaires, {available} disponibles", money = data_model::currency::MONEY)]
+    #[error("{}", data_model::texts::core_text("order.insufficient_funds", &[("needed", &.needed), ("money", &data_model::currency::MONEY), ("available", &.available)]))]
     InsufficientFunds { needed: i64, available: i64 },
-    #[error("indice d'unité invalide : {0}")]
+    #[error("{}", data_model::texts::core_text("order.invalid_unit_index", &[("0", &.0)]))]
     InvalidUnitIndex(usize),
-    #[error("aucune unité sélectionnée")]
+    #[error("{}", data_model::texts::core_text("order.no_units_selected", &[]))]
     NoUnitsSelected,
-    #[error("une armée doit garder au moins une unité")]
+    #[error("{}", data_model::texts::core_text("order.would_empty_army", &[]))]
     WouldEmptyArmy,
-    #[error("ce contingent féodal est levé pour la durée de son service : on ne le fond pas, ne le scinde pas et ne le verse pas à la garnison")]
+    #[error("{}", data_model::texts::core_text("order.host_contingent", &[]))]
     HostContingent,
-    #[error("les deux armées doivent être au même endroit")]
+    #[error("{}", data_model::texts::core_text("order.not_same_province", &[]))]
     NotSameProvince,
-    #[error("les deux armées doivent appartenir à la même faction")]
+    #[error("{}", data_model::texts::core_text("order.not_same_faction", &[]))]
     NotSameFaction,
-    #[error("ce personnage ne peut pas commander (mort, captif, mineur ou d'une autre faction)")]
+    #[error("{}", data_model::texts::core_text("order.character_unavailable", &[]))]
     CharacterUnavailable,
-    #[error("ce personnage n'est pas dans cette province")]
+    #[error("{}", data_model::texts::core_text("order.character_elsewhere", &[]))]
     CharacterElsewhere,
-    #[error("ce personnage commande une armée, gouverne ou est déjà en route")]
+    #[error("{}", data_model::texts::core_text("order.character_busy", &[]))]
     CharacterBusy,
-    #[error("ce personnage gouverne déjà une province")]
+    #[error("{}", data_model::texts::core_text("order.already_governing", &[]))]
     AlreadyGoverning,
-    #[error("il faut préciser soit une armée soit une province")]
+    #[error("{}", data_model::texts::core_text("order.ambiguous_target", &[]))]
     AmbiguousTarget,
-    #[error("faction inconnue : {0}")]
+    #[error("{}", data_model::texts::core_text("order.unknown_faction", &[("0", &.0)]))]
     UnknownFaction(FactionId),
-    #[error("bâtiment inconnu : {0}")]
+    #[error("{}", data_model::texts::core_text("order.unknown_building", &[("0", &.0)]))]
     UnknownBuilding(BuildingId),
-    #[error("vocation impossible : {0}")]
+    #[error("{}", data_model::texts::core_text("order.vocation_refused", &[("0", &.0)]))]
     VocationRefused(String),
-    #[error("construction impossible : {0}")]
+    #[error("{}", data_model::texts::core_text("order.build_unavailable", &[("0", &.0)]))]
     BuildUnavailable(String),
-    #[error("aucune construction en cours dans cette localité")]
+    #[error("{}", data_model::texts::core_text("order.no_construction", &[]))]
     NoConstruction,
-    #[error("aucune recrue à cet emplacement de la file")]
+    #[error("{}", data_model::texts::core_text("order.no_queued_recruit", &[]))]
     NoQueuedRecruit,
-    #[error("démolition impossible : {0}")]
+    #[error("{}", data_model::texts::core_text("order.demolition_refused", &[("0", &.0)]))]
     DemolitionRefused(String),
-    #[error("la localité est assiégée")]
+    #[error("{}", data_model::texts::core_text("order.settlement_besieged", &[]))]
     SettlementBesieged,
-    #[error("posture impossible : {0}")]
+    #[error("{}", data_model::texts::core_text("order.stance_refused", &[("0", &.0)]))]
     StanceRefused(String),
-    #[error("interdit en marche forcée : {0}")]
+    #[error("{}", data_model::texts::core_text("order.forced_march_forbids", &[("0", &.0)]))]
     ForcedMarchForbids(&'static str),
-    #[error("garnison complète : {cap} unités au plus dans ce type de localité")]
+    #[error("{}", data_model::texts::core_text("order.garrison_full", &[("cap", &.cap)]))]
     GarrisonFull { cap: usize },
     /// NT5 (N6): the army would exceed `armies.json` `max_units`.
-    #[error("armée complète : {cap} unités au plus par armée")]
+    #[error("{}", data_model::texts::core_text("order.army_full", &[("cap", &.cap)]))]
     ArmyFull { cap: usize },
-    #[error("sortie impossible : {0}")]
+    #[error("{}", data_model::texts::core_text("order.sortie_unavailable", &[("0", &.0)]))]
     SortieUnavailable(String),
-    #[error("sommation impossible : {0}")]
+    #[error("{}", data_model::texts::core_text("order.surrender_unavailable", &[("0", &.0)]))]
     SurrenderUnavailable(String),
     #[error(transparent)]
     LearnSkill(#[from] LearnSkillError),
@@ -163,8 +163,8 @@ pub enum OrderError {
     Capture(#[from] crate::capture::CaptureError),
     #[error(transparent)]
     Tradition(#[from] crate::traditions::TraditionError),
-    #[error("la place est en ruine : ni recrutement ni chantier")]
+    #[error("{}", data_model::texts::core_text("order.settlement_ruined", &[]))]
     SettlementRuined,
-    #[error("engagement impossible : {0}")]
+    #[error("{}", data_model::texts::core_text("order.mercenary_unavailable", &[("0", &.0)]))]
     MercenaryUnavailable(String),
 }
