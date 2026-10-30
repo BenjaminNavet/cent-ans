@@ -1,6 +1,6 @@
-# XXXX — ECO-R1c : l'impôt consenti, IA et Angleterre
+# 0815 — ECO-R1c : l'impôt consenti, IA et Angleterre
 
-Statut : accepté (30/10/2026, lot ECO-R1c de la boucle juge 2). Numéro à fixer à la fusion. Complète l'ADR 0813.
+Statut : accepté (30/10/2026, lot ECO-R1c de la boucle juge 2). Complète l'ADR 0813.
 
 ## Contexte
 R1-a/b (ADR 0813) ont livré les assemblées et une IA minimale : convoquer quand le trésor passe sous N saisons de revenu,

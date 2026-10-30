@@ -375,3 +375,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0812 | [Budget d'attention et Audience de saison (XP-AUDIENCE, R1)](0812-xp-audience.md) | accepté |
 | 0813 | [ECO-R1 : l'impôt consenti (assemblées, subsides, concessions)](0813-eco-r1-impot-consenti.md) | accepté |
 | 0814 | [VIS-R3b : parcellaire typé du sol de campagne](0814-vis-r3b-parcellaire-type.md) | accepté |
+| 0815 | [ECO-R1c : l'impôt consenti, IA et Angleterre](0815-eco-r1c-ia-et-angleterre.md) | accepté |

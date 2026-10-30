@@ -1,7 +1,7 @@
 # ECO-R1c — « L'impôt consenti » : IA et Angleterre
 
 Spec : `docs/audits/2026-10-29-economie-politique.md` § 6 R1 et § 8 R1-c. Base : ADR 0813, `docs/wip/eco-r1ab.md`.
-ADR du lot : `docs/decisions/XXXX-eco-r1c-ia-et-angleterre.md` (numéro à la fusion).
+ADR du lot : `docs/decisions/0815-eco-r1c-ia-et-angleterre.md` (numéro à la fusion).
 
 ## État : règles et tests en place, équilibre en réglage
 Fait :
@@ -23,3 +23,8 @@ Lecture a1 : trop d'argent levé, thésaurisé (trésor moyen 80-200 k pour 30-8
 
 ## Suite
 - Mesurer a2, régler, tests workspace, pytest, seed bots `--quick`, ADR, rapport.
+
+## Reprise (30/10)
+Rebase sur main fait (R1d inclus), ADR numéroté 0815 + INDEX.
+| a2 (palier 2 saisons, reserve 2) | France armée 25,8 / 24,5 / 22,0 ; exc. 36 / 36 / 31 ; adm 34/31/33 % | Angleterre armée 22,6 / 23,5 / 19,4 ; exc. 61 / 59 / 57 ; adm 50/43/46 % ; trésor <0 : 0 / 32 / 22 tours |
+- a3 : `war_military_share` 0,85, `peace_military_share` 0,55, `hoard_spending_turns` 2 (data/ai/campaign.json) : en cours.
