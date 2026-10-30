@@ -14,5 +14,11 @@
     "wetness_strength": 0.3,
     "albedo_strength": 0.12
   },
-  "fine_contrast": 0.6
+  "fine_contrast": 0.6,
+  "look": {
+    "saturation": 1.12,
+    "tuft_amount": 0.16,
+    "tuft_size_m": 1.1,
+    "tuft_fade_m": 140.0
+  }
 }

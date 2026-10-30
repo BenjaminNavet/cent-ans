@@ -59,6 +59,8 @@ pub struct BattleHeraldry {
     pub image: Option<Handle<Image>>,
     /// Layer → faction id or house id.
     pub layer_ids: Vec<String>,
+    /// Layer → dominant field colour of the arms (sRGB), the surcoat and caparison dye (VIS-L6).
+    pub layer_colours: Vec<Option<[f32; 3]>>,
     /// Attacker, defender.
     pub sides: [SideArms; 2],
     /// Regiments given arms layers, chest arms (nobles) and a livery cross (commons).
@@ -97,6 +99,9 @@ pub struct RegimentArms {
     pub chest: Option<ChestBox>,
     pub chest_arms: bool,
     pub badge: Option<Badge>,
+    /// Dye (sRGB) of the surcoat and caparison of a noble regiment: the field colour of the arms it
+    /// wears, so rider, banner arms and caparison agree (VIS-L6). `None`: the side colour.
+    pub dye: Option<[f32; 3]>,
 }
 
 pub struct HeraldryPlugin;
@@ -446,6 +451,7 @@ impl BattleHeraldry {
                 load_layer(&file)
             },
         );
+        self.layer_colours = pixels.iter().map(|layer| field_colour(layer)).collect();
         self.layer_ids = ids;
         self.sides = sides;
         if let Some(image) = atlas_image(&pixels) {
@@ -472,6 +478,7 @@ impl BattleHeraldry {
                 chest: None,
                 chest_arms: false,
                 badge: None,
+                dye: None,
             };
         }
         self.regiments += 1;
@@ -493,16 +500,92 @@ impl BattleHeraldry {
                 self.badges += 1;
             }
         }
+        let dye = if noble && chest_arms {
+            self.layer_colours
+                .get(layers[0].max(0) as usize)
+                .copied()
+                .flatten()
+        } else {
+            None
+        };
         let arms = RegimentArms {
             layers,
             chest,
             chest_arms,
             badge,
+            dye,
         };
         self.assigned.retain(|(id, _)| *id != unit_id);
         self.assigned.push((unit_id, arms.clone()));
         arms
     }
+}
+
+/// Dominant field colour (sRGB) of a shield layer: the most populated hue among the saturated
+/// pixels of the central field (charges and borders are small), else the dominant neutral
+/// (argent, sable). Brightness is lifted so a dark tincture still reads on a surcoat.
+pub fn field_colour(layer: &[u8]) -> Option<[f32; 3]> {
+    const HUES: usize = 12;
+    let size = ARMS_SIZE as usize;
+    if layer.len() < size * size * 4 {
+        return None;
+    }
+    let mut weight = [0.0f32; HUES];
+    let mut sum = [[0.0f32; 3]; HUES];
+    let (mut white, mut black) = (0.0f32, 0.0f32);
+    for y in size / 8..size * 7 / 8 {
+        for x in size / 6..size * 5 / 6 {
+            let px = &layer[(y * size + x) * 4..(y * size + x) * 4 + 4];
+            if px[3] < 200 {
+                continue;
+            }
+            let rgb = [px[0], px[1], px[2]].map(|c| f32::from(c) / 255.0);
+            let max = rgb[0].max(rgb[1]).max(rgb[2]);
+            let min = rgb[0].min(rgb[1]).min(rgb[2]);
+            let (sat, value) = (if max > 0.0 { (max - min) / max } else { 0.0 }, max);
+            if sat < 0.35 || value < 0.2 {
+                if value > 0.75 {
+                    white += 1.0;
+                } else if value < 0.25 {
+                    black += 1.0;
+                }
+                continue;
+            }
+            let delta = max - min;
+            let hue = if max == rgb[0] {
+                ((rgb[1] - rgb[2]) / delta).rem_euclid(6.0)
+            } else if max == rgb[1] {
+                (rgb[2] - rgb[0]) / delta + 2.0
+            } else {
+                (rgb[0] - rgb[1]) / delta + 4.0
+            };
+            let bucket = ((hue / 6.0 * HUES as f32) as usize).min(HUES - 1);
+            weight[bucket] += 1.0;
+            for (acc, c) in sum[bucket].iter_mut().zip(rgb) {
+                *acc += c;
+            }
+        }
+    }
+    let (best, best_weight) = weight
+        .iter()
+        .copied()
+        .enumerate()
+        .max_by(|a, b| a.1.total_cmp(&b.1))?;
+    let neutral = white.max(black);
+    if best_weight < 40.0 && neutral < 40.0 {
+        return None;
+    }
+    if best_weight >= neutral * 0.5 {
+        let mean = sum[best].map(|c| c / best_weight);
+        let top = mean[0].max(mean[1]).max(mean[2]).max(0.01);
+        let lift = (0.55 / top).clamp(1.0, 1.8);
+        return Some(mean.map(|c| (c * lift).min(1.0)));
+    }
+    Some(if white >= black {
+        [0.88, 0.86, 0.8]
+    } else {
+        [0.2, 0.19, 0.19]
+    })
 }
 
 /// Fisher-Yates shuffle seeded by the regiment (`hash("da1/%d")` in Godot; the draw differs,
@@ -656,6 +739,23 @@ mod tests {
             (heraldry.regiments, heraldry.chest_arms, heraldry.badges),
             (4, 2, 1)
         );
+    }
+
+    #[test]
+    fn field_colour_picks_the_dominant_saturated_hue() {
+        let size = ARMS_SIZE as usize;
+        let mut layer = vec![0u8; size * size * 4];
+        for px in layer.chunks_exact_mut(4) {
+            px.copy_from_slice(&[30, 50, 180, 255]);
+        }
+        let blue = field_colour(&layer).expect("a field");
+        assert!(blue[2] > blue[0] && blue[2] > blue[1]);
+        for px in layer.chunks_exact_mut(4) {
+            px.copy_from_slice(&[240, 240, 235, 255]);
+        }
+        let white = field_colour(&layer).expect("argent");
+        assert!(white[0] > 0.8);
+        assert_eq!(field_colour(&[0u8; 16]), None);
     }
 
     #[test]

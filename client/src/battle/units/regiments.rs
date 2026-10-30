@@ -262,7 +262,11 @@ fn build_params(
     params.set_rig(
         spec.fps,
         spec.variants,
-        if spec.mounted { 0.0 } else { 0.05 },
+        if spec.mounted {
+            looks::SoldierLook::bundled().size_jitter_mounted
+        } else {
+            looks::SoldierLook::bundled().size_jitter_foot
+        },
         reload,
     );
     params.set_blend_time(BLEND_TIME_S);
@@ -467,6 +471,12 @@ pub fn update_regiments(
                 ctx.heraldry
                     .regiment(side_index(unit.side), unit.id, spec.noble, spec.chest);
             params.set_arms(&arms);
+            if let Some(dye) = arms.dye {
+                // Surcoat and caparison in the colours of the arms the rider wears (VIS-L6).
+                let share = params.livery_share();
+                params.set_livery(srgb_to_linear(dye), share);
+                params.set_trim(srgb_to_linear(trim_for(dye)));
+            }
             let make = |name: String, mesh: Handle<Mesh>| {
                 (
                     Name::new(name),

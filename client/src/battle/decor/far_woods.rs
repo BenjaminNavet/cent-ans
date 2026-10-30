@@ -56,6 +56,26 @@ pub struct FarWoodsLook {
     pub tints: [[f32; 3]; 3],
     /// Noise threshold per terrain (Godot `BIOMES[...].far_woods`).
     pub thresholds: HashMap<String, f32>,
+    /// VIS-L6, two planes: trees closer than this (m outside the field) form the near plane, lower
+    /// and broken by clearings, so the far plane reads behind it (0 = one flat band).
+    #[serde(default)]
+    pub plane_split_m: f32,
+    /// Height multiplier of the near plane.
+    #[serde(default = "one")]
+    pub near_plane_height: f32,
+    /// Threshold raise of the near plane inside the clearing noise (0 = no clearings).
+    #[serde(default)]
+    pub near_plane_gaps: f32,
+    #[serde(default = "gap_period")]
+    pub gap_period_m: f32,
+}
+
+fn one() -> f32 {
+    1.0
+}
+
+fn gap_period() -> f32 {
+    260.0
 }
 
 impl Default for FarWoodsLook {
@@ -76,6 +96,10 @@ impl Default for FarWoodsLook {
             impostor_tile_m: 160.0,
             tints: [[1.0; 3]; 3],
             thresholds: HashMap::new(),
+            plane_split_m: 0.0,
+            near_plane_height: 1.0,
+            near_plane_gaps: 0.0,
+            gap_period_m: 260.0,
         }
     }
 }
@@ -174,12 +198,21 @@ pub fn plan(
                 let weight = relief_weight(field, px, pz);
                 threshold += (0.55 + (-0.9 - 0.55) * forest - threshold) * weight;
             }
+            let near_plane = cfg.plane_split_m > 0.0 && outside_by(field, px, pz) < cfg.plane_split_m;
+            if near_plane && cfg.near_plane_gaps > 0.0 {
+                let g = cfg.gap_period_m.max(10.0);
+                let clearing = (fbm(px / g - 31.7, pz / g + 9.2) - 0.45).max(0.0) * 2.0;
+                threshold += cfg.near_plane_gaps * clearing.min(1.0) * cfg.noise_gain;
+            }
             let p = cfg.noise_period_m.max(1.0);
             let n = (fbm(px / p + 17.3, pz / p - 4.1) - 0.5) * cfg.noise_gain;
             if n < threshold {
                 continue;
             }
-            let height = cfg.tree_height_m * (cfg.scale[0] + (cfg.scale[1] - cfg.scale[0]) * scale);
+            let plane = if near_plane { cfg.near_plane_height } else { 1.0 };
+            let height = cfg.tree_height_m
+                * plane
+                * (cfg.scale[0] + (cfg.scale[1] - cfg.scale[0]) * scale);
             out.push(FarTree {
                 x: px,
                 y: ring_height(field, look, relief, px, pz),

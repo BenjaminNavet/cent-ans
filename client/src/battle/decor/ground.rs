@@ -195,6 +195,9 @@ pub struct GroundParams {
     pub trample_rect: Vec4,
     /// x: far flatten, y: its start (m), z: its end (m), w: near-detail distance (m).
     pub far: Vec4,
+    /// x: decor saturation, y: tuft amount, z: tuft size (m), w: tuft fade distance (m)
+    /// (`look` of `data/fx/battle_ground.json`).
+    pub look: Vec4,
 }
 
 impl Default for GroundParams {
@@ -214,6 +217,7 @@ impl Default for GroundParams {
             weather: Vec4::new(0.0, 0.0, 0.0, 0.6),
             trample_rect: Vec4::ZERO,
             far: Vec4::new(0.8, 28.0, 180.0, 45.0),
+            look: Vec4::new(0.6, 0.0, 1.0, 120.0),
         }
     }
 }
@@ -317,6 +321,23 @@ pub fn load_pack(data_dir: &Path, biome: u32) -> Option<GroundPack> {
         });
     }
     None
+}
+
+/// Saturation, tuft amount, tuft size and tuft fade distance of the ground (`look` of
+/// `data/fx/battle_ground.json`; the former hard-coded muting of 0.6 when the file is missing).
+pub fn ground_look(data_dir: &Path) -> Vec4 {
+    let tree = read_json(&data_dir.join("fx/battle_ground.json"));
+    let num = |key: &str, default: f32| {
+        tree.as_ref()
+            .and_then(|t| t.get("look")?.get(key)?.as_f64())
+            .map_or(default, |v| v as f32)
+    };
+    Vec4::new(
+        num("saturation", 0.6),
+        num("tuft_amount", 0.0),
+        num("tuft_size_m", 1.0).max(0.05),
+        num("tuft_fade_m", 120.0).max(1.0),
+    )
 }
 
 /// Seasonal tint of the grass relative to the summer ground, and the snow cover.
@@ -772,7 +793,8 @@ pub fn build_ground_material(
     );
     let trample_on = matches!(field.ground, Ground::Snowy | Ground::Muddy)
         || matches!(weather, Weather::Snow | Weather::Rain);
-    params.weather = Vec4::new(wetness, f32::from(u8::from(trample_on)), 1.0, 0.6);
+    params.weather = Vec4::new(wetness, f32::from(u8::from(trample_on)), 1.0, 1.0);
+    params.look = ground_look(data_dir);
     let (w, d) = (field.width as f32, field.depth as f32);
     // Calm centre: the Godot rectangle (150, 60, 1050, 740) of a 1200 x 800 m field, scaled.
     params.calm = Vec4::new(w * 0.125, d * 0.075, w * 0.875, d * 0.925);
@@ -1413,6 +1435,15 @@ fn dump_ground(world: &World) -> (String, serde_json::Value) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn bundled_ground_look_is_in_range() {
+        let root = crate::paths::find_root().expect("repo root");
+        let look = ground_look(&crate::paths::data_dir(&root));
+        assert!((0.6..=1.4).contains(&look.x), "saturation {}", look.x);
+        assert!((0.0..=0.6).contains(&look.y));
+        assert!(look.z > 0.2 && look.w > 10.0);
+    }
 
     #[test]
     fn mip_chain_halves_down_to_one_pixel() {

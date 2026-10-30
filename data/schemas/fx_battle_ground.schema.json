@@ -4,7 +4,7 @@
   "title": "Bruit et variation du sol de bataille (lot A6-L14)",
   "description": "Échelles de bruit (cycles par mètre) du shader `battle_ground.gdshader`, auparavant codées en dur, et variation macro (300-800 m) de teinte et d'humidité qui casse le motif tacheté répété. Valeurs d'origine : macro 0.0021, macro2 0.00043, fine 0.017, blend 0.006, patch 0.0013, patch2 0.0047, puddle 0.021, fine_contrast 1.0.",
   "type": "object",
-  "required": ["noise_scales", "macro_variation", "fine_contrast"],
+  "required": ["noise_scales", "macro_variation", "fine_contrast", "look"],
   "additionalProperties": false,
   "properties": {
     "noise_scales": {
@@ -30,6 +30,18 @@
         "tint_strength": {"type": "number", "minimum": 0, "maximum": 1},
         "wetness_strength": {"type": "number", "minimum": 0, "maximum": 1},
         "albedo_strength": {"type": "number", "minimum": 0, "maximum": 0.5}
+      }
+    },
+    "look": {
+      "type": "object",
+      "required": ["saturation", "tuft_amount", "tuft_size_m", "tuft_fade_m"],
+      "additionalProperties": false,
+      "description": "VIS-L6 : matière du sol de bataille lue par le client Bevy.",
+      "properties": {
+        "saturation": {"type": "number", "minimum": 0.4, "maximum": 1.6, "description": "Saturation du sol (1 = couches telles que peintes ; 0,6 était le décor atténué codé en dur)."},
+        "tuft_amount": {"type": "number", "minimum": 0, "maximum": 0.6, "description": "Amplitude des touffes (clair/sombre, vert/sec)."},
+        "tuft_size_m": {"type": "number", "exclusiveMinimum": 0, "maximum": 10, "description": "Taille d'une touffe en mètres."},
+        "tuft_fade_m": {"type": "number", "exclusiveMinimum": 0, "maximum": 2000, "description": "Distance où les touffes disparaissent."}
       }
     },
     "fine_contrast": {"type": "number", "minimum": 0, "maximum": 1.5, "description": "Facteur sur l'amplitude du bruit fin (1 = historique)."}

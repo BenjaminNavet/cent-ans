@@ -111,6 +111,9 @@ pub struct SoldierLook {
     pub banner_per_m: f32,
     pub banner_min: f32,
     pub banner_max: f32,
+    /// Per-instance size jitter of riders and of men on foot (VIS-L6: no two silhouettes alike).
+    pub size_jitter_mounted: f32,
+    pub size_jitter_foot: f32,
 }
 
 impl Default for SoldierLook {
@@ -131,6 +134,8 @@ impl Default for SoldierLook {
             banner_per_m: 0.02,
             banner_min: 1.0,
             banner_max: 9.0,
+            size_jitter_mounted: 0.0,
+            size_jitter_foot: 0.05,
         }
     }
 }
@@ -163,6 +168,8 @@ impl SoldierLook {
         set(&mut look.banner_per_m, "banner", "scale_per_m");
         set(&mut look.banner_min, "banner", "scale_min");
         set(&mut look.banner_max, "banner", "scale_max");
+        set(&mut look.size_jitter_mounted, "fabric", "size_jitter_mounted");
+        set(&mut look.size_jitter_foot, "fabric", "size_jitter_foot");
         look
     }
 

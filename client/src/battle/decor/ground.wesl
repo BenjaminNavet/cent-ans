@@ -48,6 +48,7 @@ struct GroundParams {
     weather: vec4<f32>,
     trample_rect: vec4<f32>,
     far: vec4<f32>,
+    look: vec4<f32>,
 };
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(100) var<uniform> ground: GroundParams;
@@ -548,8 +549,21 @@ fn ground_pbr_input(in: VertexOutput, is_front: bool) -> PbrInput {
     // Large lighter and darker grass patches (Bevy look, `macro_contrast`).
     let patches = bt_value_noise(p / 140.0) * 0.55 + bt_value_noise(p / 23.0) * 0.45;
     albedo = albedo * (1.0 + (patches - 0.5) * ground.detail.w * grassy);
-    // Muted decor (DA bible 3.3).
-    albedo = mix(vec3<f32>(bt_luma(albedo)), albedo, ground.weather.w);
+    // Tufts (VIS-L6): three scales of value noise break the flat lawn into clumps of lighter, darker, greener
+    // and drier grass, fading out with distance (the far field keeps its layer means).
+    // look = (decor saturation, tuft amount, tuft size (m), tuft fade distance (m)).
+    let tuft_k = (1.0 - smoothstep(ground.look.w * 0.4, ground.look.w, view_dist)) * ground.look.y * grassy;
+    if tuft_k > 0.002 {
+        let t1 = bt_value_noise(p / ground.look.z);
+        let t2 = bt_value_noise(p / (ground.look.z * 3.7) + vec2<f32>(7.3, 2.9));
+        let t3 = bt_value_noise(p / (ground.look.z * 0.31) + vec2<f32>(1.7, 5.1));
+        let clump = (t1 * 0.5 + t2 * 0.35 + t3 * 0.15) - 0.5;
+        let warm = clamp(t2 - 0.5, -0.5, 0.5);
+        let tuft_tint = vec3<f32>(1.0 + warm * 0.55, 1.0 + clump * 0.2, 1.0 - warm * 0.7);
+        albedo = albedo * tuft_tint * (1.0 + clump * 1.5 * tuft_k);
+    }
+    // Decor saturation (data/fx/battle_ground.json `look.saturation`; 1 = the layers as painted).
+    albedo = mix(vec3<f32>(bt_luma(albedo)), albedo, ground.look.x);
     // Deep water where no splat is left.
     let water_w = 1.0 - clamp(land * 4.0, 0.0, 1.0);
     albedo = mix(albedo, ground.water.rgb, water_w);
