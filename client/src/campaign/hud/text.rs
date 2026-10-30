@@ -92,13 +92,11 @@ pub fn trend_tooltip(trend: Option<&FigureTrend>, money: bool) -> String {
         show(delta)
     )];
     if !trend.top_terms.is_empty() {
-        lines.push(
-            ui(if trend.terms_last_season {
-                "terms_last_season"
-            } else {
-                "terms_next_season"
-            }),
-        );
+        lines.push(ui(if trend.terms_last_season {
+            "terms_last_season"
+        } else {
+            "terms_next_season"
+        }));
         for term in &trend.top_terms {
             lines.push(format!(
                 "{} : [color={}]{}[/color]",

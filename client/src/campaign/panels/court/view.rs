@@ -14,6 +14,7 @@ use super::skill_layout::{self, LinkKind};
 use super::{COUNCIL_TABS, CourtUi, OrderMenu, SHEET_TABS, Screen, refresh_snapshot};
 use crate::campaign::panels::tech::layout::effect_label;
 use crate::sim::Sim;
+use crate::ui::kit::book::book_bar;
 use crate::ui::kit::close_button;
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::{KitWidget, ListItem, Toggled};
@@ -21,7 +22,6 @@ use crate::ui::kit::{
     UiTheme, UiTier, UiType, button_primary, button_small, caption, fr, gauge, heading, separator,
     style, tab_pane,
 };
-use crate::ui::kit::book::book_bar;
 
 #[derive(Component)]
 pub struct CourtRoot;

@@ -575,14 +575,7 @@ fn detail_column(
         // XP-R3b: the three tabs are the Diplomatie book (same button names as before).
         match books.book("diplomacy") {
             Some(book) => {
-                crate::ui::kit::book::book_bar(
-                    column,
-                    theme,
-                    book,
-                    tabs[selected].0,
-                    &[],
-                    &[],
-                );
+                crate::ui::kit::book::book_bar(column, theme, book, tabs[selected].0, &[], &[]);
             }
             None => {
                 column.spawn(tab_bar(theme, "dip_tab", &tabs, selected));

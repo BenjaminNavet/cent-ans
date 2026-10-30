@@ -45,9 +45,7 @@ use crate::campaign::provinces::{MapMode, MapModeState, SetMapMode};
 use crate::menu::KeyEdges;
 use crate::sim::Sim;
 use crate::ui::kit::panel_stack::displaces;
-use crate::ui::kit::text_field::{
-    TextFieldChanged, TextFieldSubmitted, TextInputFocus,
-};
+use crate::ui::kit::text_field::{TextFieldChanged, TextFieldSubmitted, TextInputFocus};
 use crate::ui::kit::{ButtonPressed, TabSelected};
 
 pub struct PanelDiplomacyPlugin;

@@ -526,7 +526,11 @@ fn spawn_affair(
         })
         .with_children(|col| {
             col.spawn((
-                Text::new(format!("{}, {}", affair.speaker.name, affair.speaker.role.to_lowercase())),
+                Text::new(format!(
+                    "{}, {}",
+                    affair.speaker.name,
+                    affair.speaker.role.to_lowercase()
+                )),
                 theme.text_font(true, false, UiType::Caption.size()),
                 TextColor(style::INK_TITLE),
             ));

@@ -28,11 +28,11 @@ use super::economy::EconomyPanel;
 use super::faction::FactionPanel;
 use super::feudal::FeudalUi;
 use super::tech::TechPanel;
-use crate::campaign::armies::roster::Roster;
-use crate::campaign::hud::ransom::Ransoms;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
+use crate::campaign::armies::roster::Roster;
 use crate::campaign::hud::keys::action_down;
+use crate::campaign::hud::ransom::Ransoms;
 use crate::settings::KeyMap;
 use crate::sim::Sim;
 use crate::ui::kit::ButtonPressed;
@@ -314,9 +314,9 @@ fn dump_books(world: &World) -> (String, Value) {
     };
     let player = world.resource::<Sim>().player.as_str().to_owned();
     let open = current_panel(&refs, &player).and_then(|(panel, inner)| {
-        books.hosting_tab(panel, &inner).map(
-            |(book, tab)| json!({ "book": book.id, "tab": tab.key, "panel": panel }),
-        )
+        books
+            .hosting_tab(panel, &inner)
+            .map(|(book, tab)| json!({ "book": book.id, "tab": tab.key, "panel": panel }))
     });
     let mut last: Vec<(&String, &String)> = state.last.iter().collect();
     last.sort();

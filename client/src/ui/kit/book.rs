@@ -149,9 +149,9 @@ impl Books {
 
     /// The book and tab showing `inner` of `panel` (a panel may host tabs of two books).
     pub fn hosting_tab(&self, panel: &str, inner: &str) -> Option<(&BookDef, &BookTab)> {
-        self.books.iter().find_map(|book| {
-            book.tab_of(panel, inner).map(|tab| (book, tab))
-        })
+        self.books
+            .iter()
+            .find_map(|book| book.tab_of(panel, inner).map(|tab| (book, tab)))
     }
 
     /// The first book hosting `panel`, if any.
@@ -253,7 +253,9 @@ mod tests {
         for book in &books.books {
             for tab in &book.tabs {
                 assert_eq!(
-                    books.hosting_tab(&tab.panel, &tab.inner).map(|(b, _)| &b.id),
+                    books
+                        .hosting_tab(&tab.panel, &tab.inner)
+                        .map(|(b, _)| &b.id),
                     Some(&book.id)
                 );
             }

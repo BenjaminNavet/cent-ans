@@ -51,8 +51,16 @@ pub fn candidates(target: &str) -> &'static [Candidate] {
         "city_tab" => &[Name("prov:tab_buildings")],
         "buildable" => &[Prefix("prov:build:"), Name("prov:tab_buildings")],
         // The unit cards once the recruitment panel is open, else the launcher that opens it.
-        "recruit" => &[Prefix("rec:unit:"), Name("book:armies:recruit"), Name("hud:open_armies")],
-        "research" => &[Name("TechPanel"), Name("book:kingdom:tech"), Name("hud:open_kingdom")],
+        "recruit" => &[
+            Prefix("rec:unit:"),
+            Name("book:armies:recruit"),
+            Name("hud:open_armies"),
+        ],
+        "research" => &[
+            Name("TechPanel"),
+            Name("book:kingdom:tech"),
+            Name("hud:open_kingdom"),
+        ],
         "diplomacy" => &[Name("hud:open_diplomacy")],
         "end_turn" => &[Name("hud:end_turn")],
         "season_report" => &[Name("Modal hud:season_report")],
@@ -66,7 +74,8 @@ pub fn candidates(target: &str) -> &'static [Candidate] {
             Prefix("court:appoint:"),
             Name("court:menu:governor"),
             Name("CourtPanel"),
-            Name("court:tab:council"), Name("hud:open_court"),
+            Name("court:tab:council"),
+            Name("hud:open_court"),
         ],
         // The army marker is a map point; the strip is the fallback.
         "royal_army" => &[Name("hud:army_strip")],
