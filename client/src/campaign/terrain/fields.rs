@@ -503,8 +503,10 @@ pub fn landscape_at(root: &Path, px: Vec2, map: Vec2) -> Value {
     let u = (px.x / map.x.max(1.0)).clamp(0.0, 0.9999);
     let v = (px.y / map.y.max(1.0)).clamp(0.0, 0.9999);
     let mask = agri[(v * *ah as f32) as usize * aw + (u * *aw as f32) as usize];
-    let biome_a = (biome[(v * *bh as f32) as usize * bw + (u * *bw as f32) as usize] % 16).clamp(1, 14);
-    let text = std::fs::read_to_string(root.join("data/map/agri_landscapes.json")).unwrap_or_default();
+    let biome_a =
+        (biome[(v * *bh as f32) as usize * bw + (u * *bw as f32) as usize] % 16).clamp(1, 14);
+    let text =
+        std::fs::read_to_string(root.join("data/map/agri_landscapes.json")).unwrap_or_default();
     let order = landscape_order(&text);
     let landscape = (mask as usize)
         .checked_sub(8)

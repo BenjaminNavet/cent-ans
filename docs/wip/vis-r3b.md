@@ -18,3 +18,9 @@ Spec : docs/audits/2026-10-29-visuel-campagne.md, lot R3b. Worktree, non fusionn
 - Critère 3 (teinte moyenne, printemps 1337, bande centrale, forêts comprises) : Castille 92 deg (cible 45-70) ÉCART ; Normandie 111 deg (cible 85-105) ÉCART léger. Mesure polluée par les forêts et le blé en herbe de printemps ; à reprendre en été avec un masque sol seul (point ouvert).
 - Critère 4 (Loire d 80, automne forcé) : valeur moyenne 0,37 (cible >= 0,38, de peu) ; classes chromatiques : bruns seulement, pas de vert de pré distinct ÉCART (point ouvert, ajuster les parts d'automne de `landscapes`).
 - Haies (largeur `hedge_px`) déjà en données ; couleurs `FP_HEDGE` / `HEDGE_COLOR` et multiplicateurs de saison restent codés en dur dans terrain.wesl : reportés à VIS-R7 (touchent aux uniformes partagés hors zone).
+
+## Banc A/B et vérifs finales (10-30)
+- A/B `ab.sh map vis-r3b "CENT_ANS_PERF_OFF=parcel" ""` (n=2, machine chargée, load 10-14 ; un run B en échec) : pan p50 9,68 (ancien) vs 9,52 ms (parcellaire) ; p95 17,9 vs 28,2 ms mais bruit de charge (indicatif, à refaire machine calme avant fusion pour le critère p95 Ultra <= 16,7).
+- fmt, clippy client `--features dev -D warnings` : propres. Tests client : 1535 + autres verts ; seul échec `snapshots::smoke_scenarios_parse_to_stable_command_lists`, hérité de main (scénario `faction_assembly` d'ECO-R1 absent du snapshot), hors zone, non touché. pytest schémas/sol : 2950 verts.
+
+TERMINÉ (avec écarts de mesure critères 3 et 4, voir ci-dessus).

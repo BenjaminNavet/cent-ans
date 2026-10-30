@@ -243,7 +243,10 @@ mod tests {
     fn data_block_has_the_five_forms_with_sane_values() {
         let forms = real_forms();
         let open = &forms[form_index("openfield")];
-        assert!(open.aspect[0] >= 4.0 && open.aspect[1] <= 10.0, "1:4 to 1:10");
+        assert!(
+            open.aspect[0] >= 4.0 && open.aspect[1] <= 10.0,
+            "1:4 to 1:10"
+        );
         assert!(open.ring_strength > 0.0);
         assert!(forms[form_index("bocage")].hedge_px >= 1.0);
         for f in &forms {
