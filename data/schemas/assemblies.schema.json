@@ -30,6 +30,7 @@
       "description": "Calcul de l'accord : humeur + légitimité provisoire (prestige) + nécessité + palier − poids des subsides en cours − agitation − promesses trahies.",
       "properties": {
         "prestige_weight": { "type": "number", "minimum": 0, "maximum": 10 },
+        "prestige_max_points": { "type": "number", "minimum": 0, "maximum": 1000 },
         "unrest_weight": { "type": "number", "minimum": 0, "maximum": 10 },
         "subsidy_weight": { "type": "number", "minimum": 0, "maximum": 1000 },
         "broken_promise_weight": { "type": "number", "minimum": 0, "maximum": 1000 },
@@ -44,7 +45,7 @@
         "history_sessions": { "type": "integer", "minimum": 1, "maximum": 100 }
       },
       "additionalProperties": false,
-      "required": ["prestige_weight", "unrest_weight", "subsidy_weight", "broken_promise_weight", "broken_memory_seasons", "grant_threshold", "conditional_threshold", "points_per_concession", "max_concessions", "permanent_penalty", "answer_window_seasons", "answer_delay_seasons", "history_sessions"]
+      "required": ["prestige_weight", "prestige_max_points", "unrest_weight", "subsidy_weight", "broken_promise_weight", "broken_memory_seasons", "grant_threshold", "conditional_threshold", "points_per_concession", "max_concessions", "permanent_penalty", "answer_window_seasons", "answer_delay_seasons", "history_sessions"]
     },
     "grogne": {
       "type": "object",
@@ -65,10 +66,10 @@
       "properties": {
         "convene_below_seasons": { "type": "number", "minimum": 0, "maximum": 100 },
         "accept_cost_up_to": { "type": "integer", "minimum": 0, "maximum": 10000 },
-        "ask": { "type": "string", "minLength": 1, "description": "Palier de demande préféré (id)." }
+        "target_seasons": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "Le plus petit palier dont le total atteint ce nombre de saisons d'impôt ordinaire est demandé (le plus lourd à défaut)." }
       },
       "additionalProperties": false,
-      "required": ["convene_below_seasons", "accept_cost_up_to", "ask"]
+      "required": ["convene_below_seasons", "accept_cost_up_to", "target_seasons"]
     },
     "necessities": {
       "type": "array",

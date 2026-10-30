@@ -202,6 +202,9 @@ pub struct MoodRules {
 pub struct VoteRules {
     /// Provisional legitimacy: points per point of the sovereign's prestige.
     pub prestige_weight: f64,
+    /// Ceiling (and floor, negated) of the points legitimacy can add: renown has no limit, the
+    /// estates' trust in it has.
+    pub prestige_max_points: f64,
     /// Points lost per point of mean unrest (0-100) of the covered provinces.
     pub unrest_weight: f64,
     /// Points lost per season of ordinary tax still being paid as subsidy.
@@ -252,8 +255,9 @@ pub struct AssemblyAiRules {
     pub convene_below_seasons: f64,
     /// Accept terms whose total cost is at most this many points.
     pub accept_cost_up_to: u32,
-    /// Ask tier preferred under pressure (id).
-    pub ask: String,
+    /// The smallest tier whose total (multiple x term x necessity) reaches this many seasons of
+    /// the ordinary tax of the covered provinces is asked (the largest if none does).
+    pub target_seasons: f64,
 }
 
 /// Contents of `data/rules/assemblies.json`.

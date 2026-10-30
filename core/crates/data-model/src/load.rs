@@ -1394,11 +1394,11 @@ impl ReferenceChecker<'_> {
                 }
             }
         }
-        if rules.is_active() && rules.ask(&rules.ai.ask).is_none() {
+        if rules.is_active() && rules.asks.is_empty() {
             self.errors.push(ReferenceError {
                 entity: "assembly rules".to_owned(),
-                field: "ai.ask".to_owned(),
-                target: rules.ai.ask.clone(),
+                field: "asks".to_owned(),
+                target: "no tier of demand".to_owned(),
             });
         }
     }

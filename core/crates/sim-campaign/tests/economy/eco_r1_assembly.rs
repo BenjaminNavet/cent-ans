@@ -16,6 +16,16 @@ use sim_campaign::{CampaignState, Order, OrderError};
 
 const OIL: &str = "asm_etats_oil";
 
+/// The campaign of 1337 with every war and war goal cleared: the tests make their own.
+fn scene(data: &GameData, faction: &str) -> CampaignState {
+    let mut state = start_quiet(data, faction, 5);
+    for f in state.factions.values_mut() {
+        f.at_war_with.clear();
+        f.ledger.war_goals.clear();
+    }
+    state
+}
+
 fn make_war(state: &mut CampaignState, a: &str, b: &str) {
     let (a, b) = (fac(a), fac(b));
     state
@@ -72,7 +82,7 @@ fn first_session(state: &CampaignState) -> &sim_campaign::assembly::Session {
 #[test]
 fn defensive_war_subsidy_granted_by_trusting_estates() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     let france = fac("fac_france");
     make_war(&mut state, "fac_france", "fac_england");
     set_mood(&mut state, data, OIL, 90);
@@ -100,7 +110,7 @@ fn defensive_war_subsidy_granted_by_trusting_estates() {
 #[test]
 fn offensive_war_with_low_mood_is_refused() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     let france = fac("fac_france");
     make_war(&mut state, "fac_france", "fac_england");
     state
@@ -139,7 +149,7 @@ fn conditions_are_proposed_then_accepted_or_declined() {
     let data = game_data();
     let france = fac("fac_france");
     let rules = &data.assembly_rules;
-    let mut base = start_quiet(data, "fac_france", 5);
+    let mut base = scene(data, "fac_france");
     make_war(&mut base, "fac_france", "fac_england");
     // A mood that leaves the agreement just under the grant threshold.
     let forecast = |state: &CampaignState| {
@@ -206,7 +216,7 @@ fn conditions_are_proposed_then_accepted_or_declined() {
 fn unanswered_terms_lapse() {
     let data = game_data();
     let france = fac("fac_france");
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     make_war(&mut state, "fac_france", "fac_england");
     let probe = assembly::forecast(
         &state,
@@ -231,7 +241,7 @@ fn unanswered_terms_lapse() {
 #[test]
 fn subsidy_paid_per_season_over_its_term() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     let france = fac("fac_france");
     make_war(&mut state, "fac_france", "fac_england");
     set_mood(&mut state, data, OIL, 95);
@@ -257,7 +267,7 @@ fn subsidy_paid_per_season_over_its_term() {
 #[test]
 fn the_subsidy_angers_the_provinces_it_is_levied_on() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     let france = fac("fac_france");
     make_war(&mut state, "fac_france", "fac_england");
     set_mood(&mut state, data, OIL, 95);
@@ -304,7 +314,7 @@ fn craft_promise(
 #[test]
 fn broken_strong_money_promise_angers_estates() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     let france = fac("fac_france");
     craft_promise(&mut state, data, "con_strong_money", 40, vec![]);
     state
@@ -358,7 +368,7 @@ fn broken_strong_money_promise_angers_estates() {
 #[test]
 fn kept_promise_warms_the_mood() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     craft_promise(&mut state, data, "con_strong_money", 2, vec![]);
     for _ in 0..3 {
         state.end_turn_with(data, idle);
@@ -374,7 +384,7 @@ fn kept_promise_warms_the_mood() {
 #[test]
 fn an_unmet_truce_promise_is_broken_at_its_deadline() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     make_war(&mut state, "fac_france", "fac_england");
     craft_promise(&mut state, data, "con_end_war", 2, vec!["fac_england"]);
     state.end_turn_with(data, idle);
@@ -390,7 +400,7 @@ fn an_unmet_truce_promise_is_broken_at_its_deadline() {
     );
 
     // The same promise, with the war over before the deadline, is kept.
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     craft_promise(&mut state, data, "con_end_war", 6, vec!["fac_england"]);
     state.end_turn_with(data, idle);
     assert_eq!(
@@ -402,7 +412,7 @@ fn an_unmet_truce_promise_is_broken_at_its_deadline() {
 #[test]
 fn elected_officers_cap_the_household() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     let france = fac("fac_france");
     let before = finance::household_percent(&state, data, &france);
     let cap = data
@@ -423,7 +433,7 @@ fn elected_officers_cap_the_household() {
 fn permanent_gabelle_needs_the_concession() {
     let data = game_data();
     let france = fac("fac_france");
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     make_war(&mut state, "fac_france", "fac_england");
     // Before 1360 nothing can be made permanent.
     assert!(matches!(
@@ -433,7 +443,7 @@ fn permanent_gabelle_needs_the_concession() {
                 assembly: OIL.into(),
                 necessity: NecessityKind::DefensiveWar,
                 ask: "standard".into(),
-                form: Some("gabelle".into()),
+                form: Some("aide".into()),
                 permanent: true,
             },
         ),
@@ -501,7 +511,7 @@ fn permanent_gabelle_needs_the_concession() {
 #[test]
 fn convening_needs_the_situation_and_the_house() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     // Peace: no necessity.
     assert!(matches!(
         convene(&mut state, data, NecessityKind::DefensiveWar, "modest"),
@@ -532,7 +542,7 @@ fn convening_needs_the_situation_and_the_house() {
 #[test]
 fn a_house_with_an_assembly_cannot_levy_the_old_way() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     assert!(matches!(
         state.submit_order(
             data,
@@ -548,7 +558,7 @@ fn a_house_with_an_assembly_cannot_levy_the_old_way() {
 fn no_assembly_file_keeps_old_levies() {
     let mut data = game_data().clone();
     data.assembly_rules = Default::default();
-    let mut state = start_quiet(&data, "fac_france", 5);
+    let mut state = scene(&data, "fac_france");
     let before = state.factions[&fac("fac_france")].treasury;
     state
         .submit_order(
@@ -570,7 +580,7 @@ fn no_assembly_file_keeps_old_levies() {
 #[test]
 fn a_house_without_assembly_keeps_its_levies() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_burgundy", 5);
+    let mut state = scene(data, "fac_burgundy");
     state
         .submit_order(
             data,
@@ -584,7 +594,7 @@ fn a_house_without_assembly_keeps_its_levies() {
 #[test]
 fn state_round_trips_and_old_saves_have_no_assemblies() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_france", 5);
+    let mut state = scene(data, "fac_france");
     let json = serde_json::to_value(&state).unwrap();
     assert!(
         json.get("assemblies").is_none(),
@@ -603,7 +613,7 @@ fn state_round_trips_and_old_saves_have_no_assemblies() {
 #[test]
 fn the_ai_convenes_when_poor_and_at_war_and_answers_terms() {
     let data = game_data();
-    let mut state = start_quiet(data, "fac_england", 5);
+    let mut state = scene(data, "fac_england");
     let france = fac("fac_france");
     make_war(&mut state, "fac_france", "fac_england");
     state.factions.get_mut(&france).unwrap().treasury = 0;

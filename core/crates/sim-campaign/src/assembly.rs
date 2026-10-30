@@ -585,7 +585,8 @@ fn compute_vote(
     part("assembly_mood", f64::from(mood_of(state, assembly)));
     part(
         "assembly_prestige",
-        v.prestige_weight * f64::from(ruler_prestige(state, faction)),
+        (v.prestige_weight * f64::from(ruler_prestige(state, faction)))
+            .clamp(-v.prestige_max_points, v.prestige_max_points),
     );
     part(
         "assembly_necessity",
@@ -1753,13 +1754,33 @@ pub fn ai_assembly_orders(cache: &PlanCache, data: &GameData, faction: &FactionI
             orders.push(Order::ConveneAssembly {
                 assembly: assembly.id.clone(),
                 necessity,
-                ask: rules.ai.ask.clone(),
+                ask: ai_ask(data, necessity),
                 form: Some(form.id.clone()),
                 permanent: false,
             });
         }
     }
     orders
+}
+
+/// The tier the AI asks: the smallest whose total reaches the target, else the heaviest.
+fn ai_ask(data: &GameData, necessity: NecessityKind) -> String {
+    let rules = rules(data);
+    let multiplier = rules.necessity(necessity).map_or(1.0, |n| n.multiplier);
+    let total = |a: &AskTier| a.ordinary_multiple * f64::from(a.term_seasons) * multiplier;
+    let mut tiers: Vec<&AskTier> = rules.asks.iter().collect();
+    tiers.sort_by(|a, b| {
+        total(a)
+            .partial_cmp(&total(b))
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then(a.id.cmp(&b.id))
+    });
+    tiers
+        .iter()
+        .find(|a| total(a) >= rules.ai.target_seasons)
+        .or(tiers.last())
+        .map(|a| a.id.clone())
+        .unwrap_or_default()
 }
 
 #[cfg(test)]
