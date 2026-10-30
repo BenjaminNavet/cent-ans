@@ -151,3 +151,9 @@ Constats seed bots longs : présentés au joueur, il choisit (ne rien écrire da
   CAMP-R6b (agent-a3ef7512eced87a7a), ECO-R1c (agent-aa5182d13ee2ab5e2, 0815 ; armée IA 27-37 %, sous la bande).
 - À corriger sur main : snapshot faction_assembly (test client), fmt HUD (audience, feed, story, text).
 - Suivants : IA-PLAN-2b (patience du défenseur, Castillon), R2-b retenue, XP-R3b, VIS-R4, juge visuel Opus. Prochain ADR libre : 0820.
+
+## Reprise 30/10 (9 h 20, autonomie totale, docs/prompt-session.md)
+- Worktree VIS-R3b supprimé (fusionné).
+- Lancés : FUSION-A (agent de fusion Sonnet : ECO-R1c 0815, IA-PLAN-2 0816, PLAQUES-2 0819, XP-R3a 0818, CAMP-R6 0817, CAMP-R6b ;
+  correctifs main snapshot faction_assembly + fmt HUD ; un check complet) ; VIS-R4 montagne étagée et neige (ADR 0820).
+- Après FUSION-A : juge visuel Opus frais, IA-PLAN-2b (0821), R2-b retenue (0822), XP-R3b (0823). Puis COHESION-1, VIS-R8. Prochain ADR libre : 0824.
