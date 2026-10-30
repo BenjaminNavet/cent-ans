@@ -36,14 +36,14 @@
     "convene_below_seasons": 2.5,
     "forecast_seasons": 4.0,
     "war_cost_factor": 1.6,
-    "campaign_below_seasons": 6.0,
+    "campaign_below_seasons": 3.0,
     "honour_debt_seasons": 3.0,
     "honour_min_diplomacy": 25.0,
     "need_seasons": 1.0,
     "poll_tax_shortfall_seasons": 3.0,
     "poll_tax_max_unrest": 25.0,
     "accept_cost_up_to": 60,
-    "target_seasons": 5.0
+    "target_seasons": 2.0
   },
   "necessities": [
     { "id": "defensive_war", "name": "Guerre défensive", "multiplier": 1.0, "accord_bonus": 20.0 },

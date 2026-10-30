@@ -206,6 +206,7 @@ fn assembly_summary(state: &CampaignState, data: &GameData, id: &FactionId) -> s
     let (mut convened, mut granted, mut refused, mut heavy, mut running) =
         (0u32, 0u32, 0u32, 0u32, 0i64);
     let mut moods = serde_json::Map::new();
+    let mut by_form: std::collections::BTreeMap<String, i64> = std::collections::BTreeMap::new();
     for assembly in data
         .assembly_rules
         .assemblies
@@ -226,6 +227,10 @@ fn assembly_summary(state: &CampaignState, data: &GameData, id: &FactionId) -> s
                 .iter()
                 .map(|s| s.shares.iter().map(|x| x.amount).sum::<i64>())
                 .sum::<i64>();
+            for sub in &rt.subsidies {
+                *by_form.entry(sub.form.clone()).or_default() +=
+                    sub.shares.iter().map(|x| x.amount).sum::<i64>();
+            }
             moods.insert(assembly.id.clone(), json!(rt.mood));
         }
     }
@@ -235,7 +240,7 @@ fn assembly_summary(state: &CampaignState, data: &GameData, id: &FactionId) -> s
         .get(id)
         .cloned()
         .unwrap_or_default();
-    json!({"convened": convened, "granted": granted, "refused": refused, "heavy": heavy, "running": running, "mood": moods, "permanent": permanent})
+    json!({"convened": convened, "granted": granted, "refused": refused, "heavy": heavy, "running": running, "forms": by_form, "mood": moods, "permanent": permanent})
 }
 
 fn main() {

@@ -45,7 +45,7 @@
     "debt_repayment_turns": 8,
     "max_disbands_per_turn": 12,
     "income_per_recruit": 6000,
-    "reserve_seasons": 3,
+    "reserve_seasons": 2,
     "hoard_spending_turns": 4,
     "hoard_livres_per_recruit": 1500,
     "max_recruits_per_turn": 16,

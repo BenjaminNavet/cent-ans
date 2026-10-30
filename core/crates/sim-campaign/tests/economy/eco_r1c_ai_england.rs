@@ -95,6 +95,15 @@ fn english_wool_custom_falls_under_flemish_embargo() {
     let mut state = scene(data, "fac_england");
     let england = fac("fac_england");
     make_war(&mut state, "fac_england", "fac_france");
+    // 1337: Flanders embargoes the English wool (the Flemish embargo of 1336); lifted, it sails.
+    assert_eq!(
+        sim_campaign::trade::export_openness(&state, data, &england, "res_wool"),
+        0.0,
+        "closed at the start of the campaign"
+    );
+    for f in state.factions.values_mut() {
+        f.embargoes.clear();
+    }
     let open = sim_campaign::trade::export_openness(&state, data, &england, "res_wool");
     assert!(open > 0.5, "the wool sails at the start: {open}");
     let before = forecast(&state, data, "wool_custom").expect("wool custom");
