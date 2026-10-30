@@ -11,7 +11,14 @@
 //! tools/heavy.sh cargo run --release -p sim-battle --example battle_bench
 //! tools/heavy.sh cargo run --release -p sim-battle --example battle_bench -- --smoke
 //! ... -- --filter crecy --threads 2 --out /tmp/crecy.json
+//! tools/heavy.sh cargo run --release -p sim-battle --example battle_bench -- --emit-auto-fixture
 //! ```
+//!
+//! `--emit-auto-fixture` (lot BANC-2) regenerates
+//! `core/crates/ai/tests/fixtures/auto_resolve_scenarios.json`: the scenarios
+//! already in the fixture plus the army lines of the matrix, played AI against AI
+//! over an odd number of seeds, stamped with `data_hash` (see [`data_hash`]).
+//! The `ai` test `auto_resolve_calibration` fails when that hash is stale.
 //!
 //! The JSON is stable: same matrix, same data, same code give the same bytes
 //! (no clock inside; the date only names the default output file).
@@ -120,6 +127,8 @@ struct Matrix {
 enum Scenario {
     Field {
         terrain: Terrain,
+        season: BattleSeason,
+        river: bool,
         attacker: Roster,
         defender: Roster,
     },
@@ -165,6 +174,8 @@ fn lines_of(matrix: &Matrix) -> Vec<Line> {
                     cap_s: matrix.cap_s,
                     scenario: Scenario::Field {
                         terrain: d.terrain,
+                        season: BattleSeason::Summer,
+                        river: false,
                         attacker: roster_of(&[(a, d.per_side)]),
                         defender: roster_of(&[(b, d.per_side)]),
                     },
@@ -183,6 +194,8 @@ fn lines_of(matrix: &Matrix) -> Vec<Line> {
                 cap_s: matrix.cap_s,
                 scenario: Scenario::Field {
                     terrain: l.terrain,
+                    season: BattleSeason::Summer,
+                    river: false,
                     attacker: l.attacker.clone(),
                     defender: l.defender.clone(),
                 },
@@ -274,6 +287,8 @@ fn expand(data: &GameData, roster: &Roster) -> Vec<UnitSetup> {
 fn field_setup(
     data: &GameData,
     terrain: Terrain,
+    season: BattleSeason,
+    river: bool,
     attacker: &Roster,
     defender: &Roster,
     siege: Option<SiegeSetup>,
@@ -283,8 +298,8 @@ fn field_setup(
         province: "prov_test".into(),
         province_name: "Test".into(),
         terrain,
-        river: false,
-        season: BattleSeason::Summer,
+        river,
+        season,
         coastal: false,
         bare_field: false,
         attacker: side_setup("France", expand(data, attacker)),
@@ -310,10 +325,15 @@ fn build(data: &GameData, data_dir: &Path, line: &Line, seed: u64) -> BattleSim 
     match &line.scenario {
         Scenario::Field {
             terrain,
+            season,
+            river,
             attacker,
             defender,
-        } => BattleSim::new(field_setup(data, *terrain, attacker, defender, None), seed)
-            .expect("battle starts"),
+        } => BattleSim::new(
+            field_setup(data, *terrain, *season, *river, attacker, defender, None),
+            seed,
+        )
+        .expect("battle starts"),
         Scenario::Siege {
             fortification,
             attacker,
@@ -325,7 +345,15 @@ fn build(data: &GameData, data_dir: &Path, line: &Line, seed: u64) -> BattleSim 
                 ..Default::default()
             };
             BattleSim::new(
-                field_setup(data, Terrain::Plains, attacker, defender, Some(siege)),
+                field_setup(
+                    data,
+                    Terrain::Plains,
+                    BattleSeason::Summer,
+                    false,
+                    attacker,
+                    defender,
+                    Some(siege),
+                ),
                 seed,
             )
             .expect("siege starts")
@@ -751,28 +779,199 @@ fn load_matrix(path: &Path) -> Matrix {
     serde_json::from_str(&text).unwrap_or_else(|e| panic!("{}: {e}", path.display()))
 }
 
+// ---------------------------------------------------------------- auto-resolve fixture
+
+/// Seeds per fixture scenario (odd: no tied majority).
+const FIXTURE_SEEDS: u64 = 11;
+/// Name prefix of the scenarios that come from the matrix army lines.
+const FIXTURE_BENCH_PREFIX: &str = "Banc : ";
+
+/// Stable hash (FNV-1a 64) of `data/unit_types/*.json` and `data/rules/battle_*.json`:
+/// file names sorted, each hashed as `name 0x00 length bytes`. The `ai` test
+/// `auto_resolve_calibration` computes it the same way.
+fn data_hash(data_dir: &Path) -> String {
+    let mut files: Vec<PathBuf> = Vec::new();
+    for (sub, prefix) in [("unit_types", ""), ("rules", "battle_")] {
+        let dir = data_dir.join(sub);
+        for entry in std::fs::read_dir(&dir).unwrap_or_else(|e| panic!("{}: {e}", dir.display())) {
+            let path = entry.expect("dir entry").path();
+            let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+            if name.starts_with(prefix) && name.ends_with(".json") {
+                files.push(path);
+            }
+        }
+    }
+    files.sort();
+    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
+    let mut eat = |bytes: &[u8]| {
+        for b in bytes {
+            hash ^= u64::from(*b);
+            hash = hash.wrapping_mul(0x0100_0000_01b3);
+        }
+    };
+    for path in &files {
+        let rel = path
+            .strip_prefix(data_dir)
+            .expect("under data dir")
+            .to_string_lossy()
+            .replace('\\', "/");
+        let bytes = std::fs::read(path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+        eat(rel.as_bytes());
+        eat(&[0]);
+        eat(&(bytes.len() as u64).to_le_bytes());
+        eat(&bytes);
+    }
+    format!("{hash:016x}")
+}
+
+#[derive(Debug, Deserialize)]
+struct FixtureScenario {
+    name: String,
+    attacker: Vec<(String, usize)>,
+    defender: Vec<(String, usize)>,
+    terrain: Terrain,
+    #[serde(default)]
+    season: BattleSeason,
+    #[serde(default)]
+    river: bool,
+}
+
+#[derive(Debug, Deserialize)]
+struct FixtureIn {
+    scenarios: Vec<FixtureScenario>,
+}
+
+fn unprefixed(roster: &[(String, usize)]) -> Roster {
+    roster
+        .iter()
+        .map(|(id, n)| (id.strip_prefix("unit_").unwrap_or(id).to_owned(), *n))
+        .collect()
+}
+
+fn prefixed(roster: &Roster) -> Vec<serde_json::Value> {
+    roster
+        .iter()
+        .map(|(id, n)| serde_json::json!([format!("unit_{id}"), n]))
+        .collect()
+}
+
+/// Rewrites the auto-resolve fixture from fresh 3D runs.
+fn emit_auto_fixture(matrix: &Matrix, data: &GameData, data_dir: &Path, threads: usize) {
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../ai/tests/fixtures/auto_resolve_scenarios.json");
+    let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+    let old: FixtureIn = serde_json::from_str(&text).expect("existing fixture");
+    // (name, scenario, roster pair) in fixed order: kept scenarios, then army lines.
+    let mut defs: Vec<(String, FixtureScenario)> = Vec::new();
+    for sc in old.scenarios {
+        if !sc.name.starts_with(FIXTURE_BENCH_PREFIX) {
+            defs.push((sc.name.clone(), sc));
+        }
+    }
+    for l in &matrix.armies.lines {
+        let name = format!("{FIXTURE_BENCH_PREFIX}{}", l.label);
+        defs.push((
+            name.clone(),
+            FixtureScenario {
+                name,
+                attacker: l.attacker.iter().map(|(i, n)| (i.clone(), *n)).collect(),
+                defender: l.defender.iter().map(|(i, n)| (i.clone(), *n)).collect(),
+                terrain: l.terrain,
+                season: BattleSeason::Summer,
+                river: false,
+            },
+        ));
+    }
+    let lines: Vec<Line> = defs
+        .iter()
+        .enumerate()
+        .map(|(i, (name, sc))| Line {
+            id: format!("fixture:{i}"),
+            kind: "fixture",
+            label: name.clone(),
+            mode: Mode::AiVsAi,
+            seeds: FIXTURE_SEEDS,
+            cap_s: matrix.cap_s,
+            scenario: Scenario::Field {
+                terrain: sc.terrain,
+                season: sc.season,
+                river: sc.river,
+                attacker: unprefixed(&sc.attacker),
+                defender: unprefixed(&sc.defender),
+            },
+        })
+        .collect();
+    let rows = play(data, data_dir, &lines, threads);
+    let scenarios: Vec<serde_json::Value> = defs
+        .iter()
+        .zip(&rows)
+        .map(|((name, sc), row)| {
+            serde_json::json!({
+                "name": name,
+                "attacker": prefixed(&unprefixed(&sc.attacker)),
+                "defender": prefixed(&unprefixed(&sc.defender)),
+                "terrain": sc.terrain,
+                "season": sc.season,
+                "river": sc.river,
+                "reference_3d": {
+                    "runs": row.seeds,
+                    "attacker_wins": row.attacker_wins,
+                    "undecided": row.undecided,
+                    "median_loss_attacker": row.median_loss_attacker,
+                    "median_loss_defender": row.median_loss_defender,
+                },
+            })
+        })
+        .collect();
+    let fixture = serde_json::json!({
+        "comment": "Scénarios de calibration de l'auto-résolution (ADR 0013, BANC-2). reference_3d : résultats de la bataille 3D (sim-battle, IA contre IA), générés par `tools/heavy.sh cargo run --release -p sim-battle --example battle_bench -- --emit-auto-fixture`. data_hash : empreinte de data/unit_types/*.json et data/rules/battle_*.json ; le test auto_resolve_calibration échoue si elle est périmée (relancer la commande).",
+        "data_hash": data_hash(data_dir),
+        "scenarios": scenarios,
+    });
+    std::fs::write(
+        &path,
+        serde_json::to_string_pretty(&fixture).expect("json") + "\n",
+    )
+    .expect("write fixture");
+    let agree: Vec<String> = rows
+        .iter()
+        .map(|r| format!("{}/{}", r.attacker_wins, r.seeds))
+        .collect();
+    eprintln!(
+        "fixture: {} scenarios, 3D attacker wins {agree:?}",
+        rows.len()
+    );
+    eprintln!("written to {}", path.display());
+}
+
 fn main() {
     let mut args = std::env::args().skip(1);
     let (mut smoke_only, mut out, mut filter, mut matrix_path) = (false, None, None, None);
+    let mut emit_fixture = false;
     let mut threads = std::thread::available_parallelism()
         .map_or(2, |n| n.get())
         .min(6);
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--smoke" => smoke_only = true,
+            "--emit-auto-fixture" => emit_fixture = true,
             "--out" => out = args.next().map(PathBuf::from),
             "--filter" => filter = args.next(),
             "--threads" => threads = args.next().and_then(|v| v.parse().ok()).unwrap_or(threads),
             "--matrix" => matrix_path = args.next().map(PathBuf::from),
             other => {
                 eprintln!("unknown argument {other}");
-                eprintln!("usage: battle_bench [--smoke] [--filter SUBSTR] [--threads N] [--matrix FILE] [--out FILE]");
+                eprintln!("usage: battle_bench [--smoke] [--filter SUBSTR] [--threads N] [--matrix FILE] [--out FILE] [--emit-auto-fixture]");
                 std::process::exit(2);
             }
         }
     }
     let dir = data_dir();
     let matrix = load_matrix(&matrix_path.unwrap_or_else(|| dir.join("rules/battle_bench.json")));
+    if emit_fixture {
+        emit_auto_fixture(&matrix, game_data(), &dir, threads);
+        return;
+    }
     let mut lines = lines_of(&matrix);
     if let Some(f) = &filter {
         lines.retain(|l| l.id.contains(f.as_str()));

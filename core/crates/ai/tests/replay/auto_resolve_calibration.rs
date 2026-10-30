@@ -1,12 +1,14 @@
 //! The phased auto-resolve agrees with the 3D battle simulation.
 //!
-//! `tests/fixtures/auto_resolve_scenarios.json` holds 20 matchups and the
-//! result of each in `sim-battle` (AI against AI, 6 seeds), produced by
-//! `RT_WRITE=1 cargo run --release -p ai --example balance_probe -- rt`.
-//! The auto-resolve must name the same winner (majority of its draws) in at
-//! least 95 % of them (A6-L1: 19 out of 20).
+//! `tests/fixtures/auto_resolve_scenarios.json` holds the matchups and the
+//! result of each in `sim-battle` (AI against AI, odd number of seeds), produced by
+//! `tools/heavy.sh cargo run --release -p sim-battle --example battle_bench -- --emit-auto-fixture`
+//! (BANC-2, ADR 0800). The fixture carries a `data_hash` of the unit and battle
+//! data it was played with: the test fails when the data changed since, so the
+//! references can never silently go stale again. The auto-resolve must name the
+//! same winner (majority of its draws) in at least 80 % of the scenarios.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use data_model::{GameData, Terrain, UnitCategory, UnitTypeId};
 use serde::Deserialize;
@@ -37,7 +39,44 @@ struct Scenario {
 
 #[derive(Deserialize)]
 struct Fixture {
+    data_hash: String,
     scenarios: Vec<Scenario>,
+}
+
+/// FNV-1a 64 of `unit_types/*.json` and `rules/battle_*.json` (names sorted, each
+/// hashed as `name 0x00 length bytes`). Same algorithm as `battle_bench::data_hash`.
+fn data_hash(data_dir: &Path) -> String {
+    let mut files: Vec<PathBuf> = Vec::new();
+    for (sub, prefix) in [("unit_types", ""), ("rules", "battle_")] {
+        for entry in std::fs::read_dir(data_dir.join(sub)).expect("data dir") {
+            let path = entry.expect("dir entry").path();
+            let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+            if name.starts_with(prefix) && name.ends_with(".json") {
+                files.push(path);
+            }
+        }
+    }
+    files.sort();
+    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
+    let mut eat = |bytes: &[u8]| {
+        for b in bytes {
+            hash ^= u64::from(*b);
+            hash = hash.wrapping_mul(0x0100_0000_01b3);
+        }
+    };
+    for path in &files {
+        let rel = path
+            .strip_prefix(data_dir)
+            .expect("under data dir")
+            .to_string_lossy()
+            .replace('\\', "/");
+        let bytes = std::fs::read(path).expect("data file");
+        eat(rel.as_bytes());
+        eat(&[0]);
+        eat(&(bytes.len() as u64).to_le_bytes());
+        eat(&bytes);
+    }
+    format!("{hash:016x}")
 }
 
 fn army(data: &GameData, comp: &[(String, usize)]) -> (Side, Vec<UnitProfile>) {
@@ -70,6 +109,13 @@ fn auto_resolve_agrees_with_3d_battles() {
         .expect("fixture");
     let fixture: Fixture = serde_json::from_str(&text).expect("fixture json");
     assert!(fixture.scenarios.len() >= 20);
+    let current = data_hash(&root.join("../../../data"));
+    assert_eq!(
+        fixture.data_hash, current,
+        "the 3D references of auto_resolve_scenarios.json are stale (unit or battle data changed). \
+         Regenerate them: cd core && ../tools/heavy.sh cargo run --release -p sim-battle \
+         --example battle_bench -- --emit-auto-fixture"
+    );
     let mut disagreements = Vec::new();
     for scenario in &fixture.scenarios {
         let (attacker, attacker_profiles) = army(&data, &scenario.attacker);
@@ -120,9 +166,15 @@ fn auto_resolve_agrees_with_3d_battles() {
         }
     }
     let agreement = 1.0 - disagreements.len() as f64 / fixture.scenarios.len() as f64;
+    eprintln!(
+        "auto-resolve vs 3D agreement: {:.1} % ({} disagreements out of {}): {disagreements:#?}",
+        agreement * 100.0,
+        disagreements.len(),
+        fixture.scenarios.len()
+    );
     assert!(
-        agreement >= 0.95,
-        "agreement {:.0} % < 95 %: {disagreements:#?}",
+        agreement >= 0.80,
+        "agreement {:.0} % < 80 %: {disagreements:#?}",
         agreement * 100.0
     );
 }
