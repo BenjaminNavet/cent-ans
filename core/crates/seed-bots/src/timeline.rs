@@ -235,17 +235,19 @@ pub fn run(data: &GameData, config: &ProbeConfig) -> Timeline {
         // The AI profile without a forced list takes the first ambitions offered.
         if state.acts.started && !state.acts.finished && state.acts.current != ambitions_act {
             ambitions_act = state.acts.current;
-            let wanted: Vec<String> =
-                if config.ambitions.is_empty() && config.auto_ambitions && config.profile == Profile::Ai {
-                    state
-                        .act_ambitions(data)
-                        .iter()
-                        .take(data.acts_rules.ambitions_to_choose as usize)
-                        .map(|a| a.id.clone())
-                        .collect()
-                } else {
-                    config.ambitions.clone()
-                };
+            let wanted: Vec<String> = if config.ambitions.is_empty()
+                && config.auto_ambitions
+                && config.profile == Profile::Ai
+            {
+                state
+                    .act_ambitions(data)
+                    .iter()
+                    .take(data.acts_rules.ambitions_to_choose as usize)
+                    .map(|a| a.id.clone())
+                    .collect()
+            } else {
+                config.ambitions.clone()
+            };
             for ambition in &wanted {
                 let _ = state.choose_act_ambition(data, ambition);
             }
@@ -311,7 +313,7 @@ pub fn run(data: &GameData, config: &ProbeConfig) -> Timeline {
             }
         }
         previous = now;
-        if timeline.turns % 4 == 0 || state.outcome.is_some() {
+        if timeline.turns.is_multiple_of(4) || state.outcome.is_some() {
             let (act, act_score) = state
                 .act_status(data)
                 .map_or((0, 0), |a| (a.index + 1, a.score));
@@ -362,7 +364,7 @@ fn median(mut values: Vec<f64>) -> f64 {
     }
     values.sort_by(|a, b| a.partial_cmp(b).expect("finite"));
     let mid = values.len() / 2;
-    if values.len() % 2 == 0 {
+    if values.len().is_multiple_of(2) {
         (values[mid - 1] + values[mid]) / 2.0
     } else {
         values[mid]
@@ -443,7 +445,10 @@ impl Timeline {
         out.insert("prestige_mean", mean(&|r| f64::from(r.player_prestige)));
         out.insert(
             "field_men_mean",
-            self.rows.iter().map(|r| f64::from(r.player_men)).sum::<f64>()
+            self.rows
+                .iter()
+                .map(|r| f64::from(r.player_men))
+                .sum::<f64>()
                 / self.rows.len().max(1) as f64,
         );
         out.insert(

@@ -40,8 +40,8 @@ pub use common::{
 };
 pub use cover::{CoverClass, CoverMap};
 pub use entities::acts_rules::{
-    ActAmbition, ActAudience, ActCondition, ActObjective, ActPressure, ActRules,
-    ActsRules, ReignGrade, RenownRules, RenownSource, RuinRules,
+    ActAmbition, ActAudience, ActCondition, ActObjective, ActPressure, ActRules, ActsRules,
+    ReignGrade, RenownRules, RenownSource, RuinRules,
 };
 pub use entities::advisor_rules::{Advice, AdviceTrigger, AdvisorRules, PostureNews};
 pub use entities::agent::{

@@ -54,7 +54,11 @@ fn every_ambition_changes_the_campaign() {
                     config(house, starts[index], Some(&ambition.id)),
                 ));
             }
-            runs.push((house.to_owned(), String::new(), config(house, starts[index], None)));
+            runs.push((
+                house.to_owned(),
+                String::new(),
+                config(house, starts[index], None),
+            ));
         }
     }
     let results: Vec<BTreeMap<&'static str, f64>> = std::thread::scope(|scope| {
@@ -83,5 +87,8 @@ fn every_ambition_changes_the_campaign() {
             failures.push(format!("{house} {id} ({} {:.1} %)", best.0, best.1 * 100.0));
         }
     }
-    assert!(failures.is_empty(), "ambitions without effect: {failures:?}");
+    assert!(
+        failures.is_empty(),
+        "ambitions without effect: {failures:?}"
+    );
 }

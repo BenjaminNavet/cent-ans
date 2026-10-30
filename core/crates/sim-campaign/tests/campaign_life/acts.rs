@@ -248,7 +248,10 @@ fn nothing_to_earn_is_not_a_free_hundred() {
     let data = &data;
     let mut state = started(data, "fac_france");
     let status = state.act_status(data).unwrap();
-    assert!(status.objectives.iter().all(|o| o.hold && o.met), "{status:?}");
+    assert!(
+        status.objectives.iter().all(|o| o.hold && o.met),
+        "{status:?}"
+    );
     assert!(status.score < 20, "{status:?}");
     state.year = 1361;
     state.end_turn_with(data, idle);

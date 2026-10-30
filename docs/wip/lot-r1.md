@@ -9,7 +9,8 @@ Branche : `worktree-agent-adc1d3f985235a4e2` (worktree agent). Source : `docs/au
 - [x] R1-2 ambitions à effets ; test `seed-bots --test ambitions` vert (36/36 > 10 %)
 - [x] Sauvegarde v12 + migration + fixture `save_v12.json`
 - [x] ADR XXXX (mesures, seuil 43), INDEX et statuts de 0784/0785/0788/0793
-- [ ] Vérification complète (fmt, clippy, tests workspace, seed bots rapides) puis passe longue en arrière-plan
+- [x] Vérification complète : fmt, clippy, tests workspace (2 assertions `STATE_VERSION == 11` passées à 12), seed bots rapides 0 constat
+- [ ] Passe longue seed bots en arrière-plan (lancée par l'agent, constats à présenter)
 
 ## Coordination avec le lot TUTO (prestige de faction)
 La renommée de maison sera `CampaignState::house_renown(data)` (entier, jauge) ; son journal est
@@ -17,8 +18,7 @@ La renommée de maison sera `CampaignState::house_renown(data)` (entier, jauge) 
 provisoire ; à terme il sera remplacé par cette renommée (pas de doublon de règle dans `core/`).
 
 ## Prochaine étape
-Finir la vérification complète (out/r1/full.sh via tools/heavy.sh) ; ajuster les bandes `reign_score` des seed bots si
-elles bougent ; lancer la passe longue en arrière-plan ; numéroter XXXX à la fusion.
+Lire le rapport de la passe longue (target/seed-bots/) ; numéroter l'ADR XXXX à la fusion.
 
 ## Client (à afficher plus tard)
 `ActView`/`TransitionView` gagnent `renown`, `house_renown`, `renown_recent` ; `ActPolicyRow` gagne
