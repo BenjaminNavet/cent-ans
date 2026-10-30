@@ -211,6 +211,7 @@ Reprise :
 - CAMP-R2 (agent-aca56a08ae241545a, e921291db, propre) : manquent clippy et les tests.
 - BAT-R2b (agent-ad1b97fe8e5c9b8a2, d60e1eee3, 4 fichiers modifiés) : clippy propre ; manquent les tests client et le smoke.
 - M2b (agent-af438da53ac776d29, 4a9485dc3, 3 fichiers modifiés) : en cours de recalage sur la référence du joueur (~/dev/cent-ans-raw/refs/campagne-cible-joueur.png) ; build et vues à refaire.
+  Deuxième image du joueur, vue rapprochée : ~/dev/cent-ans-raw/refs/campagne-cible-joueur-zoom.png (parcelles cernées de haies sombres, champs ocre, touffes d herbe en 3D, arbres détaillés, rivière pâle).
 - BATI-RÉEL (agent-a3e7ecbf368524a30) : les 44 images sont faites ; TRELLIS a produit farm_2 et abbey_1 à abbey_3 ; chaîne coupée. Quota TRELLIS HF épuisé (≈ 22 h) ; farm_1 et la suite restent à faire (repli SF3D).
 - Prêts pour FUSION-D : FORECAST-ASYNC, CAMP-S, M5a, VIS-L4 + L4b, VIS-L5.
 - Relancer tools/disk_guard.sh et le guetteur de coût.
