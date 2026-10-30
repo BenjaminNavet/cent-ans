@@ -271,6 +271,12 @@ fn reign_score_moves_until_1453() {
     data.acts_rules.acts[2].pressures.clear();
     let data = &data;
     let mut state = started(data, "fac_england");
+    // The jump to 1416 must not age the court: shift every birth year by the same 79 years,
+    // otherwise the dynasty dies of old age and England is absorbed by its heir's house.
+    let jump = 1416 - state.year;
+    for character in state.characters.values_mut() {
+        character.birth_year += jump;
+    }
     state.year = 1416;
     state.end_turn_with(data, idle);
     assert_eq!(state.acts.current, 2);
