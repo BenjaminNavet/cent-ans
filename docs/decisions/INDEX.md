@@ -382,3 +382,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0814 | [VIS-R3b : parcellaire typé du sol de campagne](0814-vis-r3b-parcellaire-type.md) | accepté |
 | 0824 | [VIS-L2 : habitat à l'échelle](0824-vis-l2-habitat-a-l-echelle.md) | en cours |
 | 0820 | [VIS-R4 : montagne étagée et neige d'altitude blanche](0820-vis-r4-montagne-etagee.md) | proposé |
+| 0820 | [VIS-R4 : montagne étagée et neige d'altitude blanche](0820-vis-r4-montagne-etagee.md) | accepté |
