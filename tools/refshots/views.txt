@@ -19,3 +19,7 @@ camp_0300 campaign 2.35 48.85 300
 vis_r3b_castile campaign -4.00 41.60 400
 vis_r3b_normandie campaign -0.40 49.00 400
 vis_r3b_loire campaign 0.70 47.40 80
+vis_r4_alpes400 campaign 6.87 45.83 400
+vis_r4_alpes120 campaign 6.87 45.83 120
+vis_r4_pyrenees300 campaign 0.10 42.70 300
+vis_r4_highlands400 campaign -4.60 56.90 400
