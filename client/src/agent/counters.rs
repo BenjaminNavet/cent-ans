@@ -222,9 +222,9 @@ pub fn thread_cpu_ms() -> f64 {
 }
 
 /// Heap of the allocator (mimalloc: committed bytes now and at peak), in MiB. `None` when the
-/// platform allocator is used (`system-alloc`).
+/// platform allocator is used (`system-alloc`, and the `dev` build, see main.rs).
 pub fn heap_commit_mib() -> Option<(f64, f64)> {
-    #[cfg(not(feature = "system-alloc"))]
+    #[cfg(not(any(feature = "system-alloc", feature = "dev")))]
     {
         unsafe extern "C" {
             fn mi_process_info(
@@ -256,7 +256,7 @@ pub fn heap_commit_mib() -> Option<(f64, f64)> {
         let mib = |bytes: usize| bytes as f64 / (1024.0 * 1024.0);
         Some((mib(commit), mib(peak)))
     }
-    #[cfg(feature = "system-alloc")]
+    #[cfg(any(feature = "system-alloc", feature = "dev"))]
     None
 }
 
