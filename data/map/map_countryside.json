@@ -318,18 +318,20 @@
     "farm_norman": {
       "model": "buildings/farm_norman_timber_courtyard",
       "max_mult": 60,
-      "size_scale": 1.7,
-      "fade_from": 55,
-      "max_distance": 90,
+      "max_real_mult": 3.0,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120,
       "max_instances": 500,
       "albedo_gain": 2.0
     },
     "farm_mas": {
       "model": "buildings/farm_southern_stone_mas",
       "max_mult": 60,
-      "size_scale": 1.7,
-      "fade_from": 55,
-      "max_distance": 90,
+      "max_real_mult": 3.0,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120,
       "max_instances": 400,
       "albedo_gain": 2.0
     },
@@ -377,66 +379,63 @@
     },
     "farm_german": {
       "max_mult": 60,
-      "size_scale": 1.7,
-      "fade_from": 55,
-      "max_distance": 90,
+      "max_real_mult": 3.0,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120,
       "model": "buildings/farm_german_fachwerk",
       "max_instances": 600,
       "albedo_gain": 2.0
     },
     "farm_flemish": {
       "max_mult": 60,
-      "size_scale": 1.7,
-      "fade_from": 55,
-      "max_distance": 90,
+      "max_real_mult": 3.0,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120,
       "model": "buildings/farm_flemish_brick_barn",
       "max_instances": 600,
       "albedo_gain": 2.0
     },
     "house_brick": {
       "max_mult": 60,
-      "size_scale": 1.7,
-      "fade_from": 55,
-      "max_distance": 90,
+      "max_real_mult": 3.0,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120,
       "model": "buildings/house_brick_gable",
       "max_instances": 600,
       "albedo_gain": 2.0
     },
     "farm_cortijo": {
       "max_mult": 60,
-      "size_scale": 1.7,
-      "fade_from": 55,
-      "max_distance": 90,
+      "max_real_mult": 3.0,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120,
       "model": "buildings/farm_iberian_adobe_cortijo",
       "max_instances": 600,
       "albedo_gain": 2.0
     },
     "farm_alpine": {
       "max_mult": 60,
-      "size_scale": 1.7,
-      "fade_from": 55,
-      "max_distance": 90,
+      "max_real_mult": 3.0,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120,
       "model": "buildings/farm_alpine_chalet_stone",
       "max_instances": 600,
       "albedo_gain": 2.0
     },
     "farm_english": {
       "max_mult": 60,
-      "size_scale": 1.7,
-      "fade_from": 55,
-      "max_distance": 90,
+      "max_real_mult": 3.0,
+      "size_scale": 1.0,
+      "fade_from": 70,
+      "max_distance": 120,
       "model": "buildings/farm_english_stone_manor",
       "max_instances": 600,
       "albedo_gain": 2.0
-    },
-    "hamlet_garden": {
-      "max_mult": 40,
-      "size_scale": 3.0,
-      "fade_from": 60,
-      "max_distance": 90,
-      "model": "props/crop_turnip_cabbage_garden",
-      "max_instances": 600,
-      "albedo_gain": 1.3
     }
   },
   "regions": {
@@ -670,6 +669,21 @@
         200
       ]
     }
+  },
+  "hamlet_core": {
+    "description": "VIS-L2 (ADR 0824) : noyau de hameau = décalque au sol (terre battue, jardins, vergers, quelques toits rouges vus d'en haut) posé sur chaque hameau, au lieu de grosses maisons isolées. Rayon en mètres réels ; retiré au-delà de max_distance (distance du rig). Textures générées au chargement depuis les palettes (aucune géométrie bâtie). Quatre palettes, tirées par hachage du hameau.",
+    "kinds": ["hamlet"],
+    "radius_m": 220,
+    "max_distance": 260,
+    "grid": 12,
+    "texture_px": 128,
+    "forest_max": 0.35,
+    "palettes": [
+      {"id": "openfield", "earth": [0.52, 0.42, 0.30], "garden": [0.40, 0.50, 0.22], "orchard": [0.28, 0.40, 0.18], "roof": [0.66, 0.30, 0.18]},
+      {"id": "bocage", "earth": [0.46, 0.38, 0.27], "garden": [0.34, 0.50, 0.20], "orchard": [0.24, 0.38, 0.16], "roof": [0.60, 0.28, 0.18]},
+      {"id": "midi", "earth": [0.62, 0.50, 0.34], "garden": [0.48, 0.52, 0.24], "orchard": [0.36, 0.44, 0.20], "roof": [0.72, 0.36, 0.20]},
+      {"id": "nord", "earth": [0.48, 0.40, 0.30], "garden": [0.38, 0.48, 0.24], "orchard": [0.26, 0.38, 0.18], "roof": [0.62, 0.26, 0.16]}
+    ]
   },
   "rules": [
     {
@@ -1834,37 +1848,6 @@
         "offset_m": [
           260,
           480
-        ]
-      },
-      "filters": {
-        "forest_max": 0.35,
-        "slope_max_deg": 20
-      }
-    },
-    {
-      "id": "hameau_jardins",
-      "mode": "village",
-      "props": {
-        "hamlet_garden": 1
-      },
-      "regions": [
-        "europe_occ",
-        "bretagne",
-        "pays_bas_flandre",
-        "europe_nord_plaine",
-        "bocage_ouest",
-        "mediterranee",
-        "italie",
-        "iberie"
-      ],
-      "village": {
-        "kinds": [
-          "hamlet"
-        ],
-        "chance": 0.7,
-        "offset_m": [
-          60,
-          150
         ]
       },
       "filters": {

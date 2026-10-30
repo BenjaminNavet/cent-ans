@@ -607,6 +607,7 @@ pub mod tests {
                 max_distance: 80.0,
                 stretched: false,
                 fixed_size: false,
+                max_real_mult: None,
                 max_instances: 100,
                 albedo_gain: 1.0,
             }],
@@ -625,6 +626,7 @@ pub mod tests {
             maquette_size: 1.0,
             maquette_range: 1.0,
             fixed_mult: 0.0,
+            hamlet_core: Default::default(),
         }
     }
 

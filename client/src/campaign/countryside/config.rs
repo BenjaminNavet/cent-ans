@@ -66,6 +66,9 @@ pub struct Prop {
     pub max_distance: f32,
     pub stretched: bool,
     pub fixed_size: bool,
+    /// Dwellings (VIS-L2, ADR 0824): cap of the enlargement in multiples of the real size, and no
+    /// maquette range factor (the prop fades at its own `max_distance`). `None` for other props.
+    pub max_real_mult: Option<f32>,
     pub max_instances: usize,
     /// Albedo multiplier of the model (`albedo_gain` uniform of `countryside.gdshader`).
     pub albedo_gain: f32,
@@ -133,6 +136,64 @@ pub struct Config {
     pub maquette_size: f32,
     pub maquette_range: f32,
     pub fixed_mult: f32,
+    /// Ground decal of the hamlet cores (VIS-L2, ADR 0824).
+    pub hamlet_core: HamletCore,
+}
+
+/// One palette of the hamlet core decal (linear-ish sRGB triplets, 0..1).
+#[derive(Debug, Clone)]
+pub struct CorePalette {
+    pub id: String,
+    pub earth: [f32; 3],
+    pub garden: [f32; 3],
+    pub orchard: [f32; 3],
+    pub roof: [f32; 3],
+}
+
+/// `hamlet_core` of `map_countryside.json`: the ground decal that replaces scattered pawns.
+#[derive(Debug, Clone, Default)]
+pub struct HamletCore {
+    pub radius_m: f32,
+    /// Rig distance beyond which the decals are removed.
+    pub max_distance: f32,
+    pub grid: usize,
+    pub texture_px: usize,
+    pub forest_max: f32,
+    pub kinds: Vec<String>,
+    pub palettes: Vec<CorePalette>,
+}
+
+fn parse_hamlet_core(v: &Value) -> HamletCore {
+    let rgb = |p: &Value, key: &str| {
+        let a = p.get(key).and_then(Value::as_array);
+        let c = |i: usize| {
+            a.and_then(|a| a.get(i))
+                .and_then(Value::as_f64)
+                .unwrap_or(0.5) as f32
+        };
+        [c(0), c(1), c(2)]
+    };
+    HamletCore {
+        radius_m: num(v, "radius_m", 0.0),
+        max_distance: num(v, "max_distance", 0.0),
+        grid: num(v, "grid", 12.0) as usize,
+        texture_px: num(v, "texture_px", 128.0) as usize,
+        forest_max: num(v, "forest_max", 0.35),
+        kinds: strings(v, "kinds"),
+        palettes: v
+            .get("palettes")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .map(|p| CorePalette {
+                id: p["id"].as_str().unwrap_or("").to_string(),
+                earth: rgb(p, "earth"),
+                garden: rgb(p, "garden"),
+                orchard: rgb(p, "orchard"),
+                roof: rgb(p, "roof"),
+            })
+            .collect(),
+    }
 }
 
 fn num(v: &Value, key: &str, default: f32) -> f32 {
@@ -330,6 +391,7 @@ pub fn parse(doc: &Value, data_dir: &Path, projection: &MapProjection) -> Config
                     .get("fixed_size")
                     .and_then(Value::as_bool)
                     .unwrap_or(false),
+                max_real_mult: p.get("max_real_mult").and_then(Value::as_f64).map(|v| v as f32),
                 max_instances: num(p, "max_instances", render.max_instances_per_prop as f32)
                     as usize,
                 albedo_gain: num(p, "albedo_gain", 1.0),
@@ -384,6 +446,7 @@ pub fn parse(doc: &Value, data_dir: &Path, projection: &MapProjection) -> Config
         maquette_size: 1.0,
         maquette_range: 1.0,
         fixed_mult: 0.0,
+        hamlet_core: parse_hamlet_core(&doc["hamlet_core"]),
     }
 }
 

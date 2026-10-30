@@ -6,9 +6,39 @@
   "type": "object",
   "required": ["version", "render", "biome_index", "props", "regions", "rules"],
   "additionalProperties": false,
+  "$defs": {
+    "rgb": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}}
+  },
   "properties": {
     "description": {"type": "string"},
     "version": {"const": 1},
+    "hamlet_core": {
+      "type": "object",
+      "required": ["kinds", "radius_m", "max_distance", "grid", "texture_px", "forest_max", "palettes"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "kinds": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        "radius_m": {"type": "number", "exclusiveMinimum": 0},
+        "max_distance": {"type": "number", "exclusiveMinimum": 0},
+        "grid": {"type": "integer", "minimum": 2, "maximum": 64},
+        "texture_px": {"type": "integer", "minimum": 32, "maximum": 512},
+        "forest_max": {"type": "number", "minimum": 0, "maximum": 1},
+        "palettes": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "earth", "garden", "orchard", "roof"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {"type": "string"},
+              "earth": {"$ref": "#/$defs/rgb"}, "garden": {"$ref": "#/$defs/rgb"},
+              "orchard": {"$ref": "#/$defs/rgb"}, "roof": {"$ref": "#/$defs/rgb"}
+            }
+          }
+        }
+      }
+    },
     "render": {
       "type": "object",
       "required": ["max_instances_per_prop", "cell_px", "load_factor", "min_radius_px", "max_radius_px", "max_cached_cells", "cells_per_frame", "size_k", "size_exponent", "spread_exponent", "lod_distances", "town_clearance_px", "defaults"],
@@ -67,6 +97,7 @@
           "max_mult": {"type": "number", "minimum": 1, "description": "Grossissement d'ecran maximal."},
           "size_scale": {"type": "number", "exclusiveMinimum": 0, "description": "Taille d'ecran relative (1 = taille commune)."},
           "fixed_size": {"type": "boolean", "description": "CV-B (ADR 0354) : en maquette, taille monde fixe (meme grossissement `folk_scale` que les figurines de `FolkPool`, fois `size_scale`), sans lien avec la distance ni plafond `max_mult` ; fondu tramé a la portee au lieu du retrecissement. Charrettes, caravanes, bouviers, cabanes roulantes."},
+          "max_real_mult": {"type": "number", "minimum": 1, "description": "VIS-L2 (ADR 0824), habitations : plafond du grossissement en multiples de la taille reelle (3 = au plus trois fois le batiment) ; remplace `max_mult` et ignore les facteurs de maquette ; le modele s'efface a sa propre `max_distance`."},
           "albedo_gain": {"type": "number", "exclusiveMinimum": 0},
           "fade_from": {"type": "number", "exclusiveMinimum": 0, "description": "Distance du rig ou commence le fondu de sortie."},
           "max_distance": {"type": "number", "exclusiveMinimum": 0, "description": "Distance du rig au-dela de laquelle le modele disparait."},

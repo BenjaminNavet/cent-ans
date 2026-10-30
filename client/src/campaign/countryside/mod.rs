@@ -17,6 +17,7 @@ pub mod decor;
 pub mod decor_plan;
 pub mod decor_smoke;
 pub mod field_plan;
+pub mod hamlet_core;
 pub mod landuse;
 pub mod layer;
 pub mod placement;
@@ -99,6 +100,7 @@ impl Plugin for CampaignCountrysidePlugin {
             .init_resource::<layer::Measures>()
             .init_resource::<proto::Prototypes>()
             .init_resource::<ReliefVersion>()
+            .init_resource::<hamlet_core::HamletCores>()
             .init_resource::<LoadErrors>()
             .init_resource::<bridges::Bridges>()
             .init_resource::<decor::DecorView>()
@@ -127,6 +129,7 @@ impl Plugin for CampaignCountrysidePlugin {
                     decor::reset,
                     water_props::reset,
                     rocks::reset,
+                    hamlet_core::reset,
                 ),
             )
             .add_systems(
@@ -183,6 +186,12 @@ impl Plugin for CampaignCountrysidePlugin {
                     .run_if(in_state(AppState::Campaign)),
             )
             .add_systems(Update, track_relief.run_if(in_state(AppState::Campaign)))
+            .add_systems(
+                Update,
+                hamlet_core::sync_cores
+                    .after(track_relief)
+                    .run_if(in_state(AppState::Campaign)),
+            )
             .add_systems(
                 Update,
                 (

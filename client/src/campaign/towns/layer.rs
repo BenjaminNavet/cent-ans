@@ -92,8 +92,6 @@ pub struct TownsWorld {
 #[derive(Resource)]
 pub(super) struct TownMeshes {
     cube: Handle<Mesh>,
-    /// Unit house block with a gable roof.
-    house: Handle<Mesh>,
     cylinder: Handle<Mesh>,
     blocks: Vec<Handle<BuildingAtlasMaterial>>,
     masonry: Handle<BuildingAtlasMaterial>,
@@ -133,8 +131,6 @@ struct Shown {
     anchor: Vec2,
     /// Extra of an emblematic city (wall ring meshes, plan).
     landmark: Option<landmark::LmShown>,
-    /// Merged garden trees (detail only).
-    trees: Option<Handle<Mesh>>,
 }
 
 /// Result slot of a worker thread: the value and the milliseconds it took.
@@ -337,7 +333,6 @@ fn init_towns(
     let shared = TownMeshes {
         cube: meshes
             .add(Mesh::from(Cuboid::new(1.0, 1.0, 1.0)).translated_by(Vec3::new(0.0, 0.5, 0.0))),
-        house: meshes.add(super::shapes::house_block_mesh()),
         cylinder: meshes.add(
             Cylinder::new(1.0, 1.0)
                 .mesh()
@@ -569,11 +564,6 @@ fn settle_towns(
         if let Some(mut m) = meshes.get_mut(&shown.ribbons[1]) {
             *m = ground_mesh(&shown.plan, &y_of, world.look.ground_lift_world / scale);
         }
-        if let Some(handle) = &shown.trees
-            && let Some(mut m) = meshes.get_mut(handle)
-        {
-            *m = super::shapes::trees_mesh(&shown.plan.trees, &y_of);
-        }
         if let Some(lm) = &shown.landmark {
             for (ring, handle) in lm.plan.wall_rings.iter().zip(&lm.walls) {
                 if let Some(mut m) = meshes.get_mut(handle) {
@@ -756,15 +746,6 @@ pub(super) fn stream_towns(
             style_of_town(&sim, &world, &town.id),
         );
         state.scenes = scenes;
-        let trees = spawn_trees(
-            &mut commands,
-            &mut meshes,
-            &shared,
-            root,
-            &plan,
-            lod == Lod::Detail,
-            &y_of,
-        );
         state.towns_spawned += 1;
         state.spawn_ms_max = state
             .spawn_ms_max
@@ -780,7 +761,6 @@ pub(super) fn stream_towns(
                 counts,
                 anchor: town.px,
                 landmark: None,
-                trees,
             },
         );
     }
@@ -891,31 +871,6 @@ pub fn ground_mesh(plan: &Plan, y_of: &dyn Fn(Vec2) -> f32, lift_m: f32) -> Mesh
 
 // --- Spawning -----------------------------------------------------------------------------------
 
-/// Garden trees of a plan, merged in one mesh (detail only), standing on the displayed ground.
-fn spawn_trees(
-    commands: &mut Commands,
-    meshes: &mut Assets<Mesh>,
-    shared: &TownMeshes,
-    root: Entity,
-    plan: &Plan,
-    detail: bool,
-    y_of: &dyn Fn(Vec2) -> f32,
-) -> Option<Handle<Mesh>> {
-    if !detail || plan.trees.is_empty() {
-        return None;
-    }
-    let handle = meshes.add(super::shapes::trees_mesh(&plan.trees, y_of));
-    commands.spawn((
-        Name::new("Trees"),
-        Mesh3d(handle.clone()),
-        MeshMaterial3d(shared.vertex.clone()),
-        NotShadowCaster,
-        Transform::IDENTITY,
-        ChildOf(root),
-    ));
-    Some(handle)
-}
-
 struct Spawner<'a, 'w, 's> {
     commands: &'a mut Commands<'w, 's>,
     assets: &'a AssetServer,
@@ -1012,7 +967,7 @@ impl Spawner<'_, '_, '_> {
         self.place_block(mesh, cylinder, material, local, yaw, size, lift_m);
     }
 
-    /// House block with a gable roof (prism), ridge along the facade (X).
+    /// Plain box standing in for a house whose kit model is missing.
     fn house_block(
         &mut self,
         material: Handle<BuildingAtlasMaterial>,
@@ -1021,7 +976,7 @@ impl Spawner<'_, '_, '_> {
         size: Vec3,
         lift_m: f32,
     ) {
-        let mesh = self.shared.house.clone();
+        let mesh = self.shared.cube.clone();
         self.place_block(mesh, false, material, local, yaw, size, lift_m);
     }
 
@@ -1079,11 +1034,11 @@ impl Spawner<'_, '_, '_> {
     }
 }
 
-/// One house-like building: kit model in detail, block otherwise.
+/// One house-like building: kit model whatever the level of detail (ADR 0824), plain box only
+/// when no kit model fits.
 #[allow(clippy::too_many_arguments)]
 fn spawn_building(
     sp: &mut Spawner,
-    detail: bool,
     kind: &str,
     local: Vec2,
     yaw: f32,
@@ -1094,11 +1049,10 @@ fn spawn_building(
     masonry: bool,
 ) {
     let half = Vec2::new(front, depth) * 0.5;
-    if detail
-        && let Some(entry) = sp
-            .world
-            .kit
-            .pick_styled(kind, front, depth, rng, sp.style.as_ref())
+    if let Some(entry) = sp
+        .world
+        .kit
+        .pick_styled(kind, front, depth, rng, sp.style.as_ref())
             .cloned()
     {
         let scale = sp.world.kit.fit_scale(&entry.name, front, depth);
@@ -1185,7 +1139,6 @@ fn spawn_town(
         let mut rng = Rng::new(seed ^ (i as u32).wrapping_mul(0x9E37_79B1));
         spawn_building(
             &mut sp,
-            detail,
             HOUSE_KINDS[h.kind],
             h.pos,
             h.yaw,
@@ -1237,7 +1190,7 @@ fn spawn_town(
                     other => other,
                 };
                 spawn_building(
-                    &mut sp, detail, kit_kind, m.pos, m.yaw, m.length, m.depth, 0.5, &mut rng, true,
+                    &mut sp, kit_kind, m.pos, m.yaw, m.length, m.depth, 0.5, &mut rng, true,
                 );
             }
         }
@@ -1355,7 +1308,7 @@ fn spawn_town(
                 let entry = world.kit.get(model).cloned();
                 let (front, depth) = entry.as_ref().map_or((10.0, 7.0), |e| (e.length, e.depth));
                 let mut rng = Rng::new(seed ^ 0x77 ^ i as u32);
-                if detail && entry.is_some() {
+                if entry.is_some() {
                     sp.kit_piece(
                         model,
                         inst.pos,
@@ -1439,7 +1392,7 @@ fn dump_towns(world: &World) -> (String, Value) {
                 "landmark": landmark,
                 "lod": if s.lod == Lod::Detail { "detail" } else { "blocks" },
                 "growth": {"quarters": s.growth.quarters, "enclosure": s.growth.enclosure},
-                "plan": {"streets": s.plan.streets.len(), "houses": s.plan.houses.len(), "monuments": s.plan.monuments.len(), "towers": s.plan.towers.len(), "gates": s.plan.gates.len(), "bridge": s.plan.bridge.is_some(), "trees": if s.trees.is_some() { s.plan.trees.len() } else { 0 }},
+                "plan": {"streets": s.plan.streets.len(), "houses": s.plan.houses.len(), "monuments": s.plan.monuments.len(), "towers": s.plan.towers.len(), "gates": s.plan.gates.len(), "bridge": s.plan.bridge.is_some(), "trees": 0},
                 "counts": {"houses": c.houses, "kit_models": c.kit_models, "blocks": c.blocks, "monuments": c.monuments, "wall_pieces": c.wall_pieces, "towers": c.towers, "gates": c.gates, "suburb_houses": c.suburb_houses, "enclosure_pieces": c.enclosure_pieces, "props": c.props, "entities": c.entities},
             })
         })

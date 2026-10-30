@@ -142,6 +142,11 @@ pub fn prop_frame(cfg: &super::config::Config, prop: usize, real_units: f32, d: 
     let (mult, spread) = if p.fixed_size && cfg.fixed_mult > 0.0 {
         let m = cfg.fixed_mult * p.size_scale;
         (m, m)
+    } else if let Some(cap) = p.max_real_mult {
+        // Dwellings (ADR 0824): never more than `cap` times their real size, whatever the
+        // maquette factors, so a farm cannot grow into a kilometre-wide pawn.
+        let m = (target * p.size_scale / real_units.max(1e-9)).clamp(1.0, cap);
+        (m, m.powf(r.spread_exponent))
     } else if p.stretched {
         // Enclosures (fences, hedges, walls) keep their authored ceiling: the maquette
         // enlargement of accessories would turn them into kilometre-long black walls.
@@ -152,7 +157,7 @@ pub fn prop_frame(cfg: &super::config::Config, prop: usize, real_units: f32, d: 
             .clamp(1.0, p.max_mult * cfg.maquette_size * cfg.maquette_range);
         (m, m.powf(r.spread_exponent))
     };
-    let range = if p.stretched { 1.0 } else { cfg.maquette_range };
+    let range = if p.stretched || p.max_real_mult.is_some() { 1.0 } else { cfg.maquette_range };
     let fade = 1.0 - smoothstep(p.fade_from * range, p.max_distance * range, d);
     PropFrame {
         mult,
