@@ -56,16 +56,16 @@ Meshy : crédits restants (≈ 25) pour une retouche, sur décision visuelle. Z-
 - Constats de la passe longue seed bots : présentés au joueur, rien dans seed-bots-findings.md sans lui.
 
 ## Économie de jetons (obligatoire)
-1. Opus planifie, découpe, intègre. Sous-agents Haiku par défaut, Sonnet seulement pour les lots durs (IA de bataille, économie, shaders) ; jamais Opus.
+1. Opus planifie, découpe, intègre. TOUS les sous-agents (implémentation, juges, fusion, recherche) sont Sonnet 5.5 en effort medium : `model: "sonnet"`, `effort: "medium"` à chaque appel Agent. Jamais Haiku, jamais Opus en sous-agent.
 2. 3-4 agents en parallèle au plus. Sérialiser les lots qui touchent la même zone (même shader, même module de règles, mêmes registres).
 3. Réserver le numéro d'ADR au lancement du lot ; l'agent l'écrit directement (pas de XXXX, pas de renumérotation).
 4. Brief d'agent : spec courte, fichiers, tests, numéro d'ADR, « départ = main local » (`git merge-base HEAD main`, sinon `git reset --hard main`), symlinks des assets ignorés (data/map/pyramid, game/assets/models/dn). Rapport ≤ 15 lignes (résultat, branche, échecs, points ouverts) ; le détail va dans docs/wip/<lot>.md.
 5. Dans les agents : seed bots --quick seulement ; pas de passe longue, banc court. Une passe longue sur main par lot de fusions, en arrière-plan.
-6. Fusions par un agent de fusion Sonnet par lot de 2-4 branches (rebase sur main, conflits = union des deux côtés, ADR, ff-merge), pas par la session principale.
+6. Fusions par un agent de fusion Sonnet 5.5 (effort medium) par lot de 2-4 branches (rebase sur main, conflits = union des deux côtés, ADR, ff-merge), pas par la session principale.
 7. Un seul check complet sur main par lot de fusions (tools/full_check.sh + smoke + pytest + seed quick).
 8. Lecture ciblée : grep, head, dumps d'état filtrés ; jamais de gros fichiers ni de sorties brutes. Captures : 5 par tâche (10 en travail visuel), 640 px, une seule après un groupe de corrections ; les agents mécaniques n'en prennent pas.
 9. Ne jamais finir un tour « en attente » : attendre agents et checks par Monitor ou boucle until en arrière-plan, puis enchaîner.
 10. Mettre à jour la note wip du chantier à chaque lot de fusions ; la session suivante reprend depuis elle. Une session par vague, /clear entre deux chantiers.
 ```
 
-Avant de lancer : désactiver dans `/mcp` les serveurs inutiles au projet (rea, Chrome, Gmail, Calendar, Drive, Hugging Face) ; dans `/config`, modèle de sous-agent par défaut = Haiku.
+Avant de lancer : désactiver dans `/mcp` les serveurs inutiles au projet (rea, Chrome, Gmail, Calendar, Drive, Hugging Face) ; dans `/config`, modèle de sous-agent par défaut = Sonnet (claude-sonnet-5-5).
