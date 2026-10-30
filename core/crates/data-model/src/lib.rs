@@ -73,6 +73,10 @@ pub use entities::army_traditions::{
     ArmyExperienceRules, ArmyTradition, ArmyTraditionRules, BranchWeights, TraditionAiWeights,
     TraditionBranch, TraditionBranchDef, TraditionEffects,
 };
+pub use entities::assembly_rules::{
+    AskTier, Assembly, AssemblyAiRules, AssemblyRules, Concession, ConcessionKind, GrogneRules,
+    MoodRules, Necessity, NecessityKind, SubsidyForm, VoteRules,
+};
 pub use entities::auto_resolve::{
     AutoResolveRules, AutoResolveWeather, ForecastFogRules, TerrainEffects, WeatherChances,
 };

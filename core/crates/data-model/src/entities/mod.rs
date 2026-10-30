@@ -13,6 +13,7 @@ pub mod ai_grid;
 pub mod ai_strategic_doctrine;
 pub mod army_rules;
 pub mod army_traditions;
+pub mod assembly_rules;
 pub mod auto_resolve;
 pub mod battle_ability;
 pub mod battle_history;

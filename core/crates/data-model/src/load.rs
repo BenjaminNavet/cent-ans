@@ -111,6 +111,8 @@ pub mod folders {
     pub const CAUSE_THRESHOLDS: &str = "cause_thresholds.json";
     /// Attention budget (XP-AUDIENCE), inside `rules/`; optional.
     pub const AGENDA_RULES: &str = "agenda.json";
+    /// Assemblies consenting to the extraordinary tax (ECO-R1), inside `rules/`; optional.
+    pub const ASSEMBLY_RULES: &str = "assemblies.json";
     /// The campaign arc in acts (ADR 0784), inside `rules/`; optional.
     pub const ACTS_RULES: &str = "acts.json";
     /// The counsellor's season advice (ADR 0789), inside `rules/`; optional.
@@ -386,6 +388,8 @@ pub struct GameData {
     pub cause_thresholds: crate::entities::cause_thresholds::CauseThresholds,
     /// `data/rules/agenda.json` (XP-AUDIENCE, R1).
     pub agenda_rules: crate::entities::agenda_rules::AgendaRules,
+    /// `data/rules/assemblies.json` (ECO-R1); no assembly when absent.
+    pub assembly_rules: crate::entities::assembly_rules::AssemblyRules,
     /// `data/rules/acts.json` (ADR 0784).
     pub acts_rules: crate::entities::acts_rules::ActsRules,
     /// `data/rules/advisor.json` (ADR 0789).
@@ -577,6 +581,7 @@ impl GameData {
             finance_rules: Default::default(),
             cause_thresholds: Default::default(),
             agenda_rules: Default::default(),
+            assembly_rules: Default::default(),
             acts_rules: Default::default(),
             advisor_rules: Default::default(),
             economy_rules: Default::default(),
@@ -721,6 +726,10 @@ impl GameData {
         read_into(
             &mut data.agenda_rules,
             &root.join(folders::RULES).join(folders::AGENDA_RULES),
+        )?;
+        read_into(
+            &mut data.assembly_rules,
+            &root.join(folders::RULES).join(folders::ASSEMBLY_RULES),
         )?;
         read_into(
             &mut data.acts_rules,
@@ -957,6 +966,7 @@ impl GameData {
         checker.check_chivalric_orders();
         checker.check_retinue();
         checker.check_trade();
+        checker.check_assemblies();
         checker.check_sea_lanes();
         if checker.errors.is_empty() {
             Ok(())
@@ -1349,6 +1359,47 @@ impl ReferenceChecker<'_> {
             if let Some(religion) = &edict.requires.religion {
                 self.require(id, "requires.religion", religion, &data.religions);
             }
+        }
+    }
+
+    /// ECO-R1: the assemblies' houses, provinces and demands exist; every id is unique.
+    fn check_assemblies(&mut self) {
+        let data = self.data;
+        let rules = &data.assembly_rules;
+        let mut seen = std::collections::BTreeSet::new();
+        for assembly in &rules.assemblies {
+            let id = format!("assembly {}", assembly.id);
+            if !seen.insert(assembly.id.as_str()) {
+                self.errors.push(ReferenceError {
+                    entity: id.clone(),
+                    field: "id".to_owned(),
+                    target: "duplicate assembly id".to_owned(),
+                });
+            }
+            if let Ok(house) = crate::FactionId::new(&assembly.house) {
+                self.require(&id, "house", &house, &data.factions);
+            }
+            for province in &assembly.provinces {
+                if let Ok(province) = crate::ProvinceId::new(province) {
+                    self.require(&id, "provinces", &province, &data.provinces);
+                }
+            }
+            for demand in &assembly.demands {
+                if rules.concession(demand).is_none() {
+                    self.errors.push(ReferenceError {
+                        entity: id.clone(),
+                        field: "demands".to_owned(),
+                        target: demand.clone(),
+                    });
+                }
+            }
+        }
+        if rules.is_active() && rules.ask(&rules.ai.ask).is_none() {
+            self.errors.push(ReferenceError {
+                entity: "assembly rules".to_owned(),
+                field: "ai.ask".to_owned(),
+                target: rules.ai.ask.clone(),
+            });
         }
     }
 

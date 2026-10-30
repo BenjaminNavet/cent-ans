@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/assemblies.schema.json",
+  "title": "Assemblées qui consentent l'impôt",
+  "description": "Fichier data/rules/assemblies.json (lot ECO-R1, « L'impôt consenti ») : assemblées (États, Parlement), nécessités, paliers de demande, formes de subside, catalogue de concessions, règles de vote et d'humeur. Lu par sim-campaign::assembly (AssemblyRules).",
+  "type": "object",
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "ids": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "mood": {
+      "type": "object",
+      "description": "Humeur des assemblées (0-100) et son évolution.",
+      "properties": {
+        "max": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "rest": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Valeur vers laquelle l'humeur revient." },
+        "recovery_per_season": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "refusal_penalty": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Humeur perdue quand une session est refusée ou que les conditions sont déclinées." },
+        "grant_fatigue": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Humeur perdue à chaque subside accordé." },
+        "promise_kept_bonus": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "promise_broken_penalty": { "type": "integer", "minimum": 0, "maximum": 100 }
+      },
+      "additionalProperties": false,
+      "required": ["max", "rest", "recovery_per_season", "refusal_penalty", "grant_fatigue", "promise_kept_bonus", "promise_broken_penalty"]
+    },
+    "vote": {
+      "type": "object",
+      "description": "Calcul de l'accord : humeur + légitimité provisoire (prestige) + nécessité + palier − poids des subsides en cours − agitation − promesses trahies.",
+      "properties": {
+        "prestige_weight": { "type": "number", "minimum": 0, "maximum": 10 },
+        "unrest_weight": { "type": "number", "minimum": 0, "maximum": 10 },
+        "subsidy_weight": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "broken_promise_weight": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "broken_memory_seasons": { "type": "integer", "minimum": 0, "maximum": 400 },
+        "grant_threshold": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "conditional_threshold": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "points_per_concession": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 },
+        "max_concessions": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "permanent_penalty": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "answer_window_seasons": { "type": "integer", "minimum": 1, "maximum": 40 },
+        "answer_delay_seasons": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "history_sessions": { "type": "integer", "minimum": 1, "maximum": 100 }
+      },
+      "additionalProperties": false,
+      "required": ["prestige_weight", "unrest_weight", "subsidy_weight", "broken_promise_weight", "broken_memory_seasons", "grant_threshold", "conditional_threshold", "points_per_concession", "max_concessions", "permanent_penalty", "answer_window_seasons", "answer_delay_seasons", "history_sessions"]
+    },
+    "grogne": {
+      "type": "object",
+      "description": "Agitation locale causée par la perception.",
+      "properties": {
+        "unrest_per_burden": { "type": "number", "minimum": 0, "maximum": 100 },
+        "max_unrest": { "type": "number", "minimum": 0, "maximum": 100 },
+        "urban_full_share": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "broken_promise_unrest": { "type": "number", "minimum": 0, "maximum": 100 },
+        "broken_promise_unrest_turns": { "type": "integer", "minimum": 0, "maximum": 400 }
+      },
+      "additionalProperties": false,
+      "required": ["unrest_per_burden", "max_unrest", "urban_full_share", "broken_promise_unrest", "broken_promise_unrest_turns"]
+    },
+    "ai": {
+      "type": "object",
+      "description": "Premières règles de l'IA (R1-c les affine).",
+      "properties": {
+        "convene_below_seasons": { "type": "number", "minimum": 0, "maximum": 100 },
+        "accept_cost_up_to": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "ask": { "type": "string", "minLength": 1, "description": "Palier de demande préféré (id)." }
+      },
+      "additionalProperties": false,
+      "required": ["convene_below_seasons", "accept_cost_up_to", "ask"]
+    },
+    "necessities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "enum": ["defensive_war", "invasion", "ransom", "offensive_war", "crusade"] },
+          "name": { "type": "string", "minLength": 1 },
+          "multiplier": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+          "accord_bonus": { "type": "number", "minimum": -1000, "maximum": 1000 }
+        },
+        "additionalProperties": false,
+        "required": ["id", "name", "multiplier", "accord_bonus"]
+      }
+    },
+    "asks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "name": { "type": "string", "minLength": 1 },
+          "ordinary_multiple": { "type": "number", "exclusiveMinimum": 0, "maximum": 20 },
+          "term_seasons": { "type": "integer", "minimum": 1, "maximum": 80 },
+          "accord_modifier": { "type": "number", "minimum": -1000, "maximum": 1000 }
+        },
+        "additionalProperties": false,
+        "required": ["id", "name", "ordinary_multiple", "term_seasons", "accord_modifier"]
+      }
+    },
+    "forms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "name": { "type": "string", "minLength": 1 },
+          "assemblies": { "$ref": "#/$defs/ids", "description": "Assemblées qui peuvent la voter (vide : toutes)." },
+          "from_year": { "type": "integer", "minimum": 0, "maximum": 2000 },
+          "urban_weight": { "type": "number", "minimum": 0, "maximum": 10 },
+          "rural_weight": { "type": "number", "minimum": 0, "maximum": 10 },
+          "permanent_from_year": { "type": "integer", "minimum": 0, "maximum": 2000 },
+          "permanent_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+          "permanent_unrest": { "type": "number", "minimum": 0, "maximum": 100 }
+        },
+        "additionalProperties": false,
+        "required": ["id", "name", "from_year", "urban_weight", "rural_weight"]
+      }
+    },
+    "concessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "name": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 },
+          "kind": { "enum": ["strong_money", "elected_officers", "dismiss_counsellor", "end_war", "grant"] },
+          "cost": { "type": "integer", "minimum": 0, "maximum": 10000 },
+          "duration_seasons": { "type": "integer", "minimum": 0, "maximum": 400 },
+          "prestige_cost": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "grievance_tenths": { "type": "integer", "minimum": -1000, "maximum": 1000 },
+          "ordinary_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+          "household_cap_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+          "office": { "type": "string", "minLength": 1 },
+          "truce_within_seasons": { "type": "integer", "minimum": 1, "maximum": 40 }
+        },
+        "additionalProperties": false,
+        "required": ["id", "name", "text", "kind", "cost", "duration_seasons"]
+      }
+    },
+    "assemblies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "#/$defs/id" },
+          "name": { "type": "string", "minLength": 1 },
+          "house": { "type": "string", "pattern": "^fac_[a-z0-9_]+$" },
+          "provinces": { "$ref": "#/$defs/ids" },
+          "regions": { "$ref": "#/$defs/ids" },
+          "all_provinces": { "type": "boolean" },
+          "orders": { "$ref": "#/$defs/ids" },
+          "start_mood": { "type": "integer", "minimum": 0, "maximum": 1000 },
+          "min_gap_seasons": { "type": "integer", "minimum": 4, "maximum": 400 },
+          "min_covered_provinces": { "type": "integer", "minimum": 1, "maximum": 1000 },
+          "demands": { "$ref": "#/$defs/ids" }
+        },
+        "additionalProperties": false,
+        "required": ["id", "name", "house", "orders", "start_mood", "min_gap_seasons", "min_covered_provinces", "demands"]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["mood", "vote", "grogne", "ai", "necessities", "asks", "forms", "concessions", "assemblies"]
+}
