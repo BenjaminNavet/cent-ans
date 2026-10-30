@@ -29,7 +29,7 @@ Audit : docs/audits/2026-10-29-bataille.md. Fait : BANC-1/2 (banc d'équilibre, 
 - À faire : IA-PLAN-2 plans offensifs (échelons, fixer-déborder, provoquer ; Crécy et Castillon à corriger) → IA-PLAN-3 lisibilité du plan ennemi et des déroutes → COHESION-1 fatigue et cohésion d'armée → COHESION-2 fin de la cadence historique, réglage tir/choc → BANC-3 (tests d'issue = bandes du banc, vitrine historique). Plus tard : avant-garde/bataille/arrière-garde (R2), siège gagné en campagne (R4), captifs et rançons (R5).
 - Critères : le banc ne régresse jamais ; les batailles historiques (Crécy, Poitiers, Azincourt, Formigny, Castillon, Auray) donnent l'issue historique majoritairement ; moins de duels sans contact ; hommes d'armes à pied qui tiennent une charge frontale.
 
-### 4. Économie et politique — EN PAUSE (30/10, décision du joueur : ni juge ni lot économique jusqu'à nouvel ordre ; branche ECO-R2b gardée telle quelle)
+### 4. Économie et politique — EN PAUSE (30/10, décision du joueur : ni juge ni lot économique jusqu'à nouvel ordre ; ECO-R2b, en cours, est le dernier lot mené à terme)
 Audit : docs/audits/2026-10-29-economie-politique.md. Fait : R0, R1-a/b/d impôt consenti (États, Parlement, subsides, concessions, onglet États), R2-a semonce féodale.
 - À faire : R1-c (IA, Angleterre, maltôte ; part de l'armée de la France IA 17-22 % → 35-60 %) ; R2-b lettres de retenue ; R2-c compagnies nées de la paix et des arriérés ; R3 princes et apanages ; R4 légitimité et couronne ; R5 crises nées des causes (peste, travail, révoltes).
 - Critère : sonde eco_series (3 graines) dans les bandes de l'audit ; pas de banqueroute en chaîne ; seed bots dans leurs bandes.
