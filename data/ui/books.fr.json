@@ -1,0 +1,48 @@
+{
+  "description": "XP-R3 (ADR 0818) : les livres à onglets de l'interface de campagne. Chaque onglet désigne une vue existante (panneau + onglet interne) ; le cadre « livre » ne fait que les relier par une rangée d'onglets commune. `name` est le nom du bouton d'onglet (agent `click`), conservé des anciennes fenêtres. Aucune règle de jeu ici.",
+  "books": [
+    {
+      "id": "kingdom",
+      "title": "Royaume",
+      "action": "map_toggle_kingdom",
+      "launcher": "hud:open_kingdom",
+      "icon": "glyph_crown",
+      "detail": "Fiche, budget, finances, chantiers, économie, commerce, monnaie et féodalité.",
+      "tabs": [
+        { "key": "sheet", "name": "faction:tab:sheet", "label": "Fiche", "panel": "faction", "inner": "faction:tab:sheet" },
+        { "key": "budget", "name": "faction:tab:budget", "label": "Budget", "panel": "faction", "inner": "faction:tab:budget" },
+        { "key": "finance", "name": "faction:tab:finance", "label": "Finances", "panel": "faction", "inner": "faction:tab:finance" },
+        { "key": "assembly", "name": "faction:tab:assembly", "label": "États", "panel": "faction", "inner": "faction:tab:assembly", "needs": "assembly_house" },
+        { "key": "works", "name": "faction:tab:works", "label": "Chantiers", "panel": "faction", "inner": "faction:tab:works" },
+        { "key": "overview", "name": "economy:tab:overview", "label": "Économie", "panel": "economy", "inner": "overview" },
+        { "key": "trade", "name": "economy:tab:trade", "label": "Commerce", "panel": "economy", "inner": "trade" },
+        { "key": "currency", "name": "economy:tab:currency", "label": "Monnaie", "panel": "economy", "inner": "currency" },
+        { "key": "feudal", "name": "book:kingdom:feudal", "label": "Féodalité", "panel": "feudal", "inner": "" },
+        { "key": "orders", "name": "faction:tab:court", "label": "Ordres", "panel": "faction", "inner": "faction:tab:court" }
+      ]
+    },
+    {
+      "id": "chronicle",
+      "title": "Chronique",
+      "action": "map_toggle_chronicle",
+      "launcher": "hud:open_chronicle",
+      "icon": "hud_chronicle",
+      "detail": "Registre, décisions, lettres, causes et journal.",
+      "tabs": [
+        { "key": "registry", "name": "chronicle:tab_registry", "label": "Registre", "panel": "chronicle", "inner": "registry" },
+        { "key": "decisions", "name": "chronicle:tab_decisions", "label": "Décisions", "panel": "chronicle", "inner": "decisions" },
+        { "key": "letters", "name": "chronicle:tab_letters", "label": "Lettres", "panel": "chronicle", "inner": "letters" },
+        { "key": "causes", "name": "chronicle:tab_causes", "label": "Causes", "panel": "chronicle", "inner": "causes" },
+        { "key": "journal", "name": "chronicle:tab_journal", "label": "Journal", "panel": "chronicle", "inner": "journal" }
+      ]
+    }
+  ],
+  "aliases": [
+    { "name": "hud:open_faction", "book": "kingdom", "tab": "sheet" },
+    { "name": "hud:open_economy", "book": "kingdom", "tab": "overview" },
+    { "name": "hud:open_feudal", "book": "kingdom", "tab": "feudal" }
+  ],
+  "registry": {
+    "empty": "Rien à surveiller ce trimestre."
+  }
+}

@@ -324,52 +324,48 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0748 | [Budget mémoire du client Bevy](0748-budget-memoire.md) | acceptée |
 | 0749 | [Puits d'argent : ponction progressive sur l'épargne dormante (lot ECO)](0749-puits-d-argent-epargne-progressive.md) | accepté |
 | 0750 | [Eau, côtes et neige de la campagne](0750-eau-cotes-neige-de-la-campagne.md) | accepté |
-| 0748 | [Budget mémoire du client Bevy](0748-budget-memoire.md) | accepté |
-| 0749 | [Puits d'argent : épargne progressive](0749-puits-d-argent-epargne-progressive.md) | accepté (paliers amendés par 0777) |
-| 0754 | [Journal des causes](0754-journal-des-causes.md) | accepté |
-| 0760 | [Masse et cadrage des armées en bataille](0760-masse-et-cadrage-des-armees-en-bataille.md) | accepté |
-| 0777 | [Le roi et sa dette : charges, crédit, impôts exceptionnels, banqueroute royale](0777-le-roi-et-sa-dette.md) | accepté |
-| 0778 | [Éco-guerre et budget lisible](0778-eco-guerre-et-budget-lisible.md) | accepté |
 | 0752 | [Un seul bandeau Conseiller](0752-bandeau-conseiller-unique.md) | accepté |
 | 0753 | [Focus clavier et manette du kit UI](0753-focus-clavier-et-manette.md) | accepté |
 | 0754 | [Journal des causes (« pourquoi ai-je perdu / gagné ? »)](0754-journal-des-causes.md) | accepté |
 | 0755 | [Palette unique, six heures de bataille, voile de campagne réduit](0755-palette-unique-et-heures-de-bataille.md) | accepté |
 | 0760 | [Masse, variété et cadrage des armées en bataille](0760-masse-et-cadrage-des-armees-en-bataille.md) | n/d |
-| 0774 | [Garde-fous : shaders validés par test, journaux de shader fatals, bancs sur machine calme](0774-garde-fous-shaders-et-bancs.md) | accepté |
-| 0775 | [Focus du HUD (F9, portée unique), focus initial sûr, avis ordonnés, libellés abrégés, aide de siège](0775-focus-hud-avis-ordonnes-et-aide-de-siege.md) | accepté |
-| 0770 | [Forêts et hameaux de la campagne](0770-forets-hameaux-campagne.md) | accepté |
-| 0776 | [Mémoire de campagne : textures de modèles et allocateur](0776-memoire-campagne-textures-modeles.md) | accepté |
-| 0779 | [Histoire conditionnée et bifurcations](0779-histoire-conditionnee-et-bifurcations.md) | accepté |
-| 0782 | [Doctrines stratégiques de l'IA de campagne](0782-doctrines-strategiques-de-l-ia.md) | accepté |
-| 0783 | [Paliers de comportement de la difficulté de l'IA](0783-paliers-de-comportement-de-la-difficulte-ia.md) | accepté |
-| 0784 | [L'arc de partie en trois actes](0784-arc-de-partie-en-trois-actes.md) | accepté (fin d'acte et politiques amendées par 0805) |
-| 0785 | [Victoire par score de règne (amende 0245)](0785-victoire-par-score-de-regne.md) | remplacé par l'ADR 0805 |
-| 0788 | [Score de règne : des actes, pas l'attente ; épargne dormante nette des dettes](0788-score-de-regne-par-actes-et-epargne-nette.md) | accepté (§ 1 remplacé par 0805) |
-| 0789 | [Conseiller de saison, annonce de la posture de l'IA, oracle d'équilibre des seed bots](0789-conseiller-de-saison-posture-de-l-ia-et-oracle-d-equilibre.md) | accepté |
-| 0780 | [Interface du crédit et des impôts exceptionnels](0780-interface-du-credit.md) | accepté |
+| 0770 | [forêts, saisons des arbres et hameaux composés de la campagne](0770-forets-hameaux-campagne.md) | n/d |
 | 0772 | [Le compteur « Nuit dans » suit l'heure de départ](0772-compteur-nuit-lie-a-l-heure-de-depart.md) | n/d |
 | 0773 | [Mise en scène des batailles : cadrage de siège, suivi, cartes compactes, premier plan](0773-mise-en-scene-des-batailles.md) | n/d |
-| 0787 | [Sol de campagne sans patchwork](0787-sol-de-campagne-sans-patchwork.md) | accepté |
-| 0790 | [LOD1-2 refaits par voxels et texture recuite](0790-lod-par-voxels-et-texture-recuite.md) | accepté |
+| 0774 | [Garde-fous : shaders validés par test, journaux de shader fatals, bancs sur machine calme](0774-garde-fous-shaders-et-bancs.md) | accepté |
+| 0775 | [Focus du HUD (F9, portée unique), focus initial sûr, avis ordonnés, libellés abrégés, aide de siège](0775-focus-hud-avis-ordonnes-et-aide-de-siege.md) | accepté |
+| 0776 | [Mémoire de campagne : textures de modèles GPU seules, BC1, mimalloc](0776-memoire-campagne-textures-modeles.md) | acceptée |
+| 0777 | [Le roi et sa dette : charges structurelles, crédit, impôts exceptionnels, banqueroute royale (lot ECO2)](0777-le-roi-et-sa-dette.md) | accepté |
+| 0778 | [Éco-guerre et budget lisible (lot ECO2)](0778-eco-guerre-et-budget-lisible.md) | accepté |
+| 0779 | [Histoire conditionnée et bifurcations](0779-histoire-conditionnee-et-bifurcations.md) | accepté |
+| 0780 | [Interface du crédit et des impôts exceptionnels (lot CREDIT-UI)](0780-interface-du-credit.md) | accepté |
+| 0782 | [Doctrines stratégiques de l'IA de campagne (lot IA-DOCTRINES)](0782-doctrines-strategiques-de-l-ia.md) | accepté |
+| 0783 | [Paliers de comportement de la difficulté de l'IA (lot IA-DOCTRINES)](0783-paliers-de-comportement-de-la-difficulte-ia.md) | accepté |
+| 0784 | [L'arc de partie en trois actes](0784-arc-de-partie-en-trois-actes.md) | accepté |
+| 0785 | [Victoire par score de règne (amende 0245)](0785-victoire-par-score-de-regne.md) | remplacé par l’ADR 0805 |
+| 0787 | [Sol de campagne : fin du patchwork de parcelles à bords nets](0787-sol-de-campagne-sans-patchwork.md) | n/d |
+| 0788 | [Score de règne : des actes, pas l'attente ; épargne dormante nette des dettes](0788-score-de-regne-par-actes-et-epargne-nette.md) | accepté |
+| 0789 | [Conseiller de saison, annonce de la posture de l'IA, oracle d'équilibre des seed bots](0789-conseiller-de-saison-posture-de-l-ia-et-oracle-d-equilibre.md) | accepté |
+| 0790 | [LOD1-2 refaits par voxels et texture recuite (classes massives)](0790-lod-par-voxels-et-texture-recuite.md) | accepté |
 | 0791 | [Sol de campagne : aspect provisoire avant le chargement du sol texturé](0791-sol-aspect-provisoire-avant-chargement.md) | accepté |
-| 0792 | [Combat : rééquilibrage du tir (lot COMBAT, boucle juge 1)](0792-equilibrage-tir-et-choc.md) | accepté |
-| 0793 | [ECO : économie resserrée, attrition hors territoire, réserve de recrutement](0793-economie-attrition-reserve.md) | accepté (seuil de victoire revu par 0805) |
-| 0794 | [Mémoire de campagne : textures de modèles BC1 en assets neufs, mesure avec relief](0794-textures-de-modeles-en-assets-neufs.md) | accepté |
-| 0795 | [MEM5 : les « 3 Go graphiques non comptés » sont le tas mimalloc](0795-mem5-tas-mimalloc-etiquete-ioaccelerator.md) | accepté |
+| 0792 | [Combat : rééquilibrage du tir (lot COMBAT, boucle juge 1)](0792-equilibrage-tir-et-choc.md) | n/d |
+| 0793 | [ECO : économie resserrée, attrition hors territoire, réserve de recrutement](0793-economie-attrition-reserve.md) | accepté |
+| 0794 | [Mémoire de campagne : textures de modèles BC1 dans des assets neufs, mesure avec relief](0794-textures-de-modeles-en-assets-neufs.md) | acceptée |
+| 0795 | [MEM5 : les « 3 Go graphiques non comptés » sont le tas mimalloc](0795-mem5-tas-mimalloc-etiquete-ioaccelerator.md) | acceptée |
 | 0796 | [TUTO : le champ `prestige` des factions est supprimé](0796-tuto-prestige-champ-supprime.md) | accepté |
-| 0797 | [Position diplomatique en bande intérieure en vue 3D (VIS-R2)](0797-vis-r2-position-diplomatique-en-bande.md) | accepté |
+| 0797 | [Position diplomatique en bande intérieure en vue 3D (VIS-R2)](0797-vis-r2-position-diplomatique-en-bande.md) | n/d |
 | 0798 | [HIST4 : aptitude historique du conseil, monnaie par faction, contrastes par défaut](0798-hist4-conseil-monnaies-contrastes.md) | accepté |
-| 0799 | [Ciel, lumière et air de la carte de campagne (VIS-R1)](0799-vis-r1-ciel-et-lumiere-de-la-carte.md) | accepté |
-| 0800 | [BANC-1 : banc d'équilibre des batailles](0800-banc-1-banc-d-equilibre.md) | accepté |
-| 0801 | [XP-LISIBLE : plancher typographique, glossaire testé, signes à l’encre](0801-xp-lisible-plancher-glossaire-signes.md) | accepté |
-| 0802 | [IA-CAV : charge groupée de la cavalerie (boucle juge 2)](0802-iacav-charge-groupee-cavalerie.md) | accepté |
+| 0799 | [Ciel, lumière et air de la carte de campagne (VIS-R1)](0799-vis-r1-ciel-et-lumiere-de-la-carte.md) | acceptée |
+| 0800 | [BANC-1 : banc d'équilibre des batailles](0800-banc-1-banc-d-equilibre.md) | n/d |
+| 0801 | [XP-LISIBLE : plancher typographique, glossaire testé, signes à l'encre](0801-xp-lisible-plancher-glossaire-signes.md) | accepté |
+| 0802 | [IA-CAV : charge groupée de la cavalerie (boucle juge 2)](0802-iacav-charge-groupee-cavalerie.md) | n/d |
 | 0803 | [VIS-R6b : lieux génériques de la famille « ouest » refaits en Meshy meshy-6](0803-vis-r6-lieux-generiques-meshy.md) | accepté |
-| 0804 | [Végétation de plaine (VIS-R7)](0804-vis-r7-vegetation-de-plaine.md) | accepté |
+| 0804 | [Végétation de plaine (VIS-R7)](0804-vis-r7-vegetation-de-plaine.md) | n/d |
 | 0805 | [R1 : renommée accumulée, actes à dates fixes, ambitions](0805-r1-renommee-actes-a-dates-fixes-ambitions.md) | accepté |
 | 0806 | [VIS-R5 : eau de la carte (bathymétrie réelle, rivières)](0806-vis-r5-eau.md) | accepté |
-| 0807 | [BANC-2 : auto-résolution recalibrée et datée](0807-banc-2-auto-resolution.md) | accepté |
+| 0807 | [BANC-2 : auto-résolution recalibrée et datée](0807-banc-2-auto-resolution.md) | n/d |
 | 0808 | [ECO-R2a : la semonce féodale donne des soldats](0808-eco-r2a-semonce-feodale.md) | accepté |
-| 0809 | [IA-PLAN-1 : planificateur d'IA de bataille par divisions](0809-ia-plan-planificateur.md) | accepté |
+| 0809 | [IA-PLAN-1 : planificateur d'IA de bataille par divisions](0809-ia-plan-planificateur.md) | n/d |
 | 0810 | [La cause au moment de l'effet (XP-POURQUOI, R4)](0810-xp-pourquoi-causes.md) | accepté |
 | 0811 | [Rivières lisibles à toute distance (lot RIVIERES)](0811-rivieres-lisibles.md) | accepté |
 | 0812 | [Budget d'attention et Audience de saison (XP-AUDIENCE, R1)](0812-xp-audience.md) | accepté |
@@ -377,3 +373,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0814 | [VIS-R3b : parcellaire typé du sol de campagne](0814-vis-r3b-parcellaire-type.md) | accepté |
 | 0815 | [ECO-R1c : l'impôt consenti, IA et Angleterre](0815-eco-r1c-ia-et-angleterre.md) | accepté |
 | 0816 | [IA-PLAN-2 : plans offensifs (fix, wear, strike, screen)](0816-ia-plan-2-plans-offensifs.md) | accepté |
+| 0818 | [Les cinq livres : cadre « livre à onglets » (XP-R3)](0818-xp-r3-cinq-livres.md) | accepté |

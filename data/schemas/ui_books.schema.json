@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ui_books.schema.json",
+  "title": "Livres à onglets de l'interface (XP-R3, ADR 0818)",
+  "description": "Chaque livre relie des vues existantes (panneau + onglet interne) par une rangée d'onglets. Aucune règle de jeu.",
+  "type": "object",
+  "required": ["books", "aliases"],
+  "properties": {
+    "description": {"type": "string"},
+    "books": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "action", "launcher", "tabs"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z_]+$"},
+          "title": {"type": "string", "minLength": 1},
+          "action": {"type": "string", "minLength": 1},
+          "launcher": {"type": "string", "minLength": 1},
+          "icon": {"type": "string"},
+          "detail": {"type": "string"},
+          "tabs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["key", "name", "label", "panel", "inner"],
+              "properties": {
+                "key": {"type": "string", "pattern": "^[a-z_]+$"},
+                "name": {"type": "string", "minLength": 1},
+                "label": {"type": "string", "minLength": 1, "maxLength": 20},
+                "panel": {"type": "string", "enum": ["faction", "economy", "feudal", "chronicle"]},
+                "inner": {"type": "string"},
+                "needs": {"type": "string", "enum": ["assembly_house"]}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "book", "tab"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "book": {"type": "string"},
+          "tab": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "registry": {"type": "object", "additionalProperties": {"type": "string"}}
+  },
+  "additionalProperties": false
+}
