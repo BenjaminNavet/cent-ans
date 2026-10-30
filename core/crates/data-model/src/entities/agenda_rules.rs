@@ -56,6 +56,8 @@ pub struct AgendaRules {
     pub max_strong_decisions_per_season: u32,
     /// Events that are crises: they open at once, whatever the cap.
     pub crisis_events: Vec<String>,
+    /// Seconds the Audience card stays open before it folds into the Registre counter.
+    pub audience_seconds: f32,
     /// The treasurer speaks when the coming season's net balance falls below this (negative).
     pub treasury_affair_below: i64,
     pub sources: Vec<AgendaSource>,
@@ -69,6 +71,7 @@ impl Default for AgendaRules {
             max_watch: 5,
             max_strong_decisions_per_season: 1,
             crisis_events: Vec::new(),
+            audience_seconds: 25.0,
             treasury_affair_below: -1,
             sources: Vec::new(),
         }

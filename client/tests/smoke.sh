@@ -41,6 +41,7 @@ typeset -A scenario_env scenario_args
 scenario_env[campaign_battle]="CENT_ANS_STAGE_BATTLE=1 CENT_ANS_FLOW_SIM_TO_END=1 CENT_ANS_LOADING_SECONDS=0"
 scenario_args[campaign_turns]="--faction fac_england"
 scenario_args[campaign_attention]="--faction fac_england"
+scenario_args[campaign_audience]="--faction fac_england"
 scenario_args[campaign_descent]="--bench-map --bench-descent-only"
 
 # scenario -> `dump-file=State` pairs: the final state each dump must report (AppState name).
@@ -52,6 +53,7 @@ scenario_expect[campaign]="campaign=Campaign campaign_panels=Campaign"
 scenario_expect[campaign_battle]="campaign_battle_after=Campaign campaign_battle_turn=Campaign"
 scenario_expect[campaign_turns]="turns_0=Campaign turns_1=Campaign"
 scenario_expect[campaign_attention]="attention_0=Campaign attention_10=Campaign"
+scenario_expect[campaign_audience]="audience_card=Campaign audience_rest=Campaign"
 scenario_expect[codex]="codex=Codex"
 scenario_expect[faction_select]="faction_select=FactionSelect"
 scenario_expect[faction_works]="works_0=Campaign works_1=Campaign works_2=Campaign"
@@ -61,6 +63,13 @@ scenario_expect[main_menu]="main_menu=MainMenu"
 # Récit of the season must already explain something on the third turn).
 typeset -A scenario_nonempty
 scenario_nonempty[campaign_turns]="turns_1:season_story.story.why"
+scenario_nonempty[campaign_audience]="audience_card:agenda.agenda.affairs"
+
+# scenario -> `dump-file:section.path=N` pairs whose JSON list must hold at most N items (XP-AUDIENCE:
+# never more than three Affairs pushed at once).
+typeset -A scenario_maxlen
+scenario_maxlen[campaign_attention]="attention_0:agenda.agenda.affairs=3 attention_6:agenda.agenda.affairs=3 attention_10:agenda.agenda.affairs=3"
+scenario_maxlen[campaign_audience]="audience_card:agenda.agenda.affairs=3 audience_rest:agenda.agenda.affairs=3"
 
 if (( $# )); then names=("$@"); else names=(${(f)"$(cd "$here/smoke" && ls *.txt | sed 's/\.txt$//')"}); fi
 
@@ -120,6 +129,18 @@ node = json.load(open(sys.argv[1]))
 for key in sys.argv[2].split("."):
     node = node[key]
 sys.exit(0 if node else 1)' "$dump" "$jpath" 2>/dev/null || reasons+=("${pair%%:*}.json: ${jpath} is empty or missing")
+	done
+	for pair in ${=scenario_maxlen[$name]:-}; do
+		dump="$root/out/smoke/${pair%%:*}.json"
+		rest=${pair#*:}
+		jpath=${rest%=*}
+		limit_items=${rest##*=}
+		python3 -c '
+import json, sys
+node = json.load(open(sys.argv[1]))
+for key in sys.argv[2].split("."):
+    node = node[key] if node else []
+sys.exit(0 if node is None or len(node) <= int(sys.argv[3]) else 1)' "$dump" "$jpath" "$limit_items" 2>/dev/null || reasons+=("${pair%%:*}.json: ${jpath} holds more than ${limit_items} items")
 	done
 	if (( ${#reasons} )); then
 		echo "SMOKE FAIL $name (${elapsed}s): ${(j:, :)reasons} -> $log"

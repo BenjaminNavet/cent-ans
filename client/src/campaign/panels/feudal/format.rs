@@ -384,15 +384,6 @@ pub fn is_feudal_event(kind: &str, text: &str) -> bool {
     FEUDAL_WORDS.iter().any(|word| lower.contains(word))
 }
 
-/// « 1 événement féodal » / « 3 événements féodaux » (`FrText.count`).
-pub fn event_count(n: usize) -> String {
-    if n <= 1 {
-        format!("{n} événement féodal")
-    } else {
-        format!("{n} événements féodaux")
-    }
-}
-
 #[cfg(test)]
 mod event_tests {
     use super::*;
@@ -402,7 +393,5 @@ mod event_tests {
         assert!(is_feudal_event("vassalage", "x"));
         assert!(is_feudal_event("battle", "Le Duc prononce la Commise"));
         assert!(!is_feudal_event("battle", "Bataille de Crécy"));
-        assert_eq!(event_count(1), "1 événement féodal");
-        assert_eq!(event_count(3), "3 événements féodaux");
     }
 }

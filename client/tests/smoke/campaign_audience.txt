@@ -1,0 +1,11 @@
+# Campaign: the Audience card at the start of a season, then at rest (folded after audience_seconds) - XP-AUDIENCE.
+state Campaign
+wait 120
+key Enter
+wait 100
+key Enter
+wait 200
+dump out/smoke/audience_card.json
+wait 2400
+dump out/smoke/audience_rest.json
+exit

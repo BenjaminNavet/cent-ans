@@ -1,10 +1,9 @@
-//! Offers received at the end of a season: auto-opening, toast and HUD pill.
+//! Offers received at the end of a season: counted for the HUD pill.
 //!
-//! Ports the end-of-turn half of `map/diplomacy_controller.gd` (`after_end_turn`): a new offer is
-//! announced by a toast; the screen opens by itself only for a weighty offer (peace, alliance,
-//! homage...; routine trade treaties never open it) and not over a decision of the chronicle that
-//! waits for the player. The « Diplomatie » button of the HUD shows how many offers wait (the
-//! « pastille »).
+//! Ports the end-of-turn half of `map/diplomacy_controller.gd` (`after_end_turn`). Since
+//! XP-AUDIENCE the screen no longer opens by itself and no toast announces an offer: the
+//! Audience (`hud/audience.rs`) carries the `diplomacy_offer` Affair. The « Diplomatie » button
+//! of the HUD shows how many offers wait (the « pastille »).
 
 use std::collections::HashSet;
 
@@ -12,14 +11,10 @@ use bevy::prelude::*;
 use game_api::diplomacy::{OfferView, offers};
 use serde_json::{Value, json};
 
-use super::DiplomacyUi;
 use crate::agent::dump::DumpAppExt;
 use crate::app::AppState;
 use crate::campaign::hud::flow::TurnAdvanced;
-use crate::campaign::panels::OpenPanel;
-use crate::campaign::panels::chronicle::ChroniclePanel;
 use crate::sim::Sim;
-use crate::ui::kit::modal::ToastRequest;
 
 /// Offer kinds that never open the screen on their own (`ROUTINE_OFFER_KINDS`).
 pub const ROUTINE_OFFER_KINDS: [&str; 1] = ["treaty"];
@@ -34,12 +29,8 @@ pub struct OfferWatch {
     seen: HashSet<u32>,
     pub last_fresh: usize,
     pub last_weighty: usize,
-    pub auto_opened: u32,
-    pub toasts: u32,
     pub waiting: usize,
     pub pill: String,
-    /// A weighty offer waits for the screen to be free (ADR 0775: one notice at a time).
-    pub deferred: bool,
 }
 
 pub struct NotifyPlugin;
@@ -51,7 +42,7 @@ impl Plugin for NotifyPlugin {
             .add_systems(OnEnter(AppState::Campaign), reset)
             .add_systems(
                 Update,
-                (after_turn, open_deferred, update_pill)
+                (after_turn, update_pill)
                     .chain()
                     .run_if(in_state(AppState::Campaign)),
             );
@@ -86,16 +77,12 @@ pub fn count_text(count: usize) -> String {
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+/// Counts the offers the season brought. XP-AUDIENCE: nothing opens or pops up by itself any more;
+/// the Audience carries the offers (`diplomacy_offer` Affair) and the HUD pill counts them.
 fn after_turn(
     mut turns: MessageReader<TurnAdvanced>,
     sim: Res<Sim>,
     mut watch: ResMut<OfferWatch>,
-    ui: Res<DiplomacyUi>,
-    chronicle: Option<Res<ChroniclePanel>>,
-    modals: Option<Res<crate::ui::kit::modal::ModalQueue>>,
-    mut panels: MessageWriter<OpenPanel>,
-    mut toasts: MessageWriter<ToastRequest>,
 ) {
     if turns.read().count() == 0 {
         return;
@@ -107,63 +94,6 @@ fn after_turn(
     let (fresh, weighty) = classify(&mut watch.seen, &waiting);
     watch.last_fresh = fresh;
     watch.last_weighty = weighty;
-    if fresh == 0 {
-        return;
-    }
-    // Not over a decision of the chronicle that waits for the player.
-    let decision_waiting = state
-        .chronicle
-        .pending_decisions
-        .iter()
-        .any(|d| d.faction == sim.player)
-        || chronicle.is_some_and(|c| c.open);
-    // One notice at a time (ADR 0775): a modal in progress (season report, decision) keeps the
-    // screen; the offer then waits (toast + pill) and opens once it is free.
-    let modal_busy = modals.is_some_and(|m| m.is_busy());
-    if weighty > 0 && !decision_waiting && !ui.open {
-        if modal_busy {
-            watch.deferred = true;
-        } else {
-            panels.write(OpenPanel::Diplomacy);
-            watch.auto_opened += 1;
-        }
-    }
-    toasts.write(ToastRequest::new(&format!(
-        "{} en attente.",
-        count_text(waiting.len())
-    )));
-    watch.toasts += 1;
-}
-
-/// Opens the screen of a deferred weighty offer once no modal holds the screen any more.
-fn open_deferred(
-    mut watch: ResMut<OfferWatch>,
-    ui: Res<DiplomacyUi>,
-    sim: Res<Sim>,
-    chronicle: Option<Res<ChroniclePanel>>,
-    modals: Option<Res<crate::ui::kit::modal::ModalQueue>>,
-    mut panels: MessageWriter<OpenPanel>,
-) {
-    if !watch.deferred {
-        return;
-    }
-    if ui.open {
-        watch.deferred = false;
-        return;
-    }
-    let decision_waiting = sim.state.as_ref().is_some_and(|state| {
-        state
-            .chronicle
-            .pending_decisions
-            .iter()
-            .any(|d| d.faction == sim.player)
-    }) || chronicle.is_some_and(|c| c.open);
-    if modals.is_some_and(|m| m.is_busy()) || decision_waiting {
-        return;
-    }
-    panels.write(OpenPanel::Diplomacy);
-    watch.auto_opened += 1;
-    watch.deferred = false;
 }
 
 /// Caption of the HUD button: « Diplomatie (n) » while offers wait.
@@ -209,9 +139,6 @@ fn dump_watch(world: &World) -> (String, Value) {
             "seen": watch.seen.len(),
             "last_fresh": watch.last_fresh,
             "last_weighty": watch.last_weighty,
-            "auto_opened": watch.auto_opened,
-            "deferred": watch.deferred,
-            "toasts": watch.toasts,
             "waiting": watch.waiting,
             "pill": watch.pill,
         }),

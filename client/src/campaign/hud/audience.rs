@@ -75,6 +75,8 @@ pub struct Audience {
     pub view: AudienceView,
     /// Cards pushed in front of the player so far.
     pub pushes: u32,
+    /// Seconds the card has been open.
+    card_age: f32,
     seen_turn: Option<u32>,
     seen: BTreeSet<String>,
     built_revision: Option<u64>,
@@ -99,7 +101,7 @@ pub fn plugin(app: &mut App) {
         .register_dump(dump)
         .add_systems(
             Update,
-            (refresh, handle_buttons, rebuild, seal_tooltip)
+            (refresh, auto_fold, handle_buttons, rebuild, seal_tooltip)
                 .chain()
                 .in_set(HudSet::Ui),
         );
@@ -136,6 +138,7 @@ fn refresh(
         .extend(agenda.affairs.iter().map(|a| a.id.clone()));
     if fresh {
         audience.view = AudienceView::Card;
+        audience.card_age = 0.0;
         audience.pushes += 1;
         log.audience_cards += 1;
     } else if agenda.affairs.is_empty() && audience.view == AudienceView::Card {
@@ -143,6 +146,21 @@ fn refresh(
     }
     if audience.agenda.as_ref() != Some(&agenda) {
         audience.agenda = Some(agenda);
+    }
+}
+
+/// The card folds into the Registre counter after `audience_seconds` (non-blocking Audience).
+fn auto_fold(time: Res<Time>, sim: Res<Sim>, mut audience: ResMut<Audience>) {
+    if audience.view != AudienceView::Card {
+        return;
+    }
+    audience.card_age += time.delta_secs();
+    let seconds = sim
+        .data
+        .as_ref()
+        .map_or(25.0, |data| data.agenda_rules.audience_seconds);
+    if audience.card_age >= seconds {
+        audience.view = AudienceView::Folded;
     }
 }
 
@@ -165,6 +183,7 @@ fn handle_buttons(
             audience.view = AudienceView::Folded;
         } else if name == OPEN {
             audience.view = AudienceView::Card;
+            audience.card_age = 0.0;
         } else if name == REGISTRY || name == REGISTRY_TOGGLE {
             audience.view = if audience.view == AudienceView::Registry {
                 AudienceView::Folded
@@ -320,14 +339,14 @@ fn rebuild(
             HudWidget,
             Hovered::default(),
             panel_note(&theme),
-            Node {
-                width: Val::Px(CARD_WIDTH),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(4.0),
-                padding: UiRect::all(Val::Px(6.0)),
-                ..default()
-            },
         ))
+        .insert(Node {
+            width: Val::Px(CARD_WIDTH),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(4.0),
+            padding: UiRect::all(Val::Px(6.0)),
+            ..default()
+        })
         .id();
     commands.entity(root).with_children(|card| {
         if view == AudienceView::Folded {

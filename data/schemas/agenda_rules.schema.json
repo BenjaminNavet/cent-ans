@@ -12,6 +12,7 @@
     "max_watch": {"type": "integer", "minimum": 0, "maximum": 10, "description": "Lignes de « À surveiller », au plus."},
     "max_strong_decisions_per_season": {"type": "integer", "minimum": 1, "maximum": 5, "description": "Décisions de chronique bloquantes (hors crise) ouvertes par saison."},
     "crisis_events": {"type": "array", "items": {"type": "string", "pattern": "^evt_"}, "description": "Évènements de crise : ils s'ouvrent aussitôt, sans plafond."},
+    "audience_seconds": {"type": "number", "minimum": 2, "maximum": 300, "description": "Secondes pendant lesquelles la carte d'Audience reste ouverte avant de se replier en compteur du Registre."},
     "treasury_affair_below": {"type": "integer", "maximum": 0, "description": "Le trésorier parle quand le solde net de la saison à venir passe sous ce seuil."},
     "sources": {
       "type": "array",

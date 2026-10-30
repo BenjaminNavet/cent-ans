@@ -4,6 +4,7 @@
   "max_watch": 5,
   "max_strong_decisions_per_season": 1,
   "crisis_events": ["evt_black_death", "evt_peasants_revolt", "evt_revolte_fiscale", "evt_revolte_de_glyndwr"],
+  "audience_seconds": 25,
   "treasury_affair_below": -1,
   "sources": [
     {"kind": "chronicle_decision", "rank": "affair", "order": 10, "office": "", "guaranteed": true, "action": "open_chronicle"},

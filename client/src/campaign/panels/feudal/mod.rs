@@ -138,8 +138,6 @@ fn record_events(
             continue;
         };
         let date = state.date_label();
-        let my_name = data.faction_name(&sim.player);
-        let mut mine = 0;
         let mut fresh = Vec::new();
         for event in &turn.events {
             let kind = serde_json::to_value(event.kind)
@@ -153,11 +151,6 @@ fn record_events(
                 date: date.clone(),
                 text: event.text_fr.clone(),
             });
-            if event.faction.as_ref() == Some(&sim.player)
-                || (!my_name.is_empty() && event.text_fr.contains(&my_name))
-            {
-                mine += 1;
-            }
         }
         fresh.extend(std::mem::take(&mut ui.recent));
         fresh.truncate(format::RECENT_MAX);
@@ -165,11 +158,6 @@ fn record_events(
         let calls = feudal::calls(data, state);
         if let Some(call) = calls.first() {
             toasts.write(ToastRequest::new(&format!("Appel féodal : {}", call.text)));
-        } else if mine > 0 {
-            toasts.write(ToastRequest::new(&format!(
-                "{} vous concernant : voir l’arbre féodal.",
-                format::event_count(mine)
-            )));
         }
         ui.dirty = true;
     }

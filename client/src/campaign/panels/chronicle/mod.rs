@@ -317,7 +317,6 @@ fn record_turns(
     settings: Option<Res<Settings>>,
     mut log: ResMut<ChronicleLog>,
     mut panel: ResMut<ChroniclePanel>,
-    mut toasts: MessageWriter<ToastRequest>,
     codex: Option<Res<CodexStore>>,
 ) {
     let mode = settings
@@ -329,9 +328,8 @@ fn record_turns(
         };
         let journal = game_api::turn_journal(data, state, &sim.player, &turn.events, mode);
         log.record_with(&journal, codex.as_deref());
-        for notice in &journal.expired {
-            toasts.write(ToastRequest::new(notice));
-        }
+        // XP-AUDIENCE: a decision that lapsed is news, not a toast; `log.last_expired` and the
+        // Chronicle panel carry it.
         panel.letter_open = None;
         panel.dirty = true;
     }
