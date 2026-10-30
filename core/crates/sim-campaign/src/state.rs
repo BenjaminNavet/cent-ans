@@ -1192,6 +1192,13 @@ pub struct CampaignState {
     /// ADR 0327: turn the last call ended (spacing of the calls).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_papal_call_end: Option<u32>,
+    /// XP-SOBRE: reminders of the Audience already shown without action (absent from older
+    /// saves; no change of [`STATE_VERSION`]).
+    #[serde(
+        default,
+        skip_serializing_if = "crate::reminders::ReminderLedger::is_empty"
+    )]
+    pub reminders: crate::reminders::ReminderLedger,
     /// The AI faction whose turn is being played inside `end_turn`
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
@@ -1270,6 +1277,7 @@ impl CampaignState {
             crusade: None,
             papal_crusade: None,
             last_papal_call_end: None,
+            reminders: crate::reminders::ReminderLedger::default(),
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),
             ai_refusals: crate::ai_replay::AiRefusals::default(),

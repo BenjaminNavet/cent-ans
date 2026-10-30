@@ -153,6 +153,9 @@ pub struct Agenda {
     pub news_summary: String,
     /// Fingerprint of the pushed Affairs: the client re-opens the Audience when it changes.
     pub signature: String,
+    /// XP-SOBRE: kinds of reminders that went quiet (learned); [`recall_reminder`] brings one
+    /// back.
+    pub snoozed: Vec<String>,
 }
 
 /// A source before ranking.
@@ -278,7 +281,13 @@ fn action(source: &AgendaSource, item: &Candidate) -> AgendaAction {
 
 fn line(source: &AgendaSource, item: &Candidate, to_choose: u32) -> String {
     let t = texts();
-    let template = if item.count > 1 {
+    // A sentence whose list of reasons is empty uses the plain line, never « : . ».
+    let plain = (source.kind == "treasury_swing" && item.terms.is_empty())
+        .then(|| t.lines.get("treasury_swing_plain"))
+        .flatten();
+    let template = if plain.is_some() {
+        plain
+    } else if item.count > 1 {
         t.lines_many
             .get(&source.kind)
             .or_else(|| t.lines.get(&source.kind))
@@ -327,12 +336,19 @@ fn candidates(
             }
         }
     }
+    if player {
+        if let Some(milestone) = crate::progress::reign_milestone(data, state) {
+            let mut c = candidate("reign_milestone", "reign_milestone");
+            c.text = milestone_text(&milestone);
+            out.push(c);
+        }
+    }
     if let Some(economy) = state.faction_economy(data, faction) {
         let net = economy.net_income();
         if player && net < data.agenda_rules.treasury_affair_below {
             let mut c = candidate("treasury_swing", "treasury_swing");
             c.amount = sim_campaign::advisor::fr_number(-net);
-            c.terms = treasury_terms(data, state, faction);
+            c.terms = treasury_terms(data, state, faction, net);
             c.cause_id = crate::causes::season_causes(state, data, 6)
                 .iter()
                 .find(|cause| cause.kind == "treasury_swing")
@@ -343,27 +359,99 @@ fn candidates(
     (out, to_choose)
 }
 
-/// « soldes (−1 800), Guyenne perdue (−600) »: the heaviest terms of the coming balance.
-fn treasury_terms(data: &GameData, state: &CampaignState, faction: &FactionId) -> String {
-    crate::hud::figure_trends(data, state, faction)
+/// « Sire, 4 saisons de règne : la maison est en avance sur l'acte (...). Il manque : ... ».
+fn milestone_text(milestone: &crate::progress::MilestoneView) -> String {
+    let status = ui(&format!("milestone_{}", milestone.status));
+    let missing = if milestone.missing.is_empty() {
+        String::new()
+    } else {
+        format!(
+            " {}",
+            fill(
+                &ui("milestone_missing"),
+                &[("list", &milestone.missing.join(" ; "))]
+            )
+        )
+    };
+    fill(
+        &ui("milestone"),
+        &[
+            ("turn", &milestone.turn.to_string()),
+            ("status", &status),
+            ("act", &milestone.act_name),
+            ("score", &milestone.score.to_string()),
+            ("expected", &milestone.expected.to_string()),
+            ("missing", &missing),
+        ],
+    )
+}
+
+/// Whether a source with a push cadence (`push_first_seasons`, `push_every_seasons`) speaks at
+/// `turn`.
+fn pushed_this_season(source: &AgendaSource, turn: u32) -> bool {
+    if source.push_every_seasons == 0 || turn < source.push_first_seasons {
+        return true;
+    }
+    turn.is_multiple_of(source.push_every_seasons)
+}
+
+/// XP-SOBRE: the season is over and `faction` (the player) was shown its Audience. Every
+/// learning reminder (`learn_after` in `agenda.json`) still true counts one more display; shown
+/// `learn_after` times it goes quiet for `snooze_seasons`. Call it once per season, just before
+/// the turn ends.
+pub fn note_season_end(data: &GameData, state: &mut CampaignState, faction: &FactionId) {
+    if faction != state.player_faction() {
+        return;
+    }
+    let (raw, _) = candidates(data, state, faction);
+    let turn = state.turn();
+    for source in &data.agenda_rules.sources {
+        if source.learn_after == 0 {
+            continue;
+        }
+        let present = raw.iter().any(|c| c.kind == source.kind);
+        state.reminders.season_ended(
+            &source.kind,
+            present,
+            turn,
+            source.learn_after,
+            source.snooze_seasons,
+        );
+    }
+}
+
+/// « Rappeler »: a quiet reminder speaks again from this season.
+pub fn recall_reminder(state: &mut CampaignState, kind: &str) {
+    state.reminders.recall(kind);
+}
+
+/// « recettes (+3 000), soldes (−2 800), chantiers (−1 400) »: the heaviest lines of the coming
+/// balance; they sum to `net` (the last slot gathers the rest as « autres éléments »).
+fn treasury_terms(data: &GameData, state: &CampaignState, faction: &FactionId, net: i64) -> String {
+    let Some(economy) = state.faction_economy(data, faction) else {
+        return String::new();
+    };
+    let lines: Vec<sim_campaign::season_marks::Term> = economy
+        .budget_lines(None)
         .into_iter()
-        .find(|trend| trend.figure == "net_income")
-        .map(|trend| {
-            trend
-                .top_terms
-                .iter()
-                .filter(|term| term.amount < 0)
-                .map(|term| {
-                    format!(
-                        "{} ({})",
-                        term.label.to_lowercase(),
-                        crate::causes::signed_amount(term.amount)
-                    )
-                })
-                .collect::<Vec<_>>()
-                .join(", ")
+        .map(|line| sim_campaign::season_marks::Term {
+            key: line.kind.key().to_owned(),
+            label: String::new(),
+            amount: line.projected,
         })
-        .unwrap_or_default()
+        .collect();
+    let max = data.cause_thresholds.top_terms as usize;
+    sim_campaign::season_marks::top_terms(lines, net, max)
+        .iter()
+        .map(|term| {
+            format!(
+                "{} ({})",
+                crate::causes::term_label(&term.key, &term.label).to_lowercase(),
+                crate::causes::signed_amount(term.amount)
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 /// Folds the items of a grouped kind into one.
@@ -456,6 +544,28 @@ pub fn agenda(
 ) -> Agenda {
     let rules = &data.agenda_rules;
     let (raw, to_choose) = candidates(data, state, faction);
+    // XP-SOBRE: what was learned stays quiet, what has a push cadence speaks on its seasons only.
+    let turn = state.turn();
+    let player = faction == state.player_faction();
+    let mut snoozed: Vec<String> = Vec::new();
+    let raw: Vec<Candidate> = raw
+        .into_iter()
+        .filter(|item| {
+            let Some(source) = rules.source(&item.kind) else {
+                return true;
+            };
+            if !pushed_this_season(source, turn) {
+                return false;
+            }
+            if player && source.learn_after > 0 && state.reminders.is_snoozed(&item.kind, turn) {
+                if !snoozed.contains(&item.kind) {
+                    snoozed.push(item.kind.clone());
+                }
+                return false;
+            }
+            true
+        })
+        .collect();
     let folded = fold_groups(rules, raw);
     // Rank: each item takes the rank of its source; unknown kinds stay out (the registry has them).
     let mut affairs: Vec<(&AgendaSource, Candidate)> = Vec::new();
@@ -538,7 +648,22 @@ pub fn agenda(
             &[("count", &watch_views.len().to_string())],
         ),
         news_heading: fill(&ui("news_heading"), &[("count", &news.total.to_string())]),
-        news_summary: news_summary(&news),
+        news_summary: {
+            let summary = news_summary(&news);
+            if snoozed.is_empty() {
+                summary
+            } else {
+                let names: Vec<String> = snoozed
+                    .iter()
+                    .map(|kind| ui(&format!("snoozed_{kind}")))
+                    .collect();
+                format!(
+                    "{summary} · {}",
+                    fill(&ui("snoozed_line"), &[("list", &names.join(", "))])
+                )
+            }
+        },
+        snoozed,
         affairs: affair_views,
         watch: watch_views,
         news,

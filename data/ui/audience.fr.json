@@ -12,7 +12,18 @@
     "open_registry": "Registre",
     "blocking_seal": "Une affaire vous attend : {text}",
     "why_button": "Pourquoi ?",
-    "ambitions_locked": "Choix figé jusqu'au prochain acte."
+    "ambitions_locked": "Choix figé jusqu'au prochain acte.",
+    "milestone": "Sire, {turn} saisons de règne : la maison est {status} sur l'acte « {act} » (score {score} pour {expected} attendus).{missing}",
+    "milestone_ahead": "en avance",
+    "milestone_on_time": "à l'heure",
+    "milestone_behind": "en retard",
+    "milestone_missing": "Il manque : {list}.",
+    "snoozed_line": "Rappels en sourdine : {list}",
+    "snoozed_free_slot": "chantiers libres",
+    "snoozed_advice": "conseils du trésorier",
+    "snoozed_idle_army": "armées sans ordre",
+    "snoozed_research_idle": "recherche en attente",
+    "recall_button": "Rappeler"
   },
   "lines": {
     "chronicle_decision": "Une décision vous attend : {title}.",
@@ -27,7 +38,9 @@
     "advice": "{text}",
     "research_idle": "{text}",
     "idle_army": "{text}",
-    "free_slot": "{text}"
+    "free_slot": "{text}",
+    "reign_milestone": "{text}",
+    "treasury_swing_plain": "Le trésor baisse de {amount} ₶ par saison."
   },
   "lines_many": {
     "enemy_army": "Sire, {count} armées ennemies approchent de nos terres.",
@@ -43,7 +56,8 @@
     "open_finance": "Finances",
     "open_diplomacy": "Diplomatie",
     "open_research": "Recherche",
-    "none": ""
+    "none": "",
+    "open_objectives": "Objectifs"
   },
   "speakers": {
     "chronicler_role": "Chroniqueur",

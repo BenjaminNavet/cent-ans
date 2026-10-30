@@ -236,7 +236,7 @@ fn handle_buttons(
                 "open_offer" => {
                     offers.write(OpenMissionOffer);
                 }
-                "open_ambitions" => {
+                "open_ambitions" | "open_objectives" => {
                     if !objectives_panel.open {
                         objectives.write(OpenObjectives);
                     }

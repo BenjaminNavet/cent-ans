@@ -127,6 +127,7 @@ pub mod reach;
 pub mod realm_works;
 pub mod recruit_pool;
 pub mod religion;
+pub mod reminders;
 pub mod replenish;
 pub mod research;
 pub mod retinue;

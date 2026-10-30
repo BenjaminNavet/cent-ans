@@ -89,6 +89,9 @@ impl TurnJob {
             .name("cent-ans-end-turn".to_owned())
             .stack_size(WORKER_STACK_BYTES)
             .spawn(move || {
+                // XP-SOBRE: the Audience of this season was shown; what stays true learns.
+                let player = state.player_faction().clone();
+                game_api::note_season_end(&data, &mut state, &player);
                 let events = state.end_turn_with(&data, ai::plan_turn);
                 let moves = state.ai_turn_moves().to_vec();
                 (state, events, moves)

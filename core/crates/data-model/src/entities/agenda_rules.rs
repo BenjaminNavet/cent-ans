@@ -41,6 +41,28 @@ pub struct AgendaSource {
     /// Interface target of the main button (`open_chronicle`, `open_offer`, `center_province`...).
     #[serde(default)]
     pub action: String,
+    /// XP-SOBRE: a reminder shown this many seasons while the matter stays true goes quiet
+    /// (0: it never learns). The memory is `sim_campaign::reminders`.
+    #[serde(default)]
+    pub learn_after: u32,
+    /// Seasons a learned reminder stays quiet before it speaks again.
+    #[serde(default)]
+    pub snooze_seasons: u32,
+    /// XP-SOBRE: pushed on the first `push_first_seasons` seasons of the game, then only every
+    /// `push_every_seasons` seasons (0: no such limit).
+    #[serde(default)]
+    pub push_first_seasons: u32,
+    #[serde(default)]
+    pub push_every_seasons: u32,
+}
+
+/// XP-SOBRE: a reign milestone. At campaign `turn` the act score is judged against
+/// `expected_score`: ahead from `expected_score + margin`, behind under `expected_score - margin`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ReignMilestone {
+    pub turn: u32,
+    pub expected_score: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -60,6 +82,10 @@ pub struct AgendaRules {
     pub audience_seconds: f32,
     /// The treasurer speaks when the coming season's net balance falls below this (negative).
     pub treasury_affair_below: i64,
+    /// Reign milestones (seasons 4, 8, 12): where the act score should stand.
+    pub milestones: Vec<ReignMilestone>,
+    /// Score points around the expected score that still count as « à l'heure ».
+    pub milestone_margin: u32,
     pub sources: Vec<AgendaSource>,
 }
 
@@ -73,6 +99,8 @@ impl Default for AgendaRules {
             crisis_events: Vec::new(),
             audience_seconds: 25.0,
             treasury_affair_below: -1,
+            milestones: Vec::new(),
+            milestone_margin: 3,
             sources: Vec::new(),
         }
     }

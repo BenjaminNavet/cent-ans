@@ -30,7 +30,10 @@ pub mod start_sheets;
 pub mod tech;
 pub mod turn;
 
-pub use agenda::{agenda, Affair, Agenda, AgendaAction, NewsDigest, Speaker, WatchItem};
+pub use agenda::{
+    agenda, note_season_end, recall_reminder, Affair, Agenda, AgendaAction, NewsDigest, Speaker,
+    WatchItem,
+};
 pub use army::{army_ids, army_sheet, ArmySheet};
 pub use chronicle::{
     chronicle_view, turn_journal, ChronicleView, JournalEntry, NewsLetter, NewsMode, TurnJournal,

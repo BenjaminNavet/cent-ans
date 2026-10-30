@@ -3,22 +3,142 @@
   "max_affairs": 3,
   "max_watch": 5,
   "max_strong_decisions_per_season": 1,
-  "crisis_events": ["evt_black_death", "evt_peasants_revolt", "evt_revolte_fiscale", "evt_revolte_de_glyndwr"],
+  "crisis_events": [
+    "evt_black_death",
+    "evt_peasants_revolt",
+    "evt_revolte_fiscale",
+    "evt_revolte_de_glyndwr"
+  ],
   "audience_seconds": 25,
   "treasury_affair_below": -1,
   "sources": [
-    {"kind": "chronicle_decision", "rank": "affair", "order": 10, "office": "", "guaranteed": true, "action": "open_chronicle"},
-    {"kind": "mission_offer", "rank": "affair", "order": 20, "office": "chamberlain", "guaranteed": true, "action": "open_offer"},
-    {"kind": "ambition_choice", "rank": "affair", "order": 25, "office": "chamberlain", "action": "open_ambitions"},
-    {"kind": "siege", "rank": "affair", "order": 30, "office": "constable", "action": "center_province"},
-    {"kind": "enemy_army", "rank": "affair", "order": 40, "office": "constable", "grouped": true, "action": "center_army"},
-    {"kind": "debt", "rank": "affair", "order": 50, "office": "treasurer", "action": "open_finance"},
-    {"kind": "treasury_swing", "rank": "affair", "order": 60, "office": "treasurer", "action": "open_finance"},
-    {"kind": "diplomacy_offer", "rank": "affair", "order": 70, "office": "chancellor", "action": "open_diplomacy"},
-    {"kind": "chronicle_incident", "rank": "watch", "order": 10, "office": "chamberlain", "grouped": true, "action": "open_chronicle"},
-    {"kind": "advice", "rank": "watch", "order": 20, "office": "treasurer", "action": "none"},
-    {"kind": "research_idle", "rank": "watch", "order": 30, "office": "chaplain", "action": "open_research"},
-    {"kind": "idle_army", "rank": "watch", "order": 40, "office": "constable", "grouped": true, "action": "center_army"},
-    {"kind": "free_slot", "rank": "watch", "order": 50, "office": "treasurer", "action": "center_province"}
-  ]
+    {
+      "kind": "chronicle_decision",
+      "rank": "affair",
+      "order": 10,
+      "office": "",
+      "guaranteed": true,
+      "action": "open_chronicle"
+    },
+    {
+      "kind": "mission_offer",
+      "rank": "affair",
+      "order": 20,
+      "office": "chamberlain",
+      "guaranteed": true,
+      "action": "open_offer"
+    },
+    {
+      "kind": "ambition_choice",
+      "rank": "affair",
+      "order": 25,
+      "office": "chamberlain",
+      "action": "open_ambitions",
+      "push_first_seasons": 2,
+      "push_every_seasons": 4
+    },
+    {
+      "kind": "reign_milestone",
+      "rank": "affair",
+      "order": 22,
+      "office": "chamberlain",
+      "action": "open_objectives"
+    },
+    {
+      "kind": "siege",
+      "rank": "affair",
+      "order": 30,
+      "office": "constable",
+      "action": "center_province"
+    },
+    {
+      "kind": "enemy_army",
+      "rank": "affair",
+      "order": 40,
+      "office": "constable",
+      "grouped": true,
+      "action": "center_army"
+    },
+    {
+      "kind": "debt",
+      "rank": "affair",
+      "order": 50,
+      "office": "treasurer",
+      "action": "open_finance"
+    },
+    {
+      "kind": "treasury_swing",
+      "rank": "affair",
+      "order": 60,
+      "office": "treasurer",
+      "action": "open_finance"
+    },
+    {
+      "kind": "diplomacy_offer",
+      "rank": "affair",
+      "order": 70,
+      "office": "chancellor",
+      "action": "open_diplomacy"
+    },
+    {
+      "kind": "chronicle_incident",
+      "rank": "watch",
+      "order": 10,
+      "office": "chamberlain",
+      "grouped": true,
+      "action": "open_chronicle"
+    },
+    {
+      "kind": "advice",
+      "rank": "watch",
+      "order": 20,
+      "office": "treasurer",
+      "action": "none",
+      "learn_after": 2,
+      "snooze_seasons": 4
+    },
+    {
+      "kind": "research_idle",
+      "rank": "watch",
+      "order": 30,
+      "office": "chaplain",
+      "action": "open_research",
+      "learn_after": 2,
+      "snooze_seasons": 4
+    },
+    {
+      "kind": "idle_army",
+      "rank": "watch",
+      "order": 40,
+      "office": "constable",
+      "grouped": true,
+      "action": "center_army",
+      "learn_after": 2,
+      "snooze_seasons": 4
+    },
+    {
+      "kind": "free_slot",
+      "rank": "watch",
+      "order": 50,
+      "office": "treasurer",
+      "action": "center_province",
+      "learn_after": 2,
+      "snooze_seasons": 4
+    }
+  ],
+  "milestones": [
+    {
+      "turn": 4,
+      "expected_score": 2
+    },
+    {
+      "turn": 8,
+      "expected_score": 4
+    },
+    {
+      "turn": 12,
+      "expected_score": 6
+    }
+  ],
+  "milestone_margin": 1
 }

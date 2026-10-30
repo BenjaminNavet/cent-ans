@@ -370,12 +370,13 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0811 | [Rivières lisibles à toute distance (lot RIVIERES)](0811-rivieres-lisibles.md) | accepté |
 | 0812 | [Budget d'attention et Audience de saison (XP-AUDIENCE, R1)](0812-xp-audience.md) | accepté |
 | 0813 | [ECO-R1 : l'impôt consenti (assemblées, subsides, concessions)](0813-eco-r1-impot-consenti.md) | accepté |
-| 0814 | [VIS-R3b : parcellaire typé du sol de campagne](0814-vis-r3b-parcellaire-type.md) | accepté |
+| 0814 | [parcellaire typé du sol de campagne (VIS-R3b)](0814-vis-r3b-parcellaire-type.md) | proposé |
 | 0815 | [ECO-R1c : l'impôt consenti, IA et Angleterre](0815-eco-r1c-ia-et-angleterre.md) | accepté |
-| 0816 | [IA-PLAN-2 : plans offensifs (fix, wear, strike, screen)](0816-ia-plan-2-plans-offensifs.md) | accepté |
-| 0818 | [Les cinq livres : cadre « livre à onglets » (XP-R3)](0818-xp-r3-cinq-livres.md) | accepté |
+| 0816 | [IA-PLAN-2 : plans offensifs, rôles `fix` / `wear` / `strike` / `screen`](0816-ia-plan-2-plans-offensifs.md) | n/d |
 | 0817 | [CAMP-R6 : huit maisons jouables](0817-camp-r6-maisons-jouables.md) | accepté |
 | 0820 | [VIS-R4 : montagne étagée et neige d'altitude blanche](0820-vis-r4-montagne-etagee.md) | proposé |
 | 0820 | [VIS-R4 : montagne étagée et neige d'altitude blanche](0820-vis-r4-montagne-etagee.md) | accepté |
 | 0829 | [DATA-GARDE : manifeste de schémas, chargement parallèle, textes du core](0829-data-garde-manifeste-schemas.md) | accepté |
 | 0831 | [CAMP-GEN : missions proportionnées à la puissance de la maison](0831-camp-gen-missions-proportionnees.md) | accepté |
+| 0818 | [Les cinq livres : cadre « livre à onglets » (XP-R3)](0818-xp-r3-cinq-livres.md) | accepté |
+| 0830 | [XP-SOBRE : un rappel appris ne se répète plus](0830-xp-sobre-rappels-appris.md) | accepté |

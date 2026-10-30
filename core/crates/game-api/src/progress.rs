@@ -107,6 +107,69 @@ fn kind_key(kind: OutcomeKind) -> &'static str {
     }
 }
 
+// ------------------------------------------------------------------ reign milestone
+
+/// XP-SOBRE: the reign milestone of seasons 4, 8 and 12 (`milestones` of `data/rules/agenda.json`):
+/// where the act score stands against the pace expected at that season.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct MilestoneView {
+    /// Campaign season of the milestone.
+    pub turn: u32,
+    /// `ahead`, `on_time` or `behind`.
+    pub status: String,
+    pub act_name: String,
+    pub score: u32,
+    pub expected: u32,
+    /// The heaviest objectives of the act still to do (title and progress), two at most.
+    pub missing: Vec<String>,
+}
+
+/// The milestone of this season, if the season is one (`None` otherwise, and without an act).
+pub fn reign_milestone(data: &GameData, state: &CampaignState) -> Option<MilestoneView> {
+    let rules = &data.agenda_rules;
+    let turn = state.turn();
+    let milestone = rules.milestones.iter().find(|m| m.turn == turn)?;
+    let act = crate::acts::act_view(data, state)?;
+    let margin = rules.milestone_margin;
+    let status = if act.score >= milestone.expected_score + margin {
+        "ahead"
+    } else if act.score + margin >= milestone.expected_score {
+        "on_time"
+    } else {
+        "behind"
+    };
+    let mut open: Vec<&crate::acts::ActObjectiveRow> = act
+        .objectives
+        .iter()
+        .filter(|o| !o.done && !o.held)
+        .collect();
+    open.sort_by(|a, b| {
+        b.weight
+            .cmp(&a.weight)
+            .then(b.percent.cmp(&a.percent))
+            .then_with(|| a.id.cmp(&b.id))
+    });
+    let missing = open
+        .iter()
+        .take(2)
+        .map(|o| {
+            if o.progress.is_empty() {
+                o.title.clone()
+            } else {
+                format!("{} ({})", o.title, o.progress)
+            }
+        })
+        .collect();
+    Some(MilestoneView {
+        turn,
+        status: status.to_owned(),
+        act_name: act.name,
+        score: act.score,
+        expected: milestone.expected_score,
+        missing,
+    })
+}
+
 /// End year that applies to `faction` for the chosen length (rule of `sim-campaign`).
 pub fn end_year(data: &GameData, state: &CampaignState, faction: &FactionId) -> i32 {
     state.victory_end_year(data, faction)

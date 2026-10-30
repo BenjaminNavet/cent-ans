@@ -14,6 +14,13 @@
     "crisis_events": {"type": "array", "items": {"type": "string", "pattern": "^evt_"}, "description": "Évènements de crise : ils s'ouvrent aussitôt, sans plafond."},
     "audience_seconds": {"type": "number", "minimum": 2, "maximum": 300, "description": "Secondes pendant lesquelles la carte d'Audience reste ouverte avant de se replier en compteur du Registre."},
     "treasury_affair_below": {"type": "integer", "maximum": 0, "description": "Le trésorier parle quand le solde net de la saison à venir passe sous ce seuil."},
+    "milestones": {
+      "type": "array",
+      "description": "XP-SOBRE : jalons de règne. À la saison `turn`, le score d'acte est jugé contre `expected_score`.",
+      "items": {"type": "object", "additionalProperties": false, "required": ["turn", "expected_score"],
+        "properties": {"turn": {"type": "integer", "minimum": 1}, "expected_score": {"type": "integer", "minimum": 0, "maximum": 100}}}
+    },
+    "milestone_margin": {"type": "integer", "minimum": 0, "maximum": 50, "description": "Points de score autour de l'attendu qui comptent encore « à l'heure »."},
     "sources": {
       "type": "array",
       "items": {
@@ -27,7 +34,11 @@
           "office": {"type": "string", "description": "Charge du conseil dont le titulaire parle ; vide : le chroniqueur."},
           "guaranteed": {"type": "boolean"},
           "grouped": {"type": "boolean"},
-          "action": {"type": "string"}
+          "action": {"type": "string"},
+          "learn_after": {"type": "integer", "minimum": 0, "description": "XP-SOBRE : le rappel affiché ce nombre de saisons sans que la cause disparaisse se tait (0 : jamais)."},
+          "snooze_seasons": {"type": "integer", "minimum": 0, "description": "Saisons de silence d'un rappel appris."},
+          "push_first_seasons": {"type": "integer", "minimum": 0, "description": "Poussé durant ces premières saisons du jeu, puis seulement toutes les `push_every_seasons`."},
+          "push_every_seasons": {"type": "integer", "minimum": 0}
         }
       }
     }

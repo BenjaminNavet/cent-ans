@@ -45,7 +45,7 @@ pub use entities::acts_rules::{
     ReignGrade, RenownRules, RenownSource, RuinRules,
 };
 pub use entities::advisor_rules::{Advice, AdviceTrigger, AdvisorRules, PostureNews};
-pub use entities::agenda_rules::{AgendaRank, AgendaRules, AgendaSource};
+pub use entities::agenda_rules::{AgendaRank, AgendaRules, AgendaSource, ReignMilestone};
 pub use entities::agent::{
     ActionAim, ActionCheck, ActionCondition, ActionCost, ActionEffect, ActionSpec, AgentActionKind,
     AgentKind, AgentRules, AgentTypeRules, AiAgentRules, EffectSubject,
