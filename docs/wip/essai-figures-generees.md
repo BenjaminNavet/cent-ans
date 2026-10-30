@@ -13,6 +13,17 @@ soldats générés en 3D »). Les deux essais mesurent si l'image → 3D tient.
   (solde 25 au 30/10). Consigner dans `docs/budget.md`.
 - Sortie : glb hors dépôt `~/dev/cent-ans-raw/gf/menu/`, captures de contrôle hors dépôt.
 
+### Résultat essai A (30/10, fait)
+- Image : Z-Image local, 2 graines (1337, 1338), pose A tenue, mains ouvertes vides, épée au fourreau à la ceinture.
+  Gardée : 1337. Surcot lis/léopards lisible mais plutôt parti que écartelé ; couronne et mailles bonnes.
+- 3D : TRELLIS HF **échoué** (quota ZeroGPU épuisé, 20 h d'attente) → **SF3D local**, 12 784 tri (12 864 après rig), tourné de 180° pour faire face à +Z.
+- Rig + idle : 8 crédits (5 + 3), solde 25 → 17. Le MCP `meshy_rig` n'accepte qu'une URL publique ou un data URI
+  (un glb de 650 Ko est trop gros à passer en paramètre) : appel REST direct `POST /openapi/v1/rigging` avec data URI,
+  même clé que `tools/experiments/meshy_waves.py`. Tâches : rig `01a18db9-ea86-7437-b166-c6d0d345126b`, idle `01a18dba-442f-763a-b2fe-c5464d49be59`.
+- 24 os, 1 action `Idle` (96 images). Rendu de contrôle Blender non vide (non relu).
+- Fichiers (hors dépôt) `~/dev/cent-ans-raw/gf/menu/` : `edward_s1337.png`, `edward_s1338.png`, `edward_cut.png`,
+  `edward_raw_sf3d.glb`, `edward_raw_facez.glb`, `edward_rigged.glb`, `edward_idle.glb`, `render.png`, `prompts.txt`.
+
 ## Essai B — soldat de bataille généré
 - Un homme d'armes à pied 1340 (bassinet + camail + jupon neutre), image pose A → TRELLIS.
 - Réduction ≤ 2 400 tri LOD0 (+ 500 / 230), armature `human` 22 os existante posée par script

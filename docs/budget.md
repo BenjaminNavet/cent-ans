@@ -442,3 +442,4 @@ Liste hors tableau (le tableau suivi par `cent_ans_tools.budget` ne compte que l
 ## Meshy MX, vagues 11-13 (14/10) — abonnement, crédits
 Approuvé par le joueur : 24 modèles meshy-6-lite texturés × 15 = 360 crédits (plafond 400). Dépensé : 360 (solde 645 → 285). 13 arbres d'essence (vague 11), 7 éléments ruraux (12), 4 bosquets `grove_*` (13). Aucune relance, aucun autre coût. Journal : `~/dev/cent-ans-raw/meshy/tasks/ledger.json`.
 - 2026-10-29 — Boucle juge 2, VIS-R6 (lieux génériques, famille ouest) : 4 modèles `meshy-6` texturés (`village_west`, `castle_west`, `town_west`, `abbey_west`) depuis des images Z-Image locales (`~/dev/cent-ans-raw/vis-r6/`), 30 crédits l'unité, **120 crédits** ; solde 145 → 25.
+- 2026-10-30 — GF essai A (chef de faction du menu, Édouard III) : Meshy rig (5) + animate Idle (3) sur un glb SF3D local (TRELLIS HF : quota ZeroGPU épuisé), **8 crédits** ; solde 25 → 17. `docs/wip/essai-figures-generees.md`.
