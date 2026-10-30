@@ -9,12 +9,41 @@ Tu travailles sur Cent Ans (grande stratégie, guerre de Cent Ans ; core Rust + 
 - Lis CLAUDE.md, docs/architecture.md, puis la note docs/wip/ du chantier en cours (boucle juge : docs/wip/boucle-juge-2.md) et `git log --oneline -20`. Ne refais pas l'exploration : le dépôt est la mémoire, la conversation est jetable.
 - Liste `git worktree list` : branches d'agents finies à fusionner, worktrees fusionnés à supprimer (merge-base --is-ancestor, propres).
 
-## Objectifs permanents
-- Boucle juge : audits profonds par piliers (visuel, bataille, économie et politique, expérience), puis lots de refonte, sans limite tant que je ne l'arrête pas ou qu'il reste du majeur.
-- Le visuel de campagne est la priorité n° 1 : réaliste, semi-réaliste, jamais low poly.
-- 60 fps en Ultra (Mac/Metal d'abord). Mesures de fps seulement sur machine calme.
-- Recentrer le jeu sur 6-8 maisons jouables (R6).
-- Crédits Meshy restants à dépenser ; Z-Image pour la 2D ; TRELLIS 2 interdit sur fal.
+## Objectifs
+Méthode : boucle juge sans limite (jusqu'à mon arrêt ou plus rien de majeur). Chaque itération = des juges frais (visuel avec captures, technique, bataille, campagne, économie, expérience) → constats → lots de refonte → fusion → mesure. Les audits du 29/10 (docs/audits/2026-10-29-*.md) donnent le détail de chaque refonte (spec, critères, coût) : les suivre, ne pas les réécrire. État à jour : docs/wip/boucle-juge-2.md.
+
+### 1. Visuel de campagne (priorité n° 1, à challenger le plus)
+Cible : la carte doit ressembler à une photo aérienne médiévale peinte, semi-réaliste, jamais low poly ni « jeu de plateau gris ». Audit : docs/audits/2026-10-29-visuel-campagne.md (défauts G1-G3, refontes R1-R8, bible de palette).
+- Fait : ciel et lumière (R1), frontières en bande (R2), carte de couleur rebâtie (R3a), eau et bathymétrie (R5) + rivières lisibles, lieux « ouest » Meshy (R6b), végétation de plaine (R7), horizon.
+- En cours / à faire, dans l'ordre : R3b parcellaire typé (openfield, bocage, vigne, saisons par culture) ; R4 montagne étagée et neige vraie (étages par altitude et exposition, glaciers, brume de vallée) ; R8 parchemin qui monte sur la 3D (fondu 900-1 600, glyphes d'encre Z-Image) ; heure du jour et nuit (G3-3) ; brume lointaine (G3-5).
+- Restes connus : routes peu lisibles sur la carte de couleur ; rivières pâles à d 900 et bande riveraine ; plaque de Saint-Denis qui chevauche la cathédrale de Paris (occlusion des plaques d'UI) ; plaques d'horizon en bataille ; haies de bocage ; multiplicateurs de saison codés en dur ; paquet de modèles non republié (attendre mon feu vert).
+- Critère : un juge visuel frais, captures 640 px sur les vues de tools/refshots/views.txt, ne trouve plus de défaut « flagrant » (G1) ; mesures HSV contre la planche de palette.
+
+### 2. Performance
+- 60 fps en Ultra (16,7 ms) en campagne ET en bataille de mêlée, sur Mac/Metal. Mémoire de campagne sous contrôle (était ≈ 3 Go).
+- Mesurer VIS-R1/R2/R6/R7 et chaque refonte visuelle au banc tools/bevy_bench, seulement machine calme (lot FPS lancé seul). Branches à reprendre : MEM3 (mesure mémoire) et FPS mêlée (pré-chauffe des pipelines).
+
+### 3. Bataille
+Audit : docs/audits/2026-10-29-bataille.md. Fait : BANC-1/2 (banc d'équilibre, auto-résolution à 80,8 %), IA-CAV (charge groupée), IA-PLAN-1 (planificateur, plan « Tenir »).
+- À faire : IA-PLAN-2 plans offensifs (échelons, fixer-déborder, provoquer ; Crécy et Castillon à corriger) → IA-PLAN-3 lisibilité du plan ennemi et des déroutes → COHESION-1 fatigue et cohésion d'armée → COHESION-2 fin de la cadence historique, réglage tir/choc → BANC-3 (tests d'issue = bandes du banc, vitrine historique). Plus tard : avant-garde/bataille/arrière-garde (R2), siège gagné en campagne (R4), captifs et rançons (R5).
+- Critères : le banc ne régresse jamais ; les batailles historiques (Crécy, Poitiers, Azincourt, Formigny, Castillon, Auray) donnent l'issue historique majoritairement ; moins de duels sans contact ; hommes d'armes à pied qui tiennent une charge frontale.
+
+### 4. Économie et politique
+Audit : docs/audits/2026-10-29-economie-politique.md. Fait : R0, R1-a/b/d impôt consenti (États, Parlement, subsides, concessions, onglet États), R2-a semonce féodale.
+- À faire : R1-c (IA, Angleterre, maltôte ; part de l'armée de la France IA 17-22 % → 35-60 %) ; R2-b lettres de retenue ; R2-c compagnies nées de la paix et des arriérés ; R3 princes et apanages ; R4 légitimité et couronne ; R5 crises nées des causes (peste, travail, révoltes).
+- Critère : sonde eco_series (3 graines) dans les bandes de l'audit ; pas de banqueroute en chaîne ; seed bots dans leurs bandes.
+
+### 5. Campagne et récit
+Audit : docs/audits/2026-10-29-campagne.md. Fait : R1 (renommée accumulée, actes à dates fixes, ambitions).
+- À faire : R6 recentrer sur 6-8 maisons jouables, moins de bruit, des décisions lourdes ; R2 la guerre en saisons (trêve distincte de la paix, chevauchée qui pèse, levées d'été et quartiers d'hiver) ; R5 IA qui joue la partie (plans de campagne, buts d'acte) ; R4 horloges de crise (Grandes Compagnies, peste récurrente, révolte fiscale) ; R3 couronne contestée.
+- Dérives seed bots à traiter (après mon choix) : score de règne trop bas, part de l'armée, révoltes, banqueroutes, éliminations.
+
+### 6. Expérience du joueur
+Audit : docs/audits/2026-10-29-experience.md. Fait : R1 Audience de saison (sollicitations 61 → 12 par 10 saisons), R4 « Pourquoi ? », R6 lisibilité (typographie, glossaire).
+- À faire : R3 « les cinq livres » (22 fenêtres → 5 livres et 2 fiches) ; R2 « Printemps 1337 », première campagne-scénario ; R5 voix du chroniqueur (récit plutôt que catalogue) ; restes d'XP-AUDIENCE (widgets au repos −14 % → −20 %, filtres du Registre, textes encore codés dans objectives.rs, liste des crises à valider).
+
+### Assets
+Meshy : crédits restants (≈ 25) pour une retouche, sur décision visuelle. Z-Image local gratuit pour toute la 2D (textures de culture, étages alpins, glyphes d'encre). TRELLIS 2 interdit sur fal ; jamais de low poly ; figures en A-pose. Dépenses dans docs/budget.md (plafond 50 $).
 
 ## Règles du projet (rappel, CLAUDE.md fait foi)
 - Règles de jeu dans core/ ; données dans data/ validées par data/schemas/ ; client = rendu, UI, entrées.
