@@ -17,12 +17,17 @@ Lot du rapport `docs/audits/2026-10-30-juge-visuel-iter3.md` (### L1). Branche d
 
 ## État
 
-- [ ] a. Découpage de `terrain.wesl` en modules (sans changement de rendu)
-- [ ] b. Préfiltre des lanières par largeur écran (données `view.strip_px`)
-- [ ] c. Chroma et valeur au sol (données `view.ground_look`)
-- [ ] d. Mesures avant/après
-- [ ] e. ADR 0826 + INDEX
+- [x] a. Découpage de `terrain.wesl` en modules (sans changement de rendu)
+- [x] b. Préfiltre des lanières par largeur écran (données `view.strip_px`)
+- [x] c. Chroma et valeur au sol (données `view.ground_look`)
+- [x] d. Mesures avant/après
+- [x] e. ADR 0826 + INDEX
 
 ## Mesures
 
 Voir ADR 0826 (tableau avant/après).
+
+## Reste (voir ADR 0826)
+
+- Textures de culture Z-Image (sillons, chaume, haie) non produites ; v forêt / v pré à relire ; v de d 600 (0,64) trop clair
+  (haze, lot L3). Fusion : clippy complet, `client/tests/smoke.sh`, sonde seed bots, mesure GPU (pas lancés dans le lot).
