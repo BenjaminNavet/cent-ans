@@ -6,6 +6,7 @@
 use bevy::prelude::*;
 
 pub mod army;
+pub mod books;
 pub mod chronicle;
 pub mod court;
 pub mod diplomacy;
@@ -33,6 +34,12 @@ pub enum OpenPanel {
     Feudal,
     Chronicle,
     Economy,
+    /// XP-R3 (ADR 0818): open the book tab `tab` of the hosting panel `panel` (never toggles;
+    /// an empty `tab` keeps the panel's own). Sent by `books.rs`.
+    Hosted {
+        panel: String,
+        tab: String,
+    },
     CloseAll,
 }
 
@@ -41,6 +48,7 @@ pub struct CampaignPanelsPlugin;
 impl Plugin for CampaignPanelsPlugin {
     fn build(&self, app: &mut App) {
         app.add_message::<OpenPanel>().add_plugins((
+            books::BooksPlugin,
             province::PanelProvincePlugin,
             diplomacy::PanelDiplomacyPlugin,
             tech::PanelTechPlugin,

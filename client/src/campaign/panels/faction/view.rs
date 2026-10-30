@@ -9,6 +9,7 @@ use super::{FactionPanel, PANEL_ID, TAB_GROUP, TABS, refresh, sections};
 use crate::campaign::hud::text;
 use crate::codex::store::CodexStore;
 use crate::sim::Sim;
+use crate::ui::kit::book::{BOOK_WIDTH, Books, book_bar};
 use crate::ui::kit::close_button;
 use crate::ui::kit::icons::icon;
 use crate::ui::kit::panel_stack::{PanelTier, StackedPanel};
@@ -170,6 +171,7 @@ pub fn rebuild(
     asm_ui: Res<super::assembly::AssemblyUi>,
     keymap: Option<Res<crate::settings::KeyMap>>,
     settings: Option<Res<crate::settings::Settings>>,
+    books: Res<Books>,
 ) {
     if !panel.dirty {
         return;
@@ -201,7 +203,13 @@ pub fn rebuild(
             UiTier::Panel.index(),
             Node {
                 position_type: PositionType::Absolute,
-                width: Val::Px(PANEL_WIDTH),
+                width: Val::Px(
+                    if panel.view.as_ref().is_some_and(|view| view.is_player) {
+                        BOOK_WIDTH
+                    } else {
+                        PANEL_WIDTH
+                    },
+                ),
                 padding: theme.inner_padding("panel", 8.0),
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(6.0),
@@ -231,7 +239,23 @@ pub fn rebuild(
                 }
             }
             let selected = selected.min(tabs.len() - 1);
-            root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));
+            // XP-R3: the player's own sheet lives in the Royaume book, whose row replaces the
+            // panel's own tabs; a foreign faction's sheet keeps them.
+            match (view.is_player, books.book("kingdom")) {
+                (true, Some(book)) => {
+                    let active = tabs.get(selected).map_or("", |(name, _)| *name);
+                    let have: &[&str] = if view.finance.as_ref().is_some_and(|f| f.assembly_house)
+                    {
+                        &["assembly_house"]
+                    } else {
+                        &[]
+                    };
+                    root.spawn(book_bar(&theme, book, active, have, &[]));
+                }
+                _ => {
+                    root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));
+                }
+            }
             root.spawn(tab_pane_fit(
                 TAB_GROUP,
                 TABS[0],

@@ -576,6 +576,27 @@ pub fn tab_bar(
     tabs: &[(&str, &str)],
     selected: usize,
 ) -> impl Bundle {
+    tab_bar_with(theme, group, tabs, selected, false)
+}
+
+/// [`tab_bar`] whose row wraps onto several lines when the tabs are wider than the page (the
+/// row of a book, `ui/kit/book.rs`).
+pub fn tab_bar_wrapped(
+    theme: &UiTheme,
+    group: &str,
+    tabs: &[(&str, &str)],
+    selected: usize,
+) -> impl Bundle {
+    tab_bar_with(theme, group, tabs, selected, true)
+}
+
+fn tab_bar_with(
+    theme: &UiTheme,
+    group: &str,
+    tabs: &[(&str, &str)],
+    selected: usize,
+    wrap: bool,
+) -> impl Bundle {
     let theme = theme.clone();
     let group = group.to_owned();
     let tabs: Vec<(String, String)> = tabs
@@ -587,7 +608,13 @@ pub fn tab_bar(
         KitWidget("tab_bar"),
         Node {
             column_gap: Val::Px(2.0),
+            row_gap: Val::Px(2.0),
             align_items: AlignItems::End,
+            flex_wrap: if wrap {
+                FlexWrap::Wrap
+            } else {
+                FlexWrap::NoWrap
+            },
             ..default()
         },
         Children::spawn(SpawnWith(move |parent: &mut RelatedSpawner<ChildOf>| {

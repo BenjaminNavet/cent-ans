@@ -175,6 +175,18 @@ fn open_close(
                 }
                 panel.dirty = true;
             }
+            OpenPanel::Hosted { panel: target, tab } if target == PANEL_ID => {
+                if !panel.open {
+                    panel.result = None;
+                    panel.break_armed = None;
+                }
+                if TABS.iter().any(|(key, _)| key == tab) {
+                    panel.tab = tab.clone();
+                }
+                panel.open = true;
+                panel.dirty = true;
+                panel.last_turn = sim.state.as_ref().map_or(0, |state| state.turn);
+            }
             other if panel.open && displaces(other, PANEL_ID) => {
                 panel.open = false;
                 panel.dirty = true;
@@ -203,7 +215,6 @@ fn handle_input(
     mut panel: ResMut<EconomyPanel>,
     mut sim: ResMut<Sim>,
     mut focus: MessageWriter<FocusCamera>,
-    mut open: MessageWriter<OpenPanel>,
 ) {
     for tab in tabs.read() {
         if tab.group == TAB_GROUP
@@ -213,11 +224,6 @@ fn handle_input(
         }
     }
     for press in pressed.read() {
-        // The HUD button opens the window even when it is closed.
-        if press.name == "hud:open_economy" {
-            open.write(OpenPanel::Economy);
-            continue;
-        }
         if !panel.open {
             continue;
         }

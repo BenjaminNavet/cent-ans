@@ -489,6 +489,8 @@ pub fn displaces(message: &crate::campaign::panels::OpenPanel, own_id: &str) -> 
         P::Council => central("court"),
         P::Faction(_) => central("faction"),
         P::Economy => central("economy"),
+        // A book tab opens one panel and sets the other central ones aside.
+        P::Hosted { panel, .. } => own_id != panel.as_str(),
         // The character sheet accompanies a central screen (faction, court).
         P::Character(_) => !own_central,
         P::Province(_) | P::Army(_) | P::Recruitment(_) | P::Siege(_) => own_central,

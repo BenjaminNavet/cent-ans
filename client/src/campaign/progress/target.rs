@@ -60,7 +60,7 @@ pub fn candidates(target: &str) -> &'static [Candidate] {
         "tax" => &[
             Prefix("faction:tax:"),
             Name("FactionPanel"),
-            Name("hud:open_faction"),
+            Name("hud:open_kingdom"),
         ],
         "governor" => &[
             Prefix("court:appoint:"),

@@ -10,6 +10,7 @@ use super::format::{self, Line};
 use super::{FeudalUi, pick, refresh_snapshot};
 use crate::paths;
 use crate::sim::Sim;
+use crate::ui::kit::book::{BOOK_WIDTH, Books, book_bar};
 use crate::ui::kit::close_button;
 use crate::ui::kit::tooltip::Tooltip;
 use crate::ui::kit::widgets::KitWidget;
@@ -22,7 +23,7 @@ pub struct FeudalRoot;
 
 type Kids<'a> = ChildSpawnerCommands<'a>;
 
-const PANEL_WIDTH: f32 = 480.0;
+const PANEL_WIDTH: f32 = BOOK_WIDTH;
 /// Provinces named per title before « … ».
 const PROVINCE_CAP: usize = 8;
 
@@ -33,6 +34,7 @@ pub fn rebuild(
     sim: Res<Sim>,
     mut ui: ResMut<FeudalUi>,
     roots: Query<Entity, With<FeudalRoot>>,
+    books: Res<Books>,
 ) {
     if !ui.dirty {
         return;
@@ -66,6 +68,9 @@ pub fn rebuild(
         ))
         .with_children(|root| {
             header(root, &theme, ui);
+            if let Some(book) = books.book("kingdom") {
+                root.spawn(book_bar(&theme, book, "book:kingdom:feudal", &[], &[]));
+            }
             root.spawn(separator(&theme));
             root.spawn((
                 Name::new("feudal:scroll"),

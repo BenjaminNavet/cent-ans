@@ -821,20 +821,11 @@ fn handle_clicks(
             "hud:open_tech" => {
                 panels.write(OpenPanel::Tech);
             }
-            "hud:open_faction" => {
-                panels.write(OpenPanel::Faction(sim.player.as_str().to_owned()));
-            }
             "hud:open_council" => {
                 panels.write(OpenPanel::Council);
             }
-            "hud:open_feudal" => {
-                panels.write(OpenPanel::Feudal);
-            }
             "hud:treasury" => {
                 panels.write(OpenPanel::Economy);
-            }
-            "hud:open_chronicle" => {
-                panels.write(OpenPanel::Chronicle);
             }
             "hud:open_codex" => {
                 codex.write(crate::codex::OpenCodex::default());

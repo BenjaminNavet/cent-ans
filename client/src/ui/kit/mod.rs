@@ -20,6 +20,7 @@
 //! - Gallery: `CENT_ANS_KIT_GALLERY=1` + `MainMenu` shows every widget ([`gallery`]).
 //! - Dump section `ui_kit`: widget counts by kind, open tooltips, modal queue.
 
+pub mod book;
 pub mod contrast;
 pub mod fa;
 pub mod focus;

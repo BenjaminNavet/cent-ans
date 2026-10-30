@@ -328,6 +328,19 @@ fn drive(world: &mut World) {
                         // Let the consumer react before the next command.
                         world.resource_mut::<AgentRun>().wait = 2;
                     }
+                    // XP-R3 (ADR 0818): an old launcher (`hud:open_faction`…) that no longer has a
+                    // button still opens its tab of a book, for one more cycle of scripts.
+                    None if world
+                        .get_resource::<crate::ui::kit::book::Books>()
+                        .is_some_and(|books| books.is_alias(&name)) =>
+                    {
+                        world.resource_mut::<AgentRun>().click_retries = 0;
+                        world.write_message(ButtonPressed {
+                            entity: Entity::PLACEHOLDER,
+                            name,
+                        });
+                        world.resource_mut::<AgentRun>().wait = 2;
+                    }
                     None => {
                         let retries = {
                             let mut run = world.resource_mut::<AgentRun>();

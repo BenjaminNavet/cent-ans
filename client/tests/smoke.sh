@@ -54,6 +54,7 @@ scenario_expect[campaign_battle]="campaign_battle_after=Campaign campaign_battle
 scenario_expect[campaign_turns]="turns_0=Campaign turns_1=Campaign"
 scenario_expect[campaign_attention]="attention_0=Campaign attention_10=Campaign"
 scenario_expect[campaign_audience]="audience_card=Campaign audience_rest=Campaign"
+scenario_expect[books]="books_sheet=Campaign books_trade=Campaign books_feudal=Campaign books_registry=Campaign books_journal=Campaign"
 scenario_expect[codex]="codex=Codex"
 scenario_expect[faction_select]="faction_select=FactionSelect"
 scenario_expect[faction_works]="works_0=Campaign works_1=Campaign works_2=Campaign"
@@ -63,6 +64,7 @@ scenario_expect[main_menu]="main_menu=MainMenu"
 # scenario -> `dump-file:section.path` pairs whose JSON value must be non-empty (XP-POURQUOI: the
 # Récit of the season must already explain something on the third turn).
 typeset -A scenario_nonempty
+scenario_nonempty[books]="books_sheet:books.open books_trade:books.open books_feudal:books.open books_registry:books.open books_journal:books.open"
 scenario_nonempty[campaign_turns]="turns_1:season_story.story.why"
 scenario_nonempty[campaign_audience]="audience_card:agenda.agenda.affairs"
 scenario_nonempty[faction_assembly]="assembly_1:assembly_panel.assemblies assembly_1:assembly_panel.forecast"

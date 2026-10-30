@@ -10,6 +10,7 @@ use crate::campaign::panels::faction::view::{
     budget_table, forecast_section, income_label, ink, route_text, wrapped,
 };
 use crate::sim::Sim;
+use crate::ui::kit::book::{BOOK_WIDTH, Books, book_bar};
 use crate::ui::kit::close_button;
 use crate::ui::kit::icons::icon;
 use crate::ui::kit::panel_stack::{PanelTier, StackedPanel};
@@ -29,7 +30,7 @@ pub struct EconomyRow;
 
 type Kids<'a> = ChildSpawnerCommands<'a>;
 
-const PANEL_WIDTH: f32 = 640.0;
+const PANEL_WIDTH: f32 = BOOK_WIDTH;
 const TAB_HEIGHT: f32 = 460.0;
 /// Smallest tab height when the zone is short.
 const MIN_TAB_HEIGHT: f32 = 120.0;
@@ -74,6 +75,7 @@ pub fn rebuild(
     assets: Res<AssetServer>,
     mut panel: ResMut<EconomyPanel>,
     roots: Query<Entity, With<EconomyRoot>>,
+    books: Res<Books>,
 ) {
     if !panel.dirty {
         return;
@@ -124,7 +126,15 @@ pub fn rebuild(
                 .iter()
                 .position(|(key, _)| *key == panel.tab)
                 .unwrap_or(0);
-            root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));
+            match books.book("kingdom") {
+                Some(book) => {
+                    let active = names.get(selected).map_or("", String::as_str);
+                    root.spawn(book_bar(&theme, book, active, &[], &[]));
+                }
+                None => {
+                    root.spawn(tab_bar(&theme, TAB_GROUP, &tabs, selected));
+                }
+            }
             for (index, (key, _)) in TABS.iter().enumerate() {
                 // The pane keeps TAB_HEIGHT when the zone is tall enough and shrinks (never below
                 // MIN_TAB_HEIGHT) when it is not; the list fills it and scrolls.

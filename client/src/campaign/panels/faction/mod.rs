@@ -189,6 +189,21 @@ fn open_close(
                 panel.dirty = true;
                 panel.last_turn = sim.state.as_ref().map_or(0, |state| state.turn);
             }
+            OpenPanel::Hosted { panel: target, tab } if target == "faction" => {
+                let player = sim.player.as_str().to_owned();
+                if !panel.open || panel.faction.as_deref() != Some(player.as_str()) {
+                    panel.faction = Some(player);
+                    panel.result = None;
+                    panel.break_armed = None;
+                    panel.join_armed = false;
+                }
+                if !tab.is_empty() {
+                    panel.tab = tab.clone();
+                }
+                panel.open = true;
+                panel.dirty = true;
+                panel.last_turn = sim.state.as_ref().map_or(0, |state| state.turn);
+            }
             other if panel.open && displaces(other, "faction") => {
                 panel.open = false;
                 panel.dirty = true;

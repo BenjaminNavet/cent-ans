@@ -358,7 +358,18 @@ pub const ACTIONS: &[ActionDef] = &[
         &["C"],
     ),
     action("Fenêtres", "map_toggle_tech", "Technologies", &["F4"]),
-    action("Fenêtres", "map_toggle_chronicle", "Chronique", &["F5"]),
+    action(
+        "Fenêtres",
+        "map_toggle_kingdom",
+        "Royaume (fiche, budget, économie, féodalité)",
+        &["R"],
+    ),
+    action(
+        "Fenêtres",
+        "map_toggle_chronicle",
+        "Chronique (registre, décisions, lettres, causes, journal)",
+        &["H", "F5"],
+    ),
     action(
         "Fenêtres",
         "map_toggle_diplomacy",
@@ -437,7 +448,7 @@ pub const ACTIONS: &[ActionDef] = &[
         "Filtres de carte",
         "map_mode_religion",
         "Carte religieuse",
-        &["R"],
+        &["Maj+N"],
     ),
     action(
         "Filtres de carte",
@@ -497,7 +508,7 @@ pub const ACTIONS: &[ActionDef] = &[
         "Armées et localités",
         "army_garrison",
         "Laisser les régiments choisis en garnison",
-        &["H"],
+        &["Maj+H"],
     ),
     action(
         "Armées et localités",

@@ -388,19 +388,45 @@ fn rebuild(
                 ));
             });
         });
+        registry_body(
+            card,
+            &theme,
+            &assets,
+            &bank,
+            &sim,
+            &agenda,
+            view == AudienceView::Registry,
+            CARD_WIDTH,
+        );
+    });
+}
+
+/// The Affairs and, with `lists`, the watch list and the folded news: the body of the Registre,
+/// drawn in the advisor column and as the « Registre » tab of the Chronique book (XP-R3).
+#[allow(clippy::too_many_arguments)]
+pub fn registry_body(
+    card: &mut ChildSpawnerCommands,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    bank: &PortraitBank,
+    sim: &Sim,
+    agenda: &Agenda,
+    lists: bool,
+    width: f32,
+) {
         if agenda.affairs.is_empty() {
             card.spawn((
-                caption(&theme, &agenda.quiet),
+                caption(theme, &agenda.quiet),
                 Node {
-                    width: Val::Px(CARD_WIDTH - 16.0),
+                    width: Val::Px(width - 16.0),
                     ..default()
                 },
             ));
         }
         for affair in &agenda.affairs {
-            spawn_affair(card, &theme, &assets, &bank, &sim, affair);
+            spawn_affair(card, theme, assets, bank, sim, affair);
         }
-        if view == AudienceView::Registry {
+        if lists {
             card.spawn((
                 Text::new(agenda.watch_heading.clone()),
                 theme.text_font(true, false, UiType::Body.size()),
@@ -416,15 +442,15 @@ fn rebuild(
                 })
                 .with_children(|row| {
                     row.spawn((
-                        caption(&theme, &item.text),
+                        caption(theme, &item.text),
                         Node {
-                            width: Val::Px(CARD_WIDTH - 110.0),
+                            width: Val::Px(width - 110.0),
                             ..default()
                         },
                     ));
                     if !item.action.label.is_empty() && item.action.kind != "none" {
                         row.spawn(button_small(
-                            &theme,
+                            theme,
                             &format!("{ACT}{}", item.id),
                             &item.action.label,
                         ));
@@ -437,14 +463,13 @@ fn rebuild(
                 TextColor(style::INK_TITLE),
             ));
             card.spawn((
-                caption(&theme, &agenda.news_summary),
+                caption(theme, &agenda.news_summary),
                 Node {
-                    width: Val::Px(CARD_WIDTH - 16.0),
+                    width: Val::Px(width - 16.0),
                     ..default()
                 },
             ));
         }
-    });
 }
 
 fn spawn_affair(

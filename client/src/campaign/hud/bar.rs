@@ -100,7 +100,7 @@ pub struct Launcher {
 }
 
 /// The fixed launchers, in Godot's order (court, techs, codex… then diplomacy, chronicle).
-pub const LAUNCHERS: [Launcher; 9] = [
+pub const LAUNCHERS: [Launcher; 7] = [
     Launcher {
         name: "hud:open_council",
         icon: "hud_court",
@@ -130,31 +130,17 @@ pub const LAUNCHERS: [Launcher; 9] = [
         action: "map_toggle_recruitment",
     },
     Launcher {
-        name: "hud:open_economy",
-        icon: "hud_coinage",
-        title: "Économie",
-        detail: "Recettes, dépenses, commerce et monnaie.",
-        action: "map_toggle_economy",
-    },
-    Launcher {
-        name: "hud:open_faction",
-        icon: "glyph_flag",
-        title: "Ma faction",
-        detail: "Impôts, édits, lois et état du royaume.",
-        action: "map_toggle_faction",
-    },
-    Launcher {
-        name: "hud:open_feudal",
+        name: "hud:open_kingdom",
         icon: "glyph_crown",
-        title: "Féodalité",
-        detail: "Titres, vassaux et suzerains.",
-        action: "map_toggle_feudal",
+        title: "Royaume",
+        detail: "Livre du royaume : fiche, budget, finances, chantiers, économie, commerce, monnaie et féodalité.",
+        action: "map_toggle_kingdom",
     },
     Launcher {
         name: "hud:open_chronicle",
         icon: "hud_chronicle",
         title: "Chronique",
-        detail: "Récit de la partie et décisions de chronique.",
+        detail: "Livre de la chronique : registre, décisions, lettres, causes et journal.",
         action: "map_toggle_chronicle",
     },
     Launcher {

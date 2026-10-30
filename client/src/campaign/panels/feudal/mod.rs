@@ -190,6 +190,11 @@ fn open_close(
                     ui.open_on(None);
                 }
             }
+            OpenPanel::Hosted { panel, .. } if panel == "feudal" => {
+                if !ui.open {
+                    ui.open_on(None);
+                }
+            }
             other if ui.open && displaces(other, "feudal") => {
                 ui.open = false;
                 ui.dirty = true;

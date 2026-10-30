@@ -48,20 +48,20 @@ use crate::codex::{OpenCodex, store::CodexStore, text as codex_text};
 use crate::menu::KeyEdges;
 use crate::settings::Settings;
 use crate::sim::Sim;
+use crate::ui::kit::book::{Books, book_bar};
 use crate::ui::kit::close_button;
 use crate::ui::kit::fa::FaUi;
 use crate::ui::kit::modal::ToastRequest;
 use crate::ui::kit::panel_stack::displaces;
 use crate::ui::kit::richtext::{RichStyle, rich_text};
 use crate::ui::kit::style::{self, UiTier, UiType};
-use crate::ui::kit::text_field::{TextInputFocus, keyboard_free};
 use crate::ui::kit::widgets::{
     button_small, caption, panel_sized, scroll_list, separator, toggle_button,
 };
 use crate::ui::kit::{ButtonPressed, UiTheme, typed};
 use log::ChronicleLog;
 
-const PANEL_WIDTH: f32 = 720.0;
+const PANEL_WIDTH: f32 = crate::ui::kit::book::BOOK_WIDTH;
 const LIST_HEIGHT: f32 = 360.0;
 /// `NewsLetters.SEAL_RADIUS` × 2 is 42 in Godot; the list rows are narrower.
 const SEAL_SIZE: f32 = 36.0;
@@ -74,11 +74,26 @@ pub enum Tab {
     Letters,
     /// ADR 0754: « Chroniques et causes ».
     Causes,
+    /// XP-R3: the Audience's Registre (affairs, watch list, folded news) as a tab of the book.
+    Registry,
 }
 
 impl Tab {
+    /// Tab named by a book tab (`inner` of `data/ui/books.fr.json`).
+    pub fn from_key(key: &str) -> Option<Tab> {
+        match key {
+            "decisions" => Some(Tab::Decisions),
+            "journal" => Some(Tab::Journal),
+            "letters" => Some(Tab::Letters),
+            "causes" => Some(Tab::Causes),
+            "registry" => Some(Tab::Registry),
+            _ => None,
+        }
+    }
+
     fn name(self) -> &'static str {
         match self {
+            Tab::Registry => "registry",
             Tab::Decisions => "decisions",
             Tab::Journal => "journal",
             Tab::Letters => "letters",
@@ -145,6 +160,11 @@ pub struct ChroniclePanel {
 }
 
 impl ChroniclePanel {
+    /// Key of the shown tab (`inner` of its book tab).
+    pub fn tab_key(&self) -> &'static str {
+        self.tab.name()
+    }
+
     /// Genre filter shared with the HUD journal (Godot `JournalView.remembered_genre`).
     pub fn genre(&self) -> &str {
         if self.genre.is_empty() {
@@ -266,11 +286,7 @@ fn open_close(
     mut panel: ResMut<ChroniclePanel>,
     mut request: ResMut<CausesRequest>,
     mut messages: MessageReader<OpenPanel>,
-    keys: Res<ButtonInput<KeyCode>>,
-    keymap: Option<Res<crate::settings::KeyMap>>,
-    focus: Option<Res<TextInputFocus>>,
     mut edges: ResMut<KeyEdges>,
-    mut held: Local<bool>,
 ) {
     if let Some(cause) = request.0.take() {
         panel.open = true;
@@ -285,24 +301,16 @@ fn open_close(
                 panel.open = !panel.open;
                 panel.dirty = true;
             }
+            OpenPanel::Hosted { panel: target, tab } if target == "chronicle" => {
+                if let Some(wanted) = Tab::from_key(tab) {
+                    panel.tab = wanted;
+                }
+                panel.open = true;
+                panel.dirty = true;
+            }
             other if displaces(other, "chronicle") => panel.open = false,
             _ => {}
         }
-    }
-    // Edge on `pressed` (scripted keys, see tech); a focused text field swallows the key.
-    let f5 = keyboard_free(focus)
-        && crate::campaign::hud::keys::action_down(
-            keymap.as_deref(),
-            "map_toggle_chronicle",
-            KeyCode::F5,
-            &keys,
-            false,
-        );
-    let f5_edge = f5 && !*held;
-    *held = f5;
-    if f5_edge {
-        panel.open = !panel.open;
-        panel.dirty = panel.open;
     }
     if panel.open && edges.escape {
         panel.open = false;
@@ -377,6 +385,7 @@ fn handle_buttons(
         }
         match name {
             "close" => panel.open = false,
+            "tab_registry" => panel.tab = Tab::Registry,
             "tab_decisions" => panel.tab = Tab::Decisions,
             "tab_journal" => panel.tab = Tab::Journal,
             "tab_letters" => panel.tab = Tab::Letters,
@@ -469,6 +478,9 @@ fn rebuild(
     settings: Option<Res<Settings>>,
     plates: Option<Res<crate::ui::art_plates::ArtPlates>>,
     store: Option<Res<CodexStore>>,
+    books: Res<Books>,
+    audience: Res<crate::campaign::hud::audience::Audience>,
+    bank: Option<Res<crate::campaign::panels::court::portrait::PortraitBank>>,
 ) {
     if !panel.open {
         if let Some(root) = panel.root.take() {
@@ -513,8 +525,49 @@ fn rebuild(
         mode,
         plates.as_deref(),
         store.as_deref(),
+        &RegistryInput {
+            books: &books,
+            agenda: audience.agenda.as_ref(),
+            bank: &bank.as_deref().cloned().unwrap_or_default(),
+            sim: &sim,
+        },
     );
     panel.root = Some(root);
+}
+
+/// What the Registre tab and the book row need besides the chronicle itself.
+struct RegistryInput<'a> {
+    books: &'a Books,
+    agenda: Option<&'a game_api::agenda::Agenda>,
+    bank: &'a crate::campaign::panels::court::portrait::PortraitBank,
+    sim: &'a Sim,
+}
+
+/// « Registre » tab (XP-R3): the Audience's Affairs, watch list and folded news, as in the
+/// Registre card of the advisor column.
+fn registry_tab(
+    page: &mut ChildSpawnerCommands,
+    theme: &UiTheme,
+    assets: &AssetServer,
+    input: &RegistryInput,
+) {
+    let Some(agenda) = input.agenda else {
+        page.spawn(caption(theme, &input.books.registry_empty));
+        return;
+    };
+    page.spawn(scroll_list(theme, "chronicle:registry", LIST_HEIGHT))
+        .with_children(|list| {
+            crate::campaign::hud::audience::registry_body(
+                list,
+                theme,
+                assets,
+                input.bank,
+                input.sim,
+                agenda,
+                true,
+                PANEL_WIDTH - 60.0,
+            );
+        });
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -529,6 +582,7 @@ fn spawn_screen(
     mode: NewsMode,
     plates: Option<&crate::ui::art_plates::ArtPlates>,
     store: Option<&CodexStore>,
+    registry: &RegistryInput,
 ) -> Entity {
     let theme = theme.clone();
     let body = RichStyle::body(&theme);
@@ -564,29 +618,28 @@ fn spawn_screen(
                         ));
                         bar.spawn(close_button(&theme, "chronicle:close"));
                     });
-                    page.spawn(Node {
-                        column_gap: Val::Px(6.0),
-                        ..default()
-                    })
-                    .with_children(|tabs| {
-                        let decisions = format!("Décisions ({})", view.count);
-                        let letters = format!("Lettres ({})", log.letters.len());
-                        let causes_label = ui_text("tab_title");
-                        for (tab, name, label) in [
-                            (
-                                Tab::Decisions,
-                                "chronicle:tab_decisions",
-                                decisions.as_str(),
-                            ),
-                            (Tab::Journal, "chronicle:tab_journal", "Journal"),
-                            (Tab::Letters, "chronicle:tab_letters", letters.as_str()),
-                            (Tab::Causes, "chronicle:tab_causes", causes_label.as_str()),
-                        ] {
-                            tabs.spawn(toggle_button(&theme, name, label, panel.tab == tab));
-                        }
-                    });
+                    let decisions = format!("Décisions ({})", view.count);
+                    let letters = format!("Lettres ({})", log.letters.len());
+                    let causes_label = ui_text("tab_title");
+                    if let Some(book) = registry.books.book("chronicle") {
+                        let active = book
+                            .tab_of("chronicle", panel.tab.name())
+                            .map_or("", |tab| tab.name.as_str());
+                        page.spawn(book_bar(
+                            &theme,
+                            book,
+                            active,
+                            &[],
+                            &[
+                                ("chronicle:tab_decisions", decisions),
+                                ("chronicle:tab_letters", letters),
+                                ("chronicle:tab_causes", causes_label),
+                            ],
+                        ));
+                    }
                     page.spawn(separator(&theme));
                     match panel.tab {
+                        Tab::Registry => registry_tab(page, &theme, assets, registry),
                         Tab::Decisions => {
                             decisions_tab(page, &theme, assets, &body, view, plates, store)
                         }
