@@ -32,6 +32,7 @@ SCHEMA_TABLE: dict[str, tuple[str, ...]] = {
     "art_forest_stands.schema.json": ("art/forest_stands.json",),
     "art_campaign_forest_look.schema.json": ("art/campaign_forest_look.json",),
     "auto_resolve_rules.schema.json": ("rules/auto_resolve.json",),
+    "battle_bench.schema.json": ("rules/battle_bench.json",),
     "battle_ability.schema.json": ("battle_abilities/*.json",),
     "battle_ai_rules.schema.json": ("rules/battle_ai.json",),
     "battle_alerts_rules.schema.json": ("rules/battle_alerts.json",),
