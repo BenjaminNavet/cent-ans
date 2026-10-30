@@ -129,6 +129,29 @@ impl SeaLife {
             number(eau, &["turquoise_edge_noise"], 0.35),
             number(eau, &["whitecaps", "scale"], 1.0),
         );
+        // VIS-R5: real bathymetry (the raster is bound by `build_sea`, which keeps `x` only if it loads).
+        let bathy = eau.get("bathymetry");
+        let wanted = bathy
+            .and_then(|b| b.get("enabled"))
+            .and_then(Value::as_bool)
+            .unwrap_or(bathy.is_some())
+            && !crate::campaign::perf_switch::value("BATHY").is_some_and(|v| v < 0.5);
+        if wanted {
+            let key = |name: &str, default: f32| number(eau, &["bathymetry", name], default);
+            params.bathy_a = Vec4::new(1.0, 0.0, key("shore_m_per_px", 10.0), key("noise", 0.15));
+            params.bathy_b = Vec4::new(
+                key("mid_depth_m", 50.0),
+                key("deep_depth_m", 200.0),
+                key("abyss_depth_m", 2000.0),
+                0.0,
+            );
+            let abyss = array(
+                eau,
+                &["bathymetry", "abyss_color"],
+                [params.deep_color.x, params.deep_color.y, params.deep_color.z],
+            );
+            params.abyss_color = Vec4::new(abyss[0], abyss[1], abyss[2], 1.0);
+        }
     }
 
     /// `(id, width_px, polygon)` of the tide zones, in file order.

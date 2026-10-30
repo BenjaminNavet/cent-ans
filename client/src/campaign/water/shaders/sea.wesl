@@ -50,6 +50,9 @@ struct Params {
     basin_detail_mean: array<vec4<f32>, 5>,
     eau: vec4<f32>,
     eau_b: vec4<f32>,
+    bathy_a: vec4<f32>,
+    bathy_b: vec4<f32>,
+    abyss_color: vec4<f32>,
 }
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(0) var<uniform> params: Params;
@@ -67,6 +70,8 @@ struct Params {
 @group(constants::MATERIAL_BIND_GROUP) @binding(10) var detail_ocean_albedo: texture_2d<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(11) var basin_detail_normal: texture_2d_array<f32>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(12) var basin_detail_albedo: texture_2d_array<f32>;
+// VIS-R5: baked GEBCO depth, L8 = 255 * sqrt(depth / max). Read with `coast_sampler` (no extra sampler).
+@group(constants::MATERIAL_BIND_GROUP) @binding(13) var bathymetry: texture_2d<f32>;
 
 struct VertexInput {
     @builtin(instance_index) instance_index: u32,
@@ -346,15 +351,28 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     }
     let off = max(-coast, 0.0);
     var depth = min(off * params.depth_per_px_m, params.max_depth_m);
-    if params.eau.x > 0.5 {
+    let bathy_on = params.bathy_a.x > 0.5;
+    if bathy_on {
+        // VIS-R5: real depth, never deeper than a steady slope from the composed shore (0 m on it).
+        let code = textureSampleLevel(bathymetry, coast_sampler, clamp(uv, vec2<f32>(0.0), vec2<f32>(1.0)), 0.0).r;
+        depth = min(code * code * params.bathy_a.y, off * params.bathy_a.z);
+        // Uneven shoals only: the noise fades out with depth.
+        let shoal = 1.0 - smoothstep(8.0, 40.0, depth);
+        depth = depth * (1.0 + (2.0 * value_noise(p * 0.045 + 13.0) - 1.0) * params.bathy_a.w * shoal);
+    } else if params.eau.x > 0.5 {
         // Uneven sea floor: the turquoise edge follows banks instead of a contour line.
         depth = depth * (1.0 - params.eau_b.z + 2.0 * params.eau_b.z * value_noise(p * 0.045 + 13.0));
     }
     let clarity = max(water.x, 0.1);
     let seen_depth = select(depth + (1.0 / clarity - 1.0) * 20.0, depth / clarity, clarity >= 1.0);
-    let mid = smoothstep(0.0, params.mid_depth_m, seen_depth);
-    let abyss = smoothstep(params.mid_depth_m, params.depth_falloff_m, seen_depth);
+    let mid_m = select(params.mid_depth_m, params.bathy_b.x, bathy_on);
+    let deep_m = select(params.depth_falloff_m, params.bathy_b.y, bathy_on);
+    let mid = smoothstep(0.0, mid_m, seen_depth);
+    let abyss = smoothstep(mid_m, deep_m, seen_depth);
     var col = mix(mix(params.shallow_color.rgb, params.mid_color.rgb, mid), params.deep_color.rgb, abyss);
+    if bathy_on {
+        col = mix(col, params.abyss_color.rgb, smoothstep(deep_m, params.bathy_b.z, seen_depth));
+    }
     var alpha = mix(params.alpha_shallow, params.alpha_deep, smoothstep(0.0, 45.0, seen_depth));
 
     let t = globals.time * params.wave_speed;

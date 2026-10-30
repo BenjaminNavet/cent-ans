@@ -179,6 +179,34 @@ pub struct WaterLook {
     /// EAU (ADR 0750): water tint per season (spring, summer, autumn, winter) and ice on the banks.
     pub season_tint: [[f32; 3]; 4],
     pub season_ice: [f32; 4],
+    /// VIS-R5: light bank, dark riparian forest and green alluvial plain painted outside the ribbon.
+    pub riparian: Riparian,
+}
+
+/// `river_display.json` -> `look.riparian` (VIS-R5). Positions are shares of the strip width
+/// (`wet_band_px`), measured outwards from the water.
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(default)]
+pub struct Riparian {
+    pub bank_end: f32,
+    pub forest_end: f32,
+    pub bank_alpha: f32,
+    pub plain_alpha: f32,
+    pub bank_color: [f32; 3],
+    pub plain_color: [f32; 3],
+}
+
+impl Default for Riparian {
+    fn default() -> Self {
+        Self {
+            bank_end: 0.0,
+            forest_end: 1.0,
+            bank_alpha: 0.0,
+            plain_alpha: 0.0,
+            bank_color: [0.6, 0.55, 0.42],
+            plain_color: [0.3, 0.42, 0.2],
+        }
+    }
 }
 
 impl Default for WaterLook {
@@ -205,6 +233,7 @@ impl Default for WaterLook {
             lake_deep_color: [0.13, 0.31, 0.44],
             season_tint: [[1.0; 3]; 4],
             season_ice: [0.0; 4],
+            riparian: Riparian::default(),
         }
     }
 }

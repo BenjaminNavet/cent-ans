@@ -154,6 +154,8 @@ pub struct WaterStats {
     pub labels: Vec<labels::RiverLabel>,
     pub freshwater: Vec<(String, usize)>,
     pub has_coast_dist: bool,
+    /// VIS-R5: the baked bathymetry raster is bound to the sea.
+    pub bathymetry: bool,
     /// `data/fx/sea_life.json` applied to the sea (shallows, crests, tidal flats).
     pub sea_life: bool,
     /// Time spent decoding the detail textures and building their mip chains.
@@ -316,6 +318,16 @@ fn load_png_inner(path: &Path, srgb: bool) -> Option<Image> {
     }
 }
 
+/// `data/map/bathymetry.png` (L8, `255 * sqrt(depth / max)`) and the maximum coded depth (m) of
+/// `data/map/bathymetry.json`.
+fn load_bathymetry(map_dir: &Path) -> Option<(Image, f32)> {
+    let meta: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(map_dir.join("bathymetry.json")).ok()?).ok()?;
+    let max_depth = meta.get("max_depth_m")?.as_f64()? as f32;
+    let image = load_png(&map_dir.join("bathymetry.png"), false)?;
+    Some((image, max_depth))
+}
+
 #[derive(bevy::ecs::system::SystemParam)]
 struct BuildAssets<'w> {
     meshes: ResMut<'w, Assets<Mesh>>,
@@ -378,7 +390,15 @@ fn build_water(
         }),
     };
     out.has_coast_dist = coast_dist.is_some();
-    build_sea(&mut ctx, &data, coast_dist.clone(), &mut detail, &mut out);
+    let bathymetry = load_bathymetry(&map_dir);
+    build_sea(
+        &mut ctx,
+        &data,
+        coast_dist.clone(),
+        bathymetry,
+        &mut detail,
+        &mut out,
+    );
     build_coast(&mut ctx, &data, ground.0.as_ref(), &mut out);
     build_lakes(&mut ctx, &data, coast_dist, &mut out);
     build_rivers(&mut ctx, &data, ground.0.as_ref(), &mut detail, &mut out);
@@ -483,6 +503,7 @@ fn build_sea(
     ctx: &mut Ctx,
     data: &WaterData,
     coast_dist: Option<Handle<Image>>,
+    bathymetry: Option<(Image, f32)>,
     detail: &mut detail::DetailLoader,
     out: &mut WaterStats,
 ) {
@@ -515,12 +536,24 @@ fn build_sea(
     let life = crate::paths::find_root()
         .ok()
         .and_then(|root| sea_life::SeaLife::load(&root));
+    let mut bathymetry_handle: Option<Handle<Image>> = None;
     let tide_zones = life.as_ref().map(|life| {
         life.apply(&mut params);
         ctx.images.add(life.tide_image(data.map_size))
     });
     out.sea_life = life.is_some();
     // RC5 / TX: coastal `sea`, open `ocean` and per-basin generated surfaces.
+    // VIS-R5: baked GEBCO depth. Without the raster the sea keeps the coast-distance estimate.
+    let bathymetry = if params.bathy_a.x > 0.5 { bathymetry } else { None };
+    match bathymetry {
+        Some((image, max_depth_m)) => {
+            params.bathy_a.y = max_depth_m;
+            out.bathymetry = true;
+            let handle = ctx.images.add(image);
+            bathymetry_handle = Some(handle);
+        }
+        None => params.bathy_a.x = 0.0,
+    }
     let started = Instant::now();
     let sea_layer = detail.layer("sea", ctx.images);
     let ocean_layer = detail.layer("ocean", ctx.images);
@@ -542,6 +575,7 @@ fn build_sea(
         detail_ocean_albedo: ocean_layer.as_ref().map(|l| l.albedo.clone()),
         basin_detail_normal: basin_arrays.as_ref().map(|b| b.normals.clone()),
         basin_detail_albedo: basin_arrays.as_ref().map(|b| b.albedos.clone()),
+        bathymetry: bathymetry_handle,
     });
     ctx.spawn(
         WaterPart::Sea,
@@ -944,7 +978,7 @@ fn dump_water(world: &World) -> (String, Value) {
             "view": {"medium": view.medium, "near": view.near,
                      "strategic_weight": view.strategic_weight, "camera_distance": view.camera_distance},
             "sea": {"vertices": stats.sea_vertices, "extent": [stats.sea_extent.x, stats.sea_extent.y],
-                    "basins": stats.sea_basins, "has_coast_dist": stats.has_coast_dist, "sea_life": stats.sea_life, "y": 0.0},
+                    "basins": stats.sea_basins, "has_coast_dist": stats.has_coast_dist, "bathymetry": stats.bathymetry, "sea_life": stats.sea_life, "y": 0.0},
             "coast": {"lines": stats.coast_lines, "vertices": stats.coast_vertices},
             "lakes": {"count": stats.lakes, "meshed": stats.lakes_meshed, "vertices": stats.lake_vertices,
                       "triangles": stats.lake_triangles, "samples": lake_samples},

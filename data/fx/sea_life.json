@@ -11,13 +11,13 @@
   },
   "shallows": {
     "color": [
-      0.2,
-      0.4,
-      0.37
+      0.3,
+      0.36,
+      0.27
     ],
-    "depth_m": 60.0,
-    "amount": 0.55,
-    "caustic": 0.22,
+    "depth_m": 10.0,
+    "amount": 0.4,
+    "caustic": 0.08,
     "caustic_scale": 0.9
   },
   "crests": {
@@ -43,9 +43,9 @@
     "max_px": 8.0,
     "high_cover": 0.9,
     "mud_color": [
-      0.13,
-      0.115,
-      0.085
+      0.19,
+      0.165,
+      0.115
     ],
     "wet_color": [
       0.22,
@@ -235,17 +235,26 @@
   "eau": {
     "enabled": true,
     "colors": {
-      "shallow": [0.06, 0.32, 0.30],
-      "mid": [0.03, 0.17, 0.21],
-      "deep": [0.012, 0.075, 0.12]
+      "shallow": [0.073, 0.147, 0.104],
+      "mid": [0.013, 0.064, 0.073],
+      "deep": [0.0048, 0.0212, 0.0406]
     },
     "depth_per_px_m": 4.5,
-    "turquoise_saturation": 0.62,
-    "turquoise_edge_noise": 0.3,
+    "turquoise_saturation": 0.35,
+    "turquoise_edge_noise": 0.1,
     "smooth_coast": 1,
     "swell_warp": 1.4,
     "surf_lace": 1.6,
-    "whitecaps": {"amount": 0.16, "scale": 1.0}
+    "whitecaps": {"amount": 0.16, "scale": 1.0},
+    "bathymetry": {
+      "enabled": true,
+      "shore_m_per_px": 12.0,
+      "mid_depth_m": 50.0,
+      "deep_depth_m": 200.0,
+      "abyss_depth_m": 2500.0,
+      "abyss_color": [0.003, 0.012, 0.026],
+      "noise": 0.12
+    }
   },
   "wake": {
     "enabled": true,

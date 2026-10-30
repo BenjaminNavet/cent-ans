@@ -26,6 +26,9 @@ struct Params {
     look2: vec4<f32>,
     look3: vec4<f32>,
     look4: vec4<f32>,
+    ripar: vec4<f32>,
+    ripar_bank: vec4<f32>,
+    ripar_plain: vec4<f32>,
     season: vec4<f32>,
     fine_zone: vec4<f32>,
     fords: array<vec4<f32>, 32>,
@@ -331,8 +334,15 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     col = mix(col, params.bank_ink_color.rgb, clamp(ink * bank_k + wet * params.bank_ink_strength, 0.0, 1.0));
     // VQ: dark wet banks (shade, soaked soil), no light outline.
     col = mix(col, params.look4.gba, clamp(smoothstep(params.look2.z, 1.0, edge) * params.look3.x * bank_k, 0.0, 1.0));
-    // Wet ground strip: same colour, fading out.
-    col = mix(col, params.look4.gba, in_band);
+    // Strip outside the water. Without VIS-R5 data (`ripar.y >= 1`, no light bank / plain) it is the wet
+    // ground colour fading out. With it: light sandy bank, dark riparian forest, then the green alluvial
+    // plain, each with its own opacity (see `wet_a` below).
+    var strip_col = params.look4.gba;
+    if params.ripar.z > 0.0 || params.ripar.w > 0.0 {
+        strip_col = mix(params.ripar_bank.rgb, params.look4.gba, smoothstep(params.ripar.x * 0.7, params.ripar.x * 1.3 + 0.02, band_t));
+        strip_col = mix(strip_col, params.ripar_plain.rgb * (0.85 + 0.3 * n2), smoothstep(params.ripar.y * 0.85, params.ripar.y * 1.15 + 0.02, band_t));
+    }
+    col = mix(col, strip_col, in_band);
 
     var alpha = 0.9 * in.alpha * in.far;
     if !sheet {
@@ -348,7 +358,15 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         }
     }
     if in_band > 0.5 {
-        let wet_a = params.look3.w * (1.0 - smoothstep(0.0, 1.0, band_t)) * in.alpha * (1.0 - 0.6 * far_t) * bank_k;
+        var wet_a = params.look3.w * (1.0 - smoothstep(0.0, 1.0, band_t)) * in.alpha * (1.0 - 0.6 * far_t) * bank_k;
+        if params.ripar.z > 0.0 || params.ripar.w > 0.0 {
+            let bank_w = 1.0 - smoothstep(params.ripar.x * 0.7, params.ripar.x * 1.3 + 0.02, band_t);
+            let plain_w = smoothstep(params.ripar.y * 0.85, params.ripar.y * 1.15 + 0.02, band_t);
+            let dark_a = params.look3.w * (1.0 - plain_w);
+            let plain_a = params.ripar.w * (1.0 - smoothstep(params.ripar.y, 1.0, band_t) * 0.8);
+            let strip_a = mix(mix(dark_a, params.ripar.z, bank_w), plain_a, plain_w);
+            wet_a = strip_a * in.alpha * (1.0 - 0.6 * far_t) * bank_k;
+        }
         alpha = wet_a;
     }
     // Aerial haze: the same camera `DistanceFog` as the ground, so far water blends like it.

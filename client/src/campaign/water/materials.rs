@@ -300,6 +300,13 @@ pub struct RiverParams {
     pub look3: Vec4,
     /// x = share of the camera distance fog, yzw = wet colour (linear).
     pub look4: Vec4,
+    /// VIS-R5 riparian strip outside the water: x = end of the light bank (0-1 across the strip), y = end of the
+    /// dark riparian forest, z = light bank opacity, w = alluvial plain opacity.
+    pub ripar: Vec4,
+    /// Light bank colour (linear), w unused.
+    pub ripar_bank: Vec4,
+    /// Alluvial plain green (linear), w unused.
+    pub ripar_plain: Vec4,
     /// EAU (ADR 0750): rgb = season tint of the water (synced from the season weights), w = ice on the banks.
     pub season: Vec4,
     /// Fine hydrography disc (`fine_zone`: centre xz, radius, weight): the ribbon fades out inside.
@@ -475,6 +482,14 @@ impl RiverParams {
                 let w = linear(display.look.wet_color, 1.0);
                 Vec4::new(display.look.fog_strength, w.x, w.y, w.z)
             },
+            ripar: Vec4::new(
+                display.look.riparian.bank_end,
+                display.look.riparian.forest_end,
+                display.look.riparian.bank_alpha,
+                display.look.riparian.plain_alpha,
+            ),
+            ripar_bank: linear(display.look.riparian.bank_color, 1.0),
+            ripar_plain: linear(display.look.riparian.plain_color, 1.0),
             season: Vec4::new(1.0, 1.0, 1.0, 0.0),
             fine_zone: Vec4::new(0.0, 0.0, -1.0, 0.0),
             fords: [Vec4::ZERO; 32],
@@ -517,6 +532,7 @@ impl RiverParams {
             p.look2 = Vec4::new(0.0, 0.0, 2.0, 0.0);
             p.look3 = Vec4::new(0.0, 1.0, 0.0, 0.0);
             p.look4.x = 0.0;
+            p.ripar = Vec4::ZERO;
             p.mud_color.w = 0.0;
             p.bank_ink_strength = 0.0;
         }
@@ -634,6 +650,12 @@ pub struct SeaParams {
     pub eau: Vec4,
     /// x = swell domain warp, y = surf lace width factor, z = turquoise edge noise, w = whitecap scale.
     pub eau_b: Vec4,
+    /// VIS-R5 bathymetry: x = on, y = max coded depth (m), z = shore cap (m per map px), w = shoal noise.
+    pub bathy_a: Vec4,
+    /// Depth (m) of the mid colour (x), the deep colour (y) and the abyss colour (z).
+    pub bathy_b: Vec4,
+    /// Colour of the great depths (linear), beyond `bathy_b.z`.
+    pub abyss_color: Vec4,
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
@@ -665,6 +687,9 @@ pub struct SeaMaterial {
     pub basin_detail_normal: Option<Handle<Image>>,
     #[texture(12, dimension = "2d_array")]
     pub basin_detail_albedo: Option<Handle<Image>>,
+    /// VIS-R5: real sea depth (`data/map/bathymetry.png`, GEBCO), read with the coast sampler.
+    #[texture(13)]
+    pub bathymetry: Option<Handle<Image>>,
 }
 
 impl SeaParams {
@@ -755,6 +780,9 @@ impl SeaParams {
             basin_detail_mean: [Vec4::ONE; 5],
             eau: Vec4::ZERO,
             eau_b: Vec4::new(1.0, 1.0, 0.0, 1.0),
+            bathy_a: Vec4::ZERO,
+            bathy_b: Vec4::new(50.0, 200.0, 2000.0, 0.0),
+            abyss_color: Vec4::ZERO,
         }
     }
 }
