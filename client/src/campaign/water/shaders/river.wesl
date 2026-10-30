@@ -213,7 +213,9 @@ fn vertex(in: VertexInput) -> VertexOutput {
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let sheet = params.sheet > 0.5;
     let side_ext = abs(in.side);
-    let edge = min(side_ext, in.sw);
+    // `side` is in true-half-width units, `sw` the drawn water half-width in the same units (> 1 when the
+    // pixel floor widens the ribbon): `edge` is 0 on the axis and 1 at the water's edge whatever the floor.
+    let edge = min(side_ext / max(in.sw, 1e-4), 1.0);
     // 0 on the water, 0..1 across the wet strip beyond it.
     let band_t = clamp((side_ext / max(in.sw, 1e-4) - 1.0) / max(in.ratio - 1.0, 1e-4), 0.0, 1.0);
     let in_band = select(0.0, 1.0, side_ext > in.sw * 1.0005 && in.ratio > 1.0005);
@@ -280,7 +282,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let foam = clamp(bank_foam + riffle, 0.0, 1.0);
     col = mix(col, params.foam_color.rgb, foam * 0.7);
 
-    let half_px = select(1.0 / max(fwidth(in.side), 1e-4), 1000.0, sheet);
+    let half_px = select(max(in.sw, 1e-4) / max(fwidth(in.side), 1e-4), 1000.0, sheet);
     let px_edge = max(1.0 - edge, 0.0) * half_px;
     let ink = (1.0 - smoothstep(0.0, params.bank_ink_px, px_edge)) * smoothstep(1.2, 3.0, half_px) * params.bank_ink_strength * (1.0 - in.carved);
 
