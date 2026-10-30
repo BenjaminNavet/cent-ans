@@ -20,8 +20,18 @@ fn setup(data: &GameData, loyalty: u8) -> (CampaignState, FactionId, FactionId, 
 }
 
 fn at_war(state: &mut CampaignState, a: &FactionId, b: &FactionId) {
-    state.factions.get_mut(a).unwrap().at_war_with.insert(b.clone());
-    state.factions.get_mut(b).unwrap().at_war_with.insert(a.clone());
+    state
+        .factions
+        .get_mut(a)
+        .unwrap()
+        .at_war_with
+        .insert(b.clone());
+    state
+        .factions
+        .get_mut(b)
+        .unwrap()
+        .at_war_with
+        .insert(a.clone());
 }
 
 fn contingent_of(
@@ -47,7 +57,10 @@ fn answering_vassal_raises_a_contingent() {
     assert_eq!((&service.liege, &service.enemy), (&france, &enemy));
     let rules = &data.feudal_rules.host;
     let units = army.units.len() as u32;
-    assert!((rules.min_units..=rules.max_units).contains(&units), "{units}");
+    assert!(
+        (rules.min_units..=rules.max_units).contains(&units),
+        "{units}"
+    );
     assert!(army.total_strength() > 0);
     // Proportioned to the income: a vassal twice as rich raises at least as many men.
     let poor = feudal::contingent_units(&state, data, &vassal);
@@ -116,7 +129,9 @@ fn contingent_stays_on_at_the_liege_pay_then_leaves() {
     feudal::resolve_host_service(&mut state, data, &mut events);
     let paid = liege_before - state.factions[&france].treasury;
     assert!(paid > 0, "the suzerain pays the contingent");
-    assert_eq!(state.factions[&vassal].treasury - vassal_before, paid);
+    // Every answering vassal is paid for its own contingent: ours gets a share of the total.
+    let received = state.factions[&vassal].treasury - vassal_before;
+    assert!(received > 0 && received <= paid, "{received} of {paid}");
     for _ in 1..rules.paid_seasons {
         feudal::resolve_host_service(&mut state, data, &mut events);
     }
@@ -132,9 +147,11 @@ fn refusal_still_opens_felony() {
     feudal::summon_host(&mut state, data, &france, &enemy);
     assert!(!state.is_at_war(&vassal, &enemy));
     assert!(contingent_of(&state, &vassal).is_none());
-    assert!(state.feudal.felonies.iter().any(|c| c.vassal == vassal
-        && c.liege == france
-        && c.reason == FelonyReason::RefusedHost));
+    assert!(state
+        .feudal
+        .felonies
+        .iter()
+        .any(|c| c.vassal == vassal && c.liege == france && c.reason == FelonyReason::RefusedHost));
 }
 
 #[test]
@@ -146,7 +163,9 @@ fn summon_host_order_calls_the_vassals_again_after_the_delay() {
     let order = Order::SummonHost {
         enemy: enemy.clone(),
     };
-    state.submit_order(data, order.clone()).expect("first summons");
+    state
+        .submit_order(data, order.clone())
+        .expect("first summons");
     assert!(contingent_of(&state, &vassal).is_some());
     // The contingent goes home; the delay still holds the suzerain back.
     let mut events = Vec::new();
