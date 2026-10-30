@@ -104,3 +104,25 @@ Suite : choisir les refontes prioritaires dans les audits et les lancer en lots 
 - Fusionnés : ECO-R1ab (ADR 0813, ambition `fr2_amb_compagnies` réajustée, glossaire), IA-REFUS (refus IA 430-515 -> 23-38/partie, sans ADR).
 - En cours : VIS-R3b, ECO-R1c, ECO-R1d, IA-PLAN-2, récupération MEM3 + FPS mêlée (branches à rebaser, non fusionnées).
 - Ensuite : VIS-R4 après R3b ; COHESION-1 après IA-PLAN-2 ; VIS-R8.
+
+## Passation 30/10 (nouvelle session headless)
+Mandat : autonomie totale, boucle juge 2 illimitée (visuel campagne prioritaire, 60 fps Ultra, R6 6-8 maisons). Ne jamais finir un tour « en attente » : tant que des lots tournent, attendre par Monitor/boucle until, puis fusionner et relancer.
+
+Lots lancés par la session précédente (worktrees `.claude/worktrees/agent-<id>`, branche `worktree-agent-<id>`) ; fini = worktree plus `locked` dans `git worktree list` et note wip « terminé » :
+- a771f004f6088afb4 VIS-R3b parcellaire typé (ADR à numéroter)
+- aa5182d13ee2ab5e2 ECO-R1c IA et Angleterre (note docs/wip/eco-r1c.md)
+- a81b1ae605a828a40 IA-PLAN-2 (note docs/wip/ia-plan-2.md)
+- a5dbb10991dc43fa8 récupération MEM3 (agent-a0377ad7d1eea36f9) + FPS mêlée (agent-a7fa6dbbe9cdf1f9d) : rebase, ne fusionne pas
+- af539704f9ee95346 ECO-R1d : TERMINÉ, prêt (smoke complet à relancer), sans ADR propre (0813)
+Prochain ADR libre : 0814. Script de fusion : tools ou scratchpad `merge_lot.sh` (rebase main, numérote l'ADR, ff-merge) — à recréer dans tools/ si absent.
+
+Économie de jetons (appliquer) :
+1. Sous-agents Haiku par défaut, Sonnet seulement pour les lots durs (IA bataille, économie) ; jamais Opus.
+2. Fusions par un agent de fusion dédié (Sonnet) par lot de 2-4 branches, pas par la session principale.
+3. Réserver le numéro d'ADR au lancement ; sérialiser les lots qui touchent la même zone (IA-PLAN-2 puis COHESION ; VIS-R3b puis VIS-R4).
+4. Rapport d'agent ≤ 15 lignes, détails dans docs/wip/<lot>.md.
+5. Dans les agents : seed bots --quick seulement ; une passe longue sur main par lot de fusions.
+6. Un check complet (tools/full_check.sh + smoke + pytest + seed quick) par lot de fusions, pas par lot.
+7. 3-4 agents en parallèle au plus.
+Suivants : VIS-R4 (après R3b), COHESION-1 (après IA-PLAN-2), VIS-R8 parchemin, R2-b lettres de retenue, textes XP encore codés, lot FPS seul sur machine calme.
+Constats seed bots longs : présentés au joueur, il choisit (ne rien écrire dans seed-bots-findings.md sans lui).
