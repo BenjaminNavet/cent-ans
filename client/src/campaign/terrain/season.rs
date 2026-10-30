@@ -239,8 +239,11 @@ impl SeasonParams {
         self.mt_forest = stage(&mountain["forest"], self.mt_forest);
         self.mt_alpage = stage(&mountain["alpage"], self.mt_alpage);
         self.mt_scree = stage(&mountain["scree"], self.mt_scree);
-        self.mt_moor = vec3_of(mountain["alpage"].get("north_color"), self.mt_alpage.truncate())
-            .extend(0.0);
+        self.mt_moor = vec3_of(
+            mountain["alpage"].get("north_color"),
+            self.mt_alpage.truncate(),
+        )
+        .extend(0.0);
         let snow = &mountain["snow"];
         self.mt_edge = Vec4::new(
             num(&mountain["edge_jitter_m"], 0.0),
@@ -386,7 +389,7 @@ mod tests {
         assert!(p.gain[3].w < 1.0, "winter desaturates");
         assert!(p.winter_ground.w > 0.3);
         assert!((p.snow_plain.x - 0.58).abs() < 1e-5);
-        assert!((p.snow_plain.z - 0.93).abs() < 1e-5);
+        assert!((p.snow_plain.z - 0.25).abs() < 1e-5);
         let l = |c: Vec4| 0.299 * c.x + 0.587 * c.y + 0.114 * c.z;
         assert!(l(p.snow_color) < 0.8, "sunlit snow is never pure white");
         assert!(l(p.snow_shade) < l(p.snow_color), "shaded snow is darker");
@@ -397,7 +400,27 @@ mod tests {
         assert!(p.snow_mask.z < p.snow_mask.w && p.snow_mask.x > 0.0);
         assert!(p.mud.w > 0.0 && p.rock.w > 0.0 && p.forest_floor.w > 0.0);
         assert!(p.rock_band.x < p.rock_band.y && p.rock_band.z < p.rock_band.w);
-        assert!(l(p.rock) < 0.2, "the rock of the heights is dark");
+        assert!(
+            (0.3..0.55).contains(&l(p.rock)),
+            "VIS-R4: the rock is the grey of the palette bible"
+        );
+        // VIS-R4: the alpine snow is white (bible 0.90 0.92 0.95), the plain snow is not.
+        assert!(l(p.mt_snow_sun) > 0.88 && l(p.mt_snow_sun) > l(p.snow_color) + 0.15);
+        assert!(
+            p.mt_snow_shade.z > p.mt_snow_shade.x,
+            "alpine shade is cold"
+        );
+        assert!(p.mt_edge.y < p.mt_edge.z, "the snow whitens with altitude");
+        assert!(
+            p.mt_line.x > p.mt_line.y,
+            "the tree line falls to the north"
+        );
+        assert!(p.mt_line.z < p.mt_line.w && p.mt_slope.w > 0.0);
+        assert!(p.mt_forest.w > 0.0 && p.mt_alpage.w > 0.0 && p.mt_scree.w > 0.0);
+        assert!(
+            l(p.mt_forest) < 0.2 && l(p.mt_forest) < l(p.mt_alpage),
+            "the forest is darker than the meadow"
+        );
         assert!(p.patches.x > 0.0 && p.patches.z >= 1.0);
     }
 }

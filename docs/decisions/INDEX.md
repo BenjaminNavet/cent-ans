@@ -376,3 +376,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0818 | [Les cinq livres : cadre « livre à onglets » (XP-R3)](0818-xp-r3-cinq-livres.md) | accepté |
 | 0817 | [CAMP-R6 : huit maisons jouables](0817-camp-r6-maisons-jouables.md) | accepté |
 | 0820 | [VIS-R4 : montagne étagée et neige d'altitude blanche](0820-vis-r4-montagne-etagee.md) | proposé |
+| 0820 | [VIS-R4 : montagne étagée et neige d'altitude blanche](0820-vis-r4-montagne-etagee.md) | accepté |
