@@ -167,3 +167,4 @@ Constats seed bots longs : présentés au joueur, il choisit (ne rien écrire da
 - Lancés : VIS-L2 habitat (0824), VIS-L6 bataille (0825), VIS-L1 sol-photo (0826, part de la branche VIS-R4). Prochain ADR libre : 0827.
 - Règles changées par le joueur : sondes seulement à la fusion (tools/checks_for_diff.sh), fusion de toute l'itération sauf lot en retard. 27,9 $ à 10 h 45.
 - À lancer ensuite : L-A compteurs de perf, L-C prévision asynchrone ; L4 eau après L1 ; L3/L5 après les plaques ; lots du juge de jeu.
+- 30/10 : ÉCONOMIE EN PAUSE (décision du joueur) : ni juge ni lot économique. ECO-R2b arrêté avant sa dernière eco_series, branche gardée (worktree agent-a473f9565e736a9d3, ADR 0822 réservé), non fusionnée. Exception sondes accordée : battle_bench dans les lots d'IA de bataille (eco_series idem, sans objet pendant la pause). Permissions rm autorisées (settings.local.json).
