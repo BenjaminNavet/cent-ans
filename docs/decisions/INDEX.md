@@ -371,3 +371,4 @@ Prochain numéro libre : 0193 (0200-0209 réservés au chantier SC).
 | 0808 | [ECO-R2a : la semonce féodale donne des soldats](0808-eco-r2a-semonce-feodale.md) | accepté |
 | 0809 | [IA-PLAN-1 : planificateur d'IA de bataille par divisions](0809-ia-plan-planificateur.md) | accepté |
 | 0810 | [La cause au moment de l'effet (XP-POURQUOI, R4)](0810-xp-pourquoi-causes.md) | accepté |
+| 0811 | [Rivières lisibles à toute distance (lot RIVIERES)](0811-rivieres-lisibles.md) | accepté |
