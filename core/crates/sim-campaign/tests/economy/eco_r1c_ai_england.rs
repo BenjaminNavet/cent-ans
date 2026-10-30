@@ -176,7 +176,7 @@ fn ai_convenes_before_a_campaign() {
     // A treasury that would pass for comfortable in peace, but not for a war: the forecast of
     // the war, not an empty chest, calls the Parliament.
     let gross = state.faction_income(data, &england).max(1);
-    state.factions.get_mut(&england).unwrap().treasury = 5 * gross;
+    state.factions.get_mut(&england).unwrap().treasury = 3 * gross;
     let cache = PlanCache::new(&state);
     let orders = assembly::ai_assembly_orders(&cache, data, &england);
     assert!(
@@ -185,7 +185,7 @@ fn ai_convenes_before_a_campaign() {
     );
     // The same treasury in peace calls nobody.
     let mut peace = scene(data, "fac_france");
-    peace.factions.get_mut(&england).unwrap().treasury = 5 * gross;
+    peace.factions.get_mut(&england).unwrap().treasury = 3 * gross;
     let cache = PlanCache::new(&peace);
     assert!(assembly::ai_assembly_orders(&cache, data, &england).is_empty());
 }
@@ -251,7 +251,7 @@ fn ai_declines_a_truce_it_cannot_keep_unless_in_need() {
             vec![data_model::ProvinceId::new("prov_kent").unwrap()],
         );
     let gross = state.faction_income(data, &france).max(1);
-    state.factions.get_mut(&france).unwrap().treasury = 10 * gross;
+    state.factions.get_mut(&france).unwrap().treasury = 3 * gross;
     runtime(&mut state, data, OIL).sessions.push(Session {
         id: 77,
         faction: france.clone(),

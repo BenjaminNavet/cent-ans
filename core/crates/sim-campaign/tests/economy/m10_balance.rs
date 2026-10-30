@@ -73,9 +73,9 @@ fn the_hoard_drain_is_progressive() {
         );
         previous_rate = rate;
     }
-    // A hoard of twelve seasons loses at least a quarter of its income value
-    // per season: the realm cannot sit on it.
-    assert!(drain(12) >= 3 * income);
+    // ECO-R1c: the drain is only a trickle now that the subsidies feed the hoard (ADR 0815):
+    // a hoard of twelve seasons still loses at least a season of income per season.
+    assert!(drain(12) >= income);
 }
 
 #[test]

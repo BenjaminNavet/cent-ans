@@ -68,7 +68,7 @@ fn economy_tuning_comes_from_data() {
     let data = game_data();
     let rules = &data.economy_rules;
     assert_eq!(rules.opulence_seasons, 1);
-    assert_eq!(rules.opulence_percent, 15);
+    assert_eq!(rules.opulence_percent, 5);
     assert_eq!(rules.bankruptcy_morale_penalty, 10);
     assert!((rules.administration_rate(0) - rules.administration_base).abs() < 1e-9);
     assert!((rules.administration_rate(1000) - rules.administration_max).abs() < 1e-9);
