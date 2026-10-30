@@ -8,3 +8,7 @@ couleurs des plaques sont réécrites par `plate::update_plates`.
 
 Prochaine étape : mesurer `labels_visible` / `plates_visible` à camp_0060 avant/après, régler
 `range_ratio`. Bataille : non traité (cause différente : regroupement en pastilles au-delà de 480 m).
+
+## Résultat (camp_0060, Paris d 60, CENT_ANS_WEATHER=clear)
+- `labels_visible` 24 -> 8 ; `plates_visible` (armées) 3 -> 1 (`range_ratio` 8, `min_range` 60, `fade_fraction` 0,3).
+- clippy `--features dev --all-targets -D warnings` et `cargo test --features dev` verts.
